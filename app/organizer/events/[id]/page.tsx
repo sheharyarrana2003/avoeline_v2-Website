@@ -125,6 +125,53 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ i
                                 </p>
                             </div>
                         </article>
+                        <article className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <h2 className="text-xl font-extrabold uppercase text-slate-950">System Details & Timings</h2>
+
+                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+
+                                {/* Status */}
+
+
+                                {/* Category */}
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Category</p>
+                                    <p className="text-sm font-semibold capitalize text-slate-900">{event.category}</p>
+                                </div>
+
+                                {/* Time */}
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Event Time</p>
+                                    <p className="text-sm font-semibold text-slate-900">{event.time}</p>
+                                </div>
+
+
+
+
+                                {/* Timestamps */}
+                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pt-4 border-t border-slate-100 mt-2">
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Created At</p>
+                                        <p className="text-sm font-medium text-slate-500">
+                                            {new Date(event.createdAt).toLocaleString(undefined, {
+                                                dateStyle: 'medium',
+                                                timeStyle: 'short'
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Last Updated</p>
+                                        <p className="text-sm font-medium text-slate-500">
+                                            {new Date(event.updatedAt).toLocaleString(undefined, {
+                                                dateStyle: 'medium',
+                                                timeStyle: 'short'
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </article>
 
                         <article className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <h2 className="text-xl font-extrabold uppercase text-slate-950">Key Information</h2>
