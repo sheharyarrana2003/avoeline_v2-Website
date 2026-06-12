@@ -1,52 +1,42 @@
+// interface EventsTabProps{
+//     arr : string[],
+//     default_url : string
+// }
 
-import Link from "next/link"
-export function EventsTab({ currentTab }: { currentTab: string }) {
-    return (
-        <><h6>tabs</h6>
-        {console.log(currentTab)}
-            <div className="flex space-x-6 border-b border-gray-200 mb-6 pb-2">
-                <Link
-                    href="/organizer/events"
-                    className={currentTab === "all" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    All Events
-                </Link>
 
-                <Link
-                    href="/organizer/events?status=draft"
-                    className={currentTab === "draft" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    Draft
-                </Link>
+// import Link from "next/link"
+// export function EventsTab({ currentTab }: { currentTab: string }) {
 
-                <Link
-                    href="/organizer/events?status=published"
-                    className={currentTab === "published" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    Published
-                </Link>
+//     const arr = ["all", "draft", "published", "ongoing", "completed", "cancelled"];
+//     const default_url = "/organizer/events";
+    
+//     return (
+//         <><h6>tabs</h6>
+//             <div className="flex space-x-6 border-b border-gray-200 mb-6 pb-2">
 
-                <Link
-                    href="/organizer/events?status=ongoing"
-                    className={currentTab === "ongoing" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    OnGoing
-                </Link>
+//                 {arr.map((tab) => {
 
-                <Link
-                    href="/organizer/events?status=completed"
-                    className={currentTab === "completed" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    Completed
-                </Link>
-                <Link
-                    href="/organizer/events?status=cancelled"
-                    className={currentTab === "cancelled" ? "font-bold text-black border-b-2 border-black" : "text-gray-500"}
-                >
-                    Cancelled
-                </Link>
-            </div>
-        </>
+//                     // 3. If it's "all", go to the base URL. Otherwise, add the ?status parameter.
+//                     const targetUrl = tab === "all"
+//                         ? default_url
+//                         : `${default_url}?status=${tab}`;
 
-    )
-}
+//                     return (
+//                         <Link
+//                             key={tab}
+//                             href={targetUrl}
+//                             className={`capitalize ${currentTab === tab
+//                                     ? "font-bold text-black border-b-2 border-black"
+//                                     : "text-gray-500 hover:text-gray-800"
+//                                 }`}
+//                         >
+//                             {tab}
+//                         </Link>
+//                     );
+//                 })}
+               
+//             </div>
+//         </>
+
+//     )
+// }

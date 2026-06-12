@@ -4,17 +4,17 @@ export const EventService = {
     async getEventByID(id: string) {
       const e = mockEvents.filter(
             me => {
-                const organizer_match = me.organizerId === id;
-                return organizer_match;
+                return me.id === id;
             }
         )
+        return e[0] || null;
     }
     ,
     async getAllEvents() {
        return mockEvents;
     }
     ,
-    async getEventsByStatus(organizer_id : string,status: string) {
+    async getEventsByStatusAndOrganizerID(organizer_id : string,status: string) {
         const e = mockEvents.filter(
             me => {
                 const organizer_match = me.organizerId === organizer_id;
