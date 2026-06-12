@@ -72,10 +72,10 @@ export function OrganizerHeader({ user }: { user: UserProp }) {
 
                 {/* 3. The User Profile area */}
                 <div className="flex items-center space-x-4">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <Link href={`/organizer/${user.id}`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                         {/* A quick trick to get the user's initial */}
                         {user.name.charAt(0)}
-                    </div>
+                    </Link>
                     <p className="font-medium">{user.name}</p>
                 </div>
 

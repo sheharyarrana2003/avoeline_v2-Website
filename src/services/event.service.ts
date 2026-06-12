@@ -1,24 +1,34 @@
-
-const base_url = process.env.NEXT_PUBLIC_API_BASE_URL
+import {mockEvents} from "@/app/mockdata/events.mock"
 
 export const EventService = {
     async getEventByID(id: string) {
-        console.log("this is the id in get event by id ->");
-        console.log(id)
-        const res = await fetch(`${base_url}/api/events/${id}`);
-        const res_json = await res.json();
-        return res_json.data;
+      const e = mockEvents.filter(
+            me => {
+                return me.id === id;
+            }
+        )
+        return e[0] || null;
     }
     ,
     async getAllEvents() {
-        const res = await fetch(`${base_url}/api/events/`);
-        const res_json = await res.json();
-        return res_json.data;
+       return mockEvents;
     }
     ,
-    async getEventsByStatus(status: string) {
-        const res = await fetch(`${base_url}/api/events?status=${status}`);
-        const json = await res.json();
-        return json.data;
+    async getEventsByStatusAndOrganizerID(organizer_id : string,status: string) {
+        const e = mockEvents.filter(
+            me => {
+                const organizer_match = me.organizerId === organizer_id;
+                const status_match = status === "all" || me.status.toLowerCase() === status.toLowerCase();
+                // console.log("For -> ", me.id)
+                // console.log(organizer_id);
+                // console.log(status_match);
+                // console.log("Final verdict ->",status_match && organizer_match);
+                // console.log("");
+
+                return status_match && organizer_match;
+            }
+        )
+
+        return e;
     }
 }
