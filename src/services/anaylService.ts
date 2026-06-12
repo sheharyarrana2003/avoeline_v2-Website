@@ -1,5 +1,9 @@
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
-import { mockEvents } from "@/app/api/mockdata";
+import {
+    AnalyticsEventPerformance,
+    AnalyticsMetric,
+    DailyAnalyticsRegistration
+} from "@/src/features/analytics/types";
 //! hardcoded data
 
 
@@ -7,6 +11,8 @@ import { mockEvents } from "@/app/api/mockdata";
 export const AnalyticsService = {
 
     async getDashboardStat(organizerId: string) {
+        void organizerId;
+
         return {
             activeEvents: 15,
             registrations: "1,247",
@@ -16,6 +22,8 @@ export const AnalyticsService = {
     },
 
     async getTodayEvents(organizerId: string) {
+        void organizerId;
+
         const now = new Date();
 
         const getTodayAt = (hours: number, minutes: number) => {
@@ -107,6 +115,8 @@ export const AnalyticsService = {
     },
 
     async getRecentReg(organizerId: string) {
+        void organizerId;
+
         const recentRegistrations: RecentRegistration[] = [
             { id: "reg_1", attendeeName: "Arsalan Shah", eventName: "TechVerse Hack", amountPaid: 2500, status: "CONFIRMED" },
             { id: "reg_2", attendeeName: "Fatima Zahra", eventName: "AI Workshop", amountPaid: 5000, status: "CONFIRMED" },
@@ -118,6 +128,8 @@ export const AnalyticsService = {
     },
 
     async getRegTrend(organizerId: string) {
+        void organizerId;
+
         const weeklyTrends: DailyRegistrationTrend[] = [
             { day: "MON", registrations: 12 },
             { day: "TUE", registrations: 18 },
@@ -129,5 +141,98 @@ export const AnalyticsService = {
         ];
 
         return weeklyTrends;
+    },
+    async getAnalyticsTotalEvents(organizerId: string): Promise<AnalyticsMetric> {
+        void organizerId;
+
+        return {
+            value: "24",
+            helper: "8 draft, 12 published, 4 completed"
+        };
+    },
+
+    async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
+        void organizerId;
+
+        return {
+            value: "PKR 1.7M",
+            helper: "+9.4% from last month"
+        };
+    },
+
+    async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
+        void organizerId;
+
+        return {
+            value: "PKR 4.2M",
+            helper: "Avg: PKR 175k/event"
+        };
+    },
+
+    async getAnalyticsAvgSatisfaction(organizerId: string): Promise<AnalyticsMetric> {
+        void organizerId;
+
+        return {
+            value: "4.7",
+            helper: "+0.2 from last month"
+        };
+    },
+
+    async getAnalyticsDailyRegistrations(organizerId: string): Promise<DailyAnalyticsRegistration[]> {
+        void organizerId;
+
+        return [
+            { label: "Mar 01", registrations: 340 },
+            { label: "Mar 05", registrations: 430 },
+            { label: "Mar 09", registrations: 390 },
+            { label: "Mar 13", registrations: 690 },
+            { label: "Mar 17", registrations: 1120 },
+            { label: "Mar 21", registrations: 910 },
+            { label: "Mar 25", registrations: 420 },
+            { label: "Mar 31", registrations: 980 },
+        ];
+    },
+
+    async getAnalyticsEventPerformance(organizerId: string): Promise<AnalyticsEventPerformance[]> {
+        void organizerId;
+
+        return [
+            {
+                id: "evt_tech_nexus",
+                eventName: "Tech Nexus 2026",
+                eventType: "Conference",
+                date: "Mar 12, 2026",
+                registrations: 1204,
+                profit: 890000,
+                revenue: 2400000,
+                avgSatisfaction: 4.8
+            },
+            {
+                id: "evt_urban_beats",
+                eventName: "Urban Beats Night",
+                eventType: "Concert",
+                date: "Mar 18, 2026",
+                registrations: 842,
+                profit: 460000,
+                revenue: 1100000,
+                avgSatisfaction: 4.5
+            },
+            {
+                id: "evt_ai_workshop",
+                eventName: "Generative AI Workshop",
+                eventType: "Workshop",
+                date: "Mar 24, 2026",
+                registrations: 516,
+                profit: 210000,
+                revenue: 680000,
+                avgSatisfaction: 4.6
+            },
+        ];
+    },
+
+    async getTotalEvents(organizerId: string) {
+        void organizerId;
+
+        return 15;
     }
 }
