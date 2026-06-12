@@ -6,7 +6,7 @@ import {
 } from "@/src/features/analytics/types";
 //! hardcoded data
 
-
+import {mockEvents} from "@/app/mockdata/events.mock"
 
 export const AnalyticsService = {
 
