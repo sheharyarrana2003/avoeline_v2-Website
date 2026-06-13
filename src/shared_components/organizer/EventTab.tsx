@@ -36,7 +36,7 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
         <aside className="w-full border-b border-slate-200 bg-white p-4 md:min-h-[calc(100vh-73px)] md:w-64 md:border-b-0 md:border-r md:p-6">
             <nav className="flex gap-2 overflow-x-auto md:flex-col md:overflow-visible" aria-label="Event sections">
                 {tabs.map((tab) => {
-                    const isActive = current_tab === tab.href;
+                    const isActive = current_tab.match(tab.href);
                     const Icon = iconMap[tab.value] || LayoutDashboard;
 
                     return (
