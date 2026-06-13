@@ -8,7 +8,7 @@ export interface CertificateRequirements {
 export interface CertificateConfig {
     issueCertificates: boolean;
     // Using a Union Type restricts this to specific strings to prevent typos!
-    certificateType: "digital" | "physical"; 
+    certificateType: string; 
     templateId: string;
     requirements: CertificateRequirements;
 }

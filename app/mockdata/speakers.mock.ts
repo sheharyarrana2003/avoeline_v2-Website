@@ -1,33 +1,28 @@
-export const mockSpeakers =[
+export const mockSpeakers = [
+  // ==========================================
+  // EVENT 001 - AI & Edge Computing (10 Speakers)
+  // Status: Completed | Organizer: org_001
+  // ==========================================
   {
-   "eventId": "evt_001",
+    "eventId": "evt_001",
     "organizerId": "org_001",
     "speakerId": "SPK001",
     "name": "Dr. Sarah Khan",
     "designation": "Lead Computer Vision Engineer",
+    "company": "Google",
     "bio": "Specializes in real-time object detection and model training, with extensive work implementing YOLOv8 architectures.",
     "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
-    "compnay" : "XYZ",
     "sessionTitle": "Optimizing YOLO for Real-Time Edge Computing",
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "digital",
       "templateId": "CERT_TEMPLATE_01",
-      "requirements": {
-        "minAttendance": 80,
-        "mustCompleteSurvey": true
-      }
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
     },
     "status": "completed",
     "visibility": "public",
     "accessCode": null,
-    "analytics": {
-      "views": 1245,
-      "registrations": 89,
-      "checkIns": 85,
-      "completionRate": 95.5,
-      "revenue": 178000
-    },
+    "analytics": { "views": 1245, "registrations": 89, "checkIns": 85, "completionRate": 95.5, "revenue": 178000 },
     "createdAt": "2026-05-01T10:00:00.000Z",
     "updatedAt": "2026-06-10T15:30:00.000Z",
     "publishedAt": "2026-05-05T09:00:00.000Z",
@@ -35,34 +30,264 @@ export const mockSpeakers =[
     "eventEndTime": "2026-06-12T17:00:00.000Z"
   },
   {
-   "eventId": "evt_002",
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK004",
+    "name": "David Chen",
+    "designation": "Senior Data Scientist",
+    "company": "Meta",
+    "bio": "Expert in deep learning pipelines and optimizing neural networks for mobile devices.",
+    "profileImage": "https://randomuser.me/api/portraits/men/45.jpg",
+    "sessionTitle": "Deploying PyTorch Models to Mobile",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 1102, "registrations": 95, "checkIns": 88, "completionRate": 92.6, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-12T10:00:00.000Z",
+    "eventEndTime": "2026-06-12T11:00:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK005",
+    "name": "Anita Patel",
+    "designation": "Cloud Architect",
+    "company": "AWS",
+    "bio": "Specializes in building scalable cloud infrastructures to support heavy ML workloads.",
+    "profileImage": "https://randomuser.me/api/portraits/women/22.jpg",
+    "sessionTitle": "Serverless Architecture for ML Inference",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 980, "registrations": 75, "checkIns": 70, "completionRate": 93.3, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-12T11:30:00.000Z",
+    "eventEndTime": "2026-06-12T12:30:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK006",
+    "name": "Carlos Ruiz",
+    "designation": "AI Ethics Researcher",
+    "company": "OpenAI",
+    "bio": "Focuses on the ethical implications of deploying computer vision systems in public spaces.",
+    "profileImage": "https://randomuser.me/api/portraits/men/15.jpg",
+    "sessionTitle": "Privacy and Ethics in Edge AI",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 1500, "registrations": 110, "checkIns": 105, "completionRate": 95.4, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-12T13:30:00.000Z",
+    "eventEndTime": "2026-06-12T14:30:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK007",
+    "name": "Fatima Zahra",
+    "designation": "Hardware Engineer",
+    "company": "NVIDIA",
+    "bio": "Designs embedded systems for autonomous vehicles using Jetson and TensorRT.",
+    "profileImage": "https://randomuser.me/api/portraits/women/12.jpg",
+    "sessionTitle": "Maximizing TensorRT Performance on Jetson",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 1340, "registrations": 100, "checkIns": 92, "completionRate": 92.0, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-12T14:45:00.000Z",
+    "eventEndTime": "2026-06-12T15:45:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK008",
+    "name": "James Wilson",
+    "designation": "MLOps Lead",
+    "company": "Hugging Face",
+    "bio": "Builds robust pipelines for continuously training and deploying open-source models.",
+    "profileImage": "https://randomuser.me/api/portraits/men/33.jpg",
+    "sessionTitle": "Automating MLOps for Edge Deployments",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 890, "registrations": 60, "checkIns": 55, "completionRate": 91.6, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-13T09:00:00.000Z",
+    "eventEndTime": "2026-06-13T10:00:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK009",
+    "name": "Emily Davis",
+    "designation": "Robotics Engineer",
+    "company": "Boston Dynamics",
+    "bio": "Focuses on SLAM (Simultaneous Localization and Mapping) and spatial awareness in quadrupeds.",
+    "profileImage": "https://randomuser.me/api/portraits/women/55.jpg",
+    "sessionTitle": "Spatial AI and Navigation in Robotics",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 2100, "registrations": 150, "checkIns": 140, "completionRate": 93.3, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-13T10:15:00.000Z",
+    "eventEndTime": "2026-06-13T11:15:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK010",
+    "name": "Wei Lin",
+    "designation": "IoT Specialist",
+    "company": "Cisco",
+    "bio": "Expert in securing edge-to-cloud communication protocols for industrial IoT.",
+    "profileImage": "https://randomuser.me/api/portraits/men/61.jpg",
+    "sessionTitle": "Securing the Edge: Protocols and Practices",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 750, "registrations": 50, "checkIns": 48, "completionRate": 96.0, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-13T11:30:00.000Z",
+    "eventEndTime": "2026-06-13T12:30:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK011",
+    "name": "Priya Sharma",
+    "designation": "AI Product Manager",
+    "company": "Microsoft",
+    "bio": "Bridges the gap between AI research and enterprise product delivery.",
+    "profileImage": "https://randomuser.me/api/portraits/women/33.jpg",
+    "sessionTitle": "Productizing AI: From Sandbox to Enterprise",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 1200, "registrations": 85, "checkIns": 80, "completionRate": 94.1, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-13T13:30:00.000Z",
+    "eventEndTime": "2026-06-13T14:30:00.000Z"
+  },
+  {
+    "eventId": "evt_001",
+    "organizerId": "org_001",
+    "speakerId": "SPK012",
+    "name": "Dr. Alan Turing (AI Persona)",
+    "designation": "Virtual Keynote Speaker",
+    "company": "Turing Institute",
+    "bio": "A holographic AI representation discussing the future of general intelligence.",
+    "profileImage": "https://randomuser.me/api/portraits/men/99.jpg",
+    "sessionTitle": "The Future of Compute: Beyond the Edge",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_01",
+      "requirements": { "minAttendance": 80, "mustCompleteSurvey": true }
+    },
+    "status": "completed",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 5000, "registrations": 300, "checkIns": 280, "completionRate": 98.0, "revenue": 178000 },
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-06-10T15:30:00.000Z",
+    "publishedAt": "2026-05-05T09:00:00.000Z",
+    "eventStartTime": "2026-06-13T15:00:00.000Z",
+    "eventEndTime": "2026-06-13T16:00:00.000Z"
+  },
+
+  // ==========================================
+  // EVENT 002 - Full-Stack Architecture
+  // Status: Registration Open | Organizer: org_001
+  // ==========================================
+  {
+    "eventId": "evt_002",
     "organizerId": "org_001",
     "speakerId": "SPK002",
     "name": "Omer Farooq",
-        "compnay" : "XYZ",
+    "company": "XYZ Corp",
     "designation": "Senior Full-Stack Architect",
-    "bio": "Over 10 years of experience building enterprise-scale applications, focusing on Node.js, React, and robust SQL database schemas for healthcare and management systems.",
+    "bio": "Over 10 years of experience building enterprise-scale applications, focusing on Node.js, React, and robust SQL database schemas.",
     "profileImage": "https://randomuser.me/api/portraits/men/32.jpg",
     "sessionTitle": "Architecting Scalable Node.js & React Microservices",
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "blockchain",
       "templateId": "CERT_TEMPLATE_02",
-      "requirements": {
-        "minAttendance": 90,
-        "mustCompleteSurvey": false
-      }
+      "requirements": { "minAttendance": 90, "mustCompleteSurvey": false }
     },
     "status": "registration_open",
     "visibility": "invite_only",
     "accessCode": "NODE2026_SECURE",
-    "analytics": {
-      "views": 850,
-      "registrations": 120,
-      "checkIns": 0,
-      "completionRate": 0,
-      "revenue": 250000
-    },
+    "analytics": { "views": 850, "registrations": 120, "checkIns": 0, "completionRate": 0, "revenue": 250000 },
     "createdAt": "2026-06-01T08:15:00.000Z",
     "updatedAt": "2026-06-12T11:00:00.000Z",
     "publishedAt": "2026-06-05T14:00:00.000Z",
@@ -70,39 +295,195 @@ export const mockSpeakers =[
     "eventEndTime": "2026-07-20T14:00:00.000Z"
   },
   {
-   "eventId": "evt_003",
+    "eventId": "evt_002",
+    "organizerId": "org_001",
+    "speakerId": "SPK013",
+    "name": "Michael Chang",
+    "company": "Vercel",
+    "designation": "Frontend Engineering Lead",
+    "bio": "Core contributor to Next.js and passionate about edge rendering and frontend performance.",
+    "profileImage": "https://randomuser.me/api/portraits/men/24.jpg",
+    "sessionTitle": "Next.js 16: Rendering on the Edge",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "blockchain",
+      "templateId": "CERT_TEMPLATE_02",
+      "requirements": { "minAttendance": 90, "mustCompleteSurvey": false }
+    },
+    "status": "registration_open",
+    "visibility": "invite_only",
+    "accessCode": "NODE2026_SECURE",
+    "analytics": { "views": 1120, "registrations": 145, "checkIns": 0, "completionRate": 0, "revenue": 250000 },
+    "createdAt": "2026-06-01T08:15:00.000Z",
+    "updatedAt": "2026-06-12T11:00:00.000Z",
+    "publishedAt": "2026-06-05T14:00:00.000Z",
+    "eventStartTime": "2026-07-21T09:00:00.000Z",
+    "eventEndTime": "2026-07-21T10:30:00.000Z"
+  },
+  {
+    "eventId": "evt_002",
+    "organizerId": "org_001",
+    "speakerId": "SPK014",
+    "name": "Sophia Martinez",
+    "company": "Stripe",
+    "designation": "Backend Systems Engineer",
+    "bio": "Builds high-availability financial systems and specializes in distributed systems architecture.",
+    "profileImage": "https://randomuser.me/api/portraits/women/64.jpg",
+    "sessionTitle": "Building Resilient Microservices",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "blockchain",
+      "templateId": "CERT_TEMPLATE_02",
+      "requirements": { "minAttendance": 90, "mustCompleteSurvey": false }
+    },
+    "status": "registration_open",
+    "visibility": "invite_only",
+    "accessCode": "NODE2026_SECURE",
+    "analytics": { "views": 900, "registrations": 105, "checkIns": 0, "completionRate": 0, "revenue": 250000 },
+    "createdAt": "2026-06-01T08:15:00.000Z",
+    "updatedAt": "2026-06-12T11:00:00.000Z",
+    "publishedAt": "2026-06-05T14:00:00.000Z",
+    "eventStartTime": "2026-07-21T11:00:00.000Z",
+    "eventEndTime": "2026-07-21T12:30:00.000Z"
+  },
+
+  // ==========================================
+  // EVENT 003 - Open Source & Linux
+  // Status: Draft | Organizer: org_002
+  // ==========================================
+  {
+    "eventId": "evt_003",
     "organizerId": "org_002",
     "speakerId": "SPK003",
     "name": "Elena Rostova",
-        "compnay" : "XYZ",
-
+    "company": "Red Hat",
     "designation": "Systems Engineer",
-    "bio": "Advanced Linux user and open-source contributor. Expert in custom desktop environments, tiling window managers like Hyprland, and system optimization.",
+    "bio": "Advanced Linux user and open-source contributor. Expert in custom desktop environments and tiling window managers.",
     "profileImage": "https://randomuser.me/api/portraits/women/68.jpg",
     "sessionTitle": "Mastering the Arch Linux Environment",
     "certificateConfig": {
       "issueCertificates": false,
       "certificateType": "both",
       "templateId": "CERT_TEMPLATE_03",
-      "requirements": {
-        "minAttendance": 50,
-        "mustCompleteSurvey": true
-      }
+      "requirements": { "minAttendance": 50, "mustCompleteSurvey": true }
     },
     "status": "draft",
     "visibility": "private",
     "accessCode": null,
-    "analytics": {
-      "views": 45,
-      "registrations": 0,
-      "checkIns": 0,
-      "completionRate": 0,
-      "revenue": 0
-    },
+    "analytics": { "views": 45, "registrations": 0, "checkIns": 0, "completionRate": 0, "revenue": 0 },
     "createdAt": "2026-06-13T09:00:00.000Z",
     "updatedAt": "2026-06-13T10:30:00.000Z",
     "publishedAt": null,
     "eventStartTime": "2026-08-15T13:00:00.000Z",
     "eventEndTime": "2026-08-15T16:00:00.000Z"
+  },
+  {
+    "eventId": "evt_003",
+    "organizerId": "org_002",
+    "speakerId": "SPK015",
+    "name": "Lars Svensson",
+    "company": "Linux Foundation",
+    "designation": "Kernel Developer",
+    "bio": "Maintains core subsystems of the Linux Kernel and speaks regularly at open-source summits.",
+    "profileImage": "https://randomuser.me/api/portraits/men/72.jpg",
+    "sessionTitle": "State of the Kernel: 2026 Updates",
+    "certificateConfig": {
+      "issueCertificates": false,
+      "certificateType": "both",
+      "templateId": "CERT_TEMPLATE_03",
+      "requirements": { "minAttendance": 50, "mustCompleteSurvey": true }
+    },
+    "status": "draft",
+    "visibility": "private",
+    "accessCode": null,
+    "analytics": { "views": 60, "registrations": 0, "checkIns": 0, "completionRate": 0, "revenue": 0 },
+    "createdAt": "2026-06-13T09:00:00.000Z",
+    "updatedAt": "2026-06-13T10:30:00.000Z",
+    "publishedAt": null,
+    "eventStartTime": "2026-08-16T10:00:00.000Z",
+    "eventEndTime": "2026-08-16T11:30:00.000Z"
+  },
+
+  // ==========================================
+  // EVENT 004 - UI/UX Design Summit
+  // Status: Published | Organizer: org_003
+  // ==========================================
+  {
+    "eventId": "evt_004",
+    "organizerId": "org_003",
+    "speakerId": "SPK016",
+    "name": "Mia Wong",
+    "company": "Figma",
+    "designation": "UX Director",
+    "bio": "Pioneer in design systems and collaborative design methodologies.",
+    "profileImage": "https://randomuser.me/api/portraits/women/19.jpg",
+    "sessionTitle": "The Future of Scalable Design Systems",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_04",
+      "requirements": { "minAttendance": 70, "mustCompleteSurvey": false }
+    },
+    "status": "published",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 4500, "registrations": 420, "checkIns": 0, "completionRate": 0, "revenue": 15000 },
+    "createdAt": "2026-05-20T09:00:00.000Z",
+    "updatedAt": "2026-06-01T10:30:00.000Z",
+    "publishedAt": "2026-06-01T12:00:00.000Z",
+    "eventStartTime": "2026-09-10T09:00:00.000Z",
+    "eventEndTime": "2026-09-10T10:30:00.000Z"
+  },
+  {
+    "eventId": "evt_004",
+    "organizerId": "org_003",
+    "speakerId": "SPK017",
+    "name": "Jackson Taylor",
+    "company": "Apple",
+    "designation": "Accessibility Lead",
+    "bio": "Advocate for inclusive design, ensuring digital products are accessible to everyone.",
+    "profileImage": "https://randomuser.me/api/portraits/men/51.jpg",
+    "sessionTitle": "Designing Beyond the Visual: Accessibility First",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_04",
+      "requirements": { "minAttendance": 70, "mustCompleteSurvey": false }
+    },
+    "status": "published",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 3200, "registrations": 310, "checkIns": 0, "completionRate": 0, "revenue": 15000 },
+    "createdAt": "2026-05-20T09:00:00.000Z",
+    "updatedAt": "2026-06-01T10:30:00.000Z",
+    "publishedAt": "2026-06-01T12:00:00.000Z",
+    "eventStartTime": "2026-09-10T11:00:00.000Z",
+    "eventEndTime": "2026-09-10T12:00:00.000Z"
+  },
+  {
+    "eventId": "evt_004",
+    "organizerId": "org_003",
+    "speakerId": "SPK018",
+    "name": "Chloe Smith",
+    "company": "Airbnb",
+    "designation": "Product Designer",
+    "bio": "Specializes in micro-interactions and motion design to create delightful user experiences.",
+    "profileImage": "https://randomuser.me/api/portraits/women/29.jpg",
+    "sessionTitle": "Meaningful Motion: Elevating UI",
+    "certificateConfig": {
+      "issueCertificates": true,
+      "certificateType": "digital",
+      "templateId": "CERT_TEMPLATE_04",
+      "requirements": { "minAttendance": 70, "mustCompleteSurvey": false }
+    },
+    "status": "published",
+    "visibility": "public",
+    "accessCode": null,
+    "analytics": { "views": 3800, "registrations": 385, "checkIns": 0, "completionRate": 0, "revenue": 15000 },
+    "createdAt": "2026-05-20T09:00:00.000Z",
+    "updatedAt": "2026-06-01T10:30:00.000Z",
+    "publishedAt": "2026-06-01T12:00:00.000Z",
+    "eventStartTime": "2026-09-10T13:30:00.000Z",
+    "eventEndTime": "2026-09-10T14:30:00.000Z"
   }
-]
+];
