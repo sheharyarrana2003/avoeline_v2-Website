@@ -11,7 +11,7 @@ export function AttendeeListItem(
             single_attendee: Attendee,
             attendee_user: User,
             handleOnClick: (attendee_id: String, user_id: string) => void,
-            handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>,attendee_id:String) => void
+            handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>, attendee_id: String) => void
         }) {
 
     // console.log(single_attendee);
@@ -26,7 +26,7 @@ export function AttendeeListItem(
                 <input
                     type="checkbox"
                     className="hover:opacity-80 transition-opacity"
-                    onChange={(e)=>handleCheckBoxChange(e,single_attendee.attendeeId)}
+                    onChange={(e) => handleCheckBoxChange(e, single_attendee.attendeeId)}
                 />
                 <div
                     onClick={() => handleOnClick(single_attendee.attendeeId, attendee_user.userId)}

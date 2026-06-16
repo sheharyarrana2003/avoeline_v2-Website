@@ -28,7 +28,7 @@ export default async function speaker({ params }: { params: Promise<{ id: string
             <br />
             <h1>input </h1>
 
-            <AttendeeClientSide attendee={attendeesWithUsers} />
+            <AttendeeClientSide attendees={attendeesWithUsers} />
 
 
 
