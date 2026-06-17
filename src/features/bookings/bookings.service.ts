@@ -43,6 +43,9 @@ export const BookingServices = {
 
   async getBookingById(booking_id: string) {
     return mockBookings.find(b=>b.bookingId===booking_id) || null;
+  },
+  async getAllBookingsOfOrganizer(organizerId:String){
+    return mockBookings.filter((booking) => booking.organizerId === organizerId);
   }
 }
 
