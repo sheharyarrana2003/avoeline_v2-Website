@@ -4,7 +4,7 @@ export default async function Vendor_Marketplace({params} : {params:Promise<{ven
     const resolved_params = await params;
     return (
         <>
-            <h1>A specific vendor with the id {resolved_params.vendor_id}</h1>  
+            <h1>Req quote {resolved_params.vendor_id}</h1>  
         </>
     )
 }

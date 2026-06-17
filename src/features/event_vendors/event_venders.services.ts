@@ -92,5 +92,9 @@ export const EventVendorService = {
         const actual_vendor_objects = raw_vendor_objects.map((x) => mapToVendorData(x) );
         return actual_vendor_objects;
             
+    },
+    async getVendorById(vendor_id : string){
+        return mockVendors.find(v=>v.vendorId === vendor_id );
+
     }
 }

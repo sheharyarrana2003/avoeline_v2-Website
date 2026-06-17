@@ -1,9 +1,9 @@
-export default async function EventDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrganizerIDPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     return (
 
         <div>
-            <h1>Organizer Profile {id}</h1>
+            <h1>Default Organizer id page {id}</h1>
         </div>
     );
 }

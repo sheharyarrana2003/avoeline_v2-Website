@@ -2,7 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 
 
-// Helper function to determine colors based on status
 const getStatusStyles = (status: string) => {
   const normalizedStatus = status.toUpperCase();
   
@@ -24,7 +23,11 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-export function BookingsCard({ booking }: { booking: any }) {
+export async function  BookingsCard({params, booking }: {params : Promise<{ organizer_id: string }>, booking: any }) {
+    const resolvedParams = await params;
+  const organizerId = resolvedParams.organizer_id; 
+  const basePath = `/organizer/${organizerId}`;
+
   // Safe destructuring based on typical data shape. Adjust to your exact schema.
   const vendorName = booking?.vendor?.businessName || "Unknown Vendor";
   const vendorInitials = vendorName.substring(0, 2).toUpperCase();
@@ -82,7 +85,7 @@ export function BookingsCard({ booking }: { booking: any }) {
         </p>
         
         <Link 
-        href={`/organizer/`}
+         href={`${basePath}/booking-details/${booking?.bookingId}`}
         className="w-full bg-black text-white hover:bg-gray-800 transition-colors py-3 px-4 rounded-xl font-semibold text-sm">
           View Details
         </Link>

@@ -6,12 +6,16 @@ interface PageProps {
   searchParams: Promise<{ tab?: string }>;
 }
 
-export default async function Active_Vendors({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const activeTab = params.tab?.toString() || "active"; // Default to active
+export default async function Active_Vendors({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: PageProps }) {
+  const awaited_search_params = await searchParams;
+  const resolvedParams = await params;
+  const organizerId = resolvedParams.organizer_id;
+  const basePath = `/organizer/${organizerId}`;
+
+
+  const activeTab = awaited_search_params.tab?.toString() || "active"; // Default to active
 
   //! hardcoded isko sah larna ha
-  const organizerId = "org_001";
   const bookings = await BookingServices.getBookingsOfOrganizer(organizerId);
 
   // Filter logic
@@ -26,9 +30,11 @@ export default async function Active_Vendors({ searchParams }: PageProps) {
   });
 
   return (
+
     <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">
+
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -47,9 +53,9 @@ export default async function Active_Vendors({ searchParams }: PageProps) {
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input 
-              type="text" 
-              placeholder="Search by vendor or service..." 
+            <input
+              type="text"
+              placeholder="Search by vendor or service..."
               className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm"
             />
           </div>
@@ -58,26 +64,23 @@ export default async function Active_Vendors({ searchParams }: PageProps) {
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-8 border-b border-gray-200 pb-4">
           <Link
-            href="/organizer/all-vendors?tab=active"
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-              activeTab === "active" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+            href={`${basePath}/all-vendors?tab=active`}
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${activeTab === "active" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
           >
             Active
           </Link>
           <Link
-            href="/organizer/all-vendors?tab=past"
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-              activeTab === "past" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+            href={`${basePath}/all-vendors?tab=past`}
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${activeTab === "past" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
           >
             Past
           </Link>
           <Link
-            href="/organizer/all-vendors?tab=cancelled"
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-              activeTab === "cancelled" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+            href={`${basePath}/all-vendors?tab=cancelled`}
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${activeTab === "cancelled" ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
           >
             Cancelled
           </Link>
@@ -87,7 +90,7 @@ export default async function Active_Vendors({ searchParams }: PageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBookings.length > 0 ? (
             filteredBookings.map((b) => (
-              <BookingsCard key={b.bookingId} booking={b} />
+              <BookingsCard key={b.bookingId} params={params} booking={b} />
             ))
           ) : (
             <p className="text-gray-500 text-sm">No bookings found for this category.</p>

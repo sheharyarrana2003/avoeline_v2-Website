@@ -138,6 +138,13 @@ export const mockBookings = [
         message: "Looking for lunch and high tea for our annual hackathon.",
         timestamp: "2026-05-01T10:00:00Z",
       },
+      {
+        "type": "quote_request",
+        "from": "vendor",
+        "to": "organzer",
+        "message": "Got itt",
+        "timestamp": "2026-05-01T10:00:00Z"
+      }
     ],
     documents: {
       quotePdf: "https://storage.events.com/quotes/B001_quote.pdf",
