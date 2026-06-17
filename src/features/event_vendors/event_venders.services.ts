@@ -96,5 +96,8 @@ export const EventVendorService = {
     async getVendorById(vendor_id : string){
         return mockVendors.find(v=>v.vendorId === vendor_id );
 
+    },
+    async getAllVendors(){
+        return mockVendors;
     }
 }
