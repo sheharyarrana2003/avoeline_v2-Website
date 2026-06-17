@@ -28,7 +28,7 @@ export function VendorHeader({ user }: { user: UserProp }) {
                 <ul className="flex space-x-6">
 
                     {tabs.map(x=>(
-                        <li>
+                        <li key={x}>
                             <Link
                              href={`${basePath}/${x.toLowerCase()}`}
                              className={current_tab === `${basePath}/${x.toLowerCase()}` ? "font-bold text-black" : "text-gray-500 hover:text-black"}

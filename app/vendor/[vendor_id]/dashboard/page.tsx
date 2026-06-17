@@ -117,10 +117,8 @@ export default async function VendorDashboardPage({
     const verificationBadges = v?.verification?.verificationBadges || [];
     const isVerified = v?.verification?.verified || false;
     
-    // Collect unique event IDs from bookings
     const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
     
-    // Fetch all events dynamically
     const eventsMap: Record<string, any> = {};
     for (const eventId of eventIds) {
         try {
@@ -133,19 +131,16 @@ export default async function VendorDashboardPage({
         }
     }
     
-    // Helper to get event title dynamically
     const getEventTitle = (eventId: string) => {
         return eventsMap[eventId]?.title || eventId;
     };
     
-    // Helper to get event type/category from event data
     const getEventCategory = (eventId: string) => {
         const event = eventsMap[eventId];
         if (!event) return 'Event';
         return event?.category || event?.eventType || 'Event';
     };
     
-    // Calculate stats from actual bookings
     const activeQuotes = raw_bookings.filter((b: any) => 
         ['quote_requested', 'quote_sent', 'negotiating'].includes(b?.status?.toLowerCase())
     );
@@ -158,7 +153,6 @@ export default async function VendorDashboardPage({
         b?.status?.toLowerCase() === 'completed'
     );
     
-    // Calculate revenue this month
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -172,7 +166,6 @@ export default async function VendorDashboardPage({
         })
         .reduce((sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0);
     
-    // Recent quote requests (last 7 days)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const recentQuoteRequests = raw_bookings
         .filter((b: any) => {
@@ -182,7 +175,6 @@ export default async function VendorDashboardPage({
         })
         .sort((a: any, b: any) => new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime());
     
-    // Upcoming confirmed bookings
     const upcomingBookings = confirmedBookings
         .filter((b: any) => {
             const serviceDate = b?.requirements?.serviceDate ? new Date(b.requirements.serviceDate) : null;

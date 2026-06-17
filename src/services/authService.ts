@@ -19,7 +19,7 @@ export const AuthService = {
 
      getCurrentVendor: cache(async () => {
          return {
-        id: "V001",
+        id: "V002",
         name: "Arhan",
         role: "Vendor",
         email: "arhan@avoeline.com"
