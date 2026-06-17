@@ -49,10 +49,10 @@ export function OrganizerHeader({ user }: { user: UserProp }) {
                         </li>
                         <li>
                             <Link
-                                href="/organizer/vendor"
-                                className={current_tab.includes("/organizer/vendor") ? "font-bold text-black" : "text-gray-500 hover:text-black"}
+                                href="/organizer/active-vendors"
+                                className={current_tab.includes("/organizer/active-vendors") ? "font-bold text-black" : "text-gray-500 hover:text-black"}
                             >
-                                Vendor
+                                Vendors
                             </Link>
                         </li>
                         <li>
