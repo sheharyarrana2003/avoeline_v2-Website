@@ -15,5 +15,14 @@ export const AuthService = {
     //! hardcoded data
     getCurrentUser: cache(async () => {
         return await fetching_data_from_db()
+    }),
+
+     getCurrentVendor: cache(async () => {
+         return {
+        id: "V001",
+        name: "Arhan",
+        role: "Vendor",
+        email: "arhan@avoeline.com"
+    };
     })
 }

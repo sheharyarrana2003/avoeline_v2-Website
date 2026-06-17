@@ -46,6 +46,9 @@ export const BookingServices = {
   },
   async getAllBookingsOfOrganizer(organizerId:String){
     return mockBookings.filter((booking) => booking.organizerId === organizerId);
+  },
+    async getAllBookingsOfVendor(vendorId:String){
+    return mockBookings.filter((booking) => booking.vendorId === vendorId);
   }
 }
 
