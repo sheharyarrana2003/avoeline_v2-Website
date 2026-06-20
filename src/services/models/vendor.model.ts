@@ -52,3 +52,4 @@ export interface VendorData {
     updatedAt: string;
     lastActive: string;
 }
+
