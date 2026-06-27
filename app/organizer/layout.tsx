@@ -1,5 +1,5 @@
 import { OrganizerHeader } from "@/src/shared_components/organizer/OrganizerHeader";
-import { AuthService } from "@/src/services/authService";
+import { AuthService } from "@/src/features/auth/authService";
 import { OrganizerFooter } from "@/src/shared_components/organizer/OrganizerFooter";
 export default async function OrganizerLayout({
     children,
