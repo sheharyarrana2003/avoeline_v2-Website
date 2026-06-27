@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import Head from 'next/head';
 import { 
@@ -18,6 +19,7 @@ import {
   ToggleRight,
   X
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 // --- Mock Data ---
 const ORGANIZER_DATA = {
@@ -131,7 +133,9 @@ const InputField = ({ label, value, type = "text", readOnly = false }) => (
 
 // --- Main Page Component ---
 
-export default function OrganizerProfile({ organizer_id }) {
+export default function OrganizerProfile() {
+    const organizer_id = usePathname();
+
   // State for interactive elements
   const [twoFactor, setTwoFactor] = useState(ORGANIZER_DATA.account.twoFactor);
   const [notifications, setNotifications] = useState(ORGANIZER_DATA.notifications);
@@ -480,18 +484,4 @@ export default function OrganizerProfile({ organizer_id }) {
       </div>
     </div>
   );
-}
-
-// Fetch organizer_id from path
-export async function getServerSideProps(context) {
-  const { organizer_id } = context.params;
-  
-  // In a real app, fetch data based on organizer_id
-  // const data = await fetchOrganizer(organizer_id);
-  
-  return {
-    props: {
-      organizer_id,
-    },
-  };
 }

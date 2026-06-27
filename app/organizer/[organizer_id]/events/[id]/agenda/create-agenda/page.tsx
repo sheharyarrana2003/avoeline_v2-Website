@@ -1,5 +1,5 @@
 import { SpeakerService } from "@/src/features/agendas/speakers.service"
-import { AuthService } from "@/src/services/authService"
+import { AuthService } from "@/src/features/auth/authService"
 import CreateAgendaForm from "@/src/features/agendas/components/CreateAgendaForm"
 
 

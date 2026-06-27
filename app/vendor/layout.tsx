@@ -1,4 +1,4 @@
-import { AuthService } from "@/src/services/authService";
+import { AuthService } from "@/src/features/auth/authService";
 import { VendorHeader } from "@/src/shared_components/vendor/VendorHeader";
 export default async function OrganizerLayout({
     children,
