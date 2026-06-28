@@ -2,17 +2,21 @@ import { cache } from "react"; // addding this because auth function is called b
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from '@/data/db'
-import { doc, setDoc ,getDoc} from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { Organizer } from "@/src/services/models/organizer.model";
+import { Vendor } from "@/src/services/models/vendor.model";
+
+let current_organizer: any = {
+    id: "org_001",
+    name: "Zain Ahmed",
+    role: "ORGANIZER",
+    email: "zain@avoeline.com"
+};
 
 const fetching_data_from_db = async () => {
     console.log("You should only see this ONCE per page load)");
     await new Promise(resolve => setTimeout(resolve, 300));
-    return {
-        id: "org_001",
-        name: "Zain Ahmed",
-        role: "ORGANIZER",
-        email: "zain@avoeline.com"
-    };
+    return current_organizer;
 }
 
 export const AuthService = {
@@ -43,17 +47,20 @@ export const AuthService = {
             console.log("💾Checkpoint 2: Attempting Firestore read...");
             const docRef = doc(db, "users", user_id);
             const docSnap = await getDoc(docRef);
-            const user_to_front_end ={
-                "user_id":user_id,
+            const user_to_front_end = {
+                "user_id": user_id,
                 ...docSnap.data()
             }
 
             if (docSnap.exists()) {
                 console.log("user data:", docSnap.data());
+                current_organizer = docSnap.data();
             } else {
                 console.log("No such user!");
                 return null;
             }
+
+
 
             console.log("User found");
             return user_to_front_end;
@@ -66,7 +73,7 @@ export const AuthService = {
 
     },
 
-    async signUpWithEmail(formData:any) {
+    async signUpWithEmail(formData: any) {
         const email = formData.email;
         const password = formData.password;
         console.log("Checkpoint 1: signUpWithEmail function started.");
@@ -81,8 +88,18 @@ export const AuthService = {
                 ...formData
             }
             console.log("Checking database instance:", db);
-            console.log("💾 Checkpoint 2: Attempting Firestore write...");
+            console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.role);
             await setDoc(doc(db, "users", user_id), user_object);
+
+            if (formData.role === 'Organizer') {
+                console.log("firestore wammt tpo write to organizer...");
+                const temp_organizer: Organizer = new Organizer(user_id, email, email);
+                await setDoc(doc(db, "organizer", user_id), temp_organizer.toFirestoreObject());
+                console.log("doneeeeeeeee firestore write to organizer...");
+            } else if (formData.role === 'Vendor') {
+                const temp_vendor: Vendor = new Vendor(user_id, email, email);
+                await setDoc(doc(db, "vendor", user_id), temp_vendor.toFirestoreObject());
+            }
 
             console.log("🎉 Checkpoint3: Firestore write complete!");
             return user;

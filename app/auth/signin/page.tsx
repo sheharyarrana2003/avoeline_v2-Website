@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaLinkedin } from 'react-icons/fa';
 import { AuthService } from '@/src/features/auth/authService';
-import { redirect } from 'next/dist/server/api-utils';
+import {seedEvents} from '@/seeding' 
 
 export default function SignIn() {
     const [email, setEmail] = useState('');
@@ -13,13 +13,13 @@ export default function SignIn() {
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        const user =  await AuthService.loginWithEmail(email, password);
-     
-       
-        if(user === null){
+        const user = await AuthService.loginWithEmail(email, password);
+
+
+        if (user === null) {
             router.push("/auth/signup");
-        }else{
-            console.log("in front end",user)
+        } else {
+            console.log("in front end", user)
             const user_id = user.user_id;
             const user_role = user.role;
             router.push(`/${user_role}/${user_id}/dashboard`);
