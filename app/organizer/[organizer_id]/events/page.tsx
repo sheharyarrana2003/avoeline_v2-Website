@@ -26,17 +26,17 @@ export default async function MyEventsPage({ params,searchParams }: {params:Prom
     });
 
     const tabs = [
-        { label: "All Events", value: "all", count: organizerEvents.length, href: "/organizer/events" },
-        { label: "Draft", value: "draft", count: countByStatus(organizerEvents, "draft"), href: "/organizer/events?status=draft" },
+        { label: "All Events", value: "all", count: organizerEvents.length, href: `${base_address}/events` },
+        { label: "Draft", value: "draft", count: countByStatus(organizerEvents, "draft"), href: `${base_address}/events?status=draft` },
         {
             label: "Published",
             value: "published",
             count: countByStatus(organizerEvents, "published") + countByStatus(organizerEvents, "almost-full"),
-            href: "/organizer/events?status=published"
+            href: `${base_address}/events?status=published`
         },
-        { label: "Ongoing", value: "ongoing", count: countByStatus(organizerEvents, "ongoing"), href: "/organizer/events?status=ongoing" },
-        { label: "Completed", value: "completed", count: countByStatus(organizerEvents, "completed"), href: "/organizer/events?status=completed" },
-        { label: "Cancelled", value: "cancelled", count: countByStatus(organizerEvents, "cancelled"), href: "/organizer/events?status=cancelled" },
+        { label: "Ongoing", value: "ongoing", count: countByStatus(organizerEvents, "ongoing"), href: `${base_address}/events?status=ongoing` },
+        { label: "Completed", value: "completed", count: countByStatus(organizerEvents, "completed"), href: `${base_address}/events?status=completed` },
+        { label: "Cancelled", value: "cancelled", count: countByStatus(organizerEvents, "cancelled"), href: `${base_address}/events?status=cancelled` },
     ];
 
     return (
@@ -49,7 +49,7 @@ export default async function MyEventsPage({ params,searchParams }: {params:Prom
                     </div>
 
                     <Link
-                        href="/organizer/events/create"
+                        href={`${base_address}/events/create`}
                         className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
                     >
                         <Plus size={18} />
@@ -139,14 +139,14 @@ export default async function MyEventsPage({ params,searchParams }: {params:Prom
 
                                     <div className="flex items-center justify-start gap-2 lg:justify-end">
                                         <Link
-                                            href={`/organizer/events/${event.id}`}
+                                            href={`${base_address}/events/${event.id}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`View ${event.title}`}
                                         >
                                             <Eye size={18} />
                                         </Link>
                                         <Link
-                                            href={`/organizer/events/${event.id}`}
+                                            href={`${base_address}/events/${event.id}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`Edit ${event.title}`}
                                         >

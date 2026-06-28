@@ -6,21 +6,22 @@ export default async function EventLayout({
     params
 }: {
     children: React.ReactNode;
-    params: Promise<{ id: string }>;
+    params: Promise<{ id: string; organizer_id: string }>;
 }) {
     const waitedParams = await params;
     const eventId = waitedParams.id;
+    const organizer_id = waitedParams.organizer_id;
 
     const event = await EventService.getEventByID(eventId);
 
     const tabs = [
-        { label: "Overview", value: "overview", href: `/organizer/events/${eventId}` },
-        { label: "Attendees", value: "attendees", href: `/organizer/events/${eventId}/attendees` },
-        { label: "Agenda", value: "agenda", href: `/organizer/events/${eventId}/agenda` },
-        { label: "Speakers", value: "speakers", href: `/organizer/events/${eventId}/speakers` },
-        { label: "Vendors", value: "vendors", href: `/organizer/events/${eventId}/vendors` },
-        { label: "Analytics", value: "analytics", href: `/organizer/events/${eventId}/analytics` },
-        { label: "Certificates", value: "certificates", href: `/organizer/events/${eventId}/certificates` },
+        { label: "Overview", value: "overview", href: `/organizer/${organizer_id}/events/${eventId}` },
+        { label: "Attendees", value: "attendees", href: `/organizer/${organizer_id}/events/${eventId}/attendees` },
+        { label: "Agenda", value: "agenda", href: `/organizer/${organizer_id}/events/${eventId}/agenda` },
+        { label: "Speakers", value: "speakers", href: `/organizer/${organizer_id}/events/${eventId}/speakers` },
+        { label: "Vendors", value: "vendors", href: `/organizer/${organizer_id}/events/${eventId}/vendors` },
+        { label: "Analytics", value: "analytics", href: `/organizer/${organizer_id}/events/${eventId}/analytics` },
+        { label: "Certificates", value: "certificates", href: `/organizer/${organizer_id}/events/${eventId}/certificates` },
     ];
 
     return (

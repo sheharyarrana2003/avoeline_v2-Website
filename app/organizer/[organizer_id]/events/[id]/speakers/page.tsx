@@ -7,12 +7,12 @@ import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCar
 export default async function SpeakerPage(
     { params, searchParams }:
     {
-        params: Promise<{ id: string }>,
+        params: Promise<{ id: string; organizer_id: string }>,
         searchParams: Promise<{ input_val?: string }>
     }
 ) {
     const u = await AuthService.getCurrentUser();
-    const { id } = await params;
+    const { id, organizer_id } = await params;
     const resolvedParams = await searchParams;
 
     const allSpeakers = await SpeakerService.getAllSpeakers(u.id, id);
@@ -47,7 +47,7 @@ export default async function SpeakerPage(
                         <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <Link
-                        href={`/organizer/events/${id}/speakers/create-speaker`}
+                        href={`/organizer/${organizer_id}/events/${id}/speakers/create-speaker`}
                         className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
