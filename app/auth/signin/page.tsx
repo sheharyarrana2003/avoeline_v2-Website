@@ -1,26 +1,21 @@
-'use client';
-import { useRouter } from 'next/navigation'
-import React, { useState } from 'react';
-import { FcGoogle } from 'react-icons/fc';
-import { FaApple, FaLinkedin } from 'react-icons/fa';
+'use server'
 import { AuthService } from '@/src/features/auth/authService';
 import SignInClient from './signinClient';
+import { redirect } from 'next/navigation';
+export  default async function SignIn() {
 
-export default function SignIn() {
-    const router = useRouter();
-
-    const handleEmailLogin = async (e: React.FormEvent,email:string,password:string) => {
-        e.preventDefault();
+    const handleEmailLogin = async (email:string,password:string) => {
+        'use server'
         const user = await AuthService.loginWithEmail(email, password);
 
 
         if (user === null) {
-            router.push("/auth/signup");
+            redirect("/auth/signup");
         } else {
             console.log("in front end", user)
             const user_id = user.user_id;
             const user_role = user.role;
-            router.push(`/${user_role.toLowerCase()}/${user_id}/dashboard`);
+           redirect(`/${user_role.toLowerCase()}/${user_id}/dashboard`);
         }
         console.log('Logging in with:', user);
     };
