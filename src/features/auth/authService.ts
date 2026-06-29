@@ -127,7 +127,8 @@ export const AuthService = {
                 maxAge: 3600,
                 httpOnly: true,
             });
-            return user;
+            user_object.user_id = user_id;
+            return user_object;
 
         } catch (error: any) {
             const errorCode = error.code;
