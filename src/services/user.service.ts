@@ -1,35 +1,33 @@
 import { mockUser } from "@/app/mockdata/users.mock"
 import { User } from "./models/user.type";
-import { auth, db } from '@/data/db'
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-
 
 function mapToUser(raw: any): User {
   return {
-    userId: raw?.userId || "",
-    email: raw?.email || "",
-    userType: raw?.userType || "attendee",
-    accountStatus: raw?.accountStatus || "active",
-
+    userId: raw.userId || "",
+    email: raw.email || "",
+    userType: raw.userType || "attendee",
+    accountStatus: raw.accountStatus || "active",
+    
     profile: {
       fullName: raw.profile?.fullName || "",
       phoneNumber: raw.profile?.phoneNumber || "",
       profileImageUrl: raw.profile?.profileImageUrl || "",
       gender: raw.profile?.gender || "other",
     },
-
+    
     location: {
       city: raw.location?.city || "",
       country: raw.location?.country || "",
     },
-
+    
     preferences: {
+      // Using ?? ensures that if the DB explicitly says false, we don't accidentally override it to true
       emailNotifications: Boolean(raw.preferences?.emailNotifications ?? true),
       pushNotifications: Boolean(raw.preferences?.pushNotifications ?? true),
       language: raw.preferences?.language || "en",
       theme: raw.preferences?.theme || "light",
     },
-
+    
     security: {
       lastLogin: raw.security?.lastLogin || "",
       loginCount: raw.security?.loginCount || 0,
@@ -37,14 +35,14 @@ function mapToUser(raw: any): User {
       mfaEnabled: Boolean(raw.security?.mfaEnabled),
       mfaMethod: raw.security?.mfaMethod || null,
     },
-
+    
     verification: {
       isEmailVerified: Boolean(raw.verification?.isEmailVerified),
       isPhoneVerified: Boolean(raw.verification?.isPhoneVerified),
       emailVerifiedAt: raw.verification?.emailVerifiedAt || null,
       phoneVerifiedAt: raw.verification?.phoneVerifiedAt || null,
     },
-
+    
     createdAt: raw.createdAt || new Date().toISOString(),
     updatedAt: raw.updatedAt || new Date().toISOString(),
     lastActive: raw.lastActive || new Date().toISOString(),
@@ -52,15 +50,9 @@ function mapToUser(raw: any): User {
 }
 
 export const UserService = {
-  async getUserById(user_id: String) {
-    const docRef = doc(db, "users", user_id);
-    const docSnap = await getDoc(docRef);
-    const user_to_front_end = {
-      "user_id": user_id,
-      ...docSnap.data()
+    async getUserById(user_id:String){
+        const user = mockUser.filter(u => u.userId === user_id);
+        return mapToUser(user[0]) || null;
     }
-
-  return user_to_front_end;
-  }
 }
 

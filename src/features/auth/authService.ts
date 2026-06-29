@@ -1,4 +1,3 @@
-
 import { cache } from "react"; // addding this because auth function is called by many components , using this db wll be called once and the result will be cached, the rest of components will get the cached result
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -6,31 +5,25 @@ import { auth, db } from '@/data/db'
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { Organizer } from "@/src/services/models/organizer.model";
 import { Vendor } from "@/src/services/models/vendor.model";
-import { adminAuth } from "@/data/admin_db";
-import { UserService } from "@/src/services/user.service";
-import { cookies } from "next/headers";
 
+console.log("🚨 FILE WAS INITIALIZED! current_organizer is resetting to default.");
+let current_organizer: any = {
+    id: "org_001",
+    name: "Zain Ahmed",
+    role: "ORGANIZER",
+    email: "zain@avoeline.com"
+};
 
 const fetching_data_from_db = async () => {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("firebaseToken")?.value;
-
-    if (!token) return null;
-
-    try {
-        const obj = await adminAuth.verifyIdToken(token);
-        console.log("hard workkk finally paidoff");
-        console.log(obj);
-
-        return UserService.getUserById(obj.uid);
-    } catch {
-        return null;
-    }
+    console.log("You should only see this ONCE per page load)");
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return current_organizer;
 }
 
 export const AuthService = {
     //! hardcoded data
-    getCurrentUser: async () => {
+     getCurrentUser :async () => {
+        console.log("This is the user i am returning to front end, ",current_organizer);
         return await fetching_data_from_db()
     },
 
@@ -63,21 +56,15 @@ export const AuthService = {
 
             if (docSnap.exists()) {
                 console.log("changing the user");
-                await new Promise(r => setTimeout(r, 3000));
+                await new Promise(r=>setTimeout(r,3000));
                 console.log("user data:", docSnap.data());
                 current_organizer = docSnap.data();
-                console.log("changed the user", current_organizer);
+                 console.log("changed the user",current_organizer);
             } else {
                 console.log("No such user!");
                 return null;
             }
-            const token = await user.getIdToken();
-            const cookieStore = await cookies();
-            cookieStore.set("firebaseToken", token, {
-                path: "/",
-                maxAge: 3600,
-                httpOnly: true,  
-            });
+
 
 
             console.log("User found");
@@ -120,13 +107,6 @@ export const AuthService = {
             }
 
             console.log("🎉 Checkpoint3: Firestore write complete!");
-               const token = await user.getIdToken();
-            const cookieStore = await cookies();
-            cookieStore.set("firebaseToken", token, {
-                path: "/",
-                maxAge: 3600,
-                httpOnly: true,  
-            });
             return user;
 
         } catch (error: any) {
@@ -134,7 +114,7 @@ export const AuthService = {
             const errorMessage = error.message;
             throw error;
         }
-        return null;
+
 
     }
 

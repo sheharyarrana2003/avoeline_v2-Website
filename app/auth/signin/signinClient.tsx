@@ -7,13 +7,6 @@ export default function SignInClient({handleEmailLogin}:{handleEmailLogin:any}) 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Call the server action safely with just data strings
-    await handleEmailLogin(email, password);
-  };
-
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#E5E5E5]">
             {/* Main Card */}
@@ -32,7 +25,7 @@ export default function SignInClient({handleEmailLogin}:{handleEmailLogin:any}) 
                 </div>
 
                 {/* Email & Password Form */}
-                <form onSubmit={handleSubmit} className="w-full space-y-4 mb-6">
+                <form onSubmit={(e)=>handleEmailLogin(e,email,password)} className="w-full space-y-4 mb-6">
                     <input
                         type="email"
                         placeholder="Email"
