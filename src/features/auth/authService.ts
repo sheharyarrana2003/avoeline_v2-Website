@@ -75,7 +75,7 @@ export const AuthService = {
             cookieStore.set("firebaseToken", token, {
                 path: "/",
                 maxAge: 3600,
-                httpOnly: true,
+                httpOnly: true,  
             });
 
 
@@ -98,34 +98,33 @@ export const AuthService = {
 
         try {
             const user_credintials = await createUserWithEmailAndPassword(auth, email, password);
+            console.log(user_credintials);
             const user = user_credintials.user;
             const user_id = user_credintials.user.uid;
             const user_object = {
                 ...formData
             }
+            console.log("Checking database instance:", db);
             console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.role);
             await setDoc(doc(db, "users", user_id), user_object);
-            console.log(`💾 Value: "[${formData.role}]" | Length: ${String(formData.role).length}`);
 
-
-            if (String(formData.role).trim().toLowerCase() === 'organizer') {
-                console.log("firestore wammt to write to organizer...");
+            if (formData.role === 'Organizer') {
+                console.log("firestore wammt tpo write to organizer...");
                 const temp_organizer: Organizer = new Organizer(user_id, email, email);
                 await setDoc(doc(db, "organizer", user_id), temp_organizer.toFirestoreObject());
                 console.log("doneeeeeeeee firestore write to organizer...");
-            } else if (String(formData.role).trim().toLowerCase() === 'vendor') {
+            } else if (formData.role === 'Vendor') {
                 const temp_vendor: Vendor = new Vendor(user_id, email, email);
                 await setDoc(doc(db, "vendor", user_id), temp_vendor.toFirestoreObject());
-                console.log("doneeeeeeeee firestore write to vendorrr...");
             }
 
             console.log("🎉 Checkpoint3: Firestore write complete!");
-            const token = await user.getIdToken();
+               const token = await user.getIdToken();
             const cookieStore = await cookies();
             cookieStore.set("firebaseToken", token, {
                 path: "/",
                 maxAge: 3600,
-                httpOnly: true,
+                httpOnly: true,  
             });
             return user;
 
