@@ -12,8 +12,8 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function EventDetailsPage({ params }: { params: Promise<{ id: string; organizer_id: string }> }) {
-    const { id, organizer_id } = await params;
+export default async function EventDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const event = await EventService.getEventByID(id);
 
     if (!event) {
@@ -38,7 +38,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ i
                 <header className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-4">
                         <Link
-                            href={`/organizer/${organizer_id}/events`}
+                            href="/organizer/events"
                             className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-950"
                             aria-label="Back to events"
                         >

@@ -9,8 +9,7 @@ import UpcomingEvents from "@/src/features/dashboard/components/UpcomingEvents";
 import RecentRegistrations from "@/src/features/dashboard/components/RecentRegistrations";
 import RegistrationTrendChart from "@/src/features/dashboard/components/RegistrationTrendChart";
 
-export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
-    const { organizer_id } = await params;
+export default async function Dashboard() {
     const u = await AuthService.getCurrentUser();
 
     const stats = await AnalyticsService.getDashboardStat(u.id);
@@ -31,7 +30,7 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
                     </div>
 
                     <Link
-                        href={`/organizer/${organizer_id}/analytics`}
+                        href="/organizer/analytics"
                         className="inline-flex h-11 items-center justify-center rounded-lg bg-[#7454f6] px-6 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(116,84,246,0.28)] transition hover:bg-[#6043df]"
                     >
                         View Analytics
@@ -75,14 +74,14 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
                         <div className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-[0_18px_45px_rgba(21,27,38,0.06)]">
                             <div className="grid grid-cols-2 gap-3">
                                 <Link
-                                    href={`/organizer/${organizer_id}/events/create`}
+                                    href="/organizer/events/create"
                                     className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-extrabold text-white transition hover:bg-slate-800"
                                 >
                                     <Plus size={16} />
                                     Create Event
                                 </Link>
                                 <Link
-                                    href={`/organizer/${organizer_id}/notifications`}
+                                    href="/organizer/notifications"
                                     className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 text-sm font-extrabold text-slate-950 transition hover:bg-slate-200"
                                 >
                                     <Megaphone size={16} />

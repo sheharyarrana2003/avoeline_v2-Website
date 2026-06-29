@@ -4,10 +4,9 @@ import { EventVendorService } from '@/src/features/event_vendors/event_venders.s
 
 
 
-export default async function Vendors({params} : {params : Promise<{id:string; organizer_id:string}>}) {
+export default async function Vendors({params} : {params : Promise<{id:string}>}) {
     const resolvedParams = await params;
     const event_id = resolvedParams.id;
-    const organizer_id = resolvedParams.organizer_id;
     const vendors = await EventVendorService.getVendors(event_id);
 
    const renderIcon = (categories: string[]) => {
@@ -55,7 +54,7 @@ export default async function Vendors({params} : {params : Promise<{id:string; o
                         </div>
                     </div>
                     
-                    <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className="bg-black hover:bg-slate-800 text-white px-5 py-3 rounded-xl font-bold text-[13px] transition-colors shadow-sm">
+                    <Link href="/organizer/vendor-marketplace" className="bg-black hover:bg-slate-800 text-white px-5 py-3 rounded-xl font-bold text-[13px] transition-colors shadow-sm">
                         Find Vendors
                     </Link>
                 </div>
@@ -101,10 +100,10 @@ export default async function Vendors({params} : {params : Promise<{id:string; o
                                         </div>
 
                                         <div className="flex gap-2">
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-[#f4f5f7] text-slate-700 hover:bg-gray-200">
+                                            <Link  href={`/organizer/vendor-marketplace/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-[#f4f5f7] text-slate-700 hover:bg-gray-200">
                                                 View Profile
                                             </Link>
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-slate-800">
+                                            <Link  href={`/organizer/vendor-marketplace/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-slate-800">
                                                 Request Quote
                                             </Link>
                                         </div>
