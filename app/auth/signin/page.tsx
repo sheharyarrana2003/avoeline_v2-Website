@@ -22,7 +22,7 @@ export default function SignIn() {
             console.log("in front end", user)
             const user_id = user.user_id;
             const user_role = user.role;
-            router.push(`/${user_role.toLowerCase()}/${user_id}/dashboard`);
+            router.push(`/${user_role}/${user_id}/dashboard`);
         }
         console.log('Logging in with:', user);
     };

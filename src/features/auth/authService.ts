@@ -6,7 +6,6 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { Organizer } from "@/src/services/models/organizer.model";
 import { Vendor } from "@/src/services/models/vendor.model";
 
-console.log("🚨 FILE WAS INITIALIZED! current_organizer is resetting to default.");
 let current_organizer: any = {
     id: "org_001",
     name: "Zain Ahmed",
@@ -22,10 +21,9 @@ const fetching_data_from_db = async () => {
 
 export const AuthService = {
     //! hardcoded data
-     getCurrentUser :async () => {
-        console.log("This is the user i am returning to front end, ",current_organizer);
+    getCurrentUser: cache(async () => {
         return await fetching_data_from_db()
-    },
+    }),
 
     getCurrentVendor: cache(async () => {
         return {
@@ -55,11 +53,8 @@ export const AuthService = {
             }
 
             if (docSnap.exists()) {
-                console.log("changing the user");
-                await new Promise(r=>setTimeout(r,3000));
                 console.log("user data:", docSnap.data());
                 current_organizer = docSnap.data();
-                 console.log("changed the user",current_organizer);
             } else {
                 console.log("No such user!");
                 return null;
