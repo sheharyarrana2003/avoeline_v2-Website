@@ -65,8 +65,7 @@ export const AuthService = {
                 console.log("changing the user");
                 await new Promise(r => setTimeout(r, 3000));
                 console.log("user data:", docSnap.data());
-                current_organizer = docSnap.data();
-                console.log("changed the user", current_organizer);
+
             } else {
                 console.log("No such user!");
                 return null;
