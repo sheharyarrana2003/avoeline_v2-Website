@@ -1,5 +1,5 @@
 import { AnalyticsService } from "@/src/services/anaylService";
-import { AuthService } from "@/src/features/auth/authService";
+import { AuthService } from "@/src/services/authService";
 import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
 
 import { DailyAnalyticsRegistration } from "@/src/features/analytics/types";

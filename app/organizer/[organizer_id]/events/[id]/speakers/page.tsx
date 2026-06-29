@@ -1,5 +1,5 @@
 import { SpeakerService } from "@/src/features/event_speakers/speakers.service"
-import { AuthService } from "@/src/features/auth/authService"
+import { AuthService } from "@/src/services/authService"
 import Link from "next/link";
 import { SpeakerSearchBar } from "@/src/features/event_speakers/components/SpeakerSearchBar";
 import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCard";

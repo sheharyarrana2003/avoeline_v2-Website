@@ -1,4 +1,4 @@
-import { AuthService } from "@/src/features/auth/authService";
+import { AuthService } from "@/src/services/authService";
 import { AnalyticsService } from "@/src/services/anaylService";
 import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
 import { Calendar, Megaphone, Plus, Star, Users, Wallet } from "lucide-react";

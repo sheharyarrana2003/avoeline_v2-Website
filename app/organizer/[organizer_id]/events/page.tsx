@@ -1,18 +1,15 @@
-import { AuthService } from "@/src/features/auth/authService";
+import { AuthService } from "@/src/services/authService";
 import { EventService } from "@/src/services/event.service";
 import { Event, EventStatus } from "@/src/services/models/event.model";
 import { Calendar, Eye, LayoutList, MapPin, MoreVertical, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 
-export default async function MyEventsPage({ params,searchParams }: {params:Promise<{organizer_id:string}>, searchParams: Promise<{ status?: string }> }) {
+export default async function MyEventsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
     const user = await AuthService.getCurrentUser();
     const currentTab = resolvedParams.status || "all";
     const allEvents = await EventService.getAllEvents();
     const organizerEvents = allEvents.filter((event) => event.organizerId === user.id);
-    const organizer_id = (await params).organizer_id;
-    const base_address = `/organizer/${organizer_id}`
-
     const events = organizerEvents.filter((event) => {
         if (currentTab === "all") {
             return true;
