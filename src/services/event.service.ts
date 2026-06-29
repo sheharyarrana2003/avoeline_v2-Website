@@ -1,8 +1,10 @@
-import {mockEvents} from "@/app/mockdata/events.mock"
+import { mockEvents } from "@/app/mockdata/events.mock"
+import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { auth, db } from '@/data/db'
 
 export const EventService = {
     async getEventByID(id: string) {
-      const e = mockEvents.filter(
+        const e = mockEvents.filter(
             me => {
                 return me.id === id;
             }
@@ -11,10 +13,10 @@ export const EventService = {
     }
     ,
     async getAllEvents() {
-       return mockEvents;
+        return mockEvents;
     }
     ,
-    async getEventsByStatusAndOrganizerID(organizer_id : string,status: string) {
+    async getEventsByStatusAndOrganizerID(organizer_id: string, status: string) {
         const e = mockEvents.filter(
             me => {
                 const organizer_match = me.organizerId === organizer_id;
@@ -30,5 +32,23 @@ export const EventService = {
         )
 
         return e;
+    },
+    async getAllEventsByOrganizer(organizer_id: string) {
+        const q = query(
+            collection(db, "events"),
+            where("organizer_id", "==", organizer_id)
+        );
+
+        const querySnapshot = await getDocs(q);
+        let arr=[];
+        console.log("this is querySnapShot ", querySnapshot);
+
+        querySnapshot.forEach((doc) => {
+            arr.push(doc.data());
+        });
+
+        
+
+        return arr;
     }
 }

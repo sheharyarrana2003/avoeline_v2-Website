@@ -11,6 +11,7 @@ import RegistrationTrendChart from "@/src/features/dashboard/components/Registra
 
 export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
     const { organizer_id } = await params;
+    console.log("this is my organizer_id -> ",organizer_id)
     const u = await AuthService.getCurrentUser();
 
     const stats = await AnalyticsService.getDashboardStat(u.id);

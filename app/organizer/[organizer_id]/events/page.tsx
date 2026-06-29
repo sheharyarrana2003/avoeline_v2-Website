@@ -8,10 +8,12 @@ export default async function MyEventsPage({ params,searchParams }: {params:Prom
     const resolvedParams = await searchParams;
     const user = await AuthService.getCurrentUser();
     const currentTab = resolvedParams.status || "all";
+    
     const allEvents = await EventService.getAllEvents();
-    const organizerEvents = allEvents.filter((event) => event.organizerId === user.id);
-    const organizer_id = (await params).organizer_id;
+       const organizer_id = (await params).organizer_id;
     const base_address = `/organizer/${organizer_id}`
+    const organizerEvents =await EventService.getAllEventsByOrganizer(organizer_id);
+ 
 
     const events = organizerEvents.filter((event) => {
         if (currentTab === "all") {
