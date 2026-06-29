@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+interface UserProp {
+    id: string;
+    name: string;
+    role: string;
+    email: string;
+}
 
-export function OrganizerHeader({ user }: { user: any }) {
+export function OrganizerHeader({ user }: { user: UserProp }) {
     const current_tab = usePathname();
-    console.log("idk where i am but this is thre path ",current_tab);
     
-    const basePath = `/organizer/${user.user_id}`;
+    const basePath = `/organizer/${user.id}`;
 
     return (
         <header className="flex items-center justify-between px-6 py-4 border-b">

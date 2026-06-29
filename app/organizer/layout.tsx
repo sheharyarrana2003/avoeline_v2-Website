@@ -1,7 +1,6 @@
 import { OrganizerHeader } from "@/src/shared_components/organizer/OrganizerHeader";
 import { AuthService } from "@/src/features/auth/authService";
 import { OrganizerFooter } from "@/src/shared_components/organizer/OrganizerFooter";
-
 export default async function OrganizerLayout({
     children,
 }: {
@@ -10,7 +9,6 @@ export default async function OrganizerLayout({
 
 
     const u = await AuthService.getCurrentUser();
-
     return(
         <>
         <OrganizerHeader user={u}/>
