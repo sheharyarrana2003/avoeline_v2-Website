@@ -2,7 +2,7 @@ import { cache } from "react"; // addding this because auth function is called b
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from '@/data/db'
-import { doc, setDoc ,getDoc} from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 const fetching_data_from_db = async () => {
     console.log("You should only see this ONCE per page load)");
@@ -30,46 +30,25 @@ export const AuthService = {
         };
     }),
 
-    async loginWithEmail(email: string, password: string) {
-        console.log("Checkpoint 1:  function started.");
-        console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
+    loginWithEmail(email: string, password: string) {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed up 
+                const user = userCredential.user;
+                console.log("This is the user in authentication", user);
+                return user;
 
-        try {
-            const user_credintials = await signInWithEmailAndPassword(auth, email, password);
-            console.log(user_credintials);
-            const user = user_credintials.user;
-            const user_id = user_credintials.user.uid;
-
-            console.log("💾Checkpoint 2: Attempting Firestore read...");
-            const docRef = doc(db, "users", user_id);
-            const docSnap = await getDoc(docRef);
-            const user_to_front_end ={
-                "user_id":user_id,
-                ...docSnap.data()
-            }
-
-            if (docSnap.exists()) {
-                console.log("user data:", docSnap.data());
-            } else {
-                console.log("No such user!");
-                return null;
-            }
-
-            console.log("User found");
-            return user_to_front_end;
-
-        } catch (error: any) {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            throw error;
-        }
-
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // ..
+            });
     },
 
-    async signUpWithEmail(formData:any) {
-        const email = formData.email;
-        const password = formData.password;
-        console.log("Checkpoint 1: signUpWithEmail function started.");
+    async signUpWithEmail(email: string, password: string) {
+        console.log("🚀 Checkpoint 1: signUpWithEmail function started.");
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
 
         try {
@@ -78,9 +57,14 @@ export const AuthService = {
             const user = user_credintials.user;
             const user_id = user_credintials.user.uid;
             const user_object = {
-                ...formData
+
+                "email": email,
+                "password": password,
+                "date": new Date(),
+                "isAdmin": false,
+                "role": null
             }
-            console.log("Checking database instance:", db);
+console.log("Checking database instance:", db);
             console.log("💾 Checkpoint 2: Attempting Firestore write...");
             await setDoc(doc(db, "users", user_id), user_object);
 

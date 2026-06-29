@@ -1,30 +1,19 @@
 'use client';
-import { useRouter } from 'next/navigation'
+
 import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaLinkedin } from 'react-icons/fa';
 import { AuthService } from '@/src/features/auth/authService';
-import { redirect } from 'next/dist/server/api-utils';
 
 export default function SignIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const router = useRouter();
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const handleEmailLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        const user =  await AuthService.loginWithEmail(email, password);
-     
-       
-        if(user === null){
-            router.push("/auth/signup");
-        }else{
-            console.log("in front end",user)
-            const user_id = user.user_id;
-            const user_role = user.role;
-            router.push(`/${user_role}/${user_id}/dashboard`);
-        }
-        console.log('Logging in with:', user);
+        const user =  AuthService.loginWithEmail(email, password);
+
+        console.log('Logging in with:', email, password);
     };
 
     return (
