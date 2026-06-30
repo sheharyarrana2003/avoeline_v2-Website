@@ -24,19 +24,34 @@ const fetching_data_from_db = async () => {
         console.log("hard workkk finally paidoff");
         console.log(obj);
 
+
+
         return UserService.getUserById(obj.uid);
-    } catch(error) {
+    } catch (error) {
         throw error;
     }
 }
 
-const converting_to_current_user_data = (user:User)=>{
-return{
-    userId: user?.userId || "",
-    email : user?.email || "",
-    name : user?.profile.fullName || "",
-    userType : user?.userType || ""
-}
+const converting_to_current_user_data = async (user: User) => {
+    const table_name = user.userType.trim().toLowerCase();
+    const docRef = doc(db, table_name, user.userId);
+    const docSnap = await getDoc(docRef);
+   
+    let role_id = "";
+    if (docSnap.exists()) {
+         let role_object = docSnap.data();
+         role_id = role_object.id;
+    }else{
+        let role_object = null;
+    }
+
+    return {
+        userId: user?.userId || "",
+        email: user?.email || "",
+        name: user?.profile.fullName || "",
+        userType: user?.userType || "",
+        roleId : role_id || ""
+    }
 }
 
 export const AuthService = {

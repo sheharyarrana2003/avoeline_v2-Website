@@ -16,7 +16,7 @@ export default function SignIn() {
         console.log('innn page.tsx -> signin up in with:');
         const user_id = user.userId;
         const user_role = user.userType;
-        redirect(`/${user_role.toLowerCase()}/${user_id}/dashboard`);
+        redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
     };
 
     return (

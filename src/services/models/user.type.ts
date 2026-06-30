@@ -36,6 +36,7 @@ export interface CurrentUserData{
   email: string;
   userType: "attendee" | "organizer" | "vendor" | "admin";
   name : string;
+  roleId : string;
 }
 export interface User {
   userId: string;
