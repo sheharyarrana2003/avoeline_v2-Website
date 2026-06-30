@@ -9,13 +9,15 @@ import { Vendor } from "@/src/services/models/vendor.model";
 import { adminAuth } from "@/data/admin_db";
 import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
+import { User } from "@/src/services/models/user.type";
+import { revalidatePath } from "next/cache";
 
 
 const fetching_data_from_db = async () => {
     const cookieStore = await cookies();
     const token = cookieStore.get("firebaseToken")?.value;
 
-    if (!token) return null;
+    if (!token) revalidatePath("/auth/signup");
 
     try {
         const obj = await adminAuth.verifyIdToken(token);
@@ -23,15 +25,26 @@ const fetching_data_from_db = async () => {
         console.log(obj);
 
         return UserService.getUserById(obj.uid);
-    } catch {
-        return null;
+    } catch(error) {
+        throw error;
     }
+}
+
+const converting_to_current_user_data = (user:User)=>{
+return{
+    userId: user?.userId || "",
+    email : user?.email || "",
+    name : user?.profile.fullName || "",
+    userType : user?.userType || ""
+}
 }
 
 export const AuthService = {
     //! hardcoded data
     getCurrentUser: async () => {
-        return await fetching_data_from_db()
+        const user = await fetching_data_from_db();
+
+        return converting_to_current_user_data(user);
     },
 
     getCurrentVendor: cache(async () => {

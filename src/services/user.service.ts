@@ -60,7 +60,7 @@ export const UserService = {
       ...docSnap.data()
     }
 
-  return user_to_front_end;
+    return mapToUser(user_to_front_end);
   }
 }
 

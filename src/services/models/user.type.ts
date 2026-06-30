@@ -31,7 +31,12 @@ export interface UserVerification {
   emailVerifiedAt: string | null;
   phoneVerifiedAt: string | null;
 }
-
+export interface CurrentUserData{
+   userId: string;
+  email: string;
+  userType: "attendee" | "organizer" | "vendor" | "admin";
+  name : string;
+}
 export interface User {
   userId: string;
   email: string;
