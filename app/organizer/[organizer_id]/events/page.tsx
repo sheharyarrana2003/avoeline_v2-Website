@@ -1,18 +1,19 @@
 import { AuthService } from "@/src/features/auth/authService";
 import { EventService } from "@/src/services/event.service";
-import { Event, EventStatus } from "@/src/services/models/event.model";
+import { EventModel, EventStatus } from "@/src/services/models/event.model";
+import { CurrentUserData } from "@/src/services/models/user.type";
 import { Calendar, Eye, LayoutList, MapPin, MoreVertical, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
-    const user = await AuthService.getCurrentUser();
+    const user : CurrentUserData = await AuthService.getCurrentUser();
     const currentTab = resolvedParams.status || "all";
 
-    const organizer_id = (await params).organizer_id;
-    const base_address = `/organizer/${organizer_id}`
-    const organizerEvents = await EventService.getAllEventsByOrganizer(organizer_id);
-
+    const organizer_id :string = (await params).organizer_id;
+    const base_address :string = `/organizer/${organizer_id}`
+    const organizerEvents : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
+    console.log(`these are the event of this organizer ${organizer_id} ->  ${organizerEvents}`);
 
     const events = organizerEvents.filter((event) => {
         if (currentTab === "all") {
@@ -20,7 +21,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         }
 
         if (currentTab === "published") {
-            return event.status === "published" || event.status === "almost-full";
+            return event.status === "published" ;
         }
 
         return event.status === currentTab;
@@ -32,7 +33,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         {
             label: "Published",
             value: "published",
-            count: countByStatus(organizerEvents, "published") + countByStatus(organizerEvents, "almost-full"),
+            count: countByStatus(organizerEvents, "published"),
             href: `${base_address}/events?status=published`
         },
         { label: "Ongoing", value: "ongoing", count: countByStatus(organizerEvents, "ongoing"), href: `${base_address}/events?status=ongoing` },
@@ -92,7 +93,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                     <ul className="space-y-4">
                         {events.map((event) => (
                             <li
-                                key={event.id}
+                                key={event.eventId}
                                 className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
                             >
                                 <article className="grid gap-5 lg:grid-cols-[76px_minmax(0,1fr)_minmax(220px,0.45fr)_minmax(260px,0.55fr)_120px] lg:items-center">
@@ -114,18 +115,18 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     <div className="space-y-2 text-sm font-bold text-slate-500">
                                         <p className="flex items-center gap-2">
                                             <Calendar size={16} className="text-slate-400" />
-                                            {event.date}
+                                            {event.schedule.startDate}
                                         </p>
                                         <p className="flex items-center gap-2">
                                             <MapPin size={16} className="text-slate-400" />
-                                            {event.location}
+                                            {event.location.venueName}
                                         </p>
                                     </div>
 
                                     <div>
                                         <div className="mb-2 flex items-center justify-between gap-4 text-sm font-extrabold">
                                             <span className="text-slate-950">
-                                                {event.registered}/{event.capacity}
+                                                {event.analytics.registrations}/{event.capacity.totalSeats}
                                             </span>
                                             <span className="text-slate-400">registered</span>
                                         </div>
@@ -139,14 +140,14 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                                     <div className="flex items-center justify-start gap-2 lg:justify-end">
                                         <Link
-                                            href={`${base_address}/events/${event.id}`}
+                                            href={`${base_address}/events/${event.eventId}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`View ${event.title}`}
                                         >
                                             <Eye size={18} />
                                         </Link>
                                         <Link
-                                            href={`${base_address}/events/${event.id}`}
+                                            href={`${base_address}/events/${event.eventId}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`Edit ${event.title}`}
                                         >
@@ -170,16 +171,16 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     );
 }
 
-function countByStatus(events: Event[], status: EventStatus) {
+function countByStatus(events: EventModel[], status: EventStatus) {
     return events.filter((event) => event.status === status).length;
 }
 
-function getProgress(event: Event) {
-    if (event.capacity <= 0) {
+function getProgress(event: EventModel) {
+    if (event.capacity.totalSeats <= 0) {
         return 0;
     }
 
-    return Math.min(100, Math.round((event.registered / event.capacity) * 100));
+    return Math.min(100, Math.round((event.analytics.registrations / event.capacity.totalSeats) * 100));
 }
 
 function toTitleCase(value: string) {
@@ -196,7 +197,7 @@ function StatusBadge({ status }: { status: EventStatus }) {
         ongoing: "bg-blue-100 text-blue-700",
         completed: "bg-emerald-100 text-emerald-700",
         cancelled: "bg-rose-100 text-rose-700",
-        "almost-full": "bg-amber-100 text-amber-700",
+        registration_open: "bg-rose-100 text-rose-700",
     };
 
     return (
