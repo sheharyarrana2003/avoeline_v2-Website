@@ -6,7 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 function mapToUser(raw: any): User {
   return {
-    userId: raw?.userId || "",
+    userId: raw?.userId || raw?.user_id|| "",
     email: raw?.email || "",
     userType: raw?.userType || "attendee",
     accountStatus: raw?.accountStatus || "active",
@@ -59,6 +59,7 @@ export const UserService = {
       "user_id": user_id,
       ...docSnap.data()
     }
+    console.log("this is user docSnap.data() ",docSnap.data());
 
     return mapToUser(user_to_front_end);
   }

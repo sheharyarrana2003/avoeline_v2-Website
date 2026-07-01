@@ -11,15 +11,15 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
         country: '',
         city: '',
         password: '',
-        role: 'Organizer',
+        userType: 'Organizer',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleRoleSelect = (role: string) => {
-        setFormData({ ...formData, role });
+    const handleRoleSelect = (userType: string) => {
+        setFormData({ ...formData, userType });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +162,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                                 type="button"
                                 onClick={() => handleRoleSelect(role)}
                                 className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                                    formData.role === role
+                                    formData.userType === role
                                         ? 'bg-black text-white'
                                         : 'bg-transparent text-gray-600 hover:bg-gray-200/50'
                                 }`}

@@ -12,6 +12,16 @@ import { cookies } from "next/headers";
 import { User } from "@/src/services/models/user.type";
 import { revalidatePath } from "next/cache";
 
+interface signup_with_email_form_data {
+    name: string;
+    email: string;
+    contactNo: string;
+    gender: string;
+    country: string;
+    city: string;
+    password: string;
+    userType: string;
+}
 
 const fetching_data_from_db = async () => {
     const cookieStore = await cookies();
@@ -33,24 +43,35 @@ const fetching_data_from_db = async () => {
 }
 
 const converting_to_current_user_data = async (user: User) => {
+    console.log("Thisis where its khrab");
     const table_name = user.userType.trim().toLowerCase();
+    console.log(`${table_name} and this is id ${user.userId}`);
     const docRef = doc(db, table_name, user.userId);
     const docSnap = await getDoc(docRef);
-   
-    let role_id = "";
-    if (docSnap.exists()) {
-         let role_object = docSnap.data();
-         role_id = role_object.id;
-    }else{
-        let role_object = null;
+    console.log("This is what docsnap.data returns ");
+    console.log(docSnap.data());
+
+    const role_object = docSnap.data() || {};
+    const targetKey = `${table_name}id`.toLowerCase();
+    let role_id= "didnt-exist";
+
+    const actualKey = Object.keys(role_object).find(
+        key => key.toLowerCase() === targetKey
+    );
+
+    if (actualKey) {
+        role_id = role_object[actualKey];
+    } else {
+        console.error(`Could not find an ID key matching ${table_name} case-insensitively.`);
     }
 
+    console.log("Yahan tak ata? ", role_id);
     return {
         userId: user?.userId || "",
         email: user?.email || "",
         name: user?.profile.fullName || "",
         userType: user?.userType || "",
-        roleId : role_id || ""
+        roleId: role_id || ""
     }
 }
 
@@ -118,7 +139,7 @@ export const AuthService = {
 
     },
 
-    async signUpWithEmail(formData: any) {
+    async signUpWithEmail(formData: signup_with_email_form_data) {
         const email = formData.email;
         const password = formData.password;
         console.log("Checkpoint 1: signUpWithEmail function started.");
@@ -131,17 +152,17 @@ export const AuthService = {
             const user_object = {
                 ...formData
             }
-            console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.role);
+            console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.userType);
             await setDoc(doc(db, "users", user_id), user_object);
-            console.log(`💾 Value: "[${formData.role}]" | Length: ${String(formData.role).length}`);
+            console.log(`💾 Value: "[${formData.userType}]" | Length: ${String(formData.userType).length}`);
 
 
-            if (String(formData.role).trim().toLowerCase() === 'organizer') {
+            if (String(formData.userType).trim().toLowerCase() === 'organizer') {
                 console.log("firestore wammt to write to organizer...");
                 const temp_organizer: Organizer = new Organizer(user_id, email, email);
                 await setDoc(doc(db, "organizer", user_id), temp_organizer.toFirestoreObject());
                 console.log("doneeeeeeeee firestore write to organizer...");
-            } else if (String(formData.role).trim().toLowerCase() === 'vendor') {
+            } else if (String(formData.userType).trim().toLowerCase() === 'vendor') {
                 const temp_vendor: Vendor = new Vendor(user_id, email, email);
                 await setDoc(doc(db, "vendor", user_id), temp_vendor.toFirestoreObject());
                 console.log("doneeeeeeeee firestore write to vendorrr...");
@@ -155,7 +176,7 @@ export const AuthService = {
                 maxAge: 3600,
                 httpOnly: true,
             });
-            user_object.user_id = user_id;
+
             return user_object;
 
         } catch (error: any) {

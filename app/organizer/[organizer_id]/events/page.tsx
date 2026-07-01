@@ -4,16 +4,15 @@ import { Event, EventStatus } from "@/src/services/models/event.model";
 import { Calendar, Eye, LayoutList, MapPin, MoreVertical, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 
-export default async function MyEventsPage({ params,searchParams }: {params:Promise<{organizer_id:string}>, searchParams: Promise<{ status?: string }> }) {
+export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
     const user = await AuthService.getCurrentUser();
     const currentTab = resolvedParams.status || "all";
-    
-    const allEvents = await EventService.getAllEvents();
-       const organizer_id = (await params).organizer_id;
+
+    const organizer_id = (await params).organizer_id;
     const base_address = `/organizer/${organizer_id}`
-    const organizerEvents =await EventService.getAllEventsByOrganizer(organizer_id);
- 
+    const organizerEvents = await EventService.getAllEventsByOrganizer(organizer_id);
+
 
     const events = organizerEvents.filter((event) => {
         if (currentTab === "all") {
@@ -67,11 +66,10 @@ export default async function MyEventsPage({ params,searchParams }: {params:Prom
                             <Link
                                 key={tab.value}
                                 href={tab.href}
-                                className={`shrink-0 border-b-2 pb-4 text-sm font-extrabold transition ${
-                                    isActive
+                                className={`shrink-0 border-b-2 pb-4 text-sm font-extrabold transition ${isActive
                                         ? "border-black text-slate-950"
                                         : "border-transparent text-slate-400 hover:text-slate-700"
-                                }`}
+                                    }`}
                             >
                                 {tab.label} ({tab.count})
                             </Link>

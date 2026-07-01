@@ -10,6 +10,7 @@ export default async function SignIn() {
         'use server'
         await AuthService.loginWithEmail(email, password);
         const user: CurrentUserData = await AuthService.getCurrentUser();
+        console.log("this is in signup page -> ")
 
         if (user === null) {
             redirect("/auth/signup");
