@@ -1,54 +1,59 @@
 import { mockEvents } from "@/app/mockdata/events.mock"
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '@/data/db'
+import { EventModel } from "./models/event.model";
 
 export const EventService = {
+
     async getEventByID(id: string) {
-        const e = mockEvents.filter(
-            me => {
-                return me.id === id;
-            }
-        )
-        return e[0] || null;
-    }
-    ,
-    async getAllEvents() {
-        return mockEvents;
-    }
-    ,
-    async getEventsByStatusAndOrganizerID(organizer_id: string, status: string) {
-        const e = mockEvents.filter(
-            me => {
-                const organizer_match = me.organizerId === organizer_id;
-                const status_match = status === "all" || me.status.toLowerCase() === status.toLowerCase();
-                // console.log("For -> ", me.id)
-                // console.log(organizer_id);
-                // console.log(status_match);
-                // console.log("Final verdict ->",status_match && organizer_match);
-                // console.log("");
+        console.log("In get event this is thte id i am searching for ",id);
+        if (!id){ console.warn("id is nulll brooooo") ;return null};
 
-                return status_match && organizer_match;
-            }
-        )
+        const q = query(
+            collection(db, "events"),
+            where("id", "==", id)
+        );
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("this event doesnt exist yet");
+            return new EventModel({});
+        }
+        console.log("found itttt ",querySnapshot.docs[0].data());
+        const event: EventModel = EventModel.fromJson(querySnapshot.docs[0].data());
+        return event;
 
-        return e;
-    },
+    
+
+},
+
     async getAllEventsByOrganizer(organizer_id: string) {
         const q = query(
             collection(db, "events"),
-            where("organizer_id", "==", organizer_id)
+            where("organizerId", "==", organizer_id)
         );
 
         const querySnapshot = await getDocs(q);
-        let arr=[];
-        console.log("this is querySnapShot ", querySnapshot);
+        let arr: EventModel[] = [];
 
         querySnapshot.forEach((doc) => {
-            arr.push(doc.data());
+            console.log("in getALL events");
+            console.log(doc.data());
+            arr.push(EventModel.fromJson(doc.data()));
         });
 
-        
-
         return arr;
-    }
+    },
+        async getRecentReg(event_id: string) {
+    const q = query(collection(db, "registerations"), where("eventId", "==", event_id));
+    const querySnapshot = await getDocs(q);
+    let arr: EventModel[] = [];
+
+    querySnapshot.forEach((doc) => {
+        console.log(doc.data());
+        arr.push(EventModel.fromJson(doc.data()));
+    });
+
+    return arr;
+
+}
 }

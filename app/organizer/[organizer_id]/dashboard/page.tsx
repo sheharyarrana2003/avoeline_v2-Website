@@ -8,17 +8,18 @@ import TodaysSchedule from "@/src/features/dashboard/components/TodaysSchedule";
 import UpcomingEvents from "@/src/features/dashboard/components/UpcomingEvents";
 import RecentRegistrations from "@/src/features/dashboard/components/RecentRegistrations";
 import RegistrationTrendChart from "@/src/features/dashboard/components/RegistrationTrendChart";
+import { CurrentUserData } from "@/src/services/models/user.type";
 
 export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
     const { organizer_id } = await params;
     console.log("this is my organizer_id -> ",organizer_id)
-    const u = await AuthService.getCurrentUser();
+    const u : CurrentUserData = await AuthService.getCurrentUser();
 
-    const stats = await AnalyticsService.getDashboardStat(u.id);
-    const today_events = await AnalyticsService.getTodayEvents(u.id);
-    const upcoming_events = await AnalyticsService.getUpcomingEvents(u.id);
-    const recent_reg = await AnalyticsService.getRecentReg(u.id);
-    const reg_trend_data = await AnalyticsService.getRegTrend(u.id);
+    const stats = await AnalyticsService.getDashboardStat(organizer_id);
+    const today_events = await AnalyticsService.getTodayEvents(organizer_id);
+    const upcoming_events = await AnalyticsService.getUpcomingEvents(organizer_id);
+    const recent_reg = await AnalyticsService.getRecentReg(organizer_id);
+    const reg_trend_data = await AnalyticsService.getRegTrend(organizer_id);
 
     return (
         <main className="min-h-screen bg-[#f4f2f5] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">

@@ -2,25 +2,28 @@
 import { AuthService } from '@/src/features/auth/authService';
 import SignInClient from './signinClient';
 import { redirect } from 'next/navigation';
-export  default async function SignIn() {
+import { CurrentUserData } from '@/src/services/models/user.type';
 
-    const handleEmailLogin = async (email:string,password:string) => {
+export default async function SignIn() {
+
+    const handleEmailLogin = async (email: string, password: string) => {
         'use server'
-        const user = await AuthService.loginWithEmail(email, password);
-
+        await AuthService.loginWithEmail(email, password);
+        const user: CurrentUserData = await AuthService.getCurrentUser();
+        console.log("this is in signup page -> ")
 
         if (user === null) {
             redirect("/auth/signup");
         } else {
             console.log("in front end", user)
-            const user_id = user.user_id;
-            const user_role = user.role;
-           redirect(`/${user_role.toLowerCase()}/${user_id}/dashboard`);
+            const user_id = user.userId;
+            const user_role = user.userType;
+            redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
         }
-        console.log('Logging in with:', user);
+
     };
 
     return (
-   <SignInClient handleEmailLogin={handleEmailLogin}/>
+        <SignInClient handleEmailLogin={handleEmailLogin} />
     );
 }
