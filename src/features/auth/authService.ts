@@ -11,7 +11,7 @@ import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
 import { User } from "@/src/services/models/user.type";
 import { revalidatePath } from "next/cache";
-
+import {seedEvents} from '@/seeding'
 interface signup_with_email_form_data {
     name: string;
     email: string;
@@ -31,11 +31,6 @@ const fetching_data_from_db = async () => {
 
     try {
         const obj = await adminAuth.verifyIdToken(token);
-        console.log("hard workkk finally paidoff");
-        console.log(obj);
-
-
-
         return UserService.getUserById(obj.uid);
     } catch (error) {
         throw error;
@@ -43,13 +38,13 @@ const fetching_data_from_db = async () => {
 }
 
 const converting_to_current_user_data = async (user: User) => {
-    console.log("Thisis where its khrab");
+    // console.log("Thisis where its khrab");
     const table_name = user.userType.trim().toLowerCase();
-    console.log(`${table_name} and this is id ${user.userId}`);
+    // console.log(`${table_name} and this is id ${user.userId}`);
     const docRef = doc(db, table_name, user.userId);
     const docSnap = await getDoc(docRef);
-    console.log("This is what docsnap.data returns ");
-    console.log(docSnap.data());
+    // console.log("This is what docsnap.data returns ");
+    // console.log(docSnap.data());
 
     const role_object = docSnap.data() || {};
     const targetKey = `${table_name}id`.toLowerCase();
@@ -65,7 +60,7 @@ const converting_to_current_user_data = async (user: User) => {
         console.error(`Could not find an ID key matching ${table_name} case-insensitively.`);
     }
 
-    console.log("Yahan tak ata? ", role_id);
+    // console.log("Yahan tak ata? ", role_id);
     return {
         userId: user?.userId || "",
         email: user?.email || "",
@@ -129,6 +124,7 @@ export const AuthService = {
 
 
             console.log("User found");
+            seedEvents()
             return user_to_front_end;
 
         } catch (error: any) {

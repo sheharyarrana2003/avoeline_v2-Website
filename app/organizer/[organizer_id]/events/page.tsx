@@ -92,8 +92,9 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                     <ul className="space-y-4">
                         {events.map((event) => (
+
                             <li
-                                key={event.eventId}
+                                key={`${event.id}+${new Date().toISOString()}`}
                                 className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
                             >
                                 <article className="grid gap-5 lg:grid-cols-[76px_minmax(0,1fr)_minmax(220px,0.45fr)_minmax(260px,0.55fr)_120px] lg:items-center">
@@ -108,7 +109,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                             </span>
                                             <StatusBadge status={event.status} />
                                         </div>
-                                        <h3 className="truncate text-lg font-extrabold text-slate-950">{event.title}</h3>
+                                        <h3 className="truncate text-lg font-extrabold text-slate-950">{event.title}{event.id}</h3>
                                         <p className="mt-1 line-clamp-1 text-sm font-semibold text-slate-400">{event.description}</p>
                                     </div>
 
@@ -140,14 +141,14 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                                     <div className="flex items-center justify-start gap-2 lg:justify-end">
                                         <Link
-                                            href={`${base_address}/events/${event.eventId}`}
+                                            href={`${base_address}/events/${event.id}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`View ${event.title}`}
                                         >
                                             <Eye size={18} />
                                         </Link>
                                         <Link
-                                            href={`${base_address}/events/${event.eventId}`}
+                                            href={`${base_address}/events/${event.id}`}
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`Edit ${event.title}`}
                                         >

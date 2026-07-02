@@ -102,7 +102,7 @@ export interface EventAnalytics {
 }
 
 export class EventModel {
-  eventId: string;
+  id: string;
   organizerId: string;
   title: string;
   description: string;
@@ -131,7 +131,7 @@ export class EventModel {
   eventEndTime: Date;
 
   constructor(raw: any) {
-    this.eventId = raw.eventId || "";
+    this.id = raw.eventId || raw.id ||raw.event_id||  "";
     this.organizerId = raw.organizerId || "";
     this.title = raw.title || "Untitled Event";
     this.description = raw.description || "";
