@@ -22,15 +22,15 @@ import { notFound } from "next/navigation";
 
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
-    const event : EventModel |null= await EventService.getEventByID(eventId);
+    const event : EventModel | null = await EventService.getEventByID(eventId);
 
     if (!event) {
         console.log("Event not founddd");
         notFound();
     }
 
-    const checkedIn = Math.round(event.analytics?.checkIns  * 0.75);
-    const capacityPercent = getPercent(event.analytics?.registrations , event.capacity.totalSeats);
+    const checkedIn = Math.round((event.analytics?.checkIns ?? 0) * 0.75);
+    const capacityPercent = getPercent(event.analytics?.registrations ?? 0, event.capacity.totalSeats);
     const targetRevenue = Math.max(event.analytics?.revenue ?? 0, event.capacity.totalSeats * Math.max(event.pricing?.tiers?.[0]?.price ?? 0, 1));
     const revenuePercent = getPercent(event.analytics?.revenue ?? 0, targetRevenue);
     const recentRegistrations = [
@@ -106,7 +106,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
                     <MetricCard
                         label="Registrations"
-                        value={`${event.analytics?.registrations}`}
+                        value={`${event.analytics?.registrations ?? 0}`}
                         suffix={`/${event.capacity.totalSeats}`}
                         helper={`${capacityPercent}% Capacity`}
                         progress={capacityPercent}
@@ -120,7 +120,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     />
                     <MetricCard
                         label="Revenue"
-                        value={`${event.pricing?.currency} ${(event.analytics?.revenue).toLocaleString("en-US")}`}
+                        value={`${event.pricing?.currency} ${(event.analytics?.revenue ?? 0).toLocaleString("en-US")}`}
                         helper={`${revenuePercent}% of Target`}
                         progress={revenuePercent}
                     />
@@ -132,83 +132,152 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     />
                 </section>
 
-                {/* Main Content Grid */}
-                <section className="grid gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
-                    {/* Left Column - Individual Article Boxes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Main Content Grid (Structured Layout Columns) */}
+                <section className="grid gap-8 lg:grid-cols-3">
+                    {/* Left & Middle Column Flow Content */}
+                    <div className="lg:col-span-2 space-y-6">
                         
-                        {/* Schedule Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <Clock size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Schedule</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <InfoBlock label="Start Date" value={event.schedule?.startDate} />
-                                <InfoBlock label="End Date" value={event.schedule?.endDate} />
-                                <InfoBlock label="Start Time" value={event.schedule?.startTime} />
-                                <InfoBlock label="End Time" value={event.schedule?.endTime} />
-                                <InfoBlock label="Timezone" value={event.schedule?.timezone} />
-                                <InfoBlock label="Recurring" value={event.schedule?.isRecurring ? `Yes (${event.schedule.recurrencePattern})` : "No"} />
-                            </div>
-                        </article>
-
-                        {/* Location Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <MapPin size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Location</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <InfoBlock label="Venue" value={event.location?.venueName} />
-                                <InfoBlock label="Address" value={event.location?.address} />
-                                <InfoBlock label="City" value={event.location?.city} />
-                                <InfoBlock label="Country" value={event.location?.country} />
-                                <InfoBlock label="Coordinates" value={`${event.location?.coordinates?.latitude}, ${event.location?.coordinates?.longitude}`} />
-                                <InfoBlock label="Platform" value={event.location?.meetingPlatform} />
-                                <InfoBlock label="Meeting Link" value={event.location?.meetingLink} />
-                                <InfoBlock label="Meeting ID" value={event.location?.meetingId} />
-                            </div>
-                        </article>
-
-                        {/* Capacity Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <Users size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Capacity</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <InfoBlock label="Total Seats" value={event.capacity.totalSeats.toLocaleString("en-US")} />
-                                <InfoBlock label="Reserved Seats" value={event.capacity.reservedSeats.toLocaleString("en-US")} />
-                                <InfoBlock label="Available Seats" value={event.capacity.availableSeats.toLocaleString("en-US")} />
-                            </div>
-                        </article>
-
-                        {/* Registration Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <UserCheck size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Registration</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <InfoBlock label="Opens" value={event.registration?.registrationOpenDate} />
-                                <InfoBlock label="Closes" value={event.registration?.registrationCloseDate} />
-                                <InfoBlock label="Requires Approval" value={event.registration?.requiresApproval ? "Yes" : "No"} />
-                            </div>
-                            {event.registration?.customForm && event.registration.customForm.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-slate-100">
-                                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Custom Form Fields</h4>
-                                    {event.registration.customForm.map((field) => (
-                                        <div key={field.fieldId} className="mb-2">
-                                            <p className="text-sm font-semibold text-slate-900">{field.label} <span className="text-slate-400">({field.type}{field.required ? ", Required" : ""})</span></p>
-                                            <p className="text-xs text-slate-400">Options: {field.options.join(", ")}</p>
-                                        </div>
-                                    ))}
+                        {/* Two-Column Info Cards Subgrid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Schedule Box */}
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Clock size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Schedule</h2>
                                 </div>
-                            )}
+                                <div className="space-y-4">
+                                    <InfoBlock label="Start Date" value={event.schedule?.startDate} />
+                                    <InfoBlock label="End Date" value={event.schedule?.endDate} />
+                                    <InfoBlock label="Start Time" value={event.schedule?.startTime} />
+                                    <InfoBlock label="End Time" value={event.schedule?.endTime} />
+                                    <InfoBlock label="Timezone" value={event.schedule?.timezone} />
+                                    <InfoBlock label="Recurring" value={event.schedule?.isRecurring ? `Yes` : "No"} />
+                                </div>
+                            </article>
+
+                            {/* Location Box */}
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <MapPin size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Location</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <InfoBlock label="Venue" value={event.location?.venueName} />
+                                    <InfoBlock label="Address" value={event.location?.address} />
+                                    <InfoBlock label="City" value={event.location?.city} />
+                                    <InfoBlock label="Country" value={event.location?.country} />
+                                    <InfoBlock label="Coordinates" value={`${event.location?.coordinates?.latitude}, ${event.location?.coordinates?.longitude}`} />
+                                    <InfoBlock label="Platform" value={event.location?.meetingPlatform} />
+                                </div>
+                            </article>
+
+                            {/* Capacity Box */}
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <Users size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Capacity</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <InfoBlock label="Total Seats" value={event.capacity.totalSeats.toLocaleString("en-US")} />
+                                    <InfoBlock label="Reserved Seats" value={event.capacity.reservedSeats.toLocaleString("en-US")} />
+                                    <InfoBlock label="Available Seats" value={event.capacity.availableSeats.toLocaleString("en-US")} />
+                                </div>
+                            </article>
+
+                            {/* Registration Box */}
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <UserCheck size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Registration</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <InfoBlock label="Opens" value={event.registration?.registrationOpenDate} />
+                                    <InfoBlock label="Closes" value={event.registration?.registrationCloseDate} />
+                                    <InfoBlock label="Requires Approval" value={event.registration?.requiresApproval ? "Yes" : "No"} />
+                                </div>
+                            </article>
+                        </div>
+
+                        {/* Pricing & Tickets Box (Spanned beautifully below the subgrid) */}
+                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Ticket size={18} className="text-slate-400" />
+                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Pricing & Tickets</h2>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <InfoBlock label="Free Event" value={event.pricing?.isFree ? "Yes" : "No"} />
+                                    <InfoBlock label="Currency" value={event.pricing?.currency} />
+                                    {(event.pricing?.studentDiscount || event.pricing?.groupDiscount) && (
+                                        <div className="pt-4 border-t border-slate-100 space-y-1">
+                                            <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1">Available Discounts</h4>
+                                            {event.pricing?.studentDiscount?.enabled && (
+                                                <p className="text-sm font-semibold text-slate-700">Student: {event.pricing.studentDiscount.percentage}% off</p>
+                                            )}
+                                            {event.pricing?.groupDiscount?.enabled && (
+                                                <p className="text-sm font-semibold text-slate-700">Group ({event.pricing.groupDiscount.minGroupSize}+): {event.pricing.groupDiscount.percentage}% off</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                {event.pricing?.tiers && event.pricing.tiers.length > 0 && (
+                                    <div className="border-t pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-6 border-slate-100">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Ticket Tiers</h4>
+                                        <div className="space-y-3">
+                                            {event.pricing.tiers.map((tier, index) => (
+                                                <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{tier.name}</p>
+                                                    <p className="text-base font-extrabold text-slate-950">{event.pricing?.currency} {tier.price.toLocaleString("en-US")}</p>
+                                                    <p className="text-xs text-slate-500">Until {tier.availableUntil} • {tier.seats} seats</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </article>
 
-                        {/* Timestamps Box */}
+                        {/* Description Box */}
+                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <div className="flex items-center gap-2 mb-5">
+                                <FileText size={18} className="text-slate-400" />
+                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Event Description</h2>
+                            </div>
+                            <div className="space-y-4 text-base font-semibold leading-7 text-slate-600">
+                                <p>{event.description}</p>
+                                <p className="text-sm italic text-slate-400">{event.shortDescription}</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    {/* Right Column Sidebar Stack */}
+                    <div className="space-y-6">
+                        {/* Recent Registrations Sidebar */}
+                        <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <div className="mb-6 flex items-center justify-between">
+                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Recent Registrations</h2>
+                                <Link href="#" className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-slate-950 transition">
+                                    View All
+                                </Link>
+                            </div>
+                            <ul className="space-y-4">
+                                {recentRegistrations.map(([name, role, time], index) => (
+                                    <li key={name} className="flex items-center gap-4">
+                                        <span className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-xs font-extrabold text-slate-600">
+                                            {index + 1}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-extrabold text-slate-950">{name}</p>
+                                            <p className="truncate text-xs font-semibold text-slate-400">
+                                                {role} • <span className="text-slate-500">{time}</span>
+                                            </p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </aside>
+
+                        {/* Timestamps Card */}
                         <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <div className="flex items-center gap-2 mb-5">
                                 <Clock size={18} className="text-slate-400" />
@@ -217,50 +286,12 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             <div className="space-y-4">
                                 <InfoBlock label="Created At" value={new Date(event.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} />
                                 <InfoBlock label="Updated At" value={new Date(event.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} />
-                                <InfoBlock label="Published At" value={event.publishedAt ? new Date(event.publishedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"} />
                                 <InfoBlock label="Event Start" value={event.eventStartTime ? new Date(event.eventStartTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"} />
                                 <InfoBlock label="Event End" value={event.eventEndTime ? new Date(event.eventEndTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"} />
                             </div>
                         </article>
 
-                        {/* Pricing & Tickets Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <Ticket size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Pricing & Tickets</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <InfoBlock label="Free Event" value={event.pricing?.isFree ? "Yes" : "No"} />
-                                <InfoBlock label="Currency" value={event.pricing?.currency} />
-                            </div>
-                            {event.pricing?.tiers && event.pricing.tiers.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-slate-100">
-                                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Ticket Tiers</h4>
-                                    <div className="space-y-3">
-                                        {event.pricing.tiers.map((tier, index) => (
-                                            <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                                <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{tier.name}</p>
-                                                <p className="text-lg font-extrabold text-slate-950">{event.pricing.currency} {tier.price.toLocaleString("en-US")}</p>
-                                                <p className="text-xs text-slate-500">Until {tier.availableUntil} • {tier.seats} seats</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {(event.pricing?.studentDiscount || event.pricing?.groupDiscount) && (
-                                <div className="mt-4 pt-4 border-t border-slate-100">
-                                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Discounts</h4>
-                                    {event.pricing?.studentDiscount?.enabled && (
-                                        <p className="text-sm font-semibold text-slate-700">Student: {event.pricing.studentDiscount.percentage}% off</p>
-                                    )}
-                                    {event.pricing?.groupDiscount?.enabled && (
-                                        <p className="text-sm font-semibold text-slate-700">Group ({event.pricing.groupDiscount.minGroupSize}+): {event.pricing.groupDiscount.percentage}% off</p>
-                                    )}
-                                </div>
-                            )}
-                        </article>
-
-                        {/* Speakers Box */}
+                        {/* Speakers & Certificate Card Stacked Together */}
                         {event.speakers && event.speakers.length > 0 && (
                             <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
@@ -287,128 +318,20 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             </article>
                         )}
 
-                        {/* Certificate Box */}
                         {event.certificateConfig && (
                             <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
                                     <Award size={18} className="text-slate-400" />
                                     <h2 className="text-lg font-extrabold uppercase text-slate-950">Certificate</h2>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     <InfoBlock label="Issue Certificates" value={event.certificateConfig.issueCertificates ? "Yes" : "No"} />
                                     <InfoBlock label="Type" value={event.certificateConfig.certificateType} />
-                                    <InfoBlock label="Template" value={event.certificateConfig.templateId} />
-                                </div>
-                                {event.certificateConfig.issueCertificates && event.certificateConfig.requirements && (
-                                    <div className="mt-4 pt-4 border-t border-slate-100">
-                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Requirements</h4>
-                                        <InfoBlock label="Min Attendance" value={`${event.certificateConfig.requirements.minAttendance}%`} />
-                                        <InfoBlock label="Complete Survey" value={event.certificateConfig.requirements.mustCompleteSurvey ? "Yes" : "No"} />
-                                    </div>
-                                )}
-                            </article>
-                        )}
-
-                        {/* Analytics Box */}
-                        {event.analytics && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                                <div className="flex items-center gap-2 mb-5">
-                                    <BarChart3 size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Analytics</h2>
-                                </div>
-                                <div className="space-y-4">
-                                    <InfoBlock label="Views" value={event.analytics.views.toLocaleString("en-US")} />
-                                    <InfoBlock label="Registrations" value={event.analytics.registrations.toLocaleString("en-US")} />
-                                    <InfoBlock label="Check-ins" value={event.analytics.checkIns.toLocaleString("en-US")} />
-                                    <InfoBlock label="Completion Rate" value={`${event.analytics.completionRate}%`} />
-                                    <InfoBlock label="Revenue" value={`${event.pricing?.currency} ${event.analytics.revenue.toLocaleString("en-US")}`} />
+                                    <InfoBlock label="Template ID" value={event.certificateConfig.templateId} />
                                 </div>
                             </article>
                         )}
-
-                        {/* Media Box */}
-                        {(event.bannerImage || (event.galleryImages && event.galleryImages.length > 0) || event.promoVideoUrl) && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] md:col-span-2">
-                                <div className="flex items-center gap-2 mb-5">
-                                    <ImageIcon size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Media</h2>
-                                </div>
-                                {event.bannerImage && (
-                                    <div className="mb-4">
-                                        <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Banner</p>
-                                        <img src={event.bannerImage} alt="Event Banner" className="w-full h-48 object-cover rounded-2xl" />
-                                    </div>
-                                )}
-                                {event.galleryImages && event.galleryImages.length > 0 && (
-                                    <div className="mb-4">
-                                        <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Gallery</p>
-                                        <div className="flex gap-3 overflow-x-auto pb-2">
-                                            {event.galleryImages.map((img, i) => (
-                                                <img key={i} src={img} alt={`Gallery ${i + 1}`} className="w-32 h-32 object-cover rounded-xl shrink-0" />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                                {event.promoVideoUrl && (
-                                    <div>
-                                        <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Promo Video</p>
-                                        <a href={event.promoVideoUrl} className="text-sm font-extrabold text-blue-600 underline break-all">{event.promoVideoUrl}</a>
-                                    </div>
-                                )}
-                            </article>
-                        )}
-
-                        {/* Description Box - Full Width */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] md:col-span-2">
-                            <div className="flex items-center gap-2 mb-5">
-                                <FileText size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Event Description</h2>
-                            </div>
-                            <div className="space-y-4 text-base font-semibold leading-7 text-slate-500">
-                                <p>{event.description}</p>
-                                <p>{event.shortDescription}</p>
-                            </div>
-                        </article>
-
-                        {/* Key Info Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] md:col-span-2">
-                            <div className="flex items-center gap-2 mb-5">
-                                <Tag size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Key Information</h2>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <InfoBlock label="Organizer" value="Avoeline Creative Labs" />
-                                <InfoBlock label="Contact" value="hello@avoeline.com" />
-                                <InfoBlock label="Ticket Price" value={event.pricing?.tiers?.[0] ? `${event.pricing.currency} ${event.pricing.tiers[0].price.toLocaleString("en-US")}` : "Free"} />
-                            </div>
-                           
-                        </article>
                     </div>
-
-                    {/* Right Sidebar - Recent Registrations */}
-                    <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)] h-fit">
-                        <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-lg font-extrabold uppercase text-slate-950">Recent Registrations</h2>
-                            <Link href="#" className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                View All
-                            </Link>
-                        </div>
-                        <ul className="space-y-4">
-                            {recentRegistrations.map(([name, role, time], index) => (
-                                <li key={name} className="flex items-center gap-4">
-                                    <span className="flex size-10 items-center justify-center rounded-full bg-slate-200 text-xs font-extrabold text-slate-500">
-                                        {index + 1}
-                                    </span>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-extrabold text-slate-950">{name}</p>
-                                        <p className="truncate text-xs font-semibold text-slate-400">
-                                            {role} - {time}
-                                        </p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </aside>
                 </section>
             </div>
         </main>
@@ -480,11 +403,11 @@ function MetricCard({
     );
 }
 
-function InfoBlock({ label, value }: { label: string|null; value: string|null }) {
+function InfoBlock({ label, value }: { label: string | null; value: string | null }) {
     return (
         <div>
             <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">{label}</p>
-            <p className="mt-1 font-extrabold text-slate-950 break-words">{value}</p>
+            <p className="mt-1 font-extrabold text-slate-950 break-words">{value ?? "N/A"}</p>
         </div>
     );
 }
