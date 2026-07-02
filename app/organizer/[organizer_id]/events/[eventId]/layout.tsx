@@ -16,18 +16,6 @@ export default async function EventLayout({
     const organizer_id = waitedParams.organizer_id;
 
 
-    let event: EventModel | null = null;
-    try {
-        event = await EventService.getEventByID(eventId);
-    } catch (error) {
-        console.log(error);
-        revalidatePath(`organizer/${organizer_id}/dashboard`);
-    }
-
-    if (!event) {
-        notFound();
-    }
-
     const tabs = [
         { label: "Overview", value: "overview", href: `/organizer/${organizer_id}/events/${eventId}` },
         { label: "Attendees", value: "attendees", href: `/organizer/${organizer_id}/events/${eventId}/attendees` },
@@ -44,16 +32,7 @@ export default async function EventLayout({
             <aside className="w-[260px] flex flex-col bg-white border-r border-gray-200 shadow-[4px_0_12px_rgba(0,0,0,0.03)] z-10">
 
                 {/* 1. Techverse Brand Header */}
-                <div className="px-6 py-6 flex items-center gap-3">
-                    <div className="bg-black text-white p-1.5 rounded-xl flex-shrink-0">
-                        {/* ID Card / Ticket Icon */}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <rect width="18" height="14" x="3" y="5" rx="2" ry="2" />
-                            <path d="M7 15h4M7 9h10M7 12h10" />
-                        </svg>
-                    </div>
-                    <span className="text-lg font-black text-[#1e293b] tracking-wide">{event.title}</span>
-                </div>
+               
 
                 {/* 3. Vertical Tabs */}
                 <nav className=" flex-1">
