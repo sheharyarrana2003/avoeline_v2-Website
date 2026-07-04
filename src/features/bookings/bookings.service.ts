@@ -2,15 +2,38 @@ import { mockBookings } from "@/app/mockdata/bookings.mock";
 import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { mockEvents } from "@/app/mockdata/events.mock";
 import { BookingData } from "./types";
-
+import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { auth, db } from '@/data/db'
+import { EventVendorService } from "../event_vendors/event_venders.services";
+import { EventService } from "@/src/services/event.service";
 
 
 export const BookingServices = {
   async getBookingsOfOrganizer(organizerId: string) {
-    const rawBookings = mockBookings.filter((booking) => booking.organizerId === organizerId);
-    const shapedBookings = rawBookings.map((booking) => {
-      const vendor = mockVendors.find((v) => v.vendorId === booking.vendorId);
-      const event = mockEvents.find((e) => e.id === booking.eventId);
+
+     let arr_of_bookings: BookingData[] = [];
+
+    const q = query(
+      collection(db, "bookings"),
+      where("organizerId", "==", organizerId)
+    )
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      console.log("query shot is emptyyy");
+      return null;
+    }
+    arr_of_bookings = querySnapshot.docs.map(doc => ({
+      bookingId: doc.id,
+      ...doc.data()
+    })) as BookingData[];
+
+    
+
+
+    const shapedBookings = arr_of_bookings.map(async (booking) => {
+      const vendor = await EventVendorService.getVendorById(booking.vendorId);
+      const event = await EventService.getEventByID(booking.eventId);
 
       return {
         bookingId: booking.bookingId,
@@ -35,23 +58,70 @@ export const BookingServices = {
         },
 
         eventName: event ? event.title : "Unknown Event",
-        eventDate: event ? event.date : "No date mentioned",
+        eventDate: event ? event.schedule.startDate : "No date mentioned",
 
         status: booking.status
       };
     });
 
-    return shapedBookings;
+    const actual_shaped_bookings = await Promise.all(shapedBookings);
+    return  actual_shaped_bookings;
   },
 
   async getBookingById(booking_id: string) {
-    return mockBookings.find(b=>b.bookingId===booking_id) || null;
+    const q = query(
+      collection(db, "bookings"),
+      where("bookingId", "==", booking_id)
+    )
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+    return querySnapshot.docs[0].data();
   },
-  async getAllBookingsOfOrganizer(organizerId:String){
-    return mockBookings.filter((booking) => booking.organizerId === organizerId);
+
+
+  async getAllBookingsOfOrganizer(organizerId: String) {
+    let arr_of_bookings: BookingData[] = [];
+
+    const q = query(
+      collection(db, "bookings"),
+      where("organizerId", "==", organizerId)
+    )
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      console.log("query shot is emptyyy");
+      return null;
+    }
+    arr_of_bookings = querySnapshot.docs.map(doc => ({
+      bookingId: doc.id,
+      ...doc.data()
+    })) as BookingData[];
+
+
+    return arr_of_bookings;
   },
-    async getAllBookingsOfVendor(vendorId:String){
-    return mockBookings.filter((booking) => booking.vendorId === vendorId);
+  async getAllBookingsOfVendor(vendorId: String) {
+    let arr_of_bookings: BookingData[] = [];
+
+    const q = query(
+      collection(db, "bookings"),
+      where("vendorId", "==", vendorId)
+    )
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      console.log("query shot is emptyyy");
+      return null;
+    }
+    arr_of_bookings = querySnapshot.docs.map(doc => ({
+      bookingId: doc.id,
+      ...doc.data()
+    })) as BookingData[];
+
+
+    return arr_of_bookings;
   }
 }
 

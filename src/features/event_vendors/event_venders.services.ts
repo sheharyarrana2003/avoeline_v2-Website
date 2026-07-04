@@ -3,6 +3,8 @@ import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '@/data/db'
+import { BookingData } from "../bookings/types";
+import { console } from "inspector";
 
 
 export function mapToAddress(raw: any): Address {
@@ -87,9 +89,10 @@ export function mapToVendorData(raw: any): VendorData {
     };
 }
 export const EventVendorService = {
-    getVendorsByEvent: async (eventId: string): Promise<VendorData[]> => {
+    getVendorsByEvent: async (eventId: string) => {
+        console.log("firstttt");
+        let arr_of_bookings: BookingData[] = [];
 
-        let arr_of_vendors: VendorData[] = [];
         const q = query(
             collection(db, "bookings"),
             where("eventId", "==", eventId)
@@ -97,37 +100,44 @@ export const EventVendorService = {
 
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
-            return arr_of_vendors;
+            console.log("query shot is emptyyy");
+            return null;
+        }
+        arr_of_bookings = querySnapshot.docs.map(doc => ({
+            bookingId: doc.id,
+            ...doc.data()
+        })) as BookingData[];
+
+        const validStatuses = ["confirmed", "in_progress", "completed"];
+        const arr_of_bookings_active = arr_of_bookings.filter(x =>
+            validStatuses.includes(x.status)
+        );
+        //now have many bookings -> eahc having vendorid -> extracat their corrrespoding vecator
+
+        const vendorIds = [...new Set(arr_of_bookings_active.map(b => b.vendorId).filter(Boolean))];
+        console.log("mere unqique vendorsss ", vendorIds);
+        const max_num_firebase_allows = 30;
+        let tracker_of_chunks = 0;
+        let arr_of_vendors_active: VendorData[] = [];
+
+        while (tracker_of_chunks < vendorIds.length) {
+            const q = query(
+                collection(db, "vendors"),
+                where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
+            )
+            const querySnapshot2 = await getDocs(q);
+            tracker_of_chunks += max_num_firebase_allows;
+            if (!querySnapshot2.empty) {
+                querySnapshot2.forEach(x => {
+                    arr_of_vendors_active.push(mapToVendorData(x.data()));
+                })
+            }
+            console.log(arr_of_vendors_active);
         }
 
-        querySnapshot.forEach(x => {
-            arr_of_vendors.push(mapToVendorData(x.data()));
-        })
 
-        const arr_of_vendors_active = arr_of_vendors.filter(x => x.stats === "confirmed" || "in_progress" || "completed")
         return arr_of_vendors_active;
     },
-        getVendorsByOrganizer: async (organizerId: string): Promise<VendorData[]> => {
-
-        let arr_of_vendors: VendorData[] = [];
-        const q = query(
-            collection(db, "bookings"),
-            where("organizerId", "==", organizerId)
-        )
-
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            return arr_of_vendors;
-        }
-
-        querySnapshot.forEach(x => {
-            arr_of_vendors.push(mapToVendorData(x.data()));
-        })
-
-        const arr_of_vendors_active = arr_of_vendors.filter(x => x.stats === "confirmed" || "in_progress" || "completed")
-        return arr_of_vendors_active;
-    },
-
     async getVendorById(vendor_id: string) {
         const q = query(
             collection(db, "vendors"),

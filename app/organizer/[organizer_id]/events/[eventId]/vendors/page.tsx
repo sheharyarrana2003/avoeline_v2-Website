@@ -9,7 +9,10 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
     const resolvedParams = await params;
     const event_id = resolvedParams.eventId;
     const organizer_id = resolvedParams.organizer_id;
-    const vendors : VendorData[] = await EventVendorService.getVendorsByEvent(event_id);
+     console.log("beforeeeeeeeeeeee");
+
+    const vendors : VendorData[] |null= await EventVendorService.getVendorsByEvent(event_id);
+    console.log("[frontendd]  =>   ",vendors);
 
    const renderIcon = (categories: string[]) => {
         if (categories.includes('catering') || categories.includes('food')) {

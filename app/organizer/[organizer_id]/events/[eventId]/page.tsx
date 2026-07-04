@@ -26,7 +26,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
     if (!event) {
         console.log("Event not founddd");
-        notFound();
+        //notFound();
     }
 
     const checkedIn = Math.round((event.analytics?.checkIns ?? 0) * 0.75);
