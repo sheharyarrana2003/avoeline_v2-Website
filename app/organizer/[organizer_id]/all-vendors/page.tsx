@@ -31,6 +31,8 @@ export default async function Active_Vendors({ params, searchParams }: { params:
               <p className="text-gray-500 mt-1 text-sm md:text-base">
                 Manage and track your ongoing vendor bookings and service statuses.
               </p>
+
+           
             </div>
 
             {/* Search Bar (Matches Top Right of Image) */}
@@ -43,6 +45,13 @@ export default async function Active_Vendors({ params, searchParams }: { params:
                 placeholder="Search by vendor or service..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm"
               />
+                 <Link
+                href={`${basePath}/vendor-marketplace`}
+                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+              >
+
+                Visit Vendor Marketplace
+              </Link>
             </div>
           </div>
 
@@ -71,9 +80,9 @@ export default async function Active_Vendors({ params, searchParams }: { params:
             </Link>
           </div>
 
- <p className="text-gray-500 mt-1 text-sm md:text-base">
-                You have no bookings.
-              </p>
+          <p className="text-gray-500 mt-1 text-sm md:text-base">
+            You have no bookings.
+          </p>
         </div>
       </div>
     </>)

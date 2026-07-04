@@ -7,6 +7,7 @@ import { mockSpeakers } from "./app/mockdata/speakers.mock";
 import { mockAttendee } from "./app/mockdata/attendee.mock";
 import { mockUsers } from "./app/mockdata/users.mock";
 import { mockReg } from "./app/mockdata/registeration.mock";
+import { mockNotifications } from "./app/mockdata/notifications.mock";
 
 
 export async function seedEvents() {
@@ -15,17 +16,12 @@ export async function seedEvents() {
     //     await setDoc(docRef, event)
     //     console.log("event seeded", event.id)
     // }
-  for (const x of mockUsers) {
-        const docRef = doc(db, "users", x.userId);
+  for (const x of mockNotifications) {
+        const docRef = doc(db, "notifications", x.notificationId);
         await setDoc(docRef, x)
-        console.log("seeded", x.userId)
+        console.log("seeded", x.notificationId)
     }
 
-    for (const x of mockReg) {
-        const docRef = doc(db, "registerations", x.registrationId);
-        await setDoc(docRef, x)
-        console.log("seeded", x.registrationId)
-    }
 
 }
 
