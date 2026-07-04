@@ -1,6 +1,9 @@
 import { mockBookings } from "@/app/mockdata/bookings.mock";
 import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { mockEvents } from "@/app/mockdata/events.mock";
+import { BookingData } from "./types";
+
+
 
 export const BookingServices = {
   async getBookingsOfOrganizer(organizerId: string) {

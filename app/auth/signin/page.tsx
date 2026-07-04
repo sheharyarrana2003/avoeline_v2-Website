@@ -3,6 +3,7 @@ import { AuthService } from '@/src/features/auth/authService';
 import SignInClient from './signinClient';
 import { redirect } from 'next/navigation';
 import { CurrentUserData } from '@/src/services/models/user.type';
+import { seedEvents } from '@/seeding';
 
 export default async function SignIn() {
 

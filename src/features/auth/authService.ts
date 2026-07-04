@@ -124,7 +124,6 @@ export const AuthService = {
 
 
             console.log("User found");
-            seedEvents()
             return user_to_front_end;
 
         } catch (error: any) {

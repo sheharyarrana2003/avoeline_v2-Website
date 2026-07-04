@@ -1,14 +1,15 @@
 import Link from 'next/link'; 
 import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
+import { VendorData } from '@/src/services/models/vendor.model';
 
 
 
-export default async function Vendors({params} : {params : Promise<{id:string; organizer_id:string}>}) {
+export default async function Vendors({params} : {params : Promise<{eventId:string; organizer_id:string}>}) {
     const resolvedParams = await params;
-    const event_id = resolvedParams.id;
+    const event_id = resolvedParams.eventId;
     const organizer_id = resolvedParams.organizer_id;
-    const vendors = await EventVendorService.getVendors(event_id);
+    const vendors : VendorData[] = await EventVendorService.getVendorsByEvent(event_id);
 
    const renderIcon = (categories: string[]) => {
         if (categories.includes('catering') || categories.includes('food')) {

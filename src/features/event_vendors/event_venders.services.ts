@@ -1,6 +1,9 @@
 import { mockBookings } from "@/app/mockdata/bookings.mock";
 import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
+import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { auth, db } from '@/data/db'
+
 
 export function mapToAddress(raw: any): Address {
     return {
@@ -51,53 +54,105 @@ export function mapToVendorData(raw: any): VendorData {
         vendorId: raw?.vendorId || "",
         userId: raw?.userId || "",
         businessName: raw?.businessName || "",
-        
+
         contact: mapToContact(raw?.contact),
-        
+
         serviceCategories: Array.isArray(raw?.serviceCategories) ? raw.serviceCategories : [],
         portfolio: raw?.portfolio || {},
-        
-        pricingPackages: Array.isArray(raw?.pricingPackages) 
-            ? raw.pricingPackages.map(mapToPricingPackage) 
+
+        pricingPackages: Array.isArray(raw?.pricingPackages)
+            ? raw.pricingPackages.map(mapToPricingPackage)
             : [],
-            
+
         ratings: mapToRatings(raw?.ratings),
-        
+
         stats: raw?.stats || {},
         settings: raw?.settings || {},
-        
+
         verification: {
             verified: Boolean(raw?.verification?.verified),
             verificationMethod: raw?.verification?.verificationMethod || "unknown",
             verifiedAt: raw?.verification?.verifiedAt || "",
-            verificationBadges: Array.isArray(raw?.verification?.verificationBadges) 
-                ? raw.verification.verificationBadges 
+            verificationBadges: Array.isArray(raw?.verification?.verificationBadges)
+                ? raw.verification.verificationBadges
                 : []
         },
-        
+
         status: raw?.status || "inactive",
         featured: Boolean(raw?.featured),
-        
+
         createdAt: raw?.createdAt || new Date().toISOString(),
         updatedAt: raw?.updatedAt || new Date().toISOString(),
         lastActive: raw?.lastActive || new Date().toISOString(),
     };
 }
 export const EventVendorService = {
-    getVendors: async (eventId : string): Promise<VendorData[]> => {
-        //! hardcoded
-        //! replace it  
-        const vendors_from_bookings : string[] = mockBookings.filter((b) => b.eventId).map((b) => b.vendorId);
-        const raw_vendor_objects = mockVendors.filter((v) => vendors_from_bookings.includes(v.vendorId));
-        const actual_vendor_objects = raw_vendor_objects.map((x) => mapToVendorData(x) );
-        return actual_vendor_objects;
-            
+    getVendorsByEvent: async (eventId: string): Promise<VendorData[]> => {
+
+        let arr_of_vendors: VendorData[] = [];
+        const q = query(
+            collection(db, "bookings"),
+            where("eventId", "==", eventId)
+        )
+
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return arr_of_vendors;
+        }
+
+        querySnapshot.forEach(x => {
+            arr_of_vendors.push(mapToVendorData(x.data()));
+        })
+
+        const arr_of_vendors_active = arr_of_vendors.filter(x => x.stats === "confirmed" || "in_progress" || "completed")
+        return arr_of_vendors_active;
     },
-    async getVendorById(vendor_id : string){
-        return mockVendors.find(v=>v.vendorId === vendor_id );
+        getVendorsByOrganizer: async (organizerId: string): Promise<VendorData[]> => {
+
+        let arr_of_vendors: VendorData[] = [];
+        const q = query(
+            collection(db, "bookings"),
+            where("organizerId", "==", organizerId)
+        )
+
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return arr_of_vendors;
+        }
+
+        querySnapshot.forEach(x => {
+            arr_of_vendors.push(mapToVendorData(x.data()));
+        })
+
+        const arr_of_vendors_active = arr_of_vendors.filter(x => x.stats === "confirmed" || "in_progress" || "completed")
+        return arr_of_vendors_active;
+    },
+
+    async getVendorById(vendor_id: string) {
+        const q = query(
+            collection(db, "vendors"),
+            where("vendorId", "==", vendor_id)
+        )
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        return querySnapshot.docs[0].data();
 
     },
-    async getAllVendors(){
-        return mockVendors;
+    async getAllVendors() {
+        const q = query(
+            collection(db, "vendors")
+        )
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        let arr_of_vendors: VendorData[] = [];
+
+        querySnapshot.forEach(x => {
+            arr_of_vendors.push(mapToVendorData(x.data()));
+        })
+        return arr_of_vendors;
     }
 }
