@@ -1,13 +1,10 @@
 import { mockSpeakers } from "@/app/mockdata/speakers.mock";
+import { EventService } from "@/src/services/event.service";
 
 export const SpeakerService = {
     async getAllSpeakers(organizer_id: string, event_id: string) {
-        const speakers_of_organizer = mockSpeakers.filter(
-            (ms) => {
-                return (ms.organizerId === organizer_id && ms.eventId === event_id)
-            }
-        );
-
+        const Event = await EventService.getEventByID(event_id);
+        const speakers_of_organizer = Event?.speakers || [];
         return speakers_of_organizer;
 
     },

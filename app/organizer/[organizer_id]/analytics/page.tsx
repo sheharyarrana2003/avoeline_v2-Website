@@ -39,8 +39,9 @@ function buildChartPoints(data: DailyAnalyticsRegistration[]) {
         .join(" ");
 }
 
-export default async function AnalyticsPage() {
-    const user = await AuthService.getCurrentUser();
+export default async function AnalyticsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
+    const resolvedParams = await params;
+    const organizer_id = resolvedParams.organizer_id;
     const [
         totalEvents,
         profit,
@@ -49,12 +50,12 @@ export default async function AnalyticsPage() {
         dailyRegistrations,
         eventPerformance,
     ] = await Promise.all([
-        AnalyticsService.getAnalyticsTotalEvents(user.id),
-        AnalyticsService.getAnalyticsProfit(user.id),
-        AnalyticsService.getAnalyticsTotalRevenue(user.id),
-        AnalyticsService.getAnalyticsAvgSatisfaction(user.id),
-        AnalyticsService.getAnalyticsDailyRegistrations(user.id),
-        AnalyticsService.getAnalyticsEventPerformance(user.id),
+        AnalyticsService.getAnalyticsTotalEvents(organizer_id),
+        AnalyticsService.getAnalyticsProfit(organizer_id),
+        AnalyticsService.getAnalyticsTotalRevenue(organizer_id),
+        AnalyticsService.getAnalyticsAvgSatisfaction(organizer_id),
+        AnalyticsService.getAnalyticsDailyRegistrations(organizer_id),
+        AnalyticsService.getAnalyticsEventPerformance(organizer_id),
     ]);
 
     const metrics = [

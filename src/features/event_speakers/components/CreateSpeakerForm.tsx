@@ -1,6 +1,6 @@
 "use client"
 
-import { SpeakerService } from "@/src/features/event_speakers/speakers.service"
+import { SpeakerService } from "@/src/features/event_speakers/types/speakers.service"
 import { User, Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
 
 import { useRouter } from 'next/navigation';

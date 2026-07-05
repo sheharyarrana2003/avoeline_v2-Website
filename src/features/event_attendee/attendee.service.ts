@@ -1,6 +1,9 @@
 import { mockAttendee } from "@/app/mockdata/attendee.mock"
 import { mockReg } from "@/app/mockdata/registeration.mock"
 import { Attendee } from "./type";
+import { doc, setDoc, query, where, getDocs,getDoc, collection } from 'firebase/firestore';
+import { auth, db } from '@/data/db'
+
 
 function mapToAttendee(raw: any): Attendee {
     return {
@@ -69,17 +72,27 @@ function mapToAttendee(raw: any): Attendee {
 
 export const AttendeeService = {
     async getAttendeeOfEvent(event_id: String) {
-        const ids_of_user = mockReg.filter((r) => r.eventId === event_id).map(r => r.userId);
 
-
-        const raw_attendees = mockAttendee.filter(
-            (a) => {
-                return ids_of_user.includes(a.userId);
-            }
+        const q = query(
+            collection(db, "registerations"),
+            where("eventId", "==", event_id)
         )
 
-        const attendees = raw_attendees.map((a) => mapToAttendee(a));
-        console.log(attendees);
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("query shot is emptyyy");
+            return null;
+        }
+        const user_ids_of_attendees: string[] = querySnapshot.docs.map(doc => doc.data().userId);
+
+        let attendees: Attendee[] = [];
+
+         user_ids_of_attendees.forEach(async (x) => {
+
+            const docRef = doc(db, "attendee", x);
+            const docSnap = await getDoc(docRef);
+            attendees.push(mapToAttendee(docSnap.data()));
+        })
 
         return attendees;
 

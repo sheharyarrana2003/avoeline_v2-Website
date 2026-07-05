@@ -1,4 +1,4 @@
-import { SpeakerService } from "@/src/features/event_speakers/speakers.service"
+import { SpeakerService } from "@/src/features/event_speakers/types/speakers.service"
 import { AuthService } from "@/src/features/auth/authService"
 import CreateSpeakerForm from "@/src/features/event_speakers/components/CreateSpeakerForm"
 

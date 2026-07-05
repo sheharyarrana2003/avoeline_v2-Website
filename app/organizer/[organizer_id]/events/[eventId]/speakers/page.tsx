@@ -1,21 +1,22 @@
-import { SpeakerService } from "@/src/features/event_speakers/speakers.service"
+import { SpeakerService } from "@/src/features/event_speakers/types/speakers.service"
 import { AuthService } from "@/src/features/auth/authService"
 import Link from "next/link";
 import { SpeakerSearchBar } from "@/src/features/event_speakers/components/SpeakerSearchBar";
 import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCard";
+import { Speaker } from "@/src/services/models/event.model";
 
 export default async function SpeakerPage(
     { params, searchParams }:
     {
-        params: Promise<{ id: string; organizer_id: string }>,
+        params: Promise<{ eventId: string; organizer_id: string }>,
         searchParams: Promise<{ input_val?: string }>
     }
 ) {
     const u = await AuthService.getCurrentUser();
-    const { id, organizer_id } = await params;
+    const { eventId, organizer_id } = await params;
     const resolvedParams = await searchParams;
 
-    const allSpeakers = await SpeakerService.getAllSpeakers(u.id, id);
+    const allSpeakers : Speaker[]= await SpeakerService.getAllSpeakers(organizer_id, eventId);
     let allSpeaker;
 
     if (resolvedParams.input_val) {

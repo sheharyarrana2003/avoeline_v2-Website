@@ -1,6 +1,7 @@
+import { Speaker } from "@/src/services/models/event.model";
 import Image from "next/image";
 
-import {Speaker} from "@/src/features/event_speakers/types/speaker"
+
 
 export function SpeakerCard({ speaker }: { speaker: Speaker }) {
     return (
@@ -22,7 +23,7 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
             </h3>
 
             <p className="text-sm font-medium text-slate-500 mb-6 text-center">
-                {speaker.designation} at {speaker.company}
+                {speaker.designation} 
             </p>
 
             <div className="px-4 py-2 bg-slate-50 rounded-full border border-slate-100">

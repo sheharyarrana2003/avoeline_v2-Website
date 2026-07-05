@@ -9,7 +9,7 @@ import { Vendor } from "@/src/services/models/vendor.model";
 import { adminAuth } from "@/data/admin_db";
 import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
-import { User } from "@/src/services/models/user.type";
+import { CurrentUserData, User } from "@/src/services/models/user.type";
 import { revalidatePath } from "next/cache";
 import {seedEvents} from '@/seeding'
 interface signup_with_email_form_data {
@@ -79,18 +79,14 @@ export const AuthService = {
     },
 
     getCurrentVendor: cache(async () => {
-        return {
-            id: "V002",
-            name: "Arhan",
-            role: "Vendor",
-            email: "arhan@avoeline.com"
-        };
+          const user = await fetching_data_from_db();
+
+        return converting_to_current_user_data(user);
     }),
 
     async loginWithEmail(email: string, password: string) {
         console.log("Checkpoint 1:  function started.");
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
-        seedEvents();
         try {
             const user_credintials = await signInWithEmailAndPassword(auth, email, password);
             console.log(user_credintials);
@@ -117,6 +113,13 @@ export const AuthService = {
             const token = await user.getIdToken();
             const cookieStore = await cookies();
             cookieStore.set("firebaseToken", token, {
+                path: "/",
+                maxAge: 3600,
+                httpOnly: true,
+            });
+            const current_user  = await AuthService.getCurrentUser();
+
+             cookieStore.set("userData", JSON.stringify(current_user), {
                 path: "/",
                 maxAge: 3600,
                 httpOnly: true,
@@ -167,6 +170,13 @@ export const AuthService = {
             const token = await user.getIdToken();
             const cookieStore = await cookies();
             cookieStore.set("firebaseToken", token, {
+                path: "/",
+                maxAge: 3600,
+                httpOnly: true,
+            });
+            const current_user  = await AuthService.getCurrentUser();
+
+             cookieStore.set("userData", JSON.stringify(current_user), {
                 path: "/",
                 maxAge: 3600,
                 httpOnly: true,
