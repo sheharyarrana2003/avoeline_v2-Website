@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { CurrentUserData } from './src/services/models/user.type'
-import { AuthService } from './src/features/auth/authService'
 
 // This middle ware is for role validation
 const all_possible_roles = ['organizer', 'vendor'];
@@ -24,7 +23,7 @@ export async function proxy(request: NextRequest) {
     }
 
     all_possible_roles.forEach(x => {
-        if (request.nextUrl.pathname.startsWith(`/${x}`) && !(currentUser.userType.includes(`${x}`))) {
+        if (request.nextUrl.pathname.startsWith(`/${x}`) && !(currentUser.userType.toLowerCase().includes(`${x.toLowerCase()}`))) {
             //galat role ka saath dashboard pa ha
             console.log("you are onn wrong role");
             return NextResponse.redirect(new URL('/auth/signin', request.url))

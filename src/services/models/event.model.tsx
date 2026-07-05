@@ -28,7 +28,7 @@ export interface EventLocation {
   city: string;
   country: string;
   coordinates: Coordinates;
-  
+
   // Virtual Location
   meetingPlatform: MeetingPlatform | null;
   meetingLink: string | null;
@@ -100,7 +100,55 @@ export interface EventAnalytics {
   completionRate: number;
   revenue: number;
 }
+export interface AgendaItem {
+  sessionId: string;
+  title: string;
+  type: 'talk' | 'workshop' | 'panel' | 'networking' | 'break' | 'keynote' | 'qna' | 'registration' | 'closing';
+  status: 'confirmed' | 'tentative' | 'cancelled' | 'completed';
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: string;
+  timezone: string;
+  location: string;
+  room: string;
+  building: string;
+  floor: string;
+  capacity: number;
+  speakerNames: string[];
+  description: string;
+  activities: Array<{ time: string; description: string; type: string; requirements?: string[] }>;
+  notes: string;
+  recordingUrl: string;
+  feedbackFormUrl: string;
+  isRecordingAvailable: boolean;
+  isRegistrationRequired: boolean;
+  maxAttendees: number;
+  currentAttendees: number;
+  customFields: Record<string, any>;
+}
 
+export interface VendorRequirement {
+  requirementId: string;
+  serviceCategory: string;
+  description: string;
+  budget: number;
+  status: 'open' | 'assigned' | 'completed' | 'cancelled';
+  assignedVendorId: string | null;
+  requestedBy: string;
+  requestedAt: Date;
+  assignedAt: Date | null;
+  completedAt: Date | null;
+  notes: string;
+}
+
+export interface TeamMember {
+  userId: string;
+  role: string;
+  permissions: string[];
+  addedAt: Date;
+  isActive: boolean;
+}
 export class EventModel {
   id: string;
   organizerId: string;
@@ -110,15 +158,35 @@ export class EventModel {
   category: EventCategory;
   eventType: EventType;
   format: EventFormat;
+  language: 'en' | 'ur'; 
   schedule: EventSchedule;
-  location: EventLocation;
+  location: EventLocation & { 
+    parkingInfo?: string;
+    accessibilityInfo?: string;
+    nearbyHotels?: string[];
+    nearbyRestaurants?: string[];
+  };
   bannerImage: string;
   galleryImages: string[];
   promoVideoUrl: string;
-  capacity: { totalSeats: number; reservedSeats: number; availableSeats: number };
-  registration: EventRegistration;
+  capacity: {
+    totalSeats: number;
+    reservedSeats: number;
+    availableSeats: number;
+    waitingListEnabled: boolean; 
+    waitingListCapacity: number; 
+    maxRegistrationsPerUser: number; 
+  };
+  registration: EventRegistration & { 
+    earlyBirdDeadline?: string;
+    groupRegistrationEnabled?: boolean;
+    groupDiscountEnabled?: boolean;
+  };
   pricing: EventPricing;
   speakers: Speaker[];
+  agenda: AgendaItem[]; 
+  vendorRequirements: VendorRequirement[]; 
+  teamMembers: TeamMember[]; 
   certificateConfig: CertificateConfig;
   status: EventStatus;
   visibility: EventVisibility;
@@ -129,9 +197,11 @@ export class EventModel {
   publishedAt: Date | null;
   eventStartTime: Date;
   eventEndTime: Date;
+  archivedAt: Date | null; 
+  deletedAt: Date | null;   
 
   constructor(raw: any) {
-    this.id = raw.eventId || raw.id ||raw.event_id||  "";
+    this.id = raw.eventId || raw.id || raw.event_id || "";
     this.organizerId = raw.organizerId || "";
     this.title = raw.title || "Untitled Event";
     this.description = raw.description || "";
@@ -139,7 +209,8 @@ export class EventModel {
     this.category = raw.category || "technology";
     this.eventType = raw.eventType || "workshop";
     this.format = raw.format || "physical";
-    
+    this.language = raw.language || "en"; 
+
     this.schedule = {
       startDate: raw.schedule?.startDate || "",
       endDate: raw.schedule?.endDate || "",
@@ -149,7 +220,7 @@ export class EventModel {
       isRecurring: !!raw.schedule?.isRecurring,
       recurrencePattern: raw.schedule?.recurrencePattern || null,
     };
-    
+
     this.location = {
       venueName: raw.location?.venueName || "",
       address: raw.location?.address || "",
@@ -163,25 +234,37 @@ export class EventModel {
       meetingLink: raw.location?.meetingLink || null,
       meetingId: raw.location?.meetingId || null,
       meetingPassword: raw.location?.meetingPassword || null,
+       parkingInfo: raw.location?.parkingInfo || "",
+      accessibilityInfo: raw.location?.accessibilityInfo || "",
+      nearbyHotels: Array.isArray(raw.location?.nearbyHotels) ? raw.location.nearbyHotels : [],
+      nearbyRestaurants: Array.isArray(raw.location?.nearbyRestaurants) ? raw.location.nearbyRestaurants : [],
     };
-    
+
     this.bannerImage = raw.bannerImage || "";
     this.galleryImages = Array.isArray(raw.galleryImages) ? raw.galleryImages : [];
     this.promoVideoUrl = raw.promoVideoUrl || "";
-    
+
     this.capacity = {
       totalSeats: raw.capacity?.totalSeats ?? 0,
       reservedSeats: raw.capacity?.reservedSeats ?? 0,
       availableSeats: raw.capacity?.availableSeats ?? 0,
+
+      waitingListEnabled: !!raw.capacity?.waitingListEnabled,
+      waitingListCapacity: raw.capacity?.waitingListCapacity ?? 0,
+      maxRegistrationsPerUser: raw.capacity?.maxRegistrationsPerUser ?? 1,
     };
-    
+
     this.registration = {
       registrationOpenDate: raw.registration?.registrationOpenDate || "",
       registrationCloseDate: raw.registration?.registrationCloseDate || "",
       requiresApproval: !!raw.registration?.requiresApproval,
       customForm: Array.isArray(raw.registration?.customForm) ? raw.registration.customForm : [],
+
+      earlyBirdDeadline: raw.registration?.earlyBirdDeadline || "",
+      groupRegistrationEnabled: !!raw.registration?.groupRegistrationEnabled,
+      groupDiscountEnabled: !!raw.registration?.groupDiscountEnabled,
     };
-    
+
     this.pricing = {
       isFree: !!raw.pricing?.isFree,
       currency: raw.pricing?.currency || "PKR",
@@ -197,8 +280,31 @@ export class EventModel {
         percentage: raw.pricing?.groupDiscount?.percentage ?? 0,
       }
     };
-    
+
     this.speakers = Array.isArray(raw.speakers) ? raw.speakers : [];
+
+    this.agenda = Array.isArray(raw.agenda) ? raw.agenda.map((item: any) => ({
+      ...item,
+      activities: Array.isArray(item.activities) ? item.activities : [],
+      customFields: item.customFields || {},
+    })) : [];
+
+    const parseDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : new Date();
+    const parseOptionalDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : null;
+
+    this.vendorRequirements = Array.isArray(raw.vendorRequirements) ? raw.vendorRequirements.map((v: any) => ({
+      ...v,
+      requestedAt: parseDate(v.requestedAt),
+      assignedAt: parseOptionalDate(v.assignedAt),
+      completedAt: parseOptionalDate(v.completedAt),
+    })) : [];
+
+    this.teamMembers = Array.isArray(raw.teamMembers) ? raw.teamMembers.map((tm: any) => ({
+      ...tm,
+      addedAt: parseDate(tm.addedAt),
+    })) : [];
+    // ----------------------------
+
     this.certificateConfig = {
       issueCertificates: !!raw.certificateConfig?.issueCertificates,
       certificateType: raw.certificateConfig?.certificateType || "digital",
@@ -208,7 +314,7 @@ export class EventModel {
         mustCompleteSurvey: !!raw.certificateConfig?.requirements?.mustCompleteSurvey,
       }
     };
-    
+
     this.status = raw.status || "draft";
     this.visibility = raw.visibility || "public";
     this.accessCode = raw.accessCode || null;
@@ -219,14 +325,14 @@ export class EventModel {
       completionRate: raw.analytics?.completionRate ?? 0,
       revenue: raw.analytics?.revenue ?? 0,
     };
-    
-    // Date parser helper logic built inside
-    const parseDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : new Date();
+
     this.createdAt = parseDate(raw.createdAt);
     this.updatedAt = parseDate(raw.updatedAt);
     this.publishedAt = raw.publishedAt ? parseDate(raw.publishedAt) : null;
     this.eventStartTime = parseDate(raw.eventStartTime);
     this.eventEndTime = parseDate(raw.eventEndTime);
+    this.archivedAt = raw.archivedAt ? parseOptionalDate(raw.archivedAt) : null; 
+    this.deletedAt = raw.deletedAt ? parseOptionalDate(raw.deletedAt) : null;   
   }
 
   static fromJson(json: any): EventModel {
@@ -244,37 +350,107 @@ export class EventModel {
   get formattedRevenue(): string {
     return `${this.pricing.currency} ${this.analytics.revenue.toLocaleString()}`;
   }
-}
 
+}
 
 
 
 export interface CreateEventDTO {
-    title: string;
-    description: string;
-    category: EventCategory;
-    date: string;
-    time: string;
-    location: string;
-    capacity: number;
-    ticketPrice: number;
-    imageUrl?: string;
-    tags?: string[];
+  title: string;
+  description: string;
+  category: EventCategory;
+  date: string;
+  time: string;
+  location: string;
+  capacity: number;
+  ticketPrice: number;
+  imageUrl?: string;
+  tags?: string[];
 }
 
 export interface UpdateEventDTO extends Partial<CreateEventDTO> {
-    status?: EventStatus;
+  status?: EventStatus;
 }
 
 export interface EventStats {
-    totalEvents: number;
-    activeEvents: number;
-    totalRegistrations: number;
-    totalRevenue: number;
-    avgRating: number;
-    publishedCount: number;
-    draftCount: number;
-    ongoingCount: number;
-    completedCount: number;
-    cancelledCount: number;
+  totalEvents: number;
+  activeEvents: number;
+  totalRegistrations: number;
+  totalRevenue: number;
+  avgRating: number;
+  publishedCount: number;
+  draftCount: number;
+  ongoingCount: number;
+  completedCount: number;
+  cancelledCount: number;
+}
+
+
+// --- Types ---
+export interface TicketTier {
+  id: string;
+  name: string;
+  price: number;
+  seatsAvailable: number;
+  availableUntil: string;
+  benefits: string;
+}
+
+export interface CustomField {
+  id: string;
+  label: string;
+  type: 'text' | 'dropdown' | 'file' | 'number';
+  options?: string[];
+  required: boolean;
+}
+
+export interface EventFormData {
+  // Step 1: Basic Info
+  eventType: string;
+  eventTitle: string;
+  description: string;
+  category: string;
+  shortDescription: string;
+  tags: string[];
+  bannerImage: string | null;
+  galleryImages: string[];
+  videoUrl: string;
+  dietaryOptions: string[];
+
+  // Step 2: Schedule & Location
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  isAllDay: boolean;
+  timezone: string;
+  isRecurring: boolean;
+  recurrenceType: 'daily' | 'weekly' | 'monthly' | 'custom';
+  locationType: 'physical' | 'virtual' | 'hybrid';
+  venueName: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  coordinates: { lat: number; lng: number };
+  totalSeats: number;
+  reservedSeats: number;
+  enableWaitingList: boolean;
+
+  // Step 3: Registration & Tickets
+  ticketType: 'free' | 'paid';
+  ticketTiers: TicketTier[];
+  studentDiscount: boolean;
+  studentDiscountPercent: number;
+  groupDiscount: boolean;
+  groupDiscountPercent: number;
+  promoCodes: string[];
+  customFields: CustomField[];
+  requiresApproval: boolean;
+  maxTicketsPerPerson: number;
+
+  // Step 4: Review & Publish
+  visibility: 'public' | 'private' | 'invite_only';
+  publishImmediately: boolean;
+  agreeToTerms: boolean;
+  confirmRights: boolean;
 }

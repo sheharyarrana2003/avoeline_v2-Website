@@ -2,75 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-
-// --- Types ---
-interface TicketTier {
-    id: string;
-    name: string;
-    price: number;
-    seatsAvailable: number;
-    availableUntil: string;
-    benefits: string;
-}
-
-interface CustomField {
-    id: string;
-    label: string;
-    type: 'text' | 'dropdown' | 'file' | 'number';
-    options?: string[];
-    required: boolean;
-}
-
-interface EventFormData {
-    // Step 1: Basic Info
-    eventType: string;
-    eventTitle: string;
-    description: string;
-    category: string;
-    shortDescription: string;
-    tags: string[];
-    bannerImage: string | null;
-    galleryImages: string[];
-    videoUrl: string;
-    dietaryOptions: string[];
-    
-    // Step 2: Schedule & Location
-    startDate: string;
-    endDate: string;
-    startTime: string;
-    endTime: string;
-    isAllDay: boolean;
-    timezone: string;
-    isRecurring: boolean;
-    recurrenceType: 'daily' | 'weekly' | 'monthly' | 'custom';
-    locationType: 'physical' | 'virtual' | 'hybrid';
-    venueName: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    coordinates: { lat: number; lng: number };
-    totalSeats: number;
-    reservedSeats: number;
-    enableWaitingList: boolean;
-    
-    // Step 3: Registration & Tickets
-    ticketType: 'free' | 'paid';
-    ticketTiers: TicketTier[];
-    studentDiscount: boolean;
-    studentDiscountPercent: number;
-    groupDiscount: boolean;
-    groupDiscountPercent: number;
-    promoCodes: string[];
-    customFields: CustomField[];
-    requiresApproval: boolean;
-    maxTicketsPerPerson: number;
-    
-    // Step 4: Review & Publish
-    visibility: 'public' | 'private' | 'invite_only';
-    publishImmediately: boolean;
-    agreeToTerms: boolean;
-    confirmRights: boolean;
-}
+import { EventFormData } from '@/src/services/models/event.model';
+import { CustomField } from '@/src/services/models/event.model';
 
 // --- Constants ---
 const EVENT_TYPES = [
