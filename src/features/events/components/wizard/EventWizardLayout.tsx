@@ -95,12 +95,15 @@ const INITIAL_FORM: EventFormData = {
     confirmRights: false,
 };
 
-export default function CreateEventPage() {
+export default function CreateEventPage({handle_submission} : any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
     const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
 
+    const handling_submission_client = (formData:EventFormData)=>{
+        handle_submission(formData);
+    }
     const updateForm = (field: keyof EventFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -1371,7 +1374,7 @@ export default function CreateEventPage() {
                         </button>
                     ) : (
                         <button 
-                            onClick={() => alert('Event Published!')}
+                            onClick={() => handling_submission_client(formData)}
                             disabled={!formData.agreeToTerms || !formData.confirmRights}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
