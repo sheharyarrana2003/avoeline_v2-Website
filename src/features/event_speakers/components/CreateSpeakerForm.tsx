@@ -4,7 +4,7 @@ import { SpeakerService } from "@/src/features/event_speakers/types/speakers.ser
 import { User, Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
 
 import { useRouter } from 'next/navigation';
-export default function CreateSpeakerForm() {
+export default function CreateSpeakerForm(handle_speaker_submission : any) {
     const router = useRouter();
 
     return (
@@ -18,7 +18,7 @@ export default function CreateSpeakerForm() {
                     </button>
                 </div>
 
-                <form action={SpeakerService.createNewSpeaker}>
+                <form action={handle_speaker_submission}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
 
                         {/* LEFT COLUMN */}

@@ -5,6 +5,9 @@ import CreateSpeakerForm from "@/src/features/event_speakers/components/CreateSp
 export default async function Create_speaker({ params }: { params: Promise<{ id: string }> }) {
     const u = await AuthService.getCurrentUser();
     const { id } = await params;
+    const handle_speaker_submission = (formData : FormData)=>{
+        SpeakerService.createNewSpeaker(formData,id);
+    }
     
     console.log("This is id from create speaker ->", id);
 

@@ -3,7 +3,6 @@
 export type {
 	Session,
 	SessionType,
-	Speaker,
 	AgendaDay,
 	AgendaStats,
 } from "@/src/services/models/agenda.model";

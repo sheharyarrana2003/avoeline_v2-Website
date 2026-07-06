@@ -1,4 +1,3 @@
-import { mockEvents } from "@/app/mockdata/events.mock"
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '@/data/db'
 import { EventFormData, EventModel } from "./models/event.model";
