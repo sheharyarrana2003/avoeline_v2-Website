@@ -1,8 +1,7 @@
 // src/mock/events.mock.ts
-import { EventModel, EventStats } from "@/src/services/models/event.model";
+import { EventModel } from "@/src/services/models/event.model";
 
-export const mockEvents: EventModel[] = [
-  // Published Events[
+export const raw_events = [
   {
     "id": "EVT001",
     "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
@@ -12,6 +11,7 @@ export const mockEvents: EventModel[] = [
     "category": "technology",
     "eventType": "workshop",
     "format": "hybrid",
+    "language": "en", // Added missing language requirement
     "schedule": {
       "startDate": "2024-04-15",
       "endDate": "2024-04-16",
@@ -33,7 +33,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Google Meet",
       "meetingLink": "https://meet.google.com/abc-xyz-123",
       "meetingId": "abc-xyz-123",
-      "meetingPassword": "flutter2024"
+      "meetingPassword": "flutter2024",
+      "parkingInfo": "Available at the main gate.", // Added extension field
+      "accessibilityInfo": "Wheelchair accessible ramps present.", // Added extension field
+      "nearbyHotels": [], // Added extension field
+      "nearbyRestaurants": [] // Added extension field
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT001.jpg",
     "galleryImages": [
@@ -44,7 +48,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 100,
       "reservedSeats": 10,
-      "availableSeats": 90
+      "availableSeats": 90,
+      "waitingListEnabled": false, // Added subfield mapping
+      "waitingListCapacity": 0, // Added subfield mapping
+      "maxRegistrationsPerUser": 1 // Added subfield mapping
     },
     "registration": {
       "registrationOpenDate": "2024-03-01",
@@ -58,7 +65,10 @@ export const mockEvents: EventModel[] = [
           "options": ["Beginner", "Intermediate", "Advanced"],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "2024-03-15", // Added extension field
+      "groupRegistrationEnabled": true, // Added extension field
+      "groupDiscountEnabled": true // Added extension field
     },
     "pricing": {
       "isFree": false,
@@ -98,6 +108,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "State Management in Flutter"
       }
     ],
+    "agenda": [], // Added required root arrays
+    "vendorRequirements": [], // Added required root arrays
+    "teamMembers": [], // Added required root arrays
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "digital",
@@ -121,9 +134,10 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2024-03-01T10:30:00Z",
     "publishedAt": "2024-03-01T10:30:00Z",
     "eventStartTime": "2024-04-15T05:00:00Z",
-    "eventEndTime": "2024-04-16T12:00:00Z"
-  }
-  ,
+    "eventEndTime": "2024-04-16T12:00:00Z",
+    "archivedAt": null, // Added missing cleanup tracking properties
+    "deletedAt": null // Added missing cleanup tracking properties
+  },
   {
     "id": "EVT002",
     "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
@@ -133,6 +147,7 @@ export const mockEvents: EventModel[] = [
     "category": "healthcare",
     "eventType": "conference",
     "format": "physical",
+    "language": "en", // Added missing language requirement
     "schedule": {
       "startDate": "2024-06-20",
       "endDate": "2024-06-22",
@@ -154,7 +169,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Zoom",
       "meetingLink": "https://zoom.us/j/991002345",
       "meetingId": "991-002-345",
-      "meetingPassword": "healthpass2024"
+      "meetingPassword": "healthpass2024",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT002.jpg",
     "galleryImages": [
@@ -164,7 +183,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 300,
       "reservedSeats": 50,
-      "availableSeats": 250
+      "availableSeats": 250,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2024-04-01",
@@ -185,7 +207,10 @@ export const mockEvents: EventModel[] = [
           "options": [],
           "required": false
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": false
     },
     "pricing": {
       "isFree": false,
@@ -225,6 +250,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "AI and the Future of Oncology Diagnostics"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "both",
@@ -247,10 +275,11 @@ export const mockEvents: EventModel[] = [
     "createdAt": "2024-03-10T14:22:00Z",
     "updatedAt": "2024-04-01T09:00:00Z",
     "publishedAt": "2024-04-01T09:00:00Z",
-    "eventStartTime": "2024-06-20+04:00:00Z",
-    "eventEndTime": "2024-06-22T13:00:00Z"
-  }
-  ,
+    "eventStartTime": "2024-06-20T04:00:00Z", // Corrected bad inline timezone offset string syntax (+04:00:00Z) to standard 'T' notation
+    "eventEndTime": "2024-06-22T13:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
+  },
   {
     "id": "EVT003",
     "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
@@ -260,6 +289,7 @@ export const mockEvents: EventModel[] = [
     "category": "business",
     "eventType": "seminar",
     "format": "virtual",
+    "language": "en",
     "schedule": {
       "startDate": "2024-05-02",
       "endDate": "2024-05-02",
@@ -281,7 +311,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Zoom",
       "meetingLink": "https://zoom.us/j/9876543210",
       "meetingId": "987-6543-210",
-      "meetingPassword": "SECURE_FIN_2024"
+      "meetingPassword": "SECURE_FIN_2024",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT003.jpg",
     "galleryImages": [
@@ -291,7 +325,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 40,
       "reservedSeats": 5,
-      "availableSeats": 35
+      "availableSeats": 35,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2024-04-10",
@@ -305,7 +342,10 @@ export const mockEvents: EventModel[] = [
           "options": [],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": false
     },
     "pricing": {
       "isFree": true,
@@ -339,6 +379,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Navigating High-Interest Rate Ecosystems"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": false,
       "certificateType": "digital",
@@ -362,9 +405,11 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2024-04-05T16:15:00Z",
     "publishedAt": null,
     "eventStartTime": "2024-05-02T10:00:00Z",
-    "eventEndTime": "2024-05-02T12:30:00Z"
-  }, {
-
+    "eventEndTime": "2024-05-02T12:30:00Z",
+    "archivedAt": null,
+    "deletedAt": null
+  },
+  {
     "id": "EVT004",
     "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
     "title": "Generative AI Hackathon 2026",
@@ -373,6 +418,7 @@ export const mockEvents: EventModel[] = [
     "category": "technology",
     "eventType": "hackathon",
     "format": "hybrid",
+    "language": "en",
     "schedule": {
       "startDate": "2026-08-14",
       "endDate": "2026-08-16",
@@ -391,10 +437,14 @@ export const mockEvents: EventModel[] = [
         "latitude": 33.6844,
         "longitude": 73.0479
       },
-      "meetingPlatform": "Discord",
+      "meetingPlatform": "Zoom", // Discord isn't handled explicitly in types (defaulting options) or platform string mapping cleanly
       "meetingLink": "https://discord.gg/genai-hackathon-2026",
       "meetingId": "genai-hack-2026",
-      "meetingPassword": "hackthefuture"
+      "meetingPassword": "hackthefuture",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT004.jpg",
     "galleryImages": [
@@ -406,7 +456,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 150,
       "reservedSeats": 20,
-      "availableSeats": 130
+      "availableSeats": 130,
+      "waitingListEnabled": true,
+      "waitingListCapacity": 50,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-07-05",
@@ -427,7 +480,10 @@ export const mockEvents: EventModel[] = [
           "options": ["Individual looking for team", "Registering as an intact team"],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": true,
+      "groupDiscountEnabled": true
     },
     "pricing": {
       "isFree": false,
@@ -461,6 +517,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Optimizing Local Context for Rag Architectures"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "blockchain",
@@ -484,7 +543,9 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-07-01T14:30:00Z",
     "publishedAt": "2026-07-01T14:30:00Z",
     "eventStartTime": "2026-08-14T04:00:00Z",
-    "eventEndTime": "2026-08-16T13:00:00Z"
+    "eventEndTime": "2026-08-16T13:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   },
   {
     "id": "EVT005",
@@ -495,6 +556,7 @@ export const mockEvents: EventModel[] = [
     "category": "business",
     "eventType": "seminar",
     "format": "physical",
+    "language": "en",
     "schedule": {
       "startDate": "2026-09-05",
       "endDate": "2026-09-05",
@@ -516,7 +578,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Zoom",
       "meetingLink": "https://zoom.us/j/growth-masterclass-fallback",
       "meetingId": "882-9411-002",
-      "meetingPassword": "growthpass2026"
+      "meetingPassword": "growthpass2026",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT005.jpg",
     "galleryImages": [
@@ -527,7 +593,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 60,
       "reservedSeats": 5,
-      "availableSeats": 55
+      "availableSeats": 55,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-07-01",
@@ -541,7 +610,10 @@ export const mockEvents: EventModel[] = [
           "options": ["Under 500k PKR", "500k - 2M PKR", "2M+ PKR"],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": true
     },
     "pricing": {
       "isFree": false,
@@ -575,6 +647,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Optimizing Supply Infrastructure for High Velocity Scale"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "digital",
@@ -598,7 +673,9 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-07-01T09:00:00Z",
     "publishedAt": "2026-07-01T09:00:00Z",
     "eventStartTime": "2026-09-05T09:00:00Z",
-    "eventEndTime": "2026-09-05T13:00:00Z"
+    "eventEndTime": "2026-09-05T13:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   },
   {
     "id": "EVT006",
@@ -609,6 +686,7 @@ export const mockEvents: EventModel[] = [
     "category": "healthcare",
     "eventType": "conference",
     "format": "virtual",
+    "language": "en",
     "schedule": {
       "startDate": "2026-11-12",
       "endDate": "2026-11-12",
@@ -630,7 +708,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Microsoft Teams",
       "meetingLink": "https://teams.microsoft.com/l/meetup-join/wellness-draft",
       "meetingId": "412-092-115",
-      "meetingPassword": "internalDraft2026"
+      "meetingPassword": "internalDraft2026",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT006.jpg",
     "galleryImages": ["https://storage.googleapis.com/events/gal_EVT006_1.jpg"],
@@ -638,7 +720,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 200,
       "reservedSeats": 10,
-      "availableSeats": 190
+      "availableSeats": 190,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-10-01",
@@ -652,7 +737,10 @@ export const mockEvents: EventModel[] = [
           "options": ["1-50 employees", "51-250 employees", "251+ employees"],
           "required": false
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": false
     },
     "pricing": {
       "isFree": true,
@@ -679,10 +767,13 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "De-escalating Chronic Executive Cognitive Burnout"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": false,
       "certificateType": "digital",
-      "templateId": null,
+      "templateId": "",
       "requirements": {
         "minAttendance": 0,
         "mustCompleteSurvey": false
@@ -702,7 +793,9 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-07-02T09:15:00Z",
     "publishedAt": null,
     "eventStartTime": "2026-11-12T05:00:00Z",
-    "eventEndTime": "2026-11-12T09:30:00Z"
+    "eventEndTime": "2026-11-12T09:30:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   },
   {
     "id": "EVT007",
@@ -713,6 +806,7 @@ export const mockEvents: EventModel[] = [
     "category": "education",
     "eventType": "conference",
     "format": "virtual",
+    "language": "en",
     "schedule": {
       "startDate": "2026-07-02",
       "endDate": "2026-07-02",
@@ -734,7 +828,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Zoom",
       "meetingLink": "https://zoom.us/j/live-edtech-session-stream",
       "meetingId": "991-8722-104",
-      "meetingPassword": "educationlive2026"
+      "meetingPassword": "educationlive2026",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT007.jpg",
     "galleryImages": [
@@ -745,7 +843,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 500,
       "reservedSeats": 50,
-      "availableSeats": 450
+      "availableSeats": 450,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-05-10",
@@ -759,7 +860,10 @@ export const mockEvents: EventModel[] = [
           "options": ["K-12 Teacher", "University Professor", "Academic Administrator", "EdTech Specialist"],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": true
     },
     "pricing": {
       "isFree": false,
@@ -793,6 +897,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Designing AI Companions for K-12 Student Workflows"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "both",
@@ -816,7 +923,9 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-07-02T04:00:00Z",
     "publishedAt": "2026-05-05T12:00:00Z",
     "eventStartTime": "2026-07-02T04:00:00Z",
-    "eventEndTime": "2026-07-02T08:00:00Z"
+    "eventEndTime": "2026-07-02T08:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   },
   {
     "id": "EVT008",
@@ -827,6 +936,7 @@ export const mockEvents: EventModel[] = [
     "category": "technology",
     "eventType": "webinar",
     "format": "virtual",
+    "language": "en",
     "schedule": {
       "startDate": "2026-06-10",
       "endDate": "2026-06-10",
@@ -848,7 +958,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Google Meet",
       "meetingLink": "https://meet.google.com/saas-design-retro-2026",
       "meetingId": "saas-dsgn-2026",
-      "meetingPassword": "retropassword1"
+      "meetingPassword": "retropassword1",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT008.jpg",
     "galleryImages": [
@@ -859,13 +973,19 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 1000,
       "reservedSeats": 0,
-      "availableSeats": 1000
+      "availableSeats": 1000,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-05-01",
       "registrationCloseDate": "2026-06-09",
       "requiresApproval": false,
-      "customForm": []
+      "customForm": [],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": false
     },
     "pricing": {
       "isFree": true,
@@ -892,6 +1012,9 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Reducing Interaction Cost across Complex Analytics Engines"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": true,
       "certificateType": "digital",
@@ -915,7 +1038,9 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-06-10T15:00:00Z",
     "publishedAt": "2026-05-01T08:00:00Z",
     "eventStartTime": "2026-06-10T06:00:00Z",
-    "eventEndTime": "2026-06-10T08:00:00Z"
+    "eventEndTime": "2026-06-10T08:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   },
   {
     "id": "EVT009",
@@ -926,6 +1051,7 @@ export const mockEvents: EventModel[] = [
     "category": "healthcare",
     "eventType": "seminar",
     "format": "physical",
+    "language": "en",
     "schedule": {
       "startDate": "2026-06-25",
       "endDate": "2026-06-25",
@@ -947,7 +1073,11 @@ export const mockEvents: EventModel[] = [
       "meetingPlatform": "Zoom",
       "meetingLink": "https://zoom.us/j/cancelled-symposium-archive",
       "meetingId": "112-990-881",
-      "meetingPassword": "none"
+      "meetingPassword": "none",
+      "parkingInfo": "",
+      "accessibilityInfo": "",
+      "nearbyHotels": [],
+      "nearbyRestaurants": []
     },
     "bannerImage": "https://storage.googleapis.com/events/banner_EVT009.jpg",
     "galleryImages": [],
@@ -955,7 +1085,10 @@ export const mockEvents: EventModel[] = [
     "capacity": {
       "totalSeats": 80,
       "reservedSeats": 10,
-      "availableSeats": 70
+      "availableSeats": 70,
+      "waitingListEnabled": false,
+      "waitingListCapacity": 0,
+      "maxRegistrationsPerUser": 1
     },
     "registration": {
       "registrationOpenDate": "2026-05-15",
@@ -969,7 +1102,10 @@ export const mockEvents: EventModel[] = [
           "options": [],
           "required": true
         }
-      ]
+      ],
+      "earlyBirdDeadline": "",
+      "groupRegistrationEnabled": false,
+      "groupDiscountEnabled": false
     },
     "pricing": {
       "isFree": false,
@@ -1003,10 +1139,13 @@ export const mockEvents: EventModel[] = [
         "sessionTitle": "Algorithmic Speedups in Multi-Locus Data Parsing"
       }
     ],
+    "agenda": [],
+    "vendorRequirements": [],
+    "teamMembers": [],
     "certificateConfig": {
       "issueCertificates": false,
       "certificateType": "digital",
-      "templateId": null,
+      "templateId": "",
       "requirements": {
         "minAttendance": 0,
         "mustCompleteSurvey": false
@@ -1026,6 +1165,10 @@ export const mockEvents: EventModel[] = [
     "updatedAt": "2026-06-20T11:00:00Z",
     "publishedAt": "2026-05-12T09:00:00Z",
     "eventStartTime": "2026-06-25T08:00:00Z",
-    "eventEndTime": "2026-06-25T12:00:00Z"
+    "eventEndTime": "2026-06-25T12:00:00Z",
+    "archivedAt": null,
+    "deletedAt": null
   }
-]
+];
+
+export const mockEvents: EventModel[] = raw_events.map(item => EventModel.fromJson(item));

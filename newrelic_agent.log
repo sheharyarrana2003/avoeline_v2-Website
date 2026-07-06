@@ -1,0 +1,8 @@
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:36.276Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:36.293Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:36.651Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:36.708Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:37.072Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:37.081Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:37.081Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":172416,"time":"2026-07-06T12:26:38.496Z","msg":"Your license key appears to be invalid. Reattempting connection to New Relic. If the problem persists, please contact support@newrelic.com. (status code 401)","component":"collector_api"}

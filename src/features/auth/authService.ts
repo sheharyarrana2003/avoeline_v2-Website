@@ -87,6 +87,7 @@ export const AuthService = {
     async loginWithEmail(email: string, password: string) {
         console.log("Checkpoint 1:  function started.");
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
+        //await seedEvents();
         try {
             const user_credintials = await signInWithEmailAndPassword(auth, email, password);
             console.log(user_credintials);

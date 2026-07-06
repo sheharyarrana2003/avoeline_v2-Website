@@ -1,11 +1,13 @@
 "use client"
 
-import { SpeakerService } from "@/src/features/agendas/speakers.service"
 
 import { User, Calendar, Clock, MapPin, ChevronDown, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-export default function CreateAgendaForm() {
+export default function CreateAgendaForm(handle_agenda_submission : any) {
     const router = useRouter();
+    const handle_submission_client_side = ()=>{
+        handle_agenda_submission()
+    }
 
     return (
         <>
@@ -20,7 +22,7 @@ export default function CreateAgendaForm() {
                 </div>
 
 
-                <form action={SpeakerService.createNewSpeaker}>
+                <form action={handle_submission_client_side}>
                     {/* Form Body */}
                     <div className="px-8 py-6 space-y-5 overflow-y-auto max-h-[75vh]">
 

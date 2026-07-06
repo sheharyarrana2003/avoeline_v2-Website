@@ -122,7 +122,7 @@ export const EventVendorService = {
 
         while (tracker_of_chunks < vendorIds.length) {
             const q = query(
-                collection(db, "vendors"),
+                collection(db, "vendor"),
                 where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
             )
             const querySnapshot2 = await getDocs(q);
@@ -140,7 +140,7 @@ export const EventVendorService = {
     },
     async getVendorById(vendor_id: string) {
         const q = query(
-            collection(db, "vendors"),
+            collection(db, "vendor"),
             where("vendorId", "==", vendor_id)
         )
         const querySnapshot = await getDocs(q);
@@ -152,7 +152,7 @@ export const EventVendorService = {
     },
     async getAllVendors() {
         const q = query(
-            collection(db, "vendors")
+            collection(db, "vendor")
         )
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {

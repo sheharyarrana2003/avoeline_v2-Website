@@ -192,13 +192,13 @@ export class EventModel {
   visibility: EventVisibility;
   accessCode: string | null;
   analytics: EventAnalytics;
-  createdAt: Date;
-  updatedAt: Date;
-  publishedAt: Date | null;
-  eventStartTime: Date;
-  eventEndTime: Date;
-  archivedAt: Date | null; 
-  deletedAt: Date | null;   
+  createdAt: Date|string;
+  updatedAt: Date|string;
+  publishedAt: Date |string| null;
+  eventStartTime: Date|string;
+  eventEndTime: Date|string;
+  archivedAt: Date |string| null; 
+  deletedAt: Date |string| null;   
 
   constructor(raw: any) {
     this.id = raw.eventId || raw.id || raw.event_id || "";

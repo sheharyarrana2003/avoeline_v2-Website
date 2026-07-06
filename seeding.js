@@ -11,16 +11,25 @@ import { mockNotifications } from "./app/mockdata/notifications.mock";
 
 
 export async function seedEvents() {
-    // for (const event of mockEvents) {
-    //     const docRef = doc(db, "events", event.id);
-    //     await setDoc(docRef, event)
-    //     console.log("event seeded", event.id)
-    // }
-  for (const x of mockNotifications) {
-        const docRef = doc(db, "notifications", x.notificationId);
+    for (const x of mockVendors) {
+        const docRef = doc(db, "vendor", x.vendorId);
         await setDoc(docRef, x)
-        console.log("seeded", x.notificationId)
+        console.log("venodr seeded",x.vendorId)
     }
+
+        for (const x of mockBookings) {
+        const docRef = doc(db, "bookings", x.bookingId);
+        await setDoc(docRef, x)
+        console.log("booking seeded", x.bookingId)
+    }
+    for (const x of mockEvents) {
+        const docRef = doc(db, "events", x.id);
+        await setDoc(docRef, {...x})
+        console.log("event seeded", x.id)
+    }
+
+    
+ 
 
 
 }
