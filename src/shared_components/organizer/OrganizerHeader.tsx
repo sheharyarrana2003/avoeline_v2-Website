@@ -61,6 +61,14 @@ export function OrganizerHeader({ user }: { user: CurrentUserData }) {
                             Notifications
                         </Link>
                     </li>
+                    <li>
+                        <Link 
+                            href={`${basePath}/quotes`} 
+                            className={current_tab === `${basePath}/quotes` ? "font-bold text-black" : "text-gray-500 hover:text-black"}
+                        >
+                            Quotes
+                        </Link>
+                    </li>
                 </ul>
             </nav>
             

@@ -31,13 +31,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
               <p className="text-gray-500 mt-1 text-sm md:text-base">
                 Manage and track your ongoing vendor bookings and service statuses.
               </p>
-                 <Link
-                href={`${basePath}/vendor-marketplace`}
-                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
-              >
-
-                Visit Vendor Marketplace
-              </Link>
+                
 
            
             </div>
@@ -54,6 +48,13 @@ export default async function Active_Vendors({ params, searchParams }: { params:
               />
               
             </div>
+             <Link
+                href={`${basePath}/vendor-marketplace`}
+                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+              >
+
+                Visit Vendor Marketplace
+              </Link>
           </div>
 
           {/* Tab Navigation */}
@@ -120,16 +121,33 @@ export default async function Active_Vendors({ params, searchParams }: { params:
           </div>
 
           {/* Search Bar (Matches Top Right of Image) */}
-          <div className="relative w-full md:w-80">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <input
-              type="text"
-              placeholder="Search by vendor or service..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm"
-            />
-          </div>
+         <div className="flex flex-col items-start gap-6 w-full">
+  {/* Search Bar Container */}
+  <div className="relative w-full md:w-80">
+    <svg 
+      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <input
+      type="text"
+      placeholder="Search by vendor or service..."
+      className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm"
+    />
+  </div>
+
+  {/* Button - Moved outside the search input container */}
+  <Link
+    href={`${basePath}/vendor-marketplace`}
+    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+  >
+    Visit Vendor Marketplace
+  </Link>
+</div>
+          
         </div>
 
         {/* Tab Navigation */}
