@@ -2,12 +2,14 @@ import { AttendeeService } from "@/src/features/event_attendee/attendee.service"
 import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event_attendee/components/AttendeeClientSide";
 import { UserService } from "@/src/services/user.service";
 
-export default async function speaker({ params }: { params: Promise<{ id: string }> }) {
+export default async function speaker({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
-    const event_id = resolvedParams.id;
+    const event_id = resolvedParams.eventId;
+
     const attendee = await AttendeeService.getAttendeeOfEvent(event_id);
     let attendeesWithUsers : AttendeeClientSideProp[] ;
     if(attendee){
+        console.log("one");
           attendeesWithUsers = await Promise.all(
         attendee.map(async (a) => {
             const user = await UserService.getUserById(a.userId);
@@ -18,10 +20,12 @@ export default async function speaker({ params }: { params: Promise<{ id: string
         })
     );
     }else{
+        console.log("two");
         attendeesWithUsers = [];
     }
 
-   
+   console.log("mixture og attenee and user ");
+   console.log(  attendeesWithUsers );
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans overflow-hidden">

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
 import { VendorData } from '@/src/services/models/vendor.model';
-
+import PricingPackage from '@/src/services/models/vendor.model';
 
 
 export default async function Vendors({params} : {params : Promise<{eventId:string; organizer_id:string}>}) {
@@ -53,7 +53,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                         </h1>
                         <div className="flex items-center gap-3">
                             <span className="bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
-                                {vendors.length} Active Vendors
+                                {vendors?.length} Active Vendors
                             </span>
                       
                         </div>
@@ -72,7 +72,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 </div>
 
                 <div className="space-y-4">
-                    {vendors.map((vendor) => {
+                    {vendors?.map((vendor) => {
                         const startingPrice = getStartingPrice(vendor.pricingPackages);
 
                         return (

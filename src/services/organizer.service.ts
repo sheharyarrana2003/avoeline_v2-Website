@@ -5,7 +5,7 @@ import { Organizer } from './models/organizer.model';
 
 function mapToOrganizer(item: any): Organizer {
   if (!item) {
-    throw new Error("Cannot map an empty or null object to an Organizer.");
+    return new Organizer("unknown","unknown@gmail.com","unknown");
   }
 
   // 1. Initialize the class with required base identifiers

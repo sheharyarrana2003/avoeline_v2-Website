@@ -1,8 +1,9 @@
-//all bookings 
-
+import { AcceptButton } from "@/app/organizer/[organizer_id]/quotes/Acceptbutton";
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { BookingData } from "@/src/features/bookings/types";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
+AcceptButton
 
 const formatCurrency = (amount: number, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
@@ -13,19 +14,9 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount);
 };
 
-const formatDateRange = (startDate: string, endDate?: string) => {
-    if (!startDate) return "TBD";
-    const start = new Date(startDate);
-    if (!endDate || startDate === endDate) {
-        return start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-    const end = new Date(endDate);
-    return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' })}`;
-};
-
-const formatShortDate = (dateString: string) => {
-    if (!dateString) return "TBD";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const timeAgo = (timestamp: string) => {
@@ -38,331 +29,419 @@ const timeAgo = (timestamp: string) => {
     return `${days} day${days > 1 ? 's' : ''} ago`;
 };
 
-const getDeadlineStatus = (validityDate: string) => {
-    if (!validityDate) return { label: 'No Deadline', color: 'text-gray-400', urgent: false };
-    const validity = new Date(validityDate);
-    const now = new Date();
-    const diffHours = Math.floor((validity.getTime() - now.getTime()) / (1000 * 60 * 60));
-    
-    if (diffHours < 0) return { label: 'Expired', color: 'text-gray-400', urgent: false };
-    if (diffHours < 24) return { label: 'Deadline: Today', color: 'text-red-600', urgent: true, bg: 'bg-red-50' };
-    if (diffHours < 48) return { label: 'Deadline: Tomorrow', color: 'text-red-500', urgent: true, bg: 'bg-red-50' };
-    return { label: `Deadline: ${formatShortDate(validityDate)}`, color: 'text-gray-500', urgent: false };
-};
-
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-        'quote_requested': 'bg-black text-white',
-        'new': 'bg-black text-white',
-        'quote_sent': 'bg-gray-100 text-gray-600',
-        'responded': 'bg-gray-100 text-gray-600',
-        'viewed': 'bg-gray-100 text-gray-600',
-        'expired': 'bg-gray-100 text-gray-400',
+        'negotiating': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+        'new': 'bg-green-100 text-green-700 border-green-200',
+        'quote_accepted': 'bg-blue-100 text-blue-700 border-blue-200',
+        'confirmed': 'bg-gray-100 text-gray-700 border-gray-200',
+        'completed': 'bg-gray-100 text-gray-500 border-gray-200',
+        'quote_received': 'bg-green-100 text-green-700 border-green-200',
+        'quote_sent': 'bg-purple-100 text-purple-700 border-purple-200',
+        'quote_requested': 'bg-yellow-100 text-yellow-700 border-yellow-200',
     };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600';
+    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
 };
 
 const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-        'quote_requested': 'NEW',
-        'new': 'NEW',
-        'quote_sent': 'RESPONDED',
-        'responded': 'RESPONDED',
-        'viewed': 'VIEWED',
-        'expired': 'EXPIRED',
+        'quote_requested': 'QUOTE REQUESTED',
+        'quote_sent': 'QUOTE SENT',
+        'quote_accepted': 'ACCEPTED',
+        'confirmed': 'CONFIRMED',
+        'completed': 'COMPLETED',
+        'quote_received': 'QUOTE RECEIVED',
+        'cancelled': 'QUOTE CANCELLED'
     };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'NEW';
+    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
 };
 
-// Get service type icon
-const getServiceIcon = (serviceType: string) => {
-    const icons: Record<string, string> = {
-        'catering': '🍴',
-        'av_equipment': '🎤',
-        'decoration': '🌸',
-        'photography': '📷',
-        'venues': '🏢',
-        'music': '🎵',
-        'event_management': '📋',
-        'conference_tech': '⚡',
-        'event_decor': '✨',
-    };
-    return icons[serviceType?.toLowerCase()] || '📦';
+const StarRating = ({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) => {
+    const fullStars = Math.floor(rating || 0);
+    const sizeClass = size === "md" ? "w-4 h-4" : "w-3 h-3";
+
+    return (
+        <div className="flex items-center gap-0.5">
+            {[...Array(5)].map((_, i) => (
+                <svg
+                    key={i}
+                    className={`${sizeClass} ${i < fullStars ? 'text-gray-900 fill-gray-900' : 'text-gray-300 fill-gray-300'}`}
+                    viewBox="0 0 20 20"
+                >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+            ))}
+        </div>
+    );
 };
 
-// Get service type display name
-const getServiceName = (serviceType: string) => {
-    const names: Record<string, string> = {
-        'catering': 'Catering Services',
-        'av_equipment': 'AV Equipment',
-        'decoration': 'Event Decor',
-        'photography': 'Photography',
-        'venues': 'Venue',
-        'music': 'Music',
-        'event_management': 'Event Management',
-        'conference_tech': 'Conference Tech',
-        'event_decor': 'Event Decor',
-    };
-    return names[serviceType?.toLowerCase()] || serviceType;
-};
-
-// Get organizer name from booking
-const getOrganizerName = (booking: any) => {
-    // In real app, fetch from UserService. For now, derive from organizerId
-    const orgId = booking?.organizerId || '';
-    const names: Record<string, string> = {
-        'org_001': 'TechVerse',
-        'org_002': 'AI Professionals',
-        'org_003': 'ABC Corp',
-    };
-    return names[orgId] || orgId.toUpperCase();
-};
-
-// Get budget range from quote
-const getBudgetRange = (booking: any) => {
-    const total = booking?.quote?.vendorQuote?.totalAmount || 0;
-    const currency = booking?.payment?.currency || 'PKR';
-    if (total === 0) {
-        // Estimate from requirements guest count
-        const guests = booking?.requirements?.guestCount || 0;
-        if (guests > 0) {
-            const estMin = guests * 800;
-            const estMax = guests * 1200;
-            return `${formatCurrency(estMin, currency).replace('PKR', 'PKR ')}K - ${formatCurrency(estMax, currency).replace('PKR', 'PKR ')}K`;
-        }
-        return 'Budget TBD';
+const accept_quote = async (booking: BookingData) => {
+    'use server'
+    const new_status_history = {
+        status: 'quote_accepted',
+        timestamp: new Date().toISOString()
     }
-    const min = Math.round(total * 0.8);
-    const max = Math.round(total * 1.2);
-    return `${formatCurrency(min, currency).replace('PKR', 'PKR ')}K - ${formatCurrency(max, currency).replace('PKR', 'PKR ')}K`;
-};
 
-// Get guest label
-const getGuestLabel = (booking: any) => {
-    const count = booking?.requirements?.guestCount || 0;
-    const eventType = booking?.serviceType?.toLowerCase();
-    
-    if (count === 0) return 'TBD';
-    
-    if (eventType === 'catering') return `${count} Participants`;
-    if (eventType === 'av_equipment') return `${count} Attendees`;
-    if (eventType === 'decoration') return `${count} Guests`;
-    return `${count} Guests`;
-};
+    booking?.statusHistory.push(new_status_history);
+    booking.status = 'quote_accepted'
+    await BookingServices.update_booking(booking);
+}
 
-export default async function VendorQuotesPage({ 
+export default async function VendorQuoteManagementPage({
     params,
     searchParams
-}: { 
-    params: Promise<{ vendor_id: string }>;
+}: {
+    params: Promise<{ id: string, organizer_id: string, vendor_id: string }>;
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    const { vendor_id } = await params;
+    const { organizer_id, vendor_id } = await params;
     const awaitedSearchParams = await searchParams;
-    
-    const filter = (awaitedSearchParams?.filter as string) || 'all';
-    
+
+    // Get active tab from URL (active or past)
+    const activeTab = (awaitedSearchParams?.tab as string) || "active";
+
+    // NOTE: assumes BookingServices exposes a vendor-scoped fetch method,
+    // mirroring getAllBookingsOfOrganizer. Adjust the method name if yours differs.
     const raw_bookings = await BookingServices.getAllBookingsOfVendor(vendor_id) || [];
-    
-    const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
-    
-    const eventsMap: Record<string, any> = {};
-    for (const eventId of eventIds) {
+
+    const activeStatuses = ['quote_requested', 'quote_sent', 'quote_accepted', 'inprogress', 'confirmed'];
+    const pastStatuses = ['completed', 'cancelled'];
+
+    const activeQuotes = raw_bookings.filter((b: any) =>
+        activeStatuses.includes(b?.status?.toLowerCase())
+    );
+
+    const pastQuotes = raw_bookings.filter((b: any) =>
+        pastStatuses.includes(b?.status?.toLowerCase())
+    );
+
+    const displayQuotes = activeTab === "active" ? activeQuotes : pastQuotes;
+
+    // Get selected quote ID from URL
+    const selectedQuoteId = awaitedSearchParams?.quote as string;
+    const selectedQuote = displayQuotes.find((b: any) => b?.bookingId === selectedQuoteId) || displayQuotes[0];
+
+    // Fetch event data for the selected quote (the vendor's counterpart is the event/organizer, not another vendor)
+    let selectedEvent: any = null;
+    if (selectedQuote?.eventId) {
         try {
-            const event = await EventService.getEventByID(eventId);
-            if (event) eventsMap[eventId] = event;
+            // NOTE: assumes EventService.getEventById exists. Adjust if your service uses a different method name.
+            selectedEvent = await EventService.getEventByID(selectedQuote.eventId);
         } catch {
-            // Event not found
+            selectedEvent = null;
         }
     }
-    
-    const getEventTitle = (eventId: string) => {
-        return eventsMap[eventId]?.title || eventId;
-    };
-    
-    const getEventDates = (eventId: string) => {
-        const event = eventsMap[eventId];
-        if (!event?.schedule) return { start: null, end: null };
-        return {
-            start: event.schedule.startDate,
-            end: event.schedule.endDate
-        };
-    };
-    
-    const now = new Date();
-    
-    const allQuotes = raw_bookings.filter((b: any) => 
-        ['quote_requested', 'quote_sent', 'quote_accepted', 'confirmed'].includes(b?.status?.toLowerCase())
-    );
-    
-    const newQuotes = allQuotes.filter((b: any) => 
-        b?.status?.toLowerCase() === 'quote_requested'
-    );
-    
-    const respondedQuotes = allQuotes.filter((b: any) => 
-        ['quote_sent', 'quote_accepted'].includes(b?.status?.toLowerCase())
-    );
-    
-    const expiredQuotes = allQuotes.filter((b: any) => {
-        const validity = b?.quote?.vendorQuote?.validity;
-        if (!validity) return false;
-        return new Date(validity) < now;
-    });
-    
-    // Apply filter
-    let displayQuotes = allQuotes;
-    if (filter === 'new') displayQuotes = newQuotes;
-    else if (filter === 'responded') displayQuotes = respondedQuotes;
-    else if (filter === 'expired') displayQuotes = expiredQuotes;
-    
-    // Filter tabs config
-    const tabs = [
-        { id: 'all', label: 'All', count: allQuotes.length },
-        { id: 'new', label: 'New', count: newQuotes.length },
-        { id: 'responded', label: 'Responded', count: respondedQuotes.length },
-        { id: 'expired', label: 'Expired', count: expiredQuotes.length },
-    ];
+
+    const ev = selectedEvent || {};
+    const eventName = ev?.eventName || ev?.name || selectedQuote?.eventId || "Unknown Event";
+    const organizerName = ev?.organizerName || selectedQuote?.organizerId || "Unknown Organizer";
+
+    const quote = selectedQuote?.quote || {};
+    const vendorQuote = quote?.vendorQuote || {};
+    const breakdown = vendorQuote?.breakdown || [];
+    const totalAmount = vendorQuote?.totalAmount || 0;
+    const currency = selectedQuote?.payment?.currency || "PKR";
+    const validity = quote?.vendorQuote?.validity || "";
+    const proposalNumber = selectedQuote?.bookingId || "N/A";
+    const submittedAt = quote?.respondedAt || quote?.requestedAt || "";
+    const terms = vendorQuote?.terms || "";
+
+    // Negotiation history
+    const negotiations = quote?.negotiation || [];
+
+    // Inclusions (from breakdown items)
+    const inclusions = breakdown.map((item: any) => item?.item).filter(Boolean);
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-                
-                {/* Header */}
+
+                {/* Page Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">QUOTE REQUESTS</h1>
-                    <p className="text-sm text-gray-500 mt-2">Review and respond to organizer inquiries from your dashboard.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quote Management</h1>
+                    <p className="text-sm text-gray-500 mt-1">Review and respond to booking requests</p>
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        {tabs.map((tab) => (
+                <div className="">
+
+                    {/* ================= Quote List & Detail ================= */}
+                    <div className="">
+
+                        {/* Tabs */}
+                        <div className="">
                             <Link
-                                key={tab.id}
-                                href={`/vendor/${vendor_id}/quotes?filter=${tab.id}`}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                                    filter === tab.id
-                                        ? 'bg-black text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                href={`?tab=active`}
+                                className={`pb-3 text-sm font-medium transition relative ${activeTab === "active"
+                                    ? "text-gray-900 border-b-2 border-gray-900"
+                                    : "text-gray-400 hover:text-gray-600"
+                                    }`}
                             >
-                                {tab.label} ({tab.count})
+                                Active Quotes ({activeQuotes.length})
                             </Link>
-                        ))}
-                    </div>
-                    
-                    {/* View Toggle */}
-                    <div className="flex items-center gap-2">
-                        <button className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200 transition">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                        </button>
-                        <button className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                            <Link
+                                href={`?tab=past`}
+                                className={`pb-3 text-sm font-medium transition relative ${activeTab === "past"
+                                    ? "text-gray-900 border-b-2 border-gray-900"
+                                    : "text-gray-400 hover:text-gray-600"
+                                    }`}
+                            >
+                                Past Quotes
+                            </Link>
+                        </div>
 
-                {/* Quote Cards Grid */}
-                {displayQuotes.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {displayQuotes.map((booking: any, index: number) => {
-                            const eventTitle = getEventTitle(booking?.eventId);
-                            const eventDates = getEventDates(booking?.eventId);
-                            const organizerName = getOrganizerName(booking);
-                            const serviceName = getServiceName(booking?.serviceType);
-                            const serviceIcon = getServiceIcon(booking?.serviceType);
-                            const budgetRange = getBudgetRange(booking);
-                            const guestLabel = getGuestLabel(booking);
-                            const deadline = getDeadlineStatus(booking?.quote?.vendorQuote?.validity);
-                            const statusLabel = getStatusLabel(booking?.status);
-                            const statusBadge = getStatusBadge(booking?.status);
-                            
-                            return (
-                                <div key={booking?.bookingId}>
-                                {/* href={`/vendor/${vendor_id}/quotes/${booking.bookingId}`}
-                                 key={booking?.bookingId || index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"> */}
-                                    
-                                    {/* Card Header */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{organizerName}</p>
-                                            <h3 className="text-lg font-bold text-gray-900 leading-tight">{eventTitle}</h3>
+                        {/* Summary Badge */}
+                        {activeTab === "active" && activeQuotes.length > 0 && (
+                            <div className="flex items-center gap-2">
+                                <span className="bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                                    {activeQuotes.length} Active Requests
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                    {selectedQuote?.serviceType || ""}
+                                </span>
+                                <button className="ml-auto text-gray-400 hover:text-gray-600">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Quotes Table */}
+                        {displayQuotes.length > 0 ? (
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                {/* Table Header */}
+                                <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                    <div className="col-span-4">Organizer / Event</div>
+                                    <div className="col-span-3">Quote Amount</div>
+                                    <div className="col-span-3">Inclusions</div>
+                                    <div className="col-span-2 text-right">Status</div>
+                                </div>
+
+                                {/* Table Rows */}
+                                {displayQuotes.map((booking: any, index: number) => {
+                                    const bQuote = booking?.quote?.vendorQuote || {};
+                                    const bTotal = bQuote?.totalAmount || 0;
+                                    const bCurrency = booking?.payment?.currency || "PKR";
+                                    const bStatus = booking?.status || "unknown";
+                                    const bOrganizerId = booking?.organizerId || "";
+                                    const bInclusions = (bQuote?.breakdown || []).map((item: any) => item?.item).filter(Boolean);
+                                    const isSelected = selectedQuote?.bookingId === booking?.bookingId;
+
+                                    return (
+                                        <Link
+                                            key={booking?.bookingId || index}
+                                            href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
+                                            className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 hover:bg-gray-50 transition items-center ${isSelected ? 'bg-gray-50' : ''}`}
+                                        >
+                                            {/* Organizer / Event */}
+                                            <div className="col-span-4 flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
+                                                    {bOrganizerId.slice(0, 2).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900">Organizer {bOrganizerId}</p>
+                                                    {booking?.eventName && (
+                                                        <p className="text-xs text-gray-400">{booking.eventName}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Quote Amount */}
+                                            <div className="col-span-3">
+                                                <p className="text-sm font-bold text-gray-900">{formatCurrency(bTotal, bCurrency)}</p>
+                                            </div>
+
+                                            {/* Inclusions */}
+                                            <div className="col-span-3 flex items-center gap-1">
+                                                {bInclusions.length > 0 ? (
+                                                    bInclusions.slice(0, 3).map((item: string, i: number) => (
+                                                        <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center bg-green-100" title={item}>
+                                                            <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">No breakdown yet</span>
+                                                )}
+                                            </div>
+
+                                            {/* Status */}
+                                            <div className="col-span-2 text-right">
+                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusBadge(bStatus)}`}>
+                                                    {getStatusLabel(bStatus)}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                                    {activeTab === "active" ? "No Active Requests" : "No Past Quotes"}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                    {activeTab === "active"
+                                        ? "New booking requests will appear here."
+                                        : "Completed bookings will appear here."}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Quote Detail Card */}
+                        {selectedQuote && activeTab === "active" && (
+                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
+
+                                {/* Header */}
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <span className="text-lg">📋</span>
                                         </div>
-                                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${statusBadge}`}>
-                                            {statusLabel}
-                                        </span>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">{eventName}</h3>
+                                            <p className="text-xs text-gray-400">
+                                                {organizerName} • Submitted {timeAgo(submittedAt)} • Proposal #{proposalNumber}
+                                            </p>
+                                        </div>
                                     </div>
-                                    
-                                    {/* Service Type & Deadline */}
-                                    <div className="flex items-center gap-3 mb-5">
-                                        <span className="flex items-center gap-1.5 text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full">
-                                            <span>{serviceIcon}</span>
-                                            {serviceName}
-                                        </span>
-                                        {deadline.urgent ? (
-                                            <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${deadline.bg} ${deadline.color}`}>
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                {deadline.label}
-                                            </span>
-                                        ) : (
-                                            <span className={`text-xs ${deadline.color}`}>{deadline.label}</span>
+                                    <div className="text-right">
+                                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</p>
+                                        {validity && (
+                                            <p className="text-xs text-gray-400">Validity: {formatDate(validity)}</p>
                                         )}
                                     </div>
-                                    
-                                    {/* Details Grid */}
-                                    <div className="space-y-3 mb-6">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-400">Event Date</span>
-                                            <span className="text-sm font-semibold text-gray-900">
-                                                {formatDateRange(eventDates.start, eventDates.end)}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-400">Budget Range</span>
-                                            <span className="text-sm font-semibold text-gray-900">{budgetRange}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-400">Guests</span>
-                                            <span className="text-sm font-semibold text-gray-900">{guestLabel}</span>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Itemized Pricing */}
+                                    <div>
+                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Itemized Pricing</h4>
+                                        <div className="space-y-3">
+                                            {breakdown.length > 0 ? (
+                                                breakdown.map((item: any, i: number) => (
+                                                    <div key={i} className="flex justify-between items-center">
+                                                        <span className="text-sm text-gray-600">{item?.item || 'Item'}</span>
+                                                        <span className="text-sm font-semibold text-gray-900">{formatCurrency(item?.total || 0, currency)}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-xs text-gray-400">No itemized breakdown provided.</p>
+                                            )}
+
+                                            <div className="border-t border-gray-100 pt-3 mt-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm font-bold text-gray-900">Total Amount</span>
+                                                    <span className="text-lg font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    {/* Received Time */}
-                                    <p className="text-xs text-gray-300 mb-5">Received {timeAgo(booking?.createdAt)}</p>
-                                    
-                                    {/* Action Buttons */}
-                                    <div className="flex gap-3">
-                                        <Link 
-                                            href={`/vendor/${vendor_id}/quotes/prep-quote/${booking?.bookingId}`}
-                                            className="flex-1 bg-black text-white text-sm font-semibold py-2.5 rounded-full text-center hover:bg-gray-800 transition"
-                                        >
-                                            Prepare Quote
-                                        </Link>
-                                        <button className="flex-1 border border-gray-200 text-gray-600 text-sm font-semibold py-2.5 rounded-full hover:bg-gray-50 transition">
-                                            Decline
-                                        </button>
+
+                                    {/* Negotiation History */}
+                                    <div>
+                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Negotiation History</h4>
+                                        <div className="space-y-4">
+                                            {negotiations.length > 0 ? (
+                                                negotiations.map((n: any, i: number) => {
+                                                    const isOrganizer = n?.from === "organizer";
+                                                    return (
+                                                        <div key={i} className="flex gap-3">
+                                                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-black'}`} />
+                                                            <div>
+                                                                <p className="text-xs font-bold text-gray-900">
+                                                                    {isOrganizer ? organizerName : "You (Vendor)"}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                                                                    {n?.message || "No message"}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <p className="text-xs text-gray-400">No negotiation history yet.</p>
+                                            )}
+
+                                            {/* Terms */}
+                                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                                <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Terms & Conditions</h5>
+                                                <p className="text-xs text-gray-500 leading-relaxed">
+                                                    {terms || "No terms specified."}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            );
-                        })}
+
+                                {/* Action Buttons */}
+                                <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-100">
+                                    <Link
+                                        href={`/vendor/${vendor_id}/quotes/prep-quote/${selectedQuote.bookingId}`}
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                        Counter Offer
+                                    </Link>
+
+                                    <Link
+                                        href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}`}
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        View Details
+                                    </Link>
+
+                                    <AcceptButton quote={selectedQuote} accept_quote={accept_quote} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Other Quotes Accordion */}
+                        {activeTab === "active" && activeQuotes.length > 1 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Other Requests</h3>
+                                {activeQuotes.filter((b: any) => b?.bookingId !== selectedQuote?.bookingId).map((booking: any, i: number) => {
+                                    const bq = booking?.quote?.vendorQuote || {};
+                                    return (
+                                        <Link
+                                            key={booking?.bookingId || i}
+                                            href={`?tab=active&quote=${booking?.bookingId}`}
+                                            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-50 transition"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+                                                    📋
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900">Organizer {booking?.organizerId}</p>
+                                                    <p className="text-xs text-gray-400">
+                                                        {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {getStatusLabel(booking?.status)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        )}
+
                     </div>
-                ) : (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">No Quote Requests</h3>
-                        <p className="text-sm text-gray-500">You don't have any {filter !== 'all' ? filter : ''} quote requests at the moment.</p>
-                    </div>
-                )}
+                </div>
             </div>
         </div>
     );

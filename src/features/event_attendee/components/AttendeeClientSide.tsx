@@ -15,6 +15,8 @@ export interface AttendeeClientSideProp {
 }
 
 export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[]|[] }) {
+    console.log("in elicne tsisdeee ");
+    console.log(attendees)
     const [selected_ids, set_selected_ids] = useState<String[]>([]);
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();
@@ -87,10 +89,10 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
 
                     {/* Top Stats Cards */}
                     <div className="grid grid-cols-4 gap-4 mb-8">
-                        <AttendeeCard title="TOTAL\nREGISTERED" value={stats.total || "247"} />
-                        <AttendeeCard title="CHECKED IN" value={stats.checkedIn || "185"} subValue={`${stats.checkedInPercent || "75"}%`} />
-                        <AttendeeCard title="PENDING" value={stats.pending || "42"} />
-                        <AttendeeCard title="CANCELLED" value={stats.cancelled || "20"} />
+                        <AttendeeCard title="TOTAL\nREGISTERED" value={stats.total || "0"} />
+                        <AttendeeCard title="CHECKED IN" value={stats.checkedIn || "0"} subValue={`${stats.checkedInPercent || "0"}%`} />
+                        <AttendeeCard title="PENDING" value={stats.pending || "0"} />
+                        <AttendeeCard title="CANCELLED" value={stats.cancelled || "0"} />
                     </div>
 
                     {/* Filters & Search */}

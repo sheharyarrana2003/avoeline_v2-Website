@@ -8,14 +8,14 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
         <div className="flex flex-col items-center p-8 bg-white border border-slate-100 rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
             
             <div className="relative w-28 h-28 mb-5 rounded-full overflow-hidden bg-slate-100 border-4 border-slate-50/50">
-                <Image 
+                {/* <Image 
                     src={speaker.profileImage} 
                     alt={speaker.name}
                    width={112} 
         height={112}
                     className="object-cover grayscale" 
                     sizes="(max-width: 768px) 100vw, 112px"
-                />
+                /> */}
             </div>
 
             <h3 className="text-xl font-extrabold text-slate-900 tracking-tight mb-1">

@@ -73,6 +73,7 @@ function mapToAttendee(raw: any): Attendee {
 export const AttendeeService = {
     async getAttendeeOfEvent(event_id: String) {
 
+        console.log("ths us event i am serch for",event_id)
         const q = query(
             collection(db, "registerations"),
             where("eventId", "==", event_id)
@@ -84,16 +85,18 @@ export const AttendeeService = {
             return null;
         }
         const user_ids_of_attendees: string[] = querySnapshot.docs.map(doc => doc.data().userId);
+        console.log("these are the user idsss",user_ids_of_attendees);
 
-        let attendees: Attendee[] = [];
 
-         user_ids_of_attendees.forEach(async (x) => {
-
-            const docRef = doc(db, "attendee", x);
+       const attendees: Attendee[] = await Promise.all(
+        user_ids_of_attendees.map(async (x) => {
+            const docRef = doc(db, "attendees", x);
             const docSnap = await getDoc(docRef);
-            attendees.push(mapToAttendee(docSnap.data()));
+            return mapToAttendee(docSnap.data());
         })
+    );
 
+     
         return attendees;
 
     }

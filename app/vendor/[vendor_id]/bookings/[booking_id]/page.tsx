@@ -35,8 +35,9 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
 
     // Fetch data
     const raw_booking = await BookingServices.getBookingById(booking_id);
-    const organizer = await OrganizerService.getOrganizerById(raw_booking?.organizerId || '');
-    // const vendor = await OrganizerService.getOrganizerById(vendor_id || '');
+    console.log(raw_booking?.organizerId);
+    const organizer = await OrganizerService.getOrganizerById(raw_booking?.organizerId.substring(2) || '');
+    const vendor = await OrganizerService.getOrganizerById(vendor_id || '');
     const event = await EventService.getEventByID(raw_booking?.eventId || '');
 
     return (
