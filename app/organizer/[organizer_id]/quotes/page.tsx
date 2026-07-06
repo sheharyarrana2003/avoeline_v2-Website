@@ -42,12 +42,12 @@ const getStatusBadge = (status: string) => {
 
 const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-        'negotiating': 'NEGOTIATING',
-        'new': 'NEW',
+        'quote_sent': 'QUOTE SENT',
         'quote_accepted': 'ACCEPTED',
         'confirmed': 'CONFIRMED',
         'completed': 'COMPLETED',
-        'quote_received': 'NEW',
+        'quote_received': 'QUOTE RECEIVED',
+        'cancelled': 'QUOTE CANCELLED'
     };
     return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
 };
@@ -87,7 +87,7 @@ export default async function QuoteManagementPage({
     const activeTab = (awaitedSearchParams?.tab as string) || "active";
     const raw_bookings = await BookingServices.getAllBookingsOfOrganizer(organizer_id) || [];
     console.log("these are the bookings ,  ", raw_bookings)
-    const activeStatuses = ['quote_requested','quote_received', 'quote_sent', 'negotiating', 'new', 'quote_accepted', 'confirmed'];
+    const activeStatuses = ['quote_requested', 'quote_sent',  'quote_accepted','inprogress' ,'confirmed'];
     const pastStatuses = ['completed', 'cancelled'];
 
     const activeQuotes = raw_bookings.filter((b: any) =>
@@ -146,7 +146,7 @@ export default async function QuoteManagementPage({
                     <p className="text-sm text-gray-500 mt-1">Review vendor quotes</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="">
 
 
                     {/* ================= RIGHT COLUMN: Quote List & Detail ================= */}
@@ -370,21 +370,12 @@ export default async function QuoteManagementPage({
                                                     <div className="flex gap-3">
                                                         <div className="w-2 h-2 rounded-full bg-gray-300 mt-2 flex-shrink-0" />
                                                         <div>
-                                                            <p className="text-xs font-bold text-gray-900">{businessName}</p>
                                                             <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                                                                "We've reduced the staff costs for a hackathon setup. Best we can do."
+                                                                "No history"
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-3">
-                                                        <div className="w-2 h-2 rounded-full bg-black mt-2 flex-shrink-0" />
-                                                        <div>
-                                                            <p className="text-xs font-bold text-gray-900">You (Organizer)</p>
-                                                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                                                                Requested a 10% discount for non-profit event.
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                                                   
                                                 </>
                                             )}
 
@@ -401,12 +392,12 @@ export default async function QuoteManagementPage({
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-100">
-                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                                    {/* <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
                                         Message Vendor
-                                    </button>
+                                    </button> */}
                                     <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />

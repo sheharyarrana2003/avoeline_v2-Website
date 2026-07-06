@@ -5,6 +5,7 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import { notFound } from "next/navigation";
 import PrepareQuoteClient from "@/src/features/bookings/shared_components/VendorPrepBookingClient";
+import { BookingData } from "@/src/features/bookings/types";
 
 
 export default async function PrepareQuotePage({ 
@@ -15,10 +16,10 @@ export default async function PrepareQuotePage({
     const { vendor_id, prep_quote_id } = await params;
     
     // Fetch booking data on server
-    const booking = await BookingServices.getBookingById(prep_quote_id);
+    const booking : BookingData|null = await BookingServices.getBookingById(prep_quote_id);
     
     if (!booking) {
-        notFound();
+        console.log()
     }
     
     // Fetch event details

@@ -2,8 +2,11 @@
 // Fully Server Component - Add New Service
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { PricingPackage, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import { auth, db } from '@/data/db'
 
 // Helper to get category options from vendor
 const getCategoryOptions = (categories: string[]) => {
@@ -39,63 +42,29 @@ const PRICING_MODELS = [
     { id: 'quote_required', label: 'Quote Required' },
 ];
 
-export default async function AddNewServicePage({ 
-    params 
-}: { 
-    params: Promise<{ vendor_id: string }> 
+export default async function AddNewServicePage({
+    params
+}: {
+    params: Promise<{ vendor_id: string }>
 }) {
     const { vendor_id } = await params;
-    
+
     // Fetch vendor data for categories
     const vendor = await EventVendorService.getVendorById(vendor_id);
     if (!vendor) {
         notFound();
     }
-    
+
     const serviceCategories = vendor?.serviceCategories || [];
     const categoryOptions = getCategoryOptions(serviceCategories);
     const businessName = vendor?.businessName || "Vendor";
 
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
-            
-            {/* Top Navigation */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-8">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <span className="font-bold text-gray-900">AVOELINE</span>
-                        </div>
-                        
-                        <nav className="hidden md:flex items-center gap-6">
-                            <Link href={`/vendor/${vendor_id}`} className="text-sm text-gray-500 hover:text-gray-900">Dashboard</Link>
-                            <Link href={`/vendor/${vendor_id}/bookings`} className="text-sm text-gray-500 hover:text-gray-900">Bookings</Link>
-                            <Link href={`/vendor/${vendor_id}/services`} className="text-sm font-bold text-gray-900 border-b-2 border-black pb-5 pt-5">Services</Link>
-                            <Link href={`/vendor/${vendor_id}/earnings`} className="text-sm text-gray-500 hover:text-gray-900">Earnings</Link>
-                            <Link href={`/vendor/${vendor_id}/profile`} className="text-sm text-gray-500 hover:text-gray-900">Profile</Link>
-                        </nav>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                        <button className="relative text-gray-400 hover:text-gray-600">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                        </button>
-                        <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden">
-                            <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
-                        </div>
-                    </div>
-                </div>
-            </div>
 
+        
             <div className="max-w-2xl mx-auto px-4 md:px-8 py-8">
-                
+
                 {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
                     <Link href={`/vendor/${vendor_id}/services`} className="hover:text-gray-700">Services</Link>
@@ -105,11 +74,11 @@ export default async function AddNewServicePage({
 
                 {/* Modal-like Card */}
                 <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-8">
-                    
+
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
                         <h1 className="text-xl font-bold text-gray-900">Add New Service</h1>
-                        <Link 
+                        <Link
                             href={`/vendor/${vendor_id}/services`}
                             className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition"
                         >
@@ -140,7 +109,6 @@ export default async function AddNewServicePage({
                                 <div className="relative">
                                     <select
                                         name="category"
-                                        required
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                                     >
                                         {categoryOptions.map((opt) => (
@@ -181,10 +149,10 @@ export default async function AddNewServicePage({
                             <div className="flex gap-3">
                                 {PRICING_MODELS.map((model) => (
                                     <label key={model.id} className="flex-1">
-                                        <input 
-                                            type="radio" 
-                                            name="pricingModel" 
-                                            value={model.id} 
+                                        <input
+                                            type="radio"
+                                            name="pricingModel"
+                                            value={model.id}
                                             defaultChecked={model.id === 'per_person'}
                                             className="peer sr-only"
                                         />
@@ -252,9 +220,9 @@ export default async function AddNewServicePage({
                             <div className="flex flex-wrap gap-2">
                                 {['Vegetarian', 'Vegan', 'Gluten-Free', 'Halal', 'Nut-Free', 'Spice Level'].map((opt) => (
                                     <label key={opt} className="cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
-                                            name="customizations" 
+                                        <input
+                                            type="checkbox"
+                                            name="customizations"
                                             value={opt.toLowerCase().replace(' ', '_')}
                                             className="peer sr-only"
                                         />
@@ -276,7 +244,7 @@ export default async function AddNewServicePage({
                                     </svg>
                                     <span className="text-[10px] text-gray-400">Upload</span>
                                 </div>
-                                
+
                                 {/* Mock uploaded images */}
                                 <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200">
                                     <div className="w-full h-full bg-gradient-to-br from-orange-200 to-red-300" />
@@ -300,7 +268,7 @@ export default async function AddNewServicePage({
 
                         {/* Action Buttons */}
                         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                            <Link 
+                            <Link
                                 href={`/vendor/${vendor_id}/services`}
                                 className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
                             >
@@ -323,7 +291,7 @@ export default async function AddNewServicePage({
 // Server Action
 async function createServiceAction(formData: FormData) {
     'use server';
-    
+
     const vendorId = formData.get('vendorId') as string;
     const serviceName = formData.get('serviceName') as string;
     const category = formData.get('category') as string;
@@ -332,26 +300,28 @@ async function createServiceAction(formData: FormData) {
     const price = parseFloat(formData.get('price') as string) || 0;
     const minOrder = parseInt(formData.get('minOrder') as string) || 1;
     const terms = formData.get('terms') as string;
-    
+
     const inclusions = formData.getAll('inclusions') as string[];
     const customizations = formData.getAll('customizations') as string[];
-    
-    const payload = {
-        vendorId,
-        name: serviceName,
-        category,
-        description,
-        pricingModel,
-        price,
-        minOrder,
-        inclusions,
-        customizations,
-        terms,
-        status: 'active',
+
+    const payload: PricingPackage = {
+        packageId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
+        name: formData.get('packageName') as string || formData.get('serviceName') as string, // Fallbacks handled gently
+        description: formData.get('description') as string,
+        price: parseFloat(formData.get('price') as string) || 0,
+        minOrder: parseInt(formData.get('minOrder') as string) || 1,
+
+        // formData.getAll() correctly handles multiple inputs with the same name attribute
+        inclusions: formData.getAll('inclusions') as string[],
+        customizationOptions: formData.getAll('customizations') as string[],
     };
-    
-    // TODO: Call API to create service
-    console.log('Creating service:', payload);
-    
+
+    const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
+    vendor?.pricingPackages.push(payload);
+
+    const docRef = doc(db, "vendor",vendorId);
+    await setDoc(docRef,{...vendor})
+
     // Redirect back to services page
+    redirect(`/vendor/${vendorId}/services`);
 }

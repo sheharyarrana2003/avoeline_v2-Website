@@ -85,40 +85,16 @@ export default function PrepareQuoteClient({
     const [saveAsPackage, setSaveAsPackage] = useState(false);
     
     // Initialize items from existing quote or empty
-    const [items, setItems] = useState<QuoteItem[]>(() => {
-        if (existingQuote?.breakdown && existingQuote.breakdown.length > 0) {
-            return existingQuote.breakdown.map((b, i) => ({
-                id: `existing-${i}`,
-                description: b.item,
-                quantity: b.quantity,
-                unitPrice: b.unitPrice,
-            }));
-        }
-        return [
-            { id: '1', description: 'Buffet Main Course (Premium)', quantity: requirements.guestCount || 150, unitPrice: 850 },
-            { id: '2', description: 'Dessert Assortment (3 varieties)', quantity: requirements.guestCount || 150, unitPrice: 250 },
-            { id: '3', description: 'Service Staff (Uniformed)', quantity: 10, unitPrice: 1500 },
-            { id: '4', description: 'Event Setup & Cleanup', quantity: 1, unitPrice: 5000 },
-        ];
-    });
+    const [items, setItems] = useState<QuoteItem[]>([]);
     
     const [taxRate, setTaxRate] = useState(15);
     const [discountAmount, setDiscountAmount] = useState(existingQuote?.discount || 0);
     const [platformFeePercent] = useState(2.5);
     
-    const [customizations, setCustomizations] = useState<CustomizationOption[]>([
-        { id: 'vegetarian', label: 'Vegetarian', selected: true },
-        { id: 'vegan', label: 'Vegan', selected: false },
-        { id: 'halal', label: 'Halal', selected: true },
-        { id: 'gluten-free', label: 'Gluten-Free', selected: false },
-        { id: 'nut-free', label: 'Nut-Free', selected: false },
-    ]);
+    const [customizations, setCustomizations] = useState<CustomizationOption[]>([]);
     const [customNotes, setCustomNotes] = useState("");
     
-    const [terms, setTerms] = useState(existingQuote?.terms || `1. 50% advance payment required to confirm booking.
-2. Cancellation within 48 hours of event will result in 100% loss of advance.
-3. Final number of guests must be shared at least 12 hours prior to the event date.
-4. Prices are subject to government regulations at the time of invoicing.`);
+    const [terms, setTerms] = useState(existingQuote?.terms);
     
     const [validityDate, setValidityDate] = useState(() => {
         if (existingQuote?.validity) {
@@ -129,12 +105,9 @@ export default function PrepareQuoteClient({
         return date.toISOString().split('T')[0];
     });
     
-    const [internalNotes, setInternalNotes] = useState("Only visible to your team.");
+    const [internalNotes, setInternalNotes] = useState("");
     
-    const [supportingDocs, setSupportingDocs] = useState<SupportingDoc[]>([
-        { id: '1', name: 'Sample_Menu.pdf', type: 'pdf' },
-        { id: '2', name: 'Portfolio.zip', type: 'zip' },
-    ]);
+    const [supportingDocs, setSupportingDocs] = useState<SupportingDoc[]>([    ]);
 
     // --- Computed Values ---
     const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);

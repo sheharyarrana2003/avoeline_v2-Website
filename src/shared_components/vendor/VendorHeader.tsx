@@ -1,5 +1,6 @@
 "use client";
 
+import { CurrentUserData } from "@/src/services/models/user.type";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,10 +11,10 @@ interface UserProp {
     email: string;
 }
 
-export function VendorHeader({ user }: { user: UserProp }) {
+export function VendorHeader({ user }: { user: CurrentUserData }) {
     const current_tab = usePathname();
     
-    const basePath = `/vendor/${user.id}`;
+    const basePath = `/vendor/${user.roleId}`;
     const tabs = ['Dashboard','Quotes','Services','Bookings'];
     
 

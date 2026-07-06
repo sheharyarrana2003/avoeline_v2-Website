@@ -282,9 +282,9 @@ export default async function VendorQuotesPage({
                             const statusBadge = getStatusBadge(booking?.status);
                             
                             return (
-                                <Link
-                                href={`/vendor/${vendor_id}/quotes/${booking.bookingId}`}
-                                 key={booking?.bookingId || index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
+                                <div>
+                                {/* href={`/vendor/${vendor_id}/quotes/${booking.bookingId}`}
+                                 key={booking?.bookingId || index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"> */}
                                     
                                     {/* Card Header */}
                                     <div className="flex items-start justify-between mb-4">
@@ -348,7 +348,7 @@ export default async function VendorQuotesPage({
                                             Decline
                                         </button>
                                     </div>
-                                </Link>
+                                </div>
                             );
                         })}
                     </div>

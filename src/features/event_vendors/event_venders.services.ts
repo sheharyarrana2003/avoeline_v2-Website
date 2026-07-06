@@ -147,7 +147,8 @@ export const EventVendorService = {
         if (querySnapshot.empty) {
             return null;
         }
-        return querySnapshot.docs[0].data();
+        const data = querySnapshot.docs[0].data();
+        return mapToVendorData(data);
 
     },
     async getAllVendors() {
