@@ -1,8 +1,10 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { BookingData } from "@/src/features/bookings/types";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import Link from "next/link";
+import { AcceptButton } from "./Acceptbutton";
 
 const formatCurrency = (amount: number, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
@@ -70,6 +72,19 @@ const StarRating = ({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
         </div>
     );
 };
+
+const accept_quote = async (booking : BookingData)=>{
+    'use server'
+        const new_status_history ={
+            status : 'quote_accepted',
+             timestamp: new Date().toISOString()
+        }
+
+        booking?.statusHistory.push(new_status_history);
+        booking.status = 'quote_accepted'
+        await BookingServices.update_booking(booking);
+        console.log("This booking is accepteddd");
+}
 
 
 export default async function QuoteManagementPage({
@@ -398,18 +413,21 @@ export default async function QuoteManagementPage({
                                         </svg>
                                         Message Vendor
                                     </button> */}
-                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                                    <Link href={`/organizer/${organizer_id}/booking-details/${selectedQuote.bookingId}/counter-offer`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                         </svg>
                                         Counter Offer
-                                    </button>
-                                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-black text-white py-2.5 px-5 rounded-full text-sm font-semibold hover:bg-gray-800 transition ml-auto">
+                                    </Link>
+                                    {/* <button 
+                                    onClick={()=>{accept_quote(selectedQuote)}}
+                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-black text-white py-2.5 px-5 rounded-full text-sm font-semibold hover:bg-gray-800 transition ml-auto">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                         Accept Quote
-                                    </button>
+                                    </button> */}
+                                    <AcceptButton quote={selectedQuote} accept_quote={accept_quote} />
                                 </div>
                             </div>
                         )}
@@ -450,3 +468,5 @@ export default async function QuoteManagementPage({
         </div>
     );
 }
+
+

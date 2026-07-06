@@ -398,8 +398,15 @@ export const BookingServices = {
 
     await setDoc(docRef,{...booking_object});
     console.log("populated the booking -> ",id_generated);
-  }
+  },
 
+  async update_booking(updated_booking:BookingData|null){
+    if(!updated_booking){
+      return;
+    }
+    const docRef = doc(db,"bookings",updated_booking.bookingId);
+    await setDoc(docRef,{...updated_booking});
+  }
 
 }
 

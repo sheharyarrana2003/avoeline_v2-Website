@@ -8,8 +8,9 @@ export default async function OrganizerLayout({
     children: React.ReactNode
 }) {
 
-
+console.log("LAYOUT HIT")
     const u = await AuthService.getCurrentUser();
+    console.log("After auth service LAYOUT ")
 
     return(
         <>

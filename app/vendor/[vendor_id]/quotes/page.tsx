@@ -282,7 +282,7 @@ export default async function VendorQuotesPage({
                             const statusBadge = getStatusBadge(booking?.status);
                             
                             return (
-                                <div>
+                                <div key={booking?.bookingId}>
                                 {/* href={`/vendor/${vendor_id}/quotes/${booking.bookingId}`}
                                  key={booking?.bookingId || index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"> */}
                                     

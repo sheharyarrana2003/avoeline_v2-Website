@@ -73,10 +73,12 @@ const formatDate = (dateString: string) => {
 
 export default function PrepareQuoteClient({ 
     vendorId, 
-    initialData 
+    initialData,
+    handling_prep_quote
 }: { 
     vendorId: string; 
-    initialData: InitialData 
+    initialData: InitialData ,
+    handling_prep_quote : any
 }) {
     const { requirements, existingQuote, currency, eventTitle, organizerName, bookingId } = initialData;
 
@@ -175,7 +177,7 @@ export default function PrepareQuoteClient({
         
         // TODO: Submit to API
         console.log("Submitting quote:", payload);
-        alert(`Quote submitted! Total: ${formatCurrency(totalAmount, currency)}`);
+       await handling_prep_quote(payload);
     };
 
     const handleSaveDraft = () => {
