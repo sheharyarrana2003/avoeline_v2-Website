@@ -9,12 +9,12 @@ import { AttendeeCard } from "./AttendeeCard";
 import { Mail, MessageSquare, Download, CheckCircle, Trash2, Calendar, Ticket } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-interface AttendeeClientSideProp {
+export interface AttendeeClientSideProp {
     a: Attendee,
     user: User
 }
 
-export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[] }) {
+export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[]|[] }) {
     const [selected_ids, set_selected_ids] = useState<String[]>([]);
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();

@@ -11,7 +11,7 @@ import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
 import { CurrentUserData, User } from "@/src/services/models/user.type";
 import { revalidatePath } from "next/cache";
-import {seedEvents} from '@/seeding'
+import { seedEvents } from '@/seeding'
 interface signup_with_email_form_data {
     name: string;
     email: string;
@@ -48,7 +48,7 @@ const converting_to_current_user_data = async (user: User) => {
 
     const role_object = docSnap.data() || {};
     const targetKey = `${table_name}id`.toLowerCase();
-    let role_id= "didnt-exist";
+    let role_id = "didnt-exist";
 
     const actualKey = Object.keys(role_object).find(
         key => key.toLowerCase() === targetKey
@@ -70,18 +70,57 @@ const converting_to_current_user_data = async (user: User) => {
     }
 }
 
+
+
+
 export const AuthService = {
     //! hardcoded data
     getCurrentUser: async () => {
-        const user = await fetching_data_from_db();
+        const cookieStore = await cookies();
+        let user_data = cookieStore.get('userData');
+        let currentUser: CurrentUserData = {
+            userId: "unknown",
+            email: "unknwon@unknowngmail.com",
+            userType: "attendee",
+            name: "unknown",
+            roleId: "unknown"
+        };
+        if (user_data?.value) {
+            console.log("khali user nahi ha",user_data?.value);
+            try {
+                currentUser = JSON.parse(user_data?.value);
+            } catch (error) {
+                console.log("cannot check user - failed in middle ware");
+            }
+        }else{
+            console.log("khali user kio de rahe bhai?");
+        }
+        console.log("thisis what i a read from cookie",currentUser);
+        return currentUser;
 
-        return converting_to_current_user_data(user);
+
+       
     },
 
     getCurrentVendor: cache(async () => {
-          const user = await fetching_data_from_db();
+        const cookieStore = await cookies();
+        let user_data = cookieStore.get('userData');
+        let currentUser: CurrentUserData = {
+            userId: "unknown",
+            email: "unknwon@unknowngmail.com",
+            userType: "attendee",
+            name: "unknown",
+            roleId: "unknown"
+        };
+        if (user_data?.value) {
+            try {
+                currentUser = JSON.parse(user_data?.value);
+            } catch (error) {
+                console.log("cannot check user - failed in middle ware");
+            }
+        }
+        return currentUser;
 
-        return converting_to_current_user_data(user);
     }),
 
     async loginWithEmail(email: string, password: string) {
@@ -118,9 +157,15 @@ export const AuthService = {
                 maxAge: 3600,
                 httpOnly: true,
             });
-            const current_user  = await AuthService.getCurrentUser();
 
-             cookieStore.set("userData", JSON.stringify(current_user), {
+            const obj = await adminAuth.verifyIdToken(token);
+            const user_from_obj = await UserService.getUserById(obj.uid);
+            const current_user = await converting_to_current_user_data(user_from_obj);
+
+            console.log("thos is before seeting the cookie");
+            console.log(current_user);
+
+            cookieStore.set("userData", JSON.stringify(current_user), {
                 path: "/",
                 maxAge: 3600,
                 httpOnly: true,
@@ -175,9 +220,11 @@ export const AuthService = {
                 maxAge: 3600,
                 httpOnly: true,
             });
-            const current_user  = await AuthService.getCurrentUser();
+            const obj = await adminAuth.verifyIdToken(token);
+            const user_from_obj = await UserService.getUserById(obj.uid);
+            const current_user = converting_to_current_user_data(user_from_obj);
 
-             cookieStore.set("userData", JSON.stringify(current_user), {
+            cookieStore.set("userData", JSON.stringify(current_user), {
                 path: "/",
                 maxAge: 3600,
                 httpOnly: true,
