@@ -1,22 +1,18 @@
 import { AnalyticsService } from "@/src/services/anaylService";
-import { AuthService } from "@/src/features/auth/authService";
 import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
-
 import { DailyAnalyticsRegistration } from "@/src/features/analytics/types";
+
+// ─── Helpers (server-side only) ───────────────────────────────────────────────
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 1,
 });
 
 function formatCurrency(value: number) {
-    if (value >= 1000000) {
-        return `PKR ${currencyFormatter.format(value / 1000000)}M`;
-    }
-
-    if (value >= 1000) {
-        return `PKR ${currencyFormatter.format(value / 1000)}K`;
-    }
-
+    if (value >= 1_000_000)
+        return `PKR ${currencyFormatter.format(value / 1_000_000)}M`;
+    if (value >= 1_000)
+        return `PKR ${currencyFormatter.format(value / 1_000)}K`;
     return `PKR ${value}`;
 }
 
@@ -31,17 +27,27 @@ function buildChartPoints(data: DailyAnalyticsRegistration[]) {
 
     return data
         .map((item, index) => {
-            const x = paddingX + (index / Math.max(data.length - 1, 1)) * (width - paddingX * 2);
-            const y = height - paddingY - ((item.registrations - min) / spread) * (height - paddingY * 2);
-
+            const x =
+                paddingX +
+                (index / Math.max(data.length - 1, 1)) * (width - paddingX * 2);
+            const y =
+                height -
+                paddingY -
+                ((item.registrations - min) / spread) * (height - paddingY * 2);
             return `${x},${y}`;
         })
         .join(" ");
 }
 
-export default async function AnalyticsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
-    const resolvedParams = await params;
-    const organizer_id = resolvedParams.organizer_id;
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function AnalyticsPage({
+    params,
+}: {
+    params: Promise<{ organizer_id: string }>;
+}) {
+    const { organizer_id } = await params;
+
     const [
         totalEvents,
         profit,
@@ -49,6 +55,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
         avgSatisfaction,
         dailyRegistrations,
         eventPerformance,
+        dateRange,
     ] = await Promise.all([
         AnalyticsService.getAnalyticsTotalEvents(organizer_id),
         AnalyticsService.getAnalyticsProfit(organizer_id),
@@ -56,6 +63,7 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
         AnalyticsService.getAnalyticsAvgSatisfaction(organizer_id),
         AnalyticsService.getAnalyticsDailyRegistrations(organizer_id),
         AnalyticsService.getAnalyticsEventPerformance(organizer_id),
+        AnalyticsService.getAnalyticsDateRange(organizer_id),
     ]);
 
     const metrics = [
@@ -70,6 +78,8 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
     return (
         <main className="min-h-screen bg-white px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl space-y-6">
+
+                {/* ── Header ───────────────────────────────────────────────── */}
                 <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
@@ -79,13 +89,13 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
                             Data insights and performance metrics
                         </p>
                     </div>
-                    <p className="text-sm font-bold text-slate-500">Mar 1 - Mar 31, 2026</p>
+                    <p className="text-sm font-bold text-slate-500">{dateRange}</p>
                 </header>
 
+                {/* ── Metric Cards ──────────────────────────────────────────── */}
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {metrics.map((metric) => {
                         const Icon = metric.icon;
-
                         return (
                             <article
                                 key={metric.label}
@@ -99,20 +109,29 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
                                         <Icon size={18} />
                                     </span>
                                 </div>
-                                <p className="text-3xl font-extrabold text-slate-950">{metric.value}</p>
+                                <p className="text-3xl font-extrabold text-slate-950">
+                                    {metric.value}
+                                </p>
                                 {metric.helper && (
-                                    <p className="mt-3 text-xs font-bold text-slate-400">{metric.helper}</p>
+                                    <p className="mt-3 text-xs font-bold text-slate-400">
+                                        {metric.helper}
+                                    </p>
                                 )}
                             </article>
                         );
                     })}
                 </section>
 
+                {/* ── Daily Registrations Chart ─────────────────────────────── */}
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-base font-extrabold text-slate-950">Daily Registrations</h2>
-                            <p className="mt-1 text-xs font-semibold text-slate-400">March 2026 registration volume</p>
+                            <h2 className="text-base font-extrabold text-slate-950">
+                                Daily Registrations
+                            </h2>
+                            <p className="mt-1 text-xs font-semibold text-slate-400">
+                                Registration volume over the last 30 days
+                            </p>
                         </div>
                         <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#7454f6]">
                             <span className="size-2 rounded-full bg-[#7454f6]" />
@@ -120,99 +139,155 @@ export default async function AnalyticsPage({ params }: { params: Promise<{ even
                         </div>
                     </div>
 
-                    <div className="h-[320px] overflow-hidden">
-                        <svg viewBox="0 0 720 280" className="h-full w-full" role="img" aria-label="Daily registrations line chart">
-                            {[56, 112, 168, 224].map((y) => (
-                                <line key={y} x1="22" x2="698" y1={y} y2={y} stroke="#edf0f4" strokeWidth="1" />
-                            ))}
-                            <polyline
-                                fill="none"
-                                points={chartPoints}
-                                stroke="#7454f6"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="5"
-                            />
-                            {dailyRegistrations.map((item, index) => {
-                                const x = 22 + (index / Math.max(dailyRegistrations.length - 1, 1)) * (720 - 44);
-
-                                return (
-                                    <text
-                                        key={item.label}
-                                        x={x}
-                                        y="268"
-                                        textAnchor="middle"
-                                        className="fill-slate-400 text-[13px] font-bold"
-                                    >
-                                        {item.label}
-                                    </text>
-                                );
-                            })}
-                        </svg>
-                    </div>
+                    {dailyRegistrations.length === 0 ? (
+                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-slate-400">
+                            No registration data available yet.
+                        </div>
+                    ) : (
+                        <div className="h-[320px] overflow-hidden">
+                            <svg
+                                viewBox="0 0 720 280"
+                                className="h-full w-full"
+                                role="img"
+                                aria-label="Daily registrations line chart"
+                            >
+                                {[56, 112, 168, 224].map((y) => (
+                                    <line
+                                        key={y}
+                                        x1="22"
+                                        x2="698"
+                                        y1={y}
+                                        y2={y}
+                                        stroke="#edf0f4"
+                                        strokeWidth="1"
+                                    />
+                                ))}
+                                <polyline
+                                    fill="none"
+                                    points={chartPoints}
+                                    stroke="#7454f6"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="5"
+                                />
+                                {dailyRegistrations.map((item, index) => {
+                                    const x =
+                                        22 +
+                                        (index /
+                                            Math.max(dailyRegistrations.length - 1, 1)) *
+                                        (720 - 44);
+                                    return (
+                                        <text
+                                            key={item.label}
+                                            x={x}
+                                            y="268"
+                                            textAnchor="middle"
+                                            className="fill-slate-400 text-[13px] font-bold"
+                                        >
+                                            {item.label}
+                                        </text>
+                                    );
+                                })}
+                            </svg>
+                        </div>
+                    )}
                 </section>
 
+                {/* ── Event Performance Table ───────────────────────────────── */}
                 <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                     <div className="flex items-center justify-between border-b border-slate-100 p-6">
                         <div className="flex items-center gap-3">
                             <span className="flex size-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
                                 <Activity size={18} />
                             </span>
-                            <h2 className="text-base font-extrabold text-slate-950">Event Performance</h2>
+                            <h2 className="text-base font-extrabold text-slate-950">
+                                Event Performance
+                            </h2>
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[860px] border-collapse">
-                            <thead className="bg-slate-50">
-                                <tr className="text-left">
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Event Name</th>
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Date</th>
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Registrations</th>
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Profit</th>
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Revenue</th>
-                                    <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">Avg. Satisfaction</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {eventPerformance.map((event) => (
-                                    <tr key={event.id} className="border-t border-slate-100">
-                                        <td className="px-6 py-5">
-                                            <p className="text-sm font-extrabold text-slate-950">{event.eventName}</p>
-                                            <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-                                                {event.eventType}
-                                            </p>
-                                        </td>
-                                        <td className="px-6 py-5 text-sm font-bold text-slate-500">{event.date}</td>
-                                        <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
-                                            {event.registrations.toLocaleString("en-US")}
-                                        </td>
-                                        <td className="px-6 py-5 text-sm font-extrabold text-emerald-600">
-                                            {formatCurrency(event.profit)}
-                                        </td>
-                                        <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
-                                            {formatCurrency(event.revenue)}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-sm font-extrabold text-slate-950">
-                                                    {event.avgSatisfaction.toFixed(1)}
-                                                </span>
-                                                <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-                                                    <div
-                                                        className="h-full rounded-full bg-[#7454f6]"
-                                                        style={{ width: `${(event.avgSatisfaction / 5) * 100}%` }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </td>
+                    {eventPerformance.length === 0 ? (
+                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-slate-400">
+                            No events found for this organizer.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[860px] border-collapse">
+                                <thead className="bg-slate-50">
+                                    <tr className="text-left">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Event Name
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Date
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Registrations
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Profit
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Revenue
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                            Avg. Satisfaction
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {eventPerformance.map((event) => (
+                                        <tr
+                                            key={event.id}
+                                            className="border-t border-slate-100"
+                                        >
+                                            <td className="px-6 py-5">
+                                                <p className="text-sm font-extrabold text-slate-950">
+                                                    {event.eventName}
+                                                </p>
+                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+                                                    {event.eventType}
+                                                </p>
+                                            </td>
+                                            <td className="px-6 py-5 text-sm font-bold text-slate-500">
+                                                {event.date}
+                                            </td>
+                                            <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
+                                                {event.registrations.toLocaleString("en-US")}
+                                            </td>
+                                            <td className="px-6 py-5 text-sm font-extrabold text-emerald-600">
+                                                {formatCurrency(event.profit)}
+                                            </td>
+                                            <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
+                                                {formatCurrency(event.revenue)}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-sm font-extrabold text-slate-950">
+                                                        {event.avgSatisfaction > 0
+                                                            ? event.avgSatisfaction.toFixed(1)
+                                                            : "—"}
+                                                    </span>
+                                                    {event.avgSatisfaction > 0 && (
+                                                        <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                                                            <div
+                                                                className="h-full rounded-full bg-[#7454f6]"
+                                                                style={{
+                                                                    width: `${(event.avgSatisfaction / 5) * 100}%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </section>
             </div>
         </main>
-    )
+    );
 }

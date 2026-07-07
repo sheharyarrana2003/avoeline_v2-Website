@@ -1,238 +1,484 @@
-import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import {
     AnalyticsEventPerformance,
     AnalyticsMetric,
-    DailyAnalyticsRegistration
+    DailyAnalyticsRegistration,
 } from "@/src/features/analytics/types";
-//! hardcoded data
+import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
+import { adminDb } from "@/data/admin_db";
 
-import {mockEvents} from "@/app/mockdata/events.mock"
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+function formatCurrency(value: number): string {
+    if (value >= 1_000_000) return `PKR ${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `PKR ${(value / 1_000).toFixed(0)}k`;
+    return `PKR ${value}`;
+}
+
+function toDate(val: any): Date {
+    if (!val) return new Date(0);
+    if (typeof val.toDate === "function") return val.toDate();
+    return new Date(val);
+}
+
+function startOfDay(d: Date): Date {
+    const r = new Date(d);
+    r.setHours(0, 0, 0, 0);
+    return r;
+}
+
+function endOfDay(d: Date): Date {
+    const r = new Date(d);
+    r.setHours(23, 59, 59, 999);
+    return r;
+}
+
+// ─── AnalyticsService ─────────────────────────────────────────────────────────
 
 export const AnalyticsService = {
 
+    // ── Dashboard Stats ───────────────────────────────────────────────────────
+
     async getDashboardStat(organizerId: string) {
-        void organizerId;
+        const eventsSnap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        let activeEvents = 0;
+        let totalRevenue = 0;
+        let totalRating = 0;
+        let ratedEventCount = 0;
+        let totalRegistrations = 0;
+
+        eventsSnap.forEach((doc) => {
+            const data = doc.data();
+            const status = (data.status || "").toLowerCase();
+            if (["active", "ongoing", "published", "registration_open"].includes(status)) {
+                activeEvents++;
+            }
+            const rev = data.analytics?.revenue ?? 0;
+            totalRevenue += rev;
+            const regs = data.analytics?.registrations ?? 0;
+            totalRegistrations += regs;
+            if (data.analytics?.avgRating) {
+                totalRating += data.analytics.avgRating;
+                ratedEventCount++;
+            }
+        });
+
+        const avgRating = ratedEventCount > 0
+            ? parseFloat((totalRating / ratedEventCount).toFixed(1))
+            : 0;
 
         return {
-            activeEvents: 15,
-            registrations: "1,247",
-            revenue: "PKR 8450k",
-            avgRating: 4.8
+            activeEvents,
+            registrations: totalRegistrations.toLocaleString("en-US"),
+            revenue: formatCurrency(totalRevenue),
+            avgRating,
         };
     },
 
-    async getTodayEvents(organizerId: string) {
-        void organizerId;
+    // ── Today's Events ────────────────────────────────────────────────────────
 
+    async getTodayEvents(organizerId: string): Promise<DashboardEvent[]> {
+        const now = new Date();
+        const todayStart = startOfDay(now);
+        const todayEnd = endOfDay(now);
+
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        const results: DashboardEvent[] = [];
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const start = toDate(data.eventStartTime);
+            const end = toDate(data.eventEndTime);
+            // Show events that are happening today (overlaps with today's window)
+            if (start <= todayEnd && end >= todayStart) {
+                const rawStatus = (data.status || "draft").toUpperCase();
+                const statusMap: Record<string, DashboardEvent["status"]> = {
+                    DRAFT: "DRAFT",
+                    PUBLISHED: "PUBLISHED",
+                    REGISTRATION_OPEN: "REGISTERATION_OPEN",
+                    ONGOING: "ACTIVE",
+                    COMPLETED: "COMPLETED",
+                    CANCELLED: "CANCELLED",
+                };
+                results.push({
+                    id: doc.id,
+                    organizerId: data.organizerId || organizerId,
+                    title: data.title || "Untitled Event",
+                    startDate: start,
+                    endDate: end,
+                    location: data.location?.venueName || data.location?.city || "—",
+                    registeredCount: data.analytics?.registrations ?? 0,
+                    maxCapacity: data.capacity?.totalSeats ?? 0,
+                    status: statusMap[rawStatus] ?? "DRAFT",
+                });
+            }
+        });
+
+        return results;
+    },
+
+    // ── Upcoming Events ───────────────────────────────────────────────────────
+
+    async getUpcomingEvents(organizerId: string): Promise<DashboardEvent[]> {
         const now = new Date();
 
-        const getTodayAt = (hours: number, minutes: number) => {
-            const d = new Date(now);
-            d.setHours(hours, minutes, 0, 0);
-            return d;
-        };
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
 
-        const getFutureDate = (daysAhead: number) => {
-            const d = new Date(now);
-            d.setDate(d.getDate() + daysAhead);
-            return d;
-        };
-
-        const e: DashboardEvent[] = [
-            {
-                id: "evt_001",
-                organizerId: "U001", // Linked to Dr. Sarah Khan (or your test user)
-                title: "TechVerse Hackathon Opening",
-                startDate: getTodayAt(9, 0),
-                endDate: getTodayAt(12, 0),
-                location: "Main Hall & Discord Server",
-                registeredCount: 385,
-                maxCapacity: 500,
-                status: "ACTIVE"
-            },
-            {
-                id: "evt_002",
-                organizerId: "U001",
-                title: "Generative AI Workshop",
-                startDate: getTodayAt(14, 30),
-                endDate: getTodayAt(16, 30),
-                location: "Conference Room B",
-                registeredCount: 84,
-                maxCapacity: 100,
-                status: "ACTIVE"
-            },
-            {
-                id: "evt_003",
-                organizerId: "U001",
-                title: "Product Launch '26",
-                startDate: getFutureDate(12),
-                endDate: getFutureDate(14),
-                location: "London, UK",
-                registeredCount: 385,
-                maxCapacity: 500,
-                status: "PUBLISHED"
+        const results: DashboardEvent[] = [];
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const start = toDate(data.eventStartTime);
+            if (start > now) {
+                const rawStatus = (data.status || "draft").toUpperCase();
+                const statusMap: Record<string, DashboardEvent["status"]> = {
+                    DRAFT: "DRAFT",
+                    PUBLISHED: "PUBLISHED",
+                    REGISTRATION_OPEN: "REGISTERATION_OPEN",
+                    ONGOING: "ACTIVE",
+                    COMPLETED: "COMPLETED",
+                    CANCELLED: "CANCELLED",
+                };
+                results.push({
+                    id: doc.id,
+                    organizerId: data.organizerId || organizerId,
+                    title: data.title || "Untitled Event",
+                    startDate: start,
+                    endDate: toDate(data.eventEndTime),
+                    location: data.location?.venueName || data.location?.city || "—",
+                    registeredCount: data.analytics?.registrations ?? 0,
+                    maxCapacity: data.capacity?.totalSeats ?? 0,
+                    status: statusMap[rawStatus] ?? "DRAFT",
+                });
             }
-        ]
-        return e;
+        });
 
+        // Sort ascending by start date, show the nearest first
+        results.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+        return results.slice(0, 5);
     },
 
-    async getUpcomingEvents(organizerId: string) {
+    // ── Recent Registrations ──────────────────────────────────────────────────
+
+    async getRecentReg(organizerId: string): Promise<RecentRegistration[]> {
+        // No orderBy — avoids composite index requirement; sort in memory
+        const snap = await adminDb
+            .collection("registerations")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        const allDocs: { doc: FirebaseFirestore.QueryDocumentSnapshot; createdAt: Date }[] = [];
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const createdAt = data.createdAt
+                ? (typeof data.createdAt.toDate === "function" ? data.createdAt.toDate() : new Date(data.createdAt))
+                : new Date(0);
+            allDocs.push({ doc, createdAt });
+        });
+
+        // Sort newest-first in memory — no composite index needed
+        allDocs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        const results: RecentRegistration[] = allDocs.slice(0, 10).map(({ doc }) => {
+            const data = doc.data();
+            const rawStatus = (data.status || "pending").toLowerCase();
+            const statusMap: Record<string, RecentRegistration["status"]> = {
+                confirmed: "CONFIRMED",
+                checked_in: "CONFIRMED",
+                attended: "CONFIRMED",
+                pending: "PENDING",
+                cancelled: "CANCELLED",
+                no_show: "CANCELLED",
+            };
+            return {
+                id: doc.id,
+                attendeeName: data.attendeeName || data.userName || "—",
+                eventName: data.eventName || data.eventTitle || "—",
+                amountPaid: data.payment?.amountPaid ?? data.finalPrice ?? 0,
+                status: statusMap[rawStatus] ?? "PENDING",
+            };
+        });
+
+        return results;
+    },
+
+
+
+    // ── Registration Trend (last 7 days) ─────────────────────────────────────
+
+    async getRegTrend(organizerId: string): Promise<DailyRegistrationTrend[]> {
         const now = new Date();
+        const sevenDaysAgo = new Date(now);
+        sevenDaysAgo.setDate(now.getDate() - 6);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
 
-        const getFutureDate = (daysAhead: number) => {
+        // Single-field where only — no composite index needed; date filter in memory
+        const snap = await adminDb
+            .collection("registerations")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        // Build a map for the last 7 days
+        const countMap: Record<string, number> = {};
+        const dayKeys: string[] = [];
+
+        for (let i = 6; i >= 0; i--) {
             const d = new Date(now);
-            d.setDate(d.getDate() + daysAhead);
-            return d;
-        };
+            d.setDate(now.getDate() - i);
+            const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+            countMap[key] = 0;
+            dayKeys.push(key);
+        }
 
-        const events: DashboardEvent[] = [
-            {
-                id: "evt_003",
-                organizerId,
-                title: "Product Launch '26",
-                startDate: getFutureDate(12),
-                endDate: getFutureDate(14),
-                location: "London, UK",
-                registeredCount: 385,
-                maxCapacity: 500,
-                status: "PUBLISHED"
-            },
-            {
-                id: "evt_004",
-                organizerId,
-                title: "Web3 Summit",
-                startDate: getFutureDate(28),
-                endDate: getFutureDate(29),
-                location: "Conference Room B",
-                registeredCount: 124,
-                maxCapacity: 500,
-                status: "REGISTERATION_OPEN"
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const createdAt = data.createdAt;
+            let dateStr = "";
+            if (createdAt) {
+                const d = typeof createdAt.toDate === "function"
+                    ? createdAt.toDate()
+                    : new Date(createdAt);
+                dateStr = d.toISOString().slice(0, 10);
             }
-        ];
+            if (dateStr in countMap) {
+                countMap[dateStr]++;
+            }
+        });
 
-        return events;
+        return dayKeys.map((key) => {
+            const d = new Date(key);
+            return {
+                day: dayNames[d.getUTCDay()],
+                registrations: countMap[key],
+            };
+        });
     },
 
-    async getRecentReg(organizerId: string) {
-        void organizerId;
+    // ── Analytics Page — Metrics ───────────────────────────────────────────────
 
-        const recentRegistrations: RecentRegistration[] = [
-            { id: "reg_1", attendeeName: "Arsalan Shah", eventName: "TechVerse Hack", amountPaid: 2500, status: "CONFIRMED" },
-            { id: "reg_2", attendeeName: "Fatima Zahra", eventName: "AI Workshop", amountPaid: 5000, status: "CONFIRMED" },
-            { id: "reg_3", attendeeName: "Zayn Malik", eventName: "UI/UX Bootcamp", amountPaid: 1200, status: "PENDING" },
-            { id: "reg_4", attendeeName: "Hina Altaf", eventName: "TechVerse Hack", amountPaid: 2500, status: "CONFIRMED" },
-        ];
-
-        return recentRegistrations;
-    },
-
-    async getRegTrend(organizerId: string) {
-        void organizerId;
-
-        const weeklyTrends: DailyRegistrationTrend[] = [
-            { day: "MON", registrations: 12 },
-            { day: "TUE", registrations: 18 },
-            { day: "WED", registrations: 15 },
-            { day: "THU", registrations: 45 },
-            { day: "FRI", registrations: 22 },
-            { day: "SAT", registrations: 10 },
-            { day: "SUN", registrations: 5 },
-        ];
-
-        return weeklyTrends;
-    },
     async getAnalyticsTotalEvents(organizerId: string): Promise<AnalyticsMetric> {
-        void organizerId;
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
 
+        let draft = 0, published = 0, completed = 0;
+        snap.forEach((doc) => {
+            const s = (doc.data().status || "").toLowerCase();
+            if (s === "draft") draft++;
+            else if (["published", "registration_open", "ongoing", "active"].includes(s)) published++;
+            else if (s === "completed") completed++;
+        });
+
+        const total = snap.size;
         return {
-            value: "24",
-            helper: "8 draft, 12 published, 4 completed"
+            value: String(total),
+            helper: `${draft} draft, ${published} published, ${completed} completed`,
         };
     },
 
     async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
-        void organizerId;
+        const eventsSnap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        let totalRevenue = 0;
+        eventsSnap.forEach((doc) => {
+            totalRevenue += doc.data().analytics?.revenue ?? 0;
+        });
+
+        // Profit = revenue – vendor costs
+        const vendorSnap = await adminDb
+            .collection("registerations")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        // Simple proxy: profit ≈ 70 % of revenue (platform fee placeholder until a costs collection exists)
+        const estimatedProfit = Math.round(totalRevenue * 0.7);
 
         return {
-            value: "PKR 1.7M",
-            helper: "+9.4% from last month"
+            value: formatCurrency(estimatedProfit),
+            helper: "Estimated after platform fees",
         };
     },
 
     async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
-        void organizerId;
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
 
+        let totalRevenue = 0;
+        let eventCount = 0;
+        snap.forEach((doc) => {
+            const rev = doc.data().analytics?.revenue ?? 0;
+            totalRevenue += rev;
+            eventCount++;
+        });
+
+        const avg = eventCount > 0 ? Math.round(totalRevenue / eventCount) : 0;
         return {
-            value: "PKR 4.2M",
-            helper: "Avg: PKR 175k/event"
+            value: formatCurrency(totalRevenue),
+            helper: `Avg: ${formatCurrency(avg)}/event`,
         };
     },
 
     async getAnalyticsAvgSatisfaction(organizerId: string): Promise<AnalyticsMetric> {
-        void organizerId;
+        // Single-field where only — rating > 0 filter done in memory
+        const snap = await adminDb
+            .collection("registerations")
+            .where("organizerId", "==", organizerId)
+            .get();
 
+        let total = 0;
+        let count = 0;
+        snap.forEach((doc) => {
+            const r = doc.data().rating;
+            if (r && typeof r === "number" && r > 0) {
+                total += r;
+                count++;
+            }
+        });
+
+        const avg = count > 0 ? (total / count).toFixed(1) : "N/A";
         return {
-            value: "4.7",
-            helper: "+0.2 from last month"
+            value: avg,
+            helper: count > 0 ? `Based on ${count} ratings` : "No ratings yet",
         };
     },
 
-    async getAnalyticsDailyRegistrations(organizerId: string): Promise<DailyAnalyticsRegistration[]> {
-        void organizerId;
+    // ── Analytics Page — Daily Registrations Chart ────────────────────────────
 
-        return [
-            { label: "Mar 01", registrations: 340 },
-            { label: "Mar 05", registrations: 430 },
-            { label: "Mar 09", registrations: 390 },
-            { label: "Mar 13", registrations: 690 },
-            { label: "Mar 17", registrations: 1120 },
-            { label: "Mar 21", registrations: 910 },
-            { label: "Mar 25", registrations: 420 },
-            { label: "Mar 31", registrations: 980 },
-        ];
+    async getAnalyticsDailyRegistrations(
+        organizerId: string
+    ): Promise<DailyAnalyticsRegistration[]> {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(now.getDate() - 29);
+        thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+        const snap = await adminDb
+            .collection("registerations")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        // Build a map: YYYY-MM-DD → count
+        const countMap: Record<string, number> = {};
+        snap.forEach((doc) => {
+            const data = doc.data();
+            let dateStr = "";
+            const createdAt = data.createdAt;
+            if (createdAt) {
+                const d = typeof createdAt.toDate === "function"
+                    ? createdAt.toDate()
+                    : new Date(createdAt);
+                if (d >= thirtyDaysAgo) {
+                    dateStr = d.toISOString().slice(0, 10);
+                    countMap[dateStr] = (countMap[dateStr] ?? 0) + 1;
+                }
+            }
+        });
+
+        // Return one entry per day that had at least 1 registration (or all 30 days)
+        const results: DailyAnalyticsRegistration[] = [];
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - i);
+            const key = d.toISOString().slice(0, 10);
+            const label = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+            results.push({ label, registrations: countMap[key] ?? 0 });
+        }
+
+        // Reduce to ~8 evenly-spaced points for the chart
+        const step = Math.floor(results.length / 8);
+        return results.filter((_, idx) => idx % Math.max(step, 1) === 0).slice(0, 8);
     },
 
-    async getAnalyticsEventPerformance(organizerId: string): Promise<AnalyticsEventPerformance[]> {
-        void organizerId;
+    // ── Analytics Page — Event Performance Table ──────────────────────────────
 
-        return [
-            {
-                id: "evt_tech_nexus",
-                eventName: "Tech Nexus 2026",
-                eventType: "Conference",
-                date: "Mar 12, 2026",
-                registrations: 1204,
-                profit: 890000,
-                revenue: 2400000,
-                avgSatisfaction: 4.8
-            },
-            {
-                id: "evt_urban_beats",
-                eventName: "Urban Beats Night",
-                eventType: "Concert",
-                date: "Mar 18, 2026",
-                registrations: 842,
-                profit: 460000,
-                revenue: 1100000,
-                avgSatisfaction: 4.5
-            },
-            {
-                id: "evt_ai_workshop",
-                eventName: "Generative AI Workshop",
-                eventType: "Workshop",
-                date: "Mar 24, 2026",
-                registrations: 516,
-                profit: 210000,
-                revenue: 680000,
-                avgSatisfaction: 4.6
-            },
-        ];
+    async getAnalyticsEventPerformance(
+        organizerId: string
+    ): Promise<AnalyticsEventPerformance[]> {
+        // No orderBy — avoids composite index requirement; sort in memory
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        const results: AnalyticsEventPerformance[] = [];
+        snap.forEach((doc) => {
+            const data = doc.data();
+            const startTime = toDate(data.eventStartTime);
+            const revenue = data.analytics?.revenue ?? 0;
+            const profit = Math.round(revenue * 0.7);
+
+            results.push({
+                id: doc.id,
+                eventName: data.title || "Untitled Event",
+                eventType: data.eventType
+                    ? data.eventType.charAt(0).toUpperCase() + data.eventType.slice(1)
+                    : "Event",
+                date: startTime.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "2-digit",
+                    year: "numeric",
+                }),
+                registrations: data.analytics?.registrations ?? 0,
+                profit,
+                revenue,
+                avgSatisfaction: data.analytics?.avgRating ?? 0,
+            });
+        });
+
+        // Sort newest-first in memory
+        results.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return results.slice(0, 20);
     },
 
-    async getTotalEvents(organizerId: string) {
-        void organizerId;
+    // ── Analytics Page — Date Range label ────────────────────────────────────
 
-        return 15;
-    }
-}
+    async getAnalyticsDateRange(organizerId: string): Promise<string> {
+        // No orderBy — fetch all, find earliest in memory
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+
+        if (snap.empty) {
+            const now = new Date();
+            return now.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        }
+
+        let earliest: Date | null = null;
+        snap.forEach((doc) => {
+            const d = toDate(doc.data().eventStartTime);
+            if (!earliest || d < earliest) earliest = d;
+        });
+
+        const now = new Date();
+        const fmt = (d: Date) =>
+            d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+
+        return `${fmt(earliest!)} – ${fmt(now)}`;
+    },
+
+    // ── Legacy helper (used by dashboard redirect count) ─────────────────────
+
+    async getTotalEvents(organizerId: string): Promise<number> {
+        const snap = await adminDb
+            .collection("events")
+            .where("organizerId", "==", organizerId)
+            .get();
+        return snap.size;
+    },
+};

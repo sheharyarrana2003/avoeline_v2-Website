@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
+import { RecentRegistration } from '@/src/features/dashboard/types';
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
-    const event : EventModel | null = await EventService.getEventByID(eventId);
+    const event: EventModel | null = await EventService.getEventByID(eventId);
 
     if (!event) {
         console.log("Event not founddd");
@@ -33,13 +33,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
     const capacityPercent = getPercent(event.analytics?.registrations ?? 0, event.capacity.totalSeats);
     const targetRevenue = Math.max(event.analytics?.revenue ?? 0, event.capacity.totalSeats * Math.max(event.pricing?.tiers?.[0]?.price ?? 0, 1));
     const revenuePercent = getPercent(event.analytics?.revenue ?? 0, targetRevenue);
-    const recentRegistrations = [
-        ["Zain Ahmed", "Fullstack Developer", "2m ago"],
-        ["Sarah Khan", "UX Designer", "15m ago"],
-        ["Omar Siddiqui", "AI Researcher", "1h ago"],
-        ["Esha Malik", "Product Manager", "3h ago"],
-        ["Hamza Raza", "Blockchain Dev", "5h ago"],
-    ];
+    const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
 
     return (
         <main className="px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
@@ -136,7 +130,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 <section className="grid gap-8 lg:grid-cols-3">
                     {/* Left & Middle Column Flow Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        
+
                         {/* Two-Column Info Cards Subgrid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Schedule Box */}
@@ -261,19 +255,30 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                 </Link>
                             </div>
                             <ul className="space-y-4">
-                                {recentRegistrations.map(([name, role, time], index) => (
-                                    <li key={name} className="flex items-center gap-4">
-                                        <span className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-xs font-extrabold text-slate-600">
-                                            {index + 1}
-                                        </span>
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-extrabold text-slate-950">{name}</p>
-                                            <p className="truncate text-xs font-semibold text-slate-400">
-                                                {role} • <span className="text-slate-500">{time}</span>
-                                            </p>
-                                        </div>
+                                {recentRegistrations.length === 0 ? (
+                                    <li className="text-sm font-semibold text-slate-400 text-center py-4">
+                                        No registrations yet.
                                     </li>
-                                ))}
+                                ) : (
+                                    recentRegistrations.map((reg, index) => (
+                                        <li key={reg.id} className="flex items-center gap-4">
+                                            <span className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-xs font-extrabold text-slate-600">
+                                                {index + 1}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-extrabold text-slate-950">{reg.attendeeName}</p>
+                                                <p className="truncate text-xs font-semibold text-slate-400">
+                                                    PKR {reg.amountPaid.toLocaleString("en-US")} •{" "}
+                                                    <span className={`font-bold ${
+                                                        reg.status === "CONFIRMED" ? "text-emerald-600"
+                                                        : reg.status === "PENDING"  ? "text-amber-500"
+                                                        : "text-red-500"
+                                                    }`}>{reg.status}</span>
+                                                </p>
+                                            </div>
+                                        </li>
+                                    ))
+                                )}
                             </ul>
                         </aside>
 

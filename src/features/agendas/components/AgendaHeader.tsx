@@ -6,13 +6,14 @@ import { AgendaDay, Session } from "@/src/services/models/agenda.model";
 
 interface AgendaHeaderProps {
 	id: string;
+	organizer_id: string;
 	days: AgendaDay[];
 	sessionsByDay: Record<string, Session[]>;
 	activeDate: string;
 }
 
 
-export default function AgendaHeader({ id, days, sessionsByDay, activeDate }: AgendaHeaderProps) {
+export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, activeDate }: AgendaHeaderProps) {
 	const searchParams = useSearchParams();
 
 	return (
@@ -70,7 +71,7 @@ export default function AgendaHeader({ id, days, sessionsByDay, activeDate }: Ag
 				</button>
 
 				<Link
-					href={`/organizer/events/${id}/agenda/create-agenda`}
+					href={`/organizer/${organizer_id}/events/${id}/agenda/create-agenda`}
 					className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition shrink-0"
 				>
 					<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

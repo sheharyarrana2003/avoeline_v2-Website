@@ -1,6 +1,9 @@
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '@/data/db'
 import { EventFormData, EventModel } from "./models/event.model";
+import { RecentRegistration } from '../features/dashboard/types';
+import { adminDb } from "@/data/admin_db";
+
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
   // 1. Structure the schedule object
@@ -25,7 +28,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
       longitude: formData.coordinates?.lng ?? 0,
     },
     // Map virtual properties if it's virtual or hybrid
-    meetingPlatform: formData.locationType !== 'physical' ? "Custom" : null, 
+    meetingPlatform: formData.locationType !== 'physical' ? "Custom" : null,
     meetingLink: formData.locationType !== 'physical' ? formData.videoUrl : null,
     meetingId: null,
     meetingPassword: null,
@@ -106,7 +109,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     category: formData.category,
     eventType: formData.eventType,
     format: formData.locationType,
-    language: "en", 
+    language: "en",
     schedule: schedule,
     location: location,
     bannerImage: formData.bannerImage || "",
@@ -137,65 +140,131 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 
 export const EventService = {
 
-    async getEventByID(id: string) {
-        console.log("In get event this is thte id i am searching for ", id);
-        if (!id) { console.warn("id is nulll brooooo"); return null };
+  async getEventByID(id: string) {
+    console.log("In get event this is thte id i am searching for ", id);
+    if (!id) { console.warn("id is nulll brooooo"); return null };
 
-        const q = query(
-            collection(db, "events"),
-            where("id", "==", id)
-        );
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            console.log("this event doesnt exist yet");
-            return new EventModel({});
-        }
-        console.log("found itttt ", querySnapshot.docs[0].data());
-        const event: EventModel = EventModel.fromJson(querySnapshot.docs[0].data());
-        return event;
-
-
-
-    },
-
-    async getAllEventsByOrganizer(organizer_id: string) {
-        const q = query(
-            collection(db, "events"),
-            where("organizerId", "==", organizer_id)
-        );
-
-        const querySnapshot = await getDocs(q);
-        let arr: EventModel[] = [];
-
-        querySnapshot.forEach((doc) => {
-            console.log("in getALL events");
-            console.log(doc.data());
-            arr.push(EventModel.fromJson(doc.data()));
-        });
-
-        return arr;
-    },
-    async getRecentReg(event_id: string) {
-        const q = query(collection(db, "registerations"), where("eventId", "==", event_id));
-        const querySnapshot = await getDocs(q);
-        let arr: EventModel[] = [];
-
-        querySnapshot.forEach((doc) => {
-            console.log(doc.data());
-            arr.push(EventModel.fromJson(doc.data()));
-        });
-
-        return arr;
-
-    },
-    async create_event(formdata: EventFormData,organizer_id:string) {
-        const event_to_be_added :EventModel = mapFormDataToEventModel(formdata); 
-        event_to_be_added.organizerId = organizer_id;
-        const docRef = doc(collection(db,"events"));
-        const id_generated = docRef.id;
-        event_to_be_added.id = id_generated;
-
-        await setDoc(docRef,{...event_to_be_added});
-        console.log(`Document successfully written with ID: ${id_generated}`);
+    const q = query(
+      collection(db, "events"),
+      where("id", "==", id)
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      console.log("this event doesnt exist yet");
+      return new EventModel({});
     }
+    console.log("found itttt ", querySnapshot.docs[0].data());
+    const event: EventModel = EventModel.fromJson(querySnapshot.docs[0].data());
+    return event;
+
+
+
+  },
+  async getRecentRegEvents(event_id: string): Promise<RecentRegistration[]> {
+    // No orderBy — avoids composite index requirement; sort in memory
+    const snap = await adminDb
+      .collection("registerations")
+      .where("eventId", "==", event_id)
+      .get();
+
+    const allDocs: { doc: FirebaseFirestore.QueryDocumentSnapshot; createdAt: Date }[] = [];
+    snap.forEach((doc) => {
+      const data = doc.data();
+      const createdAt = data.createdAt
+        ? (typeof data.createdAt.toDate === "function" ? data.createdAt.toDate() : new Date(data.createdAt))
+        : new Date(0);
+      allDocs.push({ doc, createdAt });
+    });
+
+    // Sort newest-first in memory — no composite index needed
+    allDocs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const top10 = allDocs.slice(0, 10);
+
+    const statusMap: Record<string, RecentRegistration["status"]> = {
+      confirmed: "CONFIRMED",
+      checked_in: "CONFIRMED",
+      attended: "CONFIRMED",
+      pending: "PENDING",
+      cancelled: "CANCELLED",
+      no_show: "CANCELLED",
+    };
+
+    // Resolve each attendee's name from users/{userId}/profile.fullName in parallel
+    const results: RecentRegistration[] = await Promise.all(
+      top10.map(async ({ doc }) => {
+        const data = doc.data();
+        const rawStatus = (data.status || "pending").toLowerCase();
+
+        // Try embedded fields first (fast path), then look up the user document
+        let attendeeName: string =
+          data.attendeeName || data.userName || data.fullName || "";
+
+        if (!attendeeName && data.userId) {
+          try {
+            const userSnap = await adminDb.collection("users").doc(data.userId).get();
+            if (userSnap.exists) {
+              const u = userSnap.data()!;
+              attendeeName =
+                u.profile?.fullName ||
+                u.name ||
+                u.email ||
+                data.userId;
+            }
+          } catch {
+            attendeeName = data.userId;
+          }
+        }
+
+        return {
+          id: doc.id,
+          attendeeName: attendeeName || "—",
+          eventName: data.eventName || data.eventTitle || "—",
+          amountPaid: data.payment?.amountPaid ?? data.finalPrice ?? 0,
+          status: statusMap[rawStatus] ?? "PENDING",
+        };
+      })
+    );
+
+    return results;
+  },
+  async getAllEventsByOrganizer(organizer_id: string) {
+    const q = query(
+      collection(db, "events"),
+      where("organizerId", "==", organizer_id)
+    );
+
+    const querySnapshot = await getDocs(q);
+    let arr: EventModel[] = [];
+
+    querySnapshot.forEach((doc) => {
+      console.log("in getALL events");
+      console.log(doc.data());
+      arr.push(EventModel.fromJson(doc.data()));
+    });
+
+    return arr;
+  },
+  async getRecentReg(event_id: string) {
+    const q = query(collection(db, "registerations"), where("eventId", "==", event_id));
+    const querySnapshot = await getDocs(q);
+    let arr: EventModel[] = [];
+
+    querySnapshot.forEach((doc) => {
+      console.log(doc.data());
+      arr.push(EventModel.fromJson(doc.data()));
+    });
+
+    return arr;
+
+  },
+  async create_event(formdata: EventFormData, organizer_id: string) {
+    const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
+    event_to_be_added.organizerId = organizer_id;
+    const docRef = doc(collection(db, "events"));
+    const id_generated = docRef.id;
+    event_to_be_added.id = id_generated;
+
+    await setDoc(docRef, { ...event_to_be_added });
+    console.log(`Document successfully written with ID: ${id_generated}`);
+  }
 }
