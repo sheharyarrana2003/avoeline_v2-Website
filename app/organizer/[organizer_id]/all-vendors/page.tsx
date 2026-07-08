@@ -14,6 +14,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   const activeTab = awaited_search_params?.tab?.toString() || "active"; // Default to active
 
   const bookings = await BookingServices.getBookingsOfOrganizer(organizerId);
+  
   if (!bookings) {
     return (<>
       <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">

@@ -79,7 +79,6 @@ export default async function AnalyticsPage({
         <main className="min-h-screen bg-white px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl space-y-6">
 
-                {/* ── Header ───────────────────────────────────────────────── */}
                 <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
@@ -92,7 +91,6 @@ export default async function AnalyticsPage({
                     <p className="text-sm font-bold text-slate-500">{dateRange}</p>
                 </header>
 
-                {/* ── Metric Cards ──────────────────────────────────────────── */}
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {metrics.map((metric) => {
                         const Icon = metric.icon;

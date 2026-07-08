@@ -7,6 +7,7 @@ import { auth, db } from '@/data/db'
 import { EventVendorService } from "../event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
+import { QuerySnapshot } from "firebase-admin/firestore";
 
 function mapToBooking(item: any): BookingData {
   if (!item) {
@@ -173,12 +174,10 @@ export const BookingServices = {
 
     let arr_of_bookings: BookingData[] = [];
 
-    const q = query(
-      collection(db, "bookings"),
-      where("organizerId", "==", organizerId)
-    )
+    const q = adminDb.collection("bookings").where("organizerId", "==", organizerId)
 
-    const querySnapshot = await getDocs(q);
+
+    const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
       console.log("query shot is emptyyy");
       return null;
@@ -188,12 +187,35 @@ export const BookingServices = {
       ...doc.data()
     })) as BookingData[];
 
+    // get unique ids
+    const vendor_unique_ids = [new Set(arr_of_bookings.map(x=>x.vendorId))];
+    const event_unique_ids = [new Set(arr_of_bookings.map(x=>x.eventId))];
+
+    // get vendor and events of these ids
+
+    const vendors_from_db =  await Promise.all(vendor_unique_ids.map(x=>EventVendorService.getVendorById(String(x))));
+    const events_from_db =  await Promise.all(event_unique_ids.map(x=>EventService.getEventByID(String(x))));
+
+    // put them in a map
+
+    const vendors_map = new Map();
+    const events_map = new Map();
+
+    vendors_from_db.map(x=>vendors_map.set(x?.vendorId,x));
+    events_from_db.map(x=>events_map.set(x?.id,x));
 
 
 
     const shapedBookings = arr_of_bookings.map(async (booking) => {
-      const vendor = await EventVendorService.getVendorById(booking.vendorId);
-      const event = await EventService.getEventByID(booking.eventId);
+
+      //repetative requests - if vendor repeat - request for every vendor
+      // const [vendor, event] = await Promise.all([
+      //   EventVendorService.getVendorById(booking.vendorId),
+      //   EventService.getEventByID(booking.eventId)
+      // ])
+
+         const vendor = vendors_map.get(booking.vendorId);
+      const event = events_map.get(booking.eventId);
 
       return {
         bookingId: booking.bookingId,
@@ -229,11 +251,12 @@ export const BookingServices = {
   },
 
   async getBookingById(booking_id: string) {
-    const q = query(
-      collection(db, "bookings"),
+    const q = adminDb.
+      collection("bookings").
       where("bookingId", "==", booking_id)
-    )
-    const querySnapshot = await getDocs(q);
+
+
+    const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
       return null;
     }
@@ -245,12 +268,12 @@ export const BookingServices = {
   async getAllBookingsOfOrganizer(organizerId: String) {
     let arr_of_bookings: BookingData[] = [];
 
-    const q = query(
-      collection(db, "bookings"),
+    const q = adminDb.
+      collection("bookings").
       where("organizerId", "==", organizerId)
-    )
 
-    const querySnapshot = await getDocs(q);
+
+    const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
       console.log("query shot is emptyyy");
       return null;
@@ -266,12 +289,13 @@ export const BookingServices = {
   async getAllBookingsOfVendor(vendorId: String) {
     let arr_of_bookings: BookingData[] = [];
 
-    const q = query(
-      collection(db, "bookings"),
-      where("vendorId", "==", vendorId)
-    )
 
-    const querySnapshot = await getDocs(q);
+    const q = adminDb.
+      collection("bookings").
+      where("vendorId", "==", vendorId)
+
+
+    const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
       console.log("query shot is emptyyy");
       return null;
@@ -397,7 +421,7 @@ export const BookingServices = {
       cancelledAt: null
     };
 
-    await adminDb.collection("bookings").doc().set({ ...booking_object });
+    await adminDb.collection("bookings").doc(id_generated).set({ ...booking_object });
     console.log("populated the booking -> ", id_generated);
   },
 
@@ -405,7 +429,7 @@ export const BookingServices = {
     if (!updated_booking) {
       return;
     }
-    await adminDb.collection("bookings").doc().update(updated_booking.bookingId, { ...updated_booking });
+    await adminDb.collection("bookings").doc(updated_booking.bookingId).update({ ...updated_booking });
   }
 
 }

@@ -5,6 +5,8 @@ import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firesto
 import { auth, db } from '@/data/db'
 import { BookingData } from "../bookings/types";
 import { console } from "inspector";
+import { adminAuth, adminDb } from "@/data/admin_db";
+import { QuerySnapshot } from "firebase-admin/firestore";
 
 
 export function mapToAddress(raw: any): Address {
@@ -121,11 +123,11 @@ export const EventVendorService = {
         let arr_of_vendors_active: VendorData[] = [];
 
         while (tracker_of_chunks < vendorIds.length) {
-            const q = query(
-                collection(db, "vendor"),
+            const q = adminDb.
+                collection("vendor").
                 where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
-            )
-            const querySnapshot2 = await getDocs(q);
+            
+            const querySnapshot2 = await q.get();
             tracker_of_chunks += max_num_firebase_allows;
             if (!querySnapshot2.empty) {
                 querySnapshot2.forEach(x => {
@@ -139,11 +141,13 @@ export const EventVendorService = {
         return arr_of_vendors_active;
     },
     async getVendorById(vendor_id: string) {
-        const q = query(
-            collection(db, "vendor"),
+        const q = adminDb.
+            collection("vendor").
             where("vendorId", "==", vendor_id)
-        )
-        const querySnapshot = await getDocs(q);
+        
+        const querySnapshot = await q.get();
+
+
         if (querySnapshot.empty) {
             return null;
         }
@@ -152,10 +156,10 @@ export const EventVendorService = {
 
     },
     async getAllVendors() {
-        const q = query(
-            collection(db, "vendor")
-        )
-        const querySnapshot = await getDocs(q);
+        const q = adminDb.
+            collection("vendor")
+        
+        const querySnapshot : QuerySnapshot= await q.get();
         if (querySnapshot.empty) {
             return null;
         }
