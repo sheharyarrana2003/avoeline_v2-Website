@@ -1,9 +1,9 @@
 import { mockAttendee } from "@/app/mockdata/attendee.mock"
 import { mockReg } from "@/app/mockdata/registeration.mock"
 import { Attendee } from "./type";
-import { doc, setDoc, query, where, getDocs,getDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, query, where, getDocs, getDoc, collection } from 'firebase/firestore';
 import { auth, db } from '@/data/db'
-
+import { adminDb } from "@/data/admin_db";
 
 function mapToAttendee(raw: any): Attendee {
     return {
@@ -73,7 +73,7 @@ function mapToAttendee(raw: any): Attendee {
 export const AttendeeService = {
     async getAttendeeOfEvent(event_id: String) {
 
-        console.log("ths us event i am serch for",event_id)
+        console.log("ths us event i am serch for", event_id)
         const q = query(
             collection(db, "registerations"),
             where("eventId", "==", event_id)
@@ -85,18 +85,18 @@ export const AttendeeService = {
             return null;
         }
         const user_ids_of_attendees: string[] = querySnapshot.docs.map(doc => doc.data().userId);
-        console.log("these are the user idsss",user_ids_of_attendees);
+        console.log("these are the user idsss", user_ids_of_attendees);
 
 
-       const attendees: Attendee[] = await Promise.all(
-        user_ids_of_attendees.map(async (x) => {
-            const docRef = doc(db, "attendees", x);
-            const docSnap = await getDoc(docRef);
-            return mapToAttendee(docSnap.data());
-        })
-    );
+        const attendees: Attendee[] = await Promise.all(
+            user_ids_of_attendees.map(async (x) => {
+                const q = await adminDb.collection("attendees").where("userId", "==", x).get();
+                const attendeeSnap = q.docs[0];
+                return mapToAttendee(attendeeSnap.data());
+            })
+        );
 
-     
+
         return attendees;
 
     }

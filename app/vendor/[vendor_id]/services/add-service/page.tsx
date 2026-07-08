@@ -5,8 +5,7 @@ import { EventVendorService } from "@/src/features/event_vendors/event_venders.s
 import { PricingPackage, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
-import { auth, db } from '@/data/db'
+import { adminDb } from "@/data/admin_db"
 
 // Helper to get category options from vendor
 const getCategoryOptions = (categories: string[]) => {
@@ -62,7 +61,7 @@ export default async function AddNewServicePage({
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
 
-        
+
             <div className="max-w-2xl mx-auto px-4 md:px-8 py-8">
 
                 {/* Breadcrumb */}
@@ -319,8 +318,7 @@ async function createServiceAction(formData: FormData) {
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
     vendor?.pricingPackages.push(payload);
 
-    const docRef = doc(db, "vendor",vendorId);
-    await setDoc(docRef,{...vendor})
+    await adminDb.collection("vendor").doc(vendorId).update({ ...vendor });
 
     // Redirect back to services page
     redirect(`/vendor/${vendorId}/services`);

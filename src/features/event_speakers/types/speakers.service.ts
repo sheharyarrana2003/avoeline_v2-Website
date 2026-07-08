@@ -2,6 +2,7 @@ import { EventService } from "@/src/services/event.service";
 import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { db } from '@/data/db'
 import { EventModel } from "@/src/services/models/event.model";
+import { adminDb } from "@/data/admin_db";
 
 export const SpeakerService = {
     async getAllSpeakers(organizer_id: string, event_id: string) {
@@ -34,7 +35,7 @@ export const SpeakerService = {
             const profileImage = "/placeholders/speaker-avatar.png";
             const sessionTitle = "Assigned Speaker Session"; // Can be populated dynamically based on active selected session arrays
 
-            const new_speaker =  {
+            const new_speaker = {
                 speakerId: `SPK_${event_id}_${uniqueHash}`,
                 name: name.trim(),
                 designation: designation.trim(),
@@ -45,9 +46,8 @@ export const SpeakerService = {
 
             Event.speakers.push(new_speaker);
 
-            const docRef = doc(db,"events",event_id);
-            await setDoc(docRef,{...Event});
-        }else{
+            await adminDb.collection("events").doc(event_id).update(Event);
+        } else {
             console.log("this event doesnt exist so how toadd a speaker to it??");
         }
 

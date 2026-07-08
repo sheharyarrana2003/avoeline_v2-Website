@@ -1,7 +1,5 @@
-import { mockUser } from "@/app/mockdata/users.mock"
 import { User } from "./models/user.type";
-import { auth, db } from '@/data/db'
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { adminDb } from "@/data/admin_db";
 
 
 function mapToUser(raw: any): User {
@@ -53,14 +51,11 @@ function mapToUser(raw: any): User {
 
 export const UserService = {
   async getUserById(user_id: String) {
-    const docRef = doc(db, "users", user_id);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await adminDb.collection("users").doc(String(user_id)).get();
     const user_to_front_end = {
-      "user_id": user_id,
+      user_id,
       ...docSnap.data()
-    }
-    console.log("this is user docSnap.data() ",docSnap.data());
-
+    };
     return mapToUser(user_to_front_end);
   }
 }

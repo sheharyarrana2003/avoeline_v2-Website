@@ -1,5 +1,4 @@
-import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
-import { auth, db } from '@/data/db'
+import { adminDb } from "@/data/admin_db";
 import { NotificationData } from "./models/notification.model";
 function mapToNotificationData(raw: any): NotificationData {
         if (!raw) throw new Error("Raw notification data is missing");
@@ -68,16 +67,15 @@ function mapToNotificationData(raw: any): NotificationData {
     }
 
 export const NotificationServices = {
-    async getAllNotificationsOfUser(user_id : string){
-        const q = query(collection(db,"notifications"),where("userId","==",user_id));
-        const querySnapshot =  await getDocs(q);
-        if(querySnapshot.empty){
+    async getAllNotificationsOfUser(user_id: string) {
+        const querySnapshot = await adminDb.collection("notifications").where("userId", "==", user_id).get();
+        if (querySnapshot.empty) {
             return [];
         }
-        let all_notifications : NotificationData[]= [];
-        querySnapshot.forEach(x=>{
-            all_notifications.push(mapToNotificationData(x.data()))
-        })
+        const all_notifications: NotificationData[] = [];
+        querySnapshot.forEach(x => {
+            all_notifications.push(mapToNotificationData(x.data()));
+        });
         return all_notifications;
     }
 }
