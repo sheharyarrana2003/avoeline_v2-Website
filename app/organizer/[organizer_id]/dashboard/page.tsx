@@ -9,17 +9,40 @@ import UpcomingEvents from "@/src/features/dashboard/components/UpcomingEvents";
 import RecentRegistrations from "@/src/features/dashboard/components/RecentRegistrations";
 import RegistrationTrendChart from "@/src/features/dashboard/components/RegistrationTrendChart";
 import { CurrentUserData } from "@/src/services/models/user.type";
+import { redirect } from "next/navigation";
 
 export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
+    console.time("Total Dashboard Load");
     const { organizer_id } = await params;
-    console.log("this is my organizer_id -> ",organizer_id)
-    const u : CurrentUserData = await AuthService.getCurrentUser();
+    console.log("this is my organizer_id -> ", organizer_id)
+    const u: CurrentUserData | null = await AuthService.getCurrentUser();
 
-    const stats = await AnalyticsService.getDashboardStat(organizer_id);
-    const today_events = await AnalyticsService.getTodayEvents(organizer_id);
-    const upcoming_events = await AnalyticsService.getUpcomingEvents(organizer_id);
-    const recent_reg = await AnalyticsService.getRecentReg(organizer_id);
-    const reg_trend_data = await AnalyticsService.getRegTrend(organizer_id);
+    if (u === null) {
+        redirect('/auth/signup');
+    }
+    // console.time("Db Fetch 1");
+    // const stats = await AnalyticsService.getDashboardStat(organizer_id);
+    // const today_events = await AnalyticsService.getTodayEvents(organizer_id);
+    // const upcoming_events = await AnalyticsService.getUpcomingEvents(organizer_id);
+    // const recent_reg = await AnalyticsService.getRecentReg(organizer_id);
+    // const reg_trend_data = await AnalyticsService.getRegTrend(organizer_id);
+
+    // console.timeEnd("Db Fetch 1");
+
+    //this is taking approx 4 sec
+
+    //  Fires all requests at the exact same time
+    console.time("Db Fetch 1");
+    const [stats, today_events, upcoming_events, recent_reg,reg_trend_data] = await Promise.all([
+        AnalyticsService.getDashboardStat(organizer_id),
+        AnalyticsService.getTodayEvents(organizer_id),
+        AnalyticsService.getUpcomingEvents(organizer_id),
+        AnalyticsService.getRecentReg(organizer_id),
+        AnalyticsService.getRegTrend(organizer_id)
+    ])
+    console.timeEnd("Db Fetch 1");
+
+    console.timeEnd("Total Dashboard Load");
 
     return (
         <main className="min-h-screen bg-[#f4f2f5] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
@@ -29,7 +52,7 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
                         <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">
                             Welcome back, {u.name}
                         </h1>
-                        
+
                     </div>
 
                     <Link

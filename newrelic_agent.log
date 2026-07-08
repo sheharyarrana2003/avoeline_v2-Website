@@ -7214,3 +7214,235 @@
 {"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28319,"time":"2026-07-08T10:36:01.330Z","msg":"Agent state changed from stopped to starting."}
 {"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28319,"time":"2026-07-08T10:36:01.335Z","msg":"Starting New Relic for Node.js connection process."}
 {"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28319,"time":"2026-07-08T10:36:01.335Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.444Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.452Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.586Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.598Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.687Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.691Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28817,"time":"2026-07-08T10:39:32.691Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:36.125Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:36.130Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:36.439Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:36.558Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:37.091Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:37.098Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":28875,"time":"2026-07-08T10:39:37.098Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:21.779Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:21.789Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:21.938Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:21.954Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:22.071Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:22.081Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30010,"time":"2026-07-08T10:41:22.081Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.654Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.658Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.739Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.750Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.830Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.836Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30047,"time":"2026-07-08T10:41:33.836Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:37.783Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:37.792Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:37.965Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:37.977Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:38.063Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:38.066Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30090,"time":"2026-07-08T10:41:38.066Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.471Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.476Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.555Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.566Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.636Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.639Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30178,"time":"2026-07-08T10:41:39.639Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.435Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.441Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.564Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.584Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.664Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.666Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30268,"time":"2026-07-08T10:41:41.666Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:42.865Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:42.870Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:42.953Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:42.964Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:43.046Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:43.051Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30295,"time":"2026-07-08T10:41:43.051Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:19.983Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:19.987Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:20.091Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:20.106Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:20.196Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:20.199Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30355,"time":"2026-07-08T10:42:20.199Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:28.896Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:28.901Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:28.994Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:29.007Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:29.076Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:29.079Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30407,"time":"2026-07-08T10:42:29.079Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.277Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.281Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.426Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.451Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.551Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.560Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30458,"time":"2026-07-08T10:42:36.560Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.219Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.226Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.356Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.370Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.497Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.502Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30512,"time":"2026-07-08T10:42:38.502Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:40.871Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:40.875Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:40.998Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:41.022Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:41.111Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:41.114Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30541,"time":"2026-07-08T10:42:41.114Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:47.790Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:47.795Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:47.941Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:47.956Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:48.056Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:48.059Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30598,"time":"2026-07-08T10:42:48.059Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.279Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.283Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.421Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.445Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.616Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.638Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30638,"time":"2026-07-08T10:42:55.639Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.344Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.348Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.430Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.448Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.531Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.537Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30680,"time":"2026-07-08T10:42:58.537Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.030Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.038Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.168Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.188Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.293Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.296Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30722,"time":"2026-07-08T10:43:00.296Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.535Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.539Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.625Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.642Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.781Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.786Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30762,"time":"2026-07-08T10:43:02.787Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.184Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.190Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.335Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.348Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.432Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.435Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30794,"time":"2026-07-08T10:43:05.435Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.234Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.239Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.369Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.394Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.587Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.590Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30821,"time":"2026-07-08T10:43:08.590Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.129Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.137Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.487Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.506Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.616Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.622Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30876,"time":"2026-07-08T10:43:25.622Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.544Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.549Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.710Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.748Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.940Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.944Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":30973,"time":"2026-07-08T10:45:09.944Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.087Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.093Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.194Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.248Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.441Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.450Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31217,"time":"2026-07-08T10:45:13.451Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.582Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.587Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.766Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.783Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.899Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.904Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31268,"time":"2026-07-08T10:45:14.905Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.273Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.278Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.417Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.432Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.544Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.548Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31343,"time":"2026-07-08T10:45:16.548Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.416Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.425Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.617Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.635Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.796Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.806Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31362,"time":"2026-07-08T10:45:18.806Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:19.936Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:19.942Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:20.025Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:20.038Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:20.110Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:20.113Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:20.113Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":50,"name":"newrelic","hostname":"omnibook5","pid":31374,"time":"2026-07-08T10:45:21.180Z","msg":"Failed to get information about vendor gcp.","component":"utilization","utilization":"gcp","error":{"stack":"Error: getaddrinfo ENOTFOUND metadata.google.internal\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)\n    at GetAddrInfoReqWrap.callbackTrampoline (node:internal/async_hooks:131:14)","message":"getaddrinfo ENOTFOUND metadata.google.internal","errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"metadata.google.internal"}}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.281Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.285Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.378Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.390Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.469Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.473Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31388,"time":"2026-07-08T10:45:22.473Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:23.838Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:23.842Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:23.917Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:23.928Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:24.000Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:24.003Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31400,"time":"2026-07-08T10:45:24.003Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.116Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.122Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.207Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.220Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.306Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.310Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31414,"time":"2026-07-08T10:45:27.310Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.724Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.731Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.858Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.884Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.969Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.974Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31535,"time":"2026-07-08T10:46:24.974Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:56.697Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:56.705Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:56.854Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:56.868Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:57.043Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:57.047Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31687,"time":"2026-07-08T10:47:57.047Z","msg":"Agent state changed from starting to connecting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.707Z","msg":"Using New Relic for Node.js. Agent version: 14.1.2; Node version: v26.4.0."}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.711Z","msg":"New Relic for Node.js 14.1.2 has not been tested on Node.js v26.4.0. Please update the agent or downgrade your version of Node.js"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.802Z","msg":"new relic agent control disabled, skipping health reporting","component":"HealthReporter"}
+{"v":0,"level":40,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.815Z","msg":"Instrumentation for timers has been disabled via 'config.instrumentation.timers.enabled. Not instrumenting package","component":"shimmer"}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.911Z","msg":"Agent state changed from stopped to starting."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.917Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"omnibook5","pid":31712,"time":"2026-07-08T10:48:06.917Z","msg":"Agent state changed from starting to connecting."}
