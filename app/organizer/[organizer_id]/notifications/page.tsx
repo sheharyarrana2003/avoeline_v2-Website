@@ -1,6 +1,4 @@
-"use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { NotificationServices } from "@/src/services/notification.services";
 import { NotificationData } from "@/src/services/models/notification.model";
