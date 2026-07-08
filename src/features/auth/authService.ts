@@ -157,6 +157,8 @@ export const AuthService = {
         } catch (error: any) {
             const errorCode = error.code;
             const errorMessage = error.message;
+
+            console.log("[user logging in] " ,error)
             throw error;
         }
         const user = user_credintials.user;
@@ -184,6 +186,7 @@ export const AuthService = {
         try {
             user_credintials = await createUserWithEmailAndPassword(auth, email, password);
         } catch (error: any) {
+             console.log("[user signing in] failed")
             throw error;
         }
 
