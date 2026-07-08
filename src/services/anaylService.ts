@@ -184,7 +184,6 @@ export const AnalyticsService = {
             allDocs.push({ doc, createdAt });
         });
 
-        // Sort newest-first in memory — no composite index needed
         allDocs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
         const results: RecentRegistration[] = allDocs.slice(0, 10).map(({ doc }) => {
@@ -212,7 +211,6 @@ export const AnalyticsService = {
 
 
 
-    // ── Registration Trend (last 7 days) ─────────────────────────────────────
 
     async getRegTrend(organizerId: string): Promise<DailyRegistrationTrend[]> {
         const now = new Date();

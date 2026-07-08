@@ -1,8 +1,7 @@
-import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
-import { auth, db } from '@/data/db'
 import { EventFormData, EventModel } from "./models/event.model";
 import { RecentRegistration } from '../features/dashboard/types';
 import { adminDb } from "@/data/admin_db";
+import { QuerySnapshot } from "firebase-admin/firestore";
 
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
@@ -141,21 +140,33 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 export const EventService = {
 
   async getEventByID(id: string) {
-    console.log("In get event this is thte id i am searching for ", id);
-    if (!id) { console.warn("id is nulll brooooo"); return null };
+    if (!id) {
+      console.warn("[getEventByID] called with empty id");
+      return null;
+    };
+    let querySnapshot: QuerySnapshot;
 
-    const q = query(
-      collection(db, "events"),
-      where("id", "==", id)
-    );
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-      console.log("this event doesnt exist yet");
-      return new EventModel({});
+
+    try {
+      querySnapshot = await adminDb.collection("events").where("id", "==", id).get();
+    } catch (err) {
+      console.error("[getEventByID] Firestore query failed", { id, err });
+      throw new Error(`Failed to fetch event ${id}`, { cause: err });
     }
-    console.log("found itttt ", querySnapshot.docs[0].data());
-    const event: EventModel = EventModel.fromJson(querySnapshot.docs[0].data());
-    return event;
+
+
+    if (querySnapshot.empty) {
+      console.info(`[getEventByID] no event found for id=${id}`);
+      return null;
+    }
+
+    try {
+      return EventModel.fromJson(querySnapshot.docs[0].data());
+    } catch (err) {
+      // Data exists but is malformed 
+      console.error("[getEventByID] failed to parse event data", { id, err });
+      throw new Error(`Malformed event data for ${id}`, { cause: err });
+    }
 
 
 
@@ -228,12 +239,8 @@ export const EventService = {
     return results;
   },
   async getAllEventsByOrganizer(organizer_id: string) {
-    const q = query(
-      collection(db, "events"),
-      where("organizerId", "==", organizer_id)
-    );
+    const querySnapshot: QuerySnapshot = await adminDb.collection("events").where("organizerId", "==", organizer_id).get();
 
-    const querySnapshot = await getDocs(q);
     let arr: EventModel[] = [];
 
     querySnapshot.forEach((doc) => {
@@ -245,8 +252,7 @@ export const EventService = {
     return arr;
   },
   async getRecentReg(event_id: string) {
-    const q = query(collection(db, "registerations"), where("eventId", "==", event_id));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot: QuerySnapshot = await adminDb.collection("registerations").where("eventId", "==", event_id).get();
     let arr: EventModel[] = [];
 
     querySnapshot.forEach((doc) => {
@@ -260,11 +266,13 @@ export const EventService = {
   async create_event(formdata: EventFormData, organizer_id: string) {
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id;
-    const docRef = doc(collection(db, "events"));
+    const docRef = adminDb.collection("events").doc();
     const id_generated = docRef.id;
     event_to_be_added.id = id_generated;
 
-    await setDoc(docRef, { ...event_to_be_added });
+    await adminDb.collection("organizers").doc(organizer_id).set({
+      ...event_to_be_added
+    })
     console.log(`Document successfully written with ID: ${id_generated}`);
   }
 }
