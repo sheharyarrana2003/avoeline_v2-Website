@@ -74,7 +74,8 @@ export default function CertificateIssuanceClient({
 
     const minAttendance = 80; // TODO: pull from event.certificateConfig.requirements.minAttendance
     const eligibleAttendees = attendees.filter(a => {
-        const rate = a.a.attendanceRate ?? 0;
+          //!fix
+        const rate = 0;
         return rate >= minAttendance;
     });
 
@@ -245,7 +246,8 @@ export default function CertificateIssuanceClient({
 
                             {paginatedAttendees.map((attendee) => {
                                 const surveyStatus = getSurveyStatus(attendee.a);
-                                const attendanceRate = attendee.a?.attendanceRate ?? 0;
+                                //!fix
+                                const attendanceRate =  0;
                                 const isSelected = selectedAttendees.has(attendee.a.attendeeId);
                                 const name = attendee.user.profile.fullName;
                                 const email = attendee.user.email;

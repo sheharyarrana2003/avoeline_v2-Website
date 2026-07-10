@@ -1,4 +1,5 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 
 // --- Helper Functions ---
@@ -57,10 +58,8 @@ export default async function VendorProfilePage({
     const activeTab = (awaitedSearchParams?.tab as string) || "services";
 
     // Fetch vendor data
-    const vendor = await EventVendorService.getVendorById(vendor_id);
+    const v = await EventVendorService.getVendorById(vendor_id);
 
-    // Fallback vendor data if fetch fails
-    const v = vendor || {};
 
     const businessName = v?.businessName || "Vendor Profile";
     const rating = v?.ratings?.averageRating || 0;

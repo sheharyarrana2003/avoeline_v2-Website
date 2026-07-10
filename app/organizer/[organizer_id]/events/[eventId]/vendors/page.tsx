@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
 import { VendorData } from '@/src/services/models/vendor.model';
-import PricingPackage from '@/src/services/models/vendor.model';
+import {PricingPackage} from '@/src/services/models/vendor.model';
 
 
 export default async function Vendors({params} : {params : Promise<{eventId:string; organizer_id:string}>}) {

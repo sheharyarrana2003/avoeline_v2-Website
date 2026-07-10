@@ -34,9 +34,8 @@ export default async function PublishSuccessModal() {
           />
           
           <EventStats 
-            capacity={event.capacity}
-            price={event.ticketPrice}
-            date={event.date}
+            capacity={event.capacity.totalSeats}
+            date={event.schedule.startDate}
           />
           
           <ActionButtons eventId={event.id} />

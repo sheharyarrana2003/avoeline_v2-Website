@@ -7,7 +7,6 @@ import Link from "next/link";
 
 export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
-    const user : CurrentUserData = await AuthService.getCurrentUser();
     const currentTab = resolvedParams.status || "all";
 
     const organizer_id :string = (await params).organizer_id;

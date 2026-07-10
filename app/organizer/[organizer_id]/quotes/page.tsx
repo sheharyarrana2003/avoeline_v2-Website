@@ -1,10 +1,12 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
-import { BookingData } from "@/src/features/bookings/types";
+import { BookingData, Quote, VendorQuote } from "@/src/features/bookings/types";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import Link from "next/link";
 import { AcceptButton } from "./Acceptbutton";
+import { VendorData } from "@/src/services/models/vendor.model";
+import { notFound } from "next/navigation";
 
 const formatCurrency = (amount: number, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
@@ -128,14 +130,18 @@ export default async function QuoteManagementPage({
             selectedVendor = null;
         }
     }
+    if(!selectedVendor){
+        console.log("selected venodr is null");
+        notFound();
+    }
 
-    const v = selectedVendor || {};
+    const v : VendorData= selectedVendor || null;
     const businessName = v?.businessName || selectedQuote?.vendorId || "Unknown Vendor";
     const vendorRating = v?.ratings?.averageRating || 0;
     const vendorInitials = businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
 
-    const quote = selectedQuote?.quote || {};
-    const vendorQuote = quote?.vendorQuote || {};
+    const quote : Quote= selectedQuote?.quote ;
+    const vendorQuote : VendorQuote|null = quote?.vendorQuote ;
     const breakdown = vendorQuote?.breakdown || [];
     const totalAmount = vendorQuote?.totalAmount || 0;
     const currency = selectedQuote?.payment?.currency || "PKR";

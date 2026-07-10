@@ -9,14 +9,21 @@ import { CurrentUserData } from '@/src/services/models/user.type';
 export default function SignIn() {
 
     const handleSubmitLogin = async (formData: any) => {
-        'use server' 
+        'use server'
         console.log("going in the function");
         await AuthService.signUpWithEmail(formData);
-        const user: CurrentUserData = await AuthService.getCurrentUser();
-        console.log('innn page.tsx -> signin up in with:');
-        const user_id = user.userId;
-        const user_role = user.userType;
-        redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
+        const user: CurrentUserData | null = await AuthService.getCurrentUser();
+
+
+        if (user === null) {
+            redirect("/auth/signup");
+        } else {
+            const user_id = user.userId;
+            const user_role = user.userType;
+            redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
+        }
+
+
     };
 
     return (
