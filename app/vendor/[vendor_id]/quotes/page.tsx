@@ -131,13 +131,13 @@ export default async function VendorQuoteManagementPage({
         }
     }
 
-    const ev = selectedEvent ;
+    const ev = selectedEvent;
     const eventName = ev?.eventName || ev?.name || selectedQuote?.eventId || "Unknown Event";
     const organizerName = ev?.organizerName || selectedQuote?.organizerId || "Unknown Organizer";
 
-    const quote = selectedQuote?.quote ;
-    const vendorQuote = quote?.vendorQuote ;
-    const breakdown = vendorQuote?.breakdown ||[];
+    const quote = selectedQuote?.quote;
+    const vendorQuote = quote?.vendorQuote;
+    const breakdown = vendorQuote?.breakdown || [];
     const totalAmount = vendorQuote?.totalAmount || 0;
     const currency = selectedQuote?.payment?.currency || "PKR";
     const validity = quote?.vendorQuote?.validity || "";
@@ -388,9 +388,18 @@ export default async function VendorQuoteManagementPage({
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                         </svg>
-                                        Counter Offer
+                                        Prepare Offer
                                     </Link>
 
+                                    <Link
+                                        href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}/counter-offer`}
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                        Counter Offer
+                                    </Link>
                                     <Link
                                         href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}`}
                                         className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"

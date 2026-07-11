@@ -36,6 +36,10 @@ export default async  function CounterOfferFormOrganizer({ params }: { params: P
 
         booking?.statusHistory.push(new_status_history);
         booking?.quote.negotiation.push(new_neg_message);
+
+         if (booking && booking.quote.vendorQuote) {
+            booking.quote.vendorQuote.totalAmount = targetBudget;
+        }
         await BookingServices.update_booking(booking);
     }
 
