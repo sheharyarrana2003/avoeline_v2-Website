@@ -45,12 +45,14 @@ export function HomeFooter() {
                 marginBottom: 12,
               }}
             >
+              {/* Logo mark stays black here — footer is a quiet, monochrome
+                  zone; the one purple mark already lives in the header */}
               <span
                 style={{
                   width: 24,
                   height: 24,
                   borderRadius: 6,
-                  background: "var(--violet)",
+                  background: "var(--ink)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -184,6 +186,7 @@ export function HomeFooter() {
           >
             © {year} Avoeline Event Systems. All rights reserved.
           </p>
+          {/* Status dot stays green — it's a functional signal, not decoration */}
           <div
             style={{
               display: "flex",

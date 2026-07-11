@@ -6,12 +6,11 @@ export function AnalyticsCardMockup() {
       style={{
         transform: "rotate(-6deg)",
         width: 320,
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
+        background: "#FFFFFF",
+        border: "1px solid #E8E7E4",
         borderRadius: 20,
         padding: 24,
-        boxShadow:
-          "0 32px 80px rgba(14,14,26,0.12), 0 8px 24px rgba(108,92,231,0.08)",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.35)",
         position: "relative",
       }}
     >
@@ -44,7 +43,7 @@ export function AnalyticsCardMockup() {
               fontFamily: "var(--font-mono)",
               fontSize: "2rem",
               fontWeight: 600,
-              color: "var(--ink)",
+              color: "#14141A",
               margin: "4px 0 0",
               letterSpacing: "-0.02em",
             }}
@@ -53,7 +52,7 @@ export function AnalyticsCardMockup() {
           </p>
         </div>
 
-        {/* Live pulse dot */}
+        {/* Live pulse dot — functional signal, kept green */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span
             className="animate-pulse-dot"
@@ -78,7 +77,7 @@ export function AnalyticsCardMockup() {
         </div>
       </div>
 
-      {/* Sparkline SVG */}
+      {/* Sparkline SVG — black line, no purple fill */}
       <svg
         width="272"
         height="64"
@@ -86,11 +85,10 @@ export function AnalyticsCardMockup() {
         fill="none"
         style={{ display: "block", marginBottom: 16 }}
       >
-        {/* Gradient fill under sparkline */}
         <defs>
           <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6C5CE7" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#6C5CE7" stopOpacity="0" />
+            <stop offset="0%" stopColor="#14141A" stopOpacity="0.14" />
+            <stop offset="100%" stopColor="#14141A" stopOpacity="0" />
           </linearGradient>
         </defs>
         {/* Area fill */}
@@ -108,7 +106,7 @@ export function AnalyticsCardMockup() {
           className="animate-sparkline"
           fill="none"
         />
-        {/* Highlight dot at end */}
+        {/* Highlight dot at end — the single pop of purple on this card */}
         <circle cx="272" cy="8" r="4" fill="#6C5CE7" />
         <circle cx="272" cy="8" r="7" fill="#6C5CE7" fillOpacity="0.2" />
       </svg>
@@ -137,7 +135,7 @@ export function AnalyticsCardMockup() {
                 fontFamily: "var(--font-mono)",
                 fontSize: "1rem",
                 fontWeight: 600,
-                color: "var(--ink)",
+                color: "#14141A",
                 margin: "2px 0 0",
               }}
             >
@@ -147,20 +145,19 @@ export function AnalyticsCardMockup() {
         ))}
       </div>
 
-      {/* Decorative badge */}
+      {/* Decorative badge — solid black, not purple-tinted */}
       <div
         style={{
           position: "absolute",
           top: -12,
           right: 24,
-          background: "var(--violet-soft)",
-          border: "1px solid rgba(108,92,231,0.2)",
+          background: "#14141A",
           borderRadius: 20,
           padding: "4px 12px",
           fontFamily: "var(--font-body)",
           fontSize: "0.7rem",
           fontWeight: 600,
-          color: "var(--violet)",
+          color: "#FFFFFF",
         }}
       >
         Analytics

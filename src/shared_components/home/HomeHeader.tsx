@@ -8,7 +8,7 @@ export function HomeHeader() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        backgroundColor: "rgba(250,250,249,0.85)",
+        backgroundColor: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         borderBottom: "1px solid #E8E7E4",
@@ -26,7 +26,7 @@ export function HomeHeader() {
           gap: 24,
         }}
       >
-        {/* ── Logo ── */}
+        {/* ── Logo — the one place purple lives in the header ── */}
         <Link
           href="/"
           style={{
@@ -42,11 +42,10 @@ export function HomeHeader() {
               width: 32,
               height: 32,
               borderRadius: 9,
-              background: "#6C5CE7",
+              background: "#000000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 2px 8px rgba(108,92,231,0.35)",
             }}
           >
             <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
@@ -68,23 +67,60 @@ export function HomeHeader() {
         </Link>
 
         {/* ── Nav ── */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {[
             { label: "Services", href: "#services" },
             { label: "How it works", href: "#how-it-works" },
           ].map((n) => (
-            <Link key={n.label} href={n.href} className="home-nav-link" style={{ padding: "6px 14px", borderRadius: 8 }}>
+            <Link
+              key={n.label}
+              href={n.href}
+              style={{
+                padding: "8px 14px",
+                borderRadius: 8,
+                fontFamily: "var(--font-body)",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#14141A",
+                textDecoration: "none",
+              }}
+              className="home-nav-link"
+            >
               {n.label}
             </Link>
           ))}
         </nav>
 
-        {/* ── Auth CTAs ── */}
+        {/* ── Auth CTAs — black/white, no purple ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <Link href="/auth/signin" id="header-signin" className="btn-header-signin">
+          <Link
+            href="/auth/signin"
+            id="header-signin"
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              color: "#14141A",
+              padding: "9px 16px",
+              textDecoration: "none",
+            }}
+          >
             Sign in
           </Link>
-          <Link href="/auth/signup" id="header-get-started" className="btn-header-primary">
+          <Link
+            href="/auth/signup"
+            id="header-get-started"
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              color: "#FFFFFF",
+              background: "#14141A",
+              padding: "9px 18px",
+              borderRadius: 100,
+              textDecoration: "none",
+            }}
+          >
             Get started →
           </Link>
         </div>

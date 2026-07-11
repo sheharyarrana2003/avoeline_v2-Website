@@ -268,4 +268,8 @@ body {
     stroke-dashoffset: 300;
     animation: sparkline-draw 2s ease-out forwards;
   }
+  .service-card:hover {
+  border-color: #14141A;
+  transform: translateY(-2px);
+}
 }
