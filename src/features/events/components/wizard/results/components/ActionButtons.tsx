@@ -3,16 +3,16 @@ import { useRouter } from "next/navigation";
 
 interface ActionButtonsProps {
   eventId: string;
+  organizer_id : string
 }
 
-export default function ActionButtons({ eventId }: ActionButtonsProps) {
+export default function ActionButtons({ eventId,organizer_id }: ActionButtonsProps) {
   const router = useRouter();
-
   return (
     <div className="w-full space-y-3 mb-8">
       {/* View Event Button */}
       <button 
-        onClick={() => router.push(`/events/${eventId}`)}
+        onClick={() => router.replace(`organizer/${organizer_id}/events/${eventId}`)}
         className="w-full bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-800 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ export default function ActionButtons({ eventId }: ActionButtonsProps) {
       
       {/* Manage Registrations Button */}
       <button 
-        onClick={() => router.push(`/dashboard/events/${eventId}/registrations`)}
+        onClick={() => router.replace(`organizer/${organizer_id}/events/${eventId}/attendee`)}
         className="w-full bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-800 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export default function ActionButtons({ eventId }: ActionButtonsProps) {
       
       {/* Go to Dashboard Button */}
       <button 
-        onClick={() => router.push('/dashboard')}
+        onClick={() => router.replace(`/organizer/${organizer_id}/dashboard`)}
         className="w-full bg-white border-2 border-black text-black py-4 rounded-full font-semibold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-50 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

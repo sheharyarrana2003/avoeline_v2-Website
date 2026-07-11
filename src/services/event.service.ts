@@ -266,13 +266,15 @@ export const EventService = {
   async create_event(formdata: EventFormData, organizer_id: string) {
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id;
+ 
     const docRef = adminDb.collection("events").doc();
     const id_generated = docRef.id;
     event_to_be_added.id = id_generated;
 
-    await adminDb.collection("organizers").doc(organizer_id).set({
+    await adminDb.collection("events").doc(id_generated).set({
       ...event_to_be_added
     })
     console.log(`Document successfully written with ID: ${id_generated}`);
+    return id_generated;
   }
 }
