@@ -12,10 +12,16 @@ import { mockCertificates } from "./app/mockdata/certificates.mock.ts";
 
 
 export async function seedEvents() {
-    for (const x of mockCertificates) {
-        const docRef = doc(db, "certificates", x.certificateId);
+    for (const x of mockEvents) {
+        const docRef = doc(db, "events", x.eventId);
         await setDoc(docRef, x)
-        console.log(" seeded", " ",x.certificateId)
+        console.log(" seeded", " ",x.eventId);
+    }
+
+     for (const x of mockAttendee) {
+        const docRef = doc(db, "attendees", x.attendeeId);
+        await setDoc(docRef, x)
+        console.log(" seeded", " ",x.attendeeId)
     }
 
     

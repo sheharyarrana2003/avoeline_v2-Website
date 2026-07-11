@@ -16,7 +16,7 @@ export default async function SpeakerPage(
     const { eventId, organizer_id } = await params;
     const resolvedParams = await searchParams;
 
-    const allSpeakers : Speaker[]= await SpeakerService.getAllSpeakers(organizer_id, eventId);
+    const allSpeakers : Speaker[]= await SpeakerService.getAllSpeakers(eventId);
     let allSpeaker;
 
     if (resolvedParams.input_val) {

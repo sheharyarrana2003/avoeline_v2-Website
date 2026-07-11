@@ -6,7 +6,7 @@ import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 
 export const SpeakerService = {
-    async getAllSpeakers(organizer_id: string, event_id: string) {
+    async getAllSpeakers( event_id: string) {
         const Event = await EventService.getEventByID(event_id);
         const speakers_of_organizer = Event?.speakers || [];
         return speakers_of_organizer;

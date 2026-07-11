@@ -4,13 +4,15 @@ import { Calendar, Clock, MapPin, ChevronDown, X, User, CheckCircle, AlertCircle
 import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { createAgendaAction } from "@/src/features/agendas/actions/createAgenda.action";
+import { Speaker } from "@/src/services/models/event.model";
 
 interface CreateAgendaFormProps {
     eventId: string;
     organizerId: string;
+    activeSpeakers?: Speaker[]; 
 }
 
-export default function CreateAgendaForm({ eventId, organizerId }: CreateAgendaFormProps) {
+export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers }: CreateAgendaFormProps) {
     const router = useRouter();
 
     const boundAction = createAgendaAction.bind(null, eventId, organizerId);
@@ -185,23 +187,18 @@ export default function CreateAgendaForm({ eventId, organizerId }: CreateAgendaF
 
                     {/* Speaker Names */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Speaker Name(s)
-                        </label>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Event</label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <User size={18} className="text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                name="speakerNames"
-                                placeholder="e.g., Jane Doe, John Smith  (comma-separated)"
-                                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                            <select name="selectedEventId" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none">
+                                {activeSpeakers && activeSpeakers.map((x) => (
+                                    /* 2. Set the value to the event ID, but display the name */
+                                    <option key={x.speakerId} value={x.speakerId}>
+                                        {x.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                        <p className="mt-1 text-xs text-gray-400">Separate multiple speakers with commas</p>
                     </div>
-
                     {/* Session Description */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">
