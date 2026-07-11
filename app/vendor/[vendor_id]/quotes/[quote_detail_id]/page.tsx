@@ -23,7 +23,7 @@ const formatDateTime = (dateString: string) => {
     });
 };
 
-const formatCurrency = (amount: number, currency: string = "PKR") => {
+const formatCurrency = (amount: number = 0, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
     return new Intl.NumberFormat('en-PK', {
         style: 'currency',
@@ -32,7 +32,7 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount);
 };
 
-const timeAgo = (timestamp: string) => {
+const timeAgo = (timestamp: string ="") => {
     if (!timestamp) return "Recently";
     const diff = Date.now() - new Date(timestamp).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -42,7 +42,7 @@ const timeAgo = (timestamp: string) => {
     return `${days} day${days > 1 ? 's' : ''} ago`;
 };
 
-const getDaysRemaining = (validityDate: string) => {
+const getDaysRemaining = (validityDate: string="") => {
     if (!validityDate) return null;
     const validity = new Date(validityDate);
     const now = new Date();
@@ -118,9 +118,9 @@ export default async function QuoteDetailPage({
 
     // Extract booking data with fallbacks
     const b = booking;
-    const requirements = b?.requirements || {};
-    const quote = b?.quote || {};
-    const vendorQuote = quote?.vendorQuote || {};
+    const requirements = b?.requirements ;
+    const quote = b?.quote ;
+    const vendorQuote = quote?.vendorQuote ;
     const breakdown = vendorQuote?.breakdown || [];
     const negotiation = quote?.negotiation || [];
     const contract = b?.contract || {};
@@ -137,7 +137,7 @@ export default async function QuoteDetailPage({
     const organizerEmail = "s.khan@techverse.io";
     const organizerPhone = "(555) 123-4567";
 
-    const deadline = getDaysRemaining(vendorQuote?.validity);
+    const deadline = getDaysRemaining(vendorQuote?.validity ||"");
     const statusLabel = getStatusLabel(b?.status);
     const statusBadge = getStatusBadge(b?.status);
 
@@ -180,7 +180,7 @@ export default async function QuoteDetailPage({
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Expanded View</span>
                                     <h2 className="text-xl font-bold text-gray-900 mt-0.5">{eventTitle}</h2>
                                     <p className="text-sm text-gray-400 mt-1">
-                                        Request ID: #{b?.bookingId} • Event Date: {formatDate(eventDate)}
+                                        Request ID: #{b?.bookingId} • Event Date: {formatDate(eventDate || "")}
                                     </p>
                                 </div>
                             </div>
@@ -339,13 +339,13 @@ export default async function QuoteDetailPage({
                                 </div>
 
                                 {/* Quote Summary (if quote exists) */}
-                                {vendorQuote?.totalAmount > 0 && (
+                                {vendorQuote?.totalAmount || 0> 0 && (
                                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                                         <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Current Quote</h3>
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Base Price</span>
-                                                <span className="text-sm font-semibold text-gray-900">{formatCurrency(vendorQuote?.basePrice)}</span>
+                                                <span className="text-sm font-semibold text-gray-900">{formatCurrency(vendorQuote?.basePrice || 0)}</span>
                                             </div>
 
                                             {vendorQuote?.additionalCharges?.map((charge: any, i: number) => (
@@ -355,10 +355,10 @@ export default async function QuoteDetailPage({
                                                 </div>
                                             ))}
 
-                                            {vendorQuote?.discount > 0 && (
+                                            {vendorQuote?.discount || 0 > 0 && (
                                                 <div className="flex justify-between">
                                                     <span className="text-sm text-gray-500">Discount</span>
-                                                    <span className="text-sm font-semibold text-green-600">-{formatCurrency(vendorQuote?.discount)}</span>
+                                                    <span className="text-sm font-semibold text-green-600">-{formatCurrency(vendorQuote?.discount || 0)}</span>
                                                 </div>
                                             )}
 

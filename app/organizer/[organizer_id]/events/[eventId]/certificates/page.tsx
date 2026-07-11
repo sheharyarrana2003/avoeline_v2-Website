@@ -23,8 +23,13 @@ export default async function CertificateIssuancePage({
     const attendeesWithData: AttendeeCertProp[] = await Promise.all(
         attendeeList.map(async (a) => {
             console.log("onepointfive")
-            const user = await UserService.getUserById(a.userId);
-            const certStatus = await CertificateService.cert_for_attendee(a.userId);
+
+            const [user, certStatus] = await Promise.all([
+                UserService.getUserById(a.userId),
+                CertificateService.cert_for_attendee(a.userId)
+
+            ])
+
 
             return {
                 a,
@@ -38,7 +43,7 @@ export default async function CertificateIssuancePage({
 
     async function handleGenerateCertificates(selectedAttendeeIds: string[]) {
         "use server";
-        await CertificateService.generateCertificatesForEvent(eventId,organizer_id,)
+        await CertificateService.generateCertificatesForEvent(eventId, organizer_id,)
         // TODO: implement certificate generation logic (I'll write this myself)
     }
 

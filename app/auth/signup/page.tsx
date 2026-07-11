@@ -18,7 +18,6 @@ export default function SignIn() {
         if (user === null) {
             redirect("/auth/signup");
         } else {
-            const user_id = user.userId;
             const user_role = user.userType;
             redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
         }

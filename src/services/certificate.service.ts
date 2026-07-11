@@ -95,7 +95,7 @@ export const CertificateService = {
   async cert_for_attendee(id: String) {
     const querySnapshot = await adminDb.collection("certificates").where("userId", "==", id).get();
     if (querySnapshot.empty) {
-      return { status: "pending" };
+      return null;
     }
     return createCertificateDocument(querySnapshot.docs[0].data());
   },
@@ -134,7 +134,7 @@ export const CertificateService = {
           status: 'ready',
           content: {
             recipientName: registrationData.userName || 'Attendee',
-            eventTitle: event?.title,
+            eventTitle: event?.title || "",
             completionDate: completionDate,
             duration: 'N/A',
             issuerName: organizer_id,

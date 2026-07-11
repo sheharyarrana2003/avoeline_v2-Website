@@ -1,5 +1,6 @@
 import { AttendeeService } from "@/src/features/event_attendee/attendee.service"
 import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event_attendee/components/AttendeeClientSide";
+import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 
 export default async function speaker({ params }: { params: Promise<{ eventId: string }> }) {
@@ -12,10 +13,15 @@ export default async function speaker({ params }: { params: Promise<{ eventId: s
         console.log("one");
           attendeesWithUsers = await Promise.all(
         attendee.map(async (a) => {
-            const user = await UserService.getUserById(a.userId);
+
+            const [user,reg] = await Promise.all([
+                 UserService.getUserById(a.userId),
+                 RegService.getRegOfUser(a.userId)
+            ])
             return {
                 a: a,
-                user: user 
+                user: user ,
+                register: reg
             };
         })
     );

@@ -1,4 +1,5 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 
 const CATEGORIES = [
@@ -19,52 +20,95 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
-const RatingBars = ({ breakdown }: { breakdown: any }) => {
-    const total = Object.values(breakdown || {}).reduce((a: any, b: any) => Number(a) + Number(b), 0);
-    if (!total) return null;
-    
-    return (
-        <div className="flex items-center gap-0.5">
-            {[5, 4, 3, 2, 1].map((star) => {
-                const count = breakdown?.[star.toString()] || 0;
-                const percentage = total > 0 ? (count / total) * 100 : 0;
-                return (
-                    <div 
-                        key={star} 
-                        className={`w-1 h-3 rounded-full ${percentage > 50 ? 'bg-gray-800' : 'bg-gray-300'}`}
-                        title={`${star} stars: ${count} reviews`}
-                    />
-                );
-            })}
-        </div>
-    );
-};
+// const RatingBars = ({ breakdown }: { breakdown: any }) => {
+//     const total = Object.values(breakdown || {}).reduce((a: any, b: any) => Number(a) + Number(b), 0);
+//     if (!total) return null;
 
-export default async function Vendor_Marketplace({ 
+//     return (
+//         <div className="flex items-center gap-0.5">
+//             {[5, 4, 3, 2, 1].map((star) => {
+//                 const count = breakdown?.[star.toString()] || 0;
+//                 const percentage = total > 0 ? (count / total) * 100 : 0;
+//                 return (
+//                     <div 
+//                         key={star} 
+//                         className={`w-1 h-3 rounded-full ${percentage > 50 ? 'bg-gray-800' : 'bg-gray-300'}`}
+//                         title={`${star} stars: ${count} reviews`}
+//                     />
+//                 );
+//             })}
+//         </div>
+//     );
+// };
+
+export default async function Vendor_Marketplace({
     params,
-    searchParams 
-}: { 
+    searchParams
+}: {
     params: Promise<{ organizer_id: string }>;
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }> 
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
     const awaited_params = await params;
     const awaited_search_params = await searchParams;
-    
+
     const { organizer_id } = awaited_params;
-    const raw_vendors = await EventVendorService.getAllVendors();
+    const vendors: VendorData[] | null = await EventVendorService.getAllVendors();
+
+    if (!vendors) {
+       return <div className="min-h-screen bg-gray-50 p-6 md:p-8">
+            <div className="max-w-7xl mx-auto">
+
+                {/* Page Title */}
+                <h1 className="text-2xl font-bold text-gray-900 mb-6">Discover Providers</h1>
+
+                {/* Category Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                    {CATEGORIES.map((cat) => {
+                        const isActive = category === cat.id || (!category && cat.id === "all");
+
+                        return (
+                            <Link
+                                key={cat.id}
+                                href={cat.id === "all"
+                                    ? `${base_url}`
+                                    : `${base_url}?category=${cat.id}`
+                                }
+                                className={`
+                                    flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all
+                                    ${isActive
+                                        ? "bg-black text-white shadow-md"
+                                        : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                                    }
+                                `}
+                            >
+                                <span className="text-base">{cat.icon}</span>
+                                <span>{cat.label}</span>
+                                {cat.count && (
+                                    <span className={`text-xs ${isActive ? "text-gray-300" : "text-gray-400"}`}>
+                                        ({cat.count})
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+                <div><h1>no vendors to display</h1></div>
+            </div>
+        </div>
+
+    }
+
     const category = awaited_search_params.category;
     const string_to_be_searched = awaited_search_params.input_val;
-    
-    let vendors = [];
-    vendors = raw_vendors;
-    
+
+
     const base_url = `/organizer/${organizer_id}/vendor-marketplace`;
 
     // Filter vendors by category if selected
     const filteredVendors = category && category !== "all"
-        ? vendors.filter((v: any) => 
+        ? vendors.filter((v: any) =>
             v?.serviceCategories?.some((c: string) => c.toLowerCase() === category.toString().toLowerCase())
-          )
+        )
         : vendors;
 
     return (
@@ -78,18 +122,18 @@ export default async function Vendor_Marketplace({
                 <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
                     {CATEGORIES.map((cat) => {
                         const isActive = category === cat.id || (!category && cat.id === "all");
-                        
+
                         return (
                             <Link
                                 key={cat.id}
-                                href={cat.id === "all" 
-                                    ? `${base_url}` 
+                                href={cat.id === "all"
+                                    ? `${base_url}`
                                     : `${base_url}?category=${cat.id}`
                                 }
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all
-                                    ${isActive 
-                                        ? "bg-black text-white shadow-md" 
+                                    ${isActive
+                                        ? "bg-black text-white shadow-md"
                                         : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                                     }
                                 `}
@@ -113,8 +157,8 @@ export default async function Vendor_Marketplace({
                         <span className="bg-black text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
                             {category}
                         </span>
-                        <Link 
-                            href={base_url} 
+                        <Link
+                            href={base_url}
                             className="text-xs text-gray-400 hover:text-gray-600 underline ml-2"
                         >
                             Clear filter
@@ -137,12 +181,12 @@ export default async function Vendor_Marketplace({
 
                         return (
                             <div key={vendor?.vendorId} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group">
-                                
+
                                 {/* Image Header */}
                                 <div className="relative h-48 bg-gray-200 overflow-hidden">
                                     {portfolioImage ? (
-                                        <img 
-                                            src={portfolioImage} 
+                                        <img
+                                            src={portfolioImage}
                                             alt={vendor?.businessName}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -165,10 +209,10 @@ export default async function Vendor_Marketplace({
                                     <div className="flex items-start gap-3 mb-2">
                                         <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                                             <span className="text-lg">
-                                                {primaryCategory === "catering" ? "🍴" : 
-                                                 primaryCategory === "venues" ? "🏛️" : 
-                                                 primaryCategory === "decor" ? "🌸" : 
-                                                 primaryCategory === "photography" ? "📷" : "🏢"}
+                                                {primaryCategory === "catering" ? "🍴" :
+                                                    primaryCategory === "venues" ? "🏛️" :
+                                                        primaryCategory === "decor" ? "🌸" :
+                                                            primaryCategory === "photography" ? "📷" : "🏢"}
                                             </span>
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -199,7 +243,7 @@ export default async function Vendor_Marketplace({
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                         <span className="text-xs text-gray-500">{city}{country ? `, ${country}` : ''}</span>
-                                        <RatingBars breakdown={vendor?.ratings?.breakdown} />
+                                        {/* <RatingBars breakdown={vendor?.ratings?.breakdown} /> */}
                                     </div>
 
                                     {/* Price */}
@@ -210,13 +254,13 @@ export default async function Vendor_Marketplace({
 
                                     {/* Action Buttons */}
                                     <div className="flex gap-3">
-                                        <Link 
+                                        <Link
                                             href={`/organizer/${organizer_id}/view-vendor/${vendor?.vendorId}`}
                                             className="flex-1 py-2.5 px-4 rounded-full border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition text-center"
                                         >
                                             View Profile
                                         </Link>
-                                        <Link 
+                                        <Link
                                             href={`/organizer/${organizer_id}/view-vendor/${vendor?.vendorId}/req-quote`}
                                             className="flex-1 py-2.5 px-4 rounded-full bg-black text-white text-sm font-semibold hover:bg-gray-800 transition text-center"
                                         >

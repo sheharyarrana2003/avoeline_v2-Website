@@ -21,20 +21,20 @@ interface signup_with_email_form_data {
     userType: string;
 }
 
-const fetching_data_from_db = async () => {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("firebaseToken")?.value;
+// const fetching_data_from_db = async () => {
+//     const cookieStore = await cookies();
+//     const token = cookieStore.get("firebaseToken")?.value;
 
-    if (!token) revalidatePath("/auth/signup");
+//     if (!token) revalidatePath("/auth/signup");
 
-    try {
-        const obj = await adminAuth.verifyIdToken(token);
-        return UserService.getUserById(obj.uid);
-    } catch (error) {
-        console.log("[user error] cannot be logged in cookie not found")
-        throw error;
-    }
-}
+//     try {
+//         const obj = await adminAuth.verifyIdToken(token);
+//         return UserService.getUserById(obj.uid);
+//     } catch (error) {
+//         console.log("[user error] cannot be logged in cookie not found")
+//         throw error;
+//     }
+// }
 function isValidCurrentUserData(data: unknown): data is CurrentUserData {
     if (typeof data !== "object" || data === null) return false;
     const d = data as Record<string, unknown>;

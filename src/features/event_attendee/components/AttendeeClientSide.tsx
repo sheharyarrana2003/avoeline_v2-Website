@@ -7,11 +7,13 @@ import { SingleAttendeeView } from "./SingleAttendeeView";
 import { AttendeeInput } from "./AttendeeInput";
 import { AttendeeCard } from "./AttendeeCard";
 import { Mail, MessageSquare, Download, CheckCircle, Trash2, Calendar, Ticket } from "lucide-react";
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { Registration } from "@/src/services/models/reg.type";
+import { useSearchParams } from "next/navigation";
 
 export interface AttendeeClientSideProp {
     a: Attendee,
-    user: User
+    user: User,
+    register: Registration
 }
 
 export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[]|[] }) {
@@ -47,13 +49,18 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
         let cancelled = 0;
         let pending = 0;
 
-        attendees.forEach((item) => {
-            const status = (item.user?.accountStatus === "active" ? "REGISTERED" : "PENDING");
-            const isCheckedIn = status === "CHECKED IN" || status === "CHECKED_IN" || item.a?.isCheckedIn === true;
+
+        attendees.forEach(async (item) => {
+            const reg_of_this_user : Registration|null= item.register;
+            if(!reg_of_this_user){
+                return;
+            }
+            const status = reg_of_this_user.status;
+            const isCheckedIn = status === "checked_in";
 
             if (isCheckedIn) {
                 checkedIn++;
-            } else if (status === "CANCELLED") {
+            } else if (status === "cancelled") {
                 cancelled++;
             } else {
                 pending++;
@@ -125,6 +132,7 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
                                 key={acs.a.attendeeId}
                                 single_attendee={acs.a}
                                 attendee_user={acs.user}
+                                attendee_reg={acs.register}
                                 handleOnClick={handleOnClick}
                                 handleCheckBoxChange={handleCheckBoxChange}
                                 isSelected={selected_ids.includes(acs.a.attendeeId)}

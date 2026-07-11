@@ -173,7 +173,7 @@ export const EventService = {
   },
   async getRecentRegEvents(event_id: string): Promise<RecentRegistration[]> {
     // No orderBy — avoids composite index requirement; sort in memory
-    const snap = await adminDb
+    const snap : QuerySnapshot= await adminDb
       .collection("registerations")
       .where("eventId", "==", event_id)
       .get();

@@ -1,4 +1,4 @@
-import { mockEvents, mockEventStats } from "@/app/mockdata/events.mock";
+import { mockEvents } from "@/app/mockdata/events.mock";
 
 export const EventController = {
     async getAllEvents() {

@@ -1,7 +1,10 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { BookingData } from "@/src/features/bookings/types";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
+import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -105,11 +108,19 @@ export default async function VendorDashboardPage({
     const { vendor_id } = await params;
     
     // Fetch vendor data
-    const vendor = await EventVendorService.getVendorById(vendor_id);
-    const v = vendor || {};
+    const v : VendorData|null = await EventVendorService.getVendorById(vendor_id);
+
+    if(!v){
+        notFound();
+    }
+   
     
     // Fetch all bookings for this vendor
-    const raw_bookings = await BookingServices.getAllBookingsOfVendor(vendor_id) || [];
+    let raw_bookings : BookingData[]|null = await BookingServices.getAllBookingsOfVendor(vendor_id) ;
+
+    if(!raw_bookings){
+        raw_bookings= [];
+    }
     
     const businessName = v?.businessName || "Vendor Dashboard";
     const vendorRating = v?.ratings?.averageRating || 0;

@@ -1,3 +1,4 @@
+import { QuerySnapshot } from "firebase-admin/firestore";
 import { User } from "./models/user.type";
 import { adminDb } from "@/data/admin_db";
 
@@ -51,10 +52,10 @@ function mapToUser(raw: any): User {
 
 export const UserService = {
   async getUserById(user_id: String) {
-    const docSnap = await adminDb.collection("users").doc(String(user_id)).get();
+    const docSnap :  QuerySnapshot= await adminDb.collection("users").doc(String(user_id)).get();
     const user_to_front_end = {
       user_id,
-      ...docSnap.data()
+      ...docSnap.docs[0].data()
     };
     return mapToUser(user_to_front_end);
   }

@@ -5,8 +5,8 @@ import {
 } from "@/src/features/analytics/types";
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
+import { QuerySnapshot } from "firebase-admin/firestore";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
 
 function formatCurrency(value: number): string {
     if (value >= 1_000_000) return `PKR ${(value / 1_000_000).toFixed(1)}M`;
@@ -32,14 +32,12 @@ function endOfDay(d: Date): Date {
     return r;
 }
 
-// ─── AnalyticsService ─────────────────────────────────────────────────────────
 
 export const AnalyticsService = {
 
-    // ── Dashboard Stats ───────────────────────────────────────────────────────
 
     async getDashboardStat(organizerId: string) {
-        const eventsSnap = await adminDb
+        const eventsSnap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -85,7 +83,7 @@ export const AnalyticsService = {
         const todayStart = startOfDay(now);
         const todayEnd = endOfDay(now);
 
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -128,7 +126,7 @@ export const AnalyticsService = {
     async getUpcomingEvents(organizerId: string): Promise<DashboardEvent[]> {
         const now = new Date();
 
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -170,7 +168,7 @@ export const AnalyticsService = {
 
     async getRecentReg(organizerId: string): Promise<RecentRegistration[]> {
         // No orderBy — avoids composite index requirement; sort in memory
-        const snap = await adminDb
+        const snap : QuerySnapshot = await adminDb
             .collection("registerations")
             .where("organizerId", "==", organizerId)
             .get();
@@ -219,7 +217,7 @@ export const AnalyticsService = {
         sevenDaysAgo.setHours(0, 0, 0, 0);
 
         // Single-field where only — no composite index needed; date filter in memory
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("registerations")
             .where("organizerId", "==", organizerId)
             .get();
@@ -264,7 +262,7 @@ export const AnalyticsService = {
     // ── Analytics Page — Metrics ───────────────────────────────────────────────
 
     async getAnalyticsTotalEvents(organizerId: string): Promise<AnalyticsMetric> {
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -285,7 +283,7 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
-        const eventsSnap = await adminDb
+        const eventsSnap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -311,7 +309,7 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -333,7 +331,7 @@ export const AnalyticsService = {
 
     async getAnalyticsAvgSatisfaction(organizerId: string): Promise<AnalyticsMetric> {
         // Single-field where only — rating > 0 filter done in memory
-        const snap = await adminDb
+        const snap: QuerySnapshot = await adminDb
             .collection("registerations")
             .where("organizerId", "==", organizerId)
             .get();
@@ -365,7 +363,7 @@ export const AnalyticsService = {
         thirtyDaysAgo.setDate(now.getDate() - 29);
         thirtyDaysAgo.setHours(0, 0, 0, 0);
 
-        const snap = await adminDb
+        const snap : QuerySnapshot= await adminDb
             .collection("registerations")
             .where("organizerId", "==", organizerId)
             .get();
@@ -408,7 +406,7 @@ export const AnalyticsService = {
         organizerId: string
     ): Promise<AnalyticsEventPerformance[]> {
         // No orderBy — avoids composite index requirement; sort in memory
-        const snap = await adminDb
+        const snap: QuerySnapshot = await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();
@@ -447,7 +445,7 @@ export const AnalyticsService = {
 
     async getAnalyticsDateRange(organizerId: string): Promise<string> {
         // No orderBy — fetch all, find earliest in memory
-        const snap = await adminDb
+        const snap: QuerySnapshot = await adminDb
             .collection("events")
             .where("organizerId", "==", organizerId)
             .get();

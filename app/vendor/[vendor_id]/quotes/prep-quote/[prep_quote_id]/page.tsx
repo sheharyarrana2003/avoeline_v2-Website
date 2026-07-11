@@ -23,6 +23,7 @@ export default async function PrepareQuotePage({
 
     if (!booking) {
         console.log()
+        notFound();
     }
 
     // Fetch event details

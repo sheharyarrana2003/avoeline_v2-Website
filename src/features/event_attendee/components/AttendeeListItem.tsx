@@ -1,21 +1,23 @@
 "use client"
 import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
+import { Registration } from "@/src/services/models/reg.type";
 import { MoreHorizontal } from "lucide-react";
 
 export function AttendeeListItem(
-    { single_attendee, attendee_user, handleOnClick, handleCheckBoxChange, isSelected }:
+    { single_attendee, attendee_user, attendee_reg,handleOnClick, handleCheckBoxChange, isSelected }:
         {
             single_attendee: Attendee,
             attendee_user: User,
+            attendee_reg: Registration
             handleOnClick: (attendee_id: string, user_id: string) => void,
             handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>, attendee_id: string) => void,
             isSelected: boolean
         }) {
 
     const status = (attendee_user?.accountStatus === "active" ? "REGISTERED" : "PENDING");
-    const isCheckedIn = status === "CHECKED_IN" || true; // Mocked active for visual matching
-    const ticketType = "STUDENT PASS";
+    const isCheckedIn = attendee_reg.status || true; // Mocked active for visual matching
+    const ticketType = attendee_reg.pricingTier;
 
     return (
         <div 

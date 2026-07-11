@@ -36,9 +36,12 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
     // Fetch data
     const raw_booking = await BookingServices.getBookingById(booking_id);
     console.log(raw_booking?.organizerId);
-    const organizer = await OrganizerService.getOrganizerById(raw_booking?.organizerId.substring(2) || '');
-    const vendor = await OrganizerService.getOrganizerById(vendor_id || '');
-    const event = await EventService.getEventByID(raw_booking?.eventId || '');
+ 
+    const [organizer,vendor,event] = await Promise.all([
+        OrganizerService.getOrganizerById(raw_booking?.organizerId.substring(2) || ''),
+         EventVendorService.getVendorById(vendor_id || ''),
+        EventService.getEventByID(raw_booking?.eventId || '')
+    ])
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] p-4 md:p-8 font-sans text-gray-900">
@@ -87,7 +90,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                             </div>
                             <div className="border-t border-gray-100 pt-4 flex items-center gap-2">
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                <span className="text-sm font-medium text-gray-600">Completed: <strong>{formatDate(raw_booking?.completedAt)}</strong></span>
+                                <span className="text-sm font-medium text-gray-600">Completed: <strong>{formatDate(raw_booking?.completedAt || "")}</strong></span>
                             </div>
                         </div>
 
@@ -117,7 +120,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 </div>
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Service Time</p>
-                                    <p className="font-semibold">{formatTime(raw_booking?.requirements?.startTime)} - {formatTime(raw_booking?.requirements?.endTime)}</p>
+                                    <p className="font-semibold">{formatTime(raw_booking?.requirements?.startTime || "")} - {formatTime(raw_booking?.requirements?.endTime|| "")}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Special Requirements</p>
@@ -142,10 +145,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div className="border border-gray-100 rounded-xl p-4">
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Delivery Schedule</p>
-                                    <p className="font-bold text-lg">{formatTime(raw_booking?.delivery?.scheduledTime)}</p>
+                                    <p className="font-bold text-lg">{formatTime(raw_booking?.delivery?.scheduledTime || "")}</p>
                                     <p className="text-[10px] font-bold text-green-600 mt-2 flex items-center gap-1">
                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                        ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime)}
+                                        ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime || "")}
                                     </p>
                                 </div>
                                 <div className="border border-gray-100 rounded-xl p-4">

@@ -127,7 +127,7 @@ export const EventVendorService = {
                 collection("vendor").
                 where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
             
-            const querySnapshot2 = await q.get();
+            const querySnapshot2 : QuerySnapshot= await q.get();
             tracker_of_chunks += max_num_firebase_allows;
             if (!querySnapshot2.empty) {
                 querySnapshot2.forEach(x => {

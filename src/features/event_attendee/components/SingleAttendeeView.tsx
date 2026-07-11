@@ -1,48 +1,40 @@
 "use client"
+import { Registration } from "@/src/services/models/reg.type";
 import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 
 import { Mail, Phone, CheckCircle2, Trash2, X, QrCode, Clock } from "lucide-react";
 
 import { useState } from "react";
+import { AttendeeClientSideProp } from "./AttendeeClientSide";
 interface SingleAttendeeViewProps {
     a: Attendee,
-    user: User
+    user: User,
+    reg: Registration
 }
 
-export function SingleAttendeeView({ combined_data, onClose }: { combined_data: SingleAttendeeViewProps, onClose: () => void }) {
+export function SingleAttendeeView({ combined_data, onClose }: { combined_data: AttendeeClientSideProp, onClose: () => void }) {
     // 1. Safely extract core data
   const a = combined_data?.a || {} as any;
     const u = combined_data?.user || {} as any;
+    const r= combined_data?.register || {} as any;
 
-    const fullName = u?.profile?.fullName || a?.name || "Unknown Attendee";
+    const fullName = u?.profile?.fullName || "Unknown Attendee";
     const email = u?.email || "No email provided";
     const phone = u?.profile?.phoneNumber  || "No phone provided"; 
     
-        //!these things are not present in the schema but front end pa dispkay ho raha
-        //! amount paid tak nai addeddd
-
-    // const organization = a?.academic?.university || a?.organization || u?.profile?.company || "Not Provided";
-    // const amountPaid = a?.amountPaid != null ? `PKR ${a.amountPaid}` : "N/A"; 
-    // const ticketType = a?.academic?.isStudentVerified ? "STUDENT PASS" : (a?.ticketType || "STANDARD PASS");
-
     const organization = a?.academic?.university || "Not Provided";
-    const amountPaid = "N?A";
-    const ticketType ="Standard";
+    const amountPaid = r.payment.amountPaid;
+    const ticketType =r.pricingTier;
     
-    const status = (u?.accountStatus === "active" ? "REGISTERED" : "PENDING");
 
-    const isCheckedIn =  status === "CHECKED_IN" ;
+    const isCheckedIn = r.status ;
     const dietaryPreference= "N/A";
 
-    //!these things are not present in the schema but front end pa dispkay ho raha
-    // const checkInTime = a?.checkInTime || "N/A";
-    // const checkInMethod = a?.checkInMethod || "N/A";
-    // const checkInDesk = a?.checkInDesk || "N/A";
 
-     const checkInTime =  "N/A";
-    const checkInMethod =  "N/A";
-    const checkInDesk = "N/A";
+     const checkInTime =  r.checkIn.checkInTime;
+    const checkInMethod = r.checkIn.checkInMethod;
+    const checkInDesk = r.checkIn.deviceId;
 
     const department = a?.academic?.department || "Not Specified";
     const studentId = a?.academic?.studentId || "Not Specified";

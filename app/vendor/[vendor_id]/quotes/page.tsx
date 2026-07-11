@@ -125,20 +125,19 @@ export default async function VendorQuoteManagementPage({
     let selectedEvent: any = null;
     if (selectedQuote?.eventId) {
         try {
-            // NOTE: assumes EventService.getEventById exists. Adjust if your service uses a different method name.
             selectedEvent = await EventService.getEventByID(selectedQuote.eventId);
         } catch {
             selectedEvent = null;
         }
     }
 
-    const ev = selectedEvent || {};
+    const ev = selectedEvent ;
     const eventName = ev?.eventName || ev?.name || selectedQuote?.eventId || "Unknown Event";
     const organizerName = ev?.organizerName || selectedQuote?.organizerId || "Unknown Organizer";
 
-    const quote = selectedQuote?.quote || {};
-    const vendorQuote = quote?.vendorQuote || {};
-    const breakdown = vendorQuote?.breakdown || [];
+    const quote = selectedQuote?.quote ;
+    const vendorQuote = quote?.vendorQuote ;
+    const breakdown = vendorQuote?.breakdown ||[];
     const totalAmount = vendorQuote?.totalAmount || 0;
     const currency = selectedQuote?.payment?.currency || "PKR";
     const validity = quote?.vendorQuote?.validity || "";

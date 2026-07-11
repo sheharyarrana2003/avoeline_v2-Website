@@ -8,7 +8,7 @@ import { CertificateDocument } from '@/src/services/models/certificate.model';
 export interface AttendeeCertProp {
     a: Attendee;
     user: User;
-    certStatus: CertificateDocument;
+    certStatus: CertificateDocument|null;
 }
 
 interface CertificateIssuanceClientProps {

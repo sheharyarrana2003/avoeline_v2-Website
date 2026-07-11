@@ -2,13 +2,14 @@
   "name": "avoeline",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "NODE_OPTIONS='--require newrelic' next dev",
-  "build": "next build",
-  "start": "NODE_OPTIONS='--require newrelic' next start",
-  "lint": "eslint"
-},
+  "scripts": {
+    "dev": "NODE_OPTIONS='--require newrelic' next dev",
+    "build": "next build",
+    "start": "NODE_OPTIONS='--require newrelic' next start",
+    "lint": "eslint"
+  },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "firebase": "^12.15.0",
     "firebase-admin": "^14.1.0",
     "lucide-react": "^1.17.0",
