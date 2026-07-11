@@ -1,11 +1,7 @@
-import { mockBookings } from "@/app/mockdata/bookings.mock";
-import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
-import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
-import { auth, db } from '@/data/db'
 import { BookingData } from "../bookings/types";
 import { console } from "inspector";
-import { adminAuth, adminDb } from "@/data/admin_db";
+import {  adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 
 
@@ -95,12 +91,11 @@ export const EventVendorService = {
         console.log("firstttt");
         let arr_of_bookings: BookingData[] = [];
 
-        const q = query(
-            collection(db, "bookings"),
+        const q = adminDb.
+            collection("bookings").
             where("eventId", "==", eventId)
-        )
-
-        const querySnapshot = await getDocs(q);
+        
+        const querySnapshot : QuerySnapshot = await q.get();
         if (querySnapshot.empty) {
             console.log("query shot is emptyyy");
             return null;

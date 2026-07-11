@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--require newrelic' next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "NODE_OPTIONS='--require newrelic' next start",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
