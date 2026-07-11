@@ -1,6 +1,7 @@
 import { adminDb } from '@/data/admin_db';
 import { Organizer } from './models/organizer.model';
 import { QuerySnapshot } from 'firebase-admin/firestore';
+import { COLLECTIONS } from '@/data/collections';
 
 
 function mapToOrganizer(item: any): Organizer {
@@ -125,7 +126,7 @@ function mapToOrganizer(item: any): Organizer {
 
 export const OrganizerService = {
   async getOrganizerById(id: String) {
-    const docSnap : QuerySnapshot = await adminDb.collection("organizer").doc(String(id)).get();
+    const docSnap : QuerySnapshot = await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(String(id)).get();
     return mapToOrganizer(docSnap.docs[0].data());
   }
 }

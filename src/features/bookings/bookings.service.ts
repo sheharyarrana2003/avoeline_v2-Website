@@ -8,6 +8,7 @@ import { EventVendorService } from "../event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
+import { COLLECTIONS } from "@/data/collections";
 
 function mapToBooking(item: any): BookingData {
   if (!item) {
@@ -174,7 +175,7 @@ export const BookingServices = {
 
     let arr_of_bookings: BookingData[] = [];
 
-    const q = adminDb.collection("bookings").where("organizerId", "==", organizerId)
+    const q = adminDb.collection(COLLECTIONS.BOOKINGS).where("organizerId", "==", organizerId)
 
 
     const querySnapshot: QuerySnapshot = await q.get();
@@ -252,7 +253,7 @@ export const BookingServices = {
 
   async getBookingById(booking_id: string) {
     const q = adminDb.
-      collection("bookings").
+      collection(COLLECTIONS.BOOKINGS).
       where("bookingId", "==", booking_id)
 
 
@@ -269,7 +270,7 @@ export const BookingServices = {
     let arr_of_bookings: BookingData[] = [];
 
     const q = adminDb.
-      collection("bookings").
+      collection(COLLECTIONS.BOOKINGS).
       where("organizerId", "==", organizerId)
 
 
@@ -291,7 +292,7 @@ export const BookingServices = {
 
 
     const q = adminDb.
-      collection("bookings").
+      collection(COLLECTIONS.BOOKINGS).
       where("vendorId", "==", vendorId)
 
 
@@ -314,7 +315,7 @@ export const BookingServices = {
     eventId: string = '',
     vendorId: string = ''
   ) {
-    const docRef = adminDb.collection("bookings").doc();;
+    const docRef = adminDb.collection(COLLECTIONS.BOOKINGS).doc();;
     const id_generated = docRef.id;
     const timestamp = new Date().toISOString();
 
@@ -421,7 +422,7 @@ export const BookingServices = {
       cancelledAt: null
     };
 
-    await adminDb.collection("bookings").doc(id_generated).set({ ...booking_object });
+    await adminDb.collection(COLLECTIONS.BOOKINGS).doc(id_generated).set({ ...booking_object });
     console.log("populated the booking -> ", id_generated);
   },
 
@@ -429,7 +430,7 @@ export const BookingServices = {
     if (!updated_booking) {
       return;
     }
-    await adminDb.collection("bookings").doc(updated_booking.bookingId).update({ ...updated_booking });
+    await adminDb.collection(COLLECTIONS.BOOKINGS).doc(updated_booking.bookingId).update({ ...updated_booking });
   }
 
 }

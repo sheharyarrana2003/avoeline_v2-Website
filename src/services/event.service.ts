@@ -2,6 +2,7 @@ import { EventFormData, EventModel } from "./models/event.model";
 import { RecentRegistration } from '../features/dashboard/types';
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
+import { COLLECTIONS } from "@/data/collections";
 
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
@@ -148,7 +149,7 @@ export const EventService = {
 
 
     try {
-      querySnapshot = await adminDb.collection("events").where("id", "==", id).get();
+      querySnapshot = await adminDb.collection(COLLECTIONS.EVENTS).where("id", "==", id).get();
     } catch (err) {
       console.error("[getEventByID] Firestore query failed", { id, err });
       throw new Error(`Failed to fetch event ${id}`, { cause: err });
@@ -174,7 +175,7 @@ export const EventService = {
   async getRecentRegEvents(event_id: string): Promise<RecentRegistration[]> {
     // No orderBy — avoids composite index requirement; sort in memory
     const snap : QuerySnapshot= await adminDb
-      .collection("registerations")
+      .collection(COLLECTIONS.REGISTRATIONS)
       .where("eventId", "==", event_id)
       .get();
 
@@ -212,7 +213,7 @@ export const EventService = {
 
         if (!attendeeName && data.userId) {
           try {
-            const userSnap = await adminDb.collection("users").doc(data.userId).get();
+            const userSnap = await adminDb.collection(COLLECTIONS.USERS).doc(data.userId).get();
             if (userSnap.exists) {
               const u = userSnap.data()!;
               attendeeName =
@@ -239,7 +240,7 @@ export const EventService = {
     return results;
   },
   async getAllEventsByOrganizer(organizer_id: string) {
-    const querySnapshot: QuerySnapshot = await adminDb.collection("events").where("organizerId", "==", organizer_id).get();
+    const querySnapshot: QuerySnapshot = await adminDb.collection(COLLECTIONS.EVENTS).where("organizerId", "==", organizer_id).get();
 
     let arr: EventModel[] = [];
 
@@ -252,7 +253,7 @@ export const EventService = {
     return arr;
   },
   async getRecentReg(event_id: string) {
-    const querySnapshot: QuerySnapshot = await adminDb.collection("registerations").where("eventId", "==", event_id).get();
+    const querySnapshot: QuerySnapshot = await adminDb.collection(COLLECTIONS.REGISTRATIONS).where("eventId", "==", event_id).get();
     let arr: EventModel[] = [];
 
     querySnapshot.forEach((doc) => {
@@ -267,11 +268,11 @@ export const EventService = {
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id;
  
-    const docRef = adminDb.collection("events").doc();
+    const docRef = adminDb.collection(COLLECTIONS.EVENTS).doc();
     const id_generated = docRef.id;
     event_to_be_added.id = id_generated;
 
-    await adminDb.collection("events").doc(id_generated).set({
+    await adminDb.collection(COLLECTIONS.EVENTS).doc(id_generated).set({
       ...event_to_be_added
     })
     console.log(`Document successfully written with ID: ${id_generated}`);

@@ -3,6 +3,7 @@ import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firesto
 import { db } from '@/data/db'
 import { EventModel } from "@/src/services/models/event.model";
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 
 export const SpeakerService = {
     async getAllSpeakers(organizer_id: string, event_id: string) {
@@ -46,7 +47,7 @@ export const SpeakerService = {
 
             Event.speakers.push(new_speaker);
 
-            await adminDb.collection("events").doc(event_id).update(Event);
+            await adminDb.collection(COLLECTIONS.EVENTS).doc(event_id).update(Event);
         } else {
             console.log("this event doesnt exist so how toadd a speaker to it??");
         }

@@ -3,6 +3,7 @@ import { BookingData } from "../bookings/types";
 import { console } from "inspector";
 import {  adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
+import { COLLECTIONS } from "@/data/collections";
 
 
 export function mapToAddress(raw: any): Address {
@@ -92,7 +93,7 @@ export const EventVendorService = {
         let arr_of_bookings: BookingData[] = [];
 
         const q = adminDb.
-            collection("bookings").
+            collection(COLLECTIONS.BOOKINGS).
             where("eventId", "==", eventId)
         
         const querySnapshot : QuerySnapshot = await q.get();
@@ -119,7 +120,7 @@ export const EventVendorService = {
 
         while (tracker_of_chunks < vendorIds.length) {
             const q = adminDb.
-                collection("vendor").
+                collection(COLLECTIONS.VENDORS).
                 where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
             
             const querySnapshot2 : QuerySnapshot= await q.get();
@@ -137,7 +138,7 @@ export const EventVendorService = {
     },
     async getVendorById(vendor_id: string) {
         const q = adminDb.
-            collection("vendor").
+            collection(COLLECTIONS.VENDORS).
             where("vendorId", "==", vendor_id)
         
         const querySnapshot = await q.get();
@@ -152,7 +153,7 @@ export const EventVendorService = {
     },
     async getAllVendors() {
         const q = adminDb.
-            collection("vendor")
+            collection(COLLECTIONS.VENDORS)
         
         const querySnapshot : QuerySnapshot= await q.get();
         if (querySnapshot.empty) {

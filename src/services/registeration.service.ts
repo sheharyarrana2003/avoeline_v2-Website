@@ -1,6 +1,7 @@
 import { adminAuth, adminDb } from "@/data/admin_db";
 import { Registration } from "./models/reg.type";
 import { QuerySnapshot } from "firebase-admin/firestore";
+import { COLLECTIONS } from "@/data/collections";
 
 
  function mapToRegistration(raw: any): Registration {
@@ -95,12 +96,12 @@ import { QuerySnapshot } from "firebase-admin/firestore";
 }
 export const RegService = {
     async getRegOfUser(user_id:string){
-        const q = adminDb.collection("registeration").where("userId","==",user_id);
+        const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId","==",user_id);
         const querySnapshot :  QuerySnapshot= await q.get();
 
-        // if(querySnapshot.empty()){
-        //     return null;
-        // }
+        if(querySnapshot.empty){
+            return mapToRegistration({});
+        }
 
         return  mapToRegistration(querySnapshot.docs[0].data());
 

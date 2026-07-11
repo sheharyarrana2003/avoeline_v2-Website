@@ -2,6 +2,7 @@ import { AgendaItem, EventModel } from "@/src/services/models/event.model";
 import { Session, AgendaDay, AgendaStats } from "@/src/services/models/agenda.model";
 import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -124,7 +125,7 @@ export const AgendaService = {
         }
     ): Promise<void> {
         // 1. Read the current event document
-        const snap = await adminDb.collection("events").doc(eventId).get();
+        const snap = await adminDb.collection(COLLECTIONS.EVENTS).doc(eventId).get();
         if (!snap.exists) throw new Error(`Event ${eventId} not found`);
 
         const data = snap.data()!;
@@ -172,6 +173,6 @@ export const AgendaService = {
 
         // 4. Append and write back
         const updatedAgenda = [...existingAgenda, newItem];
-        await adminDb.collection("events").doc(eventId).update({ agenda: updatedAgenda });
+        await adminDb.collection(COLLECTIONS.EVENTS).doc(eventId).update({ agenda: updatedAgenda });
     },
 };
