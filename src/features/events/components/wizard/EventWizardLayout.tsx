@@ -54,7 +54,7 @@ const INITIAL_FORM: EventFormData = {
     galleryImages: [],
     videoUrl: '',
     dietaryOptions: [],
-    
+
     startDate: '',
     endDate: '',
     startTime: '10:00',
@@ -72,7 +72,7 @@ const INITIAL_FORM: EventFormData = {
     totalSeats: 100,
     reservedSeats: 10,
     enableWaitingList: false,
-    
+
     ticketType: 'paid',
     ticketTiers: [
         { id: '1', name: 'Early Bird Pass', price: 4500, seatsAvailable: 100, availableUntil: '2024-12-01', benefits: 'VIP Lounge Access, Fast Track Entry' },
@@ -88,20 +88,20 @@ const INITIAL_FORM: EventFormData = {
     ],
     requiresApproval: false,
     maxTicketsPerPerson: 4,
-    
+
     visibility: 'public',
     publishImmediately: true,
     agreeToTerms: false,
     confirmRights: false,
 };
 
-export default function CreateEventPage({handle_submission} : any) {
+export default function CreateEventPage({ handle_submission }: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
     const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
 
-    const handling_submission_client = (formData:EventFormData)=>{
+    const handling_submission_client = (formData: EventFormData) => {
         handle_submission(formData);
     }
     const updateForm = (field: keyof EventFormData, value: any) => {
@@ -166,11 +166,10 @@ export default function CreateEventPage({handle_submission} : any) {
                         <button
                             key={type.id}
                             onClick={() => updateForm('eventType', type.id)}
-                            className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                                formData.eventType === type.id
+                            className={`p-4 rounded-2xl border-2 text-left transition-all ${formData.eventType === type.id
                                     ? 'border-black bg-gray-50'
                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                            }`}
+                                }`}
                         >
                             <div className="text-2xl mb-2">{type.icon}</div>
                             <div className="font-semibold text-sm text-gray-900">{type.label}</div>
@@ -335,7 +334,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                 </svg>
                             </button>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-3 mb-4">
                             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -351,17 +350,16 @@ export default function CreateEventPage({handle_submission} : any) {
                                     key={opt}
                                     onClick={() => {
                                         const current = formData.dietaryOptions;
-                                        updateForm('dietaryOptions', 
-                                            current.includes(opt) 
+                                        updateForm('dietaryOptions',
+                                            current.includes(opt)
                                                 ? current.filter(o => o !== opt)
                                                 : [...current, opt]
                                         );
                                     }}
-                                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${
-                                        formData.dietaryOptions.includes(opt)
+                                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${formData.dietaryOptions.includes(opt)
                                             ? 'bg-black text-white border-black'
                                             : 'bg-white text-gray-600 border-gray-200'
-                                    }`}
+                                        }`}
                                 >
                                     {opt}
                                 </button>
@@ -377,7 +375,12 @@ export default function CreateEventPage({handle_submission} : any) {
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs">📝</span>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">{field.label}</p>
+                                        <input
+                                            type="text"
+                                            value={field.label}
+                                            onChange={(e) => {}}
+                                            className="w-full bg-transparent text-sm text-gray-900 outline-none"
+                                        />
                                         <p className="text-[10px] text-gray-400">
                                             {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                         </p>
@@ -387,7 +390,7 @@ export default function CreateEventPage({handle_submission} : any) {
                             </div>
                         ))}
 
-                        <button 
+                        <button
                             onClick={addCustomField}
                             className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
                         >
@@ -447,7 +450,7 @@ export default function CreateEventPage({handle_submission} : any) {
 
                 <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-sm text-gray-600">
-                        <input type="checkbox" checked={formData.startDate === formData.endDate} onChange={() => {}} className="rounded" />
+                        <input type="checkbox" checked={formData.startDate === formData.endDate} onChange={() => { }} className="rounded" />
                         Same as start date
                     </label>
                     <label className="flex items-center gap-2 text-sm text-gray-600">
@@ -549,11 +552,10 @@ export default function CreateEventPage({handle_submission} : any) {
                             <button
                                 key={type}
                                 onClick={() => updateForm('recurrenceType', type.toLowerCase())}
-                                className={`px-4 py-2 rounded-full text-xs font-medium transition ${
-                                    formData.recurrenceType === type.toLowerCase()
+                                className={`px-4 py-2 rounded-full text-xs font-medium transition ${formData.recurrenceType === type.toLowerCase()
                                         ? 'bg-black text-white'
                                         : 'bg-gray-100 text-gray-600'
-                                }`}
+                                    }`}
                             >
                                 {type}
                             </button>
@@ -594,11 +596,10 @@ export default function CreateEventPage({handle_submission} : any) {
                         <button
                             key={loc.id}
                             onClick={() => updateForm('locationType', loc.id)}
-                            className={`p-4 rounded-2xl border-2 text-center transition-all ${
-                                formData.locationType === loc.id
+                            className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.locationType === loc.id
                                     ? 'border-black bg-gray-50'
                                     : 'border-gray-200 bg-white hover:border-gray-300'
-                            }`}
+                                }`}
                         >
                             <div className="text-2xl mb-1">{loc.icon}</div>
                             <div className="text-xs font-medium text-gray-700">{loc.label}</div>
@@ -690,12 +691,12 @@ export default function CreateEventPage({handle_submission} : any) {
                         </svg>
                         <h3 className="text-sm font-bold text-gray-900">Capacity & Availability</h3>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs text-gray-500 mb-2">Total Seats</label>
                             <div className="flex items-center gap-2">
-                                <button 
+                                <button
                                     onClick={() => updateForm('totalSeats', Math.max(0, formData.totalSeats - 1))}
                                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
                                 >-</button>
@@ -705,7 +706,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                     onChange={(e) => updateForm('totalSeats', parseInt(e.target.value) || 0)}
                                     className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
                                 />
-                                <button 
+                                <button
                                     onClick={() => updateForm('totalSeats', formData.totalSeats + 1)}
                                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
                                 >+</button>
@@ -714,7 +715,7 @@ export default function CreateEventPage({handle_submission} : any) {
                         <div>
                             <label className="block text-xs text-gray-500 mb-2">Reserved Seats</label>
                             <div className="flex items-center gap-2">
-                                <button 
+                                <button
                                     onClick={() => updateForm('reservedSeats', Math.max(0, formData.reservedSeats - 1))}
                                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
                                 >-</button>
@@ -724,7 +725,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                     onChange={(e) => updateForm('reservedSeats', parseInt(e.target.value) || 0)}
                                     className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
                                 />
-                                <button 
+                                <button
                                     onClick={() => updateForm('reservedSeats', formData.reservedSeats + 1)}
                                     className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
                                 >+</button>
@@ -759,21 +760,19 @@ export default function CreateEventPage({handle_submission} : any) {
                     <div className="bg-gray-100 rounded-xl p-1 flex">
                         <button
                             onClick={() => updateForm('ticketType', 'free')}
-                            className={`px-6 py-2 rounded-lg text-sm font-medium transition ${
-                                formData.ticketType === 'free'
+                            className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'free'
                                     ? 'bg-white text-gray-900 shadow-sm'
                                     : 'text-gray-500'
-                            }`}
+                                }`}
                         >
                             Free
                         </button>
                         <button
                             onClick={() => updateForm('ticketType', 'paid')}
-                            className={`px-6 py-2 rounded-lg text-sm font-medium transition ${
-                                formData.ticketType === 'paid'
+                            className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'paid'
                                     ? 'bg-black text-white shadow-sm'
                                     : 'text-gray-500'
-                            }`}
+                                }`}
                         >
                             Paid
                         </button>
@@ -800,7 +799,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                         type="text"
                                         value={tier.name}
                                         onChange={(e) => {
-                                            const updated = formData.ticketTiers.map(t => 
+                                            const updated = formData.ticketTiers.map(t =>
                                                 t.id === tier.id ? { ...t, name: e.target.value } : t
                                             );
                                             updateForm('ticketTiers', updated);
@@ -816,7 +815,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                             type="number"
                                             value={tier.price}
                                             onChange={(e) => {
-                                                const updated = formData.ticketTiers.map(t => 
+                                                const updated = formData.ticketTiers.map(t =>
                                                     t.id === tier.id ? { ...t, price: parseInt(e.target.value) || 0 } : t
                                                 );
                                                 updateForm('ticketTiers', updated);
@@ -831,7 +830,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                         type="number"
                                         value={tier.seatsAvailable}
                                         onChange={(e) => {
-                                            const updated = formData.ticketTiers.map(t => 
+                                            const updated = formData.ticketTiers.map(t =>
                                                 t.id === tier.id ? { ...t, seatsAvailable: parseInt(e.target.value) || 0 } : t
                                             );
                                             updateForm('ticketTiers', updated);
@@ -840,7 +839,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                     />
                                 </div>
                                 <div className="col-span-2 flex justify-end">
-                                    <button 
+                                    <button
                                         onClick={() => removeTicketTier(tier.id)}
                                         className="text-gray-400 hover:text-red-500 transition"
                                     >
@@ -850,7 +849,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4 mt-3">
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available Until</label>
@@ -859,7 +858,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                             type="text"
                                             value={tier.availableUntil}
                                             onChange={(e) => {
-                                                const updated = formData.ticketTiers.map(t => 
+                                                const updated = formData.ticketTiers.map(t =>
                                                     t.id === tier.id ? { ...t, availableUntil: e.target.value } : t
                                                 );
                                                 updateForm('ticketTiers', updated);
@@ -879,7 +878,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                             type="text"
                                             value={tier.benefits}
                                             onChange={(e) => {
-                                                const updated = formData.ticketTiers.map(t => 
+                                                const updated = formData.ticketTiers.map(t =>
                                                     t.id === tier.id ? { ...t, benefits: e.target.value } : t
                                                 );
                                                 updateForm('ticketTiers', updated);
@@ -896,7 +895,7 @@ export default function CreateEventPage({handle_submission} : any) {
                         </div>
                     ))}
 
-                    <button 
+                    <button
                         onClick={() => setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' })}
                         className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-2"
                     >
@@ -984,7 +983,7 @@ export default function CreateEventPage({handle_submission} : any) {
 
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                     <p className="text-xs text-gray-400 mb-4">Standard Fields (Locked)</p>
-                    
+
                     {/* Locked Fields */}
                     <div className="space-y-3 mb-6">
                         <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
@@ -1008,7 +1007,7 @@ export default function CreateEventPage({handle_submission} : any) {
                     </div>
 
                     <p className="text-xs text-gray-400 mb-4">Custom Fields</p>
-                    
+
                     {/* Custom Fields */}
                     <div className="space-y-3 mb-4">
                         {formData.customFields.map((field) => (
@@ -1027,7 +1026,7 @@ export default function CreateEventPage({handle_submission} : any) {
                         ))}
                     </div>
 
-                    <button 
+                    <button
                         onClick={addCustomField}
                         className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
                     >
@@ -1097,7 +1096,7 @@ export default function CreateEventPage({handle_submission} : any) {
                         <h2 className="text-xl font-bold text-gray-900 mt-3 mb-4">
                             {formData.eventTitle || 'TechVerse Hackathon 2026'}
                         </h2>
-                        
+
                         <div className="space-y-2 mb-6">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1116,7 +1115,7 @@ export default function CreateEventPage({handle_submission} : any) {
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
-                                {formData.ticketTiers[0]?.price 
+                                {formData.ticketTiers[0]?.price
                                     ? `$${formData.ticketTiers[0].price} — ${formData.ticketTiers[0].name}`
                                     : 'Free Entry'
                                 }
@@ -1134,7 +1133,7 @@ export default function CreateEventPage({handle_submission} : any) {
                 {/* Review Details */}
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Review Details</h3>
-                    
+
                     <div className="space-y-4">
                         {/* Basic Information */}
                         <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -1227,7 +1226,7 @@ export default function CreateEventPage({handle_submission} : any) {
                 {/* Publishing */}
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Publishing</h3>
-                    
+
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-6">
                         {/* Event Visibility */}
                         <div>
@@ -1306,7 +1305,7 @@ export default function CreateEventPage({handle_submission} : any) {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
                             <h1 className="text-lg font-bold text-gray-900">{STEPS[currentStep - 1].label}</h1>
                         </div>
-                        
+
                         {/* Progress Steps */}
                         <div className="flex items-center gap-2">
                             {STEPS.map((step, i) => (
@@ -1316,13 +1315,12 @@ export default function CreateEventPage({handle_submission} : any) {
                                     )}
                                     <button
                                         onClick={() => goToStep(step.id)}
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${
-                                            step.id < currentStep
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${step.id < currentStep
                                                 ? 'bg-black text-white'
                                                 : step.id === currentStep
                                                     ? 'bg-black text-white'
                                                     : 'bg-gray-200 text-gray-400'
-                                        }`}
+                                            }`}
                                     >
                                         {step.id < currentStep ? '✓' : step.id}
                                     </button>
@@ -1353,7 +1351,7 @@ export default function CreateEventPage({handle_submission} : any) {
                             Save as Draft
                         </button>
                         {currentStep > 1 && (
-                            <button 
+                            <button
                                 onClick={prevStep}
                                 className="text-sm text-gray-500 hover:text-gray-700 transition"
                             >
@@ -1363,7 +1361,7 @@ export default function CreateEventPage({handle_submission} : any) {
                     </div>
 
                     {currentStep < 4 ? (
-                        <button 
+                        <button
                             onClick={nextStep}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
                         >
@@ -1373,7 +1371,7 @@ export default function CreateEventPage({handle_submission} : any) {
                             </svg>
                         </button>
                     ) : (
-                        <button 
+                        <button
                             onClick={() => handling_submission_client(formData)}
                             disabled={!formData.agreeToTerms || !formData.confirmRights}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"

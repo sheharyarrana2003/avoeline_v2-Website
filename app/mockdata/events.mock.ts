@@ -3,485 +3,101 @@ import { EventModel } from "@/src/services/models/event.model";
 
 export const raw_events = [
   {
-    "id": "EVT001",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
     "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "title": "Advanced Flutter & Firebase Workshop",
-    "description": "Learn to build production-ready Flutter apps with production-grade Firebase configurations, local caching, and state management optimization.",
-    "shortDescription": "2-day intensive Flutter workshop",
+    "title": "Next-Gen Enterprise Architecture Conference 2026",
+    "description": "Join leading industry experts for a deep dive into scalable cloud-native architectures, real-time data streaming pipeline implementations, micro-frontends engineering, and advanced decentralized data meshes. This intensive conference combines strategic keynotes with deep-tech implementation tracks tailored for tech leads, staff engineers, and systems architects.",
+    "shortDescription": "The definitive 2-day conference for cloud-native systems architecture and data engineering.",
     "category": "technology",
-    "eventType": "workshop",
+    "eventType": "conference",
     "format": "hybrid",
-    "language": "en", // Added missing language requirement
+    "language": "en",
     "schedule": {
-      "startDate": "2024-04-15",
-      "endDate": "2024-04-16",
-      "startTime": "10:00",
-      "endTime": "17:00",
+      "startDate": "2026-10-14",
+      "endDate": "2026-10-15",
+      "startTime": "09:00",
+      "endTime": "18:00",
       "timezone": "PKT",
       "isRecurring": false,
       "recurrencePattern": null
     },
     "location": {
-      "venueName": "NED University Auditorium",
-      "address": "University Road, Karachi",
+      "venueName": "Movenpick Hotel Ballroom",
+      "address": "Club Road, Civil Lines",
       "city": "Karachi",
       "country": "Pakistan",
       "coordinates": {
-        "latitude": 24.8695,
-        "longitude": 67.0649
+        "latitude": 24.8472,
+        "longitude": 67.0334
       },
-      "meetingPlatform": "Google Meet",
-      "meetingLink": "https://meet.google.com/abc-xyz-123",
-      "meetingId": "abc-xyz-123",
-      "meetingPassword": "flutter2024",
-      "parkingInfo": "Available at the main gate.", // Added extension field
-      "accessibilityInfo": "Wheelchair accessible ramps present.", // Added extension field
-      "nearbyHotels": [], // Added extension field
-      "nearbyRestaurants": [] // Added extension field
+      "meetingPlatform": "Zoom",
+      "meetingLink": "https://zoom.us/j/98765432101",
+      "meetingId": "987-6543-2101",
+      "meetingPassword": "architecture2026",
+      "parkingInfo": "Complimentary valet parking available for all registered attendees at the main entrance.",
+      "accessibilityInfo": "Fully wheelchair accessible venue with step-free entrance, dedicated elevator access, and reserved front-row seating.",
+      "nearbyHotels": [
+        "Pearl Continental Hotel Karachi",
+        "Avari Towers Karachi",
+        "Hotel Mehran"
+      ],
+      "nearbyRestaurants": [
+        "The Marquee Restaurant",
+        "Kababjees Clifton",
+        "Okra Restaurant"
+      ]
     },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT001.jpg",
+    "bannerImage": "https://storage.googleapis.com/event-assets/banners/EVT_architecture_2026_hero.jpg",
     "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT001_1.jpg",
-      "https://storage.googleapis.com/events/gal_EVT001_2.jpg"
+      "https://storage.googleapis.com/event-assets/gallery/venue_setup.jpg",
+      "https://storage.googleapis.com/event-assets/gallery/networking_lounge.jpg",
+      "https://storage.googleapis.com/event-assets/gallery/panel_stage.jpg"
     ],
     "promoVideoUrl": "https://youtube.com/watch?v=dQw4w9WgXcQ",
     "capacity": {
-      "totalSeats": 100,
-      "reservedSeats": 10,
-      "availableSeats": 90,
-      "waitingListEnabled": false, // Added subfield mapping
-      "waitingListCapacity": 0, // Added subfield mapping
-      "maxRegistrationsPerUser": 1 // Added subfield mapping
+      "totalSeats": 350,
+      "reservedSeats": 50,
+      "availableSeats": 300,
+      "waitingListEnabled": true,
+      "waitingListCapacity": 50,
+      "maxRegistrationsPerUser": 3
     },
     "registration": {
-      "registrationOpenDate": "2024-03-01",
-      "registrationCloseDate": "2024-04-14",
+      "registrationOpenDate": "2026-07-15",
+      "registrationCloseDate": "2026-10-12",
       "requiresApproval": false,
       "customForm": [
         {
           "fieldId": "experience_level",
-          "label": "Flutter Experience Level",
+          "label": "Architecture Experience Level",
           "type": "dropdown",
-          "options": ["Beginner", "Intermediate", "Advanced"],
-          "required": true
-        }
-      ],
-      "earlyBirdDeadline": "2024-03-15", // Added extension field
-      "groupRegistrationEnabled": true, // Added extension field
-      "groupDiscountEnabled": true // Added extension field
-    },
-    "pricing": {
-      "isFree": false,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "Early Bird",
-          "price": 1500,
-          "availableUntil": "2024-03-15",
-          "seats": 30
+          "options": [
+            "Mid-Level Engineer",
+            "Senior Engineer",
+            "Principal / Staff Architect",
+            "Engineering Director / CTO"
+          ],
+          "required": true,
+          "helpText": "Select your current technical leadership level"
         },
         {
-          "name": "Regular",
-          "price": 2000,
-          "availableUntil": "2024-04-14",
-          "seats": 60
-        }
-      ],
-      "studentDiscount": {
-        "enabled": true,
-        "percentage": 20,
-        "requiresVerification": true
-      },
-      "groupDiscount": {
-        "enabled": true,
-        "minGroupSize": 5,
-        "percentage": 15
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK001",
-        "name": "Dr. Sarah Khan",
-        "designation": "Senior Flutter Developer at Google",
-        "bio": "10+ years experience in mobile development...",
-        "profileImage": "https://storage.googleapis.com/speakers/sarah_khan.jpg",
-        "sessionTitle": "State Management in Flutter"
-      }
-    ],
-    "agenda": [], // Added required root arrays
-    "vendorRequirements": [], // Added required root arrays
-    "teamMembers": [], // Added required root arrays
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "digital",
-      "templateId": "CERT_TEMPLATE_01",
-      "requirements": {
-        "minAttendance": 80,
-        "mustCompleteSurvey": true
-      }
-    },
-    "status": "registration_open",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 1245,
-      "registrations": 89,
-      "checkIns": 0,
-      "completionRate": 0,
-      "revenue": 178000
-    },
-    "createdAt": "2024-02-15T08:00:00Z",
-    "updatedAt": "2024-03-01T10:30:00Z",
-    "publishedAt": "2024-03-01T10:30:00Z",
-    "eventStartTime": "2024-04-15T05:00:00Z",
-    "eventEndTime": "2024-04-16T12:00:00Z",
-    "archivedAt": null, // Added missing cleanup tracking properties
-    "deletedAt": null // Added missing cleanup tracking properties
-  },
-  {
-    "id": "EVT002",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "National Healthcare Innovation Summit",
-    "description": "Connecting medical technology innovators, hospital directors, and healthcare professionals to explore AI diagnostics and electronic health record transformations.",
-    "shortDescription": "annual healthcare tech summit",
-    "category": "healthcare",
-    "eventType": "conference",
-    "format": "physical",
-    "language": "en", // Added missing language requirement
-    "schedule": {
-      "startDate": "2024-06-20",
-      "endDate": "2024-06-22",
-      "startTime": "09:00",
-      "endTime": "18:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "Marriott Hotel Crystal Ballroom",
-      "address": "Aga Khan Road, F-5/1",
-      "city": "Islamabad",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 33.7380,
-        "longitude": 73.0844
-      },
-      "meetingPlatform": "Zoom",
-      "meetingLink": "https://zoom.us/j/991002345",
-      "meetingId": "991-002-345",
-      "meetingPassword": "healthpass2024",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT002.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT002_1.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=healthcare_summit_teaser",
-    "capacity": {
-      "totalSeats": 300,
-      "reservedSeats": 50,
-      "availableSeats": 250,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2024-04-01",
-      "registrationCloseDate": "2024-06-15",
-      "requiresApproval": true,
-      "customForm": [
-        {
-          "fieldId": "hospital_affiliation",
-          "label": "Hospital/Institute Name",
-          "type": "text",
-          "options": [],
-          "required": true
-        },
-        {
-          "fieldId": "medical_license",
-          "label": "PMDC / License Number",
-          "type": "text",
-          "options": [],
-          "required": false
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": false
-    },
-    "pricing": {
-      "isFree": false,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "General Admission",
-          "price": 5000,
-          "availableUntil": "2024-06-15",
-          "seats": 200
-        },
-        {
-          "name": "VIP Pass",
-          "price": 12000,
-          "availableUntil": "2024-06-15",
-          "seats": 50
-        }
-      ],
-      "studentDiscount": {
-        "enabled": true,
-        "percentage": 50,
-        "requiresVerification": true
-      },
-      "groupDiscount": {
-        "enabled": false,
-        "minGroupSize": 0,
-        "percentage": 0
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK044",
-        "name": "Prof. Asif Malik",
-        "designation": "Director of Medical AI Labs",
-        "bio": "Pioneer in radiological machine learning models.",
-        "profileImage": "https://storage.googleapis.com/speakers/asif_malik.jpg",
-        "sessionTitle": "AI and the Future of Oncology Diagnostics"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "both",
-      "templateId": "CERT_TEMPLATE_HEALTH_2024",
-      "requirements": {
-        "minAttendance": 70,
-        "mustCompleteSurvey": false
-      }
-    },
-    "status": "published",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 412,
-      "registrations": 25,
-      "checkIns": 0,
-      "completionRate": 0,
-      "revenue": 125000
-    },
-    "createdAt": "2024-03-10T14:22:00Z",
-    "updatedAt": "2024-04-01T09:00:00Z",
-    "publishedAt": "2024-04-01T09:00:00Z",
-    "eventStartTime": "2024-06-20T04:00:00Z", // Corrected bad inline timezone offset string syntax (+04:00:00Z) to standard 'T' notation
-    "eventEndTime": "2024-06-22T13:00:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT003",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "Corporate Finance Strategy Briefing",
-    "description": "An exclusive, invitation-only briefing covering macroeconomic shifts, liquidity management, and tax structuring for mid-to-large enterprises.",
-    "shortDescription": "Exclusive corporate finance seminar",
-    "category": "business",
-    "eventType": "seminar",
-    "format": "virtual",
-    "language": "en",
-    "schedule": {
-      "startDate": "2024-05-02",
-      "endDate": "2024-05-02",
-      "startTime": "15:00",
-      "endTime": "17:30",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "Online Executive Portal",
-      "address": "Virtual Dashboard Access Only",
-      "city": "Karachi",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 24.8607,
-        "longitude": 67.0011
-      },
-      "meetingPlatform": "Zoom",
-      "meetingLink": "https://zoom.us/j/9876543210",
-      "meetingId": "987-6543-210",
-      "meetingPassword": "SECURE_FIN_2024",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT003.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT003_1.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=finance_briefing_preview",
-    "capacity": {
-      "totalSeats": 40,
-      "reservedSeats": 5,
-      "availableSeats": 35,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2024-04-10",
-      "registrationCloseDate": "2024-05-01",
-      "requiresApproval": true,
-      "customForm": [
-        {
-          "fieldId": "job_title",
-          "label": "Corporate Job Title (e.g. CFO, Director)",
-          "type": "text",
-          "options": [],
-          "required": true
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": false
-    },
-    "pricing": {
-      "isFree": true,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "Executive Invitation Pass",
-          "price": 0,
-          "availableUntil": "2024-05-01",
-          "seats": 35
-        }
-      ],
-      "studentDiscount": {
-        "enabled": false,
-        "percentage": 0,
-        "requiresVerification": false
-      },
-      "groupDiscount": {
-        "enabled": false,
-        "minGroupSize": 0,
-        "percentage": 0
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK109",
-        "name": "Mian Haris",
-        "designation": "Partner at Capital Advisory Partners",
-        "bio": "Former financial consultant for global fiscal policy units.",
-        "profileImage": "https://storage.googleapis.com/speakers/mian_haris.jpg",
-        "sessionTitle": "Navigating High-Interest Rate Ecosystems"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": false,
-      "certificateType": "digital",
-      "templateId": null,
-      "requirements": {
-        "minAttendance": 0,
-        "mustCompleteSurvey": false
-      }
-    },
-    "status": "draft",
-    "visibility": "invite_only",
-    "accessCode": "CFO_BRIEF_2024",
-    "analytics": {
-      "views": 45,
-      "registrations": 12,
-      "checkIns": 0,
-      "completionRate": 0,
-      "revenue": 0
-    },
-    "createdAt": "2024-04-01T11:00:00Z",
-    "updatedAt": "2024-04-05T16:15:00Z",
-    "publishedAt": null,
-    "eventStartTime": "2024-05-02T10:00:00Z",
-    "eventEndTime": "2024-05-02T12:30:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT004",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "title": "Generative AI Hackathon 2026",
-    "description": "An intensive 48-hour challenge focused on building practical, scalable AI agents and retrieval-augmented generation pipelines using modern LLM infrastructure.",
-    "shortDescription": "48-hour collaborative AI build challenge",
-    "category": "technology",
-    "eventType": "hackathon",
-    "format": "hybrid",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-08-14",
-      "endDate": "2026-08-16",
-      "startTime": "09:00",
-      "endTime": "18:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "National Incubation Center",
-      "address": "Plot 24, Sector H-9/1",
-      "city": "Islamabad",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 33.6844,
-        "longitude": 73.0479
-      },
-      "meetingPlatform": "Zoom", // Discord isn't handled explicitly in types (defaulting options) or platform string mapping cleanly
-      "meetingLink": "https://discord.gg/genai-hackathon-2026",
-      "meetingId": "genai-hack-2026",
-      "meetingPassword": "hackthefuture",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT004.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT004_1.jpg",
-      "https://storage.googleapis.com/events/gal_EVT004_2.jpg",
-      "https://storage.googleapis.com/events/gal_EVT004_3.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=ai_hack_teaser",
-    "capacity": {
-      "totalSeats": 150,
-      "reservedSeats": 20,
-      "availableSeats": 130,
-      "waitingListEnabled": true,
-      "waitingListCapacity": 50,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-07-05",
-      "registrationCloseDate": "2026-08-10",
-      "requiresApproval": true,
-      "customForm": [
-        {
-          "fieldId": "github_profile",
-          "label": "GitHub Profile URL",
-          "type": "text",
-          "options": [],
-          "required": true
-        },
-        {
-          "fieldId": "team_status",
-          "label": "Registration Status",
+          "fieldId": "primary_cloud",
+          "label": "Primary Cloud Environment",
           "type": "dropdown",
-          "options": ["Individual looking for team", "Registering as an intact team"],
-          "required": true
+          "options": ["AWS", "Google Cloud", "Azure", "On-Premises / Hybrid"],
+          "required": true,
+          "helpText": "Your primary cloud platform of choice"
+        },
+        {
+          "fieldId": "dietary_restrictions",
+          "label": "Dietary Restrictions",
+          "type": "text",
+          "options": [],
+          "required": false,
+          "helpText": "Please specify any allergies or dietary requirements (e.g., Nut Allergy, Vegetarian)"
         }
       ],
-      "earlyBirdDeadline": "",
+      "earlyBirdDeadline": "2026-08-31",
       "groupRegistrationEnabled": true,
       "groupDiscountEnabled": true
     },
@@ -490,685 +106,447 @@ export const raw_events = [
       "currency": "PKR",
       "tiers": [
         {
-          "name": "Hacker Pass",
-          "price": 1000,
-          "availableUntil": "2026-08-10",
-          "seats": 130
+          "name": "Early Bird Corporate Pass",
+          "price": 7500,
+          "availableUntil": "2026-08-31",
+          "seats": 100,
+          "description": "Discounted pass for early registrations by individuals or corporate entities."
+        },
+        {
+          "name": "Regular Conference Pass",
+          "price": 10000,
+          "availableUntil": "2026-10-12",
+          "seats": 200,
+          "description": "Standard full-access pass to all technical tracks, networking sessions, and catered lunch."
         }
       ],
       "studentDiscount": {
         "enabled": true,
-        "percentage": 50,
+        "percentage": 40,
         "requiresVerification": true
       },
       "groupDiscount": {
         "enabled": true,
         "minGroupSize": 4,
-        "percentage": 20
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK202",
-        "name": "Zainab Mahmood",
-        "designation": "Principal Research Engineer at AI Labs",
-        "bio": "Specializes in fine-tuning localized open-source foundational models.",
-        "profileImage": "https://storage.googleapis.com/speakers/zainab_m.jpg",
-        "sessionTitle": "Optimizing Local Context for Rag Architectures"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "blockchain",
-      "templateId": "CERT_HACK_2026",
-      "requirements": {
-        "minAttendance": 90,
-        "mustCompleteSurvey": true
-      }
-    },
-    "status": "published",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 840,
-      "registrations": 42,
-      "checkIns": 0,
-      "completionRate": 0.0,
-      "revenue": 42000
-    },
-    "createdAt": "2026-06-25T10:00:00Z",
-    "updatedAt": "2026-07-01T14:30:00Z",
-    "publishedAt": "2026-07-01T14:30:00Z",
-    "eventStartTime": "2026-08-14T04:00:00Z",
-    "eventEndTime": "2026-08-16T13:00:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT005",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "E-Commerce Growth Masterclass",
-    "description": "A comprehensive deep dive into scale logistics, customer retention loops, and multi-channel marketing matrices for modern direct-to-consumer operations.",
-    "shortDescription": "Strategic business growth framework",
-    "category": "business",
-    "eventType": "seminar",
-    "format": "physical",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-09-05",
-      "endDate": "2026-09-05",
-      "startTime": "14:00",
-      "endTime": "18:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "LUMS Executive Development Center",
-      "address": "DHA Phase 5",
-      "city": "Lahore",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 31.4716,
-        "longitude": 74.4098
-      },
-      "meetingPlatform": "Zoom",
-      "meetingLink": "https://zoom.us/j/growth-masterclass-fallback",
-      "meetingId": "882-9411-002",
-      "meetingPassword": "growthpass2026",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT005.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT005_1.jpg",
-      "https://storage.googleapis.com/events/gal_EVT005_2.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=ecom_scale_intro",
-    "capacity": {
-      "totalSeats": 60,
-      "reservedSeats": 5,
-      "availableSeats": 55,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-07-01",
-      "registrationCloseDate": "2026-09-01",
-      "requiresApproval": false,
-      "customForm": [
-        {
-          "fieldId": "current_revenue",
-          "label": "Average Monthly Business Revenue",
-          "type": "dropdown",
-          "options": ["Under 500k PKR", "500k - 2M PKR", "2M+ PKR"],
-          "required": true
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": true
-    },
-    "pricing": {
-      "isFree": false,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "Standard Entry",
-          "price": 4500,
-          "availableUntil": "2026-09-01",
-          "seats": 55
-        }
-      ],
-      "studentDiscount": {
-        "enabled": false,
-        "percentage": 0,
-        "requiresVerification": false
-      },
-      "groupDiscount": {
-        "enabled": true,
-        "minGroupSize": 3,
-        "percentage": 10
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK411",
-        "name": "Omer Rizvi",
-        "designation": "Founding Partner at RetailScale",
-        "bio": "Ex-Logistics lead with a proven track record scaling regional supply operations.",
-        "profileImage": "https://storage.googleapis.com/speakers/omer_r.jpg",
-        "sessionTitle": "Optimizing Supply Infrastructure for High Velocity Scale"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "digital",
-      "templateId": "CERT_ECOM_2026",
-      "requirements": {
-        "minAttendance": 100,
-        "mustCompleteSurvey": true
-      }
-    },
-    "status": "registration_open",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 185,
-      "registrations": 14,
-      "checkIns": 0,
-      "completionRate": 0.0,
-      "revenue": 63000
-    },
-    "createdAt": "2026-06-20T11:15:00Z",
-    "updatedAt": "2026-07-01T09:00:00Z",
-    "publishedAt": "2026-07-01T09:00:00Z",
-    "eventStartTime": "2026-09-05T09:00:00Z",
-    "eventEndTime": "2026-09-05T13:00:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT006",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "Corporate Wellness & Mental Resilience Forum",
-    "description": "Draft structure setting up executive workflows, ergonomic configurations, and scalable HR protocols targeting systemic structural burnout reduction.",
-    "shortDescription": "Strategic framework for healthy operational workplaces",
-    "category": "healthcare",
-    "eventType": "conference",
-    "format": "virtual",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-11-12",
-      "endDate": "2026-11-12",
-      "startTime": "10:00",
-      "endTime": "14:30",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "Virtual Sandbox Hub",
-      "address": "Online Stream Only",
-      "city": "Lahore",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 31.5204,
-        "longitude": 74.3587
-      },
-      "meetingPlatform": "Microsoft Teams",
-      "meetingLink": "https://teams.microsoft.com/l/meetup-join/wellness-draft",
-      "meetingId": "412-092-115",
-      "meetingPassword": "internalDraft2026",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT006.jpg",
-    "galleryImages": ["https://storage.googleapis.com/events/gal_EVT006_1.jpg"],
-    "promoVideoUrl": "https://youtube.com/watch?v=wellness_draft_preview",
-    "capacity": {
-      "totalSeats": 200,
-      "reservedSeats": 10,
-      "availableSeats": 190,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-10-01",
-      "registrationCloseDate": "2026-11-10",
-      "requiresApproval": false,
-      "customForm": [
-        {
-          "fieldId": "organization_size",
-          "label": "Total Headcount of Your Company",
-          "type": "dropdown",
-          "options": ["1-50 employees", "51-250 employees", "251+ employees"],
-          "required": false
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": false
-    },
-    "pricing": {
-      "isFree": true,
-      "currency": "PKR",
-      "tiers": [],
-      "studentDiscount": {
-        "enabled": false,
-        "percentage": 0,
-        "requiresVerification": false
-      },
-      "groupDiscount": {
-        "enabled": false,
-        "minGroupSize": 0,
-        "percentage": 0
-      }
-    },
-    "speakers": [
-      {
-        "speakerId": "SPK105",
-        "name": "Dr. Amna Baig",
-        "designation": "Organizational Psychologist",
-        "bio": "Consultant specializing in high-stress workspace dynamic shifts.",
-        "profileImage": "https://storage.googleapis.com/speakers/amna_b.jpg",
-        "sessionTitle": "De-escalating Chronic Executive Cognitive Burnout"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": false,
-      "certificateType": "digital",
-      "templateId": "",
-      "requirements": {
-        "minAttendance": 0,
-        "mustCompleteSurvey": false
-      }
-    },
-    "status": "draft",
-    "visibility": "private",
-    "accessCode": "WELLNESS_PREVIEW",
-    "analytics": {
-      "views": 12,
-      "registrations": 0,
-      "checkIns": 0,
-      "completionRate": 0.0,
-      "revenue": 0
-    },
-    "createdAt": "2026-07-02T08:30:00Z",
-    "updatedAt": "2026-07-02T09:15:00Z",
-    "publishedAt": null,
-    "eventStartTime": "2026-11-12T05:00:00Z",
-    "eventEndTime": "2026-11-12T09:30:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT007",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "Modern Pedagogical Frameworks & EdTech Strategy",
-    "description": "An interactive conference targeting real-time AI tool integration across institutional environments to build adaptive curriculum architectures.",
-    "shortDescription": "Modern strategies transforming direct classroom tech integrations",
-    "category": "education",
-    "eventType": "conference",
-    "format": "virtual",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-07-02",
-      "endDate": "2026-07-02",
-      "startTime": "09:00",
-      "endTime": "13:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "EdTech Cloud Portal",
-      "address": "Virtual Learning Infrastructure",
-      "city": "Karachi",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 24.8607,
-        "longitude": 67.0011
-      },
-      "meetingPlatform": "Zoom",
-      "meetingLink": "https://zoom.us/j/live-edtech-session-stream",
-      "meetingId": "991-8722-104",
-      "meetingPassword": "educationlive2026",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT007.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT007_1.jpg",
-      "https://storage.googleapis.com/events/gal_EVT007_2.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=live_edtech_framework",
-    "capacity": {
-      "totalSeats": 500,
-      "reservedSeats": 50,
-      "availableSeats": 450,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-05-10",
-      "registrationCloseDate": "2026-07-01",
-      "requiresApproval": false,
-      "customForm": [
-        {
-          "fieldId": "academic_role",
-          "label": "Your Primary Educational Role",
-          "type": "dropdown",
-          "options": ["K-12 Teacher", "University Professor", "Academic Administrator", "EdTech Specialist"],
-          "required": true
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": true
-    },
-    "pricing": {
-      "isFree": false,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "General Admission",
-          "price": 1200,
-          "availableUntil": "2026-07-01",
-          "seats": 450
-        }
-      ],
-      "studentDiscount": {
-        "enabled": true,
-        "percentage": 30,
-        "requiresVerification": true
-      },
-      "groupDiscount": {
-        "enabled": true,
-        "minGroupSize": 5,
         "percentage": 15
       }
     },
     "speakers": [
       {
-        "speakerId": "SPK388",
-        "name": "Kamran Aslam",
-        "designation": "Director of Technology at FutureAcademy",
-        "bio": "Pioneer developer pushing adaptive custom LLM systems directly to modern classrooms.",
-        "profileImage": "https://storage.googleapis.com/speakers/kamran_a.jpg",
-        "sessionTitle": "Designing AI Companions for K-12 Student Workflows"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "both",
-      "templateId": "CERT_EDTECH_LIVE_2026",
-      "requirements": {
-        "minAttendance": 80,
-        "mustCompleteSurvey": true
-      }
-    },
-    "status": "ongoing",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 1540,
-      "registrations": 312,
-      "checkIns": 285,
-      "completionRate": 0.0,
-      "revenue": 374400
-    },
-    "createdAt": "2026-05-01T09:00:00Z",
-    "updatedAt": "2026-07-02T04:00:00Z",
-    "publishedAt": "2026-05-05T12:00:00Z",
-    "eventStartTime": "2026-07-02T04:00:00Z",
-    "eventEndTime": "2026-07-02T08:00:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT008",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "SaaS Product Design Retrospective 2026",
-    "description": "An analysis breaking down UI/UX components, cognitive conversion loops, and dynamic dashboard workflows derived from data collected across historical SaaS rollouts.",
-    "shortDescription": "Retrospective data breakdown of user interface trends",
-    "category": "technology",
-    "eventType": "webinar",
-    "format": "virtual",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-06-10",
-      "endDate": "2026-06-10",
-      "startTime": "11:00",
-      "endTime": "13:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "Webinar Cloud Arena",
-      "address": "Digital Stream Network",
-      "city": "Karachi",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 24.8607,
-        "longitude": 67.0011
+        "speakerId": "SPK_001",
+        "name": "Dr. Zainab Mahmood",
+        "designation": "Principal Distributed Systems Architect",
+        "bio": "Dr. Zainab has over 15 years of infrastructure design experience, formerly working at AWS on Amazon DynamoDB internal engines. She specializes in global consensus engines and high-throughput databases.",
+        "profileImage": "https://storage.googleapis.com/event-assets/speakers/zainab_mahmood.jpg",
+        "sessionTitle": "Keynote: Designing for Extreme Fault Tolerance at Scale",
+        "email": "zainab.mahmood@systems-scale.io",
+        "linkedin": "https://linkedin.com/in/zainab-mahmood-dist-sys",
+        "twitter": "https://twitter.com/zainab_codes",
+        "website": "https://systems-scale.io",
+        "company": "Scale Dynamics Corp",
+        "companyLogo": "https://storage.googleapis.com/event-assets/companies/scale_dynamics.png",
+        "isKeynote": true,
+        "isPanelist": true,
+        "order": 1,
+        "sessions": ["SESS_001", "SESS_003"]
       },
-      "meetingPlatform": "Google Meet",
-      "meetingLink": "https://meet.google.com/saas-design-retro-2026",
-      "meetingId": "saas-dsgn-2026",
-      "meetingPassword": "retropassword1",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT008.jpg",
-    "galleryImages": [
-      "https://storage.googleapis.com/events/gal_EVT008_1.jpg",
-      "https://storage.googleapis.com/events/gal_EVT008_2.jpg"
-    ],
-    "promoVideoUrl": "https://youtube.com/watch?v=saas_ux_retro",
-    "capacity": {
-      "totalSeats": 1000,
-      "reservedSeats": 0,
-      "availableSeats": 1000,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-05-01",
-      "registrationCloseDate": "2026-06-09",
-      "requiresApproval": false,
-      "customForm": [],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": false
-    },
-    "pricing": {
-      "isFree": true,
-      "currency": "PKR",
-      "tiers": [],
-      "studentDiscount": {
-        "enabled": false,
-        "percentage": 0,
-        "requiresVerification": false
-      },
-      "groupDiscount": {
-        "enabled": false,
-        "minGroupSize": 0,
-        "percentage": 0
-      }
-    },
-    "speakers": [
       {
-        "speakerId": "SPK099",
-        "name": "Faisal Malik",
-        "designation": "Staff Product Designer",
-        "bio": "Ex-Silicon Valley system designer mapping clear user flows into complex software systems.",
-        "profileImage": "https://storage.googleapis.com/speakers/faisal_m.jpg",
-        "sessionTitle": "Reducing Interaction Cost across Complex Analytics Engines"
-      }
-    ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": true,
-      "certificateType": "digital",
-      "templateId": "CERT_TEMPLATE_UX_RETRO",
-      "requirements": {
-        "minAttendance": 95,
-        "mustCompleteSurvey": true
-      }
-    },
-    "status": "completed",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 3210,
-      "registrations": 890,
-      "checkIns": 745,
-      "completionRate": 92.4,
-      "revenue": 0
-    },
-    "createdAt": "2026-04-15T14:00:00Z",
-    "updatedAt": "2026-06-10T15:00:00Z",
-    "publishedAt": "2026-05-01T08:00:00Z",
-    "eventStartTime": "2026-06-10T06:00:00Z",
-    "eventEndTime": "2026-06-10T08:00:00Z",
-    "archivedAt": null,
-    "deletedAt": null
-  },
-  {
-    "id": "EVT009",
-    "organizerId": "O_IC1oAGO8G8TuKsH8FNmFKGNVnvK2",
-    "title": "Bioinformatics & Genetic Structuring Symposium",
-    "description": "A deep research symposium targeting automated laboratory workflows, sequence parsing architectures, and multi-tenant database integration patterns that ended prematurely.",
-    "shortDescription": "Advanced genetic sequence processing frameworks",
-    "category": "healthcare",
-    "eventType": "seminar",
-    "format": "physical",
-    "language": "en",
-    "schedule": {
-      "startDate": "2026-06-25",
-      "endDate": "2026-06-25",
-      "startTime": "13:00",
-      "endTime": "17:00",
-      "timezone": "PKT",
-      "isRecurring": false,
-      "recurrencePattern": null
-    },
-    "location": {
-      "venueName": "PC Hotel Conference Wing B",
-      "address": "Shahrah-e-Quaid-e-Azam",
-      "city": "Lahore",
-      "country": "Pakistan",
-      "coordinates": {
-        "latitude": 31.5565,
-        "longitude": 74.3275
+        "speakerId": "SPK_002",
+        "name": "Asif Reza",
+        "designation": "VP of Core Infrastructure",
+        "bio": "Asif manages infrastructure pipelines processing upward of 10 Billion real-time telemetry markers daily. He is an active open-source contributor to Apache Kafka and cloud infrastructure provisioning toolsets.",
+        "profileImage": "https://storage.googleapis.com/event-assets/speakers/asif_reza.jpg",
+        "sessionTitle": "Real-time Stream Interoperability across Multi-Cloud Environments",
+        "email": "asif.reza@alphastream.net",
+        "linkedin": "https://linkedin.com/in/asif-reza-infra",
+        "twitter": "https://twitter.com/asif_stream",
+        "website": "https://alphastream.net",
+        "company": "AlphaStream Global",
+        "companyLogo": "https://storage.googleapis.com/event-assets/companies/alphastream.png",
+        "isKeynote": false,
+        "isPanelist": true,
+        "order": 2,
+        "sessions": ["SESS_002", "SESS_003"]
       },
-      "meetingPlatform": "Zoom",
-      "meetingLink": "https://zoom.us/j/cancelled-symposium-archive",
-      "meetingId": "112-990-881",
-      "meetingPassword": "none",
-      "parkingInfo": "",
-      "accessibilityInfo": "",
-      "nearbyHotels": [],
-      "nearbyRestaurants": []
-    },
-    "bannerImage": "https://storage.googleapis.com/events/banner_EVT009.jpg",
-    "galleryImages": [],
-    "promoVideoUrl": "https://youtube.com/watch?v=bioinfo_teaser_archive",
-    "capacity": {
-      "totalSeats": 80,
-      "reservedSeats": 10,
-      "availableSeats": 70,
-      "waitingListEnabled": false,
-      "waitingListCapacity": 0,
-      "maxRegistrationsPerUser": 1
-    },
-    "registration": {
-      "registrationOpenDate": "2026-05-15",
-      "registrationCloseDate": "2026-06-24",
-      "requiresApproval": true,
-      "customForm": [
-        {
-          "fieldId": "lab_clearance",
-          "label": "Affiliated Laboratory ID",
-          "type": "text",
-          "options": [],
-          "required": true
-        }
-      ],
-      "earlyBirdDeadline": "",
-      "groupRegistrationEnabled": false,
-      "groupDiscountEnabled": false
-    },
-    "pricing": {
-      "isFree": false,
-      "currency": "PKR",
-      "tiers": [
-        {
-          "name": "Delegate Pass",
-          "price": 3000,
-          "availableUntil": "2026-06-24",
-          "seats": 70
-        }
-      ],
-      "studentDiscount": {
-        "enabled": false,
-        "percentage": 0,
-        "requiresVerification": false
-      },
-      "groupDiscount": {
-        "enabled": false,
-        "minGroupSize": 0,
-        "percentage": 0
-      }
-    },
-    "speakers": [
       {
-        "speakerId": "SPK801",
-        "name": "Dr. Tariq Zaman",
-        "designation": "Head of Computational Genomics",
-        "bio": "Lead researcher mapping scalable data architectures to complex protein sequencing models.",
-        "profileImage": "https://storage.googleapis.com/speakers/tariq_z.jpg",
-        "sessionTitle": "Algorithmic Speedups in Multi-Locus Data Parsing"
+        "speakerId": "SPK_003",
+        "name": "Esha Fatima",
+        "designation": "Head of Engineering & Frontend Infrastructure",
+        "bio": "Esha pioneers UI orchestration patterns for massive distributed engineering divisions. She successfully supervised micro-frontend strategies migrating monolithic platforms to federated web UI architectures.",
+        "profileImage": "https://storage.googleapis.com/event-assets/speakers/esha_fatima.jpg",
+        "sessionTitle": "Federated Micro-Frontends: Scalability Beyond the Backend",
+        "email": "esha.fatima@uilabs.org",
+        "linkedin": "https://linkedin.com/in/esha-fatima-dev",
+        "twitter": "https://twitter.com/esha_ui",
+        "website": "https://uilabs.org",
+        "company": "UI Labs International",
+        "companyLogo": "https://storage.googleapis.com/event-assets/companies/uilabs.png",
+        "isKeynote": false,
+        "isPanelist": true,
+        "order": 3,
+        "sessions": ["SESS_004"]
+      },
+      {
+        "speakerId": "SPK_004",
+        "name": "Kamran Yusuf",
+        "designation": "Chief Information Security Officer",
+        "bio": "Kamran is a veteran cybersecurity auditor with deep background domains covering Zero-Trust Networks (ZTN) and edge security boundaries across regulated e-banking frameworks.",
+        "profileImage": "https://storage.googleapis.com/event-assets/speakers/kamran_yusuf.jpg",
+        "sessionTitle": "Hardening Distributed Service Meshes Against Complex Attack Vectors",
+        "email": "k.yusuf@securemesh.co",
+        "linkedin": "https://linkedin.com/in/kamran-yusuf-cybersec",
+        "twitter": "https://twitter.com/kamran_sec",
+        "website": "https://securemesh.co",
+        "company": "SecureMesh Advisors",
+        "companyLogo": "https://storage.googleapis.com/event-assets/companies/securemesh.png",
+        "isKeynote": false,
+        "isPanelist": true,
+        "order": 4,
+        "sessions": ["SESS_003", "SESS_005"]
+      },
+      {
+        "speakerId": "SPK_005",
+        "name": "Mirza Bilal",
+        "designation": "Director of Data Engineering",
+        "bio": "Mirza works extensively at building out operational enterprise data meshes. He guides data warehousing paradigms away from traditional central architectures into clean domain-driven ownership designs.",
+        "profileImage": "https://storage.googleapis.com/event-assets/speakers/mirza_bilal.jpg",
+        "sessionTitle": "Decentralized Data Management: Transitioning to Data Mesh Paradigms",
+        "email": "mbilal@datamesh-foundry.com",
+        "linkedin": "https://linkedin.com/in/mirza-bilal-data",
+        "twitter": "https://twitter.com/bilal_data",
+        "website": "https://datamesh-foundry.com",
+        "company": "DataMesh Foundry",
+        "companyLogo": "https://storage.googleapis.com/event-assets/companies/datamesh_foundry.png",
+        "isKeynote": false,
+        "isPanelist": false,
+        "order": 5,
+        "sessions": ["SESS_006"]
       }
     ],
-    "agenda": [],
-    "vendorRequirements": [],
-    "teamMembers": [],
-    "certificateConfig": {
-      "issueCertificates": false,
-      "certificateType": "digital",
-      "templateId": "",
-      "requirements": {
-        "minAttendance": 0,
-        "mustCompleteSurvey": false
+    "agenda": [
+      {
+        "sessionId": "SESS_001",
+        "title": "Keynote: Designing for Extreme Fault Tolerance at Scale",
+        "type": "keynote",
+        "status": "confirmed",
+        "date": "2026-10-14",
+        "startTime": "09:30",
+        "endTime": "11:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Main Ballroom",
+        "room": "Grand Ballroom A",
+        "building": "Hotel West Wing",
+        "floor": "Ground Floor",
+        "capacity": 350,
+        "speakerNames": ["Dr. Zainab Mahmood"],
+        "description": "An exploratory session detailing the anatomy of systems that survive regional cloud blackouts through distributed multi-region replication techniques.",
+        "activities": [
+          {
+            "time": "09:30-09:45",
+            "description": "Opening remarks and architectural landscape analysis overview",
+            "type": "presentation"
+          },
+          {
+            "time": "09:45-10:45",
+            "description": "Deep-dive case studies on active-active replication models",
+            "type": "presentation"
+          },
+          {
+            "time": "10:45-11:00",
+            "description": "Interactive theoretical systems design scenarios with audience feedback",
+            "type": "discussion"
+          }
+        ],
+        "notes": "Keynote session stream will be recorded live. Presentation slides will be dispatched to all ticket tiers afterwards.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_001_live.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-001",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": true,
+        "maxAttendees": 350,
+        "currentAttendees": 290,
+        "customFields": {
+          "githubRepo": "https://github.com/scale-dynamics-corp/fault-tolerance-blueprints",
+          "exerciseFiles": "https://storage.googleapis.com/event-exercises/SESS_001_architectures.pdf"
+        }
+      },
+      {
+        "sessionId": "SESS_002",
+        "title": "Real-time Stream Interoperability across Multi-Cloud Environments",
+        "type": "workshop",
+        "status": "confirmed",
+        "date": "2026-10-14",
+        "startTime": "11:30",
+        "endTime": "13:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Technical Arena",
+        "room": "Seminar Room B-2",
+        "building": "Hotel East Wing",
+        "floor": "1st Floor",
+        "capacity": 150,
+        "speakerNames": ["Asif Reza"],
+        "description": "Practical architectural setup for streaming events seamlessly across separate cloud fabrics without suffering massive latency spikes.",
+        "activities": [
+          {
+            "time": "11:30-11:50",
+            "description": "Network baseline setups and cross-cloud VPC bridging principles",
+            "type": "presentation"
+          },
+          {
+            "time": "11:50-12:40",
+            "description": "Live configuration of multi-cluster mirrors and consumer validation models",
+            "type": "workshop",
+            "requirements": ["Laptop", "AWS Account CLI", "GCP Account SDK Access"]
+          },
+          {
+            "time": "12:40-13:00",
+            "description": "Q&A on cross-border legal compliance around distributed data streams",
+            "type": "discussion"
+          }
+        ],
+        "notes": "Participants should ideally set up their infrastructure credentials beforehand.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_002_live.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-002",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": true,
+        "maxAttendees": 150,
+        "currentAttendees": 142,
+        "customFields": {
+          "githubRepo": "https://github.com/alphastream-global/cross-cloud-kafka-mesh",
+          "exerciseFiles": "https://storage.googleapis.com/event-exercises/SESS_002_config_templates.zip"
+        }
+      },
+      {
+        "sessionId": "SESS_003",
+        "title": "Panel: The Next Decade of Cloud Infrastructures",
+        "type": "panel",
+        "status": "confirmed",
+        "date": "2026-10-14",
+        "startTime": "14:30",
+        "endTime": "16:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Main Ballroom",
+        "room": "Grand Ballroom A",
+        "building": "Hotel West Wing",
+        "floor": "Ground Floor",
+        "capacity": 350,
+        "speakerNames": ["Dr. Zainab Mahmood", "Asif Reza", "Kamran Yusuf"],
+        "description": "A collaborative panel discussion looking over the evolution towards serverless runtimes, decentralized systems edges, and upcoming security frameworks.",
+        "activities": [
+          {
+            "time": "14:30-15:15",
+            "description": "Panel debate surrounding edge compute versus centralized clouds",
+            "type": "discussion"
+          },
+          {
+            "time": "15:15-16:00",
+            "description": "Moderated audience dynamic question routing block",
+            "type": "discussion"
+          }
+        ],
+        "notes": "No special setups needed; open to all attending passes.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_003_panel.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-003",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": false,
+        "maxAttendees": 350,
+        "currentAttendees": 310,
+        "customFields": {}
+      },
+      {
+        "sessionId": "SESS_004",
+        "title": "Federated Micro-Frontends: Scalability Beyond the Backend",
+        "type": "talk",
+        "status": "confirmed",
+        "date": "2026-10-15",
+        "startTime": "09:30",
+        "endTime": "11:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Technical Arena",
+        "room": "Seminar Room B-2",
+        "building": "Hotel East Wing",
+        "floor": "1st Floor",
+        "capacity": 150,
+        "speakerNames": ["Esha Fatima"],
+        "description": "Breaking client side web systems into decentralized modules managed by autonomous teams using runtime module federation mechanics.",
+        "activities": [
+          {
+            "time": "09:30-10:15",
+            "description": "Deconstructing micro-frontend runtimes and continuous delivery frameworks",
+            "type": "presentation"
+          },
+          {
+            "time": "10:15-10:45",
+            "description": "Live configuration of Webpack / Vite Module Federation options",
+            "type": "presentation"
+          },
+          {
+            "time": "10:45-11:00",
+            "description": "Performance troubleshooting audit session open deck",
+            "type": "discussion"
+          }
+        ],
+        "notes": "Best suited for principal frontend and full-stack software paths.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_004_web.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-004",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": true,
+        "maxAttendees": 150,
+        "currentAttendees": 98,
+        "customFields": {
+          "githubRepo": "https://github.com/uilabs-org/federated-module-architecture-demo",
+          "exerciseFiles": "https://storage.googleapis.com/event-exercises/SESS_004_slides.pdf"
+        }
+      },
+      {
+        "sessionId": "SESS_005",
+        "title": "Hardening Distributed Service Meshes Against Complex Attack Vectors",
+        "type": "talk",
+        "status": "confirmed",
+        "date": "2026-10-15",
+        "startTime": "11:30",
+        "endTime": "13:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Main Ballroom",
+        "room": "Grand Ballroom B",
+        "building": "Hotel West Wing",
+        "floor": "Ground Floor",
+        "capacity": 200,
+        "speakerNames": ["Kamran Yusuf"],
+        "description": "Actionable security approaches covering cryptographic identities, mutual TLS policies, and dynamic policy engines inside systems grids.",
+        "activities": [
+          {
+            "time": "11:30-12:15",
+            "description": "Deconstructing network perimeter breaches using zero-day threat models",
+            "type": "presentation"
+          },
+          {
+            "time": "12:15-12:45",
+            "description": "Configuring SPIFFE/SPIRE runtime identity verification live",
+            "type": "presentation"
+          },
+          {
+            "time": "12:45-13:00",
+            "description": "Security posture evaluation framework interactive deck",
+            "type": "discussion"
+          }
+        ],
+        "notes": "Intermediate to advanced security policy experience highly recommended.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_005_security.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-005",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": true,
+        "maxAttendees": 200,
+        "currentAttendees": 115,
+        "customFields": {
+          "githubRepo": "https://github.com/securemesh-advisors/spiffe-mesh-hardening",
+          "exerciseFiles": "https://storage.googleapis.com/event-exercises/SESS_005_hardening_checklist.xlsx"
+        }
+      },
+      {
+        "sessionId": "SESS_006",
+        "title": "Decentralized Data Management: Transitioning to Data Mesh Paradigms",
+        "type": "talk",
+        "status": "confirmed",
+        "date": "2026-10-15",
+        "startTime": "14:30",
+        "endTime": "16:00",
+        "duration": "90 minutes",
+        "timezone": "PKT",
+        "location": "Technical Arena",
+        "room": "Seminar Room B-2",
+        "building": "Hotel East Wing",
+        "floor": "1st Floor",
+        "capacity": 150,
+        "speakerNames": ["Mirza Bilal"],
+        "description": "Moving beyond a single centralized data warehouse by structuring data pipelines around highly isolated domain logic frameworks.",
+        "activities": [
+          {
+            "time": "14:30-15:20",
+            "description": "Organizational and technological transformation requirements for data product units",
+            "type": "presentation"
+          },
+          {
+            "time": "15:20-15:50",
+            "description": "Architectural governance and automated lineage tool assessment models",
+            "type": "presentation"
+          },
+          {
+            "time": "15:50-16:00",
+            "description": "Open floor consultation on corporate governance blockers",
+            "type": "discussion"
+          }
+        ],
+        "notes": "Targeted directly at enterprise data engineers, team leadership paths, and analytical officers.",
+        "recordingUrl": "https://storage.googleapis.com/event-recordings/SESS_006_datamesh.mp4",
+        "feedbackFormUrl": "https://forms.google.com/feedback-sess-006",
+        "isRecordingAvailable": true,
+        "isRegistrationRequired": true,
+        "maxAttendees": 150,
+        "currentAttendees": 130,
+        "customFields": {
+          "githubRepo": "https://github.com/datamesh-foundry/data-product-blueprint",
+          "exerciseFiles": "https://storage.googleapis.com/event-exercises/SESS_006_mesh_whitepaper.pdf"
+        }
       }
-    },
-    "status": "cancelled",
-    "visibility": "public",
-    "accessCode": null,
-    "analytics": {
-      "views": 490,
-      "registrations": 18,
-      "checkIns": 0,
-      "completionRate": 0.0,
-      "revenue": 54000
-    },
-    "createdAt": "2026-05-10T10:00:00Z",
-    "updatedAt": "2026-06-20T11:00:00Z",
-    "publishedAt": "2026-05-12T09:00:00Z",
-    "eventStartTime": "2026-06-25T08:00:00Z",
-    "eventEndTime": "2026-06-25T12:00:00Z",
+    ],
+    "vendorRequirements": [
+      {
+        "requirementId": "VR_001",
+        "serviceCategory": "catering",
+        "description": "Premium multi-tier buffet hot lunch setups for 350 attendants including dietary variety parameters.",
+        "budget": 450000,
+        "status": "assigned",
+        "assignedVendorId": "VND_77a2B11c5",
+        "requestedBy": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+        "requestedAt": "2026-07-16T10:15:30Z",
+        "assignedAt": "2026-08-01T14:22:00Z",
+        "completedAt": null,
+        "notes": "Must contain strict separated labeling for gluten-free and vegetarian options."
+      },
+      {
+        "requirementId": "VR_002",
+        "serviceCategory": "audiovisual",
+        "description": "High-density dual projection array, backup audio mixers, staging arrays, and active multi-cam digital recording pipelines.",
+        "budget": 300000,
+        "status": "open",
+        "assignedVendorId": null,
+        "requestedBy": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+        "requestedAt": "2026-07-16T11:05:00Z",
+        "assignedAt": null,
+        "completedAt": null,
+        "notes": "Requires live feed outputs setup into low-latency Zoom infrastructure configurations."
+      }
+    ],
+    "teamMembers": [
+      {
+        "userId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+        "role": "organizer",
+        "permissions": ["manage_all"],
+        "addedAt": "2026-07-12T01:00:00Z",
+        "isActive": true
+      },
+      {
+        "userId": "USR_v3N2m8K1qW5xZ9",
+        "role": "moderator",
+        "permissions": ["manage_registrations", "scan_tickets"],
+        "addedAt": "2026-08-15T09:30:00Z",
+        "isActive": true
+      }
+    ],
+    "createdAt": "2026-07-12T01:15:22Z",
+    "updatedAt": "2026-07-15T18:42:10Z",
+    "publishedAt": "2026-07-15T19:00:00Z",
+    "eventStartTime": "2026-10-14T04:00:00Z",
+    "eventEndTime": "2026-10-15T13:00:00Z",
     "archivedAt": null,
     "deletedAt": null
   }
-];
+]
+
 
 export const mockEvents: EventModel[] = raw_events.map(item => EventModel.fromJson(item));

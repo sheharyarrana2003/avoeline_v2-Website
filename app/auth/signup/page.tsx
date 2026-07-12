@@ -14,11 +14,14 @@ export default function SignIn() {
         await AuthService.signUpWithEmail(formData);
         const user: CurrentUserData | null = await AuthService.getCurrentUser();
 
+        console.log("user data after signup", user);
+
 
         if (user === null) {
             redirect("/auth/signup");
         } else {
-            const user_role = user.userType;
+            const user_role = user.userType || "";
+            console.log(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
             redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
         }
 

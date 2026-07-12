@@ -3,12 +3,18 @@ import { cache } from "react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/data/db';
 import { Organizer } from "@/src/services/models/organizer.model";
-import { Vendor } from "@/src/services/models/vendor.model";
+import { Vendor, VendorData } from "@/src/services/models/vendor.model";
 import { adminAuth, adminDb } from "@/data/admin_db";
 import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
 import { CurrentUserData, User } from "@/src/services/models/user.type";
+
 import type { User as FirebaseUser } from 'firebase/auth';
+import { mockVendors } from "@/app/mockdata/vendors.mock";
+import { EventVendorService, mapToVendorData } from "../event_vendors/event_venders.services";
+import { COLLECTIONS } from "@/data/collections";
+import {seedEvents} from "@/seeding";
+
 
 interface signup_with_email_form_data {
     name: string;
@@ -52,40 +58,46 @@ const handleAuthAndCreateCookie = async (token: string) => {
     const current_user = await converting_to_current_user_data(user_from_obj);
     await adminAuth.setCustomUserClaims(obj.uid, { ...current_user });
     const expiresIn = 1000 * 60 * 60 * 24 * 5;
+
     const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn });
     return sessionCookie;
 }
 
-const making_a_session = async (user: FirebaseUser) => {
-    const token = await user.getIdToken();
-    const sessionCookieString = await handleAuthAndCreateCookie(token);
-    const cookieStore = await cookies();
-    cookieStore.set("firebaseSession", sessionCookieString, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 5,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-    });
-}
+
+
+
 const converting_to_current_user_data = async (user: User) => {
     const table_name = user.userType.trim().toLowerCase();
-    const docSnap = await adminDb.collection(table_name).doc(user.userId).get();
+    // const docSnap = await adminDb.collection(table_name).doc(user.userId).get();
 
-    const role_object = docSnap.data() || {};
-    const targetKey = `${table_name}id`.toLowerCase();
-    let role_id = "didnt-exist";
+    // const role_object = docSnap.data() || {};
+    // const targetKey = `${table_name}id`.toLowerCase();
+    // let role_id = "didnt-exist";
 
-    const actualKey = Object.keys(role_object).find(
-        key => key.toLowerCase() === targetKey
-    );
+    // const actualKey = Object.keys(role_object).find(
+    //     key => key.toLowerCase() === targetKey
+    // );
 
-    if (actualKey) {
-        role_id = role_object[actualKey];
-    } else {
-        console.error(`[converting_to_current_user_data] no ID key matching '${targetKey}' found`);
+    // if (actualKey) {
+    //     role_id = role_object[actualKey];
+    // } else {
+    //     console.error(`[converting_to_current_user_data] no ID key matching '${targetKey}' found`);
+    // }
+    let role_id = "unknown_role";
+
+    if(table_name == "organizer") {
+        role_id = `O_${user.userId}`;
+    }else   if(table_name == "vendor") {
+        role_id = `V_${user.userId}`;
     }
 
+    console.log("in converting_to_current_user_data", {
+        userId: user?.userId || "",
+        email: user?.email || "",
+        name: user?.profile.fullName || "",
+        userType: user?.userType || "",
+        roleId: role_id || ""
+    })
     return {
         userId: user?.userId || "",
         email: user?.email || "",
@@ -95,7 +107,36 @@ const converting_to_current_user_data = async (user: User) => {
     };
 }
 
+// Server: verify + set claims, return uid only
+const setClaimsForUser = async (token: string) => {
+    const obj = await adminAuth.verifyIdToken(token);
+    const user_from_obj = await UserService.getUserById(obj.uid);
+    const current_user = await converting_to_current_user_data(user_from_obj);
+    await adminAuth.setCustomUserClaims(obj.uid, { ...current_user });
+    return obj.uid;
+};
 
+// Server: just mint the cookie from whatever token you're given
+const createCookieFromToken = async (freshToken: string) => {
+    const expiresIn = 1000 * 60 * 60 * 24 * 5;
+    return adminAuth.createSessionCookie(freshToken, { expiresIn });
+};
+
+const making_a_session = async (user: FirebaseUser) => {
+    const initialToken = await user.getIdToken();
+    await setClaimsForUser(initialToken);           // set claims on the record
+    const freshToken = await user.getIdToken(true);  // force refresh -> new token WITH claims
+    const sessionCookieString = await createCookieFromToken(freshToken);
+
+    const cookieStore = await cookies();
+    cookieStore.set("firebaseSession", sessionCookieString, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 5,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
+};
 
 
 export const AuthService = {
@@ -108,7 +149,7 @@ export const AuthService = {
 
         try {
             const currentUser = await adminAuth.verifySessionCookie(jwt_key);
-            console.log(currentUser);
+            console.log("currentUser from session cookie", currentUser);
             return {
                 userId: currentUser.uid,
                 email: currentUser.email,
@@ -148,7 +189,11 @@ export const AuthService = {
     async loginWithEmail(email: string, password: string) {
         console.log("Checkpoint 1:  function started.");
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
-        //await seedEvents();
+
+        
+          //  await seedEvents(adminDb);
+        
+        
 
         let user_credintials;
         try {
@@ -158,7 +203,7 @@ export const AuthService = {
             const errorCode = error.code;
             const errorMessage = error.message;
 
-            console.log("[user logging in] " ,error)
+            console.log("[user logging in] ", error)
             throw error;
         }
         const user = user_credintials.user;
@@ -186,7 +231,7 @@ export const AuthService = {
         try {
             user_credintials = await createUserWithEmailAndPassword(auth, email, password);
         } catch (error: any) {
-             console.log("[user signing in] failed")
+            console.log("[user signing in] failed")
             throw error;
         }
 
@@ -195,25 +240,34 @@ export const AuthService = {
         const user_object = { ...formData };
 
         console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.userType);
-        await adminDb.collection("users").doc(user_id).set(user_object);
+        await adminDb.collection(COLLECTIONS.USERS).doc(user_id).set(user_object);
         console.log(`💾 userType written: "${formData.userType}"`);
 
         const userTypeLower = String(formData.userType).trim().toLowerCase();
         if (userTypeLower === 'organizer') {
+
             const temp_organizer: Organizer = new Organizer(user_id, email, email);
-            await adminDb.collection("organizer").doc(user_id).set(temp_organizer.toFirestoreObject());
+            await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(user_id).set(temp_organizer.toFirestoreObject());
             console.log("Firestore write to organizer done.");
+
         } else if (userTypeLower === 'vendor') {
-            const temp_vendor: Vendor = new Vendor(user_id, email, email);
-            await adminDb.collection("vendor").doc(user_id).set(temp_vendor.toFirestoreObject());
+            let temp_vendor: Vendor = new Vendor(user_id, email, email);
+            await adminDb.collection(COLLECTIONS.VENDORS).doc(user_id).set(temp_vendor.toFirestoreObject());
+            // await adminDb.collection(COLLECTIONS.VENDORS).doc(user_id).set(v_mapped);
             console.log("Firestore write to vendor done.");
         }
 
         console.log("🎉 Checkpoint 3: Firestore write complete!");
 
         // Create a session cookie (same as login flow)
-        await making_a_session(user);
-
+        try {
+            await making_a_session(user);
+        } catch (error: any) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log("[user logging in] making session failed")
+            throw error;
+        }
         return user_object;
     }
 

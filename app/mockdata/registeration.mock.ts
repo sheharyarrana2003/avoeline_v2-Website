@@ -1,412 +1,363 @@
-export const mockReg = [
-    {
-        "registrationId": "REG001",
-        "eventId": "evt_001",
-        "userId": "U001",
-        "organizerId": "org_001",
-        "registrationDate": "2026-05-15T10:30:00.000Z",
-        "registrationSource": "mobile_app",
-        "status": "attended",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-05-15T10:30:00.000Z" },
-            { "status": "confirmed", "timestamp": "2026-05-15T10:35:00.000Z" },
-            { "status": "checked_in", "timestamp": "2026-06-12T08:45:00.000Z" },
-            { "status": "attended", "timestamp": "2026-06-12T17:05:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY001",
-            "amountPaid": 1500,
-            "currency": "PKR",
-            "paymentMethod": "jazzcash",
-            "paymentStatus": "completed",
-            "transactionId": "JC123456789",
-            "invoiceUrl": "https://storage.events.com/invoices/INV001.pdf"
-        },
-        "pricingTier": "Early Bird",
-        "finalPrice": 1500,
-        "discountApplied": {
-            "type": "student_discount",
-            "percentage": 20,
-            "originalPrice": 1875,
-            "discountedPrice": 1500
-        },
-        "checkIn": {
-            "checkedIn": true,
-            "checkInTime": "2026-06-12T08:45:00.000Z",
-            "checkInMethod": "qr_scan",
-            "checkedInBy": "org_001",
-            "deviceId": "device_scan_01"
-        },
-        "qrCode": {
-            "data": "evt_001_U001_REG001",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_001_U001.png",
-            "scanCount": 2,
-            "lastScanned": "2026-06-12T13:00:00.000Z"
-        },
-        "certificate": {
-            "issued": true,
-            "certificateId": "CERT_REG001",
-            "issueDate": "2026-06-12T17:30:00.000Z",
-            "downloadUrl": "https://storage.events.com/certificates/CERT_REG001.pdf",
-            "sharedOnLinkedIn": true
-        },
-        "communications": [
-            {
-                "type": "registration_confirmation",
-                "sentAt": "2026-05-15T10:35:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            },
-            {
-                "type": "event_reminder",
-                "sentAt": "2026-06-11T09:00:00.000Z",
-                "channel": "push_notification",
-                "status": "read"
-            }
-        ],
-        "feedbackSubmitted": true,
-        "rating": 4.8,
-        "reviewId": "REV001",
-        "metadata": {
-            "ipAddress": "39.40.113.1",
-            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X)",
-            "deviceType": "mobile"
-        },
-        "createdAt": "2026-05-15T10:30:00.000Z",
-        "updatedAt": "2026-06-13T09:00:00.000Z",
-        "cancelledAt": null
+export const mockReg =[
+  {
+    "registrationId": "REG_q7W2pX5sL9z1M0v4rN3k",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "userId": "USR_n3K7m8X2pQ1vW4z0rL9jY",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "registrationDate": "2026-07-20T10:15:30Z",
+    "registrationSource": "mobile_app",
+    "status": "attended",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-07-20T10:12:00Z" },
+      { "status": "confirmed", "timestamp": "2026-07-20T10:15:30Z" },
+      { "status": "checked_in", "timestamp": "2026-10-14T03:45:11Z" },
+      { "status": "attended", "timestamp": "2026-10-15T13:00:00Z" }
+    ],
+    "payment": {
+      "paymentId": "PAY_x8K3m7P1qW2z",
+      "amountPaid": 4500,
+      "currency": "PKR",
+      "paymentMethod": "easypaisa",
+      "paymentStatus": "completed",
+      "transactionId": "EP998877665",
+      "invoiceUrl": "https://storage.googleapis.com/event-billing/invoices/INV_REG_q7W.pdf"
     },
-    {
-        "registrationId": "REG002",
-        "eventId": "evt_002",
-        "userId": "U002",
-        "organizerId": "org_001",
-        "registrationDate": "2026-06-05T14:20:00.000Z",
-        "registrationSource": "web",
-        "status": "confirmed",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-06-05T14:20:00.000Z" },
-            { "status": "confirmed", "timestamp": "2026-06-05T14:25:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY088",
-            "amountPaid": 5000,
-            "currency": "PKR",
-            "paymentMethod": "credit_card",
-            "paymentStatus": "completed",
-            "transactionId": "STRIPE_ch_123987",
-            "invoiceUrl": "https://storage.events.com/invoices/INV088.pdf"
-        },
-        "pricingTier": "Standard",
-        "finalPrice": 5000,
-        "discountApplied": null,
-        "checkIn": {
-            "checkedIn": false,
-            "checkInTime": null,
-            "checkInMethod": null,
-            "checkedInBy": null,
-            "deviceId": null
-        },
-        "qrCode": {
-            "data": "evt_002_U002_REG002",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_002_U002.png",
-            "scanCount": 0,
-            "lastScanned": null
-        },
-        "certificate": {
-            "issued": false,
-            "certificateId": null,
-            "issueDate": null,
-            "downloadUrl": null,
-            "sharedOnLinkedIn": false
-        },
-        "communications": [
-            {
-                "type": "registration_confirmation",
-                "sentAt": "2026-06-05T14:25:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            }
-        ],
-        "feedbackSubmitted": false,
-        "rating": null,
-        "reviewId": null,
-        "metadata": {
-            "ipAddress": "119.160.113.45",
-            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0",
-            "deviceType": "desktop"
-        },
-        "createdAt": "2026-06-05T14:20:00.000Z",
-        "updatedAt": "2026-06-05T14:25:00.000Z",
-        "cancelledAt": null
+    "pricingTier": "Early Bird Corporate Pass",
+    "finalPrice": 4500,
+    "discountApplied": {
+      "type": "student_discount",
+      "percentage": 40,
+      "originalPrice": 7500,
+      "discountedPrice": 4500
     },
-    {
-        "registrationId": "REG003",
-        "eventId": "evt_003",
-        "userId": "U001",
-        "organizerId": "org_002",
-        "registrationDate": "2026-06-08T09:15:00.000Z",
-        "registrationSource": "mobile_app",
-        "status": "cancelled",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-06-08T09:15:00.000Z" },
-            { "status": "confirmed", "timestamp": "2026-06-08T09:20:00.000Z" },
-            { "status": "cancelled", "timestamp": "2026-06-10T11:00:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY105",
-            "amountPaid": 0,
-            "currency": "PKR",
-            "paymentMethod": "free_ticket",
-            "paymentStatus": "completed",
-            "transactionId": "FREE_TKT_001",
-            "invoiceUrl": null
-        },
-        "pricingTier": "Free RSVP",
-        "finalPrice": 0,
-        "discountApplied": null,
-        "checkIn": {
-            "checkedIn": false,
-            "checkInTime": null,
-            "checkInMethod": null,
-            "checkedInBy": null,
-            "deviceId": null
-        },
-        "qrCode": {
-            "data": "evt_003_U001_REG003",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_003_U001.png",
-            "scanCount": 0,
-            "lastScanned": null
-        },
-        "certificate": {
-            "issued": false,
-            "certificateId": null,
-            "issueDate": null,
-            "downloadUrl": null,
-            "sharedOnLinkedIn": false
-        },
-        "communications": [
-            {
-                "type": "registration_confirmation",
-                "sentAt": "2026-06-08T09:20:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            },
-            {
-                "type": "cancellation_confirmation",
-                "sentAt": "2026-06-10T11:05:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            }
-        ],
-        "feedbackSubmitted": false,
-        "rating": null,
-        "reviewId": null,
-        "metadata": {
-            "ipAddress": "39.40.113.1",
-            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X)",
-            "deviceType": "mobile"
-        },
-        "createdAt": "2026-06-08T09:15:00.000Z",
-        "updatedAt": "2026-06-10T11:00:00.000Z",
-        "cancelledAt": "2026-06-10T11:00:00.000Z"
+    "checkIn": {
+      "checkedIn": true,
+      "checkInTime": "2026-10-14T03:45:11Z",
+      "checkInMethod": "qr_scan",
+      "checkedInBy": "USR_v3N2m8K1qW5xZ9",
+      "deviceId": "gate_scanner_01"
     },
-    {
-        "registrationId": "REG004",
-        "eventId": "evt_001",
-        "userId": "U003",
-        "organizerId": "org_001",
-        "registrationDate": "2026-05-20T14:00:00.000Z",
-        "registrationSource": "web",
-        "status": "attended",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-05-20T14:00:00.000Z" },
-            { "status": "confirmed", "timestamp": "2026-05-20T14:10:00.000Z" },
-            { "status": "checked_in", "timestamp": "2026-06-12T09:05:00.000Z" },
-            { "status": "attended", "timestamp": "2026-06-12T16:45:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY045",
-            "amountPaid": 1500,
-            "currency": "PKR",
-            "paymentMethod": "easypaisa",
-            "paymentStatus": "completed",
-            "transactionId": "EP987654321",
-            "invoiceUrl": "https://storage.events.com/invoices/INV045.pdf"
-        },
-        "pricingTier": "Early Bird",
-        "finalPrice": 1500,
-        "discountApplied": {
-            "type": "university_partner",
-            "percentage": 20,
-            "originalPrice": 1875,
-            "discountedPrice": 1500
-        },
-        "checkIn": {
-            "checkedIn": true,
-            "checkInTime": "2026-06-12T09:05:00.000Z",
-            "checkInMethod": "qr_scan",
-            "checkedInBy": "org_001",
-            "deviceId": "device_scan_02"
-        },
-        "qrCode": {
-            "data": "evt_001_U003_REG004",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_001_U003.png",
-            "scanCount": 1,
-            "lastScanned": "2026-06-12T09:05:00.000Z"
-        },
-        "certificate": {
-            "issued": true,
-            "certificateId": "CERT_REG004",
-            "issueDate": "2026-06-12T17:00:00.000Z",
-            "downloadUrl": "https://storage.events.com/certificates/CERT_REG004.pdf",
-            "sharedOnLinkedIn": false
-        },
-        "communications": [
-            {
-                "type": "registration_confirmation",
-                "sentAt": "2026-05-20T14:10:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            }
-        ],
-        "feedbackSubmitted": false,
-        "rating": null,
-        "reviewId": null,
-        "metadata": {
-            "ipAddress": "103.255.10.22",
-            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0",
-            "deviceType": "desktop"
-        },
-        "createdAt": "2026-05-20T14:00:00.000Z",
-        "updatedAt": "2026-06-12T17:00:00.000Z",
-        "cancelledAt": null
+    "qrCode": {
+      "data": "EVT_k9Xm2P8qL5sW1zR0vN4jY_USR_n3K7m8X2pQ1vW4z0rL9jY_REG_q7W2pX",
+      "imageUrl": "https://storage.googleapis.com/event-assets/qrcodes/qr_q7W2pX.png",
+      "scanCount": 1,
+      "lastScanned": "2026-10-14T03:45:11Z"
     },
-    {
-        "registrationId": "REG005",
-        "eventId": "evt_001",
-        "userId": "U004",
-        "organizerId": "org_001",
-        "registrationDate": "2026-06-05T11:20:00.000Z",
-        "registrationSource": "mobile_app",
-        "status": "confirmed",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-06-05T11:20:00.000Z" },
-            { "status": "confirmed", "timestamp": "2026-06-05T11:25:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY089",
-            "amountPaid": 2500,
-            "currency": "PKR",
-            "paymentMethod": "credit_card",
-            "paymentStatus": "completed",
-            "transactionId": "STRIPE_ch_998877",
-            "invoiceUrl": "https://storage.events.com/invoices/INV089.pdf"
-        },
-        "pricingTier": "Standard",
-        "finalPrice": 2500,
-        "discountApplied": null,
-        "checkIn": {
-            "checkedIn": false,
-            "checkInTime": null,
-            "checkInMethod": null,
-            "checkedInBy": null,
-            "deviceId": null
-        },
-        "qrCode": {
-            "data": "evt_001_U004_REG005",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_001_U004.png",
-            "scanCount": 0,
-            "lastScanned": null
-        },
-        "certificate": {
-            "issued": false,
-            "certificateId": null,
-            "issueDate": null,
-            "downloadUrl": null,
-            "sharedOnLinkedIn": false
-        },
-        "communications": [
-            {
-                "type": "registration_confirmation",
-                "sentAt": "2026-06-05T11:25:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            }
-        ],
-        "feedbackSubmitted": false,
-        "rating": null,
-        "reviewId": null,
-        "metadata": {
-            "ipAddress": "182.176.44.55",
-            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
-            "deviceType": "mobile"
-        },
-        "createdAt": "2026-06-05T11:20:00.000Z",
-        "updatedAt": "2026-06-05T11:25:00.000Z",
-        "cancelledAt": null
+    "certificate": {
+      "issued": true,
+      "certificateId": "CERT_m8N4jYk9Xm2P8qL5sW1z",
+      "issueDate": "2026-10-15T13:30:00Z",
+      "downloadUrl": "https://storage.googleapis.com/event-assets/certificates/CERT_m8N4jY.pdf",
+      "sharedOnLinkedIn": true
     },
-    {
-        "registrationId": "REG006",
-        "eventId": "evt_001",
-        "userId": "U005",
-        "organizerId": "org_001",
-        "registrationDate": "2026-06-10T16:00:00.000Z",
-        "registrationSource": "web",
-        "status": "pending",
-        "statusHistory": [
-            { "status": "pending", "timestamp": "2026-06-10T16:00:00.000Z" }
-        ],
-        "payment": {
-            "paymentId": "PAY112",
-            "amountPaid": 0,
-            "currency": "PKR",
-            "paymentMethod": "bank_transfer",
-            "paymentStatus": "pending",
-            "transactionId": null,
-            "invoiceUrl": null
-        },
-        "pricingTier": "Standard",
-        "finalPrice": 2500,
-        "discountApplied": null,
-        "checkIn": {
-            "checkedIn": false,
-            "checkInTime": null,
-            "checkInMethod": null,
-            "checkedInBy": null,
-            "deviceId": null
-        },
-        "qrCode": {
-            "data": "evt_001_U005_REG006",
-            "imageUrl": "https://storage.events.com/qrcodes/qr_evt_001_U005.png",
-            "scanCount": 0,
-            "lastScanned": null
-        },
-        "certificate": {
-            "issued": false,
-            "certificateId": null,
-            "issueDate": null,
-            "downloadUrl": null,
-            "sharedOnLinkedIn": false
-        },
-        "communications": [
-            {
-                "type": "payment_reminder",
-                "sentAt": "2026-06-12T10:00:00.000Z",
-                "channel": "email",
-                "status": "delivered"
-            }
-        ],
-        "feedbackSubmitted": false,
-        "rating": null,
-        "reviewId": null,
-        "metadata": {
-            "ipAddress": "202.163.76.12",
-            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15)",
-            "deviceType": "desktop"
-        },
-        "createdAt": "2026-06-10T16:00:00.000Z",
-        "updatedAt": "2026-06-10T16:00:00.000Z",
-        "cancelledAt": null
-    }
+    "communications": [
+      {
+        "type": "registration_confirmation",
+        "sentAt": "2026-07-20T10:16:00Z",
+        "channel": "email",
+        "status": "delivered"
+      },
+      {
+        "type": "event_reminder",
+        "sentAt": "2026-10-13T04:00:00Z",
+        "channel": "push_notification",
+        "status": "read"
+      }
+    ],
+    "feedbackSubmitted": true,
+    "rating": 5.0,
+    "reviewId": "REV_m2P8qL5sW1zR",
+    "metadata": {
+      "ipAddress": "111.68.96.22",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X)",
+      "deviceType": "mobile"
+    },
+    "createdAt": "2026-07-20T10:12:00Z",
+    "updatedAt": "2026-10-15T13:30:00Z",
+    "cancelledAt": null
+  },
+  {
+    "registrationId": "REG_z8K2m1p0w4x9z5r3n7lL",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "userId": "USR_b9W2z1r0vL4jYk9Xm5sP8",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "registrationDate": "2026-07-25T14:40:12Z",
+    "registrationSource": "web",
+    "status": "attended",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-07-25T14:35:00Z" },
+      { "status": "confirmed", "timestamp": "2026-07-25T14:40:12Z" },
+      { "status": "checked_in", "timestamp": "2026-10-14T03:52:44Z" },
+      { "status": "attended", "timestamp": "2026-10-15T13:00:00Z" }
+    ],
+    "payment": {
+      "paymentId": "PAY_z2W8qM5p0x4r",
+      "amountPaid": 4500,
+      "currency": "PKR",
+      "paymentMethod": "jazzcash",
+      "paymentStatus": "completed",
+      "transactionId": "JC443322110",
+      "invoiceUrl": "https://storage.googleapis.com/event-billing/invoices/INV_REG_z8K.pdf"
+    },
+    "pricingTier": "Early Bird Corporate Pass",
+    "finalPrice": 4500,
+    "discountApplied": {
+      "type": "student_discount",
+      "percentage": 40,
+      "originalPrice": 7500,
+      "discountedPrice": 4500
+    },
+    "checkIn": {
+      "checkedIn": true,
+      "checkInTime": "2026-10-14T03:52:44Z",
+      "checkInMethod": "qr_scan",
+      "checkedInBy": "USR_v3N2m8K1qW5xZ9",
+      "deviceId": "gate_scanner_01"
+    },
+    "qrCode": {
+      "data": "EVT_k9Xm2P8qL5sW1zR0vN4jY_USR_b9W2z1r0vL4jYk9Xm5sP8_REG_z8K2m1",
+      "imageUrl": "https://storage.googleapis.com/event-assets/qrcodes/qr_z8K2m1.png",
+      "scanCount": 1,
+      "lastScanned": "2026-10-14T03:52:44Z"
+    },
+    "certificate": {
+      "issued": true,
+      "certificateId": "CERT_r0vN4jYk9Xm2P8qL5sW1",
+      "issueDate": "2026-10-15T13:35:00Z",
+      "downloadUrl": "https://storage.googleapis.com/event-assets/certificates/CERT_r0vN4.pdf",
+      "sharedOnLinkedIn": false
+    },
+    "communications": [
+      {
+        "type": "registration_confirmation",
+        "sentAt": "2026-07-25T14:41:00Z",
+        "channel": "email",
+        "status": "delivered"
+      }
+    ],
+    "feedbackSubmitted": false,
+    "rating": 4.5,
+    "reviewId": null,
+    "metadata": {
+      "ipAddress": "182.180.45.101",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      "deviceType": "desktop"
+    },
+    "createdAt": "2026-07-25T14:35:00Z",
+    "updatedAt": "2026-10-15T13:35:00Z",
+    "cancelledAt": null
+  },
+  {
+    "registrationId": "REG_k3X5r9w1m0p7q2z4n8wL",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "userId": "USR_p8Q1vW4z0rL9jYn3K7m8X",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "registrationDate": "2026-09-05T11:20:00Z",
+    "registrationSource": "web",
+    "status": "attended",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-05T11:15:10Z" },
+      { "status": "confirmed", "timestamp": "2026-09-05T11:20:00Z" },
+      { "status": "checked_in", "timestamp": "2026-10-14T04:11:03Z" },
+      { "status": "attended", "timestamp": "2026-10-15T13:00:00Z" }
+    ],
+    "payment": {
+      "paymentId": "PAY_k8P5m2q0w3x1",
+      "amountPaid": 6000,
+      "currency": "PKR",
+      "paymentMethod": "bank_transfer",
+      "paymentStatus": "completed",
+      "transactionId": "FTX_2026_993311",
+      "invoiceUrl": "https://storage.googleapis.com/event-billing/invoices/INV_REG_k3X.pdf"
+    },
+    "pricingTier": "Regular Conference Pass",
+    "finalPrice": 6000,
+    "discountApplied": {
+      "type": "student_discount",
+      "percentage": 40,
+      "originalPrice": 10000,
+      "discountedPrice": 6000
+    },
+    "checkIn": {
+      "checkedIn": true,
+      "checkInTime": "2026-10-14T04:11:03Z",
+      "checkInMethod": "manual",
+      "checkedInBy": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "deviceId": "admin_dashboard_terminal"
+    },
+    "qrCode": {
+      "data": "EVT_k9Xm2P8qL5sW1zR0vN4jY_USR_p8Q1vW4z0rL9jY_REG_k3X5r9",
+      "imageUrl": "https://storage.googleapis.com/event-assets/qrcodes/qr_k3X5r9.png",
+      "scanCount": 1,
+      "lastScanned": "2026-10-14T04:11:03Z"
+    },
+    "certificate": {
+      "issued": true,
+      "certificateId": "CERT_5sW1zR0vN4jYk9Xm2P8q",
+      "issueDate": "2026-10-15T13:40:00Z",
+      "downloadUrl": "https://storage.googleapis.com/event-assets/certificates/CERT_5sW1.pdf",
+      "sharedOnLinkedIn": false
+    },
+    "communications": [
+      {
+        "type": "registration_confirmation",
+        "sentAt": "2026-09-05T11:21:00Z",
+        "channel": "email",
+        "status": "delivered"
+      }
+    ],
+    "feedbackSubmitted": true,
+    "rating": 4.0,
+    "reviewId": "REV_qL5sW1zR0vN4",
+    "metadata": {
+      "ipAddress": "119.160.118.23",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+      "deviceType": "desktop"
+    },
+    "createdAt": "2026-09-05T11:15:10Z",
+    "updatedAt": "2026-10-15T13:40:00Z",
+    "cancelledAt": null
+  },
+  {
+    "registrationId": "REG_p2Q8w4m1z0p7q4s8n1vL",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "userId": "USR_k9Xm5sP8b9W2z1r0vL4jY",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "registrationDate": "2026-09-12T09:30:15Z",
+    "registrationSource": "mobile_app",
+    "status": "attended",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-12T09:28:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-12T09:30:15Z" },
+      { "status": "checked_in", "timestamp": "2026-10-14T03:59:12Z" },
+      { "status": "attended", "timestamp": "2026-10-15T13:00:00Z" }
+    ],
+    "payment": {
+      "paymentId": "PAY_m3Q1x9w0p7z8",
+      "amountPaid": 6000,
+      "currency": "PKR",
+      "paymentMethod": "easypaisa",
+      "paymentStatus": "completed",
+      "transactionId": "EP112233445",
+      "invoiceUrl": "https://storage.googleapis.com/event-billing/invoices/INV_REG_p2Q.pdf"
+    },
+    "pricingTier": "Regular Conference Pass",
+    "finalPrice": 6000,
+    "discountApplied": {
+      "type": "student_discount",
+      "percentage": 40,
+      "originalPrice": 10000,
+      "discountedPrice": 6000
+    },
+    "checkIn": {
+      "checkedIn": true,
+      "checkInTime": "2026-10-14T03:59:12Z",
+      "checkInMethod": "qr_scan",
+      "checkedInBy": "USR_v3N2m8K1qW5xZ9",
+      "deviceId": "gate_scanner_01"
+    },
+    "qrCode": {
+      "data": "EVT_k9Xm2P8qL5sW1zR0vN4jY_USR_k9Xm5sP8b9W2z1r0vL4jY_REG_p2Q8w4",
+      "imageUrl": "https://storage.googleapis.com/event-assets/qrcodes/qr_p2Q8w4.png",
+      "scanCount": 1,
+      "lastScanned": "2026-10-14T03:59:12Z"
+    },
+    "certificate": {
+      "issued": true,
+      "certificateId": "CERT_2P8qL5sW1zR0vN4jYk9X",
+      "issueDate": "2026-10-15T13:42:00Z",
+      "downloadUrl": "https://storage.googleapis.com/event-assets/certificates/CERT_2P8q.pdf",
+      "sharedOnLinkedIn": true
+    },
+    "communications": [
+      {
+        "type": "registration_confirmation",
+        "sentAt": "2026-09-12T09:31:00Z",
+        "channel": "email",
+        "status": "delivered"
+      }
+    ],
+    "feedbackSubmitted": false,
+    "rating": null,
+    "reviewId": null,
+    "metadata": {
+      "ipAddress": "39.40.85.122",
+      "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+      "deviceType": "mobile"
+    },
+    "createdAt": "2026-09-12T09:28:00Z",
+    "updatedAt": "2026-10-15T13:42:00Z",
+    "cancelledAt": null
+  },
+  {
+    "registrationId": "REG_w1P7z4m0q2w8s9n5l4rK",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "userId": "USR_z1r0vL4jYk9Xm5sP8b9W2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "registrationDate": "2026-09-15T16:22:45Z",
+    "registrationSource": "web",
+    "status": "attended",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-15T16:20:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-15T16:22:45Z" },
+      { "status": "checked_in", "timestamp": "2026-10-14T03:40:00Z" },
+      { "status": "attended", "timestamp": "2026-10-15T13:00:00Z" }
+    ],
+    "payment": {
+      "paymentId": "PAY_p5K2q9w1x0z4",
+      "amountPaid": 6000,
+      "currency": "PKR",
+      "paymentMethod": "bank_transfer",
+      "paymentStatus": "completed",
+      "transactionId": "FTX_2026_887711",
+      "invoiceUrl": "https://storage.googleapis.com/event-billing/invoices/INV_REG_w1P.pdf"
+    },
+    "pricingTier": "Regular Conference Pass",
+    "finalPrice": 6000,
+    "discountApplied": {
+      "type": "student_discount",
+      "percentage": 40,
+      "originalPrice": 10000,
+      "discountedPrice": 6000
+    },
+    "checkIn": {
+      "checkedIn": true,
+      "checkInTime": "2026-10-14T03:40:00Z",
+      "checkInMethod": "qr_scan",
+      "checkedInBy": "USR_v3N2m8K1qW5xZ9",
+      "deviceId": "gate_scanner_01"
+    },
+    "qrCode": {
+      "data": "EVT_k9Xm2P8qL5sW1zR0vN4jY_USR_z1r0vL4jYk9Xm5sP8b9W2_REG_w1P7z4",
+      "imageUrl": "https://storage.googleapis.com/event-assets/qrcodes/qr_w1P7z4.png",
+      "scanCount": 1,
+      "lastScanned": "2026-10-14T03:40:00Z"
+    },
+    "certificate": {
+      "issued": true,
+      "certificateId": "CERT_Yk9Xm2P8qL5sW1zR0vN4",
+      "issueDate": "2026-10-15T13:45:00Z",
+      "downloadUrl": "https://storage.googleapis.com/event-assets/certificates/CERT_Yk9Xm.pdf",
+      "sharedOnLinkedIn": true
+    },
+    "communications": [
+      {
+        "type": "registration_confirmation",
+        "sentAt": "2026-09-15T16:23:00Z",
+        "channel": "email",
+        "status": "delivered"
+      }
+    ],
+    "feedbackSubmitted": true,
+    "rating": 5.0,
+    "reviewId": "REV_zR0vN4jYk9Xm",
+    "metadata": {
+      "ipAddress": "175.107.12.84",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      "deviceType": "desktop"
+    },
+    "createdAt": "2026-09-15T16:20:00Z",
+    "updatedAt": "2026-10-15T13:45:00Z",
+    "cancelledAt": null
+  }
 ]

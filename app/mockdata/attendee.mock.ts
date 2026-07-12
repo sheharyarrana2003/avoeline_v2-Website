@@ -1,514 +1,258 @@
 export const mockAttendee = [
-{
-    attendeeId: "ATT-001",
-    userId: "U001",
-    academic: {
-      university: "MIT",
-      studentId: "MIT-9921",
-      department: "Computer Science",
-      graduationYear: 2027,
-      cgpa: 4.8,
-      isStudentVerified: true,
-      verificationMethod: "EduID_OAuth",
-      verifiedAt: "2026-01-15T09:30:00Z"
+  {
+    "attendeeId": "ATT_v4u3t2s1r0q9x8y7z6w5",
+    "userId": "USR_n3K7m8X2pQ1vW4z0rL9jY",
+    "academic": {
+      "university": "NED University of Engineering & Technology",
+      "studentId": "2022-CS-91",
+      "department": "Computer Science",
+      "graduationYear": 2026,
+      "cgpa": 3.72,
+      "isStudentVerified": true,
+      "verificationMethod": "email",
+      "verifiedAt": "2025-02-14T11:22:00Z"
     },
-    interests: ["Quantum Computing", "Distributed Systems"],
-    skills: [
-      { name: "TypeScript", level: "advanced", endorsements: 24 },
-      { name: "Rust", level: "intermediate", endorsements: 12 }
+    "interests": ["Cloud Computing", "Distributed Systems", "Backend Architecture"],
+    "skills": [
+      { "name": "C++", "level": "advanced", "endorsements": 24 },
+      { "name": "Docker", "level": "intermediate", "endorsements": 11 }
     ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user001",
-      github: "https://github.com/user001",
-      portfolio: "https://user001.dev",
-      twitter: null
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/m-ali-khan-ned",
+      "github": "https://github.com/malikhan-dev",
+      "portfolio": "https://malikhan.me",
+      "twitter": "https://twitter.com/ali_codes"
     },
-    stats: {
-      totalEventsAttended: 5,
-      totalCertificatesEarned: 3,
-      totalReviewsWritten: 2,
-      averageRatingGiven: 4.5,
-      networkingConnections: 14,
-      eventsRegistered: 6,
-      eventsAttended: 5,
-      attendanceRate: 83.3,
-      totalHoursSpent: 22.5
+    "stats": {
+      "totalEventsAttended": 8,
+      "totalCertificatesEarned": 6,
+      "totalReviewsWritten": 4,
+      "averageRatingGiven": 4.5,
+      "networkingConnections": 32,
+      "eventsRegistered": 10,
+      "eventsAttended": 8,
+      "attendanceRate": 80.0,
+      "totalHoursSpent": 32
     },
-    certificates: [
+    "certificates": [
       {
-        certificateId: "CERT-001-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "blockchain",
-        verificationUrl: "https://polygonscan.com/tx/0xabc123"
+        "certificateId": "CERT_m8N4jYk9Xm2P8qL5sW1z",
+        "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+        "issuedAt": "2026-10-15T13:30:00Z",
+        "type": "digital",
+        "verificationUrl": "https://verification.eventmesh.pk/certs/CERT_m8N4jY"
       }
     ],
-    connections: [
+    "connections": [
       {
-        connectionId: "CONN-101",
-        connectedUserId: "U100", // Speaker at EVT001
-        connectedAt: "2026-05-10T14:00:00Z",
-        connectionType: "speaker",
-        notes: "Discussed the EVT001 keynote presentation."
+        "connectionId": "CON_z2W8pX4qL0sN1",
+        "connectedUserId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+        "connectedAt": "2026-10-14T11:00:00Z",
+        "connectionType": "organizer",
+        "notes": "Discussed system engineering TA positions at the architecture forum."
       }
     ],
-    createdAt: "2026-01-15T09:00:00Z",
-    updatedAt: "2026-05-11T10:00:00Z"
+    "createdAt": "2025-02-14T11:35:00Z",
+    "updatedAt": "2026-07-12T13:45:00Z"
   },
   {
-    attendeeId: "ATT-002",
-    userId: "U002",
-    academic: {
-      university: "Stanford University",
-      studentId: "STAN-4412",
-      department: "Data Science",
-      graduationYear: 2026,
-      cgpa: 3.9,
-      isStudentVerified: true,
-      verificationMethod: "Manual_Review",
-      verifiedAt: "2026-02-10T14:15:00Z"
+    "attendeeId": "ATT_2e3f4g5h6i7j8a9b0c1d",
+    "userId": "USR_b9W2z1r0vL4jYk9Xm5sP8",
+    "academic": {
+      "university": "NED University of Engineering & Technology",
+      "studentId": "2023-SE-104",
+      "department": "Software Engineering",
+      "graduationYear": 2027,
+      "cgpa": 3.91,
+      "isStudentVerified": true,
+      "verificationMethod": "email",
+      "verifiedAt": "2024-09-01T09:12:00Z"
     },
-    interests: ["Machine Learning", "AI Ethics"],
-    skills: [
-      { name: "Python", level: "advanced", endorsements: 41 },
-      { name: "PyTorch", level: "intermediate", endorsements: 15 }
+    "interests": ["Frontend Systems", "Micro-Frontends", "UI Optimization"],
+    "skills": [
+      { "name": "JavaScript", "level": "advanced", "endorsements": 31 },
+      { "name": "React", "level": "advanced", "endorsements": 28 }
     ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user002",
-      github: "https://github.com/user002",
-      portfolio: null,
-      twitter: null
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/ayesha-siddiqua-software",
+      "github": "https://github.com/ayesha-sidd",
+      "portfolio": "https://ayesha.dev",
+      "twitter": null
     },
-    stats: {
-      totalEventsAttended: 2,
-      totalCertificatesEarned: 1,
-      totalReviewsWritten: 1,
-      averageRatingGiven: 5.0,
-      networkingConnections: 4,
-      eventsRegistered: 2,
-      eventsAttended: 2,
-      attendanceRate: 100.0,
-      totalHoursSpent: 8.0
+    "stats": {
+      "totalEventsAttended": 14,
+      "totalCertificatesEarned": 12,
+      "totalReviewsWritten": 9,
+      "averageRatingGiven": 4.8,
+      "networkingConnections": 55,
+      "eventsRegistered": 14,
+      "eventsAttended": 14,
+      "attendanceRate": 100.0,
+      "totalHoursSpent": 54
     },
-    certificates: [
+    "certificates": [
       {
-        certificateId: "CERT-002-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "digital",
-        verificationUrl: "https://verify.event.com/cert-002"
+        "certificateId": "CERT_r0vN4jYk9Xm2P8qL5sW1",
+        "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+        "issuedAt": "2026-10-15T13:35:00Z",
+        "type": "blockchain",
+        "verificationUrl": "https://verification.eventmesh.pk/certs/CERT_r0vN4"
       }
     ],
-    connections: [],
-    createdAt: "2026-02-10T14:00:00Z",
-    updatedAt: "2026-05-10T17:00:00Z"
+    "connections": [],
+    "createdAt": "2024-09-01T09:30:00Z",
+    "updatedAt": "2026-07-11T16:05:00Z"
   },
   {
-    attendeeId: "ATT-003",
-    userId: "U003",
-    academic: {
-      university: "UC Berkeley",
-      studentId: "BERK-8812",
-      department: "Bioengineering",
-      graduationYear: 2028,
-      cgpa: 3.75,
-      isStudentVerified: true,
-      verificationMethod: "EduID_OAuth",
-      verifiedAt: "2026-03-01T11:22:00Z"
+    "attendeeId": "ATT_5e6f7g8h9i0j1a2b3c4d",
+    "userId": "USR_p8Q1vW4z0rL9jYn3K7m8X",
+    "academic": {
+      "university": "NED University of Engineering & Technology",
+      "studentId": "2022-CS-12",
+      "department": "Computer Science",
+      "graduationYear": 2026,
+      "cgpa": 3.45,
+      "isStudentVerified": true,
+      "verificationMethod": "email",
+      "verifiedAt": "2025-11-20T18:44:12Z"
     },
-    interests: ["Bioinformatics", "Computational Biology"],
-    skills: [
-      { name: "R", level: "intermediate", endorsements: 9 },
-      { name: "Python", level: "intermediate", endorsements: 14 }
+    "interests": ["Cybersecurity", "Network Architecture", "Service Meshes"],
+    "skills": [
+      { "name": "Linux Shell", "level": "advanced", "endorsements": 18 },
+      { "name": "Go", "level": "intermediate", "endorsements": 7 }
     ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user003",
-      github: null,
-      portfolio: null,
-      twitter: "https://x.com/user003"
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/hamza-farooq-sec",
+      "github": "https://github.com/hamza-f-net",
+      "portfolio": null,
+      "twitter": "https://twitter.com/hamza_sec"
     },
-    stats: {
-      totalEventsAttended: 1,
-      totalCertificatesEarned: 1,
-      totalReviewsWritten: 0,
-      averageRatingGiven: 0,
-      networkingConnections: 2,
-      eventsRegistered: 1,
-      eventsAttended: 1,
-      attendanceRate: 100.0,
-      totalHoursSpent: 6.0
+    "stats": {
+      "totalEventsAttended": 5,
+      "totalCertificatesEarned": 4,
+      "totalReviewsWritten": 2,
+      "averageRatingGiven": 4.2,
+      "networkingConnections": 14,
+      "eventsRegistered": 7,
+      "eventsAttended": 5,
+      "attendanceRate": 71.4,
+      "totalHoursSpent": 20
     },
-    certificates: [
+    "certificates": [
       {
-        certificateId: "CERT-003-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "digital",
-        verificationUrl: "https://verify.event.com/cert-003"
+        "certificateId": "CERT_5sW1zR0vN4jYk9Xm2P8q",
+        "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+        "issuedAt": "2026-10-15T13:40:00Z",
+        "type": "digital",
+        "verificationUrl": "https://verification.eventmesh.pk/certs/CERT_5sW1"
       }
     ],
-    connections: [
-      {
-        connectionId: "CONN-102",
-        connectedUserId: "U001",
-        connectedAt: "2026-05-10T11:15:00Z",
-        connectionType: "attendee",
-        notes: "Met during the EVT001 networking lunch."
-      }
-    ],
-    createdAt: "2026-03-01T11:00:00Z",
-    updatedAt: "2026-05-10T16:30:00Z"
+    "connections": [],
+    "createdAt": "2025-11-20T19:00:00Z",
+    "updatedAt": "2026-07-12T12:10:33Z"
   },
   {
-    attendeeId: "ATT-004",
-    userId: "U004",
-    academic: {
-      university: "Carnegie Mellon",
-      studentId: "CMU-0091",
-      department: "Robotics",
-      graduationYear: 2026,
-      cgpa: 3.95,
-      isStudentVerified: true,
-      verificationMethod: "Manual_Review",
-      verifiedAt: "2026-04-12T16:45:00Z"
+    "attendeeId": "ATT_1q2r3s4t5k6l7m8n9o0p",
+    "userId": "USR_k9Xm5sP8b9W2z1r0vL4jY",
+    "academic": {
+      "university": "NED University of Engineering & Technology",
+      "studentId": "2023-CS-45",
+      "department": "Computer Science",
+      "graduationYear": 2027,
+      "cgpa": 3.85,
+      "isStudentVerified": true,
+      "verificationMethod": "email",
+      "verifiedAt": "2025-01-10T14:05:00Z"
     },
-    interests: ["Computer Vision", "ROS", "Autonomous Vehicles"],
-    skills: [
-      { name: "C++", level: "advanced", endorsements: 33 },
-      { name: "Python", level: "advanced", endorsements: 28 }
+    "interests": ["Data Engineering", "Machine Learning Pipelines", "Analytics Platforms"],
+    "skills": [
+      { "name": "Python", "level": "advanced", "endorsements": 22 },
+      { "name": "Apache Spark", "level": "intermediate", "endorsements": 9 }
     ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user004",
-      github: "https://github.com/user004",
-      portfolio: "https://user004.ai",
-      twitter: null
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/zainab-fatima-data",
+      "github": "https://github.com/zainab-dataops",
+      "portfolio": "https://zainabfatima.github.io",
+      "twitter": null
     },
-    stats: {
-      totalEventsAttended: 4,
-      totalCertificatesEarned: 4,
-      totalReviewsWritten: 3,
-      averageRatingGiven: 4.8,
-      networkingConnections: 21,
-      eventsRegistered: 4,
-      eventsAttended: 4,
-      attendanceRate: 100.0,
-      totalHoursSpent: 32.0
+    "stats": {
+      "totalEventsAttended": 11,
+      "totalCertificatesEarned": 10,
+      "totalReviewsWritten": 6,
+      "averageRatingGiven": 4.6,
+      "networkingConnections": 41,
+      "eventsRegistered": 12,
+      "eventsAttended": 11,
+      "attendanceRate": 91.6,
+      "totalHoursSpent": 44
     },
-    certificates: [
+    "certificates": [
       {
-        certificateId: "CERT-004-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "blockchain",
-        verificationUrl: "https://polygonscan.com/tx/0xdef456"
+        "certificateId": "CERT_2P8qL5sW1zR0vN4jYk9X",
+        "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+        "issuedAt": "2026-10-15T13:42:00Z",
+        "type": "digital",
+        "verificationUrl": "https://verification.eventmesh.pk/certs/CERT_2P8q"
       }
     ],
-    connections: [],
-    createdAt: "2026-04-12T16:00:00Z",
-    updatedAt: "2026-05-10T16:00:00Z"
+    "connections": [],
+    "createdAt": "2025-01-10T14:20:00Z",
+    "updatedAt": "2026-07-10T11:30:00Z"
   },
   {
-    attendeeId: "ATT-005",
-    userId: "U005",
-    academic: {
-      university: "Georgia Tech",
-      studentId: "GT-7721",
-      department: "Information Security",
-      graduationYear: 2027,
-      cgpa: 3.62,
-      isStudentVerified: true,
-      verificationMethod: "EduID_OAuth",
-      verifiedAt: "2026-05-01T08:10:00Z"
+    "attendeeId": "ATT_3w4x5y6z7a8b9s0t1u2v",
+    "userId": "USR_z1r0vL4jYk9Xm5sP8b9W2",
+    "academic": {
+      "university": "NED University of Engineering & Technology",
+      "studentId": "2021-CS-192",
+      "department": "Computer Science",
+      "graduationYear": 2025,
+      "cgpa": 3.65,
+      "isStudentVerified": true,
+      "verificationMethod": "email",
+      "verifiedAt": "2024-05-12T10:30:00Z"
     },
-    interests: ["Cybersecurity", "Penetration Testing", "Cryptography"],
-    skills: [
-      { name: "Linux", level: "advanced", endorsements: 18 },
-      { name: "Go", level: "beginner", endorsements: 2 }
+    "interests": ["DevOps Engineering", "Multi-Cloud Architectures", "High-Availability Pipelines"],
+    "skills": [
+      { "name": "Kubernetes", "level": "advanced", "endorsements": 42 },
+      { "name": "Terraform", "level": "advanced", "endorsements": 35 }
     ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user005",
-      github: "https://github.com/user005",
-      portfolio: null,
-      twitter: "https://x.com/user005"
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/bilal-shah-devops",
+      "github": "https://github.com/bilalshah-ops",
+      "portfolio": null,
+      "twitter": "https://twitter.com/bilal_infra"
     },
-    stats: {
-      totalEventsAttended: 3,
-      totalCertificatesEarned: 2,
-      totalReviewsWritten: 1,
-      averageRatingGiven: 4.0,
-      networkingConnections: 6,
-      eventsRegistered: 4,
-      eventsAttended: 3,
-      attendanceRate: 75.0,
-      totalHoursSpent: 15.5
+    "stats": {
+      "totalEventsAttended": 19,
+      "totalCertificatesEarned": 17,
+      "totalReviewsWritten": 12,
+      "averageRatingGiven": 4.9,
+      "networkingConnections": 78,
+      "eventsRegistered": 21,
+      "eventsAttended": 19,
+      "attendanceRate": 90.4,
+      "totalHoursSpent": 76
     },
-    certificates: [
+    "certificates": [
       {
-        certificateId: "CERT-005-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "digital",
-        verificationUrl: "https://verify.event.com/cert-005"
+        "certificateId": "CERT_Yk9Xm2P8qL5sW1zR0vN4",
+        "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+        "issuedAt": "2026-10-15T13:45:00Z",
+        "type": "blockchain",
+        "verificationUrl": "https://verification.eventmesh.pk/certs/CERT_Yk9Xm"
       }
     ],
-    connections: [
+    "connections": [
       {
-        connectionId: "CONN-103",
-        connectedUserId: "U200", // Organizer of EVT001
-        connectedAt: "2026-05-10T17:30:00Z",
-        connectionType: "organizer",
-        notes: "Left feedback on the CTF track setup."
+        "connectionId": "CON_m7V1k8P0z4wQ2",
+        "connectedUserId": "USR_v3N2m8K1qW5xZ9",
+        "connectedAt": "2026-10-14T17:15:00Z",
+        "connectionType": "attendee",
+        "notes": "Discussed cluster orchestration failures during track 1 lunch break session."
       }
     ],
-    createdAt: "2026-05-01T08:00:00Z",
-    updatedAt: "2026-05-10T17:30:00Z"
-  },
-  {
-    attendeeId: "ATT-006",
-    userId: "U006",
-    academic: {
-      university: "University of Toronto",
-      studentId: "UOT-5512",
-      department: "Software Engineering",
-      graduationYear: 2026,
-      cgpa: 3.88,
-      isStudentVerified: true,
-      verificationMethod: "EduID_OAuth",
-      verifiedAt: "2026-02-20T10:40:00Z"
-    },
-    interests: ["Cloud Native", "DevOps", "Kubernetes"],
-    skills: [
-      { name: "Docker", level: "advanced", endorsements: 22 },
-      { name: "Kubernetes", level: "intermediate", endorsements: 11 }
-    ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user006",
-      github: "https://github.com/user006",
-      portfolio: "https://user006.cloud",
-      twitter: null
-    },
-    stats: {
-      totalEventsAttended: 8,
-      totalCertificatesEarned: 7,
-      totalReviewsWritten: 6,
-      averageRatingGiven: 4.6,
-      networkingConnections: 35,
-      eventsRegistered: 8,
-      eventsAttended: 8,
-      attendanceRate: 100.0,
-      totalHoursSpent: 54.0
-    },
-    certificates: [
-      {
-        certificateId: "CERT-006-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "blockchain",
-        verificationUrl: "https://polygonscan.com/tx/0xghi789"
-      }
-    ],
-    connections: [],
-    createdAt: "2026-02-20T10:00:00Z",
-    updatedAt: "2026-05-10T16:00:00Z"
-  },
-  {
-    attendeeId: "ATT-007",
-    userId: "U007",
-    academic: {
-      university: "ETH Zurich",
-      studentId: "ETH-1102",
-      department: "Mathematics",
-      graduationYear: 2027,
-      cgpa: undefined, // Testing optional property
-      isStudentVerified: false,
-      verificationMethod: "None",
-      verifiedAt: null
-    },
-    interests: ["Cryptography", "Pure Math", "Web3"],
-    skills: [
-      { name: "Solidity", level: "intermediate", endorsements: 14 },
-      { name: "Python", level: "intermediate", endorsements: 8 }
-    ],
-    socialLinks: {
-      linkedin: null,
-      github: "https://github.com/user007",
-      portfolio: null,
-      twitter: "https://x.com/user007"
-    },
-    stats: {
-      totalEventsAttended: 1,
-      totalCertificatesEarned: 1,
-      totalReviewsWritten: 0,
-      averageRatingGiven: 0,
-      networkingConnections: 1,
-      eventsRegistered: 2,
-      eventsAttended: 1,
-      attendanceRate: 50.0,
-      totalHoursSpent: 4.0
-    },
-    certificates: [
-      {
-        certificateId: "CERT-007-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "blockchain",
-        verificationUrl: "https://polygonscan.com/tx/0xjkl012"
-      }
-    ],
-    connections: [],
-    createdAt: "2026-05-09T13:20:00Z",
-    updatedAt: "2026-05-10T16:00:00Z"
-  },
-  {
-    attendeeId: "ATT-008",
-    userId: "U008",
-    academic: {
-      university: "National University of Singapore",
-      studentId: "NUS-3341",
-      department: "Computer Engineering",
-      graduationYear: 2026,
-      cgpa: 4.2,
-      isStudentVerified: true,
-      verificationMethod: "Manual_Review",
-      verifiedAt: "2026-03-15T04:12:00Z"
-    },
-    interests: ["IoT", "Embedded Systems", "Edge AI"],
-    skills: [
-      { name: "C", level: "advanced", endorsements: 19 },
-      { name: "Python", level: "intermediate", endorsements: 11 }
-    ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user008",
-      github: "https://github.com/user008",
-      portfolio: null,
-      twitter: null
-    },
-    stats: {
-      totalEventsAttended: 3,
-      totalCertificatesEarned: 2,
-      totalReviewsWritten: 1,
-      averageRatingGiven: 4.0,
-      networkingConnections: 8,
-      eventsRegistered: 3,
-      eventsAttended: 3,
-      attendanceRate: 100.0,
-      totalHoursSpent: 16.0
-    },
-    certificates: [
-      {
-        certificateId: "CERT-008-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "digital",
-        verificationUrl: "https://verify.event.com/cert-008"
-      }
-    ],
-    connections: [],
-    createdAt: "2026-03-15T04:00:00Z",
-    updatedAt: "2026-05-10T16:00:00Z"
-  },
-  {
-    attendeeId: "ATT-009",
-    userId: "U009",
-    academic: {
-      university: "Imperial College London",
-      studentId: "ICL-0042",
-      department: "Human-Computer Interaction",
-      graduationYear: 2027,
-      cgpa: 3.65,
-      isStudentVerified: true,
-      verificationMethod: "EduID_OAuth",
-      verifiedAt: "2026-04-20T09:00:00Z"
-    },
-    interests: ["UI/UX Design", "Frontend Architecture", "Accessibility"],
-    skills: [
-      { name: "Figma", level: "advanced", endorsements: 30 },
-      { name: "TypeScript", level: "intermediate", endorsements: 15 }
-    ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user009",
-      github: "https://github.com/user009",
-      portfolio: "https://user009.design",
-      twitter: "https://x.com/user009"
-    },
-    stats: {
-      totalEventsAttended: 4,
-      totalCertificatesEarned: 3,
-      totalReviewsWritten: 4,
-      averageRatingGiven: 4.9,
-      networkingConnections: 19,
-      eventsRegistered: 4,
-      eventsAttended: 4,
-      attendanceRate: 100.0,
-      totalHoursSpent: 20.0
-    },
-    certificates: [
-      {
-        certificateId: "CERT-009-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "digital",
-        verificationUrl: "https://verify.event.com/cert-009"
-      }
-    ],
-    connections: [
-      {
-        connectionId: "CONN-104",
-        connectedUserId: "U004", // Connected to attendee 4 at EVT001
-        connectedAt: "2026-05-10T15:20:00Z",
-        connectionType: "attendee",
-        notes: "Discussed HRI (Human-Robot Interaction) interface trends."
-      }
-    ],
-    createdAt: "2026-04-20T08:30:00Z",
-    updatedAt: "2026-05-10T18:00:00Z"
-  },
-  {
-    attendeeId: "ATT-010",
-    userId: "U010",
-    academic: {
-      university: "Tsinghua University",
-      studentId: "TSH-8839",
-      department: "Automation",
-      graduationYear: 2026,
-      cgpa: 3.92,
-      isStudentVerified: true,
-      verificationMethod: "Manual_Review",
-      verifiedAt: "2026-01-10T02:30:00Z"
-    },
-    interests: ["Reinforcement Learning", "Control Systems"],
-    skills: [
-      { name: "Python", level: "advanced", endorsements: 25 },
-      { name: "MATLAB", level: "advanced", endorsements: 18 }
-    ],
-    socialLinks: {
-      linkedin: "https://linkedin.com/in/user010",
-      github: "https://github.com/user010",
-      portfolio: null,
-      twitter: null
-    },
-    stats: {
-      totalEventsAttended: 2,
-      totalCertificatesEarned: 2,
-      totalReviewsWritten: 1,
-      averageRatingGiven: 4.0,
-      networkingConnections: 5,
-      eventsRegistered: 2,
-      eventsAttended: 2,
-      attendanceRate: 100.0,
-      totalHoursSpent: 14.0
-    },
-    certificates: [
-      {
-        certificateId: "CERT-010-A",
-        eventId: "EVT001",
-        issuedAt: "2026-05-10T16:00:00Z",
-        type: "blockchain",
-        verificationUrl: "https://polygonscan.com/tx/0xmno345"
-      }
-    ],
-    connections: [],
-    createdAt: "2026-01-10T02:00:00Z",
-    updatedAt: "2026-05-10T16:00:00Z"
+    "createdAt": "2024-05-12T11:00:00Z",
+    "updatedAt": "2026-07-12T13:52:10Z"
   }
 ]

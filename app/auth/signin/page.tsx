@@ -10,11 +10,10 @@ export default async function SignIn() {
         await AuthService.loginWithEmail(email, password);
         const user: CurrentUserData | null = await AuthService.getCurrentUser();
 
-
+  console.log("user data after signup", user);
         if (user === null) {
             redirect("/auth/signup");
         } else {
-            console.log("in front end", user)
             const user_role = user.userType;
             console.log(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
             redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);

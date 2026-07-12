@@ -1,701 +1,101 @@
-export const mockBookings = [
- {
-    "bookingId": "B_001_REQ",
-    "eventId": "E_CATERING_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Catering",
-    "serviceId": "S_BUFFET_PREMIUM",
-    "requirements": {
-      "description": "Premium Buffet Catering for Corporate Gala",
-      "serviceDate": "2026-08-15",
-      "startTime": "18:00",
-      "endTime": "22:00",
-      "location": "Grand Ballroom, Downtown Hotel",
-      "specialInstructions": "Require 3 vegan and 2 gluten-free options clearly labeled.",
-      "guestCount": 150
-    },
-    "quote": {
-      "requestedAt": "2026-07-06T10:00:00Z",
-      "respondedAt": null,
-      "vendorQuote": null,
-      "negotiation": [
-        {
-          "from": "organizer",
-          "message": "Hi, looking forward to your quote. Please include live pasta counter options.",
-          "timestamp": "2026-07-06T10:05:00Z"
-        }
-      ]
-    },
-    "status": "quote_requested",
-    "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-07-06T10:00:00Z"
-      }
-    ],
-    "contract": {
-      "signed": false,
-      "signedByOrganizer": null,
-      "signedByVendor": null,
-      "signedAt": null,
-      "contractUrl": null,
-      "terms": {
-        "cancellationPolicy": "Standard 48-hour cancellation policy applies.",
-        "liability": "Vendor is not liable for structural venue restrictions."
-      }
-    },
-    "payment": {
-      "totalAmount": 0,
-      "currency": "USD",
-      "paymentSchedule": [],
-      "commission": {
-        "platformCommission": 0,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 0
-      }
-    },
-    "delivery": {
-      "scheduledDate": "2026-08-15",
-      "scheduledTime": "16:00",
-      "actualDeliveryTime": null,
-      "deliveryNotes": null,
-      "setupCompleted": false,
-      "teardownCompleted": false
-    },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": null
-    },
-    "communications": [
-      {
-        "type": "chat",
-        "from": "organizer",
-        "to": "vendor",
-        "message": "Hi, looking forward to your quote. Please include live pasta counter options.",
-        "timestamp": "2026-07-06T10:05:00Z"
-      }
-    ],
-    "documents": {
-      "quotePdf": null,
-      "invoicePdf": null,
-      "receiptPdf": null
-    },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
-    },
-    "createdAt": "2026-07-06T10:00:00Z",
-    "updatedAt": "2026-07-06T10:05:00Z",
-    "confirmedAt": null,
-    "completedAt": null,
-    "cancelledAt": null
-  },
+export const mockBookings =  [
   {
-    "bookingId": "B_002_SENT",
-    "eventId": "E_LIGHTING_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
+    "bookingId": "B_001_COMPLETED",
+    "eventId": "EVT_7f8g9h1j2k3l4m5n6o7p",
+    "vendorId": "V_a3jogRG5fRezebhMOWyc8XgNK9f1",
     "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "AV & Lighting",
-    "serviceId": "S_STAGE_LIGHTS_04",
+    "serviceType": "catering",
+    "serviceId": "PKG_V1_001",
     "requirements": {
-      "description": "Stage Lighting and Sound Systems for Concert",
-      "serviceDate": "2026-09-20",
-      "startTime": "14:00",
-      "endTime": "23:00",
-      "location": "City Amphitheater",
-      "specialInstructions": "Outdoor setup, needs weatherproofing.",
-      "guestCount": 500
+      "description": "Premium multi-tier buffet hot lunch setups for 400 financial corporate summit attendants.",
+      "serviceDate": "2026-11-18",
+      "startTime": "13:00",
+      "endTime": "15:00",
+      "location": "Marriott Crystal Ballroom Louqnge Wing",
+      
+      "specialInstructions": "Rigid macroscopic labeling flags and isolated layouts for gluten-free/vegetarian profiles required.",
+      "guestCount": 400
     },
     "quote": {
-      "requestedAt": "2026-07-05T09:00:00Z",
-      "respondedAt": "2026-07-06T14:30:00Z",
+      "requestedAt": "2026-08-05T09:00:00Z",
+      "respondedAt": "2026-08-06T11:30:00Z",
       "vendorQuote": {
-        "basePrice": 3500,
+        "basePrice": 880000,
         "additionalCharges": [
-          {
-            "description": "Outdoor Weatherproofing Cover Surcharge",
-            "amount": 250
-          }
+          { "description": "Separate VIP high-tea dynamic service setups adjacent east corridor", "amount": 40000 },
+          { "description": "Supplementary dedicated service waiters crew", "amount": 30000 }
         ],
-        "discount": 150,
-        "totalAmount": 3600,
+        "discount": 150000,
+        "totalAmount": 800000,
         "breakdown": [
-          {
-            "item": "Base Stage Audio/Visual Setup",
-            "quantity": 1,
-            "unitPrice": 3500,
-            "total": 3500
-          },
-          {
-            "item": "Weather Wraps",
-            "quantity": 5,
-            "unitPrice": 50,
-            "total": 250
-          }
+          { "item": "Corporate Main Course Buffer", "quantity": 400, "unitPrice": 2200, "total": 880000 }
         ],
-        "terms": "Valid for 14 days. Requires 50% deposit to secure booking date.",
-        "validity": "2026-07-20T23:59:59Z"
+        "terms": "50% non-refundable operational token advance payment to execute logistic lock in.",
+        "validity": "2026-09-15"
       },
       "negotiation": [
         {
           "from": "organizer",
-          "message": "Can we get a small discount since we are long-term clients?",
-          "timestamp": "2026-07-05T11:00:00Z"
+          "message": "We have recurring corporate accounts through this year. Can we optimize overall balance rates downward?",
+          "timestamp": "2026-08-10T14:00:00Z"
         },
         {
           "from": "vendor",
-          "message": "Applied a $150 loyalty discount to the breakdown.",
-          "timestamp": "2026-07-06T14:28:00Z"
+          "message": "Approved high-volume partnership deduction applied to final summary block.",
+          "timestamp": "2026-08-12T10:15:00Z"
         }
       ]
     },
-    "status": "quote_sent",
-    "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-07-05T09:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-07-06T14:30:00Z"
-      }
-    ],
-    "contract": {
-      "signed": false,
-      "signedByOrganizer": null,
-      "signedByVendor": null,
-      "signedAt": null,
-      "contractUrl": "https://cdn.platform.com/contracts/draft_B_002.pdf",
-      "terms": {
-        "cancellationPolicy": "50% non-refundable deposit if cancelled within 30 days of the event.",
-        "liability": "Vendor is not responsible for power outages caused by municipal grid failures."
-      }
-    },
-    "payment": {
-      "totalAmount": 3600,
-      "currency": "USD",
-      "paymentSchedule": [
-        {
-          "installment": "Deposit",
-          "amount": 1800,
-          "dueDate": "2026-07-20",
-          "status": "pending",
-          "paymentId": null
-        },
-        {
-          "installment": "Final Balance",
-          "amount": 1800,
-          "dueDate": "2026-09-06",
-          "status": "pending",
-          "paymentId": null
-        }
-      ],
-      "commission": {
-        "platformCommission": 360,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 3240
-      }
-    },
-    "delivery": {
-      "scheduledDate": "2026-09-20",
-      "scheduledTime": "10:00",
-      "actualDeliveryTime": null,
-      "deliveryNotes": "Access through Gate 4 for loading dock.",
-      "setupCompleted": false,
-      "teardownCompleted": false
-    },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": null
-    },
-    "communications": [],
-    "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_002.pdf",
-      "invoicePdf": null,
-      "receiptPdf": null
-    },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
-    },
-    "createdAt": "2026-07-05T09:00:00Z",
-    "updatedAt": "2026-07-06T14:30:00Z",
-    "confirmedAt": null,
-    "completedAt": null,
-    "cancelledAt": null
-  },
-  {
-    "bookingId": "B_003_ACCEPTED",
-    "eventId": "E_DECOR_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Decoration",
-    "serviceId": "S_FLORAL_BACKDROP",
-    "requirements": {
-      "description": "Floral backdrops and table centerpieces",
-      "serviceDate": "2026-10-05",
-      "startTime": "09:00",
-      "endTime": "17:00",
-      "location": "Plaza Reception Hall",
-      "specialInstructions": "White and pastel roses mostly.",
-      "guestCount": 200
-    },
-    "quote": {
-      "requestedAt": "2026-07-01T12:00:00Z",
-      "respondedAt": "2026-07-02T10:00:00Z",
-      "vendorQuote": {
-        "basePrice": 1500,
-        "additionalCharges": [],
-        "discount": 0,
-        "totalAmount": 1500,
-        "breakdown": [
-          {
-            "item": "Premium Backdrop Setup",
-            "quantity": 1,
-            "unitPrice": 1000,
-            "total": 1000
-          },
-          {
-            "item": "Table Floral Pots",
-            "quantity": 20,
-            "unitPrice": 25,
-            "total": 500
-          }
-        ],
-        "terms": "Acceptance locks inventory pricing.",
-        "validity": "2026-07-15T00:00:00Z"
-      },
-      "negotiation": []
-    },
-    "status": "quote_accepted",
-    "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-07-01T12:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-07-02T10:00:00Z"
-      },
-      {
-        "status": "quote_accepted",
-        "timestamp": "2026-07-06T15:00:00Z"
-      }
-    ],
-    "contract": {
-      "signed": true,
-      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-      "signedByVendor": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-      "signedAt": "2026-07-06T15:15:00Z",
-      "contractUrl": "https://cdn.platform.com/contracts/executed_B_003.pdf",
-      "terms": {
-        "cancellationPolicy": "Full refund if cancelled 60 days before.",
-        "liability": "Standard accidental florist damage waiver."
-      }
-    },
-    "payment": {
-      "totalAmount": 1500,
-      "currency": "USD",
-      "paymentSchedule": [
-        {
-          "installment": "Full Amount",
-          "amount": 1500,
-          "dueDate": "2026-07-10",
-          "status": "pending",
-          "paymentId": null
-        }
-      ],
-      "commission": {
-        "platformCommission": 150,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 1350
-      }
-    },
-    "delivery": {
-      "scheduledDate": "2026-10-05",
-      "scheduledTime": "06:00",
-      "actualDeliveryTime": null,
-      "deliveryNotes": "Deliver straight to front room staging area.",
-      "setupCompleted": false,
-      "teardownCompleted": false
-    },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": null
-    },
-    "communications": [],
-    "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_003.pdf",
-      "invoicePdf": "https://cdn.platform.com/invoices/INV_B_003.pdf",
-      "receiptPdf": null
-    },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
-    },
-    "createdAt": "2026-07-01T12:00:00Z",
-    "updatedAt": "2026-07-06T15:15:00Z",
-    "confirmedAt": null,
-    "completedAt": null,
-    "cancelledAt": null
-  },
-  {
-    "bookingId": "B_004_CONFIRMED",
-    "eventId": "E_PHOTO_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Photography",
-    "serviceId": "S_HD_VIDEOGRAPHY_PACKAGE",
-    "requirements": {
-      "description": "Event Photography and Videography Coverage",
-      "serviceDate": "2026-07-25",
-      "startTime": "10:00",
-      "endTime": "18:00",
-      "location": "Convention Center Hall B",
-      "specialInstructions": "Deliver raw files on SSD.",
-      "guestCount": 350
-    },
-    "quote": {
-      "requestedAt": "2026-06-15T14:00:00Z",
-      "respondedAt": "2026-06-16T09:00:00Z",
-      "vendorQuote": {
-        "basePrice": 2000,
-        "additionalCharges": [],
-        "discount": 0,
-        "totalAmount": 2000,
-        "breakdown": [
-          {
-            "item": "Full Day Video & Photo Package",
-            "quantity": 1,
-            "unitPrice": 2000,
-            "total": 2000
-          }
-        ],
-        "terms": "Confirmed status finalized upon payment confirmation.",
-        "validity": "2026-06-30T00:00:00Z"
-      },
-      "negotiation": []
-    },
-    "status": "confirmed",
-    "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-06-15T14:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-06-16T09:00:00Z"
-      },
-      {
-        "status": "quote_accepted",
-        "timestamp": "2026-06-18T11:00:00Z"
-      },
-      {
-        "status": "confirmed",
-        "timestamp": "2026-06-18T12:30:00Z"
-      }
-    ],
-    "contract": {
-      "signed": true,
-      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-      "signedByVendor": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-      "signedAt": "2026-06-18T11:05:00Z",
-      "contractUrl": "https://cdn.platform.com/contracts/executed_B_004.pdf",
-      "terms": {
-        "cancellationPolicy": "Non-refundable after confirm state.",
-        "liability": "Media replacement value capping if assets corrupted."
-      }
-    },
-    "payment": {
-      "totalAmount": 2000,
-      "currency": "USD",
-      "paymentSchedule": [
-        {
-          "installment": "Deposit 100%",
-          "amount": 2000,
-          "dueDate": "2026-06-18",
-          "status": "paid",
-          "paymentId": "PAY_TXN_99821_XYZ"
-        }
-      ],
-      "commission": {
-        "platformCommission": 200,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 1800
-      }
-    },
-    "delivery": {
-      "scheduledDate": "2026-07-25",
-      "scheduledTime": "09:30",
-      "actualDeliveryTime": null,
-      "deliveryNotes": "Arrive 30 mins early for camera sound check.",
-      "setupCompleted": false,
-      "teardownCompleted": false
-    },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": null
-    },
-    "communications": [],
-    "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_004.pdf",
-      "invoicePdf": "https://cdn.platform.com/invoices/INV_B_004.pdf",
-      "receiptPdf": "https://cdn.platform.com/receipts/REC_B_004.pdf"
-    },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
-    },
-    "createdAt": "2026-06-15T14:00:00Z",
-    "updatedAt": "2026-06-18T12:30:00Z",
-    "confirmedAt": "2026-06-18T12:30:00Z",
-    "completedAt": null,
-    "cancelledAt": null
-  },
-  {
-    "bookingId": "B_005_IN_PROGRESS",
-    "eventId": "E_STAGE_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Stage Setup",
-    "serviceId": "S_PRO_STAGE_XL",
-    "requirements": {
-      "description": "Main Event Stage Construction",
-      "serviceDate": "2026-07-06",
-      "startTime": "08:00",
-      "endTime": "20:00",
-      "location": "Exhibition Arena, Shed 3",
-      "specialInstructions": "Requires high-grade security clearances for crew.",
-      "guestCount": 1000
-    },
-    "quote": {
-      "requestedAt": "2026-06-01T08:00:00Z",
-      "respondedAt": "2026-06-02T13:00:00Z",
-      "vendorQuote": {
-        "basePrice": 5000,
-        "additionalCharges": [],
-        "discount": 0,
-        "totalAmount": 5000,
-        "breakdown": [
-          {
-            "item": "Modular Scaffolding Stage Construction",
-            "quantity": 1,
-            "unitPrice": 5000,
-            "total": 5000
-          }
-        ],
-        "terms": "Standard full execution terms apply.",
-        "validity": "2026-06-15T00:00:00Z"
-      },
-      "negotiation": []
-    },
-    "status": "in_progress",
-    "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-06-01T08:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-06-02T13:00:00Z"
-      },
-      {
-        "status": "quote_accepted",
-        "timestamp": "2026-06-05T09:00:00Z"
-      },
-      {
-        "status": "confirmed",
-        "timestamp": "2026-06-05T10:00:00Z"
-      },
-      {
-        "status": "in_progress",
-        "timestamp": "2026-07-06T08:00:00Z"
-      }
-    ],
-    "contract": {
-      "signed": true,
-      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-      "signedByVendor": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-      "signedAt": "2026-06-05T09:00:00Z",
-      "contractUrl": "https://cdn.platform.com/contracts/executed_B_005.pdf",
-      "terms": {
-        "cancellationPolicy": "Non-refundable after installation starts.",
-        "liability": "Full structural safety certification provided by vendor."
-      }
-    },
-    "payment": {
-      "totalAmount": 5000,
-      "currency": "USD",
-      "paymentSchedule": [
-        {
-          "installment": "Deposit 50%",
-          "amount": 2500,
-          "dueDate": "2026-06-05",
-          "status": "paid",
-          "paymentId": "PAY_TXN_11223"
-        },
-        {
-          "installment": "Post Event Final 50%",
-          "amount": 2500,
-          "dueDate": "2026-07-07",
-          "status": "pending",
-          "paymentId": null
-        }
-      ],
-      "commission": {
-        "platformCommission": 500,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 4500
-      }
-    },
-    "delivery": {
-      "scheduledDate": "2026-07-06",
-      "scheduledTime": "07:30",
-      "actualDeliveryTime": "2026-07-06T07:45:00Z",
-      "deliveryNotes": "Crew arrived on time. Currently setting up trusses.",
-      "setupCompleted": true,
-      "teardownCompleted": false
-    },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": {
-        "completed": true,
-        "report": "Initial staging build leveled and structurally confirmed solid."
-      }
-    },
-    "communications": [
-      {
-        "type": "system",
-        "from": "system",
-        "to": "organizer",
-        "message": "Vendor check-in event logged: setup completed at the venue.",
-        "timestamp": "2026-07-06T11:00:00Z"
-      }
-    ],
-    "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_005.pdf",
-      "invoicePdf": "https://cdn.platform.com/invoices/INV_B_005.pdf",
-      "receiptPdf": null
-    },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
-    },
-    "createdAt": "2026-06-01T08:00:00Z",
-    "updatedAt": "2026-07-06T11:00:00Z",
-    "confirmedAt": "2026-06-05T10:00:00Z",
-    "completedAt": null,
-    "cancelledAt": null
-  },
-  {
-    "bookingId": "B_006_COMPLETED",
-    "eventId": "E_CONFERENCE_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Audio Engineering",
-    "serviceId": "S_MIC_SOUND_SYSTEM_01",
-    "requirements": {
-      "description": "Wireless Mic Sets & Operator for Panel Discussion",
-      "serviceDate": "2026-06-20",
-      "startTime": "09:00",
-      "endTime": "13:00",
-      "location": "Hotel Seminar Hall A",
-      "specialInstructions": "Requires 6 clip-on lapel mics.",
-      "guestCount": 80
-    },
-    "quote": {
-      "requestedAt": "2026-05-10T10:00:00Z",
-      "respondedAt": "2026-05-11T12:00:00Z",
-      "vendorQuote": {
-        "basePrice": 800,
-        "additionalCharges": [],
-        "discount": 0,
-        "totalAmount": 800,
-        "breakdown": [
-          {
-            "item": "Audio System and Engineer Block",
-            "quantity": 1,
-            "unitPrice": 800,
-            "total": 800
-          }
-        ],
-        "terms": "Full completion validation checklist applies.",
-        "validity": "2026-05-25T00:00:00Z"
-      },
-      "negotiation": []
-    },
     "status": "completed",
     "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-05-10T10:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-05-11T12:00:00Z"
-      },
-      {
-        "status": "quote_accepted",
-        "timestamp": "2026-05-14T09:00:00Z"
-      },
-      {
-        "status": "confirmed",
-        "timestamp": "2026-05-14T10:00:00Z"
-      },
-      {
-        "status": "in_progress",
-        "timestamp": "2026-06-20T09:00:00Z"
-      },
-      {
-        "status": "completed",
-        "timestamp": "2026-06-20T14:30:00Z"
-      }
+      { "status": "quote_requested", "timestamp": "2026-08-05T09:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-06T11:30:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-08-12T11:00:00Z" },
+      { "status": "confirmed", "timestamp": "2026-08-20T12:00:00Z" },
+      { "status": "in_progress", "timestamp": "2026-11-18T04:00:00Z" },
+      { "status": "completed", "timestamp": "2026-11-19T16:00:00Z" }
     ],
     "contract": {
       "signed": true,
       "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-      "signedByVendor": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
-      "signedAt": "2026-05-14T09:05:00Z",
-      "contractUrl": "https://cdn.platform.com/contracts/executed_B_006.pdf",
+      "signedByVendor": "USR_vnd001_sys_7x",
+      "signedAt": "2026-08-18T14:30:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_001_executed.pdf",
       "terms": {
-        "cancellationPolicy": "Standard cancellation rules.",
-        "liability": "Limited to replacement of technical components."
+        "cancellationPolicy": "50% base retainment rate applied if modification requested under 14 days parameter.",
+        "liability": "Vendor guarantees strict synchronization with regional sanitation health mandates."
       }
     },
     "payment": {
-      "totalAmount": 800,
-      "currency": "USD",
+      "totalAmount": 800000,
+      "currency": "PKR",
       "paymentSchedule": [
         {
-          "installment": "Total Payment",
-          "amount": 800,
-          "dueDate": "2026-05-14",
+          "installment": "Advance Booking Lock",
+          "amount": 400000,
+          "dueDate": "2026-08-20",
           "status": "paid",
-          "paymentId": "PAY_TXN_55431"
+          "paymentId": "PAY_HFT_M01"
+        },
+        {
+          "installment": "Post Event Operational Settlement Balance",
+          "amount": 400000,
+          "dueDate": "2026-11-22",
+          "status": "paid",
+          "paymentId": "PAY_HFT_M09"
         }
       ],
       "commission": {
-        "platformCommission": 80,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 720
+        "platformCommission": 120000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 680000
       }
     },
     "delivery": {
-      "scheduledDate": "2026-06-20",
-      "scheduledTime": "08:00",
-      "actualDeliveryTime": "2026-06-20T08:02:00Z",
-      "deliveryNotes": "Flawless technical layout execution. Timely pullout.",
+      "scheduledDate": "2026-11-18",
+      "scheduledTime": "12:00",
+      "actualDeliveryTime": "11:45",
+      "deliveryNotes": "Buffet line stations live ahead of schedule index boundaries.",
       "setupCompleted": true,
       "teardownCompleted": true
     },
@@ -703,996 +103,1099 @@ export const mockBookings = [
       "organizerCheck": {
         "checked": true,
         "rating": 5,
-        "comments": "Sound engineer was incredibly precise. Highly recommended!",
-        "checkedAt": "2026-06-20T14:00:00Z"
+        "comments": "Excellent deployment pace and layout accuracy constraints maintained perfectly.",
+        "checkedAt": "2026-11-18T16:00:00Z"
       },
       "vendorSelfCheck": {
         "completed": true,
-        "report": "All elements delivered fully safely back to warehouse storage."
+        "report": "All tracking fields executed accurately according to corporate sheet instructions."
       }
     },
-    "communications": [],
+    "communications": [
+      {
+        "type": "quote_request",
+        "from": "organizer",
+        "to": "vendor",
+        "message": "Verify capabilities limits mapping for 400 attendants corporate buffet structures.",
+        "timestamp": "2026-08-05T09:00:00Z"
+      }
+    ],
     "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_006.pdf",
-      "invoicePdf": "https://cdn.platform.com/invoices/INV_B_006.pdf",
-      "receiptPdf": "https://cdn.platform.com/receipts/REC_B_006.pdf"
+      "quotePdf": "https://storage.googleapis.com/vendor-docs/B_001_quote_file.pdf",
+      "invoicePdf": "https://storage.googleapis.com/vendor-docs/B_001_invoice_file.pdf",
+      "receiptPdf": "https://storage.googleapis.com/vendor-docs/B_001_receipt_file.pdf"
     },
     "review": {
-      "organizerReviewId": "REV_ORG_006",
-      "vendorReviewId": "REV_VND_006",
+      "organizerReviewId": "REV_B001_ORG",
+      "vendorReviewId": "REV_B001_VND",
       "organizerRating": 5,
       "vendorRating": 5
     },
-    "createdAt": "2026-05-10T10:00:00Z",
-    "updatedAt": "2026-06-20T14:30:00Z",
-    "confirmedAt": "2026-05-14T10:00:00Z",
-    "completedAt": "2026-06-20T14:30:00Z",
+    "createdAt": "2026-08-05T09:00:00Z",
+    "updatedAt": "2026-11-19T16:00:00Z",
+    "confirmedAt": "2026-08-20T12:00:00Z",
+    "completedAt": "2026-11-19T16:00:00Z",
     "cancelledAt": null
   },
   {
-    "bookingId": "B_007_CANCELLED",
-    "eventId": "E_FESTIVAL_2026",
-    "vendorId": "V_xf0HloVnJNQRUZMDcEWuUYw4wJ02",
+    "bookingId": "B_002_CONFIRMED",
+    "eventId": "EVT_8a9b0c1d2e3f4g5h6i7j",
+    "vendorId": "V_flghfvVVfKWTt0hTpMHuj7hNJEw1",
     "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
-    "serviceType": "Tent Rental",
-    "serviceId": "S_CANOPY_GIANT",
+    "serviceType": "security",
+    "serviceId": "PKG_V3_001",
     "requirements": {
-      "description": "Outdoor Waterproof Canopies",
-      "serviceDate": "2026-11-01",
-      "startTime": "06:00",
+      "description": "Hospital grade entrance whitelist verification deployment and parking barrier enforcement loops for oncology forum.",
+      "serviceDate": "2026-12-05",
+      "startTime": "07:30",
       "endTime": "18:00",
-      "location": "North Field Park",
-      "specialInstructions": "Anchors required for severe wind protection.",
-      "guestCount": 1200
+      "location": "Aga Khan University Center Entrance Gates",
+      "specialInstructions": "Continuous match cross checking against registered doctor validation licensing indexes required.",
+      "guestCount": 250
     },
     "quote": {
-      "requestedAt": "2026-06-10T09:00:00Z",
-      "respondedAt": "2026-06-11T15:00:00Z",
+      "requestedAt": "2026-09-05T08:00:00Z",
+      "respondedAt": "2026-09-06T10:15:00Z",
       "vendorQuote": {
-        "basePrice": 4000,
-        "additionalCharges": [],
-        "discount": 0,
-        "totalAmount": 4000,
-        "breakdown": [
-          {
-            "item": "Mega Pavilion Canopy Structure",
-            "quantity": 1,
-            "unitPrice": 4000,
-            "total": 4000
-          }
+        "basePrice": 45000,
+        "additionalCharges": [
+          { "description": "Extra mobile hand barcode scanner deployment units", "amount": 5000 }
         ],
-        "terms": "Standard cancellation fee terms applicable.",
-        "validity": "2026-06-25T00:00:00Z"
+        "discount": 0,
+        "totalAmount": 50000,
+        "breakdown": [
+          { "item": "Corporate Guard Operator Units", "quantity": 1, "unitPrice": 45000, "total": 45000 }
+        ],
+        "terms": "Full balance processing mandatory upon execution of binding registration parameters.",
+        "validity": "2026-10-15"
       },
       "negotiation": []
     },
-    "status": "cancelled",
+    "status": "confirmed",
     "statusHistory": [
-      {
-        "status": "quote_requested",
-        "timestamp": "2026-06-10T09:00:00Z"
-      },
-      {
-        "status": "quote_sent",
-        "timestamp": "2026-06-11T15:00:00Z"
-      },
-      {
-        "status": "cancelled",
-        "timestamp": "2026-06-15T16:20:00Z"
-      }
+      { "status": "quote_requested", "timestamp": "2026-09-05T08:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-09-06T10:15:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-09-15T14:22:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-20T10:00:00Z" }
     ],
     "contract": {
-      "signed": false,
-      "signedByOrganizer": null,
-      "signedByVendor": null,
-      "signedAt": null,
-      "contractUrl": null,
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd003_sys_2k",
+      "signedAt": "2026-09-18T11:30:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_002_contract.pdf",
       "terms": {
-        "cancellationPolicy": "Free cancel before booking confirmation.",
-        "liability": "None incurred."
+        "cancellationPolicy": "No baseline retention token returns generated if drop ordered under 7 calendar days windows.",
+        "liability": "Guarantees robust background validation clearances for all field operators."
       }
     },
     "payment": {
-      "totalAmount": 4000,
-      "currency": "USD",
-      "paymentSchedule": [],
+      "totalAmount": 50000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Full Allocation Clearup",
+          "amount": 50000,
+          "dueDate": "2026-09-20",
+          "status": "paid",
+          "paymentId": "PAY_SEC_X02"
+        }
+      ],
       "commission": {
-        "platformCommission": 400,
-        "platformCommissionPercentage": 10,
-        "vendorReceives": 3600
+        "platformCommission": 60000,
+        "platformCommissionPercentage": 12,
+        "vendorReceives": 44000
       }
     },
     "delivery": {
-      "scheduledDate": "2026-11-01",
-      "scheduledTime": "04:00",
+      "scheduledDate": "2026-12-05",
+      "scheduledTime": "07:00",
       "actualDeliveryTime": null,
       "deliveryNotes": null,
       "setupCompleted": false,
       "teardownCompleted": false
     },
-    "qualityCheck": {
-      "organizerCheck": null,
-      "vendorSelfCheck": null
-    },
-    "communications": [
-      {
-        "type": "chat",
-        "from": "organizer",
-        "to": "vendor",
-        "message": "Apologies, the city permit for the festival layout was denied, so we must cancel this quote request.",
-        "timestamp": "2026-06-15T16:18:00Z"
-      }
-    ],
+    "qualityCheck": {},
+    "communications": [],
     "documents": {
-      "quotePdf": "https://cdn.platform.com/quotes/Q_B_007.pdf",
-      "invoicePdf": null,
+      "quotePdf": "https://storage.googleapis.com/vendor-docs/B_002_quote.pdf",
+      "invoicePdf": "https://storage.googleapis.com/vendor-docs/B_002_invoice.pdf",
       "receiptPdf": null
     },
-    "review": {
-      "organizerReviewId": null,
-      "vendorReviewId": null,
-      "organizerRating": null,
-      "vendorRating": null
+    "review": {},
+    "createdAt": "2026-09-05T08:00:00Z",
+    "updatedAt": "2026-09-20T10:00:00Z",
+    "confirmedAt": "2026-09-20T10:00:00Z",
+    "completedAt": null,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_003_IN_PROGRESS",
+    "eventId": "EVT_k9Xm2P8qL5sW1zR0vN4jY",
+    "vendorId": "V_6ks38RXiffVvAWYCbSqszyU9FXo2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "audiovisual",
+    "serviceId": "PKG_V2_001",
+    "requirements": {
+      "description": "P2.5 LED wall distribution arrays, dynamic audio tracking links processing, and real-time live video recording capture frames integration.",
+      "serviceDate": "2026-10-14",
+      "startTime": "08:00",
+      "endTime": "18:00",
+      "location": "Movenpick Grand Ballroom Staging Deck",
+      "specialInstructions": "Provide real-time low latency hardware stream encoding routing links directly into primary Zoom node channels.",
+      "guestCount": 350
     },
-    "createdAt": "2026-06-10T09:00:00Z",
-    "updatedAt": "2026-06-15T16:20:00Z",
+    "quote": {
+      "requestedAt": "2026-07-16T11:05:00Z",
+      "respondedAt": "2026-07-18T15:40:00Z",
+      "vendorQuote": {
+        "basePrice": 280000,
+        "additionalCharges": [
+          { "description": "Supplementary active wireless lapel mic channels backup set", "amount": 20000 }
+        ],
+        "discount": 0,
+        "totalAmount": 300000,
+        "breakdown": [
+          { "item": "Ballroom Tech Production Base Array", "quantity": 1, "unitPrice": 280000, "total": 280000 }
+        ],
+        "terms": "50% initialization balance processing mandatory to lock on equipment freight pathways routing rules.",
+        "validity": "2026-08-15"
+      },
+      "negotiation": []
+    },
+    "status": "in_progress",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-07-16T11:05:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-07-18T15:40:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-07-28T09:12:00Z" },
+      { "status": "confirmed", "timestamp": "2026-08-01T14:22:00Z" },
+      { "status": "in_progress", "timestamp": "2026-10-14T03:00:00Z" }
+    ],
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd002_sys_9f",
+      "signedAt": "2026-07-30T10:00:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_003_av_lock.pdf",
+      "terms": {
+        "cancellationPolicy": "Initial allocation balance fully retained if disruption caused under 10 calendar days constraints.",
+        "liability": "Full systemic accountability covering any operational equipment failure intervals tracking rules."
+      }
+    },
+    "payment": {
+      "totalAmount": 300000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Advance Mobilization Share",
+          "amount": 150000,
+          "dueDate": "2026-08-01",
+          "status": "paid",
+          "paymentId": "PAY_AV_A901"
+        },
+        {
+          "installment": "Final Structural Closure Balance",
+          "amount": 150000,
+          "dueDate": "2026-10-16",
+          "status": "pending"
+        }
+      ],
+      "commission": {
+        "platformCommission": 45000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 255000
+      }
+    },
+    "delivery": {
+      "scheduledDate": "2026-10-14",
+      "scheduledTime": "06:00",
+      "actualDeliveryTime": "05:45",
+      "deliveryNotes": "Ballroom rig assemblies deployed accurately, live communication tests passing.",
+      "setupCompleted": true,
+      "teardownCompleted": false
+    },
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {
+      "quotePdf": "https://storage.googleapis.com/vendor-docs/B_003_quote.pdf",
+      "invoicePdf": "https://storage.googleapis.com/vendor-docs/B_003_invoice.pdf",
+      "receiptPdf": null
+    },
+    "review": {},
+    "createdAt": "2026-07-16T11:05:00Z",
+    "updatedAt": "2026-10-14T03:00:00Z",
+    "confirmedAt": "2026-08-01T14:22:00Z",
+    "completedAt": null,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_004_QUOTE_SENT",
+    "eventId": "EVT_9x8y7z6w5v4u3t2s1r0q",
+    "vendorId": "V_JlvYzpeVuBbJfPixeLSbVZzh5Sv2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "custom",
+    "serviceId": "PKG_V5_001",
+    "requirements": {
+      "description": "High volume live audio and stream interaction monitoring administration setup to maintain 500 student concurrent connections overheads safely.",
+      "serviceDate": "2026-10-24",
+      "startTime": "09:30",
+      "endTime": "16:30",
+      "location": "Online Stream Hub Infrastructure Nodes",
+      "specialInstructions": "Deploy text processing pipeline engines to catch anomalous spam scripts inside real-time interactive forums boards.",
+      "guestCount": 500
+    },
+    "quote": {
+      "requestedAt": "2026-08-12T14:00:00Z",
+      "respondedAt": "2026-08-14T11:20:00Z",
+      "vendorQuote": {
+        "basePrice": 50000,
+        "additionalCharges": [
+          { "description": "Supplementary localized latency tracer logging array setup", "amount": 5000 }
+        ],
+        "discount": 0,
+        "totalAmount": 55000,
+        "breakdown": [
+          { "item": "Core Stream Moderation Block", "quantity": 1, "unitPrice": 50000, "total": 50000 }
+        ],
+        "terms": "Net-15 transaction execution parameters apply down from confirmed milestone verification cycles dates.",
+        "validity": "2026-09-15"
+      },
+      "negotiation": [
+        {
+          "from": "organizer",
+          "message": "Confirm capability loops tracing backup server parameters before quote lock down steps.",
+          "timestamp": "2026-08-15T09:00:00Z"
+        }
+      ]
+    },
+    "status": "quote_sent",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-12T14:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-14T11:20:00Z" }
+    ],
+    "contract": {},
+    "payment": {
+      "totalAmount": 55000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Single Invoiced Post Event Settlement",
+          "amount": 55000,
+          "dueDate": "2026-11-10",
+          "status": "pending"
+        }
+      ],
+      "commission": {
+        "platformCommission": 5500,
+        "platformCommissionPercentage": 10,
+        "vendorReceives": 49500
+      }
+    },
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-12T14:00:00Z",
+    "updatedAt": "2026-08-14T11:20:00Z",
     "confirmedAt": null,
     "completedAt": null,
-    "cancelledAt": "2026-06-15T16:20:00Z"
-  }, {
-    bookingId: "B001",
-    eventId: "evt_001",
-    vendorId: "V001",
-    organizerId: "org_001",
-    serviceType: "catering",
-    serviceId: "SERV001",
-    requirements: {
-      description: "Lunch and high-tea for 200 Hackathon participants",
-      serviceDate: "2026-06-12",
-      startTime: "13:00",
-      endTime: "18:00",
-      location: "FAST-NUCES Main Campus, Lahore",
-      specialInstructions: "Include 20 vegetarian and 10 gluten-free meals.",
-      guestCount: 200,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_005_QUOTE_ACCEPTED",
+    "eventId": "EVT_1a2b3c4d5e6f7g8h9i0j",
+    "vendorId": "V_6ks38RXiffVvAWYCbSqszyU9FXo2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "audiovisual",
+    "serviceId": "PKG_V2_001",
+    "requirements": {
+      "description": "High security closed-loop audio link isolation setups and dual crisp display projections models for cybersecurity forum.",
+      "serviceDate": "2026-12-14",
+      "startTime": "08:30",
+      "endTime": "18:00",
+      "location": "Pearl Continental Zaver Hall Main Deck",
+      "specialInstructions": "Enforce strict encryption parameters over local radio frequency channel bounds to prevent exterior signals leak indicators.",
+      "guestCount": 300
     },
-    quote: {
-      requestedAt: "2026-05-01T10:00:00Z",
-      respondedAt: "2026-05-02T14:30:00Z",
-      vendorQuote: {
-        basePrice: 300000,
-        additionalCharges: [
-          { description: "Special dietary meals prep", amount: 15000 },
-          { description: "Extended service hours staff", amount: 25000 },
+    "quote": {
+      "requestedAt": "2026-09-12T09:00:00Z",
+      "respondedAt": "2026-09-15T16:45:00Z",
+      "vendorQuote": {
+        "basePrice": 280000,
+        "additionalCharges": [],
+        "discount": 10000,
+        "totalAmount": 270000,
+        "breakdown": [
+          { "item": "Base Secure Theater Production Setup", "quantity": 1, "unitPrice": 280000, "total": 280000 }
         ],
-        discount: 20000,
-        totalAmount: 320000,
-        breakdown: [
-          {
-            item: "Standard Lunch Box",
-            quantity: 170,
-            unitPrice: 1200,
-            total: 204000,
-          },
-          {
-            item: "Special Diet Box",
-            quantity: 30,
-            unitPrice: 1500,
-            total: 45000,
-          },
-          {
-            item: "High Tea Spread",
-            quantity: 200,
-            unitPrice: 255,
-            total: 51000,
-          },
-        ],
-        terms: "50% advance to confirm booking, 50% on event day morning.",
-        validity: "2026-05-15T00:00:00Z",
+        "terms": "50% billing clearance required to authorize local field engineers structural planning phases.",
+        "validity": "2026-10-15"
       },
-      negotiation: [
-        {
-          from: "organizer",
-          message:
-            "Can we waive the dietary meals prep charge since we are a university event?",
-          timestamp: "2026-05-03T09:15:00Z",
-        },
-        {
-          from: "vendor",
-          message:
-            "We can reduce it to 5000, but cannot waive it completely due to separate kitchen requirements.",
-          timestamp: "2026-05-03T11:00:00Z",
-        },
-      ],
+      "negotiation": []
     },
-    status: "completed",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-05-01T10:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-05-02T14:30:00Z" },
-      { status: "quote_accepted", timestamp: "2026-05-04T10:00:00Z" },
-      { status: "confirmed", timestamp: "2026-05-05T09:00:00Z" },
-      { status: "in_progress", timestamp: "2026-06-12T10:00:00Z" },
-      { status: "completed", timestamp: "2026-06-12T20:00:00Z" },
+    "status": "quote_accepted",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-09-12T09:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-09-15T16:45:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-07-12T13:40:00Z" }
     ],
-    contract: {
-      signed: true,
-      signedByOrganizer: "org_001",
-      signedByVendor: "V001",
-      signedAt: "2026-05-04T15:30:00Z",
-      contractUrl: "https://storage.events.com/contracts/B001.pdf",
-      terms: {
-        cancellationPolicy:
-          "Full refund if cancelled 14 days prior; 50% within 7 days.",
-        liability: "Vendor holds valid food authority license.",
-      },
-    },
-    payment: {
-      totalAmount: 310000,
-      currency: "PKR",
-      paymentSchedule: [
+    "contract": {},
+    "payment": {
+      "totalAmount": 270000,
+      "currency": "PKR",
+      "paymentSchedule": [
         {
-          installment: "Advance",
-          amount: 155000,
-          dueDate: "2026-05-05T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_ADV_001",
-        },
-        {
-          installment: "Final",
-          amount: 155000,
-          dueDate: "2026-06-12T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_FIN_001",
-        },
+          "installment": "Advance Phase Remittance",
+          "amount": 135000,
+          "dueDate": "2026-10-01",
+          "status": "pending"
+        }
       ],
-      commission: {
-        platformCommission: 31000,
-        platformCommissionPercentage: 10,
-        vendorReceives: 279000,
-      },
+      "commission": {
+        "platformCommission": 40500,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 229500
+      }
     },
-    delivery: {
-      scheduledDate: "2026-06-12",
-      scheduledTime: "12:00",
-      actualDeliveryTime: "11:45",
-      deliveryNotes: "Arrived early, setup completed in hall B.",
-      setupCompleted: true,
-      teardownCompleted: true,
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-09-12T09:00:00Z",
+    "updatedAt": "2026-07-12T13:40:00Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_006_QUOTE_REQUESTED",
+    "eventId": "EVT_5k6l7m8n9o0p1q2r3s4t",
+    "vendorId": "V_JlvYzpeVuBbJfPixeLSbVZzh5Sv2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "custom",
+    "serviceId": "PKG_V5_001",
+    "requirements": {
+      "description": "Continuous platform text triage management and dynamic Q&A indexing configuration maps support for B2B SaaS growth accelerator.",
+      "serviceDate": "2026-11-04",
+      "startTime": "12:30",
+      "endTime": "18:30",
+      "location": "SaaS Platform Online Room Matrices",
+      "specialInstructions": "Requires active moderation overrides capabilities to directly handle pipeline connection issues asynchronously.",
+      "guestCount": 150
     },
-    qualityCheck: {
-      organizerCheck: {
-        checked: true,
-        rating: 5,
-        comments: "Excellent food quality, dietary boxes were clearly labeled.",
-        checkedAt: "2026-06-12T19:00:00Z",
-      },
-      vendorSelfCheck: {
-        completed: true,
-        report: "All stations managed smoothly. No food shortages.",
-      },
+    "quote": {
+      "requestedAt": "2026-07-12T14:05:00Z",
+      "respondedAt": null,
+      "vendorQuote": null,
+      "negotiation": []
     },
-    communications: [
+    "status": "quote_requested",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-07-12T14:05:00Z" }
+    ],
+    "contract": {},
+    "payment": {},
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-07-12T14:05:00Z",
+    "updatedAt": "2026-07-12T14:05:00Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_007_CANCELLED",
+    "eventId": "EVT_3m4n5o6p7q8r9s0t1u2v",
+    "vendorId": "V_ub8I2UpWOGR4RFakTXNiY33y8gV2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "printing",
+    "serviceId": "PKG_V4_001",
+    "requirements": {
+      "description": "High resolution architectural blueprint catalog sheets prints and layout vinyl posters sets for smart cities seminar.",
+      "serviceDate": "2026-10-28",
+      "startTime": "08:00",
+      "endTime": "12:00",
+      "location": "NUST Civil Engineering Hub Base",
+      "specialInstructions": "Deliver ultra durable thick heavy paper options to safeguard design vector scales from distortions rules.",
+      "guestCount": 200
+    },
+    "quote": {
+      "requestedAt": "2026-08-10T11:00:00Z",
+      "respondedAt": "2026-08-12T14:22:00Z",
+      "vendorQuote": {
+        "basePrice": 65000,
+        "additionalCharges": [],
+        "discount": 5000,
+        "totalAmount": 60000,
+        "breakdown": [
+          { "item": "Technical Print Package Array", "quantity": 1, "unitPrice": 65000, "total": 65000 }
+        ],
+        "terms": "Production phase fires instantly post digital proof layout validation approvals.",
+        "validity": "2026-09-10"
+      },
+      "negotiation": []
+    },
+    "status": "cancelled",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-10T11:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-12T14:22:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-08-25T09:15:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-02T16:00:00Z" },
+      { "status": "cancelled", "timestamp": "2026-09-15T11:30:00Z" }
+    ],
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd004_sys_4p",
+      "signedAt": "2026-09-01T10:00:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_007_voided.pdf",
+      "terms": {
+        "cancellationPolicy": "Full cancellation processing authorization without penalty flags if triggered 30 days clear of date parameters.",
+        "liability": "Restricted to material replacement parameters."
+      }
+    },
+    "payment": {
+      "totalAmount": 60000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Advance Security Hold",
+          "amount": 30000,
+          "dueDate": "2026-09-05",
+          "status": "paid",
+          "paymentId": "PAY_PRN_C001"
+        }
+      ],
+      "commission": {
+        "platformCommission": 9000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 51000
+      }
+    },
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [
       {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message: "Looking for lunch and high tea for our annual hackathon.",
-        timestamp: "2026-05-01T10:00:00Z",
-      },
-      {
-        "type": "quote_request",
-        "from": "vendor",
-        "to": "organzer",
-        "message": "Got itt",
-        "timestamp": "2026-05-01T10:00:00Z"
+        "type": "cancellation_notice",
+        "from": "organizer",
+        "to": "vendor",
+        "message": "Zoning tracking updates forced timeline shifts. Voiding printing booking parameter grids.",
+        "timestamp": "2026-09-15T11:30:00Z"
       }
     ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B001_quote.pdf",
-      invoicePdf: "https://storage.events.com/invoices/B001_invoice.pdf",
-      receiptPdf: "https://storage.events.com/receipts/B001_receipt.pdf",
-    },
-    review: {
-      organizerReviewId: "REV_B001_ORG",
-      vendorReviewId: "REV_B001_VEN",
-      organizerRating: 5,
-      vendorRating: 4,
-    },
-    createdAt: "2026-05-01T10:00:00Z",
-    updatedAt: "2026-06-13T09:00:00Z",
-    confirmedAt: "2026-05-05T09:00:00Z",
-    completedAt: "2026-06-12T20:00:00Z",
-    cancelledAt: null,
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-10T11:00:00Z",
+    "updatedAt": "2026-09-15T11:30:00Z",
+    "confirmedAt": "2026-09-02T16:00:00Z",
+    "completedAt": null,
+    "cancelledAt": "2026-09-15T11:30:00Z"
   },
   {
-    bookingId: "B002",
-    eventId: "evt_001",
-    vendorId: "V005",
-    organizerId: "org_001",
-    serviceType: "av_equipment",
-    serviceId: "SERV_AV_102",
-    requirements: {
-      description:
-        "Projectors, PA system, and mics for Keynote and 3 side panels",
-      serviceDate: "2026-06-12",
-      startTime: "08:00",
-      endTime: "18:00",
-      location: "FAST-NUCES Main Campus, Lahore",
-      specialInstructions: "Need on-site technician for the full duration.",
-      guestCount: 0,
+    "bookingId": "B_008_CONFIRMED",
+    "eventId": "EVT_4o5p6q7r8s9t0u1v2w3x",
+    "vendorId": "V_6ks38RXiffVvAWYCbSqszyU9FXo2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "audiovisual",
+    "serviceId": "PKG_V2_001",
+    "requirements": {
+      "description": "High refresh Rate pixel terminal wall monitors and localized dynamic line sound tracking matrices setup for MLOps intensive.",
+      "serviceDate": "2026-11-12",
+      "startTime": "08:00",
+      "endTime": "17:30",
+      "location": "FAST-NUCES Computer Science Complex Auditorium Floor",
+      "specialInstructions": "Ensure proper grounding logic checks to avoid network switch isolation hum markers entirely.",
+      "guestCount": 120
     },
-    quote: {
-      requestedAt: "2026-05-10T11:00:00Z",
-      respondedAt: "2026-05-11T09:30:00Z",
-      vendorQuote: {
-        basePrice: 85000,
-        additionalCharges: [
-          { description: "Full-day onsite technician", amount: 15000 },
+    "quote": {
+      "requestedAt": "2026-08-20T09:00:00Z",
+      "respondedAt": "2026-08-22T11:00:00Z",
+      "vendorQuote": {
+        "basePrice": 280000,
+        "additionalCharges": [],
+        "discount": 20000,
+        "totalAmount": 260000,
+        "breakdown": [
+          { "item": "Academic Lab Scale Audio Visual Deck Setup", "quantity": 1, "unitPrice": 280000, "total": 280000 }
         ],
-        discount: 5000,
-        totalAmount: 95000,
-        breakdown: [
-          {
-            item: "Main Hall PA System",
-            quantity: 1,
-            unitPrice: 40000,
-            total: 40000,
-          },
-          {
-            item: "Classroom Projector Kit",
-            quantity: 3,
-            unitPrice: 15000,
-            total: 45000,
-          },
-        ],
-        terms: "100% advance payment via bank transfer.",
-        validity: "2026-05-20T00:00:00Z",
+        "terms": "50% processing advance balance required to trigger network deployment clearance schedules.",
+        "validity": "2026-09-30"
       },
-      negotiation: [],
+      "negotiation": []
     },
-    status: "confirmed",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-05-10T11:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-05-11T09:30:00Z" },
-      { status: "quote_accepted", timestamp: "2026-05-12T14:00:00Z" },
-      { status: "confirmed", timestamp: "2026-05-13T10:00:00Z" },
+    "status": "confirmed",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-20T09:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-22T11:00:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-09-10T14:30:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-15T11:00:00Z" }
     ],
-    contract: {
-      signed: true,
-      signedByOrganizer: "org_001",
-      signedByVendor: "V005",
-      signedAt: "2026-05-12T15:00:00Z",
-      contractUrl: "https://storage.events.com/contracts/B002.pdf",
-      terms: {
-        cancellationPolicy: "No refunds within 48 hours.",
-        liability: "Organizer responsible for physical damage to equipment.",
-      },
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd002_sys_9f",
+      "signedAt": "2026-09-12T16:00:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_008_fast_av.pdf",
+      "terms": {
+        "cancellationPolicy": "Standard tier platform cancellation protection frameworks apply.",
+        "liability": "Vendor covers full operational functional guarantees over physical line connections."
+      }
     },
-    payment: {
-      totalAmount: 95000,
-      currency: "PKR",
-      paymentSchedule: [
+    "payment": {
+      "totalAmount": 260000,
+      "currency": "PKR",
+      "paymentSchedule": [
         {
-          installment: "Full Payment",
-          amount: 95000,
-          dueDate: "2026-05-13T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_FULL_002",
+          "installment": "Mobilization Remittance",
+          "amount": 130000,
+          "dueDate": "2026-09-15",
+          "status": "paid",
+          "paymentId": "PAY_AV_F802"
         },
+        {
+          "installment": "Post Session Execution Wrap Close",
+          "amount": 130000,
+          "dueDate": "2026-11-15",
+          "status": "pending"
+        }
       ],
-      commission: {
-        platformCommission: 9500,
-        platformCommissionPercentage: 10,
-        vendorReceives: 85500,
-      },
+      "commission": {
+        "platformCommission": 39000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 221000
+      }
     },
-    delivery: {
-      scheduledDate: "2026-06-12",
-      scheduledTime: "07:00",
-      actualDeliveryTime: null,
-      deliveryNotes: "Pending delivery",
-      setupCompleted: false,
-      teardownCompleted: false,
-    },
-    qualityCheck: {
-      organizerCheck: null,
-      vendorSelfCheck: null,
-    },
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message: "We need robust AV for the Techverse Hackathon.",
-        timestamp: "2026-05-10T11:00:00Z",
-      },
-    ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B002_quote.pdf",
-      invoicePdf: "https://storage.events.com/invoices/B002_invoice.pdf",
-      receiptPdf: "https://storage.events.com/receipts/B002_receipt.pdf",
-    },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
-    },
-    createdAt: "2026-05-10T11:00:00Z",
-    updatedAt: "2026-05-13T10:00:00Z",
-    confirmedAt: "2026-05-13T10:00:00Z",
-    completedAt: null,
-    cancelledAt: null,
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-20T09:00:00Z",
+    "updatedAt": "2026-09-15T11:00:00Z",
+    "confirmedAt": "2026-09-15T11:00:00Z",
+    "completedAt": null,
+    "cancelledAt": null
   },
   {
-    bookingId: "B003",
-    eventId: "evt_002",
-    vendorId: "V002",
-    organizerId: "org_001",
-    serviceType: "decoration",
-    serviceId: "SERV_DEC_001",
-    requirements: {
-      description: "Stage decoration and floral arrangements",
-      serviceDate: "2026-07-15",
-      startTime: "10:00",
-      endTime: "17:00",
-      location: "Convention Center, Islamabad",
-      specialInstructions:
-        "Eco-friendly flowers only. Colors: Purple and Gold.",
-      guestCount: 500,
+    "bookingId": "B_009_QUOTE_ACCEPTED",
+    "eventId": "EVT_6p7q8r9s0t1u2v3w4x5y",
+    "vendorId": "V_JlvYzpeVuBbJfPixeLSbVZzh5Sv2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "custom",
+    "serviceId": "PKG_V5_001",
+    "requirements": {
+      "description": "High security infrastructure stream hosting moderation administration and routing telemetry logic validation sets for blockchain healthcare seminar.",
+      "serviceDate": "2026-11-25",
+      "startTime": "09:30",
+      "endTime": "16:30",
+      "location": "Secure Health Online Portal Nodes",
+      "specialInstructions": "Enforce strict encryption schemas across analytical pipeline nodes to keep metadata sets completely isolated.",
+      "guestCount": 200
     },
-    quote: {
-      requestedAt: "2026-06-10T14:00:00Z",
-      respondedAt: "2026-06-11T11:00:00Z",
-      vendorQuote: {
-        basePrice: 150000,
-        additionalCharges: [
-          { description: "Premium flower selection", amount: 25000 },
+    "quote": {
+      "requestedAt": "2026-09-10T14:00:00Z",
+      "respondedAt": "2026-09-14T10:15:00Z",
+      "vendorQuote": {
+        "basePrice": 50000,
+        "additionalCharges": [],
+        "discount": 0,
+        "totalAmount": 50000,
+        "breakdown": [
+          { "item": "Base Dynamic Stream Protection Suite", "quantity": 1, "unitPrice": 50000, "total": 50000 }
         ],
-        discount: 0,
-        totalAmount: 175000,
-        breakdown: [
-          {
-            item: "Stage Backdrop",
-            quantity: 1,
-            unitPrice: 50000,
-            total: 50000,
-          },
-          {
-            item: "Floral Arrangements",
-            quantity: 20,
-            unitPrice: 5000,
-            total: 100000,
-          },
-          {
-            item: "Installation labor",
-            quantity: 1,
-            unitPrice: 25000,
-            total: 25000,
-          },
-        ],
-        terms: "30% deposit, 70% on event day.",
-        validity: "2026-06-20T00:00:00Z",
+        "terms": "Net-30 clearing window rules apply down from verified session validation ticks timelines.",
+        "validity": "2026-10-15"
       },
-      negotiation: [],
+      "negotiation": []
     },
-    status: "quote_sent",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-06-10T14:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-06-11T11:00:00Z" },
+    "status": "quote_accepted",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-09-10T14:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-09-14T10:15:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-09-28T10:00:00Z" }
     ],
-    contract: null,
-    payment: {
-      totalAmount: 175000,
-      currency: "PKR",
-      paymentSchedule: [
+    "contract": {},
+    "payment": {
+      "totalAmount": 50000,
+      "currency": "PKR",
+      "paymentSchedule": [
         {
-          installment: "Deposit",
-          amount: 52500,
-          dueDate: "2026-06-15T00:00:00Z",
-          status: "pending",
-          paymentId: null,
-        },
-        {
-          installment: "Final",
-          amount: 122500,
-          dueDate: "2026-07-15T00:00:00Z",
-          status: "pending",
-          paymentId: null,
-        },
+          "installment": "Single Standard Post Closing Balance Invoice",
+          "amount": 50000,
+          "dueDate": "2026-12-05",
+          "status": "pending"
+        }
       ],
-      commission: null,
+      "commission": {
+        "platformCommission": 5000,
+        "platformCommissionPercentage": 10,
+        "vendorReceives": 45000
+      }
     },
-    delivery: {
-      scheduledDate: "2026-07-15",
-      scheduledTime: "09:00",
-      actualDeliveryTime: null,
-      deliveryNotes: "Awaiting confirmation",
-      setupCompleted: false,
-      teardownCompleted: false,
-    },
-    qualityCheck: null,
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message:
-          "Need beautiful and eco-friendly decorations for our summer gala.",
-        timestamp: "2026-06-10T14:00:00Z",
-      },
-    ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B003_quote.pdf",
-      invoicePdf: null,
-      receiptPdf: null,
-    },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
-    },
-    createdAt: "2026-06-10T14:00:00Z",
-    updatedAt: "2026-06-11T11:00:00Z",
-    confirmedAt: null,
-    completedAt: null,
-    cancelledAt: null,
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-09-10T14:00:00Z",
+    "updatedAt": "2026-09-28T10:00:00Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
   },
   {
-    bookingId: "B004",
-    eventId: "evt_003",
-    vendorId: "V003",
-    organizerId: "org_001",
-    serviceType: "catering",
-    serviceId: "SERV_CAT_002",
-    requirements: {
-      description: "Corporate breakfast and networking refreshments",
-      serviceDate: "2026-06-20",
-      startTime: "08:00",
-      endTime: "10:30",
-      location: "Business Park, Karachi",
-      specialInstructions: "Include vegan and keto-friendly options",
-      guestCount: 150,
+    "bookingId": "B_010_CONFIRMED",
+    "eventId": "EVT_7q8r9s0t1u2v3w4x5y6z",
+    "vendorId": "V_6ks38RXiffVvAWYCbSqszyU9FXo2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "audiovisual",
+    "serviceId": "PKG_V2_001",
+    "requirements": {
+      "description": "Ultra low leakage theater audio layouts installation and high lumen dual presentation display panels maps setup for high frequency trading forum.",
+      "serviceDate": "2026-12-18",
+      "startTime": "08:00",
+      "endTime": "18:30",
+      "location": "Movenpick Executive Suite Ballroom Base",
+      "specialInstructions": "Eliminate any broadcast wireless frequencies matching classic protocol limits to counter dynamic sniffing variables.",
+      "guestCount": 150
     },
-    quote: {
-      requestedAt: "2026-06-01T09:00:00Z",
-      respondedAt: "2026-06-02T10:15:00Z",
-      vendorQuote: {
-        basePrice: 75000,
-        additionalCharges: [
-          { description: "Special dietary preparation", amount: 8000 },
+    "quote": {
+      "requestedAt": "2026-09-20T10:00:00Z",
+      "respondedAt": "2026-09-24T12:00:00Z",
+      "vendorQuote": {
+        "basePrice": 280000,
+        "additionalCharges": [
+          { "description": "Dedicated out-of-band fiber cable injection lines rig layout", "amount": 10000 }
         ],
-        discount: 5000,
-        totalAmount: 78000,
-        breakdown: [
-          {
-            item: "Breakfast spread",
-            quantity: 150,
-            unitPrice: 450,
-            total: 67500,
-          },
-          {
-            item: "Beverages station",
-            quantity: 1,
-            unitPrice: 15500,
-            total: 15500,
-          },
+        "discount": 50000,
+        "totalAmount": 240000,
+        "breakdown": [
+          { "item": "Secure Corporate Auditorium AV Deck Setup", "quantity": 1, "unitPrice": 280000, "total": 280000 }
         ],
-        terms: "50% now, 50% before event",
-        validity: "2026-06-10T00:00:00Z",
+        "terms": "50% advance booking balance clear steps mandatory before local freight loading validation approvals.",
+        "validity": "2026-10-30"
       },
-      negotiation: [
+      "negotiation": [
         {
-          from: "organizer",
-          message: "Can you reduce the price to 70000?",
-          timestamp: "2026-06-02T15:00:00Z",
+          "from": "organizer",
+          "message": "We have low localized space requirements here, please optimize core logistics line margins.",
+          "timestamp": "2026-10-02T11:00:00Z"
         },
         {
-          from: "vendor",
-          message: "We can do 75000 as our minimum. It's a competitive price.",
-          timestamp: "2026-06-02T16:30:00Z",
-        },
-      ],
+          "from": "vendor",
+          "message": "Strategic regional adjustment discount index values applied directly into summary blocks.",
+          "timestamp": "2026-10-05T15:30:00Z"
+        }
+      ]
     },
-    status: "quote_accepted",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-06-01T09:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-06-02T10:15:00Z" },
-      { status: "quote_accepted", timestamp: "2026-06-03T11:00:00Z" },
+    "status": "confirmed",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-09-20T10:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-09-24T12:00:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-10-12T09:15:00Z" },
+      { "status": "confirmed", "timestamp": "2026-10-15T14:00:00Z" }
     ],
-    contract: {
-      signed: false,
-      signedByOrganizer: null,
-      signedByVendor: null,
-      signedAt: null,
-      contractUrl: null,
-      terms: null,
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd002_sys_9f",
+      "signedAt": "2026-10-14T11:22:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_010_hft_av.pdf",
+      "terms": {
+        "cancellationPolicy": "Advance retainment indices tier fully locked if cancel ordered past the November validation parameters calendar date rules.",
+        "liability": "Full technical replacement warranties apply over lines structural functions."
+      }
     },
-    payment: {
-      totalAmount: 78000,
-      currency: "PKR",
-      paymentSchedule: [
+    "payment": {
+      "totalAmount": 240000,
+      "currency": "PKR",
+      "paymentSchedule": [
         {
-          installment: "Advance",
-          amount: 39000,
-          dueDate: "2026-06-03T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_ADV_004",
+          "installment": "Mobilization Hold Balance",
+          "amount": 120000,
+          "dueDate": "2026-10-15",
+          "status": "paid",
+          "paymentId": "PAY_AV_HFT_09"
         },
         {
-          installment: "Final",
-          amount: 39000,
-          dueDate: "2026-06-20T00:00:00Z",
-          status: "pending",
-          paymentId: null,
-        },
+          "installment": "Final Structural Closure Remittance",
+          "amount": 120000,
+          "dueDate": "2026-12-20",
+          "status": "pending"
+        }
       ],
-      commission: null,
+      "commission": {
+        "platformCommission": 36000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 204000
+      }
     },
-    delivery: {
-      scheduledDate: "2026-06-20",
-      scheduledTime: "07:30",
-      actualDeliveryTime: null,
-      deliveryNotes: "Awaiting confirmation",
-      setupCompleted: false,
-      teardownCompleted: false,
-    },
-    qualityCheck: null,
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message: "Corporate breakfast needed for business networking event.",
-        timestamp: "2026-06-01T09:00:00Z",
-      },
-    ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B004_quote.pdf",
-      invoicePdf: null,
-      receiptPdf: null,
-    },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
-    },
-    createdAt: "2026-06-01T09:00:00Z",
-    updatedAt: "2026-06-03T11:00:00Z",
-    confirmedAt: null,
-    completedAt: null,
-    cancelledAt: null,
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-09-20T10:00:00Z",
+    "updatedAt": "2026-10-15T14:00:00Z",
+    "confirmedAt": "2026-10-15T14:00:00Z",
+    "completedAt": null,
+    "cancelledAt": null
   },
   {
-    bookingId: "B005",
-    eventId: "evt_004",
-    vendorId: "V001",
-    organizerId: "org_001",
-    serviceType: "catering",
-    serviceId: "SERV_CAT_003",
-    requirements: {
-      description: "Wedding reception dinner for 400 guests",
-      serviceDate: "2026-08-10",
-      startTime: "19:00",
-      endTime: "23:00",
-      location: "Grand Ballroom, Lahore",
-      specialInstructions: "Multi-course meal with chef presence",
-      guestCount: 400,
+    "bookingId": "B_011_QUOTE_REQUESTED",
+    "eventId": "EVT_8r9s0t1u2v3w4x5y6z7a",
+    "vendorId": "V_JlvYzpeVuBbJfPixeLSbVZzh5Sv2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "custom",
+    "serviceId": "PKG_V5_001",
+    "requirements": {
+      "description": "High volume streaming server connection moderator allocation and latency validation logs monitoring support for data mesh training.",
+      "serviceDate": "2026-12-10",
+      "startTime": "09:30",
+      "endTime": "16:30",
+      "location": "Data Engineering Cloud Streaming Portal Hub",
+      "specialInstructions": "Deploy structural data pipeline telemetry checks to dynamically watch for frame dropping anomalies variables live.",
+      "guestCount": 250
     },
-    quote: {
-      requestedAt: "2026-05-15T10:00:00Z",
-      respondedAt: "2026-05-16T14:00:00Z",
-      vendorQuote: {
-        basePrice: 650000,
-        additionalCharges: [
-          { description: "Chef and sous chef presence", amount: 50000 },
-          { description: "Dessert premium selection", amount: 30000 },
-        ],
-        discount: 50000,
-        totalAmount: 680000,
-        breakdown: [
-          {
-            item: "Multi-course main",
-            quantity: 400,
-            unitPrice: 1200,
-            total: 480000,
-          },
-          {
-            item: "Premium beverages",
-            quantity: 400,
-            unitPrice: 250,
-            total: 100000,
-          },
-          {
-            item: "Service staff",
-            quantity: 1,
-            unitPrice: 100000,
-            total: 100000,
-          },
-        ],
-        terms: "25% advance, 50% 2 weeks before, 25% on event day",
-        validity: "2026-05-30T00:00:00Z",
-      },
-      negotiation: [],
+    "quote": {
+      "requestedAt": "2026-07-12T14:06:55Z",
+      "respondedAt": null,
+      "vendorQuote": null,
+      "negotiation": []
     },
-    status: "in_progress",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-05-15T10:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-05-16T14:00:00Z" },
-      { status: "quote_accepted", timestamp: "2026-05-18T09:00:00Z" },
-      { status: "confirmed", timestamp: "2026-05-20T11:00:00Z" },
-      { status: "in_progress", timestamp: "2026-08-10T18:00:00Z" },
+    "status": "quote_requested",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-07-12T14:06:55Z" }
     ],
-    contract: {
-      signed: true,
-      signedByOrganizer: "org_001",
-      signedByVendor: "V001",
-      signedAt: "2026-05-18T15:00:00Z",
-      contractUrl: "https://storage.events.com/contracts/B005.pdf",
-      terms: {
-        cancellationPolicy:
-          "Full refund if cancelled 30 days prior; 75% within 15 days.",
-        liability: "Vendor responsible for food safety and hygiene.",
-      },
-    },
-    payment: {
-      totalAmount: 680000,
-      currency: "PKR",
-      paymentSchedule: [
-        {
-          installment: "First installment",
-          amount: 170000,
-          dueDate: "2026-05-20T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_INST1_005",
-        },
-        {
-          installment: "Second installment",
-          amount: 340000,
-          dueDate: "2026-07-25T00:00:00Z",
-          status: "paid",
-          paymentId: "PAY_INST2_005",
-        },
-        {
-          installment: "Final payment",
-          amount: 170000,
-          dueDate: "2026-08-10T00:00:00Z",
-          status: "pending",
-          paymentId: null,
-        },
-      ],
-      commission: {
-        platformCommission: 68000,
-        platformCommissionPercentage: 10,
-        vendorReceives: 612000,
-      },
-    },
-    delivery: {
-      scheduledDate: "2026-08-10",
-      scheduledTime: "18:00",
-      actualDeliveryTime: "17:45",
-      deliveryNotes:
-        "Setup in progress. Chef arrived early for final preparations.",
-      setupCompleted: true,
-      teardownCompleted: false,
-    },
-    qualityCheck: {
-      organizerCheck: null,
-      vendorSelfCheck: {
-        completed: false,
-        report: null,
-      },
-    },
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message: "Premium wedding catering for 400 guests needed.",
-        timestamp: "2026-05-15T10:00:00Z",
-      },
-    ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B005_quote.pdf",
-      invoicePdf: "https://storage.events.com/invoices/B005_invoice.pdf",
-      receiptPdf: null,
-    },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
-    },
-    createdAt: "2026-05-15T10:00:00Z",
-    updatedAt: "2026-08-10T18:30:00Z",
-    confirmedAt: "2026-05-20T11:00:00Z",
-    completedAt: null,
-    cancelledAt: null,
+    "contract": {},
+    "payment": {},
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-07-12T14:06:55Z",
+    "updatedAt": "2026-07-12T14:06:55Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
   },
   {
-    bookingId: "B006",
-    eventId: "evt_005",
-    vendorId: "V004",
-    organizerId: "org_001",
-    serviceType: "venue",
-    serviceId: "SERV_VEN_001",
-    requirements: {
-      description: "Conference venue with meeting rooms",
-      serviceDate: "2026-07-20",
-      startTime: "09:00",
-      endTime: "17:00",
-      location: "City Center, Islamabad",
-      specialInstructions: "Require WiFi, projectors in each room",
-      guestCount: 200,
+    "bookingId": "B_012_IN_PROGRESS",
+    "eventId": "EVT_9s0t1u2v3w4x5y6z7a8b",
+    "vendorId": "V_a3jogRG5fRezebhMOWyc8XgNK9f1",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "catering",
+    "serviceId": "PKG_V1_001",
+    "requirements": {
+      "description": "High nutrition sports profile lunch buffers delivery and macronutrient dynamic labeling charts management for athletic science symposium.",
+      "serviceDate": "2026-11-08",
+      "startTime": "12:00",
+      "endTime": "14:30",
+      "location": "National High Performance Center Dining Annexe Wing",
+      "specialInstructions": "Enforce clear separated cooking tracking profiles parameters to avoid cross fat contamination records rules.",
+      "guestCount": 250
     },
-    quote: {
-      requestedAt: "2026-06-05T11:00:00Z",
-      respondedAt: null,
-      vendorQuote: null,
-      negotiation: [],
-    },
-    status: "quote_requested",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-06-05T11:00:00Z" },
-    ],
-    contract: null,
-    payment: {
-      totalAmount: null,
-      currency: "PKR",
-      paymentSchedule: [],
-      commission: null,
-    },
-    delivery: {
-      scheduledDate: "2026-07-20",
-      scheduledTime: "08:30",
-      actualDeliveryTime: null,
-      deliveryNotes: "Awaiting quote response",
-      setupCompleted: false,
-      teardownCompleted: false,
-    },
-    qualityCheck: null,
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message:
-          "Looking for a spacious conference venue with excellent amenities.",
-        timestamp: "2026-06-05T11:00:00Z",
+    "quote": {
+      "requestedAt": "2026-08-15T10:00:00Z",
+      "respondedAt": "2026-08-18T14:00:00Z",
+      "vendorQuote": {
+        "basePrice": 550000,
+        "additionalCharges": [
+          { "description": "Custom high density protein dietary bars station deployment", "amount": 30000 }
+        ],
+        "discount": 20000,
+        "totalAmount": 560000,
+        "breakdown": [
+          { "item": "High Nutrition Buffet Line Unit", "quantity": 250, "unitPrice": 2200, "total": 550000 }
+        ],
+        "terms": "50% deposit balance execution requested to structure fresh organic resource purchase operations timelines safely.",
+        "validity": "2026-09-15"
       },
+      "negotiation": []
+    },
+    "status": "in_progress",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-15T10:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-18T14:00:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-09-01T11:00:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-05T12:00:00Z" },
+      { "status": "in_progress", "timestamp": "2026-07-12T14:00:00Z" }
     ],
-    documents: {
-      quotePdf: null,
-      invoicePdf: null,
-      receiptPdf: null,
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd001_sys_7x",
+      "signedAt": "2026-09-04T10:15:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_012_sports_food.pdf",
+      "terms": {
+        "cancellationPolicy": "Standard tier platform cancellation protection rules model outlines apply.",
+        "liability": "Vendor guarantees strict synchronization with state certified hygiene tracking rules parameters."
+      }
     },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
+    "payment": {
+      "totalAmount": 560000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Initialization Remittance",
+          "amount": 280000,
+          "dueDate": "2026-09-05",
+          "status": "paid",
+          "paymentId": "PAY_CAT_S901"
+        },
+        {
+          "installment": "Final Wrap Settlement",
+          "amount": 280000,
+          "dueDate": "2026-11-12",
+          "status": "pending"
+        }
+      ],
+      "commission": {
+        "platformCommission": 84000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 476000
+      }
     },
-    createdAt: "2026-06-05T11:00:00Z",
-    updatedAt: "2026-06-05T11:00:00Z",
-    confirmedAt: null,
-    completedAt: null,
-    cancelledAt: null,
+    "delivery": {
+      "scheduledDate": "2026-11-08",
+      "scheduledTime": "11:00",
+      "actualDeliveryTime": "10:50",
+      "deliveryNotes": "Dining wing installations set up smoothly ahead of schedule timelines limits.",
+      "setupCompleted": true,
+      "teardownCompleted": false
+    },
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-15T10:00:00Z",
+    "updatedAt": "2026-07-12T14:00:00Z",
+    "confirmedAt": "2026-09-05T12:00:00Z",
+    "completedAt": null,
+    "cancelledAt": null
   },
   {
-    bookingId: "B007",
-    eventId: "evt_006",
-    vendorId: "V001",
-    organizerId: "org_001",
-    serviceType: "catering",
-    serviceId: "SERV_CAT_004",
-    requirements: {
-      description: "Outdoor picnic setup for 100 employees",
-      serviceDate: "2026-06-25",
-      startTime: "12:00",
-      endTime: "15:00",
-      location: "National Park, Rawalpindi",
-      specialInstructions: "Portable setup, weather-resistant containers",
-      guestCount: 100,
+    "bookingId": "B_013_CONFIRMED",
+    "eventId": "EVT_0u1v2w3x4y5z6a7b8c9d",
+    "vendorId": "V_ub8I2UpWOGR4RFakTXNiY33y8gV2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "printing",
+    "serviceId": "PKG_V4_001",
+    "requirements": {
+      "description": "Fine art catalog lookbooks prints and spatial entrance map layouts printing for art history biennale.",
+      "serviceDate": "2026-11-14",
+      "startTime": "09:00",
+      "endTime": "13:00",
+      "location": "Alhamra Arts Council Hall 2 Entry Hub",
+      "specialInstructions": "Utilize textured high opacity matte stock options to verify art piece representations remain clean and color true.",
+      "guestCount": 180
     },
-    quote: {
-      requestedAt: "2026-06-10T10:00:00Z",
-      respondedAt: "2026-06-10T16:00:00Z",
-      vendorQuote: {
-        basePrice: 40000,
-        additionalCharges: [
-          { description: "Portable setup and cleanup", amount: 5000 },
+    "quote": {
+      "requestedAt": "2026-08-20T11:00:00Z",
+      "respondedAt": "2026-08-22T16:00:00Z",
+      "vendorQuote": {
+        "basePrice": 65000,
+        "additionalCharges": [
+          { "description": "Supplementary color profile proofing alignment review step", "amount": 5000 }
         ],
-        discount: 0,
-        totalAmount: 45000,
-        breakdown: [
-          {
-            item: "Picnic meal boxes",
-            quantity: 100,
-            unitPrice: 350,
-            total: 35000,
-          },
-          { item: "Beverages", quantity: 100, unitPrice: 100, total: 10000 },
+        "discount": 15000,
+        "totalAmount": 55000,
+        "breakdown": [
+          { "item": "Fine Paper Art Catalog Base Print Set", "quantity": 1, "unitPrice": 65000, "total": 65000 }
         ],
-        terms: "Full payment 3 days before event",
-        validity: "2026-06-15T00:00:00Z",
+        "terms": "Production pipeline fires instantly down from clear token confirmation inputs logs.",
+        "validity": "2026-09-20"
       },
-      negotiation: [],
+      "negotiation": []
     },
-    status: "cancelled",
-    statusHistory: [
-      { status: "quote_requested", timestamp: "2026-06-10T10:00:00Z" },
-      { status: "quote_sent", timestamp: "2026-06-10T16:00:00Z" },
-      { status: "quote_accepted", timestamp: "2026-06-11T09:00:00Z" },
-      { status: "confirmed", timestamp: "2026-06-12T10:00:00Z" },
-      { status: "cancelled", timestamp: "2026-06-20T14:30:00Z" },
+    "status": "confirmed",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-20T11:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-22T16:00:00Z" },
+      { "status": "quote_accepted", "timestamp": "2026-09-05T10:12:00Z" },
+      { "status": "confirmed", "timestamp": "2026-09-12T15:00:00Z" }
     ],
-    contract: {
-      signed: true,
-      signedByOrganizer: "org_001",
-      signedByVendor: "V001",
-      signedAt: "2026-06-11T14:00:00Z",
-      contractUrl: "https://storage.events.com/contracts/B007.pdf",
-      terms: {
-        cancellationPolicy: "75% refund if cancelled 10 days prior.",
-        liability: "Standard food safety liability.",
-      },
+    "contract": {
+      "signed": true,
+      "signedByOrganizer": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+      "signedByVendor": "USR_vnd004_sys_4p",
+      "signedAt": "2026-09-10T14:00:00Z",
+      "contractUrl": "https://storage.googleapis.com/event-contracts/B_013_art_print.pdf",
+      "terms": {
+        "cancellationPolicy": "Initial production lock in balance holds non refundable parameters rules if cancellation orders hit past printing operations setups templates.",
+        "liability": "Restricted fully to product correction loops."
+      }
     },
-    payment: {
-      totalAmount: 45000,
-      currency: "PKR",
-      paymentSchedule: [
+    "payment": {
+      "totalAmount": 55000,
+      "currency": "PKR",
+      "paymentSchedule": [
         {
-          installment: "Full Payment",
-          amount: 45000,
-          dueDate: "2026-06-22T00:00:00Z",
-          status: "refunded",
-          paymentId: "PAY_FUL_007",
-        },
+          "installment": "Production Fire Deposit",
+          "amount": 55000,
+          "dueDate": "2026-09-12",
+          "status": "paid",
+          "paymentId": "PAY_PRN_A112"
+        }
       ],
-      commission: null,
+      "commission": {
+        "platformCommission": 8250,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 46750
+      }
     },
-    delivery: {
-      scheduledDate: "2026-06-25",
-      scheduledTime: "11:30",
-      actualDeliveryTime: null,
-      deliveryNotes: "Booking cancelled by organizer due to venue change",
-      setupCompleted: false,
-      teardownCompleted: false,
-    },
-    qualityCheck: null,
-    communications: [
-      {
-        type: "quote_request",
-        from: "organizer",
-        to: "vendor",
-        message: "Team building event outdoor picnic.",
-        timestamp: "2026-06-10T10:00:00Z",
-      },
-      {
-        type: "cancellation",
-        from: "organizer",
-        to: "vendor",
-        message:
-          "We have to reschedule due to venue unavailability. We'll contact you next month.",
-        timestamp: "2026-06-20T14:30:00Z",
-      },
-    ],
-    documents: {
-      quotePdf: "https://storage.events.com/quotes/B007_quote.pdf",
-      invoicePdf: null,
-      receiptPdf: null,
-    },
-    review: {
-      organizerReviewId: null,
-      vendorReviewId: null,
-      organizerRating: null,
-      vendorRating: null,
-    },
-    createdAt: "2026-06-10T10:00:00Z",
-    updatedAt: "2026-06-20T14:30:00Z",
-    confirmedAt: "2026-06-12T10:00:00Z",
-    completedAt: null,
-    cancelledAt: "2026-06-20T14:30:00Z",
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-20T11:00:00Z",
+    "updatedAt": "2026-09-12T15:00:00Z",
+    "confirmedAt": "2026-09-12T15:00:00Z",
+    "completedAt": null,
+    "cancelledAt": null
   },
-];
+  {
+    "bookingId": "B_014_QUOTE_SENT",
+    "eventId": "EVT_1v2w3x4y5z6a7b8c9d0e",
+    "vendorId": "V_JlvYzpeVuBbJfPixeLSbVZzh5Sv2",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "custom",
+    "serviceId": "PKG_V5_001",
+    "requirements": {
+      "description": "High speed competition scoring registry tracking monitor array and real-time live video dashboard coordination for decentralization hackathon event.",
+      "serviceDate": "2026-12-04",
+      "startTime": "16:00",
+      "endTime": "18:00",
+      "location": "Online Competitive Server Mesh Platforms Environments",
+      "specialInstructions": "Deploy fast diagnostic alerts nodes to monitor incoming repository updates loops performance statistics.",
+      "guestCount": 300
+    },
+    "quote": {
+      "requestedAt": "2026-09-10T14:00:00Z",
+      "respondedAt": "2026-10-05T11:00:00Z",
+      "vendorQuote": {
+        "basePrice": 50000,
+        "additionalCharges": [
+          { "description": "Supplementary automated leaderboard tracking API script setups", "amount": 6000 }
+        ],
+        "discount": 0,
+        "totalAmount": 560000,
+        "breakdown": [
+          { "item": "Core Virtual Infrastructure Moderation Array", "quantity": 1, "unitPrice": 50000, "total": 50000 }
+        ],
+        "terms": "Net-15 transaction mapping parameters trace from point of confirmed hackathon evaluations closure cycles dates.",
+        "validity": "2026-11-15"
+      },
+      "negotiation": []
+    },
+    "status": "quote_sent",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-09-10T14:00:00Z" },
+      { "status": "quote_sent", "timestamp": "2026-10-05T11:00:00Z" }
+    ],
+    "contract": {},
+    "payment": {
+      "totalAmount": 56000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Single Invoiced Post Event Closing Remittance Balance",
+          "amount": 56000,
+          "dueDate": "2026-12-20",
+          "status": "pending"
+        }
+      ],
+      "commission": {
+        "platformCommission": 5600,
+        "platformCommissionPercentage": 10,
+        "vendorReceives": 50400
+      }
+    },
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-09-10T14:00:00Z",
+    "updatedAt": "2026-10-05T11:00:00Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
+  },
+  {
+    "bookingId": "B_015_QUOTE_ACCEPTED",
+    "eventId": "EVT_2w3x4y5z6a7b8c9d0e1f",
+    "vendorId": "V_a3jogRG5fRezebhMOWyc8XgNK9f1",
+    "organizerId": "O_LDTZmbtrdKg5Scr6d4mEMzIiinD2",
+    "serviceType": "catering",
+    "serviceId": "PKG_V1_001",
+    "requirements": {
+      "description": "Premium day conference buffet catering array and separate coffee buffer lines management for B2B pipeline intensive.",
+      "serviceDate": "2026-11-10",
+      "startTime": "11:30",
+      "endTime": "14:30",
+      "location": "Avari Towers Khursheed Mahal Banquet Lounge Space",
+      "specialInstructions": "Maintain continuous high-tea installation access routes set adjacent across the main networking loops borders.",
+      "guestCount": 150
+    },
+    "quote": {
+      "requestedAt": "2026-08-10T14:15:22Z",
+      "respondedAt": "2026-08-15T11:04:12Z",
+      "vendorQuote": {
+        "basePrice": 330000,
+        "additionalCharges": [
+          { "description": "Supplementary dedicated premium coffee installation bars module", "amount": 25000 }
+        ],
+        "discount": 15000,
+        "totalAmount": 340000,
+        "breakdown": [
+          { "item": "Premium Conference Main Buffer Line Unit", "quantity": 150, "unitPrice": 2200, "total": 330000 }
+        ],
+        "terms": "50% advance mobilization balance transaction mandatory to initialize logistics routing locks sets templates.",
+        "validity": "2026-09-15"
+      },
+      "negotiation": []
+    },
+    "status": "quote_accepted",
+    "statusHistory": [
+      { "status": "quote_requested", "timestamp": "2026-08-10T14:15:22Z" },
+      { "status": "quote_sent", "timestamp": "2026-08-15T11:04:12Z" },
+      { "status": "quote_accepted", "timestamp": "2026-07-12T13:58:00Z" }
+    ],
+    "contract": {},
+    "payment": {
+      "totalAmount": 340000,
+      "currency": "PKR",
+      "paymentSchedule": [
+        {
+          "installment": "Advance Mobilization Remittance Hold",
+          "amount": 170000,
+          "dueDate": "2026-09-15",
+          "status": "pending"
+        }
+      ],
+      "commission": {
+        "platformCommission": 51000,
+        "platformCommissionPercentage": 15,
+        "vendorReceives": 289000
+      }
+    },
+    "delivery": {},
+    "qualityCheck": {},
+    "communications": [],
+    "documents": {},
+    "review": {},
+    "createdAt": "2026-08-10T14:15:22Z",
+    "updatedAt": "2026-07-12T13:58:00Z",
+    "confirmedAt": null,
+    "completedAt": null,
+    "cancelledAt": null
+  }
+]
