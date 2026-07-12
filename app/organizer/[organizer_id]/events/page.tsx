@@ -108,7 +108,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                             </span>
                                             <StatusBadge status={event.status} />
                                         </div>
-                                        <h3 className="truncate text-lg font-extrabold text-slate-950">{event.title}{event.id}</h3>
+                                        <h3 className="truncate text-lg font-extrabold text-slate-950">{event.title}</h3>
                                         <p className="mt-1 line-clamp-1 text-sm font-semibold text-slate-400">{event.description}</p>
                                     </div>
 
@@ -116,6 +116,10 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                         <p className="flex items-center gap-2">
                                             <Calendar size={16} className="text-slate-400" />
                                             {event.schedule.startDate}
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <Calendar size={16} className="text-slate-400" />
+                                            {event.id}
                                         </p>
                                         <p className="flex items-center gap-2">
                                             <MapPin size={16} className="text-slate-400" />
