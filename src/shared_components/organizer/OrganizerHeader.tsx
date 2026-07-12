@@ -47,8 +47,8 @@ export function OrganizerHeader({ user }: { user: CurrentUserData }) {
                     </li>
                     <li>
                         <Link
-                            href={`${basePath}/all-vendors`}
-                            className={current_tab.includes(`${basePath}/all-vendors`) ? "font-bold text-black" : "text-gray-500 hover:text-black"}
+                            href={`${basePath}/vendor-marketplace`}
+                            className={current_tab.includes(`${basePath}/vendor-marketplace`) ? "font-bold text-black" : "text-gray-500 hover:text-black"}
                         >
                             Vendors
                         </Link>
