@@ -266,7 +266,7 @@ export const EventService = {
   },
   async create_event(formdata: EventFormData, organizer_id: string) {
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
-    event_to_be_added.organizerId = organizer_id;
+    event_to_be_added.organizerId = organizer_id; // Remove the "o_" prefix from organizer_id
  
     const docRef = adminDb.collection(COLLECTIONS.EVENTS).doc();
     const id_generated = docRef.id;

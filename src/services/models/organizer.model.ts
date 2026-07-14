@@ -19,7 +19,7 @@ export class Organizer implements IOrganizer{
 
   // 2. The Constructor sets up the default "Empty/New" profile state for a new signup
   constructor(userId: string, email: string, organizationName: string) {
-    this.organizerId = `O_${userId}`; // Or use a UUID generator
+    this.organizerId = `${userId}`; // Or use a UUID generator
     this.userId = userId;
     
     // Set default values for a brand new account so the document structure matches perfectly

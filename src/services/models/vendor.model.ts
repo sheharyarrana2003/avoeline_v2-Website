@@ -82,7 +82,7 @@ export class Vendor implements VendorData {
     constructor(userId: string, email: string, businessName: string) {
         const currentIsoString = new Date().toISOString();
 
-        this.vendorId = `V_${userId}`;
+        this.vendorId = `${userId}`;
         this.userId = userId;
         this.businessName = businessName;
         this.serviceCategories = [];
