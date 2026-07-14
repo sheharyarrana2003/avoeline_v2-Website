@@ -93,7 +93,7 @@ export default function SignInClient({handleEmailLogin}:{handleEmailLogin:any}) 
 
                 {/* Footer Link */}
                 <div className="mt-8 text-sm text-gray-600">
-                    Don't have an account? <a href="/signup" className="text-black font-semibold hover:underline">Signup</a>
+                    Don't have an account? <a href="/auth/signup" className="text-black font-semibold hover:underline">Signup</a>
                 </div>
 
             </div>

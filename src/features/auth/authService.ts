@@ -85,12 +85,6 @@ const converting_to_current_user_data = async (user: User) => {
     // }
     let role_id = "unknown_role";
 
-    if(table_name == "organizer") {
-        role_id = `O_${user.userId}`;
-    }else   if(table_name == "vendor") {
-        role_id = `V_${user.userId}`;
-    }
-
     console.log("in converting_to_current_user_data", {
         userId: user?.userId || "",
         email: user?.email || "",
