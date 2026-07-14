@@ -85,7 +85,6 @@ const accept_quote = async (booking : BookingData)=>{
         booking?.statusHistory.push(new_status_history);
         booking.status = 'quote_accepted'
         await BookingServices.update_booking(booking);
-        console.log("This booking is accepteddd");
 }
 
 
@@ -103,7 +102,6 @@ export default async function QuoteManagementPage({
     // Get active tab from URL (active or past)
     const activeTab = (awaitedSearchParams?.tab as string) || "active";
     const raw_bookings = await BookingServices.getAllBookingsOfOrganizer(organizer_id) || [];
-    console.log("these are the bookings ,  ", raw_bookings)
     const activeStatuses = ['quote_requested', 'quote_sent',  'quote_accepted','inprogress' ,'confirmed'];
     const pastStatuses = ['completed', 'cancelled'];
 
@@ -131,7 +129,6 @@ export default async function QuoteManagementPage({
         }
     }
     if(!selectedVendor){
-        console.log("selected venodr is null");
         notFound();
     }
 

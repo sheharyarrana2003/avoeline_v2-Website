@@ -135,14 +135,14 @@ export default async function VendorBookingsPage({
     
     // Fetch all events dynamically
     const eventsMap: Record<string, any> = {};
-    for (const eventId of eventIds) {
+    await Promise.all(eventIds.map(async (eventId) => {
         try {
             const event = await EventService.getEventByID(eventId);
             if (event) eventsMap[eventId] = event;
         } catch {
             // Event not found
         }
-    }
+    }));
     
     // Get event title dynamically
     const getEventTitle = (eventId: string) => {

@@ -48,7 +48,8 @@ export default async function AnalyticsPage({
 }) {
     const { organizer_id } = await params;
 
-    const [
+    // One events read + one registerations read feed all seven metrics.
+    const {
         totalEvents,
         profit,
         totalRevenue,
@@ -56,15 +57,7 @@ export default async function AnalyticsPage({
         dailyRegistrations,
         eventPerformance,
         dateRange,
-    ] = await Promise.all([
-        AnalyticsService.getAnalyticsTotalEvents(organizer_id),
-        AnalyticsService.getAnalyticsProfit(organizer_id),
-        AnalyticsService.getAnalyticsTotalRevenue(organizer_id),
-        AnalyticsService.getAnalyticsAvgSatisfaction(organizer_id),
-        AnalyticsService.getAnalyticsDailyRegistrations(organizer_id),
-        AnalyticsService.getAnalyticsEventPerformance(organizer_id),
-        AnalyticsService.getAnalyticsDateRange(organizer_id),
-    ]);
+    } = await AnalyticsService.getAnalyticsData(organizer_id);
 
     const metrics = [
         { label: "Total Events", icon: CalendarDays, ...totalEvents },

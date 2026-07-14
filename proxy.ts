@@ -8,12 +8,10 @@ import { adminAuth } from './data/admin_db';
 const all_possible_roles = ['organizer', 'vendor'];
 
 export async function proxy(request: NextRequest) {
-    console.log("MIDDLEWARE HIT:", request.nextUrl.pathname);
     const session_cookie = request.cookies.get('firebaseSession');
     const session_cookie_val = session_cookie?.value;
 
     const currentUser  = await adminAuth.verifySessionCookie(session_cookie_val);
-    console.log(currentUser);
     const parsed_user =  {
         userId: currentUser.uid,
         email: currentUser.email,

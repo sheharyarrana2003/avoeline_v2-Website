@@ -176,9 +176,11 @@ export default async function VendorServicesPage({
                                     {/* Image Header */}
                                     <div className="relative h-48 bg-gray-200 overflow-hidden">
                                         {portfolioImage ? (
-                                            <img 
-                                                src={portfolioImage} 
+                                            <img
+                                                src={portfolioImage}
                                                 alt={pkg.name}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (

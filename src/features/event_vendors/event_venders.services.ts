@@ -89,16 +89,14 @@ export function mapToVendorData(raw: any): VendorData {
 }
 export const EventVendorService = {
     getVendorsByEvent: async (eventId: string) => {
-        console.log("firstttt");
         let arr_of_bookings: BookingData[] = [];
 
         const q = adminDb.
             collection(COLLECTIONS.BOOKINGS).
             where("eventId", "==", eventId)
-        
+
         const querySnapshot : QuerySnapshot = await q.get();
         if (querySnapshot.empty) {
-            console.log("query shot is emptyyy");
             return null;
         }
         arr_of_bookings = querySnapshot.docs.map(doc => ({
@@ -113,7 +111,6 @@ export const EventVendorService = {
         //now have many bookings -> eahc having vendorid -> extracat their corrrespoding vecator
 
         const vendorIds = [...new Set(arr_of_bookings_active.map(b => b.vendorId).filter(Boolean))];
-        console.log("mere unqique vendorsss ", vendorIds);
         const max_num_firebase_allows = 30;
         let tracker_of_chunks = 0;
         let arr_of_vendors_active: VendorData[] = [];
@@ -130,7 +127,6 @@ export const EventVendorService = {
                     arr_of_vendors_active.push(mapToVendorData(x.data()));
                 })
             }
-            console.log(arr_of_vendors_active);
         }
 
 

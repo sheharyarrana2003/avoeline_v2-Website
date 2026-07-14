@@ -74,7 +74,6 @@ function mapToAttendee(raw: any): Attendee {
 export const AttendeeService = {
     async getAttendeeOfEvent(event_id: String) {
 
-        console.log("ths us event i am serch for", event_id)
         const q = adminDb.
             collection(COLLECTIONS.REGISTRATIONS).
             where("eventId", "==", event_id)
@@ -82,11 +81,9 @@ export const AttendeeService = {
 
         const querySnapshot: QuerySnapshot = await q.get();
         if (querySnapshot.empty) {
-            console.log("query shot is emptyyy");
             return null;
         }
         const user_ids_of_attendees: string[] = querySnapshot.docs.map(doc => doc.data().userId);
-        console.log("these are the user idsss", user_ids_of_attendees);
 
 
         const attendees: Attendee[] = await Promise.all(

@@ -10,7 +10,6 @@ export default async function speaker({ params }: { params: Promise<{ eventId: s
     const attendee = await AttendeeService.getAttendeeOfEvent(event_id);
     let attendeesWithUsers : AttendeeClientSideProp[] ;
     if(attendee){
-        console.log("one");
           attendeesWithUsers = await Promise.all(
         attendee.map(async (a) => {
 
@@ -26,12 +25,8 @@ export default async function speaker({ params }: { params: Promise<{ eventId: s
         })
     );
     }else{
-        console.log("two");
         attendeesWithUsers = [];
     }
-
-   console.log("mixture og attenee and user ");
-   console.log(  attendeesWithUsers );
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans overflow-hidden">

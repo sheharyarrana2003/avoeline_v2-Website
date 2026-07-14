@@ -245,8 +245,6 @@ export const EventService = {
     let arr: EventModel[] = [];
 
     querySnapshot.forEach((doc) => {
-      console.log("in getALL events");
-      console.log(doc.data());
       arr.push(EventModel.fromJson(doc.data()));
     });
 
@@ -257,7 +255,6 @@ export const EventService = {
     let arr: EventModel[] = [];
 
     querySnapshot.forEach((doc) => {
-      console.log(doc.data());
       arr.push(EventModel.fromJson(doc.data()));
     });
 
@@ -275,7 +272,6 @@ export const EventService = {
     await adminDb.collection(COLLECTIONS.EVENTS).doc(id_generated).set({
       ...event_to_be_added
     })
-    console.log(`Document successfully written with ID: ${id_generated}`);
     return id_generated;
   }
 }

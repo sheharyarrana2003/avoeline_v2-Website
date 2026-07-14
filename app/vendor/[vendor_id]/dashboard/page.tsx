@@ -131,7 +131,7 @@ export default async function VendorDashboardPage({
     const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
     
     const eventsMap: Record<string, any> = {};
-    for (const eventId of eventIds) {
+    await Promise.all(eventIds.map(async (eventId) => {
         try {
             const event = await EventService.getEventByID(eventId);
             if (event) {
@@ -140,7 +140,7 @@ export default async function VendorDashboardPage({
         } catch {
             // Event not found, will use fallback
         }
-    }
+    }));
     
     const getEventTitle = (eventId: string) => {
         return eventsMap[eventId]?.title || eventId;

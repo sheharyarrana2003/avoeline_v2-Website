@@ -157,9 +157,11 @@ export default async function VendorProfilePage({
                             {/* Banner Image */}
                             <div className="relative h-48 bg-gray-200">
                                 {portfolioImages[0]?.url ? (
-                                    <img 
-                                        src={portfolioImages[0].url} 
+                                    <img
+                                        src={portfolioImages[0].url}
                                         alt={businessName}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-full h-full object-cover grayscale"
                                     />
                                 ) : (
@@ -286,7 +288,7 @@ export default async function VendorProfilePage({
                                             {portfolioImages.map((img: any, i: number) => (
                                                 <div key={i} className="aspect-square bg-gray-200 rounded-xl overflow-hidden">
                                                     {img?.url ? (
-                                                        <img src={img.url} alt={img.caption} className="w-full h-full object-cover" />
+                                                        <img src={img.url} alt={img.caption} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
                                                     )}

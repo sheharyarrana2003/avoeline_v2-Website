@@ -180,7 +180,6 @@ export const BookingServices = {
 
     const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
-      console.log("query shot is emptyyy");
       return null;
     }
     arr_of_bookings = querySnapshot.docs.map(doc => ({
@@ -188,9 +187,9 @@ export const BookingServices = {
       ...doc.data()
     })) as BookingData[];
 
-    // get unique ids
-    const vendor_unique_ids = [new Set(arr_of_bookings.map(x=>x.vendorId))];
-    const event_unique_ids = [new Set(arr_of_bookings.map(x=>x.eventId))];
+    // get unique ids (spread the Set so each id is fetched once, not the Set itself)
+    const vendor_unique_ids = [...new Set(arr_of_bookings.map(x=>x.vendorId))];
+    const event_unique_ids = [...new Set(arr_of_bookings.map(x=>x.eventId))];
 
     // get vendor and events of these ids
 
@@ -276,7 +275,6 @@ export const BookingServices = {
 
     const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
-      console.log("query shot is emptyyy");
       return null;
     }
     arr_of_bookings = querySnapshot.docs.map(doc => ({
@@ -298,7 +296,6 @@ export const BookingServices = {
 
     const querySnapshot: QuerySnapshot = await q.get();
     if (querySnapshot.empty) {
-      console.log("query shot is emptyyy");
       return null;
     }
     arr_of_bookings = querySnapshot.docs.map(doc => ({
@@ -423,7 +420,6 @@ export const BookingServices = {
     };
 
     await adminDb.collection(COLLECTIONS.BOOKINGS).doc(id_generated).set({ ...booking_object });
-    console.log("populated the booking -> ", id_generated);
   },
 
   async update_booking(updated_booking: BookingData | null) {

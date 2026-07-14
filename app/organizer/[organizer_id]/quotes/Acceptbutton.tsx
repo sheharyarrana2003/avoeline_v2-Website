@@ -1,5 +1,4 @@
 'use client'
-import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData } from "@/src/features/bookings/types";
 
 

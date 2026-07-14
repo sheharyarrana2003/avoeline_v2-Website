@@ -307,7 +307,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                     {event.speakers.map((speaker) => (
                                         <div key={speaker.speakerId} className="flex items-center gap-3">
                                             {speaker.profileImage ? (
-                                                <img src={speaker.profileImage} alt={speaker.name} className="size-8 rounded-full object-cover" />
+                                                <img src={speaker.profileImage} alt={speaker.name} loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
                                             ) : (
                                                 <div className="flex size-8 items-center justify-center rounded-full bg-slate-200 text-xs font-extrabold text-slate-500">
                                                     {speaker.name.charAt(0)}

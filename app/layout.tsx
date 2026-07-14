@@ -19,6 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  // Mono is only used on the marketing pages — don't preload its files on every route.
+  preload: false,
 });
 
 export const metadata: Metadata = {
