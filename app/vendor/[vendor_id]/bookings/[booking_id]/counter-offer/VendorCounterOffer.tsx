@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { BookingData } from '@/src/features/bookings/types';
 import { useRouter } from 'next/navigation';
 
@@ -19,10 +19,12 @@ export default function VendorCounterOfferForm ({
   const [targetBudget, setTargetBudget] = useState<number>(currentTotal);
   const [organizerMessage, setOrganizerMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (isPending) return; // guard against duplicate submissions
+
     // if (targetBudget <= 0) {
     //   setError('Please enter a valid counter-offer amount.');
     //   return;
@@ -37,10 +39,10 @@ export default function VendorCounterOfferForm ({
     // }
 
     setError('');
-    onSubmitCounter(targetBudget, organizerMessage);
-    router.push(`/vendor/${bookingData.vendorId}/quotes?tab=active&quote=${bookingData.bookingId}`);
-  
- 
+    startTransition(async () => {
+      await onSubmitCounter(targetBudget, organizerMessage);
+      router.push(`/vendor/${bookingData.vendorId}/quotes?tab=active&quote=${bookingData.bookingId}`);
+    });
   };
    const OnCancel= ()=>{
         router.push(`/vendor/${bookingData.vendorId}/dashboard`);
@@ -122,9 +124,11 @@ export default function VendorCounterOfferForm ({
         </button>
         <button
           type="submit"
-          className="bg-black hover:bg-gray-800 text-white font-medium text-sm px-5 py-2 rounded-lg transition-colors"
+          disabled={isPending}
+          aria-busy={isPending}
+          className="bg-black hover:bg-gray-800 text-white font-medium text-sm px-5 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Send Counter Offer
+          {isPending ? 'Sending…' : 'Send Counter Offer'}
         </button>
       </div>
     </form>

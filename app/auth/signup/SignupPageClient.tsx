@@ -1,8 +1,9 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 
 export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:any}) {
+    const [isPending, startTransition] = useTransition();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -24,7 +25,10 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await handleSubmitLogin(formData);
+        if (isPending) return; // guard against duplicate submissions
+        startTransition(async () => {
+            await handleSubmitLogin(formData);
+        });
     };
 
     return (
@@ -174,9 +178,11 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
 
                     <button
                         type="submit"
-                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors mt-2"
+                        disabled={isPending}
+                        aria-busy={isPending}
+                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        Sign up
+                        {isPending ? 'Creating account…' : 'Sign up'}
                     </button>
                 </form>
 

@@ -3,6 +3,7 @@
 import { User, Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
 
 import { useRouter } from 'next/navigation';
+import { SubmitButton } from "@/src/shared_components/SubmitButton";
 export default function CreateSpeakerForm(handle_speaker_submission : any) {
     const router = useRouter();
 
@@ -140,9 +141,9 @@ export default function CreateSpeakerForm(handle_speaker_submission : any) {
                             <button type="button" onClick={()=>router.back()} className="flex-1 md:flex-none px-6 py-3 border border-gray-200 rounded-xl font-bold text-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" className="flex-1 md:flex-none px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-md">
+                            <SubmitButton pendingText="Saving…" className="flex-1 md:flex-none px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
                                 Save Speaker
-                            </button>
+                            </SubmitButton>
                         </div>
                     </div>
                 </form>

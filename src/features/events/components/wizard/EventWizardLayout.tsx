@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { EventFormData } from '@/src/services/models/event.model';
 import { CustomField } from '@/src/services/models/event.model';
@@ -100,9 +100,13 @@ export default function CreateEventPage({ handle_submission }: any) {
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
     const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
+    const [isPublishing, startPublishing] = useTransition();
 
     const handling_submission_client = (formData: EventFormData) => {
-        handle_submission(formData);
+        if (isPublishing) return; // guard against duplicate submissions
+        startPublishing(async () => {
+            await handle_submission(formData);
+        });
     }
     const updateForm = (field: keyof EventFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -1373,10 +1377,11 @@ export default function CreateEventPage({ handle_submission }: any) {
                     ) : (
                         <button
                             onClick={() => handling_submission_client(formData)}
-                            disabled={!formData.agreeToTerms || !formData.confirmRights}
+                            disabled={!formData.agreeToTerms || !formData.confirmRights || isPublishing}
+                            aria-busy={isPublishing}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Publish Event
+                            {isPublishing ? 'Publishing…' : 'Publish Event'}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { Attendee } from '@/src/features/event_attendee/type';
 import { User } from '@/src/services/models/user.type';
 import { CertificateDocument } from '@/src/services/models/certificate.model';
@@ -67,6 +67,7 @@ export default function CertificateIssuanceClient({
     const [testMode, setTestMode] = useState(false);
     const [issueToCheckedIn, setIssueToCheckedIn] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isGenerating, startGenerating] = useTransition();
     const itemsPerPage = 10;
 
     // Computed data
@@ -135,8 +136,11 @@ export default function CertificateIssuanceClient({
         setSelectAll(newSet.size === filteredAttendees.length);
     };
 
-    const handleGenerateClick = async () => {
-        await onGenerateCertificates(Array.from(selectedAttendees));
+    const handleGenerateClick = () => {
+        if (isGenerating) return; // guard against duplicate submissions
+        startGenerating(async () => {
+            await onGenerateCertificates(Array.from(selectedAttendees));
+        });
     };
 
     return (
@@ -152,9 +156,11 @@ export default function CertificateIssuanceClient({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleGenerateClick}
-                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
+                            disabled={isGenerating}
+                            aria-busy={isGenerating}
+                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Generate Certificates
+                            {isGenerating ? 'Generating…' : 'Generate Certificates'}
                         </button>
                     </div>
                 </div>

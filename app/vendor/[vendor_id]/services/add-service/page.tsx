@@ -6,6 +6,7 @@ import { PricingPackage, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { adminDb } from "@/data/admin_db"
+import { SubmitButton } from "@/src/shared_components/SubmitButton"
 
 // Helper to get category options from vendor
 const getCategoryOptions = (categories: string[]) => {
@@ -273,12 +274,12 @@ export default async function AddNewServicePage({
                             >
                                 Cancel
                             </Link>
-                            <button
-                                type="submit"
-                                className="bg-black text-white px-8 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
+                            <SubmitButton
+                                pendingText="Saving…"
+                                className="bg-black text-white px-8 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 Save Service
-                            </button>
+                            </SubmitButton>
                         </div>
                     </form>
                 </div>

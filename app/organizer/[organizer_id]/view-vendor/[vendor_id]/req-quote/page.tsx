@@ -1,6 +1,7 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
+import { SubmitButton } from "@/src/shared_components/SubmitButton";
 
 
 export default async function ReqQuotePage({
@@ -162,12 +163,12 @@ export default async function ReqQuotePage({
                                 </div>
 
                                 {/* Submit */}
-                                <button
-                                    type="submit"
-                                    className="w-full bg-black text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-gray-800 transition"
+                                <SubmitButton
+                                    pendingText="Submitting…"
+                                    className="w-full bg-black text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     Submit Quote Request
-                                </button>
+                                </SubmitButton>
                             </form>
                         </div>
                     </div>

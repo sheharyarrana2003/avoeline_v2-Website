@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from "next/link";
 
 // --- Types ---
@@ -159,7 +159,10 @@ export default function PrepareQuoteClient({
         setSupportingDocs(prev => prev.filter(d => d.id !== id));
     };
 
-    const handleSubmit = async () => {
+    const [isSubmitting, startSubmitting] = useTransition();
+
+    const handleSubmit = () => {
+        if (isSubmitting) return; // guard against duplicate submissions
         const payload = {
             bookingId,
             vendorId,
@@ -174,10 +177,10 @@ export default function PrepareQuoteClient({
             totalAmount,
             currency,
         };
-        
-        // TODO: Submit to API
-        console.log("Submitting quote:", payload);
-       await handling_prep_quote(payload);
+
+        startSubmitting(async () => {
+            await handling_prep_quote(payload);
+        });
     };
 
     const handleSaveDraft = () => {
@@ -200,11 +203,13 @@ export default function PrepareQuoteClient({
                         >
                             Save as Draft
                         </button>
-                        <button 
+                        <button
                             onClick={handleSubmit}
-                            className="bg-black text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
+                            disabled={isSubmitting}
+                            aria-busy={isSubmitting}
+                            className="bg-black text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Prepare Quote
+                            {isSubmitting ? 'Submitting…' : 'Prepare Quote'}
                         </button>
                         <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">
                             {organizerName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -585,11 +590,13 @@ export default function PrepareQuoteClient({
                         
                         <div className="flex items-center gap-4">
                             <span className="text-sm text-gray-500">Total: <span className="font-bold text-gray-900">{formatCurrency(totalAmount, currency)}</span></span>
-                            <button 
+                            <button
                                 onClick={handleSubmit}
-                                className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
+                                disabled={isSubmitting}
+                                aria-busy={isSubmitting}
+                                className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Submit Quote
+                                {isSubmitting ? 'Submitting…' : 'Submit Quote'}
                             </button>
                         </div>
                     </div>

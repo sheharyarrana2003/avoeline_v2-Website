@@ -1,16 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaLinkedin } from 'react-icons/fa';
 
 export default function SignInClient({handleEmailLogin}:{handleEmailLogin:any}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isPending, startTransition] = useTransition();
 
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isPending) return; // guard against duplicate submissions
     // Call the server action safely with just data strings
-    await handleEmailLogin(email, password);
+    startTransition(async () => {
+      await handleEmailLogin(email, password);
+    });
   };
 
 
@@ -51,9 +55,11 @@ export default function SignInClient({handleEmailLogin}:{handleEmailLogin:any}) 
                     />
                     <button
                         type="submit"
-                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors"
+                        disabled={isPending}
+                        aria-busy={isPending}
+                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        Sign in with Email
+                        {isPending ? 'Signing in…' : 'Sign in with Email'}
                     </button>
                 </form>
 
