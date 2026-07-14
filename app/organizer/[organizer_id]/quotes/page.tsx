@@ -75,17 +75,17 @@ const StarRating = ({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
     );
 };
 
-const accept_quote = async (booking : BookingData)=>{
+const accept_quote = async (booking: BookingData) => {
     'use server'
-        const new_status_history ={
-            status : 'quote_accepted',
-             timestamp: new Date().toISOString()
-        }
+    const new_status_history = {
+        status: 'quote_accepted',
+        timestamp: new Date().toISOString()
+    }
 
-        booking?.statusHistory.push(new_status_history);
-        booking.status = 'quote_accepted'
-        await BookingServices.update_booking(booking);
-        console.log("This booking is accepteddd");
+    booking?.statusHistory.push(new_status_history);
+    booking.status = 'quote_accepted'
+    await BookingServices.update_booking(booking);
+    console.log("This booking is accepteddd");
 }
 
 
@@ -104,7 +104,7 @@ export default async function QuoteManagementPage({
     const activeTab = (awaitedSearchParams?.tab as string) || "active";
     const raw_bookings = await BookingServices.getAllBookingsOfOrganizer(organizer_id) || [];
     console.log("these are the bookings ,  ", raw_bookings)
-    const activeStatuses = ['quote_requested', 'quote_sent',  'quote_accepted','inprogress' ,'confirmed'];
+    const activeStatuses = ['quote_requested', 'quote_sent', 'quote_accepted', 'inprogress', 'confirmed'];
     const pastStatuses = ['completed', 'cancelled'];
 
     const activeQuotes = raw_bookings.filter((b: any) =>
@@ -130,31 +130,177 @@ export default async function QuoteManagementPage({
             selectedVendor = null;
         }
     }
-    if(!selectedVendor){
+   
+
+
+
+    const displaying_selected_quote = () => {
+         if (!selectedVendor) {
         console.log("selected venodr is null");
-        notFound();
+        return(
+            <></>
+        )
+
     }
+        const v: VendorData = selectedVendor || null;
+        const businessName = v?.businessName || selectedQuote?.vendorId || "Unknown Vendor";
+        const vendorRating = v?.ratings?.averageRating || 0;
+        const vendorInitials = businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
 
-    const v : VendorData= selectedVendor || null;
-    const businessName = v?.businessName || selectedQuote?.vendorId || "Unknown Vendor";
-    const vendorRating = v?.ratings?.averageRating || 0;
-    const vendorInitials = businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+        const quote: Quote = selectedQuote?.quote;
+        const vendorQuote: VendorQuote | null = quote?.vendorQuote;
+        const breakdown = vendorQuote?.breakdown || [];
+        const totalAmount = vendorQuote?.totalAmount || 0;
+        const currency = selectedQuote?.payment?.currency || "PKR";
+        const validity = quote?.vendorQuote?.validity || "";
+        const proposalNumber = selectedQuote?.bookingId || "N/A";
+        const submittedAt = quote?.respondedAt || quote?.requestedAt || "";
+        const terms = vendorQuote?.terms || "";
 
-    const quote : Quote= selectedQuote?.quote ;
-    const vendorQuote : VendorQuote|null = quote?.vendorQuote ;
-    const breakdown = vendorQuote?.breakdown || [];
-    const totalAmount = vendorQuote?.totalAmount || 0;
-    const currency = selectedQuote?.payment?.currency || "PKR";
-    const validity = quote?.vendorQuote?.validity || "";
-    const proposalNumber = selectedQuote?.bookingId || "N/A";
-    const submittedAt = quote?.respondedAt || quote?.requestedAt || "";
-    const terms = vendorQuote?.terms || "";
+        // Negotiation history
+        const negotiations = quote?.negotiation || [];
 
-    // Negotiation history
-    const negotiations = quote?.negotiation || [];
+        // Inclusions (from breakdown items)
+        const inclusions = breakdown.map((item: any) => item?.item).filter(Boolean);
+        return (
+            <>
+                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
 
-    // Inclusions (from breakdown items)
-    const inclusions = breakdown.map((item: any) => item?.item).filter(Boolean);
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                <span className="text-lg">🍴</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-900">{businessName} - Standard Package</h3>
+                                <p className="text-xs text-gray-400">
+                                    Submitted {timeAgo(submittedAt)} • Proposal #{proposalNumber}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</p>
+                            <p className="text-xs text-gray-400">Validity: {validity ? formatDate(validity) : '7 Days'}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Itemized Pricing */}
+                        <div>
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Itemized Pricing</h4>
+                            <div className="space-y-3">
+                                {breakdown.length > 0 ? (
+                                    breakdown.map((item: any, i: number) => (
+                                        <div key={i} className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">{item?.item || 'Item'}</span>
+                                            <span className="text-sm font-semibold text-gray-900">{formatCurrency(item?.total || 0, currency)}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Main Course (Continental)</span>
+                                            <span className="text-sm font-semibold text-gray-900">PKR 95,000</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Dessert Platter (Live)</span>
+                                            <span className="text-sm font-semibold text-gray-900">PKR 25,000</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Service Staff (5 Pax)</span>
+                                            <span className="text-sm font-semibold text-gray-900">PKR 18,000</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Logistics & Setup</span>
+                                            <span className="text-sm font-semibold text-gray-900">PKR 10,000</span>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="border-t border-gray-100 pt-3 mt-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-900">Total Amount</span>
+                                        <span className="text-lg font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Negotiation History */}
+                        <div>
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Negotiation History</h4>
+                            <div className="space-y-4">
+                                {negotiations.length > 0 ? (
+                                    negotiations.map((n: any, i: number) => {
+                                        const isOrganizer = n?.from === "organizer";
+                                        return (
+                                            <div key={i} className="flex gap-3">
+                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-black' : 'bg-gray-300'}`} />
+                                                <div>
+                                                    <p className="text-xs font-bold text-gray-900">
+                                                        {isOrganizer ? "You (Organizer)" : businessName}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                                                        {n?.message || "No message"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <>
+                                        <div className="flex gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-gray-300 mt-2 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                                                    "No history"
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    </>
+                                )}
+
+                                {/* Terms */}
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                    <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Terms & Conditions</h5>
+                                    <p className="text-xs text-gray-500 leading-relaxed">
+                                        {terms || "50% Advance payment required. Cancellation allowed up to 48 hours before the event with 10% penalty."}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-100">
+                        {/* <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Message Vendor
+                                    </button> */}
+                        <Link href={`/organizer/${organizer_id}/booking-details/${selectedQuote.bookingId}/counter-offer`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            Counter Offer
+                        </Link>
+                        {/* <button 
+                                    onClick={()=>{accept_quote(selectedQuote)}}
+                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-black text-white py-2.5 px-5 rounded-full text-sm font-semibold hover:bg-gray-800 transition ml-auto">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Accept Quote
+                                    </button> */}
+                        <AcceptButton quote={selectedQuote} accept_quote={accept_quote} />
+                    </div>
+                </div>
+            </>
+        )
+    }
 
 
     return (
@@ -301,143 +447,7 @@ export default async function QuoteManagementPage({
                         )}
 
                         {/* Quote Detail Card */}
-                        {selectedQuote && activeTab === "active" && (
-                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
-
-                                {/* Header */}
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                            <span className="text-lg">🍴</span>
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-gray-900">{businessName} - Standard Package</h3>
-                                            <p className="text-xs text-gray-400">
-                                                Submitted {timeAgo(submittedAt)} • Proposal #{proposalNumber}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</p>
-                                        <p className="text-xs text-gray-400">Validity: {validity ? formatDate(validity) : '7 Days'}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {/* Itemized Pricing */}
-                                    <div>
-                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Itemized Pricing</h4>
-                                        <div className="space-y-3">
-                                            {breakdown.length > 0 ? (
-                                                breakdown.map((item: any, i: number) => (
-                                                    <div key={i} className="flex justify-between items-center">
-                                                        <span className="text-sm text-gray-600">{item?.item || 'Item'}</span>
-                                                        <span className="text-sm font-semibold text-gray-900">{formatCurrency(item?.total || 0, currency)}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-sm text-gray-600">Main Course (Continental)</span>
-                                                        <span className="text-sm font-semibold text-gray-900">PKR 95,000</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-sm text-gray-600">Dessert Platter (Live)</span>
-                                                        <span className="text-sm font-semibold text-gray-900">PKR 25,000</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-sm text-gray-600">Service Staff (5 Pax)</span>
-                                                        <span className="text-sm font-semibold text-gray-900">PKR 18,000</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-sm text-gray-600">Logistics & Setup</span>
-                                                        <span className="text-sm font-semibold text-gray-900">PKR 10,000</span>
-                                                    </div>
-                                                </>
-                                            )}
-
-                                            <div className="border-t border-gray-100 pt-3 mt-3">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm font-bold text-gray-900">Total Amount</span>
-                                                    <span className="text-lg font-extrabold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Negotiation History */}
-                                    <div>
-                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Negotiation History</h4>
-                                        <div className="space-y-4">
-                                            {negotiations.length > 0 ? (
-                                                negotiations.map((n: any, i: number) => {
-                                                    const isOrganizer = n?.from === "organizer";
-                                                    return (
-                                                        <div key={i} className="flex gap-3">
-                                                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-black' : 'bg-gray-300'}`} />
-                                                            <div>
-                                                                <p className="text-xs font-bold text-gray-900">
-                                                                    {isOrganizer ? "You (Organizer)" : businessName}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                                                                    {n?.message || "No message"}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })
-                                            ) : (
-                                                <>
-                                                    <div className="flex gap-3">
-                                                        <div className="w-2 h-2 rounded-full bg-gray-300 mt-2 flex-shrink-0" />
-                                                        <div>
-                                                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                                                                "No history"
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                   
-                                                </>
-                                            )}
-
-                                            {/* Terms */}
-                                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                                <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Terms & Conditions</h5>
-                                                <p className="text-xs text-gray-500 leading-relaxed">
-                                                    {terms || "50% Advance payment required. Cancellation allowed up to 48 hours before the event with 10% penalty."}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-100">
-                                    {/* <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
-                                        Message Vendor
-                                    </button> */}
-                                    <Link href={`/organizer/${organizer_id}/booking-details/${selectedQuote.bookingId}/counter-offer`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-300 py-2.5 px-5 rounded-full text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                        </svg>
-                                        Counter Offer
-                                    </Link>
-                                    {/* <button 
-                                    onClick={()=>{accept_quote(selectedQuote)}}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-black text-white py-2.5 px-5 rounded-full text-sm font-semibold hover:bg-gray-800 transition ml-auto">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Accept Quote
-                                    </button> */}
-                                    <AcceptButton quote={selectedQuote} accept_quote={accept_quote} />
-                                </div>
-                            </div>
-                        )}
-
+                        {selectedQuote && activeTab === "active" && displaying_selected_quote()}
                         {/* Other Quotes Accordion */}
                         {activeTab === "active" && activeQuotes.length > 1 && (
                             <div className="space-y-3">
@@ -474,5 +484,4 @@ export default async function QuoteManagementPage({
         </div>
     );
 }
-
 
