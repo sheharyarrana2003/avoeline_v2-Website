@@ -1,0 +1,54 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (secrets)
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# firebase service account credentials (NEVER commit)
+*firebase-adminsdk*.json
+avoelinev2-38f83-firebase-adminsdk-fbsvc-349d5f0a0c.json
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel
+.vercel
+
+# editor / tooling
+/.claude/
+.VSCodeCounter/
+
+# newrelic logs
+newrelic_agent.log
+
+# local-only documentation (kept out of the repo)
+/DEVELOPER_GUIDE.md
+/PERFORMANCE_REPORT.md
