@@ -437,6 +437,7 @@ export interface EventFormData {
   enableWaitingList: boolean;
   waitingListCapacity : number
 
+
   // Step 3: Registration & Tickets
   ticketType: 'free' | 'paid';
   ticketTiers: TicketTier[];
@@ -446,6 +447,10 @@ export interface EventFormData {
   groupDiscountPercent: number;
   promoCodes: string[];
   customFields: CustomField[];
+
+  registrationOpenDate : string
+  registrationCloseDate : string
+
   requiresApproval: boolean;
   maxTicketsPerPerson: number;
 

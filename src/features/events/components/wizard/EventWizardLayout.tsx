@@ -72,7 +72,7 @@ const INITIAL_FORM: EventFormData = {
     totalSeats: 100,
     reservedSeats: 10,
     enableWaitingList: false,
-    waitingListCapacity : 0,
+    waitingListCapacity: 0,
 
     ticketType: 'paid',
     ticketTiers: [
@@ -88,6 +88,9 @@ const INITIAL_FORM: EventFormData = {
         { id: '2', label: 'Identity Proof (ID/Passport)', type: 'file', required: false },
     ],
     requiresApproval: false,
+    registrationOpenDate: "",
+    registrationCloseDate: "",
+
     maxTicketsPerPerson: 4,
 
     visibility: 'public',
@@ -321,108 +324,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </div>
                     </div>
 
-                    {/* Registration Form */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h4 className="font-bold text-gray-900">Registration Form</h4>
-                                <p className="text-xs text-gray-400">Design your attendee intake form.</p>
-                            </div>
-                            <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-3 mb-4">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span className="text-xs text-gray-500">Standard Fields (Name, Email, Phone)</span>
-                            <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded ml-auto">REQUIRED</span>
-                        </div>
-
-                        {/* Dietary Options */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {['Vegetarian', 'Vegan', 'Gluten-Free'].map(opt => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const current = formData.dietaryOptions;
-                                        updateForm('dietaryOptions',
-                                            current.includes(opt)
-                                                ? current.filter(o => o !== opt)
-                                                : [...current, opt]
-                                        );
-                                    }}
-                                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${formData.dietaryOptions.includes(opt)
-                                        ? 'bg-black text-white border-black'
-                                        : 'bg-white text-gray-600 border-gray-200'
-                                        }`}
-                                >
-                                    {opt}
-                                </button>
-                            ))}
-                            <button className="text-xs font-medium px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400">
-                                + Add option
-                            </button>
-                        </div>
-
-                        {/* Custom Fields */}
-                        {formData.customFields.map((field, i) => (
-                            <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs">📝</span>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            value={field.label}
-                                            onChange={(e) => {
-                                                {
-                                                    formData.customFields.map(x => {
-                                                        if (x.id === field.id) {
-                                                            field.label = e.target.value;
-                                                        }
-                                                        return x;
-                                                    })
-
-                                                    updateForm('customFields', formData.customFields);
-                                                }
-                                            }}
-
-
-                                            className="w-full bg-transparent text-sm text-gray-900 outline-none"
-                                        />
-                                        <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
-                                            {
-                                                formData.customFields.map(x => {
-                                                    if (x.id === field.id) {
-                                                        field.required = !field.required;
-                                                    }
-                                                    return x;
-                                                })
-
-                                                updateForm('customFields', formData.customFields);
-                                            }
-                                        }}>Required</button>
-                                        <p className="text-[10px] text-gray-400">
-                                            {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : ""}</span>
-                            </div>
-                        ))}
-
-                        <button
-                            onClick={addCustomField}
-                            className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
-                        >
-                            <span>+</span> Add Custom Field
-                        </button>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -764,15 +666,15 @@ export default function CreateEventPage({ handle_submission }: any) {
                             <p className="text-sm font-medium text-gray-700">Enable Waiting List</p>
                             <p className="text-xs text-gray-400">Allows guests to join queue if seats are full</p>
                             {
-                            formData.enableWaitingList && <div className='mt-10'>
-                                <label className="text-sm font-medium text-gray-700">Waiting List Capacity</label>
-                                <input
-                                    type="number"
-                                    value={formData.waitingListCapacity}
-                                    onChange={(e) => updateForm('waitingListCapacity', parseInt(e.target.value) || 0)}
-                                    className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
-                                />
-                            </div>
+                                formData.enableWaitingList && <div className='mt-10'>
+                                    <label className="text-sm font-medium text-gray-700">Waiting List Capacity</label>
+                                    <input
+                                        type="number"
+                                        value={formData.waitingListCapacity}
+                                        onChange={(e) => updateForm('waitingListCapacity', parseInt(e.target.value) || 0)}
+                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                    />
+                                </div>
                             }
                         </div>
                         <button
@@ -1015,7 +917,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <h3 className="font-bold text-gray-900">Registration Form Builder</h3>
+                            <div>
+                                <h4 className="font-bold text-gray-900">Registration Form</h4>
+                                <p className="text-xs text-gray-400">Design your attendee intake form.</p>
+                            </div>
                 </div>
 
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -1045,30 +950,61 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <p className="text-xs text-gray-400 mb-4">Custom Fields</p>
 
-                    {/* Custom Fields */}
-                    <div className="space-y-3 mb-4">
-                        {formData.customFields.map((field) => (
-                            <div key={field.id} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+    {/* Custom Fields */}
+                        {formData.customFields.map((field, i) => (
+                            <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm">📝</span>
+                                    <span className="text-xs">📝</span>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">{field.label}</p>
+                                        <input
+                                            type="text"
+                                            value={field.label}
+                                            onChange={(e) => {
+                                                {
+                                                    formData.customFields.map(x => {
+                                                        if (x.id === field.id) {
+                                                            field.label = e.target.value;
+                                                        }
+                                                        return x;
+                                                    })
+
+                                                    updateForm('customFields', formData.customFields);
+                                                }
+                                            }}
+
+
+                                            className="w-full bg-transparent text-sm text-gray-900 outline-none"
+                                        />
+                                        <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
+                                            {
+                                                formData.customFields.map(x => {
+                                                    if (x.id === field.id) {
+                                                        field.required = !field.required;
+                                                    }
+                                                    return x;
+                                                })
+
+                                                updateForm('customFields', formData.customFields);
+                                            }
+                                        }}>Required</button>
                                         <p className="text-[10px] text-gray-400">
                                             {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                         </p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded">REQUIRED</span>
+                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : ""}</span>
                             </div>
                         ))}
-                    </div>
 
-                    <button
-                        onClick={addCustomField}
-                        className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
-                    >
-                        <span>+</span> Add Custom Field
-                    </button>
+                        <button
+                            onClick={addCustomField}
+                            className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
+                        >
+                            <span>+</span> Add Custom Field
+                        </button>
+
+
+
                 </div>
             </div>
 
@@ -1106,6 +1042,28 @@ export default function CreateEventPage({ handle_submission }: any) {
                             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
                         />
                     </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Starting Date Of Registeration</p>
+                        <input
+                            type="date"
+                            value={formData.registrationOpenDate}
+                            onChange={(e) => updateForm('registrationOpenDate',e.target.value)}
+                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                    </div>
+
+                     <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Closing Date Of Registeration</p>
+                        <input
+                            type="date"
+                            value={formData.registrationCloseDate}
+                            onChange={(e) => updateForm('registrationCloseDate',e.target.value)}
+                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                    </div>
+
+                    
                 </div>
             </div>
         </div>
