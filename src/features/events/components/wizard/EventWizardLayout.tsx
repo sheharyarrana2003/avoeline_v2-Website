@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import CustomFieldsBuilder from './CustomFieldsBuilder';
 import { EventFormData } from '@/src/services/models/event.model';
-import { CustomField } from '@/src/services/models/event.model';
 
 // --- Constants ---
 const EVENT_TYPES = [
@@ -84,7 +84,7 @@ const INITIAL_FORM: EventFormData = {
     promoCodes: [],
     customFields: [
         { id: '1', label: 'Years of Experience', type: 'dropdown', options: ['0-2', '3-5', '5+'], required: false },
-        { id: '2', label: 'Identity Proof (ID/Passport)', type: 'file', required: false },
+        { id: '2', label: 'Dietary Preferences', type: 'checkbox', options: ['Vegetarian', 'Vegan', 'Halal', 'None'], required: false },
     ],
     requiresApproval: false,
     maxTicketsPerPerson: 4,
@@ -132,16 +132,6 @@ export default function CreateEventPage({ handle_submission }: any) {
 
     const removeTicketTier = (id: string) => {
         updateForm('ticketTiers', formData.ticketTiers.filter(t => t.id !== id));
-    };
-
-    const addCustomField = () => {
-        const newField: CustomField = {
-            id: Date.now().toString(),
-            label: 'New Field',
-            type: 'text',
-            required: false,
-        };
-        updateForm('customFields', [...formData.customFields, newField]);
     };
 
     const nextStep = () => {
@@ -373,33 +363,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                             </button>
                         </div>
 
-                        {/* Custom Fields */}
-                        {formData.customFields.map((field, i) => (
-                            <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs">📝</span>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            value={field.label}
-                                            onChange={(e) => {}}
-                                            className="w-full bg-transparent text-sm text-gray-900 outline-none"
-                                        />
-                                        <p className="text-[10px] text-gray-400">
-                                            {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">REQUIRED</span>
-                            </div>
-                        ))}
-
-                        <button
-                            onClick={addCustomField}
-                            className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
-                        >
-                            <span>+</span> Add Custom Field
-                        </button>
+                        {/* Custom registration fields are configured in the Registration & Tickets step. */}
                     </div>
                 </div>
             </div>
@@ -1012,30 +976,10 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <p className="text-xs text-gray-400 mb-4">Custom Fields</p>
 
-                    {/* Custom Fields */}
-                    <div className="space-y-3 mb-4">
-                        {formData.customFields.map((field) => (
-                            <div key={field.id} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm">📝</span>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">{field.label}</p>
-                                        <p className="text-[10px] text-gray-400">
-                                            {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded">REQUIRED</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={addCustomField}
-                        className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
-                    >
-                        <span>+</span> Add Custom Field
-                    </button>
+                    <CustomFieldsBuilder
+                        fields={formData.customFields}
+                        onChange={(fields) => updateForm('customFields', fields)}
+                    />
                 </div>
             </div>
 
