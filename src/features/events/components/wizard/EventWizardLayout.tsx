@@ -90,7 +90,8 @@ const INITIAL_FORM: EventFormData = {
     requiresApproval: false,
     registrationOpenDate: "",
     registrationCloseDate: "",
-    PriceOfTicket : 0,
+    PriceOfTicket: 0,
+    minSizeForGroupDiscounts : 5,
 
     maxTicketsPerPerson: 4,
 
@@ -720,7 +721,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                 </div>
             </div>
 
-
+            {/* {Ticket final price} */}
             <div
                 className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
@@ -911,6 +912,16 @@ export default function CreateEventPage({ handle_submission }: any) {
                             <div>
                                 <p className="text-sm font-medium text-gray-700">Group Discount</p>
                                 <p className="text-xs text-gray-400">Limit number of tickets per registrant</p>
+                                {formData.groupDiscount && <>
+                                    <p className="text-sm font-medium text-gray-700 mb-2">Min Size For Group Discounts</p>
+                                    <input
+                                        type="number"
+                                        value={formData.minSizeForGroupDiscounts}
+                                        onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
+                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                    />
+
+                                </>}
                             </div>
                         </div>
                         <button

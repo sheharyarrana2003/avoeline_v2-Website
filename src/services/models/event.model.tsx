@@ -439,6 +439,7 @@ export interface EventFormData {
   enableWaitingList: boolean;
   waitingListCapacity : number
   PriceOfTicket : number
+  minSizeForGroupDiscounts : number;
 
 
   // Step 3: Registration & Tickets

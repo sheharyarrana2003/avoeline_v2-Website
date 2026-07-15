@@ -86,7 +86,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     },
     groupDiscount: {
       enabled: formData.groupDiscount,
-      minGroupSize: 5, // ! change
+      minGroupSize: formData.minSizeForGroupDiscounts,
       percentage: formData.groupDiscountPercent,
     },
   };
