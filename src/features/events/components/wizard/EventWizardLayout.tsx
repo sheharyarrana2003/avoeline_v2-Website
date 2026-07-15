@@ -380,13 +380,6 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             value={field.label}
                                             onChange={(e) => {
                                                 {
-                                                    let new_field = {
-                                                        id: Date.now().toString(),
-                                                        label: e.target.value,
-                                                        type: 'text',
-                                                        required: false,
-                                                    };
-
                                                     formData.customFields.map(x => {
                                                         if (x.id === field.id) {
                                                             field.label = e.target.value;
@@ -397,14 +390,28 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                     updateForm('customFields', formData.customFields);
                                                 }
                                             }}
+
+
                                             className="w-full bg-transparent text-sm text-gray-900 outline-none"
                                         />
+                                        <button  className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
+                                            {
+                                                formData.customFields.map(x => {
+                                                    if (x.id === field.id) {
+                                                        field.required = !field.required;
+                                                    }
+                                                    return x;
+                                                })
+
+                                                updateForm('customFields', formData.customFields);
+                                            }
+                                        }}>Required</button>
                                         <p className="text-[10px] text-gray-400">
                                             {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                         </p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">REQUIRED</span>
+                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : "" }</span>
                             </div>
                         ))}
 
