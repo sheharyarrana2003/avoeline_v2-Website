@@ -60,11 +60,10 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 
   // 5. Structure the registration limits and setups
   const registration = {
-    registrationOpenDate: "", // ! change
-    registrationCloseDate: formData.startDate,  // ! change
+    registrationOpenDate: formData.registrationOpenDate, 
+    registrationCloseDate: formData.registrationCloseDate,  
     requiresApproval: formData.requiresApproval,
     customForm: customForm,
-    earlyBirdDeadline: "", // ! change
     groupRegistrationEnabled: formData.groupDiscount,
     groupDiscountEnabled: formData.groupDiscount,
   };
@@ -132,6 +131,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     eventEndTime: combineDateTime(formData.endDate, formData.endTime),
     archivedAt: null,
     deletedAt: null,
+    PriceOfTicket : formData.PriceOfTicket,
   };
 
   // Return generated implementation via the class factory instance

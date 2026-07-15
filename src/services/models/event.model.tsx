@@ -199,6 +199,7 @@ export class EventModel {
   eventEndTime: Date|string;
   archivedAt: Date |string| null; 
   deletedAt: Date |string| null;   
+  PriceOfTicket : number;
 
   constructor(raw: any) {
     this.id = raw.eventId || raw.id || raw.event_id || "";
@@ -210,6 +211,7 @@ export class EventModel {
     this.eventType = raw.eventType || "workshop";
     this.format = raw.format || "physical";
     this.language = raw.language || "en"; 
+    this.PriceOfTicket = raw?.PriceOfTicket || 0;
 
     this.schedule = {
       startDate: raw.schedule?.startDate || "",
@@ -436,6 +438,7 @@ export interface EventFormData {
   reservedSeats: number;
   enableWaitingList: boolean;
   waitingListCapacity : number
+  PriceOfTicket : number
 
 
   // Step 3: Registration & Tickets
