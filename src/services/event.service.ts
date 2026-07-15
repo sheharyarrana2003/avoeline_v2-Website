@@ -92,11 +92,34 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
   };
 
   // 7. Calculate combined dates for the timestamps based on your parseDate logic
-  const combineDateTime = (dateStr: string, timeStr: string): Date => {
-    if (!dateStr) return new Date();
-    const time = timeStr || "00:00";
-    return new Date(`${dateStr}T${time}`);
-  };
+const combineDateTime = (dateStr: string, timeStr: string): Date => {
+  if (!dateStr) return new Date();
+  const time = timeStr || "00:00";
+
+  // Check if dateStr is in DD/MM/YYYY format (e.g., '15/07/2026')
+  if (dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+      
+      // Re-format to standardized YYYY-MM-DD
+      dateStr = `${year}-${month}-${day}`;
+    }
+  }
+
+  // Now safely construct standard ISO-8601 format: YYYY-MM-DDTHH:mm
+  const parsedDate = new Date(`${dateStr}T${time}`);
+
+  // Fallback check: if it's still invalid for some reason, return the current date
+  if (isNaN(parsedDate.getTime())) {
+    console.warn(`Failed to parse date: "${dateStr}" with time: "${time}". Falling back to now.`);
+    return new Date();
+  }
+
+  return parsedDate;
+};
 
   // 8. Assemble raw object mirroring standard backend updates
   const rawModelPayload = {
@@ -265,6 +288,7 @@ export const EventService = {
 
   },
   async create_event(formdata: EventFormData, organizer_id: string) {
+    console.log(formdata);
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id; // Remove the "o_" prefix from organizer_id
  

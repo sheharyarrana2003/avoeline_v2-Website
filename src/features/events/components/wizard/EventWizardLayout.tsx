@@ -91,7 +91,7 @@ const INITIAL_FORM: EventFormData = {
     registrationOpenDate: "",
     registrationCloseDate: "",
     PriceOfTicket: 0,
-    minSizeForGroupDiscounts : 5,
+    minSizeForGroupDiscounts: 5,
 
     maxTicketsPerPerson: 4,
 
@@ -105,7 +105,7 @@ export default function CreateEventPage({ handle_submission }: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
-    const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' });
+    const [newTier, setNewTier] = useState([{ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }]);
 
     const handling_submission_client = (formData: EventFormData) => {
         handle_submission(formData);
@@ -126,10 +126,10 @@ export default function CreateEventPage({ handle_submission }: any) {
     };
 
     const addTicketTier = () => {
-        if (newTier.name) {
-            updateForm('ticketTiers', [...formData.ticketTiers, { ...newTier, id: Date.now().toString() }]);
-            setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' });
-        }
+
+        updateForm('ticketTiers', [...formData.ticketTiers, { ...newTier, id: Date.now().toString() }]);
+        setNewTier([...formData.ticketTiers, { name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }]);
+
     };
 
     const removeTicketTier = (id: string) => {
@@ -500,7 +500,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </svg>
                         <div>
                             <p className="text-sm font-medium text-gray-700">Quick Summary</p>
-                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting March 12, 2026 until March 19, 2026. Starts at 10:00 AM and ends at 05:00 PM PKT.</p>
+                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting{formData.startDate}, until {formData.endDate}. Starts at {formData.startTime} and ends at{formData.endTime} PKT.</p>
                         </div>
                     </div>
                 )}
@@ -852,7 +852,15 @@ export default function CreateEventPage({ handle_submission }: any) {
                     ))}
 
                     <button
-                        onClick={() => setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' })}
+                        onClick={
+                            () => {
+                                const new_ticket_tiers = [...formData.ticketTiers, { name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }];
+                                console.log(new_ticket_tiers);
+                                setNewTier(new_ticket_tiers);
+                                updateForm('ticketTiers', new_ticket_tiers);
+                            }
+
+                        }
                         className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -913,13 +921,24 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 <p className="text-sm font-medium text-gray-700">Group Discount</p>
                                 <p className="text-xs text-gray-400">Limit number of tickets per registrant</p>
                                 {formData.groupDiscount && <>
-                                    <p className="text-sm font-medium text-gray-700 mb-2">Min Size For Group Discounts</p>
+                                   
+                                    <div className="flex items-center gap-1 mt-1">
+                                         <p className="text-sm font-small text-gray-700 mb-2">Min Size For Group Discounts</p>
                                     <input
                                         type="number"
                                         value={formData.minSizeForGroupDiscounts}
                                         onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
                                         className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
                                     />
+                                     <p className="text-sm font-medium text-gray-700 mb-2"> Group Discount Percentage</p>
+                                        <input
+                                            type="number"
+                                            value={formData.groupDiscountPercent}
+                                            onChange={(e) => updateForm('groupDiscountPercent', parseInt(e.target.value) || 0)}
+                                            className="w-12 bg-gray-50 border border-gray-200 rounded px-2 py-1 text-xs text-center"
+                                        />
+                                        <span className="text-xs text-gray-500">% off</span>
+                                    </div>
 
                                 </>}
                             </div>
