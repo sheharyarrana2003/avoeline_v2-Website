@@ -44,7 +44,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     reservedSeats: formData.reservedSeats,
     availableSeats: Math.max(0, formData.totalSeats - formData.reservedSeats),
     waitingListEnabled: formData.enableWaitingList,
-    waitingListCapacity: formData.enableWaitingList ? 20 : 0,  // ! change
+    waitingListCapacity: formData.enableWaitingList ? formData.waitingListCapacity : 0, 
     maxRegistrationsPerUser: formData.maxTicketsPerPerson,
   };
 

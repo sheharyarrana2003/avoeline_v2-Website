@@ -72,6 +72,7 @@ const INITIAL_FORM: EventFormData = {
     totalSeats: 100,
     reservedSeats: 10,
     enableWaitingList: false,
+    waitingListCapacity : 0,
 
     ticketType: 'paid',
     ticketTiers: [
@@ -394,7 +395,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                                             className="w-full bg-transparent text-sm text-gray-900 outline-none"
                                         />
-                                        <button  className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
+                                        <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
                                             {
                                                 formData.customFields.map(x => {
                                                     if (x.id === field.id) {
@@ -411,7 +412,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                         </p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : "" }</span>
+                                <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : ""}</span>
                             </div>
                         ))}
 
@@ -762,6 +763,17 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <div>
                             <p className="text-sm font-medium text-gray-700">Enable Waiting List</p>
                             <p className="text-xs text-gray-400">Allows guests to join queue if seats are full</p>
+                            {
+                            formData.enableWaitingList && <div className='mt-10'>
+                                <label className="text-sm font-medium text-gray-700">Waiting List Capacity</label>
+                                <input
+                                    type="number"
+                                    value={formData.waitingListCapacity}
+                                    onChange={(e) => updateForm('waitingListCapacity', parseInt(e.target.value) || 0)}
+                                    className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                />
+                            </div>
+                            }
                         </div>
                         <button
                             onClick={() => updateForm('enableWaitingList', !formData.enableWaitingList)}

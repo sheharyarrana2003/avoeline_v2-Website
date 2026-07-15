@@ -435,6 +435,7 @@ export interface EventFormData {
   totalSeats: number;
   reservedSeats: number;
   enableWaitingList: boolean;
+  waitingListCapacity : number
 
   // Step 3: Registration & Tickets
   ticketType: 'free' | 'paid';
