@@ -166,7 +166,7 @@ export const AuthService = {
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
 
         
-           await seedEvents(adminDb);
+        //  await seedEvents(adminDb);
         
         
 

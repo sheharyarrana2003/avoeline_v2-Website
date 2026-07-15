@@ -24,23 +24,23 @@ export async function seedEvents(adminDb) {
     //   console.log("Seeded Event:", x.id);
     // }
 
-    const docRef = adminDb.collection(COLLECTIONS.BOOKINGS);
-    const e = await docRef.get();
+    // const docRef = adminDb.collection(COLLECTIONS.BOOKINGS);
+    // const e = await docRef.get();
 
-    e.docs.forEach(async (element) => {
+    // e.docs.forEach(async (element) => {
 
-      console.log("Eleement :", element.data());
-      console.log("Document :", element.data().bookingId);
-      const id =  element.data().bookingId|| "random";
-      console.log("---------");
-      
-      const docRefOfE = await adminDb.collection(COLLECTIONS.BOOKINGS).doc(id).update({
-        organizerId: "LDTZmbtrdKg5Scr6d4mEMzIiinD2"
-      }).then( console.log("Document updated successfully", id))
+    //   console.log("Eleement :", element.data());
+    //   console.log("Document :", element.data().bookingId);
+    //   const id =  element.data().bookingId|| "random";
+    //   console.log("---------");
+
+    //   const docRefOfE = await adminDb.collection(COLLECTIONS.BOOKINGS).doc(id).update({
+    //     organizerId: "LDTZmbtrdKg5Scr6d4mEMzIiinD2"
+    //   }).then( console.log("Document updated successfully", id))
 
 
      
-    });
+    // });
 
 
 
