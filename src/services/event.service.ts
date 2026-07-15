@@ -77,7 +77,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
       price: formData.ticketType === 'free' ? 0 : tier.price,
       availableUntil: tier.availableUntil,
       seats: tier.seatsAvailable,
-      description: tier.benefits,
+      description: tier.description,
     })),
     studentDiscount: {
       enabled: formData.studentDiscount,

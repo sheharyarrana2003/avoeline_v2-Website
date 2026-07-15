@@ -395,7 +395,7 @@ export interface TicketTier {
   price: number;
   seatsAvailable: number;
   availableUntil: string;
-  benefits: string;
+  description: string;
 }
 
 export interface CustomField {

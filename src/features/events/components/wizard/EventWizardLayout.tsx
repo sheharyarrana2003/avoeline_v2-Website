@@ -76,7 +76,7 @@ const INITIAL_FORM: EventFormData = {
 
     ticketType: 'paid',
     ticketTiers: [
-        { id: '1', name: 'Early Bird Pass', price: 4500, seatsAvailable: 100, availableUntil: '2024-12-01', benefits: 'VIP Lounge Access, Fast Track Entry' },
+        { id: '1', name: 'Early Bird Pass', price: 4500, seatsAvailable: 100, availableUntil: '2024-12-01', description: 'VIP Lounge Access, Fast Track Entry' },
     ],
     studentDiscount: false,
     studentDiscountPercent: 15,
@@ -105,7 +105,7 @@ export default function CreateEventPage({ handle_submission }: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
-    const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
+    const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' });
 
     const handling_submission_client = (formData: EventFormData) => {
         handle_submission(formData);
@@ -128,7 +128,7 @@ export default function CreateEventPage({ handle_submission }: any) {
     const addTicketTier = () => {
         if (newTier.name) {
             updateForm('ticketTiers', [...formData.ticketTiers, { ...newTier, id: Date.now().toString() }]);
-            setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
+            setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' });
         }
     };
 
@@ -828,14 +828,14 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ticket Benefits</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ticket description</label>
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            value={tier.benefits}
+                                            value={tier.description}
                                             onChange={(e) => {
                                                 const updated = formData.ticketTiers.map(t =>
-                                                    t.id === tier.id ? { ...t, benefits: e.target.value } : t
+                                                    t.id === tier.id ? { ...t, description: e.target.value } : t
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
@@ -852,7 +852,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                     ))}
 
                     <button
-                        onClick={() => setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' })}
+                        onClick={() => setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' })}
                         className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
