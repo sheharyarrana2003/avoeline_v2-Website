@@ -50,9 +50,11 @@ export function mapToRatings(raw: any): Ratings {
     };
 }
 
-export function mapToVendorData(raw: any): VendorData {
+export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
     return {
-        vendorId: raw?.vendorId || "",
+        // Fall back to the Firestore doc id so vendorId is never empty (empty ids
+        // collide as React keys in vendor lists).
+        vendorId: raw?.vendorId || fallbackId,
         userId: raw?.userId || "",
         businessName: raw?.businessName || "",
 
@@ -124,7 +126,7 @@ export const EventVendorService = {
             tracker_of_chunks += max_num_firebase_allows;
             if (!querySnapshot2.empty) {
                 querySnapshot2.forEach(x => {
-                    arr_of_vendors_active.push(mapToVendorData(x.data()));
+                    arr_of_vendors_active.push(mapToVendorData(x.data(), x.id));
                 })
             }
         }
@@ -144,7 +146,7 @@ export const EventVendorService = {
             return null;
         }
         const data = querySnapshot.docs[0].data();
-        return mapToVendorData(data);
+        return mapToVendorData(data, querySnapshot.docs[0].id);
 
     },
     async getAllVendors() {
@@ -158,7 +160,7 @@ export const EventVendorService = {
         let arr_of_vendors: VendorData[] = [];
 
         querySnapshot.forEach(x => {
-            arr_of_vendors.push(mapToVendorData(x.data()));
+            arr_of_vendors.push(mapToVendorData(x.data(), x.id));
         })
         return arr_of_vendors;
     }

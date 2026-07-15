@@ -70,12 +70,12 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 </div>
 
                 <div className="space-y-4">
-                    {vendors?.map((vendor) => {
+                    {vendors?.map((vendor, index) => {
                         const startingPrice = getStartingPrice(vendor.pricingPackages);
 
                         return (
-                            <div 
-                                key={vendor.vendorId} 
+                            <div
+                                key={vendor.vendorId || index}
                                 className="bg-white border border-gray-200/60 rounded-[1.5rem] p-6 shadow-sm flex items-center justify-between transition-all hover:shadow-md"
                             >
                                 <div className="flex items-center gap-5">

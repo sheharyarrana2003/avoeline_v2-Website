@@ -168,7 +168,7 @@ export default async function Vendor_Marketplace({
 
                 {/* Vendor Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredVendors?.map((vendor: any) => {
+                    {filteredVendors?.map((vendor: any, index: number) => {
                         const primaryCategory = vendor?.serviceCategories?.[0] || "service";
                         const secondaryCategory = vendor?.serviceCategories?.[1] || "";
                         const portfolioImage = vendor?.portfolio?.images?.[0]?.url;
@@ -180,7 +180,7 @@ export default async function Vendor_Marketplace({
                         const country = vendor?.contact?.address?.country || "";
 
                         return (
-                            <div key={vendor?.vendorId} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group">
+                            <div key={vendor?.vendorId || index} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group">
 
                                 {/* Image Header */}
                                 <div className="relative h-48 bg-gray-200 overflow-hidden">
