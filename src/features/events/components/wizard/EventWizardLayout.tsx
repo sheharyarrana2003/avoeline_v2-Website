@@ -167,8 +167,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                             key={type.id}
                             onClick={() => updateForm('eventType', type.id)}
                             className={`p-4 rounded-2xl border-2 text-left transition-all ${formData.eventType === type.id
-                                    ? 'border-black bg-gray-50'
-                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                ? 'border-black bg-gray-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                 }`}
                         >
                             <div className="text-2xl mb-2">{type.icon}</div>
@@ -357,8 +357,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                                         );
                                     }}
                                     className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${formData.dietaryOptions.includes(opt)
-                                            ? 'bg-black text-white border-black'
-                                            : 'bg-white text-gray-600 border-gray-200'
+                                        ? 'bg-black text-white border-black'
+                                        : 'bg-white text-gray-600 border-gray-200'
                                         }`}
                                 >
                                     {opt}
@@ -378,7 +378,25 @@ export default function CreateEventPage({ handle_submission }: any) {
                                         <input
                                             type="text"
                                             value={field.label}
-                                            onChange={(e) => {}}
+                                            onChange={(e) => {
+                                                {
+                                                    let new_field = {
+                                                        id: Date.now().toString(),
+                                                        label: e.target.value,
+                                                        type: 'text',
+                                                        required: false,
+                                                    };
+
+                                                    formData.customFields.map(x => {
+                                                        if (x.id === field.id) {
+                                                            field.label = e.target.value;
+                                                        }
+                                                        return x;
+                                                    })
+
+                                                    updateForm('customFields', formData.customFields);
+                                                }
+                                            }}
                                             className="w-full bg-transparent text-sm text-gray-900 outline-none"
                                         />
                                         <p className="text-[10px] text-gray-400">
@@ -553,8 +571,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 key={type}
                                 onClick={() => updateForm('recurrenceType', type.toLowerCase())}
                                 className={`px-4 py-2 rounded-full text-xs font-medium transition ${formData.recurrenceType === type.toLowerCase()
-                                        ? 'bg-black text-white'
-                                        : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-black text-white'
+                                    : 'bg-gray-100 text-gray-600'
                                     }`}
                             >
                                 {type}
@@ -597,8 +615,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                             key={loc.id}
                             onClick={() => updateForm('locationType', loc.id)}
                             className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.locationType === loc.id
-                                    ? 'border-black bg-gray-50'
-                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                ? 'border-black bg-gray-50'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
                                 }`}
                         >
                             <div className="text-2xl mb-1">{loc.icon}</div>
@@ -761,8 +779,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <button
                             onClick={() => updateForm('ticketType', 'free')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'free'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500'
                                 }`}
                         >
                             Free
@@ -770,8 +788,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <button
                             onClick={() => updateForm('ticketType', 'paid')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'paid'
-                                    ? 'bg-black text-white shadow-sm'
-                                    : 'text-gray-500'
+                                ? 'bg-black text-white shadow-sm'
+                                : 'text-gray-500'
                                 }`}
                         >
                             Paid
@@ -1316,10 +1334,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <button
                                         onClick={() => goToStep(step.id)}
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${step.id < currentStep
+                                            ? 'bg-black text-white'
+                                            : step.id === currentStep
                                                 ? 'bg-black text-white'
-                                                : step.id === currentStep
-                                                    ? 'bg-black text-white'
-                                                    : 'bg-gray-200 text-gray-400'
+                                                : 'bg-gray-200 text-gray-400'
                                             }`}
                                     >
                                         {step.id < currentStep ? '✓' : step.id}

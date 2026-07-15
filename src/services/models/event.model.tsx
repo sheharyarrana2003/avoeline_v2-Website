@@ -399,7 +399,7 @@ export interface TicketTier {
 export interface CustomField {
   id: string;
   label: string;
-  type: 'text' | 'dropdown' | 'file' | 'number';
+  type: 'text' | 'dropdown' | 'file' | 'number'| string;
   options?: string[];
   required: boolean;
 }
