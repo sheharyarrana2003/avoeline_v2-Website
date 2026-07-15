@@ -159,33 +159,14 @@ export const AuthService = {
 
     }),
 
-    getCurrentVendor: cache(async () => {
-        const cookieStore = await cookies();
-        let user_data = cookieStore.get('userData');
-        let currentUser: CurrentUserData = {
-            userId: "unknown",
-            email: "unknwon@unknowngmail.com",
-            userType: "attendee",
-            name: "unknown",
-            roleId: "unknown"
-        };
-        if (user_data?.value) {
-            try {
-                currentUser = JSON.parse(user_data?.value);
-            } catch (error) {
-                console.log("cannot check user - failed in middle ware");
-            }
-        }
-        return currentUser;
-
-    }),
+    
 
     async loginWithEmail(email: string, password: string) {
         console.log("Checkpoint 1:  function started.");
         console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
 
         
-          //  await seedEvents(adminDb);
+           await seedEvents(adminDb);
         
         
 
