@@ -15,8 +15,7 @@ export default async function SignIn() {
             redirect("/auth/signup");
         } else {
             const user_role = user.userType;
-            console.log(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
-            redirect(`/${user_role.toLowerCase()}/${user.roleId}/dashboard`);
+            redirect(`/${user_role.toLowerCase()}/${user.userId}/dashboard`);
         }
 
     };

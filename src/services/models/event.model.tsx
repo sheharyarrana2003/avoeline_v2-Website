@@ -199,6 +199,7 @@ export class EventModel {
   eventEndTime: Date|string;
   archivedAt: Date |string| null; 
   deletedAt: Date |string| null;   
+  PriceOfTicket : number;
 
   constructor(raw: any) {
     this.id = raw.eventId || raw.id || raw.event_id || "";
@@ -210,6 +211,7 @@ export class EventModel {
     this.eventType = raw.eventType || "workshop";
     this.format = raw.format || "physical";
     this.language = raw.language || "en"; 
+    this.PriceOfTicket = raw?.PriceOfTicket || 0;
 
     this.schedule = {
       startDate: raw.schedule?.startDate || "",
@@ -393,13 +395,13 @@ export interface TicketTier {
   price: number;
   seatsAvailable: number;
   availableUntil: string;
-  benefits: string;
+  description: string;
 }
 
 export interface CustomField {
   id: string;
   label: string;
-  type: 'text' | 'dropdown' | 'checkbox';
+  type: 'text' | 'dropdown' | 'file' | 'number'| string;
   options?: string[];
   required: boolean;
 }
@@ -435,6 +437,10 @@ export interface EventFormData {
   totalSeats: number;
   reservedSeats: number;
   enableWaitingList: boolean;
+  waitingListCapacity : number
+  PriceOfTicket : number
+  minSizeForGroupDiscounts : number;
+
 
   // Step 3: Registration & Tickets
   ticketType: 'free' | 'paid';
@@ -445,6 +451,10 @@ export interface EventFormData {
   groupDiscountPercent: number;
   promoCodes: string[];
   customFields: CustomField[];
+
+  registrationOpenDate : string
+  registrationCloseDate : string
+
   requiresApproval: boolean;
   maxTicketsPerPerson: number;
 

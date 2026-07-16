@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import CustomFieldsBuilder from './CustomFieldsBuilder';
 import { EventFormData } from '@/src/services/models/event.model';
+import { CustomField } from '@/src/services/models/event.model';
 
 // --- Constants ---
 const EVENT_TYPES = [
@@ -72,10 +72,11 @@ const INITIAL_FORM: EventFormData = {
     totalSeats: 100,
     reservedSeats: 10,
     enableWaitingList: false,
+    waitingListCapacity: 0,
 
     ticketType: 'paid',
     ticketTiers: [
-        { id: '1', name: 'Early Bird Pass', price: 4500, seatsAvailable: 100, availableUntil: '2024-12-01', benefits: 'VIP Lounge Access, Fast Track Entry' },
+        { id: '1', name: 'Early Bird Pass', price: 4500, seatsAvailable: 100, availableUntil: '2024-12-01', description: 'VIP Lounge Access, Fast Track Entry' },
     ],
     studentDiscount: false,
     studentDiscountPercent: 15,
@@ -84,9 +85,14 @@ const INITIAL_FORM: EventFormData = {
     promoCodes: [],
     customFields: [
         { id: '1', label: 'Years of Experience', type: 'dropdown', options: ['0-2', '3-5', '5+'], required: false },
-        { id: '2', label: 'Dietary Preferences', type: 'checkbox', options: ['Vegetarian', 'Vegan', 'Halal', 'None'], required: false },
+        { id: '2', label: 'Identity Proof (ID/Passport)', type: 'file', required: false },
     ],
     requiresApproval: false,
+    registrationOpenDate: "",
+    registrationCloseDate: "",
+    PriceOfTicket: 0,
+    minSizeForGroupDiscounts: 5,
+
     maxTicketsPerPerson: 4,
 
     visibility: 'public',
@@ -99,7 +105,7 @@ export default function CreateEventPage({ handle_submission }: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
-    const [newTier, setNewTier] = useState({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
+    const [newTier, setNewTier] = useState([{ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }]);
     const [isPublishing, startPublishing] = useTransition();
 
     const handling_submission_client = (formData: EventFormData) => {
@@ -124,14 +130,24 @@ export default function CreateEventPage({ handle_submission }: any) {
     };
 
     const addTicketTier = () => {
-        if (newTier.name) {
-            updateForm('ticketTiers', [...formData.ticketTiers, { ...newTier, id: Date.now().toString() }]);
-            setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' });
-        }
+
+        updateForm('ticketTiers', [...formData.ticketTiers, { ...newTier, id: Date.now().toString() }]);
+        setNewTier([...formData.ticketTiers, { name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }]);
+
     };
 
     const removeTicketTier = (id: string) => {
         updateForm('ticketTiers', formData.ticketTiers.filter(t => t.id !== id));
+    };
+
+    const addCustomField = () => {
+        const newField: CustomField = {
+            id: Date.now().toString(),
+            label: 'New Field',
+            type: 'text',
+            required: false,
+        };
+        updateForm('customFields', [...formData.customFields, newField]);
     };
 
     const nextStep = () => {
@@ -161,8 +177,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                             key={type.id}
                             onClick={() => updateForm('eventType', type.id)}
                             className={`p-4 rounded-2xl border-2 text-left transition-all ${formData.eventType === type.id
-                                    ? 'border-black bg-gray-50'
-                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                ? 'border-black bg-gray-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                 }`}
                         >
                             <div className="text-2xl mb-2">{type.icon}</div>
@@ -314,57 +330,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </div>
                     </div>
 
-                    {/* Registration Form */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h4 className="font-bold text-gray-900">Registration Form</h4>
-                                <p className="text-xs text-gray-400">Design your attendee intake form.</p>
-                            </div>
-                            <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
-                        </div>
 
-                        <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-3 mb-4">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span className="text-xs text-gray-500">Standard Fields (Name, Email, Phone)</span>
-                            <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded ml-auto">REQUIRED</span>
-                        </div>
-
-                        {/* Dietary Options */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {['Vegetarian', 'Vegan', 'Gluten-Free'].map(opt => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const current = formData.dietaryOptions;
-                                        updateForm('dietaryOptions',
-                                            current.includes(opt)
-                                                ? current.filter(o => o !== opt)
-                                                : [...current, opt]
-                                        );
-                                    }}
-                                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition ${formData.dietaryOptions.includes(opt)
-                                            ? 'bg-black text-white border-black'
-                                            : 'bg-white text-gray-600 border-gray-200'
-                                        }`}
-                                >
-                                    {opt}
-                                </button>
-                            ))}
-                            <button className="text-xs font-medium px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400">
-                                + Add option
-                            </button>
-                        </div>
-
-                        {/* Custom registration fields are configured in the Registration & Tickets step. */}
-                    </div>
                 </div>
             </div>
         </div>
@@ -521,8 +487,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 key={type}
                                 onClick={() => updateForm('recurrenceType', type.toLowerCase())}
                                 className={`px-4 py-2 rounded-full text-xs font-medium transition ${formData.recurrenceType === type.toLowerCase()
-                                        ? 'bg-black text-white'
-                                        : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-black text-white'
+                                    : 'bg-gray-100 text-gray-600'
                                     }`}
                             >
                                 {type}
@@ -538,7 +504,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </svg>
                         <div>
                             <p className="text-sm font-medium text-gray-700">Quick Summary</p>
-                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting March 12, 2026 until March 19, 2026. Starts at 10:00 AM and ends at 05:00 PM PKT.</p>
+                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting{formData.startDate}, until {formData.endDate}. Starts at {formData.startTime} and ends at{formData.endTime} PKT.</p>
                         </div>
                     </div>
                 )}
@@ -565,8 +531,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                             key={loc.id}
                             onClick={() => updateForm('locationType', loc.id)}
                             className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.locationType === loc.id
-                                    ? 'border-black bg-gray-50'
-                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                ? 'border-black bg-gray-50'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
                                 }`}
                         >
                             <div className="text-2xl mb-1">{loc.icon}</div>
@@ -705,6 +671,17 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <div>
                             <p className="text-sm font-medium text-gray-700">Enable Waiting List</p>
                             <p className="text-xs text-gray-400">Allows guests to join queue if seats are full</p>
+                            {
+                                formData.enableWaitingList && <div className='mt-10'>
+                                    <label className="text-sm font-medium text-gray-700">Waiting List Capacity</label>
+                                    <input
+                                        type="number"
+                                        value={formData.waitingListCapacity}
+                                        onChange={(e) => updateForm('waitingListCapacity', parseInt(e.target.value) || 0)}
+                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                    />
+                                </div>
+                            }
                         </div>
                         <button
                             onClick={() => updateForm('enableWaitingList', !formData.enableWaitingList)}
@@ -729,8 +706,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <button
                             onClick={() => updateForm('ticketType', 'free')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'free'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500'
                                 }`}
                         >
                             Free
@@ -738,14 +715,29 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <button
                             onClick={() => updateForm('ticketType', 'paid')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'paid'
-                                    ? 'bg-black text-white shadow-sm'
-                                    : 'text-gray-500'
+                                ? 'bg-black text-white shadow-sm'
+                                : 'text-gray-500'
                                 }`}
                         >
                             Paid
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* {Ticket final price} */}
+            <div
+                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
+                <input
+                    type="text"
+                    value={formData.PriceOfTicket}
+                    onChange={(e) => {
+                        formData.PriceOfTicket = parseInt(e.target.value) || 0;
+                        updateForm('PriceOfTicket', formData.PriceOfTicket);
+                    }}
+                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                />
             </div>
 
             {/* Ticket Tiers */}
@@ -840,14 +832,14 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ticket Benefits</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ticket description</label>
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            value={tier.benefits}
+                                            value={tier.description}
                                             onChange={(e) => {
                                                 const updated = formData.ticketTiers.map(t =>
-                                                    t.id === tier.id ? { ...t, benefits: e.target.value } : t
+                                                    t.id === tier.id ? { ...t, description: e.target.value } : t
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
@@ -864,7 +856,15 @@ export default function CreateEventPage({ handle_submission }: any) {
                     ))}
 
                     <button
-                        onClick={() => setNewTier({ name: '', price: 0, seatsAvailable: 0, availableUntil: '', benefits: '' })}
+                        onClick={
+                            () => {
+                                const new_ticket_tiers = [...formData.ticketTiers, { name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }];
+                                console.log(new_ticket_tiers);
+                                setNewTier(new_ticket_tiers);
+                                updateForm('ticketTiers', new_ticket_tiers);
+                            }
+
+                        }
                         className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -924,6 +924,27 @@ export default function CreateEventPage({ handle_submission }: any) {
                             <div>
                                 <p className="text-sm font-medium text-gray-700">Group Discount</p>
                                 <p className="text-xs text-gray-400">Limit number of tickets per registrant</p>
+                                {formData.groupDiscount && <>
+                                   
+                                    <div className="flex items-center gap-1 mt-1">
+                                         <p className="text-sm font-small text-gray-700 mb-2">Min Size For Group Discounts</p>
+                                    <input
+                                        type="number"
+                                        value={formData.minSizeForGroupDiscounts}
+                                        onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
+                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                    />
+                                     <p className="text-sm font-medium text-gray-700 mb-2"> Group Discount Percentage</p>
+                                        <input
+                                            type="number"
+                                            value={formData.groupDiscountPercent}
+                                            onChange={(e) => updateForm('groupDiscountPercent', parseInt(e.target.value) || 0)}
+                                            className="w-12 bg-gray-50 border border-gray-200 rounded px-2 py-1 text-xs text-center"
+                                        />
+                                        <span className="text-xs text-gray-500">% off</span>
+                                    </div>
+
+                                </>}
                             </div>
                         </div>
                         <button
@@ -935,9 +956,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                     </div>
                 </div>
 
-                <button className="mt-4 border border-gray-300 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                    Create Promo Codes
-                </button>
+
             </div>
 
             {/* Registration Form Builder */}
@@ -946,7 +965,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <h3 className="font-bold text-gray-900">Registration Form Builder</h3>
+                    <div>
+                        <h4 className="font-bold text-gray-900">Registration Form</h4>
+                        <p className="text-xs text-gray-400">Design your attendee intake form.</p>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -976,10 +998,61 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <p className="text-xs text-gray-400 mb-4">Custom Fields</p>
 
-                    <CustomFieldsBuilder
-                        fields={formData.customFields}
-                        onChange={(fields) => updateForm('customFields', fields)}
-                    />
+                    {/* Custom Fields */}
+                    {formData.customFields.map((field, i) => (
+                        <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs">📝</span>
+                                <div>
+                                    <input
+                                        type="text"
+                                        value={field.label}
+                                        onChange={(e) => {
+                                            {
+                                                formData.customFields.map(x => {
+                                                    if (x.id === field.id) {
+                                                        field.label = e.target.value;
+                                                    }
+                                                    return x;
+                                                })
+
+                                                updateForm('customFields', formData.customFields);
+                                            }
+                                        }}
+
+
+                                        className="w-full bg-transparent text-sm text-gray-900 outline-none"
+                                    />
+                                    <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
+                                        {
+                                            formData.customFields.map(x => {
+                                                if (x.id === field.id) {
+                                                    field.required = !field.required;
+                                                }
+                                                return x;
+                                            })
+
+                                            updateForm('customFields', formData.customFields);
+                                        }
+                                    }}>Required</button>
+                                    <p className="text-[10px] text-gray-400">
+                                        {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : ""}</span>
+                        </div>
+                    ))}
+
+                    <button
+                        onClick={addCustomField}
+                        className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
+                    >
+                        <span>+</span> Add Custom Field
+                    </button>
+
+
+
                 </div>
             </div>
 
@@ -1017,6 +1090,28 @@ export default function CreateEventPage({ handle_submission }: any) {
                             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
                         />
                     </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Starting Date Of Registeration</p>
+                        <input
+                            type="date"
+                            value={formData.registrationOpenDate}
+                            onChange={(e) => updateForm('registrationOpenDate', e.target.value)}
+                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                    </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Closing Date Of Registeration</p>
+                        <input
+                            type="date"
+                            value={formData.registrationCloseDate}
+                            onChange={(e) => updateForm('registrationCloseDate', e.target.value)}
+                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -1264,10 +1359,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <button
                                         onClick={() => goToStep(step.id)}
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${step.id < currentStep
+                                            ? 'bg-black text-white'
+                                            : step.id === currentStep
                                                 ? 'bg-black text-white'
-                                                : step.id === currentStep
-                                                    ? 'bg-black text-white'
-                                                    : 'bg-gray-200 text-gray-400'
+                                                : 'bg-gray-200 text-gray-400'
                                             }`}
                                     >
                                         {step.id < currentStep ? '✓' : step.id}

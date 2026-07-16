@@ -1,7 +1,7 @@
 
 export const COLLECTIONS = {
   USERS: "users",
-  ORGANIZERS: "organizers",
+  ORGANIZERS: "organizer",
   EVENTS: "events",
   REGISTRATIONS: "registerations",
   VENDORS: "vendor",

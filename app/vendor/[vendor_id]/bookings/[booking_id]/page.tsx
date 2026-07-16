@@ -38,7 +38,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
     console.log(raw_booking?.organizerId);
  
     const [organizer,vendor,event] = await Promise.all([
-        OrganizerService.getOrganizerById(raw_booking?.organizerId.substring(2) || ''),
+        OrganizerService.getOrganizerById(raw_booking?.organizerId || ''),
          EventVendorService.getVendorById(vendor_id || ''),
         EventService.getEventByID(raw_booking?.eventId || '')
     ])

@@ -85,12 +85,13 @@ const converting_to_current_user_data = async (user: User) => {
     // }
     let role_id = "unknown_role";
 
-    if(table_name == "organizer") {
-        role_id = `O_${user.userId}`;
-    }else   if(table_name == "vendor") {
-        role_id = `V_${user.userId}`;
-    }
-
+    console.log("in converting_to_current_user_data", {
+        userId: user?.userId || "",
+        email: user?.email || "",
+        name: user?.profile.fullName || "",
+        userType: user?.userType || "",
+        roleId: role_id || ""
+    })
     return {
         userId: user?.userId || "",
         email: user?.email || "",
@@ -142,6 +143,7 @@ export const AuthService = {
 
         try {
             const currentUser = await adminAuth.verifySessionCookie(jwt_key);
+            console.log("currentUser from session cookie", currentUser);
             return {
                 userId: currentUser.uid,
                 email: currentUser.email,
@@ -157,40 +159,39 @@ export const AuthService = {
 
     }),
 
-    getCurrentVendor: cache(async () => {
-        const cookieStore = await cookies();
-        let user_data = cookieStore.get('userData');
-        let currentUser: CurrentUserData = {
-            userId: "unknown",
-            email: "unknwon@unknowngmail.com",
-            userType: "attendee",
-            name: "unknown",
-            roleId: "unknown"
-        };
-        if (user_data?.value) {
-            try {
-                currentUser = JSON.parse(user_data?.value);
-            } catch (error) {
-                // ignore malformed userData cookie
-            }
-        }
-        return currentUser;
-
-    }),
+    
 
     async loginWithEmail(email: string, password: string) {
+        console.log("Checkpoint 1:  function started.");
+        console.log(`Payload checking: Email is "${email}", Password length is ${password?.length}`);
+
+        
+        //  await seedEvents(adminDb);
+        
+        
+
         let user_credintials;
         try {
             user_credintials = await signInWithEmailAndPassword(auth, email, password);
 
         } catch (error: any) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+
+            console.log("[user logging in] ", error)
             throw error;
         }
         const user = user_credintials.user;
+        const user_id = user_credintials.user.uid;
+        console.log("💾Checkpoint 2: Attempting Firestore read...");
+
 
         try {
             await making_a_session(user);
         } catch (error: any) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log("[user logging in] making session failed")
             throw error;
         }
 
@@ -199,11 +200,13 @@ export const AuthService = {
     async signUpWithEmail(formData: signup_with_email_form_data) {
         const email = formData.email;
         const password = formData.password;
+        console.log("Checkpoint 1: signUpWithEmail function started.");
 
         let user_credintials;
         try {
             user_credintials = await createUserWithEmailAndPassword(auth, email, password);
         } catch (error: any) {
+            console.log("[user signing in] failed")
             throw error;
         }
 
@@ -211,23 +214,33 @@ export const AuthService = {
         const user_id = user_credintials.user.uid;
         const user_object = { ...formData };
 
+        console.log("💾 Checkpoint 2: Attempting Firestore write...", formData.userType);
         await adminDb.collection(COLLECTIONS.USERS).doc(user_id).set(user_object);
+        console.log(`💾 userType written: "${formData.userType}"`);
 
         const userTypeLower = String(formData.userType).trim().toLowerCase();
         if (userTypeLower === 'organizer') {
 
             const temp_organizer: Organizer = new Organizer(user_id, email, email);
             await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(user_id).set(temp_organizer.toFirestoreObject());
+            console.log("Firestore write to organizer done.");
 
         } else if (userTypeLower === 'vendor') {
             let temp_vendor: Vendor = new Vendor(user_id, email, email);
             await adminDb.collection(COLLECTIONS.VENDORS).doc(user_id).set(temp_vendor.toFirestoreObject());
+            // await adminDb.collection(COLLECTIONS.VENDORS).doc(user_id).set(v_mapped);
+            console.log("Firestore write to vendor done.");
         }
+
+        console.log("🎉 Checkpoint 3: Firestore write complete!");
 
         // Create a session cookie (same as login flow)
         try {
             await making_a_session(user);
         } catch (error: any) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log("[user logging in] making session failed")
             throw error;
         }
         return user_object;

@@ -148,7 +148,8 @@ AVOELINE is an end-to-end event management platform built specifically for Pakis
 avoeline/
 ├── .next/                # Next.js build configuration artifacts
 |
-├── app/                  # App Router - Application Shell & Routing System
+├── app/                  # App Router - Application Shell & Routing 
+|   |
 │   ├── (auth)/           # Authentication layout and route handlers
 |   |
 │   ├── organizer/        # Organizer dashboard and operations workspace
