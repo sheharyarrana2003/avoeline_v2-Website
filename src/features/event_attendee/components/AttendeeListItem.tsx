@@ -17,7 +17,12 @@ function AttendeeListItemBase(
         }) {
 
     const status = (attendee_user?.accountStatus === "active" ? "REGISTERED" : "PENDING");
-    const isCheckedIn = attendee_reg.status || true; // Mocked active for visual matching
+    // Derive check-in from the real registration, not a hardcoded truthy value.
+    const isCheckedIn = Boolean(attendee_reg?.checkIn?.checkedIn) || attendee_reg?.status === "checked_in";
+    const statusLabel = isCheckedIn
+        ? "CHECKED IN"
+        : (attendee_reg?.status || "confirmed").toUpperCase().replace(/_/g, " ");
+    const checkInTime = attendee_reg?.checkIn?.checkInTime || null;
     const ticketType = attendee_reg.pricingTier;
 
     return (
@@ -70,17 +75,16 @@ function AttendeeListItemBase(
             {/* Status Badge */}
             <div>
                 <span className={`text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-400 border border-gray-300'}`}>
-                    {isCheckedIn ? 'CHECKED IN' : 'CONFIRMED'}
+                    {statusLabel}
                 </span>
             </div>
 
             {/* Check-in Time */}
             <div>
                 {isCheckedIn ? (
-                    <>
-                        <p className="text-[13px] font-bold text-slate-900">09:45 AM</p>
-                        <p className="text-[10px] font-medium text-gray-400">Oct 24, 2026</p>
-                    </>
+                    <p className="text-[13px] font-bold text-slate-900">
+                        {checkInTime ? checkInTime : "Checked in"}
+                    </p>
                 ) : (
                     <p className="text-[13px] font-bold text-gray-400">—</p>
                 )}

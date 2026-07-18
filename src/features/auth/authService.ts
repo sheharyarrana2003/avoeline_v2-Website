@@ -68,30 +68,27 @@ const handleAuthAndCreateCookie = async (token: string) => {
 
 const converting_to_current_user_data = async (user: User) => {
     const table_name = user.userType.trim().toLowerCase();
-    // const docSnap = await adminDb.collection(table_name).doc(user.userId).get();
 
-    // const role_object = docSnap.data() || {};
-    // const targetKey = `${table_name}id`.toLowerCase();
-    // let role_id = "didnt-exist";
+    // The id used for a role's routes/queries differs by role:
+    //  - organizer: looked up by document id (== the auth uid), and events are
+    //    queried by organizerId == uid, so the route id is the auth uid.
+    //  - vendor: looked up via where(vendorId == id) and bookings are queried by
+    //    vendorId, whose stored value can carry a "V_" prefix, so the route id
+    //    is the vendorId field (not the raw uid).
+    // Default to the auth uid; only vendors need the field lookup.
+    let role_id = user?.userId || "";
+    try {
+        if (table_name === "vendor") {
+            const docSnap = await adminDb.collection(COLLECTIONS.VENDORS).doc(user.userId).get();
+            const vendorId = docSnap.data()?.vendorId;
+            if (vendorId) {
+                role_id = String(vendorId);
+            }
+        }
+    } catch (err) {
+        console.error("[converting_to_current_user_data] vendor id lookup failed", err);
+    }
 
-    // const actualKey = Object.keys(role_object).find(
-    //     key => key.toLowerCase() === targetKey
-    // );
-
-    // if (actualKey) {
-    //     role_id = role_object[actualKey];
-    // } else {
-    //     console.error(`[converting_to_current_user_data] no ID key matching '${targetKey}' found`);
-    // }
-    let role_id = "unknown_role";
-
-    console.log("in converting_to_current_user_data", {
-        userId: user?.userId || "",
-        email: user?.email || "",
-        name: user?.profile.fullName || "",
-        userType: user?.userType || "",
-        roleId: role_id || ""
-    })
     return {
         userId: user?.userId || "",
         email: user?.email || "",
