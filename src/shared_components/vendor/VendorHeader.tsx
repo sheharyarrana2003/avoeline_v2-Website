@@ -44,9 +44,9 @@ export function VendorHeader({ user }: { user: CurrentUserData }) {
             
             <div className="flex items-center space-x-4">
                 <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0)?.toUpperCase() ?? "?"}
                 </Link>
-                <p className="font-medium">{user.name}</p>
+                <p className="font-medium">{user?.name ?? ""}</p>
             </div>
 
         </header>

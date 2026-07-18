@@ -24,28 +24,32 @@ export default function OrganizerCounterOfferForm ({
     e.preventDefault();
     if (isPending) return; // guard against duplicate submissions
 
-    // if (targetBudget <= 0) {
-    //   setError('Please enter a valid counter-offer amount.');
-    //   return;
-    // }
-    // if (targetBudget >= currentTotal) {
-    //   setError('Your counter-offer should generally be less than the current total price.');
-    //   return;
-    // }
-    // if (!organizerMessage.trim()) {
-    //   setError('Please include a message to explain your requested changes to the vendor.');
-    //   return;
-    // }
+    if (targetBudget <= 0) {
+      setError('Please enter a valid counter-offer amount.');
+      return;
+    }
+    if (targetBudget >= currentTotal) {
+      setError('Your counter-offer should generally be less than the current total price.');
+      return;
+    }
+    if (!organizerMessage.trim()) {
+      setError('Please include a message to explain your requested changes to the vendor.');
+      return;
+    }
 
     setError('');
     startTransition(async () => {
-      await onSubmitCounter(targetBudget, organizerMessage);
-      router.push(`/organizer/${bookingData.organizerId}/booking-details/${bookingData.bookingId}`);
+      try {
+        await onSubmitCounter(targetBudget, organizerMessage);
+        router.push(`/organizer/${bookingData.organizerId}/booking-details/${bookingData.bookingId}`);
+      } catch {
+        setError('Something went wrong sending your counter offer. Please try again.');
+      }
     });
   };
-   const OnCancel= ()=>{
-        router.push(`/organizer/${bookingData.organizerId}/dashboard`);
-    }
+  const OnCancel = () => {
+    router.push(`/organizer/${bookingData.organizerId}/dashboard`);
+  }
   return (
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white border border-gray-200 p-6 rounded-xl shadow-sm space-y-5">
       <div>
@@ -115,8 +119,7 @@ export default function OrganizerCounterOfferForm ({
       <div className="flex justify-end gap-3 pt-2">
         <button
           type="button"
-          // onClick={OnCancel}
-           onClick={()=>{alert("cancel")}}
+          onClick={OnCancel}
           className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
         >
           Cancel

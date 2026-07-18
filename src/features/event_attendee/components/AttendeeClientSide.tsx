@@ -17,8 +17,6 @@ export interface AttendeeClientSideProp {
 }
 
 export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[]|[] }) {
-    console.log("in elicne tsisdeee ");
-    console.log(attendees)
     const [selected_ids, set_selected_ids] = useState<String[]>([]);
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();
@@ -50,15 +48,14 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
         let pending = 0;
 
 
-        attendees.forEach(async (item) => {
-            const reg_of_this_user : Registration|null= item.register;
-            if(!reg_of_this_user){
+        attendees.forEach((item) => {
+            const reg_of_this_user: Registration | null = item.register;
+            if (!reg_of_this_user) {
                 return;
             }
             const status = reg_of_this_user.status;
-            const isCheckedIn = status === "checked_in";
 
-            if (isCheckedIn) {
+            if (status === "checked_in") {
                 checkedIn++;
             } else if (status === "cancelled") {
                 cancelled++;
@@ -74,10 +71,14 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
     const stats = getAnalytics();
     let attendee: AttendeeClientSideProp[] = [];
 
-    if (searchParams.get("value")) {
-        const query = searchParams.get("value");
-        const regex = new RegExp(String(query), "i");
-        attendee = attendees.filter((s) => regex.test(s.user.profile.fullName));
+    const query = searchParams.get("value");
+    if (query) {
+        // Plain substring match: building a RegExp from raw user input throws
+        // on regex metacharacters (e.g. "(", "[", "*") and crashed the list.
+        const needle = query.toLowerCase();
+        attendee = attendees.filter((s) =>
+            (s.user?.profile?.fullName ?? "").toLowerCase().includes(needle)
+        );
     } else {
         attendee = attendees;
     }
@@ -96,7 +97,7 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
 
                     {/* Top Stats Cards */}
                     <div className="grid grid-cols-4 gap-4 mb-8">
-                        <AttendeeCard title="TOTAL\nREGISTERED" value={stats.total || "0"} />
+                        <AttendeeCard title={"TOTAL\nREGISTERED"} value={stats.total || "0"} />
                         <AttendeeCard title="CHECKED IN" value={stats.checkedIn || "0"} subValue={`${stats.checkedInPercent || "0"}%`} />
                         <AttendeeCard title="PENDING" value={stats.pending || "0"} />
                         <AttendeeCard title="CANCELLED" value={stats.cancelled || "0"} />

@@ -94,11 +94,12 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
                     />
                       <input
-                        type="text"
+                        type="password"
                         name="password"
                         placeholder="password"
                         value={formData.password}
                         onChange={handleChange}
+                        required
                         className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
                     />
 

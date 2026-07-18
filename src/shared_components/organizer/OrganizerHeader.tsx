@@ -7,10 +7,7 @@ import { usePathname } from "next/navigation";
 
 export function OrganizerHeader({ user }: { user: CurrentUserData }) {
     const current_tab = usePathname();
-    console.log("idk where i am but this is thre path ",current_tab);
-    
     const basePath = `/organizer/${user.userId}`;
-    console.log("basaePAtj is ",basePath," => ",user.userId)
 
     return (
         <header className="flex items-center justify-between px-6 py-4 border-b">
@@ -77,9 +74,9 @@ export function OrganizerHeader({ user }: { user: CurrentUserData }) {
                 {/* Kept the profile route as an example, adjust if you have a specific settings route */}
                 <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
                     {/* Ensure the initial is always uppercase */}
-                    {user.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0)?.toUpperCase() ?? "?"}
                 </Link>
-                <p className="font-medium">{user.name}</p>
+                <p className="font-medium">{user?.name ?? ""}</p>
             </div>
 
         </header>

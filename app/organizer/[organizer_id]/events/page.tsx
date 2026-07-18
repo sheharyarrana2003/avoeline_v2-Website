@@ -93,7 +93,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                         {events.map((event) => (
 
                             <li
-                                key={`${event.id}+${new Date().toISOString()}`}
+                                key={event.id}
                                 className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
                             >
                                 <article className="grid gap-5 lg:grid-cols-[76px_minmax(0,1fr)_minmax(220px,0.45fr)_minmax(260px,0.55fr)_120px] lg:items-center">
