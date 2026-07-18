@@ -1,3 +1,4 @@
+import { cache } from "react";
 import {
     AnalyticsEventPerformance,
     AnalyticsMetric,
@@ -333,8 +334,10 @@ export const AnalyticsService = {
 
     // ── Consolidated reads (fetch each collection once, derive everything) ──────
 
-    /** Dashboard: one events read + one registerations read feed all 5 widgets. */
-    async getDashboardData(organizerId: string) {
+    /** Dashboard: one events read + one registerations read feed all 5 widgets.
+     *  cache()'d so independent <Suspense> regions on the dashboard can each
+     *  await it while it still runs only once per request. */
+    getDashboardData: cache(async (organizerId: string) => {
         const [eventsSnap, regsSnap] = await Promise.all([
             fetchEvents(organizerId),
             fetchRegistrations(organizerId),
@@ -349,7 +352,7 @@ export const AnalyticsService = {
             recentReg: deriveRecentReg(regDocs),
             regTrend: deriveRegTrend(regDocs),
         };
-    },
+    }),
 
     /** Analytics page: one events read + one registerations read feed all 7 metrics. */
     async getAnalyticsData(organizerId: string) {
