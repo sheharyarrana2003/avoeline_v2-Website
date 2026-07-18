@@ -222,41 +222,47 @@ export const EventService = {
       no_show: "CANCELLED",
     };
 
-    // Resolve each attendee's name from users/{userId}/profile.fullName in parallel
-    const results: RecentRegistration[] = await Promise.all(
-      top10.map(async ({ doc }) => {
-        const data = doc.data();
-        const rawStatus = (data.status || "pending").toLowerCase();
+    // Resolve names only for rows without an embedded name, in a single
+    // batched getAll() instead of one user read per row (previously N+1).
+    const lookupIds = [
+      ...new Set(
+        top10
+          .map(({ doc }) => doc.data())
+          .filter(d => !(d.attendeeName || d.userName || d.fullName) && d.userId)
+          .map(d => d.userId as string)
+      ),
+    ];
 
-        // Try embedded fields first (fast path), then look up the user document
-        let attendeeName: string =
-          data.attendeeName || data.userName || data.fullName || "";
+    const userMap = new Map<string, FirebaseFirestore.DocumentData>();
+    if (lookupIds.length) {
+      const refs = lookupIds.map(id => adminDb.collection(COLLECTIONS.USERS).doc(id));
+      const snaps: FirebaseFirestore.DocumentSnapshot[] = await adminDb.getAll(...refs);
+      snaps.forEach((s, i) => {
+        if (s.exists) userMap.set(lookupIds[i], s.data()!);
+      });
+    }
 
-        if (!attendeeName && data.userId) {
-          try {
-            const userSnap = await adminDb.collection(COLLECTIONS.USERS).doc(data.userId).get();
-            if (userSnap.exists) {
-              const u = userSnap.data()!;
-              attendeeName =
-                u.profile?.fullName ||
-                u.name ||
-                u.email ||
-                data.userId;
-            }
-          } catch {
-            attendeeName = data.userId;
-          }
-        }
+    const results: RecentRegistration[] = top10.map(({ doc }) => {
+      const data = doc.data();
+      const rawStatus = (data.status || "pending").toLowerCase();
 
-        return {
-          id: doc.id,
-          attendeeName: attendeeName || "—",
-          eventName: data.eventName || data.eventTitle || "—",
-          amountPaid: data.payment?.amountPaid ?? data.finalPrice ?? 0,
-          status: statusMap[rawStatus] ?? "PENDING",
-        };
-      })
-    );
+      let attendeeName: string =
+        data.attendeeName || data.userName || data.fullName || "";
+
+      if (!attendeeName && data.userId) {
+        const u = userMap.get(data.userId);
+        attendeeName =
+          (u && (u.profile?.fullName || u.name || u.email)) || data.userId;
+      }
+
+      return {
+        id: doc.id,
+        attendeeName: attendeeName || "—",
+        eventName: data.eventName || data.eventTitle || "—",
+        amountPaid: data.payment?.amountPaid ?? data.finalPrice ?? 0,
+        status: statusMap[rawStatus] ?? "PENDING",
+      };
+    });
 
     return results;
   },

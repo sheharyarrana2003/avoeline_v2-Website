@@ -106,5 +106,15 @@ export const RegService = {
 
         return  mapToRegistration(querySnapshot.docs[0].data());
 
+    },
+
+    // Fetch every registration for an event in one query. Used to resolve each
+    // attendee's this-event registration without an extra read per attendee.
+    async getRegsOfEvent(event_id: string): Promise<Registration[]> {
+        const querySnapshot: QuerySnapshot = await adminDb
+            .collection(COLLECTIONS.REGISTRATIONS)
+            .where("eventId", "==", event_id)
+            .get();
+        return querySnapshot.docs.map(d => mapToRegistration(d.data()));
     }
 }

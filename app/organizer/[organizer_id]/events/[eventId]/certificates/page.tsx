@@ -14,32 +14,23 @@ export default async function CertificateIssuancePage({
     const { organizer_id, eventId } = resolvedParams;
 
 
-    console.log("zero")
     const attendee = await AttendeeService.getAttendeeOfEvent(eventId);
     const attendeeList = attendee ?? [];
 
-    console.log("one")
+    let attendeesWithData: AttendeeCertProp[] = [];
+    if (attendeeList.length) {
+        // Two batched reads for the whole list instead of 2 reads per attendee.
+        const [usersById, certByUser] = await Promise.all([
+            UserService.getUsersByIds(attendeeList.map(a => a.userId)),
+            CertificateService.getCertsOfEventByUser(eventId),
+        ]);
 
-    const attendeesWithData: AttendeeCertProp[] = await Promise.all(
-        attendeeList.map(async (a) => {
-            console.log("onepointfive")
-
-            const [user, certStatus] = await Promise.all([
-                UserService.getUserById(a.userId),
-                CertificateService.cert_for_attendee(a.userId)
-
-            ])
-
-
-            return {
-                a,
-                user,
-                certStatus,
-
-            };
-        })
-    );
-    console.log("two")
+        attendeesWithData = attendeeList.map(a => ({
+            a,
+            user: usersById.get(String(a.userId))!,
+            certStatus: certByUser.get(String(a.userId)) ?? null,
+        }));
+    }
 
     async function handleGenerateCertificates(selectedAttendeeIds: string[]) {
         "use server";

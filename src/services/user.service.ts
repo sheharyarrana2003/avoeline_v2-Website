@@ -61,6 +61,23 @@ export const UserService = {
       ...docSnap.data()
     };
     return mapToUser(user_to_front_end);
-  })
+  }),
+
+  // Batch-fetch many users in a single Firestore getAll() round-trip instead
+  // of one getUserById per id. Returns a Map keyed by userId (missing docs map
+  // to a safe default via mapToUser).
+  async getUsersByIds(ids: string[]): Promise<Map<string, User>> {
+    const uniqueIds = [...new Set(ids.filter(Boolean).map(String))];
+    const map = new Map<string, User>();
+    if (uniqueIds.length === 0) return map;
+
+    const refs = uniqueIds.map(id => adminDb.collection(COLLECTIONS.USERS).doc(id));
+    const snaps: FirebaseFirestore.DocumentSnapshot[] = await adminDb.getAll(...refs);
+    snaps.forEach((snap, i) => {
+      const id = uniqueIds[i];
+      map.set(id, mapToUser({ user_id: id, ...(snap.exists ? snap.data() : {}) }));
+    });
+    return map;
+  }
 }
 

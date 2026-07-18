@@ -83,17 +83,31 @@ export const AttendeeService = {
         if (querySnapshot.empty) {
             return null;
         }
-        const user_ids_of_attendees: string[] = querySnapshot.docs.map(doc => doc.data().userId);
+        const user_ids_of_attendees: string[] = [
+            ...new Set(querySnapshot.docs.map(doc => doc.data().userId).filter(Boolean))
+        ];
 
+        // Batch the attendee lookups into Firestore's 30-per-"in" chunks, fetched
+        // in parallel, instead of one query per attendee (previously N+1, and it
+        // crashed on any attendee without a matching doc via docs[0].data()).
+        const CHUNK = 30;
+        const chunks: string[][] = [];
+        for (let i = 0; i < user_ids_of_attendees.length; i += CHUNK) {
+            chunks.push(user_ids_of_attendees.slice(i, i + CHUNK));
+        }
 
-        const attendees: Attendee[] = await Promise.all(
-            user_ids_of_attendees.map(async (x) => {
-                const q = await adminDb.collection(COLLECTIONS.ATTENDEES).where("userId", "==", x).get();
-                const attendeeSnap = q.docs[0];
-                return mapToAttendee(attendeeSnap.data());
-            })
+        const snapshots: QuerySnapshot[] = await Promise.all(
+            chunks.map(chunk =>
+                adminDb.collection(COLLECTIONS.ATTENDEES).where("userId", "in", chunk).get()
+            )
         );
 
+        const attendees: Attendee[] = [];
+        snapshots.forEach((snap) => {
+            snap.forEach((d) => {
+                attendees.push(mapToAttendee(d.data()));
+            });
+        });
 
         return attendees;
 

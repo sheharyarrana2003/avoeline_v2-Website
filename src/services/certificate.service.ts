@@ -94,11 +94,25 @@ function createCertificateDocument(input: any) {
 
 export const CertificateService = {
   async cert_for_attendee(id: String) {
-    const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", id).get();
+    const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", id).limit(1).get();
     if (querySnapshot.empty) {
       return null;
     }
     return createCertificateDocument(querySnapshot.docs[0].data());
+  },
+
+  // Batch: fetch every certificate for an event once and index by userId,
+  // replacing one cert_for_attendee query per attendee (N+1).
+  async getCertsOfEventByUser(event_id: string): Promise<Map<string, CertificateDocument>> {
+    const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("eventId", "==", event_id).get();
+    const map = new Map<string, CertificateDocument>();
+    querySnapshot.forEach((d: FirebaseFirestore.QueryDocumentSnapshot) => {
+      const data = d.data();
+      if (data.userId) {
+        map.set(String(data.userId), createCertificateDocument(data));
+      }
+    });
+    return map;
   },
 
   async generateCertificatesForEvent(event_id: string, organizer_id: string) {
@@ -113,6 +127,11 @@ export const CertificateService = {
       let certificateCount = 0;
       const nowISO = new Date().toISOString();
       const completionDate = nowISO.split('T')[0];
+
+      // Use a BulkWriter so the 2 writes per registration (cert create + reg
+      // update) are batched and flushed in parallel instead of awaited one at a
+      // time (previously 2N sequential round-trips).
+      const bulkWriter = adminDb.bulkWriter();
 
       for (const registrationDoc of registrationsSnapshot.docs) {
         const registrationData = registrationDoc.data();
@@ -164,7 +183,7 @@ export const CertificateService = {
           updatedAt: nowISO
         };
 
-        await newCertDocRef.set(certPayload);
+        bulkWriter.set(newCertDocRef, certPayload);
 
         const updatedCertConfig: RegistrationCertificate = {
           issued: true,
@@ -174,12 +193,15 @@ export const CertificateService = {
           sharedOnLinkedIn: false
         };
 
-        await adminDb.collection(COLLECTIONS.REGISTRATIONS).doc(registrationId).update({
+        bulkWriter.update(adminDb.collection(COLLECTIONS.REGISTRATIONS).doc(registrationId), {
           certificateConfig: updatedCertConfig
         });
 
         certificateCount++;
       }
+
+      // Flush all buffered writes and wait for them to complete.
+      await bulkWriter.close();
 
       return {
         success: true,
