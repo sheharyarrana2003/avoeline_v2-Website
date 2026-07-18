@@ -1,6 +1,5 @@
 import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
 import { BookingData } from "../bookings/types";
-import { console } from "inspector";
 import {  adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";

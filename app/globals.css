@@ -230,8 +230,8 @@ body {
   }
 
   .service-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(108, 92, 231, 0.3);
+    transform: translateY(-2px);
+    border-color: #14141A;
     box-shadow: 0 16px 40px rgba(108, 92, 231, 0.10);
   }
 
@@ -278,8 +278,4 @@ body {
       animation: none;
     }
   }
-  .service-card:hover {
-  border-color: #14141A;
-  transform: translateY(-2px);
-}
 }
