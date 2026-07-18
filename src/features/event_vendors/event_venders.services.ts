@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
 import { BookingData } from "../bookings/types";
 import {  adminDb } from "@/data/admin_db";
@@ -113,31 +114,36 @@ export const EventVendorService = {
 
         const vendorIds = [...new Set(arr_of_bookings_active.map(b => b.vendorId).filter(Boolean))];
         const max_num_firebase_allows = 30;
-        let tracker_of_chunks = 0;
-        let arr_of_vendors_active: VendorData[] = [];
 
-        while (tracker_of_chunks < vendorIds.length) {
-            const q = adminDb.
-                collection(COLLECTIONS.VENDORS).
-                where("vendorId", "in", vendorIds.filter((_, index) => (index < (tracker_of_chunks + max_num_firebase_allows) && index >= tracker_of_chunks)))
-            
-            const querySnapshot2 : QuerySnapshot= await q.get();
-            tracker_of_chunks += max_num_firebase_allows;
-            if (!querySnapshot2.empty) {
-                querySnapshot2.forEach(x => {
-                    arr_of_vendors_active.push(mapToVendorData(x.data(), x.id));
-                })
-            }
+        // Split the vendor ids into Firestore's max 30-per-"in"-query chunks and
+        // fetch all chunks in parallel instead of one sequential round-trip each.
+        const chunks: string[][] = [];
+        for (let i = 0; i < vendorIds.length; i += max_num_firebase_allows) {
+            chunks.push(vendorIds.slice(i, i + max_num_firebase_allows));
         }
 
+        const snapshots: QuerySnapshot[] = await Promise.all(
+            chunks.map(chunk =>
+                adminDb.collection(COLLECTIONS.VENDORS).where("vendorId", "in", chunk).get()
+            )
+        );
+
+        const arr_of_vendors_active: VendorData[] = [];
+        snapshots.forEach((snap) => {
+            snap.forEach((x) => {
+                arr_of_vendors_active.push(mapToVendorData(x.data(), x.id));
+            });
+        });
 
         return arr_of_vendors_active;
     },
-    async getVendorById(vendor_id: string) {
+    getVendorById: cache(async (vendor_id: string) => {
+        // Only the first match is used, so cap the read at one document.
         const q = adminDb.
             collection(COLLECTIONS.VENDORS).
-            where("vendorId", "==", vendor_id)
-        
+            where("vendorId", "==", vendor_id).
+            limit(1)
+
         const querySnapshot = await q.get();
 
 
@@ -147,11 +153,14 @@ export const EventVendorService = {
         const data = querySnapshot.docs[0].data();
         return mapToVendorData(data, querySnapshot.docs[0].id);
 
-    },
+    }),
     async getAllVendors() {
+        // Cap the marketplace read instead of pulling the entire vendors
+        // collection every load. Raise the limit or paginate when needed.
         const q = adminDb.
-            collection(COLLECTIONS.VENDORS)
-        
+            collection(COLLECTIONS.VENDORS).
+            limit(60)
+
         const querySnapshot : QuerySnapshot= await q.get();
         if (querySnapshot.empty) {
             return null;

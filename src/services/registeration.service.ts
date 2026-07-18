@@ -96,7 +96,8 @@ import { COLLECTIONS } from "@/data/collections";
 }
 export const RegService = {
     async getRegOfUser(user_id:string){
-        const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId","==",user_id);
+        // Only the first match is used, so cap the read at one document.
+        const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId","==",user_id).limit(1);
         const querySnapshot :  QuerySnapshot= await q.get();
 
         if(querySnapshot.empty){

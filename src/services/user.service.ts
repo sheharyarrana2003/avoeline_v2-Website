@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { User } from "./models/user.type";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
@@ -51,13 +52,15 @@ function mapToUser(raw: any): User {
 }
 
 export const UserService = {
-  async getUserById(user_id: String) {
+  // Cached per request: the same user is often resolved multiple times in one
+  // render (layout + page + list rows), so dedupe those to a single read.
+  getUserById: cache(async (user_id: String) => {
     const docSnap = await adminDb.collection(COLLECTIONS.USERS).doc(String(user_id)).get();
     const user_to_front_end = {
       user_id,
       ...docSnap.data()
     };
     return mapToUser(user_to_front_end);
-  }
+  })
 }
 

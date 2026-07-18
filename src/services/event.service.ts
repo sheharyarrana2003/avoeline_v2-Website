@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { EventFormData, EventModel } from "./models/event.model";
 import { RecentRegistration } from '../features/dashboard/types';
 import { adminDb } from "@/data/admin_db";
@@ -163,38 +164,35 @@ const combineDateTime = (dateStr: string, timeStr: string): Date => {
 
 export const EventService = {
 
-  async getEventByID(id: string) {
+  // Wrapped in React.cache() so repeated reads of the same event within a
+  // single request (page + layout + agenda/speakers, etc.) hit Firestore once.
+  getEventByID: cache(async (id: string) => {
     if (!id) {
       console.warn("[getEventByID] called with empty id");
       return null;
-    };
-    let querySnapshot: QuerySnapshot;
-
-
-    try {
-      querySnapshot = await adminDb.collection(COLLECTIONS.EVENTS).where("id", "==", id).get();
-    } catch (err) {
-      console.error("[getEventByID] Firestore query failed", { id, err });
-      throw new Error(`Failed to fetch event ${id}`, { cause: err });
-    }
-
-
-    if (querySnapshot.empty) {
-      console.info(`[getEventByID] no event found for id=${id}`);
-      return null;
     }
 
     try {
+      // Fast path: events are written with the document id equal to the `id`
+      // field (see create_event), so a single keyed doc read replaces the
+      // previous where("id","==") collection query.
+      const docSnap = await adminDb.collection(COLLECTIONS.EVENTS).doc(id).get();
+      if (docSnap.exists) {
+        return EventModel.fromJson(docSnap.data());
+      }
+
+      // Fallback for any legacy docs whose document id != the `id` field.
+      const querySnapshot = await adminDb.collection(COLLECTIONS.EVENTS).where("id", "==", id).get();
+      if (querySnapshot.empty) {
+        console.info(`[getEventByID] no event found for id=${id}`);
+        return null;
+      }
       return EventModel.fromJson(querySnapshot.docs[0].data());
     } catch (err) {
-      // Data exists but is malformed 
-      console.error("[getEventByID] failed to parse event data", { id, err });
-      throw new Error(`Malformed event data for ${id}`, { cause: err });
+      console.error("[getEventByID] Firestore read failed", { id, err });
+      throw new Error(`Failed to fetch event ${id}`, { cause: err });
     }
-
-
-
-  },
+  }),
   async getRecentRegEvents(event_id: string): Promise<RecentRegistration[]> {
     // No orderBy — avoids composite index requirement; sort in memory
     const snap : QuerySnapshot= await adminDb

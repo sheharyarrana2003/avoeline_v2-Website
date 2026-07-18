@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { adminDb } from '@/data/admin_db';
 import { Organizer } from './models/organizer.model';
 import { DocumentSnapshot } from 'firebase-admin/firestore';
@@ -125,11 +126,11 @@ function mapToOrganizer(item: any): Organizer {
 }
 
 export const OrganizerService = {
-  async getOrganizerById(id: String) {
+  getOrganizerById: cache(async (id: String) => {
     const docSnap: DocumentSnapshot = await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(String(id)).get();
     // .doc().get() returns a single DocumentSnapshot (no .docs array).
     // mapToOrganizer handles a missing/undefined doc by returning a default.
     return mapToOrganizer(docSnap.data());
-  }
+  })
 }
 
