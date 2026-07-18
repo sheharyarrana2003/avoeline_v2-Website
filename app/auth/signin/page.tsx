@@ -15,11 +15,7 @@ export default async function SignIn() {
             redirect("/auth/signup");
         } else {
             const user_role = user.userType;
-            // Route by the role-specific id (roleId), which is what the role's
-            // pages/queries key off — not the raw auth uid (they differ for
-            // vendors whose vendorId carries a "V_" prefix).
-            const routeId = user.roleId || user.userId;
-            redirect(`/${user_role.toLowerCase()}/${routeId}/dashboard`);
+            redirect(`/${user_role.toLowerCase()}/${user.userId}/dashboard`);
         }
 
     };
