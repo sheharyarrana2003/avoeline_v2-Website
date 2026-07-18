@@ -1,4 +1,5 @@
 "use client"
+import { useRef, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 
@@ -6,15 +7,27 @@ export function AttendeeInput() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Clear any pending navigation on unmount.
+    useEffect(() => () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+    }, []);
 
     const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-         const params = new URLSearchParams(searchParams.toString());
-         if(e.target.value === "" || e.target.value === undefined ){
-             params.delete("value");
-         } else {
-             params.set("value", e.target.value);
-         }
-         router.push(`${pathname}?${params.toString()}`)
+         const value = e.target.value;
+         // Debounce so we navigate once the user pauses typing, instead of a
+         // full server round-trip on every keystroke.
+         if (debounceRef.current) clearTimeout(debounceRef.current);
+         debounceRef.current = setTimeout(() => {
+             const params = new URLSearchParams(searchParams.toString());
+             if (value === "" || value === undefined) {
+                 params.delete("value");
+             } else {
+                 params.set("value", value);
+             }
+             router.push(`${pathname}?${params.toString()}`);
+         }, 300);
     }
 
     return (

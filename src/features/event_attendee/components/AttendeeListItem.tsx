@@ -1,10 +1,11 @@
 "use client"
+import { memo } from "react";
 import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 import { Registration } from "@/src/services/models/reg.type";
 import { MoreHorizontal } from "lucide-react";
 
-export function AttendeeListItem(
+function AttendeeListItemBase(
     { single_attendee, attendee_user, attendee_reg,handleOnClick, handleCheckBoxChange, isSelected }:
         {
             single_attendee: Attendee,
@@ -94,3 +95,7 @@ export function AttendeeListItem(
         </div>
     )
 }
+
+// Memoized so rows don't all re-render when the parent state changes (search
+// keystroke, selecting another row); only rows whose props changed re-render.
+export const AttendeeListItem = memo(AttendeeListItemBase);

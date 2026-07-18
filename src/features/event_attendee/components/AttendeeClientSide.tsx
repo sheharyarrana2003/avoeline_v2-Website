@@ -1,7 +1,7 @@
 "use client"
 import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { AttendeeListItem } from "./AttendeeListItem";
 import { SingleAttendeeView } from "./SingleAttendeeView";
 import { AttendeeInput } from "./AttendeeInput";
@@ -21,32 +21,29 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();
 
-    const handleOnClick = (attendee_id: string, user_id: string) => {
+    // Stable identities so the memoized AttendeeListItem rows don't re-render
+    // on every parent state change (search keystroke, selection toggle).
+    const handleOnClick = useCallback((attendee_id: string, user_id: string) => {
         const target = attendees.find((a) => a.user.userId === user_id) || null;
         if (target) {
             set_single_attendee_view(target);
         }
-    }
+    }, [attendees]);
 
-    const handleCheckBoxChange = (e: React.ChangeEvent<HTMLInputElement>, attendee_id: string) => {
+    const handleCheckBoxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, attendee_id: string) => {
         const isChecked = e.target.checked;
-        if (isChecked) {
-            set_selected_ids([...selected_ids, attendee_id]);
-        } else {
-            set_selected_ids((prev_arr) => prev_arr.filter(item => item !== attendee_id));
-        }
-    }
+        set_selected_ids((prev_arr) =>
+            isChecked
+                ? [...prev_arr, attendee_id]
+                : prev_arr.filter(item => item !== attendee_id)
+        );
+    }, []);
 
-    const handleMassDelete = () => {
-        console.log("Deleting these", selected_ids);
-    }
-
-    const getAnalytics = () => {
+    const stats = useMemo(() => {
         const total = attendees.length;
         let checkedIn = 0;
         let cancelled = 0;
         let pending = 0;
-
 
         attendees.forEach((item) => {
             const reg_of_this_user: Registration | null = item.register;
@@ -66,22 +63,18 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
 
         const checkedInPercent = total > 0 ? Math.round((checkedIn / total) * 100) : 0;
         return { total, checkedIn, pending, cancelled, checkedInPercent };
-    };
-
-    const stats = getAnalytics();
-    let attendee: AttendeeClientSideProp[] = [];
+    }, [attendees]);
 
     const query = searchParams.get("value");
-    if (query) {
+    const attendee = useMemo<AttendeeClientSideProp[]>(() => {
+        if (!query) return attendees;
         // Plain substring match: building a RegExp from raw user input throws
         // on regex metacharacters (e.g. "(", "[", "*") and crashed the list.
         const needle = query.toLowerCase();
-        attendee = attendees.filter((s) =>
+        return attendees.filter((s) =>
             (s.user?.profile?.fullName ?? "").toLowerCase().includes(needle)
         );
-    } else {
-        attendee = attendees;
-    }
+    }, [attendees, query]);
 
     return (
         <div className="flex h-screen w-full relative overflow-hidden bg-[#f8f9fa]">
