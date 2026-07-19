@@ -49,7 +49,7 @@ export default async function MakingTemplateUi() {
         }
     }
 
-    const [selectedId,setselectedId] = useState("");
+    const [selectedId, setselectedId] = useState("");
 
 
     function ElementRenderer({ element, isSelected, onSelect }) {
@@ -69,9 +69,33 @@ export default async function MakingTemplateUi() {
 
         switch (element.type) {
             case 'text':
-                return <div style={style} onClick={onSelect}>{element.content}</div>;
+                return <div style={{
+                    position: 'absolute',
+                    left: element.x,
+                    top: element.y,
+                    width: element.width,
+                    fontFamily: element.fontFamily,
+                    fontSize: element.fontSize,
+                    fontWeight: element.fontWeight,
+                    textAlign: element.align,
+                    color: element.color,
+                    outline: isSelected ? '1px solid #000' : 'none',
+                    cursor: 'pointer',
+                }} onClick={onSelect}>{element.content}</div>;
             case 'image':
-                return <img style={style} src={element.src} onClick={onSelect} />;
+                return <img style={{
+                    position: 'absolute',
+                    left: element.x,
+                    top: element.y,
+                    width: element.width,
+                    fontFamily: element.fontFamily,
+                    fontSize: element.fontSize,
+                    fontWeight: element.fontWeight,
+                    textAlign: element.align,
+                    color: element.color,
+                    outline: isSelected ? '1px solid #000' : 'none',
+                    cursor: 'pointer',
+                }} src={element.src} onClick={onSelect} />;
             default:
                 return null;
         }
