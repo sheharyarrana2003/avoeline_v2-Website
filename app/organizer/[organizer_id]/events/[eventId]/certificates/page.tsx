@@ -35,7 +35,6 @@ export default async function CertificateIssuancePage({
     async function handleGenerateCertificates(selectedAttendeeIds: string[]) {
         "use server";
         await CertificateService.generateCertificatesForEvent(eventId, organizer_id,)
-        // TODO: implement certificate generation logic (I'll write this myself)
     }
 
     return (
