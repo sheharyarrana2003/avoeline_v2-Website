@@ -1,11 +1,15 @@
 "use client"
 
-import { User, Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
+import { Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
-export default function CreateSpeakerForm(handle_speaker_submission : any) {
+import { MediaUpload } from "@/src/features/media/MediaUpload";
+
+export default function CreateSpeakerForm({ handle_speaker_submission }: { handle_speaker_submission: (formData: FormData) => void | Promise<void> }) {
     const router = useRouter();
+    const [photoUrl, setPhotoUrl] = useState<string>("");
 
     return (
         <>
@@ -25,10 +29,16 @@ export default function CreateSpeakerForm(handle_speaker_submission : any) {
                         <div className="space-y-6">
                             {/* Upload Photo Area */}
                             <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-8 flex flex-col items-center justify-center">
-                                <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-100/50 mb-4">
-                                    <User className="text-gray-400" size={32} />
-                                </div>
-                                <span className="font-bold text-sm text-gray-900">Upload Photo</span>
+                                <MediaUpload
+                                    folder="speaker-avatars"
+                                    accept="image/*"
+                                    value={photoUrl || null}
+                                    label="Upload Photo"
+                                    onUploaded={setPhotoUrl}
+                                    buttonClassName="relative flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-full border-2 border-dashed border-gray-300 bg-gray-100/50 text-gray-400 transition hover:border-gray-400 disabled:opacity-60"
+                                />
+                                {/* Uploaded avatar URL rides the form's server action. */}
+                                <input type="hidden" name="profileImage" value={photoUrl} />
                             </div>
 
                             {/* Text Inputs */}

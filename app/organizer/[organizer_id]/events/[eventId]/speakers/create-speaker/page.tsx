@@ -1,23 +1,20 @@
 import { SpeakerService } from "@/src/features/event_speakers/types/speakers.service"
-import { AuthService } from "@/src/features/auth/authService"
 import CreateSpeakerForm from "@/src/features/event_speakers/components/CreateSpeakerForm"
+import { redirect } from "next/navigation"
 
-export default async function Create_speaker({ params }: { params: Promise<{ id: string }> }) {
-    const u = await AuthService.getCurrentUser();
-    const { id } = await params;
-    const handle_speaker_submission = (formData : FormData)=>{
-        SpeakerService.createNewSpeaker(formData,id);
-    }
-    
-    console.log("This is id from create speaker ->", id);
+export default async function Create_speaker({ params }: { params: Promise<{ organizer_id: string; eventId: string }> }) {
+    const { organizer_id, eventId } = await params;
+
+    const handle_speaker_submission = async (formData: FormData) => {
+        "use server";
+        await SpeakerService.createNewSpeaker(formData, eventId);
+        redirect(`/organizer/${organizer_id}/events/${eventId}/speakers`);
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
-            
             <div className="relative w-full max-w-4xl shadow-2xl rounded-2xl drop-shadow-2xl">
-                
-                <CreateSpeakerForm />
-                
+                <CreateSpeakerForm handle_speaker_submission={handle_speaker_submission} />
             </div>
         </div>
     )

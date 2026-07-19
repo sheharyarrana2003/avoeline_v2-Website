@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { EventFormData } from '@/src/services/models/event.model';
 import { CustomField } from '@/src/services/models/event.model';
+import { MediaUpload } from '@/src/features/media/MediaUpload';
+import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from '@/src/features/media/media.utils';
 
 // --- Constants ---
 const EVENT_TYPES = [
@@ -291,26 +293,56 @@ export default function CreateEventPage({ handle_submission }: any) {
                     </div>
 
                     {/* Banner Upload */}
-                    <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-gray-300 transition cursor-pointer">
-                        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <p className="text-sm font-semibold text-gray-700">Upload Event Banner</p>
+                    <div>
+                        <MediaUpload
+                            folder="banners"
+                            accept="image/*"
+                            value={formData.bannerImage}
+                            label="Upload Event Banner"
+                            onUploaded={(url) => updateForm('bannerImage', url)}
+                        />
                         <p className="text-xs text-gray-400 mt-1">1600 × 900px recommended (JPG, PNG)</p>
                     </div>
 
                     {/* Gallery */}
-                    <div className="flex items-center gap-3">
-                        <button className="w-16 h-16 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center hover:border-gray-300 transition">
-                            <span className="text-gray-400 text-lg">+</span>
-                        </button>
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="w-16 h-16 bg-gray-200 rounded-xl overflow-hidden">
-                                <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
-                            </div>
-                        ))}
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Gallery</label>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <MediaUpload
+                                folder="gallery"
+                                accept={IMAGE_AND_VIDEO_ACCEPT}
+                                multiple
+                                label="+"
+                                className="shrink-0"
+                                buttonClassName="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-lg text-gray-400 transition hover:border-gray-400 disabled:opacity-60"
+                                onUploaded={(url) =>
+                                    updateForm('galleryImages', [...(formData.galleryImages ?? []), url])
+                                }
+                            />
+                            {(formData.galleryImages ?? []).map((img, i) => (
+                                <div key={img + i} className="relative w-16 h-16 rounded-xl overflow-hidden group">
+                                    {isVideoUrl(img) ? (
+                                        <video src={img} muted className="w-full h-full object-cover" />
+                                    ) : (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={img} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" />
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            updateForm(
+                                                'galleryImages',
+                                                (formData.galleryImages ?? []).filter((_, idx) => idx !== i)
+                                            )
+                                        }
+                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-white text-[10px] leading-none opacity-0 group-hover:opacity-100 transition"
+                                        aria-label="Remove image"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Video URL */}

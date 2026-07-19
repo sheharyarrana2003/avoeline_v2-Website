@@ -2,6 +2,7 @@
 // Fully Server Component
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { VendorLogoUpload } from "@/src/features/event_vendors/components/VendorLogoUpload";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -168,18 +169,34 @@ export default async function VendorProfilePage({
                                     <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
                                 )}
                                 
-                                {/* Avatar */}
+                                {/* Avatar / Logo */}
                                 <div className="absolute -bottom-8 left-6">
-                                    <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center text-white text-xl font-bold border-4 border-white">
-                                        {businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-                                    </div>
+                                    {v.logo ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={v.logo}
+                                            alt={businessName}
+                                            className="w-16 h-16 rounded-full object-cover border-4 border-white bg-white"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center text-white text-xl font-bold border-4 border-white">
+                                            {businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Profile Info */}
                             <div className="pt-10 pb-6 px-6">
                                 <h2 className="text-xl font-bold text-gray-900">{businessName}</h2>
-                                
+
+                                {!isPreview && (
+                                    <div className="mt-4">
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Business Logo</p>
+                                        <VendorLogoUpload vendorId={vendor_id} currentLogo={v.logo} />
+                                    </div>
+                                )}
+
                                 <div className="flex items-center gap-2 mt-2">
                                     <div className="flex items-center gap-1">
                                         <svg className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">

@@ -423,13 +423,11 @@ export default async function VendorProfilePage({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {portfolioVideos.map((video: string, i: number) => (
                                         <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                                            <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center relative overflow-hidden">
-                                                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                                    <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M8 5v14l11-7z" />
-                                                    </svg>
-                                                </div>
-                                            </div>
+                                            <video
+                                                src={video}
+                                                controls
+                                                className="aspect-video w-full rounded-xl bg-gray-900 object-cover"
+                                            />
                                             <p className="text-xs text-gray-400 mt-2">Video {i + 1}</p>
                                         </div>
                                     ))}
