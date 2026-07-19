@@ -279,3 +279,38 @@ body {
     }
   }
 }
+
+.canvas {
+  position: relative;
+  margin: 0 auto;
+  border: 1px solid #e2e2e2;
+}
+
+.certificate-element {
+  position: absolute;
+  cursor: pointer;
+  outline: 1px solid transparent;
+  transition: outline-color 0.15s ease;
+}
+
+.certificate-element.is-selected {
+  outline: 1px solid #000;
+}
+
+.certificate-element.is-editable:hover {
+  outline: 1px dashed #94a3b8;
+}
+
+.certificate-element.is-locked {
+  cursor: default;
+  pointer-events: none; /* not editable, so skip selection entirely */
+}
+
+.certificate-text {
+  white-space: pre-wrap;
+}
+
+.certificate-image {
+  object-fit: contain;
+}
+

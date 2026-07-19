@@ -4,11 +4,12 @@ import { useState, useMemo, useTransition } from 'react';
 import { Attendee } from '@/src/features/event_attendee/type';
 import { User } from '@/src/services/models/user.type';
 import { CertificateDocument } from '@/src/services/models/certificate.model';
+import Link from 'next/link';
 
 export interface AttendeeCertProp {
     a: Attendee;
     user: User;
-    certStatus: CertificateDocument|null;
+    certStatus: CertificateDocument | null;
 }
 
 interface CertificateIssuanceClientProps {
@@ -70,12 +71,13 @@ export default function CertificateIssuanceClient({
     const [isGenerating, startGenerating] = useTransition();
     const itemsPerPage = 10;
 
+    const pathName = window.location.pathname;
     // Computed data
     const totalAttendees = attendees.length;
 
     const minAttendance = 80; // TODO: pull from event.certificateConfig.requirements.minAttendance
     const eligibleAttendees = attendees.filter(a => {
-          //!fix
+        //!fix
         const rate = 0;
         return rate >= minAttendance;
     });
@@ -163,6 +165,10 @@ export default function CertificateIssuanceClient({
                             {isGenerating ? 'Generating…' : 'Generate Certificates'}
                         </button>
                     </div>
+                    <Link href={`${pathName}/making-template`} className="flex items-center gap-3">
+
+                        <span className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">    Edit Template</span>
+                    </Link>
                 </div>
 
                 {/* Stats Cards */}
@@ -253,11 +259,11 @@ export default function CertificateIssuanceClient({
                             {paginatedAttendees.map((attendee) => {
                                 const surveyStatus = getSurveyStatus(attendee.a);
                                 //!fix
-                                const attendanceRate =  0;
+                                const attendanceRate = 0;
                                 const isSelected = selectedAttendees.has(attendee.a.attendeeId);
                                 const name = attendee.user.profile.fullName;
                                 const email = attendee.user.email;
-                                
+
                                 // Clean dynamic parsing mapping fallback for cases where no cert record exists yet
                                 const currentCertStatus = attendee.certStatus?.status || 'pending';
 
