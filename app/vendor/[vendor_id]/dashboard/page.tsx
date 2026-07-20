@@ -234,7 +234,11 @@ export default async function VendorDashboardPage({
                 
                 {/* Welcome Section */}
                 <div className="flex items-center justify-between mb-8">
-                    <div>
+                    <div className="flex items-center gap-3">
+                        {v?.logo && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={v.logo} alt={businessName} className="w-10 h-10 rounded-full object-cover border border-gray-200 bg-white" />
+                        )}
                         <h2 className="text-xl font-bold text-gray-900">Welcome back, {businessName}!</h2>
                     </div>
                     <div className="flex items-center gap-2">
