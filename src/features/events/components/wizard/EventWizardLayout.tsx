@@ -297,7 +297,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <MediaUpload
                             folder="banners"
                             accept="image/*"
-                            value={formData.bannerImage}
+                            value={formData.bannerImage ?? ''}
                             label="Upload Event Banner"
                             onUploaded={(url) => updateForm('bannerImage', url)}
                         />
@@ -957,16 +957,16 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 <p className="text-sm font-medium text-gray-700">Group Discount</p>
                                 <p className="text-xs text-gray-400">Limit number of tickets per registrant</p>
                                 {formData.groupDiscount && <>
-                                   
+
                                     <div className="flex items-center gap-1 mt-1">
-                                         <p className="text-sm font-small text-gray-700 mb-2">Min Size For Group Discounts</p>
-                                    <input
-                                        type="number"
-                                        value={formData.minSizeForGroupDiscounts}
-                                        onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
-                                    />
-                                     <p className="text-sm font-medium text-gray-700 mb-2"> Group Discount Percentage</p>
+                                        <p className="text-sm font-small text-gray-700 mb-2">Min Size For Group Discounts</p>
+                                        <input
+                                            type="number"
+                                            value={formData.minSizeForGroupDiscounts}
+                                            onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
+                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                        />
+                                        <p className="text-sm font-medium text-gray-700 mb-2"> Group Discount Percentage</p>
                                         <input
                                             type="number"
                                             value={formData.groupDiscountPercent}
@@ -1055,6 +1055,28 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                                         className="w-full bg-transparent text-sm text-gray-900 outline-none"
                                     />
+
+                                    {/* Type Dropdown */}
+                                    <select
+                                        value={field.type}
+                                        onChange={(e) => {
+                                            formData.customFields.map(x => {
+                                                if (x.id === field.id) {
+                                                    field.type = e.target.value as any;
+                                                }
+                                                return x;
+                                            });
+                                            updateForm('customFields', formData.customFields);
+                                        }}
+                                        className="bg-white border border-gray-200 text-xs rounded-lg px-2 py-1 my-1 text-gray-700 outline-none"
+                                    >
+                                        <option value="text">Text</option>
+                                        <option value="number">Number</option>
+                                        <option value="file">File</option>
+                                        <option value="image">Image</option>
+                                        <option value="dropdown">Dropdown</option>
+                                    </select>
+
                                     <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
                                         {
                                             formData.customFields.map(x => {
@@ -1067,6 +1089,14 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             updateForm('customFields', formData.customFields);
                                         }
                                     }}>Required</button>
+                                    <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
+                                        {
+                                            e.preventDefault();
+                                            const updatedFields = formData.customFields.filter(x => x.id !== field.id);
+                                            updateForm('customFields', updatedFields);
+                                        }
+                                    }}>Delete</button>
+
                                     <p className="text-[10px] text-gray-400">
                                         {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                     </p>
@@ -1191,15 +1221,13 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                                 {formData.ticketTiers[0]?.price
-                                    ? `$${formData.ticketTiers[0].price} — ${formData.ticketTiers[0].name}`
+                                    ? `PKR ${formData.ticketTiers[0].price} — ${formData.ticketTiers[0].name}`
                                     : 'Free Entry'
                                 }
                             </div>
                         </div>
 
-                        <button className="w-full border border-gray-300 py-2.5 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                            Preview Landing Page
-                        </button>
+
                     </div>
                 </div>
             </div>
