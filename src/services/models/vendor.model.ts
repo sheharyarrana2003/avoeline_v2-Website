@@ -21,6 +21,10 @@ export interface PricingPackage {
     price: number;
     minOrder: number;
     customizationOptions: string[];
+    /** Media uploaded for THIS service, stored on the package so it never
+     *  gets mis-associated by array position with a shared portfolio list. */
+    images?: string[];
+    videos?: string[];
 }
 
 export interface Ratings {
@@ -33,6 +37,7 @@ export interface VendorData {
     vendorId: string;
     userId: string;
     businessName: string;
+    logo: string;
     contact: Contact;
     serviceCategories: string[];
     portfolio: any; 
@@ -57,6 +62,7 @@ export class Vendor implements VendorData {
     public vendorId: string;
     public userId: string;
     public businessName: string;
+    public logo: string;
     public contact: Contact;
     public serviceCategories: string[];
     public portfolio: any; 
@@ -85,6 +91,7 @@ export class Vendor implements VendorData {
         this.vendorId = `${userId}`;
         this.userId = userId;
         this.businessName = businessName;
+        this.logo = "";
         this.serviceCategories = [];
         this.pricingPackages = [];
         this.status = 'active';
@@ -163,6 +170,7 @@ export class Vendor implements VendorData {
             vendorId: this.vendorId,
             userId: this.userId,
             businessName: this.businessName,
+            logo: this.logo,
             contact: this.contact,
             serviceCategories: this.serviceCategories,
             portfolio: this.portfolio,

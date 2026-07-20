@@ -31,9 +31,9 @@ export const SpeakerService = {
             const linkedin = (formData.get("linkedin") as string) || "";
             const twitter = (formData.get("twitter") as string) || "";
 
-            // Note: Since assigned tags (sessions) and images are stateful/interactive DOM elements rather than 
-            // raw standard text inputs, populate them with clean fallbacks or placeholders to be hydrated.
-            const profileImage = "/placeholders/speaker-avatar.png";
+            // Avatar uploaded to Supabase Storage (public URL) via the form's
+            // hidden profileImage input; fall back to the placeholder if none.
+            const profileImage = String(formData.get("profileImage") || "/placeholders/speaker-avatar.png");
             const sessionTitle = "Assigned Speaker Session"; // Can be populated dynamically based on active selected session arrays
 
             const new_speaker = {
@@ -47,7 +47,10 @@ export const SpeakerService = {
 
             Event.speakers.push(new_speaker);
 
-            await adminDb.collection(COLLECTIONS.EVENTS).doc(event_id).update(Event);
+            // Update only the speakers array (a plain array of plain objects).
+            // Passing the whole EventModel class instance to .update() fails —
+            // Firestore rejects objects created via a custom prototype.
+            await adminDb.collection(COLLECTIONS.EVENTS).doc(event_id).update({ speakers: Event.speakers });
         } else {
             console.log("this event doesnt exist so how toadd a speaker to it??");
         }

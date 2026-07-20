@@ -7,6 +7,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { adminDb } from "@/data/admin_db"
 import { SubmitButton } from "@/src/shared_components/SubmitButton"
+import { MediaUploadField } from "@/src/features/media/MediaUploadField"
+import { isVideoUrl } from "@/src/features/media/media.utils"
 
 // Helper to get category options from vendor
 const getCategoryOptions = (categories: string[]) => {
@@ -237,22 +239,13 @@ export default async function AddNewServicePage({
                         {/* Service Images */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">Service Images</label>
-                            <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-gray-300 transition">
-                                    <svg className="w-6 h-6 text-gray-300 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span className="text-[10px] text-gray-400">Upload</span>
-                                </div>
-
-                                {/* Mock uploaded images */}
-                                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200">
-                                    <div className="w-full h-full bg-gradient-to-br from-orange-200 to-red-300" />
-                                </div>
-                                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200">
-                                    <div className="w-full h-full bg-gradient-to-br from-amber-700 to-amber-900" />
-                                </div>
-                            </div>
+                            <MediaUploadField
+                                name="serviceImages"
+                                folder="service-images"
+                                multiple
+                                accept="image/*,video/*"
+                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-200 text-[10px] text-gray-400 transition hover:border-gray-300 disabled:opacity-60"
+                            />
                         </div>
 
                         {/* Terms */}
@@ -303,6 +296,10 @@ async function createServiceAction(formData: FormData) {
 
     const inclusions = formData.getAll('inclusions') as string[];
     const customizations = formData.getAll('customizations') as string[];
+    const serviceMedia = (formData.getAll('serviceImages') as string[]).filter(Boolean);
+    // Split by type so each service card can show its own image/video.
+    const serviceImageUrls = serviceMedia.filter((u) => !isVideoUrl(u));
+    const serviceVideoUrls = serviceMedia.filter((u) => isVideoUrl(u));
 
     const payload: PricingPackage = {
         packageId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
@@ -314,12 +311,34 @@ async function createServiceAction(formData: FormData) {
         // formData.getAll() correctly handles multiple inputs with the same name attribute
         inclusions: formData.getAll('inclusions') as string[],
         customizationOptions: formData.getAll('customizations') as string[],
+
+        // Media stored ON the service — the source of truth for each service card.
+        images: serviceImageUrls,
+        videos: serviceVideoUrls,
     };
 
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
-    vendor?.pricingPackages.push(payload);
+    if (vendor) {
+        vendor.pricingPackages.push(payload);
 
-    await adminDb.collection("vendor").doc(vendorId).update({ ...vendor });
+        // Also mirror into the vendor's portfolio so the aggregate portfolio
+        // galleries still show everything. NOTE: per-service cards read the
+        // package's own images/videos (above) — the portfolio array is only an
+        // aggregate view, never used for per-service association.
+        if (serviceMedia.length) {
+            const portfolio: any = vendor.portfolio || {};
+            portfolio.images = Array.isArray(portfolio.images) ? portfolio.images : [];
+            portfolio.videos = Array.isArray(portfolio.videos) ? portfolio.videos : [];
+            for (const url of serviceImageUrls) portfolio.images.push({ url, caption: serviceName });
+            for (const url of serviceVideoUrls) portfolio.videos.push(url);
+            vendor.portfolio = portfolio;
+        }
+
+        // Vendor docs are keyed by the auth uid (== vendor.userId), NOT the
+        // vendorId field — write to the correct document.
+        const docId = vendor.userId || vendorId;
+        await adminDb.collection("vendor").doc(docId).update({ ...vendor });
+    }
 
     // Redirect back to services page
     redirect(`/vendor/${vendorId}/services`);
