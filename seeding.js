@@ -17,12 +17,12 @@ import { QuerySnapshot } from "firebase-admin/firestore";
 export async function seedEvents(adminDb) {
   try {
     // 1. Seed Events
-    // for (const x of mockEvents) {
-    //     console.log("Seeding Event:", x.id);
-    //   const docRef = adminDb.collection("events").doc(x.id);
-    //   await docRef.set({...x});
-    //   console.log("Seeded Event:", x.id);
-    // }
+    for (const x of mockReg) {
+        console.log("Seeding Event:", x.registrationId);
+      const docRef = adminDb.collection(COLLECTIONS.REGISTRATIONS).doc(x.registrationId);
+      await docRef.set({...x});
+      console.log("Seeded Event:", x.registrationId);
+    }
 
     // const docRef = adminDb.collection(COLLECTIONS.BOOKINGS);
     // const e = await docRef.get();

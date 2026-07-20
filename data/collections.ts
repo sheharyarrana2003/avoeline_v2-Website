@@ -3,7 +3,7 @@ export const COLLECTIONS = {
   USERS: "users",
   ORGANIZERS: "organizer",
   EVENTS: "events",
-  REGISTRATIONS: "registerations",
+  REGISTRATIONS: "registrations",
   VENDORS: "vendor",
   BOOKINGS: "bookings",
   ATTENDEES: "attendees",
@@ -13,5 +13,5 @@ export const COLLECTIONS = {
   MESSAGES: "messages",
   SETTINGS: "settings",
   ANALYTICS: "analytics",
-  FEEDBACK: "feedback"
+  FEEDBACK: "reviews"
 } as const; 
