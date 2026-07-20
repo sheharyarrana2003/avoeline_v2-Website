@@ -82,7 +82,7 @@ export interface Blockchain {
 export interface CertificateTemplate {
     templateId: string,
 organizer_id : string;
-    templateName: String;
+    templateName: string;
     canvas: Canvas;
     elements: CertElement[];
     blockchain: Blockchain;
