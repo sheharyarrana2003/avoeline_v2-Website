@@ -66,6 +66,9 @@ export default function MakingTemplateUi({initialTemplate,save_template} : {init
                     <span className="text-xs tracking-wide text-gray-500 uppercase">Show Grid</span>
                     <Toggle checked={showGrid} onChange={setShowGrid} />
                 </div>
+                 <div className="flex items-center gap-2.5">
+                   <button onClick={()=>{save_template(template)}}>Save Template</button>
+                </div>
             </div>
 
             <div className="flex flex-1 min-h-0">
