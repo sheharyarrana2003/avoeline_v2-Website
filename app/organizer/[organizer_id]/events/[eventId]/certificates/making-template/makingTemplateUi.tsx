@@ -1,17 +1,18 @@
 'use client'
 
-import { CertificateTemplate,CertElement,Blockchain,Canvas } from "@/src/services/certificate.template.services";
+import { CertificateTemplate, CertElement, Blockchain, Canvas } from "@/src/services/certificate.template.services";
 import { useState, useRef, useEffect } from "react";
-
+import { useRouter } from 'next/navigation'
 
 const FONT_OPTIONS = ["Clash Display", "Inter", "Georgia", "Playfair Display", "Space Grotesk"];
 
-export default function MakingTemplateUi({initialTemplate,save_template} : {initialTemplate : CertificateTemplate,save_template:(template: CertificateTemplate) => Promise<void>}) {
+export default function MakingTemplateUi({ initialTemplate, save_template }: { initialTemplate: CertificateTemplate, save_template: (template: CertificateTemplate) => Promise<void> }) {
     const [template, setTemplate] = useState<CertificateTemplate>(initialTemplate);
     const [selectedId, setSelectedId] = useState<string>("el_event_name");
     const [zoom, setZoom] = useState(100);
     const [showGrid, setShowGrid] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const router = useRouter();
 
     const selectedElement = template.elements.find((el) => el.id === selectedId) ?? null;
 
@@ -62,12 +63,24 @@ export default function MakingTemplateUi({initialTemplate,save_template} : {init
                     <div className="w-px h-5 bg-gray-200 mx-1" />
 
                 </div>
-                <div className="flex items-center gap-2.5">
-                    <span className="text-xs tracking-wide text-gray-500 uppercase">Show Grid</span>
-                    <Toggle checked={showGrid} onChange={setShowGrid} />
-                </div>
-                 <div className="flex items-center gap-2.5">
-                   <button onClick={()=>{save_template(template)}}>Save Template</button>
+                <div className="flex items-center gap-6">
+                    {/* Grid Toggle */}
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">Show Grid</span>
+                        <Toggle checked={showGrid} onChange={setShowGrid} />
+                    </div>
+
+                    {/* Save Template Button */}
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            await save_template(template);
+                            router.back();
+                        }}
+                        className="bg-black text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition shadow-sm active:scale-95"
+                    >
+                        Save Template
+                    </button>
                 </div>
             </div>
 
@@ -109,7 +122,7 @@ export default function MakingTemplateUi({initialTemplate,save_template} : {init
                         </div>
                     </div>
 
-         
+
                 </div>
 
                 {/* Right property panel */}
