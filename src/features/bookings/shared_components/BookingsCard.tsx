@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { formatDate } from "@/src/lib/datetime";
 
 
 const getStatusStyles = (status: string) => {
@@ -33,7 +34,7 @@ export async function  BookingsCard({params, booking }: {params : Promise<{ orga
   const vendorInitials = vendorName.substring(0, 2).toUpperCase();
   const serviceType = booking?.vendor?.serviceCategories?.[0]?.replace('_', ' ') || "Service";
   const eventName = booking?.eventName || "Event";
-  const date = booking?.requirements?.serviceDate ? new Date(booking.requirements.serviceDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : "TBD";
+  const date = booking?.requirements?.serviceDate ? formatDate(booking.requirements.serviceDate) : "TBD";
   
   // Try to get total amount, default to 0
   const amount = booking?.quote?.vendorQuote?.totalAmount || booking?.estimatedAmount || 0;

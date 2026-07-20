@@ -1,12 +1,9 @@
-import { mockAttendee } from "@/app/mockdata/attendee.mock"
-import { mockReg } from "@/app/mockdata/registeration.mock"
 import { Attendee } from "./type";
-import { doc, setDoc, query, where, getDocs, getDoc, collection } from 'firebase/firestore';
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { QuerySnapshot } from "firebase-admin/firestore";
 
-function mapToAttendee(raw: any): Attendee {
+export function mapToAttendee(raw: any): Attendee {
     return {
         attendeeId: raw.attendeeId || "",
         userId: raw.userId || "",
@@ -111,7 +108,45 @@ export const AttendeeService = {
 
         return attendees;
 
+    },
+
+    // Fetch attendee PROFILES for a set of user ids, returned as a Map keyed by
+    // userId. Unlike getAttendeeOfEvent, this lets callers drive a list off the
+    // registrations and treat the attendee profile as an optional left-join —
+    // so a registered user without an `attendees` doc still shows up.
+    async getAttendeeProfilesByUserIds(userIds: string[]): Promise<Map<string, Attendee>> {
+        const uniqueIds = [...new Set(userIds.filter(Boolean).map(String))];
+        const map = new Map<string, Attendee>();
+        if (uniqueIds.length === 0) return map;
+
+        const CHUNK = 30;
+        const chunks: string[][] = [];
+        for (let i = 0; i < uniqueIds.length; i += CHUNK) {
+            chunks.push(uniqueIds.slice(i, i + CHUNK));
+        }
+
+        const snapshots: QuerySnapshot[] = await Promise.all(
+            chunks.map(chunk =>
+                adminDb.collection(COLLECTIONS.ATTENDEES).where("userId", "in", chunk).get()
+            )
+        );
+
+        snapshots.forEach((snap) => {
+            snap.forEach((d) => {
+                const attendee = mapToAttendee(d.data());
+                if (attendee.userId) map.set(attendee.userId, attendee);
+            });
+        });
+
+        return map;
     }
 
 
+}
+
+// Build a minimal Attendee placeholder for a registered user who has no
+// `attendees` profile doc, so registration-driven lists can still render a row
+// with a stable, unique key.
+export function emptyAttendeeForUser(userId: string): Attendee {
+    return mapToAttendee({ userId, attendeeId: `reg-${userId}` });
 }

@@ -6,6 +6,18 @@ import { EventFormData } from '@/src/services/models/event.model';
 import { CustomField } from '@/src/services/models/event.model';
 import { MediaUpload } from '@/src/features/media/MediaUpload';
 import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from '@/src/features/media/media.utils';
+import { formatDate, formatTime } from '@/src/lib/datetime';
+
+// Preview-friendly formatters: show the pretty value once parseable, but fall
+// back to the raw (partially-typed) string so the live preview isn't a dash.
+const previewDate = (d: string) => {
+    const f = formatDate(d);
+    return f === "—" ? (d || "Not set") : f;
+};
+const previewTime = (t: string) => {
+    const f = formatTime(t);
+    return f === "—" ? (t || "") : f;
+};
 
 // --- Constants ---
 const EVENT_TYPES = [
@@ -389,7 +401,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 type="text"
                                 value={formData.startDate}
                                 onChange={(e) => updateForm('startDate', e.target.value)}
-                                placeholder="mm/dd/yyyy"
+                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -404,7 +416,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 type="text"
                                 value={formData.endDate}
                                 onChange={(e) => updateForm('endDate', e.target.value)}
-                                placeholder="mm/dd/yyyy"
+                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -435,11 +447,11 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 onChange={(e) => updateForm('startTime', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                             >
-                                <option>10:00 AM</option>
-                                <option>11:00 AM</option>
-                                <option>12:00 PM</option>
-                                <option>01:00 PM</option>
-                                <option>02:00 PM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="14:00">02:00 PM</option>
                             </select>
                             <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -454,10 +466,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 onChange={(e) => updateForm('endTime', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                             >
-                                <option>05:00 PM</option>
-                                <option>06:00 PM</option>
-                                <option>07:00 PM</option>
-                                <option>08:00 PM</option>
+                                <option value="17:00">05:00 PM</option>
+                                <option value="18:00">06:00 PM</option>
+                                <option value="19:00">07:00 PM</option>
+                                <option value="20:00">08:00 PM</option>
                             </select>
                             <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -536,7 +548,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </svg>
                         <div>
                             <p className="text-sm font-medium text-gray-700">Quick Summary</p>
-                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting{formData.startDate}, until {formData.endDate}. Starts at {formData.startTime} and ends at{formData.endTime} PKT.</p>
+                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting {previewDate(formData.startDate)}, until {previewDate(formData.endDate)}. Starts at {previewTime(formData.startTime)} and ends at {previewTime(formData.endTime)} PKT.</p>
                         </div>
                     </div>
                 )}
@@ -1269,10 +1281,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <div>
                                         <p className="text-sm font-bold text-gray-900">Schedule & Agenda</p>
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {formData.startDate ? `${formData.startDate} - ${formData.endDate || formData.startDate}` : 'Dates not set'}
+                                            {formData.startDate ? `${previewDate(formData.startDate)} - ${previewDate(formData.endDate || formData.startDate)}` : 'Dates not set'}
                                         </p>
                                         <p className="text-xs text-gray-500">
-                                            {formData.startTime} - {formData.endTime}
+                                            {previewTime(formData.startTime)} - {previewTime(formData.endTime)}
                                         </p>
                                     </div>
                                 </div>

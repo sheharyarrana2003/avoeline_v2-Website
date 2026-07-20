@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AcceptButton } from "./Acceptbutton";
 import { VendorData } from "@/src/services/models/vendor.model";
 import { notFound } from "next/navigation";
+import { formatDate } from "@/src/lib/datetime";
 
 const formatCurrency = (amount: number, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
@@ -15,11 +16,6 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
         currency: currency,
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const timeAgo = (timestamp: string) => {

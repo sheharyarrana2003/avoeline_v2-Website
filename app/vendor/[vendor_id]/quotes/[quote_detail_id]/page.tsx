@@ -1,28 +1,9 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
+import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-};
-
-const formatDateTime = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
 const formatCurrency = (amount: number = 0, currency: string = "PKR") => {
     if (!amount && amount !== 0) return "N/A";
     return new Intl.NumberFormat('en-PK', {
@@ -237,7 +218,7 @@ export default async function QuoteDetailPage({
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm text-gray-500">Time</span>
-                                            <span className="text-sm font-semibold text-gray-900">{requirements?.startTime || '--:--'} - {requirements?.endTime || '--:--'}</span>
+                                            <span className="text-sm font-semibold text-gray-900">{formatTime(requirements?.startTime)} - {formatTime(requirements?.endTime)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm text-gray-500">Location</span>

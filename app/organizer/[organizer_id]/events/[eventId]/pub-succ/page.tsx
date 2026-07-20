@@ -5,6 +5,7 @@ import EventStats from "@/src/features/events/components/wizard/results/componen
 import ActionButtons from "@/src/features/events/components/wizard/results/components/ActionButtons";
 import ShareRow from "@/src/features/events/components/wizard/results/components/ShareRow";
 import { EventService } from "@/src/services/event.service";
+import { formatDate } from "@/src/lib/datetime";
 
 export default async function PublishSuccessModal({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
   const resolvedParams = await params;
@@ -37,7 +38,7 @@ export default async function PublishSuccessModal({ params }: { params: Promise<
 
           <EventStats
             capacity={event.capacity.totalSeats}
-            date={event.schedule.startDate}
+            date={formatDate(event.schedule.startDate)}
           />
 
           <ActionButtons organizer_id={organizer_id} eventId={event.id} />

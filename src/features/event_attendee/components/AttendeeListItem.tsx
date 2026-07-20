@@ -23,7 +23,7 @@ function AttendeeListItemBase(
         ? "CHECKED IN"
         : (attendee_reg?.status || "confirmed").toUpperCase().replace(/_/g, " ");
     const checkInTime = attendee_reg?.checkIn?.checkInTime || null;
-    const ticketType = attendee_reg.pricingTier;
+    const ticketType = attendee_reg?.pricingTier || "General";
 
     return (
         <div 

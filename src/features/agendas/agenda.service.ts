@@ -3,12 +3,12 @@ import { Session, AgendaDay, AgendaStats } from "@/src/services/models/agenda.mo
 import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
+import { formatDate } from "@/src/lib/datetime";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function formatDateLabel(dateStr: string): string {
-    const date = new Date(dateStr + "T00:00:00");
-    return date.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    return formatDate(dateStr);
 }
 
 /**

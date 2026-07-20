@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { formatDate, formatTime } from "@/src/lib/datetime";
 
 // --- Types ---
 interface Task {
@@ -68,42 +69,6 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
         currency: currency,
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
-};
-
-const formatDateShort = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-    });
-};
-
-const formatTime = (timeString: string) => {
-    if (!timeString) return "";
-    if (timeString.includes('T')) {
-        return new Date(timeString).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-        });
-    }
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-    });
 };
 
 const timeAgo = (timestamp: string) => {
@@ -263,7 +228,7 @@ export default function BookingDetailClient({
                                         <div>
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Dates</p>
                                             <p className="text-sm font-semibold text-gray-900">
-                                                {formatDateShort(requirements.serviceDate)} - {formatDateShort(requirements.serviceDate)}
+                                                {formatDate(requirements.serviceDate)} - {formatDate(requirements.serviceDate)}
                                             </p>
                                         </div>
                                     </div>
