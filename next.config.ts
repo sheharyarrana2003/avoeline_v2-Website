@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
+    // Requests pass through proxy.ts (Next 16 middleware), whose client body buffer
+    // defaults to 10MB — SEPARATE from serverActions.bodySizeLimit above. Without this,
+    // uploads >10MB get truncated and the server-action multipart parser throws
+    // "Unexpected end of form" (500) before uploadMedia() ever runs. Keep in step with
+    // bodySizeLimit. (Formerly experimental.middlewareClientMaxBodySize, renamed in Next 16.)
+    proxyClientMaxBodySize: "50mb",
   },
   images: {
     remotePatterns: [
