@@ -109,12 +109,7 @@ export default function MakingTemplateUi({initialTemplate,save_template} : {init
                         </div>
                     </div>
 
-                    <button
-                        className="absolute bottom-7 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg hover:bg-black"
-                        aria-label="Add element"
-                    >
-                        <PlusIcon />
-                    </button>
+         
                 </div>
 
                 {/* Right property panel */}
