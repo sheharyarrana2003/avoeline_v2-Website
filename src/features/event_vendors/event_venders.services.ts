@@ -57,6 +57,7 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
         vendorId: raw?.vendorId || fallbackId,
         userId: raw?.userId || "",
         businessName: raw?.businessName || "",
+        logo: raw?.logo || "",
 
         contact: mapToContact(raw?.contact),
 

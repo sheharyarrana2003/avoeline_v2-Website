@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   // service registration that import-rewriting drops ("Service firestore is not available").
   experimental: {
     optimizePackageImports: ["recharts", "react-icons", "lucide-react"],
+    // Server actions receive uploaded files; default body limit is 1MB, too small
+    // for images and short video clips uploaded via uploadMedia.
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
   },
   images: {
     remotePatterns: [
@@ -21,6 +26,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "randomuser.me",
         pathname: "/**", // This allows any image path from this domain
+      },
+      {
+        protocol: "https",
+        hostname: "pfepncjkjamukhvsfwkx.supabase.co",
+        pathname: "/storage/v1/object/public/**", // Supabase public media bucket
       },
     ],
   },
