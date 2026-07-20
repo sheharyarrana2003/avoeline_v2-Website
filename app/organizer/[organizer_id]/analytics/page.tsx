@@ -1,6 +1,8 @@
 import { AnalyticsService } from "@/src/services/anaylService";
+import { analyzeOrganizerFeedback } from "@/src/features/analytics/feedbackAnalysis.service";
 import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
 import { DailyAnalyticsRegistration } from "@/src/features/analytics/types";
+import EventFeedbackAnalysis from "./EventFeedbackAnalysis";
 
 // ─── Helpers (server-side only) ───────────────────────────────────────────────
 
@@ -67,6 +69,11 @@ export default async function AnalyticsPage({
     ];
 
     const chartPoints = buildChartPoints(dailyRegistrations);
+
+    const analyzeFeedback = async () => {
+        "use server";
+        return analyzeOrganizerFeedback(organizer_id);
+    };
 
     return (
         <main className="min-h-screen bg-white px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
@@ -278,6 +285,8 @@ export default async function AnalyticsPage({
                         </div>
                     )}
                 </section>
+
+                <EventFeedbackAnalysis analyzeFeedback={analyzeFeedback} />
             </div>
         </main>
     );

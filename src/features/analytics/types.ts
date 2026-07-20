@@ -18,3 +18,13 @@ export interface AnalyticsEventPerformance {
     revenue: number;
     avgSatisfaction: number;
 }
+
+export interface EventFeedbackAnalysisRow {
+    eventId: string;
+    eventName: string;
+    feedbackCount: number;
+    summary: string;
+    strengths: string;
+    improvements: string;
+    sentiment: string;
+}

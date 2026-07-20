@@ -12,5 +12,6 @@ export const COLLECTIONS = {
   NOTIFICATIONS: "notifications",
   MESSAGES: "messages",
   SETTINGS: "settings",
-  ANALYTICS: "analytics"
+  ANALYTICS: "analytics",
+  FEEDBACK: "feedback"
 } as const; 
