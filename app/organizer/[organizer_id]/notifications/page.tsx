@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { NotificationServices } from "@/src/services/notification.services";
 import { NotificationData } from "@/src/services/models/notification.model";
+import { formatDate } from "@/src/lib/datetime";
 
 
 type TabKey = "all" | "unread" | "registrations" | "vendors" | "system";
@@ -51,7 +52,7 @@ function timeAgo(dateStr: string): string {
     if (diffMins < 60) return `${diffMins} MINUTE${diffMins > 1 ? "S" : ""} AGO`;
     if (diffHours < 24) return `${diffHours} HOUR${diffHours > 1 ? "S" : ""} AGO`;
     if (diffDays < 7) return `${diffDays} DAY${diffDays > 1 ? "S" : ""} AGO`;
-    return then.toLocaleDateString();
+    return formatDate(then);
 }
 
 function getNotificationIcon(type: NotificationData["type"]): string {

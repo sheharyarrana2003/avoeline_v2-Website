@@ -4,6 +4,7 @@ import { EventVendorService } from "@/src/features/event_vendors/event_venders.s
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDate, formatTime } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string) => {
@@ -12,23 +13,6 @@ const formatCurrency = (amount: number, currency: string) => {
         currency: currency || 'PKR',
         maximumFractionDigits: 0,
     }).format(amount || 0);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "Pending";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
-
-const formatTime = (timeString: string) => {
-    if (!timeString) return "";
-    // Handles standard "13:00" string or ISO dates
-    if (timeString.includes('T')) {
-        return new Date(timeString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    }
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 };
 
 export default async function EventDetailsPage({ params }: { params: Promise<{ organizer_id: string, booking_id: string }> }) {

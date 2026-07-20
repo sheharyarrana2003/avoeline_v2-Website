@@ -5,6 +5,7 @@ import { EventService } from "@/src/services/event.service";
 import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDate } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -14,18 +15,6 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
         currency: currency,
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-};
-
-const formatShortDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const timeAgo = (timestamp: string) => {
@@ -370,7 +359,7 @@ export default async function VendorDashboardPage({
                                                         <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
-                                                        {formatShortDate(serviceDate)}
+                                                        {formatDate(serviceDate)}
                                                     </p>
                                                     <p className="text-xs text-gray-500 flex items-center gap-1.5">
                                                         <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -497,5 +486,5 @@ function computeWeeklyRevenue(completedBookings: any[]): number[] {
 function getWeekLabel(weeksAgo: number): string {
     const date = new Date();
     date.setDate(date.getDate() - (6 - weeksAgo) * 7);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDate(date);
 }

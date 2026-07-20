@@ -21,6 +21,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecentRegistration } from '@/src/features/dashboard/types';
 import { isVideoUrl } from "@/src/features/media/media.utils";
+import { RegService } from "@/src/services/registeration.service";
+import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
     const event: EventModel | null = await EventService.getEventByID(eventId);
@@ -30,10 +32,16 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
         notFound();
     }
 
-    const checkedIn = Math.round((event.analytics?.checkIns ?? 0) * 0.75);
-    const capacityPercent = getPercent(event.analytics?.registrations ?? 0, event.capacity.totalSeats);
-    const targetRevenue = Math.max(event.analytics?.revenue ?? 0, event.capacity.totalSeats * Math.max(event.pricing?.tiers?.[0]?.price ?? 0, 1));
-    const revenuePercent = getPercent(event.analytics?.revenue ?? 0, targetRevenue);
+    // Live metrics derived from the actual `registerations` collection instead
+    // of the stale denormalized `event.analytics.*` counters.
+    const regs = await RegService.getRegsOfEvent(eventId);
+    const registrationsCount = regs.filter(r => r.status !== "cancelled").length;
+    const checkedIn = regs.filter(r => r.status === "checked_in" || r.status === "attended").length;
+    const revenue = regs.reduce((sum, r) => sum + (r.payment?.amountPaid ?? 0), 0);
+
+    const capacityPercent = getPercent(registrationsCount, event.capacity.totalSeats);
+    const targetRevenue = Math.max(revenue, event.capacity.totalSeats * Math.max(event.pricing?.tiers?.[0]?.price ?? 0, 1));
+    const revenuePercent = getPercent(revenue, targetRevenue);
     const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
 
     return (
@@ -81,7 +89,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         <div className="flex flex-wrap gap-3 rounded-2xl bg-black/55 p-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(0,0,0,0.24)] backdrop-blur">
                             <span className="flex items-center gap-2">
                                 <CalendarDays size={16} />
-                                {event.schedule?.startDate}
+                                {formatDate(event.schedule?.startDate)}
                             </span>
                             <span className="hidden h-5 w-px bg-white/25 sm:block" />
                             <span className="flex items-center gap-2">
@@ -91,7 +99,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             <span className="hidden h-5 w-px bg-white/25 sm:block" />
                             <span className="flex items-center gap-2">
                                 <Users size={16} />
-                                {event.analytics?.registrations} Registrations
+                                {registrationsCount} Registrations
                             </span>
                         </div>
                     </div>
@@ -101,7 +109,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
                     <MetricCard
                         label="Registrations"
-                        value={`${event.analytics?.registrations ?? 0}`}
+                        value={`${registrationsCount}`}
                         suffix={`/${event.capacity.totalSeats}`}
                         helper={`${capacityPercent}% Capacity`}
                         progress={capacityPercent}
@@ -109,13 +117,13 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     <MetricCard
                         label="Checked In"
                         value={`${checkedIn}`}
-                        suffix={` (${getPercent(checkedIn, event.analytics?.registrations ?? 1)}%)`}
+                        suffix={` (${getPercent(checkedIn, registrationsCount || 1)}%)`}
                         helper="Live attendance"
                         bars
                     />
                     <MetricCard
                         label="Revenue"
-                        value={`${event.pricing?.currency} ${(event.analytics?.revenue ?? 0).toLocaleString("en-US")}`}
+                        value={`${event.pricing?.currency} ${revenue.toLocaleString("en-US")}`}
                         helper={`${revenuePercent}% of Target`}
                         progress={revenuePercent}
                     />
@@ -141,10 +149,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                     <h2 className="text-lg font-extrabold uppercase text-slate-950">Schedule</h2>
                                 </div>
                                 <div className="space-y-4">
-                                    <InfoBlock label="Start Date" value={event.schedule?.startDate} />
-                                    <InfoBlock label="End Date" value={event.schedule?.endDate} />
-                                    <InfoBlock label="Start Time" value={event.schedule?.startTime} />
-                                    <InfoBlock label="End Time" value={event.schedule?.endTime} />
+                                    <InfoBlock label="Start Date" value={formatDate(event.schedule?.startDate)} />
+                                    <InfoBlock label="End Date" value={formatDate(event.schedule?.endDate)} />
+                                    <InfoBlock label="Start Time" value={formatTime(event.schedule?.startTime)} />
+                                    <InfoBlock label="End Time" value={formatTime(event.schedule?.endTime)} />
                                     <InfoBlock label="Timezone" value={event.schedule?.timezone} />
                                     <InfoBlock label="Recurring" value={event.schedule?.isRecurring ? `Yes` : "No"} />
                                 </div>
@@ -186,8 +194,8 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                     <h2 className="text-lg font-extrabold uppercase text-slate-950">Registration</h2>
                                 </div>
                                 <div className="space-y-4">
-                                    <InfoBlock label="Opens" value={event.registration?.registrationOpenDate} />
-                                    <InfoBlock label="Closes" value={event.registration?.registrationCloseDate} />
+                                    <InfoBlock label="Opens" value={formatDate(event.registration?.registrationOpenDate)} />
+                                    <InfoBlock label="Closes" value={formatDate(event.registration?.registrationCloseDate)} />
                                     <InfoBlock label="Requires Approval" value={event.registration?.requiresApproval ? "Yes" : "No"} />
                                 </div>
                             </article>
@@ -290,10 +298,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                 <h2 className="text-lg font-extrabold uppercase text-slate-950">Timestamps</h2>
                             </div>
                             <div className="space-y-4">
-                                <InfoBlock label="Created At" value={new Date(event.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} />
-                                <InfoBlock label="Updated At" value={new Date(event.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })} />
-                                <InfoBlock label="Event Start" value={event.eventStartTime ? new Date(event.eventStartTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"} />
-                                <InfoBlock label="Event End" value={event.eventEndTime ? new Date(event.eventEndTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : "N/A"} />
+                                <InfoBlock label="Created At" value={formatDateTime(event.createdAt)} />
+                                <InfoBlock label="Updated At" value={formatDateTime(event.updatedAt)} />
+                                <InfoBlock label="Event Start" value={event.eventStartTime ? formatDateTime(event.eventStartTime) : "N/A"} />
+                                <InfoBlock label="Event End" value={event.eventEndTime ? formatDateTime(event.eventEndTime) : "N/A"} />
                             </div>
                         </article>
 

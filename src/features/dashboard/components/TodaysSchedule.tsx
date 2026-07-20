@@ -1,13 +1,6 @@
 import { DashboardEvent } from "../types";
 import { MoreHorizontal } from "lucide-react";
-
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  }).format(date);
-}
+import { formatTime } from "@/src/lib/datetime";
 
 export default function TodaysSchedule({ events }: { events: DashboardEvent[] }) {
   return (

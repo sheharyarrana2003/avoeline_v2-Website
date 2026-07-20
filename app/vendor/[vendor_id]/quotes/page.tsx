@@ -3,6 +3,7 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData } from "@/src/features/bookings/types";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
+import { formatDate } from "@/src/lib/datetime";
 AcceptButton
 
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -12,11 +13,6 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
         currency: currency,
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const timeAgo = (timestamp: string) => {

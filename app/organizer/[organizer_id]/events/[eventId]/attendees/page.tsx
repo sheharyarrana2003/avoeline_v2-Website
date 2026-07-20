@@ -1,38 +1,38 @@
-import { AttendeeService } from "@/src/features/event_attendee/attendee.service"
+import { AttendeeService, emptyAttendeeForUser } from "@/src/features/event_attendee/attendee.service"
 import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event_attendee/components/AttendeeClientSide";
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
+import { EventService } from "@/src/services/event.service";
 
 export default async function speaker({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
     const event_id = resolvedParams.eventId;
 
-    const attendee = await AttendeeService.getAttendeeOfEvent(event_id);
-    let attendeesWithUsers: AttendeeClientSideProp[] = [];
-    if (attendee && attendee.length) {
-        // Two batched reads for the whole list instead of 2 reads per attendee.
-        const [usersById, regs] = await Promise.all([
-            UserService.getUsersByIds(attendee.map(a => a.userId)),
-            RegService.getRegsOfEvent(event_id),
-        ]);
-        const regByUser = new Map(regs.map(r => [String(r.userId), r]));
+    // Drive the list off registrations, not attendee profiles: every registrant
+    // must show up, whether or not they have an `attendees` profile doc.
+    const [regs, event] = await Promise.all([
+        RegService.getRegsOfEvent(event_id),
+        EventService.getEventByID(event_id),
+    ]);
 
-        attendeesWithUsers = attendee
-            .map(a => {
-                const register = regByUser.get(String(a.userId));
-                if (!register) return null;
-                return {
-                    a,
-                    user: usersById.get(String(a.userId))!,
-                    register,
-                };
-            })
-            .filter((x): x is AttendeeClientSideProp => x !== null);
+    let attendeesWithUsers: AttendeeClientSideProp[] = [];
+    if (regs.length) {
+        const userIds = regs.map(r => r.userId).filter(Boolean);
+        const [usersById, attendeesByUser] = await Promise.all([
+            UserService.getUsersByIds(userIds),
+            AttendeeService.getAttendeeProfilesByUserIds(userIds),
+        ]);
+
+        attendeesWithUsers = regs.map(register => ({
+            a: attendeesByUser.get(String(register.userId)) ?? emptyAttendeeForUser(String(register.userId)),
+            user: usersById.get(String(register.userId))!,
+            register,
+        }));
     }
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans overflow-hidden">
-            <AttendeeClientSide attendees={attendeesWithUsers} />
+            <AttendeeClientSide attendees={attendeesWithUsers} eventTitle={event?.title ?? "Event Attendees"} />
         </div>
     )
 }

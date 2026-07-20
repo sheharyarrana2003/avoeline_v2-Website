@@ -3,6 +3,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from "next/link";
+import { formatDate, formatTime } from "@/src/lib/datetime";
 
 // --- Types ---
 interface QuoteItem {
@@ -62,16 +63,7 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount || 0);
 };
 
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
-};
-
-export default function PrepareQuoteClient({ 
+export default function PrepareQuoteClient({
     vendorId, 
     initialData,
     handling_prep_quote
@@ -470,7 +462,7 @@ export default function PrepareQuoteClient({
                                 <div>
                                     <p className="text-[10px] text-gray-400 uppercase tracking-wider">Event Date & Time</p>
                                     <p className="text-sm font-semibold text-gray-900">
-                                        {formatDate(requirements.serviceDate)}, {requirements.startTime} - {requirements.endTime}
+                                        {formatDate(requirements.serviceDate)}, {formatTime(requirements.startTime)} - {formatTime(requirements.endTime)}
                                     </p>
                                 </div>
                                 <div>

@@ -16,7 +16,7 @@ export interface AttendeeClientSideProp {
     register: Registration
 }
 
-export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClientSideProp[]|[] }) {
+export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attendees" }: { attendees: AttendeeClientSideProp[]|[], eventTitle?: string }) {
     const [selected_ids, set_selected_ids] = useState<String[]>([]);
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();
@@ -52,9 +52,12 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
             }
             const status = reg_of_this_user.status;
 
-            if (status === "checked_in") {
+            // Bucket every known status: those who showed up (checked_in /
+            // attended), those who won't (cancelled / no_show), and everyone
+            // still outstanding (pending / confirmed / awaiting_payment).
+            if (status === "checked_in" || status === "attended") {
                 checkedIn++;
-            } else if (status === "cancelled") {
+            } else if (status === "cancelled" || status === "no_show") {
                 cancelled++;
             } else {
                 pending++;
@@ -84,7 +87,7 @@ export function AttendeeClientSide({ attendees = [] }: { attendees: AttendeeClie
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}
                     <div className="flex items-center gap-4 mb-8">
-                        <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">TechVerse Hackathon 2026</h1>
+                        <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">{eventTitle}</h1>
                         <span className="bg-gray-200 h-6 w-12 rounded-full"></span>
                     </div>
 

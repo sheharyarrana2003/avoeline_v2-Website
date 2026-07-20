@@ -1,6 +1,7 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
+import { formatDate } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number) => {
@@ -10,11 +11,6 @@ const formatCurrency = (amount: number) => {
         currency: 'PKR',
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 // --- Star Rating Component ---

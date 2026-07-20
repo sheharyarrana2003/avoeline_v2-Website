@@ -1,5 +1,5 @@
 export interface StatusHistoryEntry {
-  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show";
+  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show" | "awaiting_payment";
   timestamp: string;
 }
 
@@ -63,7 +63,7 @@ export interface Registration {
   organizerId: string; // Foreign Key to Organizer (User)
   registrationDate: string;
   registrationSource: "mobile_app" | "web" | "admin_panel";
-  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show";
+  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show" | "awaiting_payment";
   statusHistory: StatusHistoryEntry[];
   payment: PaymentInfo;
   pricingTier: string;

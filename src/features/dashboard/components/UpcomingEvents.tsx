@@ -1,11 +1,5 @@
 import { DashboardEvent } from "@/src/features/dashboard/types";
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(date);
-}
+import { formatDate } from "@/src/lib/datetime";
 
 export default function UpcomingEvents({ events }: { events: DashboardEvent[] }) {
   return (

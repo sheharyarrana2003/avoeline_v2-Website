@@ -7,6 +7,7 @@ import {
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
+import { formatDate } from "@/src/lib/datetime";
 
 
 function formatCurrency(value: number): string {
@@ -275,30 +276,29 @@ function deriveDailyRegistrations(regDocs: Docs): DailyAnalyticsRegistration[] {
 }
 
 function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
-    const results: AnalyticsEventPerformance[] = eventDocs.map((doc) => {
+    // Carry a numeric sort key alongside the formatted date so sorting stays
+    // chronological (parsing the DD/MM/YYYY display string would be unreliable).
+    const results = eventDocs.map((doc) => {
         const data = doc.data();
         const startTime = toDate(data.eventStartTime);
         const revenue = data.analytics?.revenue ?? 0;
-        return {
+        const row: AnalyticsEventPerformance = {
             id: doc.id,
             eventName: data.title || "Untitled Event",
             eventType: data.eventType
                 ? data.eventType.charAt(0).toUpperCase() + data.eventType.slice(1)
                 : "Event",
-            date: startTime.toLocaleDateString("en-US", {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-            }),
+            date: formatDate(startTime),
             registrations: data.analytics?.registrations ?? 0,
             profit: Math.round(revenue * 0.7),
             revenue,
             avgSatisfaction: data.analytics?.avgRating ?? 0,
         };
+        return { row, sortMs: startTime.getTime() };
     });
 
-    results.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return results.slice(0, 20);
+    results.sort((a, b) => b.sortMs - a.sortMs);
+    return results.map((r) => r.row).slice(0, 20);
 }
 
 function deriveDateRange(eventDocs: Docs): string {

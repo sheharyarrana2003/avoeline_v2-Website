@@ -7,6 +7,7 @@ import { Mail, Phone, CheckCircle2, Trash2, X, QrCode, Clock } from "lucide-reac
 
 import { useState } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
+import { formatDateTime } from "@/src/lib/datetime";
 interface SingleAttendeeViewProps {
     a: Attendee,
     user: User,
@@ -24,17 +25,18 @@ export function SingleAttendeeView({ combined_data, onClose }: { combined_data: 
     const phone = u?.profile?.phoneNumber  || "No phone provided"; 
     
     const organization = a?.academic?.university || "Not Provided";
-    const amountPaid = r.payment.amountPaid;
-    const ticketType =r.pricingTier;
-    
+    const currency = r?.payment?.currency || "PKR";
+    const amountPaid = `${currency} ${(r?.payment?.amountPaid ?? 0).toLocaleString("en-US")}`;
+    const ticketType = r?.pricingTier || "General";
 
-    const isCheckedIn = r.status ;
+
+    const isCheckedIn = Boolean(r?.checkIn?.checkedIn) || r?.status === "checked_in";
     const dietaryPreference= "N/A";
 
 
-     const checkInTime =  r.checkIn.checkInTime;
-    const checkInMethod = r.checkIn.checkInMethod;
-    const checkInDesk = r.checkIn.deviceId;
+    const checkInTime = r?.checkIn?.checkInTime ? formatDateTime(r.checkIn.checkInTime) : null;
+    const checkInMethod = r?.checkIn?.checkInMethod || "—";
+    const checkInDesk = r?.checkIn?.deviceId || "—";
 
     const department = a?.academic?.department || "Not Specified";
     const studentId = a?.academic?.studentId || "Not Specified";
@@ -109,7 +111,7 @@ export function SingleAttendeeView({ combined_data, onClose }: { combined_data: 
                         <CheckCircle2 size={20} className="text-black" />
                     </div>
                     <div>
-                        <p className="font-extrabold text-slate-900 text-[14px] mb-0.5">Checked In at {checkInTime}</p>
+                        <p className="font-extrabold text-slate-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
                         <p className="text-xs text-gray-400 font-medium">Method: {checkInMethod} • Desk {checkInDesk}</p>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import { EventVendorService } from "@/src/features/event_vendors/event_venders.s
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDate } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -15,21 +16,6 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
         currency: currency,
         maximumFractionDigits: 0,
     }).format(amount);
-};
-
-const formatDateRange = (startDate: string, endDate?: string) => {
-    if (!startDate) return "TBD";
-    const start = new Date(startDate);
-    if (!endDate || startDate === endDate) {
-        return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-    const end = new Date(endDate);
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${end.getDate()}`;
-};
-
-const formatShortDate = (dateString: string) => {
-    if (!dateString) return "TBD";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const getStatusBadge = (status: string) => {
@@ -341,7 +327,7 @@ export default async function VendorBookingsPage({
                                             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            {formatDateRange(serviceDate, serviceDate)}
+                                            {formatDate(serviceDate)}
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

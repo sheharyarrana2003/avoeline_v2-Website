@@ -1,6 +1,7 @@
 "use client";
 
 import { Session, SessionType } from "@/src/services/models/agenda.model";
+import { formatTime } from "@/src/lib/datetime";
 
 /* ------------------------------------------------------------------ */
 /*  Icon SVGs — outlined style matching the reference                  */
@@ -248,7 +249,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 							letterSpacing: "0.01em",
 						}}
 					>
-						{session.startTime} - {session.endTime}
+						{formatTime(session.startTime)} - {formatTime(session.endTime)}
 					</span>
 					<Badge type={session.type} />
 				</div>

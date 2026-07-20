@@ -4,6 +4,7 @@ import { EventModel, EventStatus } from "@/src/services/models/event.model";
 import { CurrentUserData } from "@/src/services/models/user.type";
 import { Calendar, Eye, LayoutList, MapPin, MoreVertical, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
+import { formatDate } from "@/src/lib/datetime";
 
 export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
@@ -115,7 +116,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     <div className="space-y-2 text-sm font-bold text-slate-500">
                                         <p className="flex items-center gap-2">
                                             <Calendar size={16} className="text-slate-400" />
-                                            {event.schedule.startDate}
+                                            {formatDate(event.schedule.startDate)}
                                         </p>
                                         <p className="flex items-center gap-2">
                                             <Calendar size={16} className="text-slate-400" />
