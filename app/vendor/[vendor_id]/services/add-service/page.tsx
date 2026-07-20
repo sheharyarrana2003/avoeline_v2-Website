@@ -296,7 +296,10 @@ async function createServiceAction(formData: FormData) {
 
     const inclusions = formData.getAll('inclusions') as string[];
     const customizations = formData.getAll('customizations') as string[];
-    const serviceImages = (formData.getAll('serviceImages') as string[]).filter(Boolean);
+    const serviceMedia = (formData.getAll('serviceImages') as string[]).filter(Boolean);
+    // Split by type so each service card can show its own image/video.
+    const serviceImageUrls = serviceMedia.filter((u) => !isVideoUrl(u));
+    const serviceVideoUrls = serviceMedia.filter((u) => isVideoUrl(u));
 
     const payload: PricingPackage = {
         packageId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
@@ -308,23 +311,26 @@ async function createServiceAction(formData: FormData) {
         // formData.getAll() correctly handles multiple inputs with the same name attribute
         inclusions: formData.getAll('inclusions') as string[],
         customizationOptions: formData.getAll('customizations') as string[],
+
+        // Media stored ON the service — the source of truth for each service card.
+        images: serviceImageUrls,
+        videos: serviceVideoUrls,
     };
 
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
     if (vendor) {
         vendor.pricingPackages.push(payload);
 
-        // Store uploaded media on the vendor's portfolio — images into
-        // portfolio.images ({url,caption}) and videos into portfolio.videos
-        // (string URLs), matching the shapes the vendor pages already render.
-        if (serviceImages.length) {
+        // Also mirror into the vendor's portfolio so the aggregate portfolio
+        // galleries still show everything. NOTE: per-service cards read the
+        // package's own images/videos (above) — the portfolio array is only an
+        // aggregate view, never used for per-service association.
+        if (serviceMedia.length) {
             const portfolio: any = vendor.portfolio || {};
             portfolio.images = Array.isArray(portfolio.images) ? portfolio.images : [];
             portfolio.videos = Array.isArray(portfolio.videos) ? portfolio.videos : [];
-            for (const url of serviceImages) {
-                if (isVideoUrl(url)) portfolio.videos.push(url);
-                else portfolio.images.push({ url, caption: serviceName });
-            }
+            for (const url of serviceImageUrls) portfolio.images.push({ url, caption: serviceName });
+            for (const url of serviceVideoUrls) portfolio.videos.push(url);
             vendor.portfolio = portfolio;
         }
 

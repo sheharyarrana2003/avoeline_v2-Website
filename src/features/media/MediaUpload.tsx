@@ -27,6 +27,11 @@ interface MediaUploadProps {
 const DEFAULT_BUTTON =
   "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400 transition hover:border-gray-400 disabled:opacity-60";
 
+// Keep in step with uploadMedia.action MAX_BYTES and next.config proxyClientMaxBodySize.
+// Guarding here avoids a raw 500 ("Unexpected end of form") when the body would be
+// truncated by the proxy layer before the server action can validate size.
+const MAX_BYTES = 50 * 1024 * 1024;
+
 export function MediaUpload({
   folder,
   onUploaded,
@@ -46,6 +51,12 @@ export function MediaUpload({
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setError(null);
+    const tooBig = Array.from(files).find((f) => f.size > MAX_BYTES);
+    if (tooBig) {
+      setError(`"${tooBig.name}" is too large (max 50MB).`);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     startTransition(async () => {
       for (const file of Array.from(files)) {
         const fd = new FormData();

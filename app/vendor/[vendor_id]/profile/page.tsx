@@ -3,6 +3,7 @@
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { VendorLogoUpload } from "@/src/features/event_vendors/components/VendorLogoUpload";
+import { VendorCoverUpload } from "@/src/features/event_vendors/components/VendorCoverUpload";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -77,6 +78,8 @@ export default async function VendorProfilePage({
     const contact = v?.contact || {};
     const address = contact?.address || {};
     const portfolioImages = v?.portfolio?.images || [];
+    // Prefer the deliberately-chosen cover; fall back to the first portfolio image.
+    const coverImage = v?.portfolio?.coverImage || portfolioImages[0]?.url || "";
     const pricingPackages = v?.pricingPackages || [];
     const verification = v?.verification || {};
     const settings = v?.settings || {};
@@ -157,9 +160,9 @@ export default async function VendorProfilePage({
                         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
                             {/* Banner Image */}
                             <div className="relative h-48 bg-gray-200">
-                                {portfolioImages[0]?.url ? (
+                                {coverImage ? (
                                     <img
-                                        src={portfolioImages[0].url}
+                                        src={coverImage}
                                         alt={businessName}
                                         loading="lazy"
                                         decoding="async"
@@ -191,9 +194,15 @@ export default async function VendorProfilePage({
                                 <h2 className="text-xl font-bold text-gray-900">{businessName}</h2>
 
                                 {!isPreview && (
-                                    <div className="mt-4">
-                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Business Logo</p>
-                                        <VendorLogoUpload vendorId={vendor_id} currentLogo={v.logo} />
+                                    <div className="mt-4 space-y-4">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Business Logo</p>
+                                            <VendorLogoUpload vendorId={vendor_id} currentLogo={v.logo} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Cover Image</p>
+                                            <VendorCoverUpload vendorId={vendor_id} currentCover={v?.portfolio?.coverImage} />
+                                        </div>
                                     </div>
                                 )}
 

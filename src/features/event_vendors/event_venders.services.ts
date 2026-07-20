@@ -37,7 +37,11 @@ export function mapToPricingPackage(raw: any): PricingPackage {
         inclusions: Array.isArray(raw?.inclusions) ? raw.inclusions : [],
         price: Number(raw?.price) || 0,
         minOrder: Number(raw?.minOrder) || 0,
-        customizationOptions: Array.isArray(raw?.customizationOptions) ? raw.customizationOptions : []
+        customizationOptions: Array.isArray(raw?.customizationOptions) ? raw.customizationOptions : [],
+        // Per-service media (S1) — must be carried through or the service cards
+        // fall back to placeholders even when media is stored.
+        images: Array.isArray(raw?.images) ? raw.images : [],
+        videos: Array.isArray(raw?.videos) ? raw.videos : [],
     };
 }
 

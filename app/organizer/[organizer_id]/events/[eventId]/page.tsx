@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecentRegistration } from '@/src/features/dashboard/types';
+import { isVideoUrl } from "@/src/features/media/media.utils";
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
     const event: EventModel | null = await EventService.getEventByID(eventId);
@@ -334,6 +335,50 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                     <InfoBlock label="Type" value={event.certificateConfig.certificateType} />
                                     <InfoBlock label="Template ID" value={event.certificateConfig.templateId} />
                                 </div>
+                            </article>
+                        )}
+
+                        {/* Gallery */}
+                        {event.galleryImages && event.galleryImages.length > 0 && (
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <ImageIcon size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Gallery</h2>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {event.galleryImages.map((url: string, i: number) => (
+                                        <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+                                            {isVideoUrl(url) ? (
+                                                <video src={url} controls className="h-full w-full object-cover" />
+                                            ) : (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={url} alt={`Gallery ${i + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </article>
+                        )}
+
+                        {/* Promo Video */}
+                        {event.promoVideoUrl && (
+                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <ImageIcon size={18} className="text-slate-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Promo Video</h2>
+                                </div>
+                                {isVideoUrl(event.promoVideoUrl) ? (
+                                    <video src={event.promoVideoUrl} controls className="w-full rounded-xl bg-black" />
+                                ) : (
+                                    <a
+                                        href={event.promoVideoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:underline"
+                                    >
+                                        Watch promo video ↗
+                                    </a>
+                                )}
                             </article>
                         )}
                     </div>

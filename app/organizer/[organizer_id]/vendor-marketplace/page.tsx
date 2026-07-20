@@ -171,7 +171,9 @@ export default async function Vendor_Marketplace({
                     {filteredVendors?.map((vendor: any, index: number) => {
                         const primaryCategory = vendor?.serviceCategories?.[0] || "service";
                         const secondaryCategory = vendor?.serviceCategories?.[1] || "";
-                        const portfolioImage = vendor?.portfolio?.images?.[0]?.url;
+                        // Deliberate cover first, then any portfolio image.
+                        const coverImage = vendor?.portfolio?.coverImage || vendor?.portfolio?.images?.[0]?.url;
+                        const logo = vendor?.logo;
                         const rating = vendor?.ratings?.averageRating || 0;
                         const totalReviews = vendor?.ratings?.totalReviews || 0;
                         const pricePackage = vendor?.pricingPackages?.[0];
@@ -184,9 +186,9 @@ export default async function Vendor_Marketplace({
 
                                 {/* Image Header */}
                                 <div className="relative h-48 bg-gray-200 overflow-hidden">
-                                    {portfolioImage ? (
+                                    {coverImage ? (
                                         <img
-                                            src={portfolioImage}
+                                            src={coverImage}
                                             alt={vendor?.businessName}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -207,13 +209,18 @@ export default async function Vendor_Marketplace({
                                 <div className="p-5">
                                     {/* Vendor Name & Rating */}
                                     <div className="flex items-start gap-3 mb-2">
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                            <span className="text-lg">
-                                                {primaryCategory === "catering" ? "🍴" :
-                                                    primaryCategory === "venues" ? "🏛️" :
-                                                        primaryCategory === "decor" ? "🌸" :
-                                                            primaryCategory === "photography" ? "📷" : "🏢"}
-                                            </span>
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            {logo ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={logo} alt={vendor?.businessName} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-lg">
+                                                    {primaryCategory === "catering" ? "🍴" :
+                                                        primaryCategory === "venues" ? "🏛️" :
+                                                            primaryCategory === "decor" ? "🌸" :
+                                                                primaryCategory === "photography" ? "📷" : "🏢"}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{vendor?.businessName}</h3>
