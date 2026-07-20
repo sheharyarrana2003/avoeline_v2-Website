@@ -77,7 +77,6 @@ export default async function VendorServicesPage({
     const businessName = vendor?.businessName || "Vendor Services";
     const pricingPackages = vendor?.pricingPackages || [];
     const serviceCategories = vendor?.serviceCategories || [];
-    const portfolioImages = vendor?.portfolio?.images || [];
     
     // Build category tabs from vendor's serviceCategories
     const categoryTabs = [
@@ -164,8 +163,10 @@ export default async function VendorServicesPage({
                         {enrichedPackages.map((pkg: any, index: number) => {
                             const isActive = pkg.statusInfo.status === 'active';
                             const isInactive = pkg.statusInfo.status === 'inactive';
-                            const portfolioImage = portfolioImages[index]?.url;
-                            
+                            // Media comes from THE SERVICE, not a positional portfolio index.
+                            const serviceVideo = pkg.videos?.[0];
+                            const serviceImage = pkg.images?.[0];
+
                             return (
                                 <div 
                                     key={pkg.packageId} 
@@ -175,9 +176,17 @@ export default async function VendorServicesPage({
                                 >
                                     {/* Image Header */}
                                     <div className="relative h-48 bg-gray-200 overflow-hidden">
-                                        {portfolioImage ? (
+                                        {serviceVideo ? (
+                                            <video
+                                                src={serviceVideo}
+                                                muted
+                                                loop
+                                                playsInline
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : serviceImage ? (
                                             <img
-                                                src={portfolioImage}
+                                                src={serviceImage}
                                                 alt={pkg.name}
                                                 loading="lazy"
                                                 decoding="async"

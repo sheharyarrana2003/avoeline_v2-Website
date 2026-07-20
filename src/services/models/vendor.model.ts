@@ -21,6 +21,10 @@ export interface PricingPackage {
     price: number;
     minOrder: number;
     customizationOptions: string[];
+    /** Media uploaded for THIS service, stored on the package so it never
+     *  gets mis-associated by array position with a shared portfolio list. */
+    images?: string[];
+    videos?: string[];
 }
 
 export interface Ratings {

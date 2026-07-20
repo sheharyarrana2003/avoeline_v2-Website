@@ -72,6 +72,8 @@ export default async function VendorProfilePage({
     const website = v?.contact?.website || "";
     const portfolioImages = v?.portfolio?.images || [];
     const portfolioVideos = v?.portfolio?.videos || [];
+    const coverImage = v?.portfolio?.coverImage || portfolioImages[0]?.url || "";
+    const logo = v?.logo || "";
     const testimonials = v?.portfolio?.clientTestimonials || [];
     const pricingPackages = v?.pricingPackages || [];
     const verificationBadges = v?.verification?.verificationBadges || [];
@@ -129,10 +131,10 @@ export default async function VendorProfilePage({
 
             {/* Hero Banner */}
             <div className="relative h-64 md:h-80 bg-gray-300 overflow-hidden">
-                {portfolioImages[0]?.url ? (
+                {coverImage ? (
                     <img
-                        src={portfolioImages[0].url}
-                        alt={portfolioImages[0].caption || businessName}
+                        src={coverImage}
+                        alt={portfolioImages[0]?.caption || businessName}
                         className="w-full h-full object-cover"
                     />
                 ) : (
@@ -147,7 +149,7 @@ export default async function VendorProfilePage({
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {portfolioImages.length + portfolioVideos.length} Photos
+                        {portfolioImages.length + portfolioVideos.length} Media
                     </div>
                 )}
             </div>
@@ -159,6 +161,10 @@ export default async function VendorProfilePage({
                     {/* Left: Vendor Info */}
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
+                            {logo && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={logo} alt={businessName} className="w-12 h-12 rounded-full object-cover border border-gray-200 bg-white" />
+                            )}
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{businessName}</h1>
                             <div className="flex gap-1.5">
                                 {isVerified && <VerificationBadge label="Verified" />}
@@ -274,7 +280,9 @@ export default async function VendorProfilePage({
                         {pricingPackages.length > 0 ? (
                             <div className="space-y-6">
                                 {pricingPackages.map((pkg: any, index: number) => {
-                                    const hasImage = portfolioImages[index + 1]?.url;
+                                    // Media from THE SERVICE — no positional portfolio offset.
+                                    const packageVideo = pkg?.videos?.[0];
+                                    const packageImage = pkg?.images?.[0];
                                     const inclusions = pkg?.inclusions || [];
                                     const customizations = pkg?.customizationOptions || [];
 
@@ -283,9 +291,17 @@ export default async function VendorProfilePage({
 
                                             {/* Package Image */}
                                             <div className="w-full md:w-48 h-48 md:h-40 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200">
-                                                {hasImage ? (
+                                                {packageVideo ? (
+                                                    <video
+                                                        src={packageVideo}
+                                                        muted
+                                                        loop
+                                                        playsInline
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : packageImage ? (
                                                     <img
-                                                        src={hasImage}
+                                                        src={packageImage}
                                                         alt={pkg?.name || "Package"}
                                                         className="w-full h-full object-cover"
                                                     />
