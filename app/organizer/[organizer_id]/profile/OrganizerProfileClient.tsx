@@ -323,18 +323,8 @@ export default function OrganizerProfileClient({
               </div>
 
               {/* Action Buttons */}
-              <button className="w-full bg-black text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors mb-3">
-                Follow
-              </button>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <button className="flex items-center justify-center gap-2 border border-gray-200 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-                  <MessageSquare size={16} /> Message
-                </button>
-                <button className="flex items-center justify-center gap-2 border border-gray-200 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-                  <Mail size={16} /> Email
-                </button>
-              </div>
+             
+             
             </div>
           </Card>
 
@@ -632,33 +622,7 @@ export default function OrganizerProfileClient({
             </div>
           </Card>
 
-          {/* ── Danger Zone ── */}
-          {/* <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
-            <div className="flex items-center gap-2 text-red-600 mb-4">
-              <AlertTriangle size={18} />
-              <h2 className="font-semibold">Danger Zone</h2>
-            </div>
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">Deactivate Account</h3>
-                <p className="text-xs text-gray-500">Temporarily disable your account and hide your profile.</p>
-              </div>
-              <div className="flex gap-3 w-full md:w-auto">
-                <button
-                  type="button"
-                  className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Power size={14} /> Deactivate
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Trash2 size={14} /> Delete Account
-                </button>
-              </div>
-            </div>
-          </div> */}
+  
 
         </div>
       </div>
