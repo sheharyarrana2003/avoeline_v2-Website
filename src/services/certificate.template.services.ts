@@ -13,20 +13,20 @@ function mapJsonToTemplate(data: any): CertificateTemplate {
               id: el.id ?? "",
               type: el.type === "image" ? "image" : "text",
               content: el.content ?? "",
-              src: el.src ?? undefined,
+              src: el.src ?? "undefined",
               x: Number(el.x) || 0,
               y: Number(el.y) || 0,
               width: Number(el.width) || 0,
               height: Number(el.height) || 0,
-              fontFamily: el.fontFamily ?? undefined,
-              fontSize: el.fontSize ? Number(el.fontSize) : undefined,
+              fontFamily: el.fontFamily ?? "",
+              fontSize: el.fontSize ? Number(el.fontSize) : 0,
               fontWeight: ["normal", "medium", "bold"].includes(el.fontWeight)
                   ? el.fontWeight
-                  : undefined,
+                  : "",
               align: ["left", "center", "right"].includes(el.align)
                   ? el.align
-                  : undefined,
-              color: el.color ?? undefined,
+                  : "",
+              color: el.color ?? "",
               editable: Boolean(el.editable),
               binding: el.binding ?? "",
           }))
@@ -109,6 +109,7 @@ export const initialTemplate : CertificateTemplate = {
             x: 326, y: 20, width: 48, height: 48,
             editable: false,
             binding: "logo",
+             fontFamily: ""
         },
         {
             id: "el_organizer",
@@ -225,6 +226,8 @@ export const CertificateTemplateService = {
         const docSnap = await adminDb.collection(COLLECTIONS.CERTIFICATE_TEMPLATE).doc(organizer_id).get();
         if (docSnap.exists) {
             return mapJsonToTemplate(docSnap.data());
+        }else{
+            return initialTemplate;
         }
 
     },

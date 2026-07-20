@@ -74,8 +74,10 @@ export default function MakingTemplateUi({ initialTemplate, save_template }: { i
                     <button
                         type="button"
                         onClick={async () => {
+                             
                             await save_template(template);
-                            router.back();
+                             router.back();
+                          
                         }}
                         className="bg-black text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition shadow-sm active:scale-95"
                     >
