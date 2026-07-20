@@ -1197,14 +1197,24 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Event Preview Card */}
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2">
-                    <div className="h-48 md:h-auto bg-gray-800 flex items-center justify-center">
-                        <div className="text-center">
-                            <div className="w-20 h-20 bg-gray-700 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                                <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
+                    <div className="relative h-48 md:h-auto min-h-[200px] bg-gray-800 flex items-center justify-center overflow-hidden">
+                        {formData.bannerImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={formData.bannerImage}
+                                alt="Event Banner Preview"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="text-center">
+                                <div className="w-20 h-20 bg-gray-700 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+                                    <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                </div>
+                                <p className="text-xs text-gray-400">No banner uploaded</p>
                             </div>
-                        </div>
+                        )}
                     </div>
                     <div className="p-6 md:p-8">
                         <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
