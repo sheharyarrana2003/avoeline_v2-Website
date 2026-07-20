@@ -497,14 +497,14 @@ export default function OrganizerProfileClient({
               <ToggleSwitch enabled={twoFactor} onChange={setTwoFactor} />
             </div>
             
-            <div className="mt-2">
+            {/* <div className="mt-2">
               <button
                 type="button"
                 className="text-sm text-gray-600 hover:text-black font-medium flex items-center gap-1 transition-colors"
               >
                 Change Password
               </button>
-            </div>
+            </div> */}
           </Card>
 
           {/* ── Organization Settings ── */}
@@ -526,167 +526,9 @@ export default function OrganizerProfileClient({
             <InputField label="Business Registration Address" value={organizer.address.officeAddress} />
             <InputField label="City" value={organizer.address.city} />
             <InputField label="Country" value={organizer.address.country} />
-            
-            <div className="flex items-center justify-between mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-200">
-                  <CreditCard size={20} className="text-gray-600" />
-                </div>
-                <div className="text-sm">
-                  <p className="font-medium text-gray-900">{organizer.banking.bankName}</p>
-                  <p className="text-xs text-gray-500">
-                    {organizer.banking.accountTitle} • ****{organizer.banking.accountNumber.slice(-4)}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="text-sm font-medium hover:text-gray-600 flex items-center gap-1 transition-colors"
-              >
-                Edit Bank Details <ChevronRight size={16} />
-              </button>
-            </div>
+           
           </Card>
-
-          {/* ── Notifications ── */}
-          <Card>
-            <SectionTitle icon={Bell} title="Notifications" />
-            <div className="space-y-4">
-              {([
-                {
-                  key: 'newRegistrations' as const,
-                  label: 'New attendee registrations',
-                  desc: 'Get notified when someone registers for your event.',
-                },
-                {
-                  key: 'newVendorQuotes' as const,
-                  label: 'Vendor quotes & inquiries',
-                  desc: 'Receive updates on vendor interest and quotes.',
-                },
-                {
-                  key: 'paymentReceived' as const,
-                  label: 'Payment & payout confirmation',
-                  desc: 'Confirmations for all transactions.',
-                },
-                {
-                  key: 'eventReminders' as const,
-                  label: 'Event reminders',
-                  desc: 'Reminders before your events start.',
-                },
-              ]).map((item) => (
-                <div key={item.key} className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">{item.label}</h3>
-                    <p className="text-xs text-gray-500">{item.desc}</p>
-                  </div>
-                  <ToggleSwitch
-                    enabled={notifications[item.key]}
-                    onChange={() => handleNotificationToggle(item.key)}
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* ── Payments ── */}
-          <Card>
-            <SectionTitle icon={CreditCard} title="Payments" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Payout Schedule</label>
-                <div className="relative">
-                  <select
-                    className="w-full appearance-none px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 bg-white focus:ring-2 focus:ring-black outline-none"
-                    defaultValue={organizer.banking.payoutSchedule}
-                  >
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Bi-weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                  <ChevronRight className="absolute right-3 top-3 text-gray-400 rotate-90 pointer-events-none" size={16} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Minimum Payout</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    defaultValue={organizer.banking.minimumPayout}
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 bg-white focus:ring-2 focus:ring-black outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <label className="block text-xs font-medium text-gray-500 mb-3">Accepted Payment Methods</label>
-            <div className="flex flex-wrap gap-2">
-              {organizer.banking.paymentMethods.map((method) => (
-                <span key={method} className="px-3 py-1.5 bg-black text-white text-xs font-medium rounded-full capitalize">
-                  {method.replace(/_/g, ' ')}
-                </span>
-              ))}
-              <button
-                type="button"
-                className="px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 text-xs font-medium rounded-full hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center gap-1"
-              >
-                <Plus size={12} /> Add Method
-              </button>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">IBAN</span>
-                <span className="font-mono text-gray-900">{organizer.banking.iban}</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* ── Event Settings ── */}
-          <Card>
-            <SectionTitle icon={Settings} title="Default Event Settings" />
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Auto-publish Events</h3>
-                  <p className="text-xs text-gray-500">Automatically publish events upon creation.</p>
-                </div>
-                <ToggleSwitch
-                  enabled={organizer.settings.autoPublishEvents}
-                  onChange={() => {}} // Handle via API
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Allow Waitlist</h3>
-                  <p className="text-xs text-gray-500">Enable waitlist when events are full.</p>
-                </div>
-                <ToggleSwitch
-                  enabled={organizer.settings.defaultEventSettings.allowWaitlist}
-                  onChange={() => {}} // Handle via API
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Require Approval</h3>
-                  <p className="text-xs text-gray-500">Manually approve attendee registrations.</p>
-                </div>
-                <ToggleSwitch
-                  enabled={organizer.settings.defaultEventSettings.requireApproval}
-                  onChange={() => {}} // Handle via API
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Reminder Days</label>
-                <div className="flex flex-wrap gap-2">
-                  {organizer.settings.defaultEventSettings.reminderDays.map((day) => (
-                    <span key={day} className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
-                      {day} days before
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Card>
+        
 
           {/* ── Verification Status ── */}
           <Card>
@@ -744,53 +586,10 @@ export default function OrganizerProfileClient({
             </div>
           </Card>
 
-          {/* ── Branding ── */}
-          <Card>
-            <SectionTitle icon={ImageIcon} title="Branding" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-2">Logo</label>
-                <div className="w-24 h-24 bg-black rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-2 overflow-hidden">
-                  {organizer.organization.logo ? (
-                    <Image
-                      src={organizer.organization.logo}
-                      alt="Logo"
-                      width={96}
-                      height={96}
-                      className="object-cover"
-                    />
-                  ) : (
-                    organizer.organization.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <button type="button" className="text-xs text-gray-500 hover:text-black font-medium underline">
-                  Upload New Logo
-                </button>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-2">Cover Image (1200x400px)</label>
-                <div className="w-full h-24 bg-gray-100 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center mb-2 overflow-hidden">
-                  {organizer.organization.coverImage ? (
-                    <Image
-                      src={organizer.organization.coverImage}
-                      alt="Cover"
-                      width={400}
-                      height={100}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-xs">No image selected</span>
-                  )}
-                </div>
-                <button type="button" className="text-xs text-gray-500 hover:text-black font-medium underline">
-                  Upload New Cover
-                </button>
-              </div>
-            </div>
-          </Card>
+
 
           {/* ── Privacy ── */}
-          <Card>
+          {/* <Card>
             <SectionTitle icon={Eye} title="Privacy" />
             <div className="flex items-center justify-between">
               <div>
@@ -802,7 +601,7 @@ export default function OrganizerProfileClient({
                 onChange={(val) => setPrivacy({ ...privacy, publicProfile: val })}
               />
             </div>
-          </Card>
+          </Card> */}
 
           {/* ── Subscription Plan ── */}
           <Card>
@@ -834,7 +633,7 @@ export default function OrganizerProfileClient({
           </Card>
 
           {/* ── Danger Zone ── */}
-          <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
+          {/* <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
             <div className="flex items-center gap-2 text-red-600 mb-4">
               <AlertTriangle size={18} />
               <h2 className="font-semibold">Danger Zone</h2>
@@ -859,7 +658,7 @@ export default function OrganizerProfileClient({
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
 
         </div>
       </div>
