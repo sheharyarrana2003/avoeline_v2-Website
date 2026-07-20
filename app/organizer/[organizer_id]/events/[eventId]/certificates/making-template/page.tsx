@@ -1,60 +1,23 @@
-// {
-//   "templateId": "techverse-hackathon-2026",
-//   "templateName": "TechVerse Hackathon Certificate",
-//   "canvas": {
-//     "width": 1200,
-//     "height": 850,
-//     "background": "#fdfdfb",
-//     "showGrid": true
-//   },
-//   "elements": [
-//     {
-//       "id": "el_1",
-//       "type": "text",
-//       "content": "TechVerse Hackathon 2026",
-//       "x": 421,
-//       "y": 180,
-//       "width": 370,
-//       "height": 60,
-//       "fontFamily": "Clash Display",
-//       "fontSize": 36,
-//       "fontWeight": "bold",
-//       "align": "center",
-//       "color": "#111111",
-//       "editable": true,
-//       "binding": "eventName"
-//     },
-//     {
-//       "id": "el_2",
-//       "type": "text",
-//       "content": "Ali Ahmed Khan",
-//       "binding": "recipientName",
-//       "x": 300, "y": 380, "fontSize": 28
-//     },
-//     {
-//       "id": "el_3",
-//       "type": "qrcode",
-//       "x": 900, "y": 500, "size": 60,
-//       "binding": "verificationUrl"
-//     }
-//   ],
-//   "blockchain": {
-//     "enabled": true,
-//     "network": "Polygon",
-//     "estimatedGasFee": "0.002"
-//   },
-//   "requirements": {
-//     "minAttendanceRate": 80
-//   }
-// }
 
+import { CertificateTemplate, CertificateTemplateService } from "@/src/services/certificate.template.services";
 import MakingTemplateUi from "./makingTemplateUi";
 
 
-export default async function  MakingTemplate(){
-return (
-    <>
-    <MakingTemplateUi />
-    </>
-)
+export default async function MakingTemplate({ params }: { params: Promise<{ organizer_id: string }> }) {
+    const resolvedParams = await params;
+    const organizerId = resolvedParams.organizer_id;
+    const template = await CertificateTemplateService.get_template_of_organizer(organizerId);
+
+    const save_template_to_server = async (template: CertificateTemplate) => {
+        'use server'
+        // basically update certificate template in colllection
+        await CertificateTemplateService.save_template_of_organizer(template, organizerId);
+    }
+
+   
+    return (
+        <>
+            <MakingTemplateUi initialTemplate={template} save_template={save_template_to_server}/>
+        </>
+    )
 }

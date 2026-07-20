@@ -1,28 +1,13 @@
 'use client'
 
+import { CertificateTemplate,CertElement,Blockchain,Canvas } from "@/src/services/certificate.template.services";
 import { useState, useRef, useEffect } from "react";
 
-type CertElement = {
-    id: string;
-    type: "text" | "image";
-    content: string;
-    src?: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: "normal" | "medium" | "bold";
-    align?: "left" | "center" | "right";
-    color?: string;
-    editable: boolean;
-    binding: string;
-};
 
-const initialTemplate = {
+const initialTemplate : CertificateTemplate = {
     templateId: "techverse-hackathon-2026",
     templateName: "TechVerse Hackathon Certificate",
+    organizer_id : "",
     canvas: {
         width: 700,
         height: 500,
@@ -78,7 +63,7 @@ const initialTemplate = {
         {
             id: "el_recipient_name",
             type: "text",
-            content: "Ali Ahmed Khan",
+            content: "Attendee Name",
             x: 130, y: 288, width: 440, height: 36,
             fontFamily: "Georgia", fontSize: 26, fontWeight: "bold",
             align: "center", color: "#111111",
@@ -133,17 +118,13 @@ const initialTemplate = {
     blockchain: {
         enabled: true,
         network: "Polygon",
-        estimatedGasFee: "0.002",
-    },
-    requirements: {
-        minAttendanceRate: 80,
-    },
+    }
 };
 
 const FONT_OPTIONS = ["Clash Display", "Inter", "Georgia", "Playfair Display", "Space Grotesk"];
 
-export default function MakingTemplateUi() {
-    const [template, setTemplate] = useState(initialTemplate);
+export default function MakingTemplateUi({initialTemplate,save_template} : {initialTemplate : CertificateTemplate,save_template:(template: CertificateTemplate) => Promise<void>}) {
+    const [template, setTemplate] = useState<CertificateTemplate>(initialTemplate);
     const [selectedId, setSelectedId] = useState<string>("el_event_name");
     const [zoom, setZoom] = useState(100);
     const [showGrid, setShowGrid] = useState(true);
@@ -196,7 +177,7 @@ export default function MakingTemplateUi() {
                         <ZoomInIcon />
                     </button>
                     <div className="w-px h-5 bg-gray-200 mx-1" />
-                    
+
                 </div>
                 <div className="flex items-center gap-2.5">
                     <span className="text-xs tracking-wide text-gray-500 uppercase">Show Grid</span>
@@ -220,7 +201,7 @@ export default function MakingTemplateUi() {
                             style={{
                                 width: template.canvas.width,
                                 height: template.canvas.height,
-                                background: template.canvas.background,
+                                background: template.canvas.background || '#ffffff',
                             }}
                         >
                             {template.elements.map((el) => (
@@ -292,11 +273,10 @@ export default function MakingTemplateUi() {
                                     {(["normal", "medium", "bold"] as const).map((w) => (
                                         <button
                                             key={w}
-                                            className={`flex-1 py-1.5 px-2 text-xs rounded-md ${
-                                                selectedElement.fontWeight === w
-                                                    ? "bg-gray-900 text-white"
-                                                    : "text-gray-500"
-                                            }`}
+                                            className={`flex-1 py-1.5 px-2 text-xs rounded-md ${selectedElement.fontWeight === w
+                                                ? "bg-gray-900 text-white"
+                                                : "text-gray-500"
+                                                }`}
                                             onClick={() => updateElement(selectedElement.id, { fontWeight: w })}
                                         >
                                             {w === "normal" ? "Regular" : w === "medium" ? "Medium" : "Bold"}
@@ -313,11 +293,10 @@ export default function MakingTemplateUi() {
                                             {(["left", "center", "right"] as const).map((a) => (
                                                 <button
                                                     key={a}
-                                                    className={`flex-1 flex items-center justify-center py-1.5 rounded-md ${
-                                                        selectedElement.align === a
-                                                            ? "bg-gray-900 text-white"
-                                                            : "text-gray-500"
-                                                    }`}
+                                                    className={`flex-1 flex items-center justify-center py-1.5 rounded-md ${selectedElement.align === a
+                                                        ? "bg-gray-900 text-white"
+                                                        : "text-gray-500"
+                                                        }`}
                                                     aria-label={`Align ${a}`}
                                                     onClick={() => updateElement(selectedElement.id, { align: a })}
                                                 >
@@ -373,10 +352,6 @@ export default function MakingTemplateUi() {
                             <span className="w-2 h-2 rounded-full bg-purple-500" />
                             {template.blockchain.network}
                         </div>
-                        <div className="flex items-center justify-between mt-3.5">
-                            <span className="text-[11px] text-gray-400">Estimated Gas Fee</span>
-                            <span className="text-[11px] text-gray-500 font-medium">~{template.blockchain.estimatedGasFee} MATIC</span>
-                        </div>
                     </section>
                 </div>
             </div>
@@ -429,9 +404,8 @@ function ElementRenderer({
 
     return (
         <div
-            className={`absolute flex items-center justify-center transition-[outline-color] duration-150 ${
-                element.editable ? "cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-slate-400" : "cursor-default pointer-events-none"
-            } ${isSelected && !isEditing ? "outline outline-1 outline-gray-900" : ""}`}
+            className={`absolute flex items-center justify-center transition-[outline-color] duration-150 ${element.editable ? "cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-slate-400" : "cursor-default pointer-events-none"
+                } ${isSelected && !isEditing ? "outline outline-1 outline-gray-900" : ""}`}
             style={positionStyle}
             onClick={(e) => {
                 e.stopPropagation();
@@ -444,8 +418,8 @@ function ElementRenderer({
         >
             {isSelected && element.editable && !isEditing && (
                 <div className="absolute -top-[38px] left-1/2 -translate-x-1/2 flex gap-1 bg-gray-900 p-1.5 rounded-full shadow-lg z-10">
-                    <button 
-                        className="w-6 h-6 rounded-full text-white flex items-center justify-center hover:bg-white/15" 
+                    <button
+                        className="w-6 h-6 rounded-full text-white flex items-center justify-center hover:bg-white/15"
                         aria-label="Edit"
                         onClick={(e) => { e.stopPropagation(); onStartEdit(); }}
                     >
@@ -517,9 +491,8 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
             onClick={() => onChange(!checked)}
         >
             <span
-                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-150 ${
-                    checked ? "translate-x-4" : "translate-x-0"
-                }`}
+                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-150 ${checked ? "translate-x-4" : "translate-x-0"
+                    }`}
             />
         </button>
     );
@@ -594,8 +567,8 @@ function BlockchainIcon() {
 function AlignIcon({ type }: { type: "left" | "center" | "right" }) {
     const lines =
         type === "left" ? ["3,6 15,6", "3,12 21,12", "3,18 12,18"] :
-        type === "center" ? ["6,6 18,6", "3,12 21,12", "7,18 17,18"] :
-        ["9,6 21,6", "3,12 21,12", "12,18 21,18"];
+            type === "center" ? ["6,6 18,6", "3,12 21,12", "7,18 17,18"] :
+                ["9,6 21,6", "3,12 21,12", "12,18 21,18"];
     return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {lines.map((pts, i) => {

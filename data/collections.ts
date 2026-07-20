@@ -8,6 +8,7 @@ export const COLLECTIONS = {
   BOOKINGS: "bookings",
   ATTENDEES: "attendees",
   CERTIFICATES: "certificates",
+  CERTIFICATE_TEMPLATE: "certificate_template",
   NOTIFICATIONS: "notifications",
   MESSAGES: "messages",
   SETTINGS: "settings",
