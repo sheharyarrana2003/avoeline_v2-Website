@@ -7,7 +7,7 @@ import {
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
-import { formatDate } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 
 
 function formatCurrency(value: number): string {
@@ -20,6 +20,15 @@ function toDate(val: any): Date {
     if (!val) return new Date(0);
     if (typeof val.toDate === "function") return val.toDate();
     return new Date(val);
+}
+
+// Event start/end now come from schedule (DD/MM/YYYY + 12h). Fall back to the
+// legacy eventStartTime/eventEndTime for old docs created before the change.
+function eventStart(data: any): Date {
+    return parseScheduleDateTime(data.schedule?.startDate, data.schedule?.startTime) ?? toDate(data.eventStartTime);
+}
+function eventEnd(data: any): Date {
+    return parseScheduleDateTime(data.schedule?.endDate, data.schedule?.endTime) ?? toDate(data.eventEndTime);
 }
 
 function startOfDay(d: Date): Date {
@@ -90,8 +99,8 @@ function toDashboardEvent(doc: QueryDocumentSnapshot, organizerId: string): Dash
         id: doc.id,
         organizerId: data.organizerId || organizerId,
         title: data.title || "Untitled Event",
-        startDate: toDate(data.eventStartTime),
-        endDate: toDate(data.eventEndTime),
+        startDate: eventStart(data),
+        endDate: eventEnd(data),
         location: data.location?.venueName || data.location?.city || "—",
         registeredCount: data.analytics?.registrations ?? 0,
         maxCapacity: data.capacity?.totalSeats ?? 0,
@@ -107,8 +116,8 @@ function deriveTodayEvents(eventDocs: Docs, organizerId: string): DashboardEvent
     const results: DashboardEvent[] = [];
     eventDocs.forEach((doc) => {
         const data = doc.data();
-        const start = toDate(data.eventStartTime);
-        const end = toDate(data.eventEndTime);
+        const start = eventStart(data);
+        const end = eventEnd(data);
         if (start <= todayEnd && end >= todayStart) {
             results.push(toDashboardEvent(doc, organizerId));
         }
@@ -120,7 +129,7 @@ function deriveUpcomingEvents(eventDocs: Docs, organizerId: string): DashboardEv
     const now = new Date();
     const results: DashboardEvent[] = [];
     eventDocs.forEach((doc) => {
-        const start = toDate(doc.data().eventStartTime);
+        const start = eventStart(doc.data());
         if (start > now) {
             results.push(toDashboardEvent(doc, organizerId));
         }
@@ -280,7 +289,7 @@ function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
     // chronological (parsing the DD/MM/YYYY display string would be unreliable).
     const results = eventDocs.map((doc) => {
         const data = doc.data();
-        const startTime = toDate(data.eventStartTime);
+        const startTime = eventStart(data);
         const revenue = data.analytics?.revenue ?? 0;
         const row: AnalyticsEventPerformance = {
             id: doc.id,
@@ -312,7 +321,7 @@ function deriveDateRange(eventDocs: Docs): string {
 
     let earliest: Date | null = null;
     eventDocs.forEach((doc) => {
-        const d = toDate(doc.data().eventStartTime);
+        const d = eventStart(doc.data());
         if (!earliest || d < earliest) earliest = d;
     });
 

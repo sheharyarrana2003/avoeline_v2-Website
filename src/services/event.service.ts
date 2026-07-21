@@ -4,15 +4,17 @@ import { RecentRegistration } from '../features/dashboard/types';
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
+import { formatDate, formatTime } from "@/src/lib/datetime";
 
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
-  // 1. Structure the schedule object
+  // 1. Structure the schedule object.
+  // Times stored as 12-hour ("10:00 AM"); dates stay DD/MM/YYYY.
   const schedule = {
     startDate: formData.startDate,
     endDate: formData.endDate,
-    startTime: formData.startTime,
-    endTime: formData.endTime,
+    startTime: formatTime(formData.startTime),
+    endTime: formatTime(formData.endTime),
     timezone: formData.timezone,
     isRecurring: formData.isRecurring,
     recurrencePattern: formData.isRecurring ? formData.recurrenceType : null,
@@ -61,8 +63,8 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 
   // 5. Structure the registration limits and setups
   const registration = {
-    registrationOpenDate: formData.registrationOpenDate, 
-    registrationCloseDate: formData.registrationCloseDate,  
+    registrationOpenDate: formData.registrationOpenDate ? formatDate(formData.registrationOpenDate) : "",
+    registrationCloseDate: formData.registrationCloseDate ? formatDate(formData.registrationCloseDate) : "",
     requiresApproval: formData.requiresApproval,
     customForm: customForm,
     groupRegistrationEnabled: formData.groupDiscount,
@@ -92,37 +94,10 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     },
   };
 
-  // 7. Calculate combined dates for the timestamps based on your parseDate logic
-const combineDateTime = (dateStr: string, timeStr: string): Date => {
-  if (!dateStr) return new Date();
-  const time = timeStr || "00:00";
-
-  // Check if dateStr is in DD/MM/YYYY format (e.g., '15/07/2026')
-  if (dateStr.includes('/')) {
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-      const day = parts[0].padStart(2, '0');
-      const month = parts[1].padStart(2, '0');
-      const year = parts[2];
-      
-      // Re-format to standardized YYYY-MM-DD
-      dateStr = `${year}-${month}-${day}`;
-    }
-  }
-
-  // Now safely construct standard ISO-8601 format: YYYY-MM-DDTHH:mm
-  const parsedDate = new Date(`${dateStr}T${time}`);
-
-  // Fallback check: if it's still invalid for some reason, return the current date
-  if (isNaN(parsedDate.getTime())) {
-    console.warn(`Failed to parse date: "${dateStr}" with time: "${time}". Falling back to now.`);
-    return new Date();
-  }
-
-  return parsedDate;
-};
-
-  // 8. Assemble raw object mirroring standard backend updates
+  // 7. Assemble raw object mirroring standard backend updates.
+  // Event start/end are NOT stored as timestamps — they're derived from
+  // `schedule` (DD/MM/YYYY + 12h) by the EventModel getters. Only createdAt/
+  // updatedAt/publishedAt remain as Firebase auto-timestamps.
   const rawModelPayload = {
     eventId: "",
     organizerId: "", 
@@ -151,8 +126,6 @@ const combineDateTime = (dateStr: string, timeStr: string): Date => {
     createdAt: new Date(),
     updatedAt: new Date(),
     publishedAt: formData.publishImmediately ? new Date() : null,
-    eventStartTime: combineDateTime(formData.startDate, formData.startTime),
-    eventEndTime: combineDateTime(formData.endDate, formData.endTime),
     archivedAt: null,
     deletedAt: null,
     PriceOfTicket : formData.PriceOfTicket,

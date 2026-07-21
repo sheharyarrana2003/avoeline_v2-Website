@@ -1,3 +1,5 @@
+import { parseScheduleDateTime } from "@/src/lib/datetime";
+
 export type EventCategory = 'technology' | 'business' | 'healthcare' | 'education';
 export type EventType = 'workshop' | 'conference' | 'seminar' | 'webinar' | 'hackathon';
 export type EventFormat = 'physical' | 'virtual' | 'hybrid';
@@ -195,9 +197,7 @@ export class EventModel {
   createdAt: Date|string;
   updatedAt: Date|string;
   publishedAt: Date |string| null;
-  eventStartTime: Date|string;
-  eventEndTime: Date|string;
-  archivedAt: Date |string| null; 
+  archivedAt: Date |string| null;
   deletedAt: Date |string| null;   
   PriceOfTicket : number;
 
@@ -331,9 +331,7 @@ export class EventModel {
     this.createdAt = parseDate(raw.createdAt);
     this.updatedAt = parseDate(raw.updatedAt);
     this.publishedAt = raw.publishedAt ? parseDate(raw.publishedAt) : null;
-    this.eventStartTime = parseDate(raw.eventStartTime);
-    this.eventEndTime = parseDate(raw.eventEndTime);
-    this.archivedAt = raw.archivedAt ? parseOptionalDate(raw.archivedAt) : null; 
+    this.archivedAt = raw.archivedAt ? parseOptionalDate(raw.archivedAt) : null;
     this.deletedAt = raw.deletedAt ? parseOptionalDate(raw.deletedAt) : null;   
   }
 
@@ -345,8 +343,19 @@ export class EventModel {
     return (this.analytics.registrations / this.capacity.totalSeats) * 100;
   }
 
+  // Derived from `schedule` (not stored). Only createdAt/updatedAt etc. remain
+  // as Firebase timestamps; event start/end live in schedule as DD/MM/YYYY + 12h.
+  get eventStartTime(): Date | null {
+    return parseScheduleDateTime(this.schedule?.startDate, this.schedule?.startTime);
+  }
+
+  get eventEndTime(): Date | null {
+    return parseScheduleDateTime(this.schedule?.endDate, this.schedule?.endTime);
+  }
+
   get isPastEvent(): boolean {
-    return new Date() > this.eventEndTime;
+    const end = this.eventEndTime;
+    return end ? new Date() > end : false;
   }
 
   get formattedRevenue(): string {
