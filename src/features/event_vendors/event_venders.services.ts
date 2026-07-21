@@ -143,20 +143,27 @@ export const EventVendorService = {
         return arr_of_vendors_active;
     },
     getVendorById: cache(async (vendor_id: string) => {
-        // Only the first match is used, so cap the read at one document.
-        const q = adminDb.
+        if (!vendor_id) return null;
+
+        // Vendor-role pages (dashboard/profile/etc.) reach a vendor by its auth
+        // uid, which is the Firestore doc id. The organizer marketplace instead
+        // links by the `vendorId` field (e.g. "V_<uid>"). Resolve either: try a
+        // direct keyed doc read first, then fall back to the field query.
+        const byDoc = await adminDb.collection(COLLECTIONS.VENDORS).doc(vendor_id).get();
+        if (byDoc.exists) {
+            return mapToVendorData(byDoc.data(), byDoc.id);
+        }
+
+        const querySnapshot = await adminDb.
             collection(COLLECTIONS.VENDORS).
             where("vendorId", "==", vendor_id).
-            limit(1)
-
-        const querySnapshot = await q.get();
-
+            limit(1).
+            get();
 
         if (querySnapshot.empty) {
             return null;
         }
-        const data = querySnapshot.docs[0].data();
-        return mapToVendorData(data, querySnapshot.docs[0].id);
+        return mapToVendorData(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
 
     }),
     async getAllVendors() {

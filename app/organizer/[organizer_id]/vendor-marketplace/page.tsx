@@ -52,6 +52,13 @@ export default async function Vendor_Marketplace({
     const awaited_search_params = await searchParams;
 
     const { organizer_id } = awaited_params;
+    // Declared before the early-return below — the empty-state markup references
+    // `category` and `base_url`, and `const`s are in the temporal dead zone until
+    // their declaration runs, so declaring them later crashed the empty state.
+    const category = awaited_search_params.category;
+    const string_to_be_searched = awaited_search_params.input_val;
+    const base_url = `/organizer/${organizer_id}/vendor-marketplace`;
+
     const vendors: VendorData[] | null = await EventVendorService.getAllVendors();
 
     if (!vendors) {
@@ -97,12 +104,6 @@ export default async function Vendor_Marketplace({
         </div>
 
     }
-
-    const category = awaited_search_params.category;
-    const string_to_be_searched = awaited_search_params.input_val;
-
-
-    const base_url = `/organizer/${organizer_id}/vendor-marketplace`;
 
     // Filter vendors by category if selected
     const filteredVendors = category && category !== "all"
