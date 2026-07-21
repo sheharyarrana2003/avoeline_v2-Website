@@ -92,7 +92,7 @@ organizer_id : string;
 
 export const initialTemplate : CertificateTemplate = {
     templateId: "techverse-hackathon-2026",
-    templateName: "TechVerse Hackathon Certificate",
+    templateName: "Event Name",
     organizer_id : "",
     canvas: {
         width: 700,
@@ -123,7 +123,7 @@ export const initialTemplate : CertificateTemplate = {
         {
             id: "el_event_name",
             type: "text",
-            content: "TechVerse Hackathon 2026",
+            content: "Event Name",
             x: 150, y: 145, width: 400, height: 60,
             fontFamily: "Clash Display", fontSize: 36, fontWeight: "bold",
             align: "center", color: "#111111",
@@ -159,7 +159,7 @@ export const initialTemplate : CertificateTemplate = {
         {
             id: "el_custom_statement",
             type: "text",
-            content: "For outstanding performance and technical innovation demonstrated during the 48-hour global blockchain hackathon.",
+            content: "For outstanding performance and technical innovation demonstrated during event",
             x: 110, y: 335, width: 480, height: 44,
             fontFamily: "Inter", fontSize: 13, fontWeight: "normal",
             align: "center", color: "#475569",

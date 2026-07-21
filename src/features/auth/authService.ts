@@ -14,6 +14,7 @@ import { mockVendors } from "@/app/mockdata/vendors.mock";
 import { EventVendorService, mapToVendorData } from "../event_vendors/event_venders.services";
 import { COLLECTIONS } from "@/data/collections";
 import {seedEvents} from "@/seeding";
+import { CertificateTemplateService } from "@/src/services/certificate.template.services";
 
 
 interface signup_with_email_form_data {
@@ -221,6 +222,8 @@ export const AuthService = {
             const temp_organizer: Organizer = new Organizer(user_id, email, email);
             await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(user_id).set(temp_organizer.toFirestoreObject());
             console.log("Firestore write to organizer done.");
+            await CertificateTemplateService.insert_generic_Template(user_id);
+              console.log("Firestore write to certificate template done.");
 
         } else if (userTypeLower === 'vendor') {
             let temp_vendor: Vendor = new Vendor(user_id, email, email);
