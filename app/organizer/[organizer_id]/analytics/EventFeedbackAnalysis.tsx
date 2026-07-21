@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MessageSquareText } from "lucide-react";
-import { EventFeedbackAnalysisRow } from "@/src/features/analytics/types";
+import { EventFeedbackAnalysisRow } from "@/src/services/models/feedback.model";
 
 const SENTIMENT_STYLES: Record<string, string> = {
     Positive: "bg-emerald-50 text-emerald-700",

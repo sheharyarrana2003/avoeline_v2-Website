@@ -3,7 +3,7 @@ import {
     AnalyticsEventPerformance,
     AnalyticsMetric,
     DailyAnalyticsRegistration,
-} from "@/src/features/analytics/types";
+} from "@/src/services/models/feedback.model";
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
