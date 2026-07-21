@@ -35,11 +35,12 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
                     </div>
 
-                    <Link
-                        href={`/organizer/${organizer_id}/analytics`}
+                 
+                     <Link
+                        href={`/organizer/${organizer_id}/chatbot`}
                         className="inline-flex h-11 items-center justify-center rounded-lg bg-[#7454f6] px-6 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(116,84,246,0.28)] transition hover:bg-[#6043df]"
                     >
-                        View Analytics
+                        Chat With Ai
                     </Link>
                 </section>
 
