@@ -166,6 +166,27 @@ export function formatDateTime(value: unknown): string {
   return `${formatDate(d)}, ${formatClock(d)}`;
 }
 
+/**
+ * Combine a schedule date (DD/MM/YYYY, or any format `toDate` accepts) with a
+ * time string (12h "10:00 AM" or 24h "17:00") into a JS Date pinned to PKT
+ * (UTC+5), so event timing is unambiguous regardless of server timezone.
+ * This replaces the removed stored eventStartTime/eventEndTime timestamps.
+ * Returns null when the date is missing/unparseable.
+ */
+export function parseScheduleDateTime(dateStr: unknown, timeStr: unknown): Date | null {
+  const d = toDate(dateStr);
+  if (!d) return null;
+  const hhmm = typeof timeStr === "string" && timeStr.trim()
+    ? normalizeTimeToken(timeStr)
+    : "00:00";
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const iso = `${y}-${mo}-${day}T${hhmm}:00+05:00`;
+  const out = new Date(iso);
+  return isNaN(out.getTime()) ? null : out;
+}
+
 /** "12 Aug 2026" style medium date, used where a compact label reads better. */
 export function formatDateMedium(value: unknown): string {
   const d = toDate(value);

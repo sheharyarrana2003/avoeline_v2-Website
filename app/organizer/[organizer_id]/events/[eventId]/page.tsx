@@ -300,8 +300,8 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             <div className="space-y-4">
                                 <InfoBlock label="Created At" value={formatDateTime(event.createdAt)} />
                                 <InfoBlock label="Updated At" value={formatDateTime(event.updatedAt)} />
-                                <InfoBlock label="Event Start" value={event.eventStartTime ? formatDateTime(event.eventStartTime) : "N/A"} />
-                                <InfoBlock label="Event End" value={event.eventEndTime ? formatDateTime(event.eventEndTime) : "N/A"} />
+                                <InfoBlock label="Event Start" value={event.schedule?.startDate ? `${formatDate(event.schedule.startDate)}, ${formatTime(event.schedule.startTime)}` : "N/A"} />
+                                <InfoBlock label="Event End" value={event.schedule?.endDate ? `${formatDate(event.schedule.endDate)}, ${formatTime(event.schedule.endTime)}` : "N/A"} />
                             </div>
                         </article>
 

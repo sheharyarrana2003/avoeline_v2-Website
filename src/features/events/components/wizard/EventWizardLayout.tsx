@@ -71,8 +71,8 @@ const INITIAL_FORM: EventFormData = {
 
     startDate: '',
     endDate: '',
-    startTime: '10:00',
-    endTime: '17:00',
+    startTime: '10:00 AM',
+    endTime: '05:00 PM',
     isAllDay: false,
     timezone: 'Pakistan Standard Time (PKT, UTC+5)',
     isRecurring: false,
@@ -447,11 +447,11 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 onChange={(e) => updateForm('startTime', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                             >
-                                <option value="10:00">10:00 AM</option>
-                                <option value="11:00">11:00 AM</option>
-                                <option value="12:00">12:00 PM</option>
-                                <option value="13:00">01:00 PM</option>
-                                <option value="14:00">02:00 PM</option>
+                                <option value="10:00 AM">10:00 AM</option>
+                                <option value="11:00 AM">11:00 AM</option>
+                                <option value="12:00 PM">12:00 PM</option>
+                                <option value="01:00 PM">01:00 PM</option>
+                                <option value="02:00 PM">02:00 PM</option>
                             </select>
                             <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -466,10 +466,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 onChange={(e) => updateForm('endTime', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                             >
-                                <option value="17:00">05:00 PM</option>
-                                <option value="18:00">06:00 PM</option>
-                                <option value="19:00">07:00 PM</option>
-                                <option value="20:00">08:00 PM</option>
+                                <option value="05:00 PM">05:00 PM</option>
+                                <option value="06:00 PM">06:00 PM</option>
+                                <option value="07:00 PM">07:00 PM</option>
+                                <option value="08:00 PM">08:00 PM</option>
                             </select>
                             <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
