@@ -1,7 +1,7 @@
 import { AnalyticsService } from "@/src/services/anaylService";
 import { analyzeOrganizerFeedback } from "@/src/features/analytics/feedbackAnalysis.service";
 import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
-import { DailyAnalyticsRegistration } from "@/src/features/analytics/types";
+import { DailyAnalyticsRegistration } from "@/src/services/models/feedback.model";
 import EventFeedbackAnalysis from "./EventFeedbackAnalysis";
 
 // ─── Helpers (server-side only) ───────────────────────────────────────────────
