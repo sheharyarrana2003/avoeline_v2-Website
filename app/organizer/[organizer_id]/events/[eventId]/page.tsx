@@ -231,7 +231,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                                 <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                                                     <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{tier.name}</p>
                                                     <p className="text-base font-extrabold text-slate-950">{event.pricing?.currency} {tier.price.toLocaleString("en-US")}</p>
-                                                    <p className="text-xs text-slate-500">Until {tier.availableUntil} • {tier.seats} seats</p>
+                                                    <p className="text-xs text-slate-500">Until {formatDate(tier.availableUntil)} • {tier.seats} seats</p>
                                                 </div>
                                             ))}
                                         </div>
