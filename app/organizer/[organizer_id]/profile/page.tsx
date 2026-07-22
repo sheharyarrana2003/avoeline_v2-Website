@@ -25,6 +25,7 @@ import {
     ProfileEventsTabs,
     ProfileEventSummary,
 } from "@/src/shared_components/organizer/ProfileEventsTabs";
+import { OrganizerLogoUpload } from "@/src/shared_components/organizer/OrganizerLogoUpload";
 
 const PAST_STATUSES = new Set(["completed", "cancelled"]);
 
@@ -119,9 +120,18 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                     <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <div className="-mx-6 -mt-6 mb-12 h-28 bg-gradient-to-r from-gray-100 to-gray-200" />
                         <div className="absolute left-6 top-16">
-                            <div className="flex size-20 items-center justify-center rounded-full border-4 border-white bg-black text-2xl font-bold text-white shadow-md">
-                                {initial}
-                            </div>
+                            {organizer.organization.logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={organizer.organization.logo}
+                                    alt={organizer.organization.name || "Organizer logo"}
+                                    className="size-20 rounded-full border-4 border-white bg-white object-cover shadow-md"
+                                />
+                            ) : (
+                                <div className="flex size-20 items-center justify-center rounded-full border-4 border-white bg-black text-2xl font-bold text-white shadow-md">
+                                    {initial}
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-2">
@@ -154,6 +164,13 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                     <Phone size={16} />
                                     <span>{organizer.contact.primaryPhone || "—"}</span>
                                 </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                                    Organization Logo
+                                </p>
+                                <OrganizerLogoUpload organizerId={organizer_id} currentLogo={organizer.organization.logo} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
