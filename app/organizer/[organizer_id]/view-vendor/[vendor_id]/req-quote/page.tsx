@@ -110,7 +110,7 @@ export default async function ReqQuotePage({
                                         <input
                                             name="serviceDate"
                                             type="text"
-                                            placeholder="mm/dd/yyyy"
+                                            placeholder="dd/mm/yyyy"
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
                                         />
                                     </div>
