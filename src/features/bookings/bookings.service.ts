@@ -9,6 +9,17 @@ import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
+import { formatDate, formatTime } from "@/src/lib/datetime";
+
+// Normalize a stored timestamp (Firebase Timestamp | ISO string | Date) to a
+// Date, so system-timestamp fields round-trip as Firestore Timestamps on the
+// whole-object update_booking write instead of degrading to strings.
+function toDt(v: any): Date | null {
+  if (!v) return null;
+  if (typeof v.toDate === "function") return v.toDate();
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
 
 function mapToBooking(item: any): BookingData {
   if (!item) {
@@ -36,8 +47,8 @@ function mapToBooking(item: any): BookingData {
 
     // QUOTE & NEGOTIATION
     quote: {
-      requestedAt: item.quote?.requestedAt || new Date().toISOString(),
-      respondedAt: item.quote?.respondedAt || null,
+      requestedAt: toDt(item.quote?.requestedAt) ?? new Date(),
+      respondedAt: toDt(item.quote?.respondedAt),
       vendorQuote: item.quote?.vendorQuote
         ? {
           basePrice: Number(item.quote.vendorQuote.basePrice) || 0,
@@ -65,7 +76,7 @@ function mapToBooking(item: any): BookingData {
         ? item.quote.negotiation.map((msg: any) => ({
           from: msg.from === "vendor" ? "vendor" : "organizer",
           message: msg.message || "",
-          timestamp: msg.timestamp || new Date().toISOString(),
+          timestamp: toDt(msg.timestamp) ?? new Date(),
         }))
         : [],
     },
@@ -75,7 +86,7 @@ function mapToBooking(item: any): BookingData {
     statusHistory: Array.isArray(item.statusHistory)
       ? item.statusHistory.map((history: any) => ({
         status: history.status || "quote_requested",
-        timestamp: history.timestamp || new Date().toISOString(),
+        timestamp: toDt(history.timestamp) ?? new Date(),
       }))
       : [],
 
@@ -147,7 +158,7 @@ function mapToBooking(item: any): BookingData {
         from: ["organizer", "vendor", "system"].includes(comm.from) ? comm.from : "system",
         to: ["organizer", "vendor", "system"].includes(comm.to) ? comm.to : "system",
         message: comm.message || "",
-        timestamp: comm.timestamp || new Date().toISOString(),
+        timestamp: toDt(comm.timestamp) ?? new Date(),
       }))
       : [],
     documents: {
@@ -163,11 +174,11 @@ function mapToBooking(item: any): BookingData {
     },
 
     // SYSTEM TIMESTAMPS
-    createdAt: item.createdAt || new Date().toISOString(),
-    updatedAt: item.updatedAt || new Date().toISOString(),
-    confirmedAt: item.confirmedAt || null,
-    completedAt: item.completedAt || null,
-    cancelledAt: item.cancelledAt || null,
+    createdAt: toDt(item.createdAt) ?? new Date(),
+    updatedAt: toDt(item.updatedAt) ?? new Date(),
+    confirmedAt: toDt(item.confirmedAt),
+    completedAt: toDt(item.completedAt),
+    cancelledAt: toDt(item.cancelledAt),
   };
 }
 export const BookingServices = {
@@ -314,14 +325,18 @@ export const BookingServices = {
   ) {
     const docRef = adminDb.collection(COLLECTIONS.BOOKINGS).doc();;
     const id_generated = docRef.id;
-    const timestamp = new Date().toISOString();
+    const now = new Date(); // system timestamps → Firebase Timestamp
 
     // Extract basic textual values safely out of the form payload
     const serviceType = (formData.get('serviceType') as string) || '';
     const serviceId = (formData.get('serviceName') as string) || ''; // Using serviceName field to match context
     const description = (formData.get('requirementsDescription') as string) || '';
-    const serviceDate = (formData.get('serviceDate') as string) || '';
-    const startTime = (formData.get('startTime') as string) || '';
+    // Human date/time → DD/MM/YYYY and 12h. Inputs may arrive as ISO (date
+    // picker) or 24h (time picker); the formatters normalize both.
+    const rawServiceDate = (formData.get('serviceDate') as string) || '';
+    const rawStartTime = (formData.get('startTime') as string) || '';
+    const serviceDate = rawServiceDate ? formatDate(rawServiceDate) : '';
+    const startTime = rawStartTime ? formatTime(rawStartTime) : '';
 
     // Budget range numerical parsing logic
     const baseBudget = Number(formData.get('budget')) || 50000;
@@ -347,7 +362,7 @@ export const BookingServices = {
       },
 
       quote: {
-        requestedAt: timestamp,
+        requestedAt: now,
         respondedAt: null,
         vendorQuote: null, // Populated later once a vendor bids
         negotiation: []
@@ -357,7 +372,7 @@ export const BookingServices = {
       statusHistory: [
         {
           status: 'quote_requested',
-          timestamp: timestamp
+          timestamp: now
         }
       ],
 
@@ -385,8 +400,8 @@ export const BookingServices = {
       },
 
       delivery: {
-        scheduledDate: serviceDate,
-        scheduledTime: startTime,
+        scheduledDate: serviceDate,   // already formatted DD/MM/YYYY
+        scheduledTime: startTime,     // already formatted 12h
         actualDeliveryTime: null,
         deliveryNotes: null,
         setupCompleted: false,
@@ -412,8 +427,8 @@ export const BookingServices = {
         vendorRating: null
       },
 
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdAt: now,
+      updatedAt: now,
       confirmedAt: null,
       completedAt: null,
       cancelledAt: null

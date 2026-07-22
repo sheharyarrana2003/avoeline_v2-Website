@@ -4,6 +4,7 @@ import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 import { Registration } from "@/src/services/models/reg.type";
 import { MoreHorizontal } from "lucide-react";
+import { formatDateTime } from "@/src/lib/datetime";
 
 function AttendeeListItemBase(
     { single_attendee, attendee_user, attendee_reg,handleOnClick, handleCheckBoxChange, isSelected }:
@@ -83,7 +84,7 @@ function AttendeeListItemBase(
             <div>
                 {isCheckedIn ? (
                     <p className="text-[13px] font-bold text-slate-900">
-                        {checkInTime ? checkInTime : "Checked in"}
+                        {checkInTime ? formatDateTime(checkInTime) : "Checked in"}
                     </p>
                 ) : (
                     <p className="text-[13px] font-bold text-gray-400">—</p>

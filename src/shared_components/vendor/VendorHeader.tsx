@@ -11,9 +11,9 @@ interface UserProp {
     email: string;
 }
 
-export function VendorHeader({ user }: { user: CurrentUserData }) {
+export function VendorHeader({ user, logoUrl }: { user: CurrentUserData; logoUrl?: string }) {
     const current_tab = usePathname();
-    
+
     const basePath = `/vendor/${user.roleId}`;
     const tabs = ['Dashboard','Quotes','Services','Bookings'];
     
@@ -43,8 +43,13 @@ export function VendorHeader({ user }: { user: CurrentUserData }) {
             </nav>
             
             <div className="flex items-center space-x-4">
-                <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
-                    {user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+                <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden font-semibold text-gray-700">
+                    {logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                        user?.name?.charAt(0)?.toUpperCase() ?? "?"
+                    )}
                 </Link>
                 <p className="font-medium">{user?.name ?? ""}</p>
             </div>

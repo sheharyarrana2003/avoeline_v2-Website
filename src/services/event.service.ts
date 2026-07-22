@@ -11,8 +11,8 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
   // 1. Structure the schedule object.
   // Times stored as 12-hour ("10:00 AM"); dates stay DD/MM/YYYY.
   const schedule = {
-    startDate: formData.startDate,
-    endDate: formData.endDate,
+    startDate: formData.startDate ? formatDate(formData.startDate) : "",
+    endDate: formData.endDate ? formatDate(formData.endDate) : "",
     startTime: formatTime(formData.startTime),
     endTime: formatTime(formData.endTime),
     timezone: formData.timezone,
@@ -78,7 +78,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     tiers: formData.ticketTiers.map((tier) => ({
       name: tier.name,
       price: formData.ticketType === 'free' ? 0 : tier.price,
-      availableUntil: tier.availableUntil,
+      availableUntil: tier.availableUntil ? formatDate(tier.availableUntil) : "",
       seats: tier.seatsAvailable,
       description: tier.description,
     })),

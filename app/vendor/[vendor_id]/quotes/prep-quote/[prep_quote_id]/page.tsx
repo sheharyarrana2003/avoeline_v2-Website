@@ -3,6 +3,7 @@
 
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
+import { formatDate } from "@/src/lib/datetime";
 import { notFound } from "next/navigation";
 import PrepareQuoteClient from "@/src/features/bookings/shared_components/VendorPrepBookingClient";
 import { BookingData } from "@/src/features/bookings/types";
@@ -86,7 +87,7 @@ export default async function PrepareQuotePage({
             totalAmount,
             breakdown: breakdownItems,
             terms: terms ?? "",          // fallback instead of undefined
-            validity: validityDate ?? "" // same safety for validityDate
+            validity: validityDate ? formatDate(validityDate) : "" // DD/MM/YYYY (input is ISO from the date picker)
         };
 
 
@@ -95,14 +96,14 @@ export default async function PrepareQuotePage({
             status: "quote_sent",
             quote: {
                 ...booking.quote,
-                respondedAt: new Date().toISOString(),
+                respondedAt: new Date(),
                 vendorQuote: updatedVendorQuote,
                 negotiation: [
                     ...(booking.quote?.negotiation || []),
                     {
                         from: "vendor",
                         message: `Quote prepared. Total: Rs ${totalAmount.toLocaleString()}`,
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date()
                     }
                 ]
             },
@@ -110,10 +111,10 @@ export default async function PrepareQuotePage({
                 ...(booking.statusHistory || []),
                 {
                     status: "quote_sent",
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date()
                 }
             ],
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date()
         };
 
         console.log("about to update booking on vendor side");

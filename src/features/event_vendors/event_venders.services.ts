@@ -5,6 +5,13 @@ import {  adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 
+// Normalize a stored timestamp (Firebase Timestamp | ISO string | Date) to a
+// Date so it round-trips as a Timestamp on whole-object vendor updates.
+function toDt(v: any): Date {
+    if (v && typeof v.toDate === "function") return v.toDate();
+    const d = v ? new Date(v) : new Date();
+    return isNaN(d.getTime()) ? new Date() : d;
+}
 
 export function mapToAddress(raw: any): Address {
     return {
@@ -89,9 +96,9 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
         status: raw?.status || "inactive",
         featured: Boolean(raw?.featured),
 
-        createdAt: raw?.createdAt || new Date().toISOString(),
-        updatedAt: raw?.updatedAt || new Date().toISOString(),
-        lastActive: raw?.lastActive || new Date().toISOString(),
+        createdAt: toDt(raw?.createdAt),
+        updatedAt: toDt(raw?.updatedAt),
+        lastActive: toDt(raw?.lastActive),
     };
 }
 export const EventVendorService = {

@@ -1,7 +1,7 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
-import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
+import { formatDate, formatTime, formatDateTime, parseScheduleDateTime } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number = 0, currency: string = "PKR") => {
@@ -25,7 +25,10 @@ const timeAgo = (timestamp: string ="") => {
 
 const getDaysRemaining = (validityDate: string="") => {
     if (!validityDate) return null;
-    const validity = new Date(validityDate);
+    // validity is stored DD/MM/YYYY (or legacy ISO) — new Date() can't parse
+    // DD/MM, so use the shared parser.
+    const validity = parseScheduleDateTime(validityDate, "");
+    if (!validity) return null;
     const now = new Date();
     const diffMs = validity.getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
@@ -383,7 +386,7 @@ export default async function QuoteDetailPage({
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-sm text-gray-500">Scheduled</span>
-                                                    <span className="text-sm font-semibold text-gray-900">{delivery?.scheduledDate} at {delivery?.scheduledTime}</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{formatDate(delivery?.scheduledDate)} at {formatTime(delivery?.scheduledTime)}</span>
                                                 </div>
                                                 {delivery?.actualDeliveryTime && (
                                                     <div className="flex justify-between">

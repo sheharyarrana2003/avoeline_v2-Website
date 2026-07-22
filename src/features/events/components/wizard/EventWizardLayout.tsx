@@ -398,10 +398,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <label className="block text-xs text-gray-500 mb-2">Start Date</label>
                         <div className="relative">
                             <input
-                                type="text"
+                                type="date"
                                 value={formData.startDate}
                                 onChange={(e) => updateForm('startDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -413,10 +412,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <label className="block text-xs text-gray-500 mb-2">End Date</label>
                         <div className="relative">
                             <input
-                                type="text"
+                                type="date"
                                 value={formData.endDate}
                                 onChange={(e) => updateForm('endDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -769,20 +767,22 @@ export default function CreateEventPage({ handle_submission }: any) {
                 </div>
             </div>
 
-            {/* {Ticket final price} */}
-            <div
-                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
-                <input
-                    type="text"
-                    value={formData.PriceOfTicket}
-                    onChange={(e) => {
-                        formData.PriceOfTicket = parseInt(e.target.value) || 0;
-                        updateForm('PriceOfTicket', formData.PriceOfTicket);
-                    }}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
-                />
-            </div>
+            {/* {Ticket final price} — only relevant for paid events */}
+            {formData.ticketType !== 'free' && (
+                <div
+                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
+                    <input
+                        type="text"
+                        value={formData.PriceOfTicket}
+                        onChange={(e) => {
+                            formData.PriceOfTicket = parseInt(e.target.value) || 0;
+                            updateForm('PriceOfTicket', formData.PriceOfTicket);
+                        }}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                    />
+                </div>
+            )}
 
             {/* Ticket Tiers */}
             <div>
@@ -859,7 +859,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available Until</label>
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            type="date"
                                             value={tier.availableUntil}
                                             onChange={(e) => {
                                                 const updated = formData.ticketTiers.map(t =>
@@ -867,7 +867,6 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
-                                            placeholder="12/01/2024"
                                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                                         />
                                         <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1219,7 +1218,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                {formData.startDate || 'Oct 24-28, 2026'}
+                                {formData.startDate ? previewDate(formData.startDate) : 'Dates not set'}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

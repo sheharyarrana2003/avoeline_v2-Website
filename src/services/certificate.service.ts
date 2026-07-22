@@ -5,6 +5,7 @@ import { EventService } from "./event.service";
 import { EventModel } from "./models/event.model";
 import { RegistrationCertificate } from "./models/reg.type";
 import { COLLECTIONS } from "@/data/collections";
+import { formatDate } from "@/src/lib/datetime";
 import { BlockchainService } from "./blockchain.service";
 import { CertificateTemplateService, initialTemplate } from "./certificate.template.services";
 
@@ -176,8 +177,8 @@ export const CertificateService = {
       let certificateCount = 0;
       let mintedCount = 0;
       const mintFailures: { registrationId: string; error: string }[] = [];
-      const nowISO = new Date().toISOString();
-      const completionDate = nowISO.split('T')[0];
+      const nowDate = new Date();                 // system timestamps → Timestamp
+      const completionDate = formatDate(nowDate);  // human date → DD/MM/YYYY
 
       // Firestore writes still go through BulkWriter — fast, batched, parallel.
       const bulkWriter = adminDb.bulkWriter();
@@ -262,8 +263,8 @@ export const CertificateService = {
             sharedOnFacebook: false,
             shareCount: 0
           },
-          createdAt: nowISO,
-          updatedAt: nowISO
+          createdAt: nowDate,
+          updatedAt: nowDate
         };
 
         bulkWriter.set(newCertDocRef, certPayload);
@@ -324,7 +325,7 @@ export const CertificateService = {
             'blockchain.transactionHash': mintResult.transactionHash,
             'blockchain.metadata.ipfsUrl': metadataUri,
             'blockchain.verificationUrl': mintResult.explorerUrl,
-            'blockchain.mintedAt': new Date().toISOString()
+            'blockchain.mintedAt': new Date()
           });
 
           mintedCount++;

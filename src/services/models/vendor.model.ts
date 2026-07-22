@@ -53,9 +53,9 @@ export interface VendorData {
     settings: any;
     status: string;
     featured: boolean;
-    createdAt: string;
-    updatedAt: string;
-    lastActive: string;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    lastActive: Date | string;
 }
 
 export class Vendor implements VendorData {
@@ -78,15 +78,15 @@ export class Vendor implements VendorData {
     public settings: any;
     public status: string;
     public featured: boolean;
-    public createdAt: string;
-    public updatedAt: string;
-    public lastActive: string;
+    public createdAt: Date | string;
+    public updatedAt: Date | string;
+    public lastActive: Date | string;
 
     /**
      * Initializes a brand-new Vendor profile layout during the authentication / role selection flow.
      */
     constructor(userId: string, email: string, businessName: string) {
-        const currentIsoString = new Date().toISOString();
+        const now = new Date(); // system timestamps → Firebase Timestamp
 
         this.vendorId = `${userId}`;
         this.userId = userId;
@@ -97,9 +97,9 @@ export class Vendor implements VendorData {
         this.status = 'active';
         this.featured = false;
         
-        this.createdAt = currentIsoString;
-        this.updatedAt = currentIsoString;
-        this.lastActive = currentIsoString;
+        this.createdAt = now;
+        this.updatedAt = now;
+        this.lastActive = now;
 
         // Structured Contact data block mapping your schema
         this.contact = {
