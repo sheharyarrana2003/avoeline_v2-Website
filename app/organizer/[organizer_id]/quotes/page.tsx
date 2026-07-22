@@ -18,7 +18,7 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount);
 };
 
-const timeAgo = (timestamp: string) => {
+const timeAgo = (timestamp: string | Date) => {
     if (!timestamp) return "Recently";
     const diff = Date.now() - new Date(timestamp).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));

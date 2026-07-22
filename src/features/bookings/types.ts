@@ -38,15 +38,19 @@ export interface VendorQuote {
     validity: string;
 }
 
+// System timestamps are stored as Firebase Timestamps (read back as Date);
+// legacy docs may still carry ISO strings, hence the union.
+export type SystemTimestamp = Date | string;
+
 export interface NegotiationMessage {
     from: "organizer" | "vendor";
     message: string;
-    timestamp: string;
+    timestamp: SystemTimestamp;
 }
 
 export interface Quote {
-    requestedAt: string;
-    respondedAt: string | null;
+    requestedAt: SystemTimestamp;
+    respondedAt: SystemTimestamp | null;
     vendorQuote: VendorQuote | null;
     negotiation: NegotiationMessage[];
 }
@@ -57,7 +61,7 @@ export interface Quote {
 
 export interface StatusHistoryEntry {
     status: "quote_requested" | "quote_sent" | "quote_accepted" | "confirmed" | "in_progress" | "completed" | "cancelled" | string;
-    timestamp: string;
+    timestamp: SystemTimestamp;
 }
 
 export interface ContractTerms {
@@ -130,7 +134,7 @@ export interface Communication {
     from: "organizer" | "vendor" | "system";
     to: "organizer" | "vendor" | "system";
     message: string;
-    timestamp: string;
+    timestamp: SystemTimestamp;
 }
 
 export interface Documents {
@@ -168,9 +172,9 @@ export interface BookingData {
     communications: Communication[];
     documents: Documents;
     review: Review;
-    createdAt: string;
-    updatedAt: string;
-    confirmedAt: string | null;
-    completedAt: string | null;
-    cancelledAt: string | null;
+    createdAt: SystemTimestamp;
+    updatedAt: SystemTimestamp;
+    confirmedAt: SystemTimestamp | null;
+    completedAt: SystemTimestamp | null;
+    cancelledAt: SystemTimestamp | null;
 }

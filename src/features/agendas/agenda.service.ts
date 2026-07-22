@@ -3,7 +3,7 @@ import { Session, AgendaDay, AgendaStats } from "@/src/services/models/agenda.mo
 import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
-import { formatDate } from "@/src/lib/datetime";
+import { formatDate, formatTime } from "@/src/lib/datetime";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -148,9 +148,11 @@ export const AgendaService = {
             title:                 formData.title,
             type:                  formData.type,
             status:                formData.status ?? "confirmed",
-            date:                  formData.date,
-            startTime:             formData.startTime,
-            endTime:               formData.endTime,
+            // Store DD/MM/YYYY date + 12h times; duration is computed from the
+            // raw 24h form values first (calcDuration expects 24h "HH:mm").
+            date:                  formatDate(formData.date),
+            startTime:             formatTime(formData.startTime),
+            endTime:               formatTime(formData.endTime),
             duration:              calcDuration(formData.startTime, formData.endTime),
             timezone:              data.schedule?.timezone ?? "UTC",
             location:              formData.location,

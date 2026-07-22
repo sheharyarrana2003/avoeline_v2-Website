@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 
-export function OrganizerHeader({ user }: { user: CurrentUserData }) {
+export function OrganizerHeader({ user, logoUrl }: { user: CurrentUserData; logoUrl?: string }) {
     const current_tab = usePathname();
     const basePath = `/organizer/${user.userId}`;
 
@@ -72,9 +72,14 @@ export function OrganizerHeader({ user }: { user: CurrentUserData }) {
             {/* 3. The User Profile area */}
             <div className="flex items-center space-x-4">
                 {/* Kept the profile route as an example, adjust if you have a specific settings route */}
-                <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
-                    {/* Ensure the initial is always uppercase */}
-                    {user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+                <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden font-semibold text-gray-700">
+                    {logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                        /* Ensure the initial is always uppercase */
+                        user?.name?.charAt(0)?.toUpperCase() ?? "?"
+                    )}
                 </Link>
                 <p className="font-medium">{user?.name ?? ""}</p>
             </div>

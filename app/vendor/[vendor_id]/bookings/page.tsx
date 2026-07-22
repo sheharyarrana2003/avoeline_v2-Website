@@ -6,7 +6,7 @@ import { EventVendorService } from "@/src/features/event_vendors/event_venders.s
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDate } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -154,7 +154,8 @@ export default async function VendorBookingsPage({
     );
     
     const upcomingThisWeek = activeBookings.filter((b: any) => {
-        const serviceDate = b?.requirements?.serviceDate ? new Date(b.requirements.serviceDate) : null;
+        // serviceDate is stored DD/MM/YYYY — parse with the shared helper.
+        const serviceDate = parseScheduleDateTime(b?.requirements?.serviceDate, "");
         return serviceDate && serviceDate >= startOfWeek && serviceDate <= endOfWeek;
     });
     
@@ -180,8 +181,8 @@ export default async function VendorBookingsPage({
     
     // Sort by service date (upcoming first)
     displayBookings = displayBookings.sort((a: any, b: any) => {
-        const dateA = new Date(a?.requirements?.serviceDate || 0).getTime();
-        const dateB = new Date(b?.requirements?.serviceDate || 0).getTime();
+        const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
+        const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
         return dateA - dateB;
     });
 

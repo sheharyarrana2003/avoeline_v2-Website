@@ -276,7 +276,7 @@ function deriveDailyRegistrations(regDocs: Docs): DailyAnalyticsRegistration[] {
         const d = new Date(now);
         d.setDate(now.getDate() - i);
         const key = d.toISOString().slice(0, 10);
-        const label = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+        const label = formatDate(d);
         results.push({ label, registrations: countMap[key] ?? 0 });
     }
 
@@ -312,11 +312,10 @@ function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
 
 function deriveDateRange(eventDocs: Docs): string {
     const now = new Date();
-    const fmt = (d: Date) =>
-        d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const fmt = (d: Date) => formatDate(d);
 
     if (eventDocs.length === 0) {
-        return now.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        return formatDate(now);
     }
 
     let earliest: Date | null = null;

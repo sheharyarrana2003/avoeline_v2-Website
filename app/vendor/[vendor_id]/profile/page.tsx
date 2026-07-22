@@ -17,7 +17,7 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount);
 };
 
-const getYearsInBusiness = (createdAt: string) => {
+const getYearsInBusiness = (createdAt: string | Date) => {
     if (!createdAt) return 0;
     return new Date().getFullYear() - new Date(createdAt).getFullYear();
 };

@@ -91,8 +91,14 @@ export default function PrepareQuoteClient({
     const [terms, setTerms] = useState(existingQuote?.terms);
     
     const [validityDate, setValidityDate] = useState(() => {
-        if (existingQuote?.validity) {
-            return new Date(existingQuote.validity).toISOString().split('T')[0];
+        // The <input type="date"> needs an ISO yyyy-mm-dd value. Stored validity
+        // may be DD/MM/YYYY (new) or ISO (legacy) — convert without new Date()
+        // on a DD/MM string (which would be Invalid Date and throw on toISOString).
+        const raw = existingQuote?.validity;
+        if (raw) {
+            if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+            const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
         }
         const date = new Date();
         date.setDate(date.getDate() + 14);

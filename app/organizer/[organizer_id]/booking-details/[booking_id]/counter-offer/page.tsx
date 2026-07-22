@@ -26,12 +26,12 @@ export default async  function CounterOfferFormOrganizer({ params }: { params: P
         const new_neg_message :NegotiationMessage = {
             from : 'organizer',
             message : message_String,
-            timestamp: new Date().toISOString()
+            timestamp: new Date()
         }
 
         const new_status_history : StatusHistoryEntry={
             status : 'quote_requested',
-             timestamp: new Date().toISOString()
+             timestamp: new Date()
         }
 
         booking?.statusHistory.push(new_status_history);
