@@ -113,7 +113,9 @@ function mapToOrganizer(item: any): Organizer {
   organizer.plan = {
     type: item.plan?.type || 'free',
     features: Array.isArray(item.plan?.features) ? item.plan.features : [],
-    expiresAt: item.plan?.expiresAt ? new Date(item.plan.expiresAt) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    expiresAt: item.plan?.expiresAt
+      ? new Date(item.plan.expiresAt.seconds ? item.plan.expiresAt.toDate() : item.plan.expiresAt)
+      : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     autoRenew: Boolean(item.plan?.autoRenew)
   };
 
