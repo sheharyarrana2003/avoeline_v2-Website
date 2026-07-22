@@ -398,10 +398,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <label className="block text-xs text-gray-500 mb-2">Start Date</label>
                         <div className="relative">
                             <input
-                                type="text"
+                                type="date"
                                 value={formData.startDate}
                                 onChange={(e) => updateForm('startDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -413,10 +412,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <label className="block text-xs text-gray-500 mb-2">End Date</label>
                         <div className="relative">
                             <input
-                                type="text"
+                                type="date"
                                 value={formData.endDate}
                                 onChange={(e) => updateForm('endDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                             />
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -859,7 +857,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available Until</label>
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            type="date"
                                             value={tier.availableUntil}
                                             onChange={(e) => {
                                                 const updated = formData.ticketTiers.map(t =>
@@ -867,7 +865,6 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
-                                            placeholder="12/01/2024"
                                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
                                         />
                                         <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
