@@ -77,32 +77,6 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
                         <Suspense fallback={<WidgetSkeleton height="h-48" />}>
                             <DashboardUpcoming organizerId={organizer_id} />
                         </Suspense>
-
-                        <section className="rounded-lg border border-slate-200/80 border-l-4 border-l-slate-950 bg-white p-6 shadow-[0_18px_45px_rgba(21,27,38,0.06)]">
-                            <div className="mb-5 flex items-center gap-2">
-                                <span className="flex size-7 items-center justify-center rounded-full border border-slate-300 text-slate-700">
-                                    <Calendar size={15} />
-                                </span>
-                                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700">
-                                    Pending Tasks
-                                </h2>
-                            </div>
-                            <ul className="space-y-4">
-                                {[
-                                    ["Approve speaker list", "TechVerse Hackathon"],
-                                    ["Send final venue payment", "Product Launch '26"],
-                                    ["Review catering menu", "AI Workshop"],
-                                ].map(([title, subtitle]) => (
-                                    <li key={title} className="flex gap-3">
-                                        <span className="mt-1 size-4 rounded-full border border-slate-300" />
-                                        <div>
-                                            <p className="text-sm font-extrabold text-slate-800">{title}</p>
-                                            <p className="text-xs font-semibold text-slate-400">{subtitle}</p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
                     </aside>
                 </section>
             </div>
