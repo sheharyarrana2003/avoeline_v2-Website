@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { AuthService } from "@/src/features/auth/authService";
 import { AnalyticsService } from "@/src/services/anaylService";
 import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
-import { Calendar, Megaphone, Plus, Star, Users, Wallet } from "lucide-react";
+import { Calendar, Plus, Star, Users, Wallet } from "lucide-react";
 import Link from "next/link";
 
 import TodaysSchedule from "@/src/features/dashboard/components/TodaysSchedule";
@@ -56,20 +56,13 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
                     <aside className="space-y-8">
                         <div className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-[0_18px_45px_rgba(21,27,38,0.06)]">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-3">
                                 <Link
                                     href={`/organizer/${organizer_id}/events/create`}
                                     className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-extrabold text-white transition hover:bg-slate-800"
                                 >
                                     <Plus size={16} />
                                     Create Event
-                                </Link>
-                                <Link
-                                    href={`/organizer/${organizer_id}/notifications`}
-                                    className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 px-4 text-sm font-extrabold text-slate-950 transition hover:bg-slate-200"
-                                >
-                                    <Megaphone size={16} />
-                                    Announce
                                 </Link>
                             </div>
                         </div>

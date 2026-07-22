@@ -767,20 +767,22 @@ export default function CreateEventPage({ handle_submission }: any) {
                 </div>
             </div>
 
-            {/* {Ticket final price} */}
-            <div
-                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
-                <input
-                    type="text"
-                    value={formData.PriceOfTicket}
-                    onChange={(e) => {
-                        formData.PriceOfTicket = parseInt(e.target.value) || 0;
-                        updateForm('PriceOfTicket', formData.PriceOfTicket);
-                    }}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
-                />
-            </div>
+            {/* {Ticket final price} — only relevant for paid events */}
+            {formData.ticketType !== 'free' && (
+                <div
+                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Price Of Ticket</label>
+                    <input
+                        type="text"
+                        value={formData.PriceOfTicket}
+                        onChange={(e) => {
+                            formData.PriceOfTicket = parseInt(e.target.value) || 0;
+                            updateForm('PriceOfTicket', formData.PriceOfTicket);
+                        }}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                    />
+                </div>
+            )}
 
             {/* Ticket Tiers */}
             <div>
