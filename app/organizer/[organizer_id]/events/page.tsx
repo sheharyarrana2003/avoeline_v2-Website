@@ -83,11 +83,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                         <h2 className="text-2xl font-extrabold text-slate-900">
                             {currentTab === "all" ? "All Events" : `${toTitleCase(currentTab)} Events`}
                         </h2>
-                        <div className="flex items-center gap-2 text-slate-500">
-                            <span className="flex size-9 items-center justify-center rounded-lg bg-slate-50 ring-1 ring-slate-200">
-                                <LayoutList size={18} />
-                            </span>
-                        </div>
+                        
                     </div>
 
                     <ul className="space-y-4">
@@ -149,22 +145,10 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                             className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                                             aria-label={`View ${event.title}`}
                                         >
-                                            <Eye size={18} />
+                                            <Eye size={25} />
                                         </Link>
-                                        <Link
-                                            href={`${base_address}/events/${event.id}`}
-                                            className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
-                                            aria-label={`Edit ${event.title}`}
-                                        >
-                                            <Pencil size={18} />
-                                        </Link>
-                                        <button
-                                            type="button"
-                                            className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
-                                            aria-label={`More actions for ${event.title}`}
-                                        >
-                                            <MoreVertical size={18} />
-                                        </button>
+
+                                  
                                     </div>
                                 </article>
                             </li>
