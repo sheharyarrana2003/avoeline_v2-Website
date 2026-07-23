@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SpeakerSearchBar } from "@/src/features/event_speakers/components/SpeakerSearchBar";
 import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCard";
 import { Speaker } from "@/src/services/models/event.model";
+import { EventService } from "@/src/services/event.service";
 
 export default async function SpeakerPage(
     { params, searchParams }:
@@ -16,7 +17,10 @@ export default async function SpeakerPage(
     const { eventId, organizer_id } = await params;
     const resolvedParams = await searchParams;
 
-    const allSpeakers : Speaker[]= await SpeakerService.getAllSpeakers(eventId);
+    const [allSpeakers, event] = await Promise.all([
+        SpeakerService.getAllSpeakers(eventId),
+        EventService.getEventByID(eventId),
+    ]);
     let allSpeaker;
 
     if (resolvedParams.input_val) {
@@ -34,7 +38,7 @@ export default async function SpeakerPage(
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                     <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 uppercase">
-                        TECHVERSE HACKATHON 2026
+                        {event?.title ?? "Event Speakers"}
                     </h1>
                     <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">
                         {count_of_speakers} Speakers
@@ -42,13 +46,6 @@ export default async function SpeakerPage(
                 </div>
 
                 <div className="flex items-center gap-3">
-
-                    
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-50 transition">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        Import Speakers
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
                     <Link
                         href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
                         className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition"

@@ -2,6 +2,7 @@ import { adminAuth, adminDb } from "@/data/admin_db";
 import { Registration } from "./models/reg.type";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
+import { toIsoString } from "@/src/lib/datetime";
 
 
  function mapToRegistration(raw: any): Registration {
@@ -49,7 +50,7 @@ import { COLLECTIONS } from "@/data/collections";
 
     checkIn: {
       checkedIn: Boolean(raw.checkIn?.checkedIn ?? false),
-      checkInTime: raw.checkIn?.checkInTime ?? null,
+      checkInTime: toIsoString(raw.checkIn?.checkInTime),
       checkInMethod: raw.checkIn?.checkInMethod ?? null,
       checkedInBy: raw.checkIn?.checkedInBy ?? null,
       deviceId: raw.checkIn?.deviceId ?? null,

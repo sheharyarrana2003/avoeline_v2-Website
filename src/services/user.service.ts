@@ -2,6 +2,7 @@ import { cache } from "react";
 import { User } from "./models/user.type";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
+import { toIsoString } from "@/src/lib/datetime";
 
 
 function mapToUser(raw: any): User {
@@ -31,7 +32,7 @@ function mapToUser(raw: any): User {
     },
 
     security: {
-      lastLogin: raw.security?.lastLogin || "",
+      lastLogin: toIsoString(raw.security?.lastLogin) || "",
       loginCount: raw.security?.loginCount || 0,
       failedLoginAttempts: raw.security?.failedLoginAttempts || 0,
       mfaEnabled: Boolean(raw.security?.mfaEnabled),
@@ -41,13 +42,13 @@ function mapToUser(raw: any): User {
     verification: {
       isEmailVerified: Boolean(raw.verification?.isEmailVerified),
       isPhoneVerified: Boolean(raw.verification?.isPhoneVerified),
-      emailVerifiedAt: raw.verification?.emailVerifiedAt || null,
-      phoneVerifiedAt: raw.verification?.phoneVerifiedAt || null,
+      emailVerifiedAt: toIsoString(raw.verification?.emailVerifiedAt),
+      phoneVerifiedAt: toIsoString(raw.verification?.phoneVerifiedAt),
     },
 
-    createdAt: raw.createdAt || new Date().toISOString(),
-    updatedAt: raw.updatedAt || new Date().toISOString(),
-    lastActive: raw.lastActive || new Date().toISOString(),
+    createdAt: toIsoString(raw.createdAt) || new Date().toISOString(),
+    updatedAt: toIsoString(raw.updatedAt) || new Date().toISOString(),
+    lastActive: toIsoString(raw.lastActive) || new Date().toISOString(),
   };
 }
 

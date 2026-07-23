@@ -216,26 +216,6 @@ export default async function AddNewServicePage({
                             </button>
                         </div>
 
-                        {/* Customization Options */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">Customization Options</label>
-                            <div className="flex flex-wrap gap-2">
-                                {['Vegetarian', 'Vegan', 'Gluten-Free', 'Halal', 'Nut-Free', 'Spice Level'].map((opt) => (
-                                    <label key={opt} className="cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            name="customizations"
-                                            value={opt.toLowerCase().replace(' ', '_')}
-                                            className="peer sr-only"
-                                        />
-                                        <span className="inline-block px-4 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
-                                            {opt}
-                                        </span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
                         {/* Service Images */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">Service Images</label>
@@ -295,7 +275,6 @@ async function createServiceAction(formData: FormData) {
     const terms = formData.get('terms') as string;
 
     const inclusions = formData.getAll('inclusions') as string[];
-    const customizations = formData.getAll('customizations') as string[];
     const serviceMedia = (formData.getAll('serviceImages') as string[]).filter(Boolean);
     // Split by type so each service card can show its own image/video.
     const serviceImageUrls = serviceMedia.filter((u) => !isVideoUrl(u));

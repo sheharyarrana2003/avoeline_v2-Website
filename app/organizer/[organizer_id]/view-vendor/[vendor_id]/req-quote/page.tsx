@@ -124,34 +124,6 @@ export default async function ReqQuotePage({
                                     </div>
                                 </div>
 
-                                {/* Budget Range */}
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Budget Range</label>
-                                    <div className="relative">
-                                        {/* Added name="budget" */}
-                                        <input
-                                            name="budget"
-                                            type="range"
-                                            min="50000"
-                                            max="150000"
-                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                                        />
-                                        {/* Range markers omitted for brevity */}
-                                    </div>
-                                </div>
-
-                                {/* Attachments */}
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Attachments</label>
-                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-gray-300 transition cursor-pointer">
-                                        <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <p className="text-xs text-gray-500 font-medium">Click or drag files to upload</p>
-                                        <p className="text-[10px] text-gray-400 mt-1">Menu plans, floor layouts (Max 10MB)</p>
-                                    </div>
-                                </div>
-
                                 {/* Toggle */}
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-700">Send to all eligible vendors</span>
