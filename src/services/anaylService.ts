@@ -8,6 +8,7 @@ import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/sr
 import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { COLLECTIONS } from "@/data/collections";
 
 
 function formatCurrency(value: number): string {
@@ -330,11 +331,11 @@ function deriveDateRange(eventDocs: Docs): string {
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
 
 function fetchEvents(organizerId: string): Promise<QuerySnapshot> {
-    return adminDb.collection("events").where("organizerId", "==", organizerId).get();
+    return adminDb.collection(COLLECTIONS.EVENTS).where("organizerId", "==", organizerId).get();
 }
 
 function fetchRegistrations(organizerId: string): Promise<QuerySnapshot> {
-    return adminDb.collection("registerations").where("organizerId", "==", organizerId).get();
+    return adminDb.collection(COLLECTIONS.REGISTRATIONS).where("organizerId", "==", organizerId).get();
 }
 
 
