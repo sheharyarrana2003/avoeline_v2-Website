@@ -55,13 +55,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                         <StatusPill status={event.status} />
-                        <button
-                            type="button"
-                            className="flex size-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50"
-                            aria-label="More event actions"
-                        >
-                            <MoreHorizontal size={20} />
-                        </button>
+                      
                     </div>
                 </header>
 
