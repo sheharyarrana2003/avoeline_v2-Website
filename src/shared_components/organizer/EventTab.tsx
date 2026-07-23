@@ -32,11 +32,18 @@ const iconMap: Record<string, ComponentType<{ size?: number; className?: string 
 export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
     const current_tab = usePathname();
 
+    // Overview's href is a prefix of every other tab's href, so a plain
+    // substring/prefix test lights up two tabs at once. Pick the single tab
+    // whose href is the *longest* match for the current path.
+    const activeHref = tabs
+        .filter((t) => current_tab === t.href || current_tab.startsWith(`${t.href}/`))
+        .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
     return (
         <aside className="w-full border-b border-slate-200 bg-white p-4 md:min-h-[calc(100vh-73px)] md:w-64 md:border-b-0 md:border-r md:p-6">
             <nav className="flex gap-2 overflow-x-auto md:flex-col md:overflow-visible" aria-label="Event sections">
                 {tabs.map((tab) => {
-                    const isActive = current_tab.match(tab.href);
+                    const isActive = tab.href === activeHref;
                     const Icon = iconMap[tab.value] || LayoutDashboard;
 
                     return (
