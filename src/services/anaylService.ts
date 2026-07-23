@@ -51,29 +51,21 @@ function endOfDay(d: Date): Date {
 
 type Docs = QueryDocumentSnapshot[];
 
-// Revenue, calculated directly from the events: for every event, its ticket
-// price × the number of people registered for it (registrations counted from
-// the registrations collection). Free events contribute nothing.
-function computeRevenueFromEvents(eventDocs: Docs, regDocs: Docs): number {
-    const regCountByEvent: Record<string, number> = {};
-    regDocs.forEach((doc) => {
-        const eventId = doc.data().eventId;
-        if (eventId) regCountByEvent[eventId] = (regCountByEvent[eventId] ?? 0) + 1;
-    });
-
+// Revenue = the actual amount paid on each registration, summed across the
+// organizer's registrations (payment.amountPaid, falling back to finalPrice).
+// This reflects real ticket sales exactly, including mixed tiers/discounts.
+function computeRevenue(regDocs: Docs): number {
     let total = 0;
-    eventDocs.forEach((doc) => {
+    regDocs.forEach((doc) => {
         const data = doc.data();
-        if (data.pricing?.isFree) return;
-        const ticketPrice = Number(data.PriceOfTicket) || Number(data.pricing?.tiers?.[0]?.price) || 0;
-        total += ticketPrice * (regCountByEvent[doc.id] ?? 0);
+        total += Number(data.payment?.amountPaid ?? data.finalPrice ?? 0) || 0;
     });
     return total;
 }
 
 // Each headline stat is derived from its own source collection:
 //   • active events            → events collection (status)
-//   • revenue                  → events collection (ticket price × registrations)
+//   • revenue                  → registrations collection (actual amounts paid)
 //   • registrations (count)    → registrations collection
 //   • average rating           → reviews collection
 function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
@@ -85,8 +77,8 @@ function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
         }
     });
 
-    // Revenue calculated from the events (price × registrations).
-    const totalRevenue = computeRevenueFromEvents(eventDocs, regDocs);
+    // Revenue = sum of actual amounts paid across the registrations.
+    const totalRevenue = computeRevenue(regDocs);
 
     // Registrations = live count of the organizer's registrations collection.
     const totalRegistrations = regDocs.length;
@@ -448,8 +440,8 @@ export const AnalyticsService = {
             if (eventStart(data) > now) upcomingEvents++;
         });
 
-        // Revenue calculated from the events (ticket price × registrations).
-        const totalRevenue = computeRevenueFromEvents(eventsSnap.docs, regsSnap.docs);
+        // Revenue = sum of actual amounts paid across the registrations.
+        const totalRevenue = computeRevenue(regsSnap.docs);
 
         let totalRating = 0, ratedCount = 0;
         reviewsSnap.docs.forEach((doc) => {
