@@ -189,26 +189,7 @@ export default async function Noti({
                             Stay updated with all platform activities
                         </p>
                     </div>
-                    <div className="flex items-center gap-2.5">
-                        <button className="px-4 py-2 bg-[#111] text-white text-[13px] font-medium rounded-lg hover:bg-[#333] transition-colors">
-                            Mark All as Read
-                        </button>
-                        <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#ddd] bg-white text-[#555] hover:bg-[#f0f0f0] transition-colors">
-                            <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="12" cy="12" r="3" />
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                            </svg>
-                        </button>
-                    </div>
+  
                 </div>
 
                 {/* Tabs */}
@@ -373,30 +354,7 @@ export default async function Noti({
                             )}
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="bg-white rounded-[14px] p-5 border border-[#eee]">
-                            <h4 className="text-[11px] font-semibold text-[#aaa] uppercase tracking-widest mb-3">
-                                Quick Actions
-                            </h4>
-                            <div className="grid grid-cols-2 gap-2.5">
-                                <button className="bg-[#f5f5f5] border border-[#eee] rounded-[10px] p-4 text-center hover:bg-[#eee] hover:border-[#ddd] transition-all cursor-pointer">
-                                    <div className="text-xl mb-1.5 text-[#666]">📢</div>
-                                    <div className="text-[11px] font-medium text-[#555] leading-tight">
-                                        Send
-                                        <br />
-                                        Announcement
-                                    </div>
-                                </button>
-                                <button className="bg-[#f5f5f5] border border-[#eee] rounded-[10px] p-4 text-center hover:bg-[#eee] hover:border-[#ddd] transition-all cursor-pointer">
-                                    <div className="text-xl mb-1.5 text-[#666]">📋</div>
-                                    <div className="text-[11px] font-medium text-[#555] leading-tight">
-                                        Review Vendor
-                                        <br />
-                                        Quotes
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
+                        
 
 
                     </div>
