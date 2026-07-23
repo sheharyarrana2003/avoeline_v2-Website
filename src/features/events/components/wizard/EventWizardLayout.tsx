@@ -1043,77 +1043,82 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Custom Fields */}
                     {formData.customFields.map((field, i) => (
-                        <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex items-center justify-between">
+                        <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex flex-col gap-3">
+                            {/* Row 1: icon + label + required badge */}
                             <div className="flex items-center gap-2">
                                 <span className="text-xs">📝</span>
-                                <div>
-                                    <input
-                                        type="text"
-                                        value={field.label}
-                                        onChange={(e) => {
-                                            {
-                                                formData.customFields.map(x => {
-                                                    if (x.id === field.id) {
-                                                        field.label = e.target.value;
-                                                    }
-                                                    return x;
-                                                })
-
-                                                updateForm('customFields', formData.customFields);
+                                <input
+                                    type="text"
+                                    value={field.label}
+                                    onChange={(e) => {
+                                        formData.customFields.map(x => {
+                                            if (x.id === field.id) {
+                                                field.label = e.target.value;
                                             }
-                                        }}
-
-
-                                        className="w-full bg-transparent text-sm text-gray-900 outline-none"
-                                    />
-
-                                    {/* Type Dropdown */}
-                                    <select
-                                        value={field.type}
-                                        onChange={(e) => {
-                                            formData.customFields.map(x => {
-                                                if (x.id === field.id) {
-                                                    field.type = e.target.value as any;
-                                                }
-                                                return x;
-                                            });
-                                            updateForm('customFields', formData.customFields);
-                                        }}
-                                        className="bg-white border border-gray-200 text-xs rounded-lg px-2 py-1 my-1 text-gray-700 outline-none"
-                                    >
-                                        <option value="text">Text</option>
-                                        <option value="number">Number</option>
-                                        <option value="file">File</option>
-                                        <option value="image">Image</option>
-                                        <option value="dropdown">Dropdown</option>
-                                    </select>
-
-                                    <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
-                                        {
-                                            formData.customFields.map(x => {
-                                                if (x.id === field.id) {
-                                                    field.required = !field.required;
-                                                }
-                                                return x;
-                                            })
-
-                                            updateForm('customFields', formData.customFields);
-                                        }
-                                    }}>Required</button>
-                                    <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition" onClick={(e) => {
-                                        {
-                                            e.preventDefault();
-                                            const updatedFields = formData.customFields.filter(x => x.id !== field.id);
-                                            updateForm('customFields', updatedFields);
-                                        }
-                                    }}>Delete</button>
-
-                                    <p className="text-[10px] text-gray-400">
-                                        {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
-                                    </p>
-                                </div>
+                                            return x;
+                                        })
+                                        updateForm('customFields', formData.customFields);
+                                    }}
+                                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
+                                />
+                                {field.required && (
+                                    <span className="shrink-0 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">REQUIRED</span>
+                                )}
                             </div>
-                            <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">{field.required ? "REQUIRED" : ""}</span>
+
+                            {/* Row 2: type dropdown + actions, aligned on one baseline */}
+                            <div className="flex flex-wrap items-center gap-2 pl-6">
+                                <select
+                                    value={field.type}
+                                    onChange={(e) => {
+                                        formData.customFields.map(x => {
+                                            if (x.id === field.id) {
+                                                field.type = e.target.value as any;
+                                            }
+                                            return x;
+                                        });
+                                        updateForm('customFields', formData.customFields);
+                                    }}
+                                    className="h-8 bg-white border border-gray-200 text-xs rounded-lg px-2 text-gray-700 outline-none"
+                                >
+                                    <option value="text">Text</option>
+                                    <option value="number">Number</option>
+                                    <option value="file">File</option>
+                                    <option value="image">Image</option>
+                                    <option value="dropdown">Dropdown</option>
+                                </select>
+
+                                <button
+                                    type="button"
+                                    className={`h-8 px-4 rounded-lg text-xs font-medium transition ${field.required ? "bg-black text-white hover:bg-gray-800" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100"}`}
+                                    onClick={() => {
+                                        formData.customFields.map(x => {
+                                            if (x.id === field.id) {
+                                                field.required = !field.required;
+                                            }
+                                            return x;
+                                        })
+                                        updateForm('customFields', formData.customFields);
+                                    }}
+                                >
+                                    Required
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-8 px-4 rounded-lg text-xs font-medium border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        const updatedFields = formData.customFields.filter(x => x.id !== field.id);
+                                        updateForm('customFields', updatedFields);
+                                    }}
+                                >
+                                    Delete
+                                </button>
+
+                                <span className="ml-auto text-[10px] text-gray-400">
+                                    {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
+                                </span>
+                            </div>
                         </div>
                     ))}
 

@@ -187,6 +187,18 @@ export function parseScheduleDateTime(dateStr: unknown, timeStr: unknown): Date 
   return isNaN(out.getTime()) ? null : out;
 }
 
+/**
+ * Serialize any supported date value (Firestore Timestamp, Date, ISO/slash
+ * string, epoch number) to an ISO string, or null if empty/unparseable.
+ * Use this in Firestore read-mappers so server-fetched docs stay plain and
+ * serializable across the Server→Client Component boundary (a raw admin-SDK
+ * `Timestamp` is a class instance and cannot be passed to a Client Component).
+ */
+export function toIsoString(value: unknown): string | null {
+  const d = toDate(value);
+  return d ? d.toISOString() : null;
+}
+
 /** "12 Aug 2026" style medium date, used where a compact label reads better. */
 export function formatDateMedium(value: unknown): string {
   const d = toDate(value);

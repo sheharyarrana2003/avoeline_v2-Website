@@ -2,6 +2,7 @@ import { Attendee } from "./type";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { QuerySnapshot } from "firebase-admin/firestore";
+import { toIsoString } from "@/src/lib/datetime";
 
 export function mapToAttendee(raw: any): Attendee {
     return {
@@ -16,7 +17,7 @@ export function mapToAttendee(raw: any): Attendee {
             cgpa: raw.academic?.cgpa, // Optional field, so undefined/null is fine
             isStudentVerified: Boolean(raw.academic?.isStudentVerified),
             verificationMethod: raw.academic?.verificationMethod || "manual",
-            verifiedAt: raw.academic?.verifiedAt || null,
+            verifiedAt: toIsoString(raw.academic?.verifiedAt),
         },
 
         // Ensure arrays are actually arrays before mapping
@@ -50,7 +51,7 @@ export function mapToAttendee(raw: any): Attendee {
         certificates: Array.isArray(raw.certificates) ? raw.certificates.map((cert: any) => ({
             certificateId: cert.certificateId || "",
             eventId: cert.eventId || "",
-            issuedAt: cert.issuedAt || "",
+            issuedAt: toIsoString(cert.issuedAt) || "",
             type: cert.type || "digital",
             verificationUrl: cert.verificationUrl || "",
         })) : [],
@@ -58,13 +59,13 @@ export function mapToAttendee(raw: any): Attendee {
         connections: Array.isArray(raw.connections) ? raw.connections.map((conn: any) => ({
             connectionId: conn.connectionId || "",
             connectedUserId: conn.connectedUserId || "",
-            connectedAt: conn.connectedAt || "",
+            connectedAt: toIsoString(conn.connectedAt) || "",
             connectionType: conn.connectionType || "attendee",
             notes: conn.notes || "",
         })) : [],
 
-        createdAt: raw.createdAt || new Date().toISOString(),
-        updatedAt: raw.updatedAt || new Date().toISOString(),
+        createdAt: toIsoString(raw.createdAt) || new Date().toISOString(),
+        updatedAt: toIsoString(raw.updatedAt) || new Date().toISOString(),
     };
 }
 
