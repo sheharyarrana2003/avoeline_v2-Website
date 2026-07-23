@@ -163,6 +163,21 @@ export default function CreateEventPage({ handle_submission }: any) {
         };
         updateForm('customFields', [...formData.customFields, newField]);
     };
+    const addCustomFieldOption = (field: CustomField) => {
+
+        formData.customFields.map((trav_field) => {
+            if (trav_field.id === field.id) {
+                if (trav_field.options) {
+                    trav_field?.options.push('new option');
+                } else {
+                    trav_field["options"] = ['new option'];
+                }
+
+            }
+            return trav_field;
+        })
+        updateForm('customFields', [...formData.customFields]);
+    };
 
     const nextStep = () => {
         if (currentStep < 4) setCurrentStep(currentStep + 1);
@@ -1114,6 +1129,35 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 >
                                     Delete
                                 </button>
+
+                                {field.type === 'dropdown' && <><br /> <button
+                                    onClick={() => addCustomFieldOption(field)}
+                                    className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
+                                >
+                                    <span>+</span> Add Custom options
+                                </button></>}
+
+                                {field.type === 'dropdown' && field?.options && <><br />{field?.options.map((option, ind) => {
+                                    return <div key={ind} className="flex items-center gap-2">
+                                        <span className="text-xs">📝</span>
+                                        <input
+                                            type="text"
+                                            value={option}
+                                            onChange={(e) => {
+                                                
+                                               if (field?.options) {
+                                                    field.options[ind] = e.target.value;
+                                                }
+                                                updateForm('customFields', formData.customFields);
+                                            }}
+                                            className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
+                                        />
+                                        {field.required && (
+                                            <span className="shrink-0 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">REQUIRED</span>
+                                        )}
+                                    </div>
+
+                                })}</>}
 
                                 <span className="ml-auto text-[10px] text-gray-400">
                                     {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
