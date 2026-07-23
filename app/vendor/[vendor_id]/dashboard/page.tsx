@@ -478,9 +478,9 @@ function computeWeeklyRevenue(completedBookings: any[]): number[] {
         
         weeks.push(weekRevenue);
     }
-    
-    // If no real data, return zeros to avoid empty chart
-    return weeks.some(w => w > 0) ? weeks : [45000, 32000, 78000, 95000, 55000, 42000, 88000];
+
+    // Real weekly revenue (zeros when the vendor has no completed bookings yet).
+    return weeks;
 }
 
 // --- Helper to get week label for chart ---
