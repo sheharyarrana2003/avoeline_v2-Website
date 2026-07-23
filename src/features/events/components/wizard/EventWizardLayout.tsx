@@ -113,9 +113,11 @@ const INITIAL_FORM: EventFormData = {
     publishImmediately: true,
     agreeToTerms: false,
     confirmRights: false,
+    isDraft :false
+
 };
 
-export default function CreateEventPage({ handle_submission ,errors}: any) {
+export default function CreateEventPage({ handle_submission }: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
@@ -125,9 +127,7 @@ export default function CreateEventPage({ handle_submission ,errors}: any) {
 
     const handling_submission_client = (formData: EventFormData) => {
         if (isPublishing) return; // guard against duplicate submissions
-        startPublishing(async () => {
-           
-               
+        startPublishing(async () => {  
           try {
                 const response = await handle_submission(formData);
 
@@ -1512,7 +1512,10 @@ export default function CreateEventPage({ handle_submission ,errors}: any) {
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button className="text-sm text-gray-500 hover:text-gray-700 transition">
+                        <button onClick={()=>{
+                            formData.isDraft = true;
+                            handling_submission_client(formData);
+                        }} className="text-sm text-gray-500 hover:text-gray-700 transition">
                             Save as Draft
                         </button>
                         {currentStep > 1 && (

@@ -269,6 +269,10 @@ export const EventService = {
     const docRef = adminDb.collection(COLLECTIONS.EVENTS).doc();
     const id_generated = docRef.id;
     event_to_be_added.id = id_generated;
+   
+    if(formdata.isDraft){
+      event_to_be_added.status = 'draft';
+    }
 
     await adminDb.collection(COLLECTIONS.EVENTS).doc(id_generated).set({
       ...event_to_be_added

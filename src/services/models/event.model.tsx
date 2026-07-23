@@ -472,4 +472,5 @@ export interface EventFormData {
   publishImmediately: boolean;
   agreeToTerms: boolean;
   confirmRights: boolean;
+  isDraft: boolean;
 }

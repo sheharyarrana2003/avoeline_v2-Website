@@ -12,6 +12,7 @@ export default async function EventWiz({ params }: { params: Promise<{ organizer
 
 
     const handle_submission = async (formData: EventFormData) => {
+        'use server'
         try {
             const new_id = await EventService.create_event(formData, organizer_id);
             console.log("Event created successfully");
