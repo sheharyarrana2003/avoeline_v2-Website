@@ -17,6 +17,7 @@ import {
 
 import { AuthService } from "@/src/features/auth/authService";
 import { OrganizerService } from "@/src/services/organizer.service";
+import { AnalyticsService } from "@/src/services/anaylService";
 import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import { CurrentUserData } from "@/src/services/models/user.type";
@@ -105,7 +106,9 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
     }));
 
     const basePath = `/organizer/${organizer_id}`;
-    const stats = organizer.eventStats;
+    // Headline stats computed live from the events/registrations/reviews
+    // collections rather than the (often stale) denormalized organizer.eventStats.
+    const stats = await AnalyticsService.getOrganizerProfileStats(organizer_id);
     const initial = (organizer.organization.name || organizer.contact.primaryEmail || "?")
         .charAt(0)
         .toUpperCase();

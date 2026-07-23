@@ -2,6 +2,7 @@
 // Fully Server Component
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { VendorLogoUpload } from "@/src/features/event_vendors/components/VendorLogoUpload";
 import { VendorCoverUpload } from "@/src/features/event_vendors/components/VendorCoverUpload";
 import Link from "next/link";
@@ -85,16 +86,20 @@ export default async function VendorProfilePage({
     const settings = v?.settings || {};
     const yearsInBusiness = getYearsInBusiness(v?.createdAt);
     
-    // Services for display
-    const displayServices = getDisplayServices(pricingPackages);
-    
-    // Mock additional services if less than 3
-    const services = displayServices.length >= 3 ? displayServices : [
-        ...displayServices,
-        { name: 'Private Dinner', price: 6500, unit: 'pp', description: 'Formal plated service' },
-        { name: 'Corporate Luncheon', price: 2500, unit: 'pp', description: 'Min 20 - Max 100 persons' },
-        { name: 'Wedding Buffet', price: 4800, unit: 'pp', description: 'Premium 12-course menu' },
-    ].slice(0, 3);
+    // Services for display — real pricing packages only (no mock filler).
+    const services = getDisplayServices(pricingPackages);
+
+    // Real booking-derived stats from the bookings collection.
+    const bookings = (await BookingServices.getAllBookingsOfVendor(vendor_id)) ?? [];
+    const totalBookings = bookings.length;
+    const bookingsByOrganizer: Record<string, number> = {};
+    bookings.forEach((b: any) => {
+        const orgId = b?.organizerId;
+        if (orgId) bookingsByOrganizer[orgId] = (bookingsByOrganizer[orgId] ?? 0) + 1;
+    });
+    const repeatBookings = Object.values(bookingsByOrganizer).filter((c) => c > 1).reduce((s, c) => s + c, 0);
+    const repeatPct = totalBookings > 0 ? Math.round((repeatBookings / totalBookings) * 100) : 0;
+    const avgResponseTime = (stats as any)?.avgResponseTime || "—";
 
     // Active tab from URL
     const activeTab = (awaitedSearchParams?.tab as string) || 'services';
@@ -216,8 +221,8 @@ export default async function VendorProfilePage({
                                     <span className="text-sm text-gray-400">({totalReviews} reviews)</span>
                                 </div>
 
-                                <p className="text-sm text-gray-500 mt-3 leading-relaxed">
-                                    Professional event catering services specializing in gourmet fusion and traditional delicacies.
+                                <p className="text-sm text-gray-400 mt-3 leading-relaxed">
+                                    No bio added yet.
                                 </p>
 
                                 <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
@@ -226,13 +231,7 @@ export default async function VendorProfilePage({
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        {address?.city || 'Karachi'}, {address?.country || 'Pakistan'}
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Serves {address?.city || 'Karachi'} & {address?.city === 'Lahore' ? 'Karachi' : 'Lahore'}
+                                        {[address?.city, address?.country].filter(Boolean).join(', ') || 'Location not set'}
                                     </span>
                                 </div>
 
@@ -261,19 +260,19 @@ export default async function VendorProfilePage({
                                 <div className="grid grid-cols-2 gap-3 mt-6">
                                     <div className="bg-gray-50 rounded-xl p-4">
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Bookings</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{stats?.totalBookings || 0}+</p>
+                                        <p className="text-xl font-bold text-gray-900 mt-1">{totalBookings}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Years</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{yearsInBusiness || 5}</p>
+                                        <p className="text-xl font-bold text-gray-900 mt-1">{yearsInBusiness || 0}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Response</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{v?.stats?.avgResponseTime || '< 2 hrs'}</p>
+                                        <p className="text-xl font-bold text-gray-900 mt-1">{avgResponseTime}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Repeat</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{stats?.repeatClients ? Math.round((stats.repeatClients / stats.totalBookings) * 100) : 85}%</p>
+                                        <p className="text-xl font-bold text-gray-900 mt-1">{repeatPct}%</p>
                                     </div>
                                 </div>
 
@@ -296,6 +295,9 @@ export default async function VendorProfilePage({
 
                                 {/* Tab Content */}
                                 <div className="mt-6 space-y-4">
+                                    {activeTab === 'services' && services.length === 0 && (
+                                        <p className="text-sm text-gray-400 text-center py-8">No services added yet.</p>
+                                    )}
                                     {activeTab === 'services' && services.map((service: any, i: number) => (
                                         <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                                             <div>
@@ -373,7 +375,8 @@ export default async function VendorProfilePage({
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
                                     <input
                                         type="email"
-                                        defaultValue={contact?.businessEmail || 'contact@perfectcatering.pk'}
+                                        defaultValue={contact?.businessEmail || ''}
+                                        placeholder="business@email.com"
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
                                     />
                                 </div>
@@ -381,7 +384,8 @@ export default async function VendorProfilePage({
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Phone Number</label>
                                     <input
                                         type="tel"
-                                        defaultValue={contact?.primaryPhone || '+92 300 1234567'}
+                                        defaultValue={contact?.primaryPhone || ''}
+                                        placeholder="+92 300 0000000"
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
                                     />
                                 </div>
@@ -426,7 +430,8 @@ export default async function VendorProfilePage({
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Short Bio</label>
                                     <textarea
                                         rows={3}
-                                        defaultValue="Professional event catering services based in Karachi..."
+                                        defaultValue=""
+                                        placeholder="Tell clients about your business..."
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 resize-none"
                                     />
                                 </div>
@@ -486,7 +491,7 @@ export default async function VendorProfilePage({
                                     <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    <p className="text-xs text-gray-400">Bank details verified. HBL - ****4592</p>
+                                    <p className="text-xs text-gray-400">No payout method added yet.</p>
                                 </div>
                             </div>
                         </div>
