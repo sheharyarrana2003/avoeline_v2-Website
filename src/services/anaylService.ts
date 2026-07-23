@@ -6,6 +6,7 @@ import {
 } from "@/src/services/models/feedback.model";
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 import { COLLECTIONS } from "@/data/collections";
@@ -51,29 +52,50 @@ function endOfDay(d: Date): Date {
 
 type Docs = QueryDocumentSnapshot[];
 
-function deriveDashboardStat(eventDocs: Docs) {
-    let activeEvents = 0;
-    let totalRevenue = 0;
-    let totalRating = 0;
-    let ratedEventCount = 0;
-    let totalRegistrations = 0;
-
-    eventDocs.forEach((doc) => {
+// Revenue = the actual amount paid on each registration, summed across the
+// organizer's registrations (payment.amountPaid, falling back to finalPrice).
+// This reflects real ticket sales exactly, including mixed tiers/discounts.
+function computeRevenue(regDocs: Docs): number {
+    let total = 0;
+    regDocs.forEach((doc) => {
         const data = doc.data();
-        const status = (data.status || "").toLowerCase();
+        total += Number(data.payment?.amountPaid ?? data.finalPrice ?? 0) || 0;
+    });
+    return total;
+}
+
+// Each headline stat is derived from its own source collection:
+//   • active events            → events collection (status)
+//   • revenue                  → registrations collection (actual amounts paid)
+//   • registrations (count)    → registrations collection
+//   • average rating           → reviews collection
+function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
+    let activeEvents = 0;
+    eventDocs.forEach((doc) => {
+        const status = (doc.data().status || "").toLowerCase();
         if (["active", "ongoing", "published", "registration_open"].includes(status)) {
             activeEvents++;
         }
-        totalRevenue += data.analytics?.revenue ?? 0;
-        totalRegistrations += data.analytics?.registrations ?? 0;
-        if (data.analytics?.avgRating) {
-            totalRating += data.analytics.avgRating;
-            ratedEventCount++;
-        }
     });
 
-    const avgRating = ratedEventCount > 0
-        ? parseFloat((totalRating / ratedEventCount).toFixed(1))
+    // Revenue = sum of actual amounts paid across the registrations.
+    const totalRevenue = computeRevenue(regDocs);
+
+    // Registrations = live count of the organizer's registrations collection.
+    const totalRegistrations = regDocs.length;
+
+    // Average rating = mean of ratings stored in the reviews collection.
+    let totalRating = 0;
+    let ratedCount = 0;
+    reviewDocs.forEach((doc) => {
+        const rating = Number(doc.data().rating);
+        if (rating > 0) {
+            totalRating += rating;
+            ratedCount++;
+        }
+    });
+    const avgRating = ratedCount > 0
+        ? parseFloat((totalRating / ratedCount).toFixed(1))
         : 0;
 
     return {
@@ -338,6 +360,10 @@ function fetchRegistrations(organizerId: string): Promise<QuerySnapshot> {
     return adminDb.collection(COLLECTIONS.REGISTRATIONS).where("organizerId", "==", organizerId).get();
 }
 
+function fetchReviews(organizerId: string): Promise<QuerySnapshot> {
+    return adminDb.collection(COLLECTIONS.FEEDBACK).where("organizerId", "==", organizerId).get();
+}
+
 
 export const AnalyticsService = {
 
@@ -347,15 +373,17 @@ export const AnalyticsService = {
      *  cache()'d so independent <Suspense> regions on the dashboard can each
      *  await it while it still runs only once per request. */
     getDashboardData: cache(async (organizerId: string) => {
-        const [eventsSnap, regsSnap] = await Promise.all([
+        const [eventsSnap, regsSnap, reviewsSnap] = await Promise.all([
             fetchEvents(organizerId),
             fetchRegistrations(organizerId),
+            fetchReviews(organizerId),
         ]);
         const eventDocs = eventsSnap.docs;
         const regDocs = regsSnap.docs;
+        const reviewDocs = reviewsSnap.docs;
 
         return {
-            stats: deriveDashboardStat(eventDocs),
+            stats: deriveDashboardStat(eventDocs, regDocs, reviewDocs),
             todayEvents: deriveTodayEvents(eventDocs, organizerId),
             upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId),
             recentReg: deriveRecentReg(regDocs),
@@ -386,7 +414,55 @@ export const AnalyticsService = {
     // ── Individual methods (kept for other callers; each fetches then derives) ──
 
     async getDashboardStat(organizerId: string) {
-        return deriveDashboardStat((await fetchEvents(organizerId)).docs);
+        const [eventsSnap, regsSnap, reviewsSnap] = await Promise.all([
+            fetchEvents(organizerId),
+            fetchRegistrations(organizerId),
+            fetchReviews(organizerId),
+        ]);
+        return deriveDashboardStat(eventsSnap.docs, regsSnap.docs, reviewsSnap.docs);
+    },
+
+    /** Profile headline stats, each computed from its source collection:
+     *  events (counts + revenue), registrations (attendees), reviews (rating). */
+    async getOrganizerProfileStats(organizerId: string) {
+        const [eventsSnap, regsSnap, reviewsSnap] = await Promise.all([
+            fetchEvents(organizerId),
+            fetchRegistrations(organizerId),
+            fetchReviews(organizerId),
+        ]);
+        const now = new Date();
+
+        let publishedEvents = 0, completedEvents = 0, upcomingEvents = 0;
+        eventsSnap.docs.forEach((doc) => {
+            const data = doc.data();
+            const status = (data.status || "").toLowerCase();
+            if (["published", "registration_open", "ongoing", "active"].includes(status)) publishedEvents++;
+            else if (status === "completed") completedEvents++;
+            if (eventStart(data) > now) upcomingEvents++;
+        });
+
+        // Revenue = sum of actual amounts paid across the registrations.
+        const totalRevenue = computeRevenue(regsSnap.docs);
+
+        let totalRating = 0, ratedCount = 0;
+        reviewsSnap.docs.forEach((doc) => {
+            const rating = Number(doc.data().rating);
+            if (rating > 0) { totalRating += rating; ratedCount++; }
+        });
+
+        const totalEventsCreated = eventsSnap.size;
+        const totalAttendees = regsSnap.size;
+
+        return {
+            totalEventsCreated,
+            totalAttendees,
+            totalRevenue,
+            publishedEvents,
+            completedEvents,
+            upcomingEvents,
+            averageRating: ratedCount > 0 ? parseFloat((totalRating / ratedCount).toFixed(1)) : 0,
+            averageAttendeesPerEvent: totalEventsCreated > 0 ? totalAttendees / totalEventsCreated : 0,
+        };
     },
 
     async getTodayEvents(organizerId: string): Promise<DashboardEvent[]> {
