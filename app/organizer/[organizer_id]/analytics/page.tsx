@@ -222,15 +222,11 @@ export default async function AnalyticsPage({
                                         <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                             Registrations
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                            Profit
-                                        </th>
+                                      
                                         <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
                                             Revenue
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
-                                            Avg. Satisfaction
-                                        </th>
+                                       
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -253,31 +249,10 @@ export default async function AnalyticsPage({
                                             <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
                                                 {event.registrations.toLocaleString("en-US")}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-emerald-600">
-                                                {formatCurrency(event.profit)}
-                                            </td>
                                             <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
                                                 {formatCurrency(event.revenue)}
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-sm font-extrabold text-slate-950">
-                                                        {event.avgSatisfaction > 0
-                                                            ? event.avgSatisfaction.toFixed(1)
-                                                            : "—"}
-                                                    </span>
-                                                    {event.avgSatisfaction > 0 && (
-                                                        <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-                                                            <div
-                                                                className="h-full rounded-full bg-[#7454f6]"
-                                                                style={{
-                                                                    width: `${(event.avgSatisfaction / 5) * 100}%`,
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
+                                           
                                         </tr>
                                     ))}
                                 </tbody>
