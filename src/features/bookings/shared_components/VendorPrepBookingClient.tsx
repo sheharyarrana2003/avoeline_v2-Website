@@ -237,6 +237,7 @@ export default function PrepareQuoteClient({
                                     onChange={(e) => setServicePackage(e.target.value)}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
                                 >
+                                    
                                     <option>Custom Quote (Standard)</option>
                                     <option>Premium Package</option>
                                     <option>Basic Package</option>
@@ -479,15 +480,7 @@ export default function PrepareQuoteClient({
                                     <p className="text-[10px] text-gray-400 uppercase tracking-wider">Location</p>
                                     <p className="text-sm font-semibold text-gray-900">{requirements.location || 'TBD'}</p>
                                 </div>
-                                <div>
-                                    <p className="text-[10px] text-gray-400 uppercase tracking-wider">Attachments</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                        </svg>
-                                        <span className="text-xs text-gray-600">event_brief.pdf</span>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </div>
 
@@ -568,23 +561,7 @@ export default function PrepareQuoteClient({
                 {/* Bottom Bar */}
                 <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
                     <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button 
-                                onClick={handleSaveDraft}
-                                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                                </svg>
-                                Save as Draft
-                            </button>
-                            <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                                </svg>
-                                Save as Template
-                            </button>
-                        </div>
+                        
                         
                         <div className="flex items-center gap-4">
                             <span className="text-sm text-gray-500">Total: <span className="font-bold text-gray-900">{formatCurrency(totalAmount, currency)}</span></span>
