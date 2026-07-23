@@ -2,7 +2,6 @@ import { EventService } from "@/src/services/event.service";
 import { EventModel, EventStatus } from "@/src/services/models/event.model";
 import {
     CalendarDays,
-    ChevronLeft,
     Eye,
     MapPin,
     MoreHorizontal,
@@ -50,13 +49,6 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 {/* Header */}
                 <header className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-4">
-                        <Link
-                            href={`/organizer/${organizer_id}/events`}
-                            className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-950"
-                            aria-label="Back to events"
-                        >
-                            <ChevronLeft size={22} />
-                        </Link>
                         <h1 className="truncate text-2xl font-extrabold uppercase tracking-tight text-slate-950">
                             {event.title}
                         </h1>
