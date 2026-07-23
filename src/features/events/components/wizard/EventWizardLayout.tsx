@@ -115,17 +115,31 @@ const INITIAL_FORM: EventFormData = {
     confirmRights: false,
 };
 
-export default function CreateEventPage({ handle_submission }: any) {
+export default function CreateEventPage({ handle_submission ,errors}: any) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
     const [newTier, setNewTier] = useState([{ name: '', price: 0, seatsAvailable: 0, availableUntil: '', description: '' }]);
     const [isPublishing, startPublishing] = useTransition();
+    const [serverError, setServerError] = useState<string | null>(null);
 
     const handling_submission_client = (formData: EventFormData) => {
         if (isPublishing) return; // guard against duplicate submissions
         startPublishing(async () => {
-            await handle_submission(formData);
+           
+               
+          try {
+                const response = await handle_submission(formData);
+
+                // If redirect happens on server, code below doesn't execute.
+                // If code reaches here, handle return object:
+                if (response && !response.success) {
+                    setServerError(response.error);
+                }
+            } catch (err) {
+                // Catches network failures or unexpected client crashes
+                setServerError('Network error. Please check your connection and try again. Detail : ');
+            }
         });
     }
     const updateForm = (field: keyof EventFormData, value: any) => {
@@ -1221,6 +1235,7 @@ export default function CreateEventPage({ handle_submission }: any) {
         <div className="space-y-8">
             {/* Event Preview Card */}
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                <div>{serverError}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     <div className="relative h-48 md:h-auto min-h-[200px] bg-gray-800 flex items-center justify-center overflow-hidden">
                         {formData.bannerImage ? (
