@@ -23,6 +23,8 @@ Avoeline is Pakistan's all-in-one event management platform. Key capabilities in
 - **Certificates**: Custom dynamic certificate editor, automated post-event issuing, and tamper-proof blockchain certificates (Polygon).
 - **Vendor Marketplace**: Request quotes (RFQs) for catering, photography, AV, and venue rentals directly inside the app.
 - **Agenda & Speakers**: Session schedules, panel/talk/workshop tags, resource attachments (PDFs, code repos), and speaker bios.
+
+Give All the response in markdown. make sure if there are tables or such things so they are in proper markdown.
 `;
 
 export async function callGemini(prompt: string): Promise<string[]> {
