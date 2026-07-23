@@ -12,13 +12,22 @@ export default async function PublishSuccessModal({ params }: { params: Promise<
   const organizer_id = resolvedParams.organizer_id;
   const event_id = resolvedParams.eventId;
   const event = await EventService.getEventByID(event_id);
+  let message = "";
 
+  if(event && event.status === 'draft'){
+    message = ' is a draft event.'
+  }else if(event && event.status === 'published'){
+    message = 'is now live and open for registrations.'
+  }
+else{
+  message = " is being added to your events";
+}
   if (!event) {
     return <div>Event not found</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-900/50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white-900/50 flex items-center justify-center p-4">
       {/* Modal Container */}
       <div className="bg-white rounded-[32px] p-10 max-w-[500px] w-full shadow-2xl relative overflow-hidden">
 
@@ -31,9 +40,10 @@ export default async function PublishSuccessModal({ params }: { params: Promise<
         <div className="relative z-10 flex flex-col items-center">
           <SuccessIcon />
 
+
           <SuccessHeader
             eventTitle={event.title}
-            message="is now live and open for registrations."
+            message={message}
           />
 
           <EventStats

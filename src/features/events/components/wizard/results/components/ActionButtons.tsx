@@ -12,7 +12,7 @@ export default function ActionButtons({ eventId,organizer_id }: ActionButtonsPro
     <div className="w-full space-y-3 mb-8">
       {/* View Event Button */}
       <button 
-        onClick={() => router.replace(`organizer/${organizer_id}/events/${eventId}`)}
+        onClick={() => router.replace(`/organizer/${organizer_id}/events/${eventId}`)}
         className="w-full bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-800 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ export default function ActionButtons({ eventId,organizer_id }: ActionButtonsPro
       
       {/* Manage Registrations Button */}
       <button 
-        onClick={() => router.replace(`organizer/${organizer_id}/events/${eventId}/attendee`)}
+        onClick={() => router.replace(`/organizer/${organizer_id}/events/${eventId}/attendees`)}
         className="w-full bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-800 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

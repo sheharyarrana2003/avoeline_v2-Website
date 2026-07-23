@@ -271,6 +271,7 @@ export const EventService = {
     event_to_be_added.id = id_generated;
    
     if(formdata.isDraft){
+      console.log(`the status -> ${formdata.isDraft}`);
       event_to_be_added.status = 'draft';
     }
 
