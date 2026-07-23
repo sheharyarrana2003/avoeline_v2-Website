@@ -6,7 +6,6 @@ import {
 } from "@/src/services/models/feedback.model";
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 import { COLLECTIONS } from "@/data/collections";
