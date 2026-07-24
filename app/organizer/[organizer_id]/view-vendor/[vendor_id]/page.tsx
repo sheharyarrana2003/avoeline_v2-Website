@@ -93,62 +93,11 @@ export default async function VendorProfilePage({
         { id: "services", label: "Services" },
         { id: "portfolio", label: "Portfolio" },
         { id: "reviews", label: `Reviews (${totalReviews})` },
-        { id: "availability", label: "Availability" },
     ];
 
     return (
         <div className="min-h-screen bg-gray-50">
 
-            {/* Top Navigation Bar */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-                    <Link
-                        href={`/organizer/${organizer_id}/vendor-marketplace`}
-                        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Marketplace
-                    </Link>
-
-                    <div className="flex items-center gap-3">
-                        <button className="px-4 py-1.5 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                            Contact
-                        </button>
-                        <button className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 transition">
-                            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Hero Banner */}
-            <div className="relative h-64 md:h-80 bg-gray-300 overflow-hidden">
-                {coverImage ? (
-                    <img
-                        src={coverImage}
-                        alt={portfolioImages[0]?.caption || businessName}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center">
-                        <span className="text-6xl opacity-30">🏢</span>
-                    </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
-                {portfolioImages.length > 0 && (
-                    <div className="absolute bottom-4 left-4 md:left-8 bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {portfolioImages.length + portfolioVideos.length} Media
-                    </div>
-                )}
-            </div>
 
             {/* Profile Info Section - Below Banner */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
@@ -162,12 +111,6 @@ export default async function VendorProfilePage({
                                 <img src={logo} alt={businessName} className="w-12 h-12 rounded-full object-cover border border-gray-200 bg-white" />
                             )}
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{businessName}</h1>
-                            <div className="flex gap-1.5">
-                                {isVerified && <VerificationBadge label="Verified" />}
-                                {verificationBadges.includes("top_rated") && <VerificationBadge label="Top Rated" />}
-                                {verificationBadges.includes("fast_responder") && <VerificationBadge label="Fast Responder" />}
-                                {verificationBadges.includes("food_safety_certified") && <VerificationBadge label="Food Safe" />}
-                            </div>
                         </div>
 
                         {/* Rating */}
@@ -198,24 +141,7 @@ export default async function VendorProfilePage({
                             </div>
                         )}
 
-                        {/* Meta Info */}
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                            {yearsInBusiness !== null && yearsInBusiness > 0 && (
-                                <span>Established {new Date().getFullYear() - yearsInBusiness}</span>
-                            )}
-                            {stats?.totalBookings && (
-                                <>
-                                    <span>•</span>
-                                    <span>{stats.totalBookings} Bookings</span>
-                                </>
-                            )}
-                            {stats?.avgResponseTime && (
-                                <>
-                                    <span>•</span>
-                                    <span className="text-green-600 font-medium">Fast Responder</span>
-                                </>
-                            )}
-                        </div>
+                       
                     </div>
 
                     {/* Right: Action Buttons */}
@@ -229,22 +155,6 @@ export default async function VendorProfilePage({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </Link>
-
-                        <div className="flex gap-3">
-                            <button className="flex-1 border border-gray-300 py-2.5 px-4 rounded-full font-semibold text-sm text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-1.5">
-                                Contact
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <button className="flex-1 border border-gray-300 py-2.5 px-4 rounded-full font-semibold text-sm text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-1.5">
-                                Portfolio
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
