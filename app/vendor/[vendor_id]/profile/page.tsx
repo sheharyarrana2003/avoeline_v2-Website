@@ -104,18 +104,12 @@ export default async function VendorProfilePage({
     // Active tab from URL
     const activeTab = (awaitedSearchParams?.tab as string) || 'services';
 
-    const tabs = [
-        { id: 'services', label: 'Services' },
-        { id: 'portfolio', label: 'Portfolio' },
-        { id: 'reviews', label: 'Reviews' },
-        { id: 'availability', label: 'Availability' },
-    ];
-
+ 
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
             
             {/* Top Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+            <div className=" border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link 
@@ -140,17 +134,8 @@ export default async function VendorProfilePage({
                                 <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isPreview ? 'right-1' : 'left-1'}`} />
                             </Link>
                         </div>
-                        
-                        <button className="px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                            Share Profile
-                        </button>
-                        
-                        <Link
-                            href={`/vendor/${vendor_id}/profile/edit`}
-                            className="px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-                        >
-                            Edit Profile
-                        </Link>
+                       
+                       
                     </div>
                 </div>
             </div>
@@ -256,104 +241,9 @@ export default async function VendorProfilePage({
                                     </a>
                                 </div>
 
-                                {/* Stats Grid */}
-                                <div className="grid grid-cols-2 gap-3 mt-6">
-                                    <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Bookings</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{totalBookings}</p>
-                                    </div>
-                                    <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Years</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{yearsInBusiness || 0}</p>
-                                    </div>
-                                    <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Response</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{avgResponseTime}</p>
-                                    </div>
-                                    <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Repeat</p>
-                                        <p className="text-xl font-bold text-gray-900 mt-1">{repeatPct}%</p>
-                                    </div>
-                                </div>
+                                
 
-                                {/* Tabs */}
-                                <div className="flex gap-6 mt-6 border-b border-gray-100">
-                                    {tabs.map((tab) => (
-                                        <Link
-                                            key={tab.id}
-                                            href={`/vendor/${vendor_id}/profile?tab=${tab.id}`}
-                                            className={`pb-3 text-sm font-medium transition relative ${
-                                                activeTab === tab.id
-                                                    ? "text-gray-900 border-b-2 border-black"
-                                                    : "text-gray-400 hover:text-gray-600"
-                                            }`}
-                                        >
-                                            {tab.label}
-                                        </Link>
-                                    ))}
-                                </div>
-
-                                {/* Tab Content */}
-                                <div className="mt-6 space-y-4">
-                                    {activeTab === 'services' && services.length === 0 && (
-                                        <p className="text-sm text-gray-400 text-center py-8">No services added yet.</p>
-                                    )}
-                                    {activeTab === 'services' && services.map((service: any, i: number) => (
-                                        <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-900">{service.name}</p>
-                                                <p className="text-xs text-gray-400 mt-0.5">{service.description}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-bold text-gray-900">{formatCurrency(service.price)}</p>
-                                                <p className="text-[10px] text-gray-400">/{service.unit}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    
-                                    {activeTab === 'portfolio' && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {portfolioImages.map((img: any, i: number) => (
-                                                <div key={i} className="aspect-square bg-gray-200 rounded-xl overflow-hidden">
-                                                    {img?.url ? (
-                                                        <img src={img.url} alt={img.caption} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
-                                                    )}
-                                                </div>
-                                            ))}
-                                            {portfolioImages.length === 0 && (
-                                                <p className="text-sm text-gray-400 col-span-2 text-center py-8">No portfolio images yet.</p>
-                                            )}
-                                        </div>
-                                    )}
-                                    
-                                    {activeTab === 'reviews' && (
-                                        <div className="space-y-4">
-                                            {v?.portfolio?.clientTestimonials?.map((t: any, i: number) => (
-                                                <div key={i} className="bg-gray-50 rounded-xl p-4">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <div className="flex">
-                                                            {[...Array(5)].map((_, si) => (
-                                                                <svg key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
-                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                </svg>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 italic">"{t?.testimonial}"</p>
-                                                    <p className="text-xs text-gray-400 mt-2">— {t?.clientName}</p>
-                                                </div>
-                                            )) || <p className="text-sm text-gray-400 text-center py-8">No reviews yet.</p>}
-                                        </div>
-                                    )}
-                                    
-                                    {activeTab === 'availability' && (
-                                        <div className="text-center py-8">
-                                            <p className="text-sm text-gray-400">Availability calendar coming soon.</p>
-                                        </div>
-                                    )}
-                                </div>
+                        
                             </div>
                         </div>
                     </div>
@@ -438,7 +328,7 @@ export default async function VendorProfilePage({
                             </div>
                         </div>
 
-                        {/* Notifications */}
+                        {/* Notifications
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
@@ -475,10 +365,10 @@ export default async function VendorProfilePage({
                                     </form>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Payments & Tax */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Payments & Tax</h3>
                                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -494,10 +384,10 @@ export default async function VendorProfilePage({
                                     <p className="text-xs text-gray-400">No payout method added yet.</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Danger Zone */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 className="text-sm font-bold text-red-600 mb-4">Danger Zone</h3>
                             
                             <div className="flex items-center gap-3">
@@ -529,7 +419,7 @@ export default async function VendorProfilePage({
                                     </button>
                                 </form>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Save Bar */}
                         <div className="flex items-center justify-end gap-3 pt-4">
