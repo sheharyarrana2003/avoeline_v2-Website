@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import {
     BadgeCheck,
-    Bell,
     CalendarDays,
     CreditCard,
     Globe,
@@ -258,26 +257,6 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                 {organizer.plan.type}
                             </span>
                         </div>
-                    </div>
-
-                    {/* Notifications */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <SectionTitle icon={<Bell size={18} />} title="Notifications" />
-                        <ul className="space-y-4">
-                            {[
-                                ["New registrations", organizer.settings.notificationPreferences.newRegistrations],
-                                ["New vendor quotes", organizer.settings.notificationPreferences.newVendorQuotes],
-                                ["Payment received", organizer.settings.notificationPreferences.paymentReceived],
-                                ["Event reminders", organizer.settings.notificationPreferences.eventReminders],
-                            ].map(([label, enabled]) => (
-                                <li key={String(label)} className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-gray-900">{label}</span>
-                                    <span className={`inline-flex h-6 w-11 items-center rounded-full ${enabled ? "bg-black" : "bg-gray-200"}`}>
-                                        <span className={`inline-block size-4 rounded-full bg-white transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`} />
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
                     </div>
                 </div>
             </div>

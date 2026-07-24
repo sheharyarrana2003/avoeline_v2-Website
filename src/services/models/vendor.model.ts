@@ -41,6 +41,29 @@ export interface Ratings {
     breakdown: Record<string, number>;
 }
 
+export interface PortfolioImage {
+    url: string;
+    caption: string;
+    eventType: string;
+    date: string;
+}
+
+export interface ClientTestimonial {
+    clientName: string;
+    testimonial: string;
+    rating: number;
+    eventDate: string;
+}
+
+export interface VendorPortfolio {
+    images: PortfolioImage[];
+    videos: string[];
+    clientTestimonials: ClientTestimonial[];
+    pastEvents: string[];
+    /** Not part of the base schema, but written by the cover-image upload. */
+    coverImage?: string;
+}
+
 export interface VendorData {
     vendorId: string;
     userId: string;
@@ -48,11 +71,11 @@ export interface VendorData {
     logo: string;
     contact: Contact;
     serviceCategories: string[];
-    portfolio: any; 
+    portfolio: VendorPortfolio;
     pricingPackages: PricingPackage[];
     services: Service[]; // Added to match Service interface
     ratings: Ratings;
-    stats: any;    
+    stats: any;
     verification: {
         verified: boolean;
         verificationMethod: string;
@@ -74,7 +97,7 @@ export class Vendor implements VendorData {
     public logo: string;
     public contact: Contact;
     public serviceCategories: string[];
-    public portfolio: any; 
+    public portfolio: VendorPortfolio;
     public pricingPackages: PricingPackage[];
     public services: Service[]; // Added property declaration
     public ratings: Ratings;
@@ -126,12 +149,13 @@ export class Vendor implements VendorData {
             }
         };
 
-        // Complete instantiation structure for the 'any' portfolio property
+        // Complete instantiation structure for the portfolio property
         this.portfolio = {
             images: [],
             videos: [],
             clientTestimonials: [],
-            pastEvents: []
+            pastEvents: [],
+            coverImage: ""
         };
 
         // Complete initialization structure for the 'ratings' property

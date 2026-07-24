@@ -1,20 +1,20 @@
 import { DashboardEvent } from "../types";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Clock, MapPin } from "lucide-react";
 import { formatTime } from "@/src/lib/datetime";
 
 export default function TodaysSchedule({ events }: { events: DashboardEvent[] }) {
   return (
-    <section className="rounded-lg border border-slate-200/80 bg-white p-6 shadow-[0_18px_45px_rgba(21,27,38,0.06)]">
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-base font-extrabold uppercase tracking-wide text-slate-800">
+    <section className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
+      <div className="mb-4 flex items-center justify-between border-b border-gray-300/60 pb-3">
+        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">
           Today&apos;s Schedule
         </h2>
         <button
           type="button"
-          className="flex size-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors"
           aria-label="Schedule options"
         >
-          <MoreHorizontal size={18} />
+          <MoreHorizontal size={16} />
         </button>
       </div>
 
@@ -23,31 +23,35 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
           const isActive = event.status === "ACTIVE";
 
           return (
-            <li key={event.id} className="grid grid-cols-[18px_minmax(0,1fr)] gap-4">
+            <li key={event.id} className="grid grid-cols-[16px_minmax(0,1fr)] gap-3">
               <div className="flex flex-col items-center">
                 <span
-                  className={`mt-1 size-4 rounded-full border-2 ${
+                  className={`mt-1.5 w-3.5 h-3.5 rounded-full border-2 ${
                     isActive
-                      ? "border-[#7454f6] bg-[#7454f6] shadow-[0_0_0_4px_rgba(116,84,246,0.16)]"
-                      : "border-slate-200 bg-slate-300"
+                      ? "border-black bg-black shadow-xs"
+                      : "border-gray-300 bg-gray-400"
                   }`}
                 />
-                {index < events.length - 1 && <span className="mt-2 h-full w-px min-h-16 bg-slate-200" />}
+                {index < events.length - 1 && <span className="mt-1.5 h-full w-px min-h-12 bg-gray-300/80" />}
               </div>
 
-              <div className="border-b border-slate-100 pb-5 last:border-b-0">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="border-b border-gray-300/40 pb-4 last:border-b-0">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-wider text-[#7454f6]">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-gray-500" />
                       {formatTime(event.startDate)} - {formatTime(event.endDate)}
                     </p>
-                    <h3 className="mt-2 text-base font-extrabold text-slate-900">{event.title}</h3>
-                    <p className="mt-1 text-sm font-semibold text-slate-400">{event.location}</p>
+                    <h3 className="mt-1 text-sm font-bold text-gray-900">{event.title}</h3>
+                    <p className="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-gray-400" />
+                      {event.location}
+                    </p>
                   </div>
 
                   <span
-                    className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-extrabold ${
-                      isActive ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-400"
+                    className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                      isActive ? "bg-black text-white" : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     {isActive ? "Live View" : "Upcoming"}
