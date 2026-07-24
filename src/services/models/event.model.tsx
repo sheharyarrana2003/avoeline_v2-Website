@@ -83,6 +83,9 @@ export interface Speaker {
   bio: string;
   profileImage: string;
   sessionTitle: string;
+  purpose: string;
+  start_time: string;
+  end_time: string;
 }
 
 export interface CertificateConfig {

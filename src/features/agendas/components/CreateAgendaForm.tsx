@@ -187,7 +187,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
 
                     {/* Speaker Names */}
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Event</label>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Speakers</label>
                         <div className="relative">
                             <select name="selectedEventId" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none">
                                 {activeSpeakers && activeSpeakers.map((x) => (
@@ -216,15 +216,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                 {/* Footer */}
                 <div className="flex flex-col-reverse md:flex-row justify-between items-center px-8 py-5 border-t border-gray-50 bg-white rounded-b-2xl gap-4 md:gap-0">
 
-                    {/* Keyboard Shortcuts */}
-                    <div className="flex items-center gap-3 text-xs text-gray-400 font-medium">
-                        <span className="flex items-center gap-1">
-                            <span className="border border-gray-200 rounded px-1.5 py-0.5 shadow-sm bg-gray-50">⌘+S</span> to save
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <span className="border border-gray-200 rounded px-1.5 py-0.5 shadow-sm bg-gray-50">Esc</span> to cancel
-                        </span>
-                    </div>
+            
 
                     {/* Action Buttons */}
                     <div className="flex gap-3 w-full md:w-auto">

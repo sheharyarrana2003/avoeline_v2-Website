@@ -31,6 +31,10 @@ export const SpeakerService = {
             const linkedin = (formData.get("linkedin") as string) || "";
             const twitter = (formData.get("twitter") as string) || "";
 
+            const purpose = (formData.get("purpose") as string) || "";
+            const start_time = (formData.get("start_time") as string) || "";
+            const end_time = (formData.get("end_time") as string) || "";
+
             // Avatar uploaded to Supabase Storage (public URL) via the form's
             // hidden profileImage input; fall back to the placeholder if none.
             const profileImage = String(formData.get("profileImage") || "/placeholders/speaker-avatar.png");
@@ -42,7 +46,10 @@ export const SpeakerService = {
                 designation: designation.trim(),
                 bio: bio.trim(),
                 profileImage: profileImage,
-                sessionTitle: sessionTitle
+                sessionTitle: sessionTitle,
+                purpose:purpose,
+                start_time: start_time,
+                end_time: end_time
             };
 
             Event.speakers.push(new_speaker);

@@ -1,7 +1,17 @@
 import { Speaker } from "@/src/services/models/event.model";
 
 
-
+// export interface Speaker {
+//   speakerId: string;
+//   name: string;
+//   designation: string;
+//   bio: string;
+//   profileImage: string;
+//   sessionTitle: string;
+//   purpose: string;
+//   start_time: string;
+//   end_time: string;
+// }
 export function SpeakerCard({ speaker }: { speaker: Speaker }) {
     return (
         <div className="flex flex-col items-center p-8 bg-white border border-slate-100 rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
@@ -29,6 +39,15 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
 
             <p className="text-sm font-medium text-slate-500 mb-6 text-center">
                 {speaker.designation} 
+            </p>
+             <p className="text-sm font-medium text-slate-500 mb-6 text-center">
+                {speaker.purpose} 
+            </p>
+             <p className="text-sm font-medium text-slate-500 mb-6 text-center">
+                {speaker.start_time} 
+            </p>
+             <p className="text-sm font-medium text-slate-500 mb-6 text-center">
+                {speaker.end_time} 
             </p>
 
             <div className="px-4 py-2 bg-slate-50 rounded-full border border-slate-100">

@@ -83,24 +83,35 @@ export default function CreateSpeakerForm({ handle_speaker_submission }: { handl
                                         </span>
                                         <input name="twitter" type="url" placeholder="Twitter URL" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-400" />
                                     </div>
+                                      <div className="flex">
+                                        <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
+                                            <Share2 size={16} />
+                                        </span>
+                                        <input name="website" type="url" placeholder="Website URL" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-400" />
+                                    </div>
+                                     <label className="block text-sm font-bold text-gray-900 mb-2">Agenda</label>
+                                    <div className="flex">
+                                           <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
+                                            Purpose
+                                        </span>
+                                        <input name="purpose" type="text" placeholder="Opening Cermony...." className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-400" />
+                                    </div>
+                                     <div className="flex">
+                                         <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
+                                            Start Time
+                                        </span>
+                                        <input name="start-time" type="time"className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-400" />
+                                    </div>
+                                     <div className="flex">
+                                         <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
+                                            End Time
+                                        </span>
+                                        <input name="end-time" type="time" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-400" />
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Assigned Sessions */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2">Assigned Sessions</label>
-                                <div className="border border-gray-200 rounded-xl p-4 flex flex-wrap gap-2 items-center bg-gray-50/30">
-                                    <span className="bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                                        Keynote: Future of AI <X size={14} className="cursor-pointer hover:text-gray-300" />
-                                    </span>
-                                    <span className="bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                                        Panel: Tech Ethics <X size={14} className="cursor-pointer hover:text-gray-500" />
-                                    </span>
-                                    <button type="button" className="text-gray-400 hover:text-blue-600 transition-colors ml-1 border border-gray-300 rounded-full p-0.5">
-                                        <Plus size={16} />
-                                    </button>
-                                </div>
-                            </div>
+                           
                         </div>
                     </div>
 
@@ -123,28 +134,14 @@ export default function CreateSpeakerForm({ handle_speaker_submission }: { handl
                             </div>
 
                             {/* Custom Toggle Switch */}
-                            <label className="flex items-center cursor-pointer gap-3">
-                                <div className="relative">
-                                    <input type="checkbox" name="isPublic" className="sr-only peer" />
-                                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </div>
-                                <span className="text-sm font-medium text-gray-600">Show contact info publicly</span>
-                            </label>
+                            
                         </div>
                     </div>
 
                     {/* Footer Section */}
                     <div className="mt-8 pt-6 bg-gray-50/50 -mx-8 -mb-8 p-8 rounded-b-2xl flex flex-col md:flex-row justify-between items-center gap-6 border-t border-gray-100">
 
-                        {/* Keyboard Shortcuts */}
-                        <div className="flex items-center gap-4 text-[11px] font-medium text-gray-400 uppercase tracking-wider">
-                            <span className="flex items-center gap-2">
-                                <kbd className="border border-gray-200 rounded px-2 py-1 bg-white text-gray-500 shadow-sm font-sans">ESC</kbd> to cancel
-                            </span>
-                            <span className="flex items-center gap-2">
-                                <kbd className="border border-gray-200 rounded px-2 py-1 bg-white text-gray-500 shadow-sm font-sans">⌘+S</kbd> to save
-                            </span>
-                        </div>
+                        
 
                         {/* Action Buttons */}
                         <div className="flex gap-3 w-full md:w-auto">
