@@ -1,7 +1,7 @@
 import { cache } from "react";
-import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
+import { VendorData, Contact, Address, PricingPackage, Service, Ratings } from "@/src/services/models/vendor.model"
 import { BookingData } from "../bookings/types";
-import {  adminDb } from "@/data/admin_db";
+import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 
@@ -35,7 +35,6 @@ export function mapToContact(raw: any): Contact {
     };
 }
 
-
 export function mapToPricingPackage(raw: any): PricingPackage {
     return {
         packageId: raw?.packageId || "",
@@ -45,13 +44,22 @@ export function mapToPricingPackage(raw: any): PricingPackage {
         price: Number(raw?.price) || 0,
         minOrder: Number(raw?.minOrder) || 0,
         customizationOptions: Array.isArray(raw?.customizationOptions) ? raw.customizationOptions : [],
-        // Per-service media (S1) — must be carried through or the service cards
-        // fall back to placeholders even when media is stored.
+    };
+}
+
+export function mapToService(raw: any): Service {
+    return {
+        serviceId: raw?.serviceId || "",
+        name: raw?.name || "",
+        description: raw?.description || "",
+        category: raw?.category || "",
+        inclusions: Array.isArray(raw?.inclusions) ? raw.inclusions : [],
+        price: Number(raw?.price) || 0,
+        minOrder: Number(raw?.minOrder) || 0,
         images: Array.isArray(raw?.images) ? raw.images : [],
         videos: Array.isArray(raw?.videos) ? raw.videos : [],
     };
 }
-
 
 export function mapToRatings(raw: any): Ratings {
     return {
@@ -79,6 +87,10 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
             ? raw.pricingPackages.map(mapToPricingPackage)
             : [],
 
+        services: Array.isArray(raw?.services)
+            ? raw.services.map(mapToService)
+            : [],
+
         ratings: mapToRatings(raw?.ratings),
 
         stats: raw?.stats || {},
@@ -101,6 +113,7 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
         lastActive: toDt(raw?.lastActive),
     };
 }
+
 export const EventVendorService = {
     getVendorsByEvent: async (eventId: string) => {
         let arr_of_bookings: BookingData[] = [];
@@ -122,7 +135,6 @@ export const EventVendorService = {
         const arr_of_bookings_active = arr_of_bookings.filter(x =>
             validStatuses.includes(x.status)
         );
-        //now have many bookings -> eahc having vendorid -> extracat their corrrespoding vecator
 
         const vendorIds = [...new Set(arr_of_bookings_active.map(b => b.vendorId).filter(Boolean))];
         const max_num_firebase_allows = 30;
@@ -149,6 +161,7 @@ export const EventVendorService = {
 
         return arr_of_vendors_active;
     },
+
     getVendorById: cache(async (vendor_id: string) => {
         // Only the first match is used, so cap the read at one document.
         const q = adminDb.
@@ -158,7 +171,6 @@ export const EventVendorService = {
 
         const querySnapshot = await q.get();
 
-
         if (querySnapshot.empty) {
             return null;
         }
@@ -166,6 +178,7 @@ export const EventVendorService = {
         return mapToVendorData(data, querySnapshot.docs[0].id);
 
     }),
+
     async getAllVendors() {
         // Cap the marketplace read instead of pulling the entire vendors
         // collection every load. Raise the limit or paginate when needed.
@@ -173,7 +186,7 @@ export const EventVendorService = {
             collection(COLLECTIONS.VENDORS).
             limit(60)
 
-        const querySnapshot : QuerySnapshot= await q.get();
+        const querySnapshot : QuerySnapshot = await q.get();
         if (querySnapshot.empty) {
             return null;
         }

@@ -21,8 +21,16 @@ export interface PricingPackage {
     price: number;
     minOrder: number;
     customizationOptions: string[];
-    /** Media uploaded for THIS service, stored on the package so it never
-     *  gets mis-associated by array position with a shared portfolio list. */
+}
+
+export interface Service {
+    serviceId: string;
+    name: string;
+    description: string;
+    category: string;
+    inclusions: string[];
+    price: number;
+    minOrder: number;
     images?: string[];
     videos?: string[];
 }
@@ -42,6 +50,7 @@ export interface VendorData {
     serviceCategories: string[];
     portfolio: any; 
     pricingPackages: PricingPackage[];
+    services: Service[]; // Added to match Service interface
     ratings: Ratings;
     stats: any;    
     verification: {
@@ -67,6 +76,7 @@ export class Vendor implements VendorData {
     public serviceCategories: string[];
     public portfolio: any; 
     public pricingPackages: PricingPackage[];
+    public services: Service[]; // Added property declaration
     public ratings: Ratings;
     public stats: any;    
     public verification: {
@@ -86,7 +96,7 @@ export class Vendor implements VendorData {
      * Initializes a brand-new Vendor profile layout during the authentication / role selection flow.
      */
     constructor(userId: string, email: string, businessName: string) {
-        const now = new Date(); // system timestamps → Firebase Timestamp
+        const now = new Date();
 
         this.vendorId = `${userId}`;
         this.userId = userId;
@@ -94,6 +104,7 @@ export class Vendor implements VendorData {
         this.logo = "";
         this.serviceCategories = [];
         this.pricingPackages = [];
+        this.services = []; // Initialized as empty array
         this.status = 'active';
         this.featured = false;
         
@@ -175,6 +186,7 @@ export class Vendor implements VendorData {
             serviceCategories: this.serviceCategories,
             portfolio: this.portfolio,
             pricingPackages: this.pricingPackages,
+            services: this.services, // Added to Firestore payload
             ratings: this.ratings,
             stats: this.stats,
             verification: this.verification,

@@ -1,6 +1,3 @@
-// app/vendor/[vendor_id]/services/page.tsx
-// Fully Server Component
-
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -28,32 +25,18 @@ const getCategoryLabel = (category: string) => {
     return labels[category?.toLowerCase()] || category;
 };
 
-const getCategoryCount = (packages: any[], category: string) => {
-    // In real app, packages would have a category field. 
-    // For now, map based on package name/content
-    if (category === 'catering') return packages.filter((p: any) => 
-        p.name.toLowerCase().includes('catering') || 
-        p.name.toLowerCase().includes('buffet') ||
-        p.name.toLowerCase().includes('lunch') ||
-        p.name.toLowerCase().includes('wedding')
+const getCategoryCount = (services: any[], category: string) => {
+    return services.filter(
+        (s: any) => s.category?.toLowerCase() === category.toLowerCase()
     ).length;
-    if (category === 'event_management') return packages.filter((p: any) => 
-        p.name.toLowerCase().includes('event') || 
-        p.name.toLowerCase().includes('management')
-    ).length;
-    return 0;
 };
 
-const getServiceStatus = (pkg: any, index: number) => {
-    // Mock status logic - first 2 active, last one inactive
+const getServiceStatus = (service: any, index: number) => {
+    // Mock status logic - first 2 active, rest inactive
     if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-green-500 text-white' };
     return { status: 'inactive', label: 'INACTIVE', color: 'bg-white text-gray-500' };
 };
 
-const isPopular = (pkg: any, index: number) => {
-    // Mock popular flag
-    return index === 1; // Premium Wedding Package is popular
-};
 
 export default async function VendorServicesPage({ 
     params,
@@ -74,48 +57,35 @@ export default async function VendorServicesPage({
         notFound();
     }
     
-    const businessName = vendor?.businessName || "Vendor Services";
-    const pricingPackages = vendor?.pricingPackages || [];
+    const services = vendor?.services || [];
     const serviceCategories = vendor?.serviceCategories || [];
     
     // Build category tabs from vendor's serviceCategories
     const categoryTabs = [
-        { id: 'all', label: 'All Services', count: pricingPackages.length },
+        { id: 'all', label: 'All Services', count: services.length },
         ...serviceCategories.map((cat: string) => ({
             id: cat.toLowerCase(),
             label: getCategoryLabel(cat),
-            count: getCategoryCount(pricingPackages, cat),
+            count: getCategoryCount(services, cat),
         })),
     ];
     
-    // Filter packages by category
-    let displayPackages = pricingPackages;
+    // Filter services by category
+    let displayServices = services;
     if (filter !== 'all') {
-        displayPackages = pricingPackages.filter((pkg: any) => {
-            const pkgName = pkg.name.toLowerCase();
-            if (filter === 'catering') {
-                return pkgName.includes('catering') || pkgName.includes('buffet') || pkgName.includes('lunch') || pkgName.includes('wedding') || pkgName.includes('drop');
-            }
-            if (filter === 'event_management') {
-                return pkgName.includes('event') || pkgName.includes('management');
-            }
-            return true;
+        displayServices = services.filter((s: any) => {
+            return s.category?.toLowerCase() === filter.toLowerCase();
         });
     }
     
-    // Add status and metadata to packages
-    const enrichedPackages = displayPackages.map((pkg: any, index: number) => ({
-        ...pkg,
-        statusInfo: getServiceStatus(pkg, index),
-        isPopular: isPopular(pkg, index),
-        category: index < 2 ? 'catering' : 'event_management',
+    // Add status and metadata to services
+    const enrichedServices = displayServices.map((service: any, index: number) => ({
+        ...service,
+        statusInfo: getServiceStatus(service, index),
     }));
 
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
-            
-            
-
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
                 
                 {/* Header */}
@@ -126,12 +96,6 @@ export default async function VendorServicesPage({
                     </div>
                     <div className="flex items-center gap-3">
                         <Link 
-                            href={`/vendor/${vendor_id}/portfolio`}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-                        >
-                            View Portfolio
-                        </Link>
-                        <Link 
                             href={`/vendor/${vendor_id}/services/add-service`}
                             className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
                         >
@@ -141,12 +105,12 @@ export default async function VendorServicesPage({
                 </div>
 
                 {/* Category Tabs */}
-                <div className="flex items-center gap-2 mb-8">
+                <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
                     {categoryTabs.map((tab) => (
                         <Link
                             key={tab.id}
                             href={`/vendor/${vendor_id}/services?filter=${tab.id}`}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition ${
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition whitespace-nowrap ${
                                 filter === tab.id
                                     ? 'bg-black text-white'
                                     : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
@@ -158,23 +122,22 @@ export default async function VendorServicesPage({
                 </div>
 
                 {/* Services Grid */}
-                {enrichedPackages.length > 0 ? (
+                {enrichedServices.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {enrichedPackages.map((pkg: any, index: number) => {
-                            const isActive = pkg.statusInfo.status === 'active';
-                            const isInactive = pkg.statusInfo.status === 'inactive';
-                            // Media comes from THE SERVICE, not a positional portfolio index.
-                            const serviceVideo = pkg.videos?.[0];
-                            const serviceImage = pkg.images?.[0];
+                        {enrichedServices.map((service: any) => {
+                            const isActive = service.statusInfo.status === 'active';
+                            const isInactive = service.statusInfo.status === 'inactive';
+                            const serviceVideo = service.videos?.[0];
+                            const serviceImage = service.images?.[0];
 
                             return (
                                 <div 
-                                    key={pkg.packageId} 
+                                    key={service.serviceId} 
                                     className={`bg-white rounded-2xl overflow-hidden shadow-sm border transition ${
                                         isInactive ? 'opacity-60 border-gray-200' : 'border-gray-100 hover:shadow-md'
                                     }`}
                                 >
-                                    {/* Image Header */}
+                                    {/* Image/Video Header */}
                                     <div className="relative h-48 bg-gray-200 overflow-hidden">
                                         {serviceVideo ? (
                                             <video
@@ -187,7 +150,7 @@ export default async function VendorServicesPage({
                                         ) : serviceImage ? (
                                             <img
                                                 src={serviceImage}
-                                                alt={pkg.name}
+                                                alt={service.name}
                                                 loading="lazy"
                                                 decoding="async"
                                                 className="w-full h-full object-cover"
@@ -200,24 +163,17 @@ export default async function VendorServicesPage({
                                         
                                         {/* Status Badge */}
                                         <div className="absolute top-3 left-3">
-                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${pkg.statusInfo.color}`}>
-                                                {pkg.statusInfo.label}
+                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${service.statusInfo.color}`}>
+                                                {service.statusInfo.label}
                                             </span>
                                         </div>
                                         
-                                        {/* Popular Badge */}
-                                        {pkg.isPopular && (
-                                            <div className="absolute top-3 right-3">
-                                                <span className="text-[10px] font-bold bg-white text-gray-900 px-2.5 py-1 rounded-full uppercase tracking-wider border border-gray-200">
-                                                    POPULAR
-                                                </span>
-                                            </div>
-                                        )}
+                                    
                                         
                                         {/* Edit/Delete Actions */}
                                         <div className="absolute bottom-3 right-3 flex gap-2">
                                             <Link 
-                                                href={`/vendor/${vendor_id}/services/${pkg.packageId}/edit`}
+                                                href={`/vendor/${vendor_id}/services/${service.serviceId}/edit`}
                                                 className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
                                             >
                                                 <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,7 +181,7 @@ export default async function VendorServicesPage({
                                                 </svg>
                                             </Link>
                                             <form action={deleteServiceAction} className="inline">
-                                                <input type="hidden" name="packageId" value={pkg.packageId} />
+                                                <input type="hidden" name="serviceId" value={service.serviceId} />
                                                 <button 
                                                     type="submit"
                                                     className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
@@ -242,37 +198,37 @@ export default async function VendorServicesPage({
                                     <div className="p-5">
                                         {/* Category */}
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                            {getCategoryLabel(pkg.category || 'catering')}
+                                            {getCategoryLabel(service.category || 'general')}
                                         </p>
                                         
                                         {/* Title */}
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">{pkg.name}</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2">{service.name}</h3>
                                         
                                         {/* Description */}
                                         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                                            {pkg.description}
+                                            {service.description}
                                         </p>
                                         
                                         {/* Price & Action */}
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <span className="text-lg font-bold text-gray-900">{formatCurrency(pkg.price)}</span>
-                                                <span className="text-xs text-gray-400 ml-1">/ {pkg.minOrder ? `min ${pkg.minOrder}` : 'person'}</span>
+                                                <span className="text-lg font-bold text-gray-900">{formatCurrency(service.price)}</span>
+                                                <span className="text-xs text-gray-400 ml-1">/ {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
                                             </div>
                                             
                                             {isActive ? (
                                                 <Link 
-                                                    href={`/vendor/${vendor_id}/services/${pkg.packageId}`}
+                                                    href={`/vendor/${vendor_id}/services/${service.serviceId}`}
                                                     className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1 hover:text-gray-600 transition"
                                                 >
-                                                    View Packages
+                                                    View Service
                                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                     </svg>
                                                 </Link>
                                             ) : (
                                                 <form action={activateServiceAction}>
-                                                    <input type="hidden" name="packageId" value={pkg.packageId} />
+                                                    <input type="hidden" name="serviceId" value={service.serviceId} />
                                                     <button 
                                                         type="submit"
                                                         className="text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition"
@@ -300,7 +256,7 @@ export default async function VendorServicesPage({
                             href={`/vendor/${vendor_id}/services/add-service`}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
                         >
-                            + Add add-service Service
+                            + Add Service
                         </Link>
                     </div>
                 )}
@@ -312,14 +268,14 @@ export default async function VendorServicesPage({
 // Server Actions
 async function deleteServiceAction(formData: FormData) {
     'use server';
-    const packageId = formData.get('packageId') as string;
+    const serviceId = formData.get('serviceId') as string;
     // TODO: Call API to delete service
-    console.log('Delete service', packageId);
+    console.log('Delete service', serviceId);
 }
 
 async function activateServiceAction(formData: FormData) {
     'use server';
-    const packageId = formData.get('packageId') as string;
+    const serviceId = formData.get('serviceId') as string;
     // TODO: Call API to activate service
-    console.log('Activate service', packageId);
+    console.log('Activate service', serviceId);
 }
