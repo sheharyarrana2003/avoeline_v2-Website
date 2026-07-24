@@ -1,6 +1,5 @@
 import { cache } from "react";
-import { VendorData, Contact, Address, PricingPackage, Ratings, VendorPortfolio, PortfolioImage, ClientTestimonial } from "@/src/services/models/vendor.model"
-import { VendorData, Contact, Address, PricingPackage, Service, Ratings } from "@/src/services/models/vendor.model"
+import { VendorData, Contact,Service, Address, PricingPackage, Ratings, VendorPortfolio, PortfolioImage, ClientTestimonial } from "@/src/services/models/vendor.model"
 import { BookingData } from "../bookings/types";
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
