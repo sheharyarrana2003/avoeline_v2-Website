@@ -23,7 +23,7 @@ export default async function ReqQuotePage({
 
         try {
             await BookingServices.createBookingFromForm(form_data, organizerId, eventId, vendorId);
-            redirect(`organizer/${organizer_id}/quotes`)
+            redirect(`/organizer/${organizer_id}/quotes`)
         } catch (error) {
             if (isRedirectError(error)) {
                 throw error;
@@ -95,7 +95,7 @@ export default async function ReqQuotePage({
                                     <div className="relative">
                                         {/* Added name="serviceType" */}
                                         <select name="serviceType" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                            {vendor?.serviceCategories.map(s => <option>{s}</option>)}
+                                            {vendor?.serviceCategories.map(s => <option key={s}>{s}</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -106,7 +106,7 @@ export default async function ReqQuotePage({
                                     {/* Added name="serviceName" */}
 
                                     <select name="serviceName" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                        {vendor?.services.map(s => <option>{s.name}</option>)}
+                                        {vendor?.services.map(s => <option  key={s.serviceId}>{s.name}</option>)}
                                     </select>
                                 </div>
 
