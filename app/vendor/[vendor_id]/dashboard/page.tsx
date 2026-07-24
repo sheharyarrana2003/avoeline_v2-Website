@@ -22,24 +22,24 @@ const timeAgo = (timestamp: string) => {
     const diff = Date.now() - new Date(timestamp).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (days < 30) return `${days}d ago`;
     const months = Math.floor(days / 30);
-    return `${months} month${months > 1 ? 's' : ''} ago`;
+    return `${months}m ago`;
 };
 
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-        'quote_requested': 'bg-gray-100 text-gray-600 border-gray-200',
-        'quote_sent': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        'quote_accepted': 'bg-blue-100 text-blue-700 border-blue-200',
-        'confirmed': 'bg-green-100 text-green-700 border-green-200',
-        'in_progress': 'bg-purple-100 text-purple-700 border-purple-200',
-        'completed': 'bg-gray-100 text-gray-500 border-gray-200',
-        'cancelled': 'bg-red-100 text-red-700 border-red-200',
+        'quote_requested': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        'quote_sent': 'bg-[#EAEAEA] text-gray-800 border-gray-300',
+        'quote_accepted': 'bg-blue-100 text-blue-800 border-blue-200',
+        'confirmed': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        'in_progress': 'bg-purple-100 text-purple-800 border-purple-200',
+        'completed': 'bg-gray-200 text-gray-700 border-gray-300',
+        'cancelled': 'bg-rose-100 text-rose-800 border-rose-200',
     };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
+    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 border-gray-200';
 };
 
 const getStatusLabel = (status: string) => {
@@ -63,7 +63,7 @@ const StarRating = ({ rating }: { rating: number }) => {
             {[...Array(5)].map((_, i) => (
                 <svg
                     key={i}
-                    className={`w-3 h-3 ${i < fullStars ? 'text-gray-900 fill-gray-900' : 'text-gray-300 fill-gray-300'}`}
+                    className={`w-3 h-3 ${i < fullStars ? 'text-black fill-black' : 'text-gray-300 fill-gray-300'}`}
                     viewBox="0 0 20 20"
                 >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -77,12 +77,12 @@ const StarRating = ({ rating }: { rating: number }) => {
 const MiniBarChart = ({ data }: { data: number[] }) => {
     const max = Math.max(...data, 1);
     return (
-        <div className="flex items-end gap-1 h-16">
+        <div className="flex items-end gap-1.5 h-16 pt-2">
             {data.map((val, i) => (
                 <div
                     key={i}
-                    className={`flex-1 rounded-sm ${val === max ? 'bg-black' : 'bg-gray-200'}`}
-                    style={{ height: `${(val / max) * 100}%`, minHeight: '4px' }}
+                    className={`flex-1 rounded-t-sm transition-all ${val === max && val > 0 ? 'bg-black' : 'bg-gray-300'}`}
+                    style={{ height: `${(val / max) * 100}%`, minHeight: '6px' }}
                 />
             ))}
         </div>
@@ -102,7 +102,6 @@ export default async function VendorDashboardPage({
     if(!v){
         notFound();
     }
-   
     
     // Fetch all bookings for this vendor
     let raw_bookings : BookingData[]|null = await BookingServices.getAllBookingsOfVendor(vendor_id) ;
@@ -127,7 +126,7 @@ export default async function VendorDashboardPage({
                 eventsMap[eventId] = event;
             }
         } catch {
-            // Event not found, will use fallback
+            // Event not found fallback
         }
     }));
     
@@ -177,7 +176,6 @@ export default async function VendorDashboardPage({
     
     const upcomingBookings = confirmedBookings
         .filter((b: any) => {
-            // serviceDate is stored DD/MM/YYYY — parse with the shared helper.
             const serviceDate = parseScheduleDateTime(b?.requirements?.serviceDate, "");
             return serviceDate && serviceDate >= now;
         })
@@ -188,10 +186,8 @@ export default async function VendorDashboardPage({
         })
         .slice(0, 4);
     
-    // Weekly revenue data for chart (computed from actual completed bookings)
     const weeklyRevenue = computeWeeklyRevenue(completedBookings);
     
-    // Get budget range from quote
     const getBudgetRange = (booking: any) => {
         const total = booking?.quote?.vendorQuote?.totalAmount || 0;
         const currency = booking?.payment?.currency || 'PKR';
@@ -201,7 +197,6 @@ export default async function VendorDashboardPage({
         return `${formatCurrency(min, currency)}-${formatCurrency(max, currency).replace('PKR', '')}`;
     };
     
-    // Get service type icon
     const getServiceIcon = (serviceType: string) => {
         const icons: Record<string, string> = {
             'catering': '🍽️',
@@ -216,26 +211,33 @@ export default async function VendorDashboardPage({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Top Navigation Bar */}
-          
-
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="min-h-screen bg-[#E5E5E5] px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
+            <div className="max-w-7xl mx-auto space-y-6">
                 
-                {/* Welcome Section */}
-                <div className="flex items-center justify-between mb-8">
+                {/* Welcome Header Card - Matching Project Aesthetics */}
+                <div className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        {v?.logo && (
+                        {v?.logo ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={v.logo} alt={businessName} className="w-10 h-10 rounded-full object-cover border border-gray-200 bg-white" />
+                            <img src={v.logo} alt={businessName} className="w-11 h-11 rounded-full object-cover border border-gray-300 bg-white shadow-xs" />
+                        ) : (
+                            <div className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                                {businessName.charAt(0).toUpperCase()}
+                            </div>
                         )}
-                        <h2 className="text-xl font-bold text-gray-900">Welcome back, {businessName}!</h2>
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                                Welcome back, {businessName}!
+                            </h1>
+                            <p className="text-xs text-gray-500">Track your quotes, confirmed bookings, and monthly revenue.</p>
+                        </div>
                     </div>
+
                     <div className="flex items-center gap-2">
                         {isVerified && verificationBadges.includes('top_rated') && (
-                            <span className="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            <span className="bg-black text-white text-[10px] font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                                <svg className="w-3 h-3 fill-white" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                                 Top Rated Vendor
                             </span>
@@ -243,45 +245,51 @@ export default async function VendorDashboardPage({
                     </div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Active Quotes</p>
-                        <p className="text-3xl font-bold text-gray-900">{activeQuotes.length}</p>
+                {/* Compact Stats Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Quotes</p>
+                        <p className="text-2xl font-extrabold text-gray-900">{activeQuotes.length}</p>
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Confirmed Bookings</p>
-                        <p className="text-3xl font-bold text-gray-900">{confirmedBookings.length}</p>
+
+                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirmed Bookings</p>
+                        <p className="text-2xl font-extrabold text-gray-900">{confirmedBookings.length}</p>
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Revenue This Month</p>
-                        <p className="text-3xl font-bold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
+
+                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">This Month Revenue</p>
+                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
                     </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Average Rating</p>
-                        <p className="text-3xl font-bold text-gray-900">{vendorRating || 'N/A'}</p>
-                        <div className="flex items-center gap-2 mt-1">
+
+                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Average Rating</p>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-2xl font-extrabold text-gray-900">{vendorRating || 'N/A'}</p>
+                            <span className="text-xs text-gray-500">({totalReviews} reviews)</span>
+                        </div>
+                        <div className="mt-1">
                             <StarRating rating={vendorRating} />
-                            <span className="text-xs text-gray-400">from {totalReviews} reviews</span>
                         </div>
                     </div>
                 </div>
 
+                {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left Column: Quote Requests & Upcoming Bookings */}
+                    {/* Left Column: Recent Quote Requests & Upcoming Bookings */}
                     <div className="lg:col-span-2 space-y-6">
                         
                         {/* Recent Quote Requests */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-sm font-bold text-gray-900">Recent Quote Requests</h3>
-                                <Link href={`/vendor/${vendor_id}/quotes`} className="text-xs text-gray-500 hover:text-gray-700 underline">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
+                            <div className="flex items-center justify-between mb-4 border-b border-gray-300/60 pb-3">
+                                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">Recent Quote Requests</h3>
+                                <Link href={`/vendor/${vendor_id}/quotes`} className="text-xs font-semibold text-black hover:underline">
                                     View All
                                 </Link>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {recentQuoteRequests.length > 0 ? (
                                     recentQuoteRequests.map((booking: any, index: number) => {
                                         const eventTitle = getEventTitle(booking?.eventId);
@@ -289,34 +297,32 @@ export default async function VendorDashboardPage({
                                         const budgetRange = getBudgetRange(booking);
                                         
                                         return (
-                                            <div key={booking?.bookingId || index} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                                            <div key={booking?.bookingId || index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white border border-gray-300/50 shadow-2xs">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                                                        <span className="text-lg">{getServiceIcon(booking?.serviceType)}</span>
+                                                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
+                                                        <span className="text-base">{getServiceIcon(booking?.serviceType)}</span>
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-gray-900">{eventTitle}</p>
-                                                        <p className="text-xs text-gray-400">
+                                                        <p className="text-xs font-bold text-gray-900">{eventTitle}</p>
+                                                        <p className="text-[11px] text-gray-500">
                                                             {eventCategory} • {budgetRange}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                            {timeAgo(booking?.createdAt)}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
+
+                                                <div className="flex items-center gap-2 self-end sm:self-center">
+                                                    <span className="text-[10px] text-gray-400 font-medium mr-1">
+                                                        {timeAgo(booking?.createdAt)}
+                                                    </span>
                                                     <Link 
                                                         href={`/vendor/${vendor_id}/quotes/${booking?.bookingId}`}
-                                                        className="text-xs text-gray-500 hover:text-gray-700 underline"
+                                                        className="text-xs font-medium text-gray-600 hover:text-black underline"
                                                     >
-                                                        View Details
+                                                        Details
                                                     </Link>
                                                     <Link 
                                                         href={`/vendor/${vendor_id}/quotes/${booking?.bookingId}/submit`}
-                                                        className="bg-black text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition"
+                                                        className="bg-black text-white text-xs font-semibold px-3.5 py-1.5 rounded-full hover:bg-gray-800 transition shadow-2xs"
                                                     >
                                                         Submit Quote
                                                     </Link>
@@ -325,17 +331,17 @@ export default async function VendorDashboardPage({
                                         );
                                     })
                                 ) : (
-                                    <div className="text-center py-8">
-                                        <p className="text-sm text-gray-400">No recent quote requests</p>
+                                    <div className="text-center py-6 bg-white rounded-xl border border-gray-300/50">
+                                        <p className="text-xs text-gray-500">No recent quote requests</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Upcoming Bookings */}
-                        <div>
-                            <h3 className="text-sm font-bold text-gray-900 mb-4">Upcoming Bookings</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-[#F5F5F5] rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-4 border-b border-gray-300/60 pb-3">Upcoming Bookings</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {upcomingBookings.length > 0 ? (
                                     upcomingBookings.map((booking: any, index: number) => {
                                         const eventTitle = getEventTitle(booking?.eventId);
@@ -343,37 +349,39 @@ export default async function VendorDashboardPage({
                                         const location = booking?.requirements?.location;
                                         
                                         return (
-                                            <div key={booking?.bookingId || index} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusBadge(booking?.status)}`}>
-                                                        {getStatusLabel(booking?.status)}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-400 font-medium">
-                                                        {booking?.bookingId}
-                                                    </span>
-                                                </div>
-                                                
-                                                <h4 className="font-bold text-gray-900 mb-2">{eventTitle}</h4>
-                                                
-                                                <div className="space-y-1.5 mb-4">
-                                                    <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        {formatDate(serviceDate)}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        {location || 'Location TBD'}
-                                                    </p>
+                                            <div key={booking?.bookingId || index} className="bg-white rounded-xl p-4 border border-gray-300/50 shadow-2xs flex flex-col justify-between">
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${getStatusBadge(booking?.status)}`}>
+                                                            {getStatusLabel(booking?.status)}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-mono">
+                                                            {booking?.bookingId}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <h4 className="font-bold text-xs text-gray-900 mb-2">{eventTitle}</h4>
+                                                    
+                                                    <div className="space-y-1 mb-4">
+                                                        <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
+                                                            <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                            {formatDate(serviceDate)}
+                                                        </p>
+                                                        <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
+                                                            <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            </svg>
+                                                            {location || 'Location TBD'}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
                                                 <Link 
                                                     href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}/prepare`}
-                                                    className="w-full block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-xl transition"
+                                                    className="w-full block text-center bg-gray-200 hover:bg-gray-300 text-gray-900 text-xs font-semibold py-2 rounded-full transition"
                                                 >
                                                     Prepare
                                                 </Link>
@@ -381,24 +389,24 @@ export default async function VendorDashboardPage({
                                         );
                                     })
                                 ) : (
-                                    <div className="col-span-2 bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-                                        <p className="text-sm text-gray-400">No upcoming bookings</p>
+                                    <div className="col-span-2 bg-white rounded-xl p-6 text-center border border-gray-300/50">
+                                        <p className="text-xs text-gray-500">No upcoming bookings</p>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column: Revenue Overview */}
+                    {/* Right Column: Revenue Overview & Quick Actions */}
                     <div className="space-y-6">
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                            <h3 className="text-sm font-bold text-gray-900 mb-4">Revenue Overview</h3>
-                            <p className="text-xs text-gray-400 mb-1">Total This Month</p>
-                            <p className="text-2xl font-bold text-gray-900 mb-6">{formatCurrency(thisMonthRevenue)}</p>
+                        <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Revenue Overview</h3>
+                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Total This Month</p>
+                            <p className="text-xl font-extrabold text-gray-900 mb-4">{formatCurrency(thisMonthRevenue)}</p>
                             
                             <MiniBarChart data={weeklyRevenue} />
                             
-                            <div className="flex justify-between mt-2 text-[10px] text-gray-400">
+                            <div className="flex justify-between mt-2 text-[10px] text-gray-500 font-medium">
                                 <span>{getWeekLabel(0)}</span>
                                 <span>{getWeekLabel(3)}</span>
                                 <span>{getWeekLabel(6)}</span>
@@ -406,51 +414,38 @@ export default async function VendorDashboardPage({
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                            <h3 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h3>
+                        <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs">
+                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Quick Actions</h3>
                             <div className="space-y-2">
                                 <Link 
                                     href={`/vendor/${vendor_id}/quotes`}
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition"
+                                    className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-300/50 hover:bg-gray-100/70 transition shadow-2xs"
                                 >
-                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
+                                        <svg className="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">View All Quotes</p>
-                                        <p className="text-xs text-gray-400">{activeQuotes.length} active</p>
+                                        <p className="text-xs font-bold text-gray-900">View All Quotes</p>
+                                        <p className="text-[10px] text-gray-500">{activeQuotes.length} active quotes</p>
                                     </div>
                                 </Link>
+
                                 <Link 
                                     href={`/vendor/${vendor_id}/bookings`}
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition"
+                                    className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-300/50 hover:bg-gray-100/70 transition shadow-2xs"
                                 >
-                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
+                                        <svg className="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">Manage Bookings</p>
-                                        <p className="text-xs text-gray-400">{confirmedBookings.length} confirmed</p>
+                                        <p className="text-xs font-bold text-gray-900">Manage Bookings</p>
+                                        <p className="text-[10px] text-gray-500">{confirmedBookings.length} confirmed</p>
                                     </div>
                                 </Link>
-                                {/* <Link 
-                                    href={`/vendor/${vendor_id}/portfolio`}
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition"
-                                >
-                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    {/* <div>
-                                        <p className="text-sm font-medium text-gray-700">Update Portfolio</p>
-                                        <p className="text-xs text-gray-400">Showcase your work</p>
-                                    </div> */}
-                                {/* </Link> */} 
                             </div>
                         </div>
                     </div>
@@ -479,7 +474,6 @@ function computeWeeklyRevenue(completedBookings: any[]): number[] {
         weeks.push(weekRevenue);
     }
 
-    // Real weekly revenue (zeros when the vendor has no completed bookings yet).
     return weeks;
 }
 

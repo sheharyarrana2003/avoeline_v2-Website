@@ -3,8 +3,14 @@
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { EventService } from "@/src/services/event.service";
 import { VendorLogoUpload } from "@/src/features/event_vendors/components/VendorLogoUpload";
 import { VendorCoverUpload } from "@/src/features/event_vendors/components/VendorCoverUpload";
+import { PortfolioImageManager } from "@/src/features/event_vendors/components/PortfolioImageManager";
+import { PortfolioVideoManager } from "@/src/features/event_vendors/components/PortfolioVideoManager";
+import { ClientReviewManager } from "@/src/features/event_vendors/components/ClientReviewManager";
+import { PastEventsManager } from "@/src/features/event_vendors/components/PastEventsManager";
+import { formatDate } from "@/src/lib/datetime";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -100,6 +106,29 @@ export default async function VendorProfilePage({
     const repeatBookings = Object.values(bookingsByOrganizer).filter((c) => c > 1).reduce((s, c) => s + c, 0);
     const repeatPct = totalBookings > 0 ? Math.round((repeatBookings / totalBookings) * 100) : 0;
     const avgResponseTime = (stats as any)?.avgResponseTime || "—";
+
+    // Portfolio sections (normalized by mapToPortfolio, so always arrays).
+    const portfolioVideos: string[] = v?.portfolio?.videos || [];
+    const clientTestimonials = v?.portfolio?.clientTestimonials || [];
+    const pastEventIds: string[] = v?.portfolio?.pastEvents || [];
+
+    // Resolve the vendor's booked events (id → title) for the past-events picker
+    // and to show past events by title rather than raw ID.
+    const bookedEventIds = [...new Set(bookings.map((b: any) => b?.eventId).filter(Boolean))] as string[];
+    const bookedEvents = (
+        await Promise.all(
+            bookedEventIds.map(async (id) => {
+                try {
+                    const ev = await EventService.getEventByID(id);
+                    return ev ? { id, title: ev.title || id } : { id, title: id };
+                } catch {
+                    return { id, title: id };
+                }
+            })
+        )
+    );
+    const eventTitleById = new Map(bookedEvents.map((e) => [e.id, e.title]));
+    const pastEventTitle = (id: string) => eventTitleById.get(id) || id;
 
     // Active tab from URL
     const activeTab = (awaitedSearchParams?.tab as string) || 'services';
@@ -312,42 +341,82 @@ export default async function VendorProfilePage({
                                     ))}
                                     
                                     {activeTab === 'portfolio' && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {portfolioImages.map((img: any, i: number) => (
-                                                <div key={i} className="aspect-square bg-gray-200 rounded-xl overflow-hidden">
-                                                    {img?.url ? (
-                                                        <img src={img.url} alt={img.caption} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
+                                        !isPreview ? (
+                                            <div className="space-y-6">
+                                                <PortfolioImageManager vendorId={vendor_id} images={portfolioImages} />
+                                                <div>
+                                                    <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Videos</p>
+                                                    <PortfolioVideoManager vendorId={vendor_id} videos={portfolioVideos} />
+                                                </div>
+                                                <div>
+                                                    <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Past Events</p>
+                                                    <PastEventsManager vendorId={vendor_id} pastEvents={pastEventIds} bookedEvents={bookedEvents} />
+                                                </div>
+                                                <div>
+                                                    <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Client Reviews</p>
+                                                    <ClientReviewManager vendorId={vendor_id} testimonials={clientTestimonials} />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-6">
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {portfolioImages.map((img: any, i: number) => (
+                                                        <div key={i} className="aspect-square bg-gray-200 rounded-xl overflow-hidden">
+                                                            {img?.url ? (
+                                                                <img src={img.url} alt={img.caption} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    {portfolioImages.length === 0 && (
+                                                        <p className="text-sm text-gray-400 col-span-2 text-center py-8">No portfolio images yet.</p>
                                                     )}
                                                 </div>
-                                            ))}
-                                            {portfolioImages.length === 0 && (
-                                                <p className="text-sm text-gray-400 col-span-2 text-center py-8">No portfolio images yet.</p>
-                                            )}
-                                        </div>
-                                    )}
-                                    
-                                    {activeTab === 'reviews' && (
-                                        <div className="space-y-4">
-                                            {v?.portfolio?.clientTestimonials?.map((t: any, i: number) => (
-                                                <div key={i} className="bg-gray-50 rounded-xl p-4">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <div className="flex">
-                                                            {[...Array(5)].map((_, si) => (
-                                                                <svg key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
-                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                </svg>
+                                                {portfolioVideos.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Videos</p>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            {portfolioVideos.map((url: string, i: number) => (
+                                                                <video key={i} src={url} controls className="aspect-video w-full rounded-xl bg-gray-900 object-cover" />
                                                             ))}
                                                         </div>
                                                     </div>
-                                                    <p className="text-sm text-gray-600 italic">"{t?.testimonial}"</p>
-                                                    <p className="text-xs text-gray-400 mt-2">— {t?.clientName}</p>
-                                                </div>
-                                            )) || <p className="text-sm text-gray-400 text-center py-8">No reviews yet.</p>}
-                                        </div>
+                                                )}
+                                                {pastEventIds.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Past Events</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {pastEventIds.map((id: string) => (
+                                                                <span key={id} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">{pastEventTitle(id)}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
                                     )}
                                     
+                                    {activeTab === 'reviews' && (
+                                            <div className="space-y-4">
+                                                {clientTestimonials.length > 0 ? clientTestimonials.map((t: any, i: number) => (
+                                                    <div key={i} className="bg-gray-50 rounded-xl p-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="flex">
+                                                                {[...Array(5)].map((_, si) => (
+                                                                    <svg key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
+                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                    </svg>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 italic">"{t?.testimonial}"</p>
+                                                        <p className="text-xs text-gray-400 mt-2">— {t?.clientName}{t?.eventDate ? ` • ${t.eventDate}` : ""}</p>
+                                                    </div>
+                                                )) : <p className="text-sm text-gray-400 text-center py-8">No reviews yet.</p>}
+                                            </div>
+                                    )}
+
                                     {activeTab === 'availability' && (
                                         <div className="text-center py-8">
                                             <p className="text-sm text-gray-400">Availability calendar coming soon.</p>

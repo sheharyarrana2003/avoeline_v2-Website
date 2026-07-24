@@ -1,4 +1,5 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { EventService } from "@/src/services/event.service";
 import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
@@ -81,6 +82,19 @@ export default async function VendorProfilePage({
     const yearsInBusiness = createdAt
         ? new Date().getFullYear() - new Date(createdAt).getFullYear()
         : null;
+
+    // Resolve past-event IDs → titles (fall back to the raw ID) for display.
+    const pastEventIds: string[] = v?.portfolio?.pastEvents || [];
+    const pastEvents = await Promise.all(
+        pastEventIds.map(async (id) => {
+            try {
+                const ev = await EventService.getEventByID(id);
+                return { id, title: ev?.title || id };
+            } catch {
+                return { id, title: id };
+            }
+        })
+    );
 
     const baseUrl = `/organizer/${organizer_id}/view-vendor`;
     const profileUrl = `${baseUrl}/${vendor_id}`;
@@ -448,13 +462,13 @@ export default async function VendorProfilePage({
                         )}
 
                         {/* Past Events */}
-                        {v?.portfolio?.pastEvents && v.portfolio.pastEvents.length > 0 && (
+                        {pastEvents.length > 0 && (
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-4">Past Events</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {v.portfolio.pastEvents.map((evt: string, i: number) => (
-                                        <span key={i} className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full">
-                                            {evt}
+                                    {pastEvents.map((evt) => (
+                                        <span key={evt.id} className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full">
+                                            {evt.title}
                                         </span>
                                     ))}
                                 </div>

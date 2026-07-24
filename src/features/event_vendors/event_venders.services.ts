@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { VendorData, Contact, Address, PricingPackage, Ratings } from "@/src/services/models/vendor.model"
+import { VendorData, Contact, Address, PricingPackage, Ratings, VendorPortfolio, PortfolioImage, ClientTestimonial } from "@/src/services/models/vendor.model"
 import { BookingData } from "../bookings/types";
 import {  adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
@@ -61,6 +61,34 @@ export function mapToRatings(raw: any): Ratings {
     };
 }
 
+export function mapToPortfolio(raw: any): VendorPortfolio {
+    const images: PortfolioImage[] = Array.isArray(raw?.images)
+        ? raw.images.map((img: any) => ({
+            url: img?.url || "",
+            caption: img?.caption || "",
+            eventType: img?.eventType || "",
+            date: img?.date || "",
+        }))
+        : [];
+
+    const clientTestimonials: ClientTestimonial[] = Array.isArray(raw?.clientTestimonials)
+        ? raw.clientTestimonials.map((t: any) => ({
+            clientName: t?.clientName || "",
+            testimonial: t?.testimonial || "",
+            rating: Number(t?.rating) || 0,
+            eventDate: t?.eventDate || "",
+        }))
+        : [];
+
+    return {
+        images,
+        videos: Array.isArray(raw?.videos) ? raw.videos.filter((v: any) => typeof v === "string") : [],
+        clientTestimonials,
+        pastEvents: Array.isArray(raw?.pastEvents) ? raw.pastEvents.filter((e: any) => typeof e === "string") : [],
+        coverImage: raw?.coverImage || "",
+    };
+}
+
 export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
     return {
         // Fall back to the Firestore doc id so vendorId is never empty (empty ids
@@ -73,7 +101,7 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
         contact: mapToContact(raw?.contact),
 
         serviceCategories: Array.isArray(raw?.serviceCategories) ? raw.serviceCategories : [],
-        portfolio: raw?.portfolio || {},
+        portfolio: mapToPortfolio(raw?.portfolio),
 
         pricingPackages: Array.isArray(raw?.pricingPackages)
             ? raw.pricingPackages.map(mapToPricingPackage)
