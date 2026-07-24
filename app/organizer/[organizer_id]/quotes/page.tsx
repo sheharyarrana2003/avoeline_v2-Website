@@ -115,7 +115,10 @@ export default async function QuoteManagementPage({
 
     // Get selected quote ID from URL
     const selectedQuoteId = awaitedSearchParams?.quote as string;
-    const selectedQuote = displayQuotes.find((b: any) => b?.bookingId === selectedQuoteId) || displayQuotes[0];
+    if(! selectedQuoteId){
+
+    }
+    const selectedQuote = displayQuotes.find((b: any) => b?.bookingId === selectedQuoteId) || null ;
 
     // Fetch vendor data for selected quote
     let selectedVendor = null;
@@ -126,12 +129,10 @@ export default async function QuoteManagementPage({
             selectedVendor = null;
         }
     }
-   
-
 
 
     const displaying_selected_quote = () => {
-         if (!selectedVendor) {
+         if (!selectedVendor ||  !selectedQuote) {
         console.log("selected venodr is null");
         return(
             <></>
@@ -356,7 +357,7 @@ export default async function QuoteManagementPage({
 
   
                         {/* Quote Detail Card */}
-                        {selectedQuote && activeTab === "active" && displaying_selected_quote()}
+                        {selectedQuote && displaying_selected_quote()}
                         {/* Other Quotes Accordion */}
                         {activeTab === "active" && activeQuotes.length > 1 && (
                             <div className="space-y-3">
@@ -375,7 +376,7 @@ export default async function QuoteManagementPage({
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-900">Vendor {booking?.vendorId} </p>
-                                                    <p className="text-xs text-gray-400">{formatCurrency(bq?.totalAmount || 165000, booking?.payment?.currency || "PKR")} • Pending response</p>
+                                                    <p className="text-xs text-gray-400">{formatCurrency(bq?.totalAmount , booking?.payment?.currency || "PKR")} • Pending response</p>
                                                 </div>
                                             </div>
                                             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
