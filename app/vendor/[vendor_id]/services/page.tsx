@@ -1,4 +1,7 @@
+import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -38,28 +41,28 @@ const getServiceStatus = (service: any, index: number) => {
 };
 
 
-export default async function VendorServicesPage({ 
+export default async function VendorServicesPage({
     params,
     searchParams
-}: { 
+}: {
     params: Promise<{ vendor_id: string }>;
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const { vendor_id } = await params;
     const awaitedSearchParams = await searchParams;
-    
+
     // Get filter from URL
     const filter = (awaitedSearchParams?.filter as string) || 'all';
-    
+
     // Fetch vendor data
     const vendor = await EventVendorService.getVendorById(vendor_id);
     if (!vendor) {
         notFound();
     }
-    
+
     const services = vendor?.services || [];
     const serviceCategories = vendor?.serviceCategories || [];
-    
+
     // Build category tabs from vendor's serviceCategories
     const categoryTabs = [
         { id: 'all', label: 'All Services', count: services.length },
@@ -69,7 +72,7 @@ export default async function VendorServicesPage({
             count: getCategoryCount(services, cat),
         })),
     ];
-    
+
     // Filter services by category
     let displayServices = services;
     if (filter !== 'all') {
@@ -77,7 +80,7 @@ export default async function VendorServicesPage({
             return s.category?.toLowerCase() === filter.toLowerCase();
         });
     }
-    
+
     // Add status and metadata to services
     const enrichedServices = displayServices.map((service: any, index: number) => ({
         ...service,
@@ -87,7 +90,7 @@ export default async function VendorServicesPage({
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-                
+
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -95,7 +98,7 @@ export default async function VendorServicesPage({
                         <p className="text-sm text-gray-500 mt-1">Manage your professional service catalog, pricing models, and availability status.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Link 
+                        <Link
                             href={`/vendor/${vendor_id}/services/add-service`}
                             className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
                         >
@@ -110,11 +113,10 @@ export default async function VendorServicesPage({
                         <Link
                             key={tab.id}
                             href={`/vendor/${vendor_id}/services?filter=${tab.id}`}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition whitespace-nowrap ${
-                                filter === tab.id
-                                    ? 'bg-black text-white'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                            }`}
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition whitespace-nowrap ${filter === tab.id
+                                ? 'bg-black text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
                         >
                             {tab.label} ({tab.count})
                         </Link>
@@ -124,18 +126,15 @@ export default async function VendorServicesPage({
                 {/* Services Grid */}
                 {enrichedServices.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {enrichedServices.map((service: any) => {
-                            const isActive = service.statusInfo.status === 'active';
-                            const isInactive = service.statusInfo.status === 'inactive';
+                        {enrichedServices.map((service: Service) => {
                             const serviceVideo = service.videos?.[0];
                             const serviceImage = service.images?.[0];
 
                             return (
-                                <div 
-                                    key={service.serviceId} 
-                                    className={`bg-white rounded-2xl overflow-hidden shadow-sm border transition ${
-                                        isInactive ? 'opacity-60 border-gray-200' : 'border-gray-100 hover:shadow-md'
-                                    }`}
+                                <div
+                                    key={service.serviceId}
+                                    className={`bg-white rounded-2xl overflow-hidden shadow-sm border transition
+                                        }`}
                                 >
                                     {/* Image/Video Header */}
                                     <div className="relative h-48 bg-gray-200 overflow-hidden">
@@ -160,19 +159,14 @@ export default async function VendorServicesPage({
                                                 <span className="text-4xl">🍽️</span>
                                             </div>
                                         )}
-                                        
-                                        {/* Status Badge */}
-                                        <div className="absolute top-3 left-3">
-                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${service.statusInfo.color}`}>
-                                                {service.statusInfo.label}
-                                            </span>
-                                        </div>
-                                        
-                                    
-                                        
+
+
+
+
+
                                         {/* Edit/Delete Actions */}
                                         <div className="absolute bottom-3 right-3 flex gap-2">
-                                            <Link 
+                                            <Link
                                                 href={`/vendor/${vendor_id}/services/${service.serviceId}/edit`}
                                                 className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
                                             >
@@ -182,7 +176,8 @@ export default async function VendorServicesPage({
                                             </Link>
                                             <form action={deleteServiceAction} className="inline">
                                                 <input type="hidden" name="serviceId" value={service.serviceId} />
-                                                <button 
+                                                <input type="hidden" name="vendorId" value={vendor_id} />
+                                                <button
                                                     type="submit"
                                                     className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
                                                 >
@@ -200,43 +195,21 @@ export default async function VendorServicesPage({
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                                             {getCategoryLabel(service.category || 'general')}
                                         </p>
-                                        
+
                                         {/* Title */}
                                         <h3 className="text-lg font-bold text-gray-900 mb-2">{service.name}</h3>
-                                        
+
                                         {/* Description */}
                                         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
                                             {service.description}
                                         </p>
-                                        
+
                                         {/* Price & Action */}
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <span className="text-lg font-bold text-gray-900">{formatCurrency(service.price)}</span>
                                                 <span className="text-xs text-gray-400 ml-1">/ {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
                                             </div>
-                                            
-                                            {isActive ? (
-                                                <Link 
-                                                    href={`/vendor/${vendor_id}/services/${service.serviceId}`}
-                                                    className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1 hover:text-gray-600 transition"
-                                                >
-                                                    View Service
-                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                    </svg>
-                                                </Link>
-                                            ) : (
-                                                <form action={activateServiceAction}>
-                                                    <input type="hidden" name="serviceId" value={service.serviceId} />
-                                                    <button 
-                                                        type="submit"
-                                                        className="text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition"
-                                                    >
-                                                        Activate to View
-                                                    </button>
-                                                </form>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -252,7 +225,7 @@ export default async function VendorServicesPage({
                         </div>
                         <h3 className="text-lg font-bold text-gray-900 mb-2">No Services Found</h3>
                         <p className="text-sm text-gray-500 mb-4">No services match the selected filter.</p>
-                        <Link 
+                        <Link
                             href={`/vendor/${vendor_id}/services/add-service`}
                             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
                         >
@@ -269,13 +242,22 @@ export default async function VendorServicesPage({
 async function deleteServiceAction(formData: FormData) {
     'use server';
     const serviceId = formData.get('serviceId') as string;
-    // TODO: Call API to delete service
-    console.log('Delete service', serviceId);
+    const vendorId = formData.get('vendorId') as string;
+    const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
+
+   if(vendor){ console.log("vendor found before ", vendor?.services);
+    const new_arr = vendor?.services.filter(s => {
+        if (s.serviceId !== serviceId) {
+            return s;
+        } else {
+            console.log("foundddddd");
+        }
+    })
+    vendor.services = new_arr;
+
+    console.log("vendor found after ", vendor?.services);
+
+    console.log("updatingggg");
+    await adminDb.collection(COLLECTIONS.VENDORS).doc(vendorId).update({ ...vendor });}
 }
 
-async function activateServiceAction(formData: FormData) {
-    'use server';
-    const serviceId = formData.get('serviceId') as string;
-    // TODO: Call API to activate service
-    console.log('Activate service', serviceId);
-}
