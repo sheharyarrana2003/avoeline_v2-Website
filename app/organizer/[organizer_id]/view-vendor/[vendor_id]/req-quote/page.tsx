@@ -4,6 +4,8 @@ import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import { VendorData } from "@/src/services/models/vendor.model";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { redirect } from "next/navigation";
 
 
 export default async function ReqQuotePage({
@@ -17,12 +19,26 @@ export default async function ReqQuotePage({
         'use server'
         console.log(`this is the form data , ${form_data}`);
         const eventId = form_data.get("selectedEventId") as string;
-        await BookingServices.createBookingFromForm(form_data, organizerId, eventId, vendorId);
+
+
+        try {
+            await BookingServices.createBookingFromForm(form_data, organizerId, eventId, vendorId);
+            redirect(`organizer/${organizer_id}/quotes`)
+        } catch (error) {
+            if (isRedirectError(error)) {
+                throw error;
+            }
+
+            console.error("booking creation failed:", error);
+
+            // Returning this keeps the user on the current page and sends back the error
+            // return {
+            //     success: false,
+            //     error: error instanceof Error ? error.message : 'Failed to create quote. Please try again.'
+            // };
+        }
 
     }
-
-    // const vendor : VendorData |null = await EventVendorService.getVendorById(vendor_id);
-    // const all_events_of_organizer  : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
 
 
     const [vendor, all_events_of_organizer] = await Promise.all([
