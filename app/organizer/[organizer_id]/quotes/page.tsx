@@ -18,6 +18,17 @@ const formatCurrency = (amount: number, currency: string = "PKR") => {
     }).format(amount);
 };
 
+function sanitizeForClient<T>(obj: T): T {
+    if (!obj) return obj;
+    return JSON.parse(JSON.stringify(obj, (key, value) => {
+        // Convert Firestore Timestamps {_seconds, _nanoseconds} to ISO string
+        if (value && typeof value === 'object' && '_seconds' in value) {
+            return new Date(value._seconds * 1000).toISOString();
+        }
+        return value;
+    }));
+}
+
 const timeAgo = (timestamp: string | Date) => {
     if (!timestamp) return "Recently";
     const diff = Date.now() - new Date(timestamp).getTime();
@@ -292,7 +303,7 @@ export default async function QuoteManagementPage({
                                         </svg>
                                         Accept Quote
                                     </button> */}
-                        <AcceptButton quote={selectedQuote} accept_quote={accept_quote} />
+                       <AcceptButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
                     </div>
                 </div>
             </>
