@@ -201,96 +201,10 @@ export default async function VendorQuoteManagementPage({
                             </div>
                         )}
 
-                        {/* Quotes Table */}
-                        {displayQuotes.length > 0 ? (
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                                {/* Table Header */}
-                                <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                    <div className="col-span-4">Organizer / Event</div>
-                                    <div className="col-span-3">Quote Amount</div>
-                                    <div className="col-span-3">Inclusions</div>
-                                    <div className="col-span-2 text-right">Status</div>
-                                </div>
 
-                                {/* Table Rows */}
-                                {displayQuotes.map((booking: any, index: number) => {
-                                    const bQuote = booking?.quote?.vendorQuote || {};
-                                    const bTotal = bQuote?.totalAmount || 0;
-                                    const bCurrency = booking?.payment?.currency || "PKR";
-                                    const bStatus = booking?.status || "unknown";
-                                    const bOrganizerId = booking?.organizerId || "";
-                                    const bInclusions = (bQuote?.breakdown || []).map((item: any) => item?.item).filter(Boolean);
-                                    const isSelected = selectedQuote?.bookingId === booking?.bookingId;
-
-                                    return (
-                                        <Link
-                                            key={booking?.bookingId || index}
-                                            href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
-                                            className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 hover:bg-gray-50 transition items-center ${isSelected ? 'bg-gray-50' : ''}`}
-                                        >
-                                            {/* Organizer / Event */}
-                                            <div className="col-span-4 flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
-                                                    {bOrganizerId.slice(0, 2).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-900">Organizer {bOrganizerId}</p>
-                                                    {booking?.eventName && (
-                                                        <p className="text-xs text-gray-400">{booking.eventName}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Quote Amount */}
-                                            <div className="col-span-3">
-                                                <p className="text-sm font-bold text-gray-900">{formatCurrency(bTotal, bCurrency)}</p>
-                                            </div>
-
-                                            {/* Inclusions */}
-                                            <div className="col-span-3 flex items-center gap-1">
-                                                {bInclusions.length > 0 ? (
-                                                    bInclusions.slice(0, 3).map((item: string, i: number) => (
-                                                        <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center bg-green-100" title={item}>
-                                                            <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <span className="text-xs text-gray-400">No breakdown yet</span>
-                                                )}
-                                            </div>
-
-                                            {/* Status */}
-                                            <div className="col-span-2 text-right">
-                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusBadge(bStatus)}`}>
-                                                    {getStatusLabel(bStatus)}
-                                                </span>
-                                            </div>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    {activeTab === "active" ? "No Active Requests" : "No Past Quotes"}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    {activeTab === "active"
-                                        ? "New booking requests will appear here."
-                                        : "Completed bookings will appear here."}
-                                </p>
-                            </div>
-                        )}
 
                         {/* Quote Detail Card */}
-                        {selectedQuote && activeTab === "active" && (
+                        {selectedQuote && (
                             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
 
                                 {/* Header */}
