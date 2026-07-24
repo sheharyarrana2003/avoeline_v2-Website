@@ -4,6 +4,7 @@ import { EventService } from "@/src/services/event.service";
 import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/src/lib/datetime";
+import { MediaUploadField } from "@/src/features/media/MediaUploadField";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string) => {
@@ -20,10 +21,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
     // Fetch data
     const raw_booking = await BookingServices.getBookingById(booking_id);
     console.log(raw_booking?.organizerId);
- 
-    const [organizer,vendor,event] = await Promise.all([
+
+    const [organizer, vendor, event] = await Promise.all([
         OrganizerService.getOrganizerById(raw_booking?.organizerId || ''),
-         EventVendorService.getVendorById(vendor_id || ''),
+        EventVendorService.getVendorById(vendor_id || ''),
         EventService.getEventByID(raw_booking?.eventId || '')
     ])
 
@@ -51,7 +52,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
 
                             <div className="relative pl-4 border-l-2 border-gray-100 space-y-8 mb-8">
                                 {raw_booking?.statusHistory?.map((s: any, index: number) => {
-                                    const isCompleted = true; 
+                                    const isCompleted = true;
                                     return (
                                         <div key={index} className="relative">
                                             {/* Timeline Dot */}
@@ -88,11 +89,11 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Service Type</p>
-                                    <p className="font-semibold capitalize">{raw_booking?.serviceType || 'N/A'} - Corporate</p>
+                                    <p className="font-semibold capitalize">{raw_booking?.serviceType || 'N/A'} </p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Event</p>
-                                    <p className="font-semibold">{event?.title || "TechVerse Hackathon 2026"}</p>
+                                    <p className="font-semibold">{event?.title || "Event Title"}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Location</p>
@@ -104,15 +105,9 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 </div>
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Service Time</p>
-                                    <p className="font-semibold">{formatTime(raw_booking?.requirements?.startTime || "")} - {formatTime(raw_booking?.requirements?.endTime|| "")}</p>
+                                    <p className="font-semibold">{formatTime(raw_booking?.requirements?.startTime || "")} - {formatTime(raw_booking?.requirements?.endTime || "")}</p>
                                 </div>
-                                <div>
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Special Requirements</p>
-                                    <div className="flex gap-2 mt-1">
-                                        <span className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded">VEGETARIAN</span>
-                                        <span className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded">GLUTEN-FREE</span>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
 
@@ -135,22 +130,9 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                         ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime || "")}
                                     </p>
                                 </div>
-                                <div className="border border-gray-100 rounded-xl p-4">
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Setup Completion</p>
-                                    <p className="font-bold text-lg">12:30 PM</p>
-                                    <p className="text-[10px] font-bold text-gray-500 mt-2">COMPLETED</p>
-                                </div>
-                                <div className="border border-gray-100 rounded-xl p-4">
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Teardown Schedule</p>
-                                    <p className="font-bold text-lg">06:00 PM</p>
-                                    <p className="text-[10px] font-bold text-gray-500 mt-2">COMPLETED</p>
-                                </div>
+
                             </div>
 
-                            <div className="bg-gray-50 rounded-xl p-4 flex gap-3 text-sm text-gray-600">
-                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                <p>"{raw_booking?.delivery?.deliveryNotes || 'No delivery notes provided.'}"</p>
-                            </div>
                         </div>
 
                     </div>
@@ -237,29 +219,16 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 Documents
                             </h3>
 
-                            <div className="space-y-3 mb-4">
-                                <Link href={raw_booking?.documents?.quotePdf || '#'} target="_blank" className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition group">
-                                    <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                        <div>
-                                        </div>
-                                    </div>
-                                    <svg className="w-4 h-4 text-gray-300 group-hover:text-black transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </Link>
+                         
 
-                                <Link href={raw_booking?.documents?.invoicePdf || '#'} target="_blank" className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition group">
-                                    <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                        <div>
-                                        </div>
-                                    </div>
-                                    <svg className="w-4 h-4 text-gray-300 group-hover:text-black transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </Link>
-                            </div>
 
-                            <button className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-xs font-bold text-gray-400 uppercase tracking-wider hover:border-gray-300 hover:text-gray-600 transition">
-                                + Upload Document
-                            </button>
+                            <MediaUploadField
+                                name="booking-images"
+                                folder="booking-images"
+                                multiple
+                                accept="image/*,video/*,pdf/*"
+                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-200 text-[10px] text-gray-400 transition hover:border-gray-300 disabled:opacity-60"
+                            />
                         </div>
 
                     </div>
