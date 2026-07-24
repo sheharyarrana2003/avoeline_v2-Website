@@ -1,6 +1,8 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
+import { VendorData } from "@/src/services/models/vendor.model";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 
 
@@ -19,9 +21,18 @@ export default async function ReqQuotePage({
 
     }
 
-    const all_events_of_organizer  : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
+    // const vendor : VendorData |null = await EventVendorService.getVendorById(vendor_id);
+    // const all_events_of_organizer  : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
+    
+
+    const [vendor,all_events_of_organizer ] = await Promise.all([
+        EventVendorService.getVendorById(vendor_id),
+         EventService.getAllEventsByOrganizer(organizer_id)
+    ])
+
     const activeEvents : EventModel[]= all_events_of_organizer.filter(x => 
     ['published', 'registration_open', 'ongoing'].includes(x.status))
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -33,7 +44,7 @@ export default async function ReqQuotePage({
                     <p className="text-sm text-gray-500 mt-1">Post requirements and review vendor quotes</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="">
 
                     {/* ================= LEFT COLUMN: Quote Request Form ================= */}
                     <div className="lg:col-span-4">
@@ -68,12 +79,7 @@ export default async function ReqQuotePage({
                                     <div className="relative">
                                         {/* Added name="serviceType" */}
                                         <select name="serviceType" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                            <option>Catering Services</option>
-                                            <option>Venues</option>
-                                            <option>Photography</option>
-                                            <option>Decor</option>
-                                            <option>Music</option>
-                                            <option>Events</option>
+                                            {vendor?.serviceCategories.map(s=><option>{s}</option>)}
                                         </select>
                                     </div>
                                 </div>
