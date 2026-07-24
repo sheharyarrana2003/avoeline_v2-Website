@@ -1,5 +1,5 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
-import { VendorData } from "@/src/services/models/vendor.model";
+import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
 
@@ -78,6 +78,7 @@ export default async function VendorProfilePage({
     const stats = v?.stats || {};
     const createdAt = v?.createdAt || "";
     const serviceCategories = v?.serviceCategories || [];
+    const services = v?.services || [];
 
     const yearsInBusiness = createdAt
         ? new Date().getFullYear() - new Date(createdAt).getFullYear()
@@ -236,17 +237,16 @@ export default async function VendorProfilePage({
                         {/* ===== SERVICES TAB ===== */}
                         {activeTab === "services" && (
                             <div>
-                                {pricingPackages.length > 0 ? (
+                                {services.length > 0 ? (
                                     <div className="space-y-6">
-                                        {pricingPackages.map((pkg: any, index: number) => {
+                                        {services.map((pkg: Service, index: number) => {
                                             // Media from THE SERVICE — no positional portfolio offset.
                                             const packageVideo = pkg?.videos?.[0];
                                             const packageImage = pkg?.images?.[0];
                                             const inclusions = pkg?.inclusions || [];
-                                            const customizations = pkg?.customizationOptions || [];
 
                                             return (
-                                                <div key={pkg?.packageId || index} className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition flex flex-col md:flex-row gap-6">
+                                                <div key={pkg?.serviceId || index} className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition flex flex-col md:flex-row gap-6">
 
                                                     {/* Package Image */}
                                                     <div className="w-full md:w-48 h-48 md:h-40 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200">
@@ -305,20 +305,11 @@ export default async function VendorProfilePage({
                                                             </div>
                                                         )}
 
-                                                        {/* Customization Tags */}
-                                                        {customizations.length > 0 && (
-                                                            <div className="flex flex-wrap gap-2 mb-4">
-                                                                {customizations.map((opt: string, i: number) => (
-                                                                    <span key={i} className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                                                                        {opt.replace('_', ' ')}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                       
 
                                                         {/* CTA Button */}
                                                         <Link
-                                                            href={`${quoteUrl}?package=${pkg?.packageId || ''}`}
+                                                            href={`${quoteUrl}?package=${pkg?.serviceId || ''}`}
                                                             className="inline-block bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gray-800 transition"
                                                         >
                                                             {pkg?.price ? "Request Quote for This Service" : "Inquire for Custom Pricing"}
@@ -497,24 +488,7 @@ export default async function VendorProfilePage({
                             </div>
                         )}
 
-                        {/* ===== AVAILABILITY TAB ===== */}
-                        {activeTab === "availability" && (
-                            <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-100">
-                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">Availability Calendar</h3>
-                                <p className="text-sm text-gray-500 mb-4">Check available dates and request a booking.</p>
-                                <Link
-                                    href={quoteUrl}
-                                    className="inline-block bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gray-800 transition"
-                                >
-                                    Request a Date
-                                </Link>
-                            </div>
-                        )}
+                       
 
                         {/* Contact Info Footer - Always visible */}
                         <div className="mt-12 bg-gray-50 rounded-2xl p-6 border border-gray-100">
