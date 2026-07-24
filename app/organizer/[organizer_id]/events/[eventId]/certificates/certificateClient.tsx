@@ -348,68 +348,7 @@ export default function CertificateIssuanceClient({
                         </div>
                     </div>
 
-                    {/* Right: Settings Panel */}
-                    <div className="space-y-6">
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-5">
-                            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Batch Settings</h3>
-
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-700">Generate all eligible</p>
-                                <button
-                                    onClick={() => setGenerateAllEligible(!generateAllEligible)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors ${generateAllEligible ? 'bg-black' : 'bg-gray-300'}`}
-                                >
-                                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${generateAllEligible ? 'right-1' : 'left-1'}`} />
-                                </button>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-700">Schedule generation</p>
-                                <button
-                                    onClick={() => setScheduleGeneration(!scheduleGeneration)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors ${scheduleGeneration ? 'bg-black' : 'bg-gray-300'}`}
-                                >
-                                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${scheduleGeneration ? 'right-1' : 'left-1'}`} />
-                                </button>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-700">Test mode</p>
-                                <button
-                                    onClick={() => setTestMode(!testMode)}
-                                    className={`relative w-11 h-6 rounded-full transition-colors ${testMode ? 'bg-black' : 'bg-gray-300'}`}
-                                >
-                                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${testMode ? 'right-1' : 'left-1'}`} />
-                                </button>
-                            </div>
-
-                            <div className="pt-4 border-t border-gray-100">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Recipient Filter</p>
-
-                                <label className="flex items-start gap-3 cursor-pointer mb-3">
-                                    <input
-                                        type="radio"
-                                        name="recipientFilter"
-                                        checked={issueToCheckedIn}
-                                        onChange={() => setIssueToCheckedIn(true)}
-                                        className="mt-0.5"
-                                    />
-                                    <p className="text-sm font-medium text-gray-700">Issue only to checked-in</p>
-                                </label>
-
-                                <label className="flex items-start gap-3 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="recipientFilter"
-                                        checked={!issueToCheckedIn}
-                                        onChange={() => setIssueToCheckedIn(false)}
-                                        className="mt-0.5"
-                                    />
-                                    <p className="text-sm font-medium text-gray-700">Issue to all registrants</p>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                 
                 </div>
             </div>
         </div>

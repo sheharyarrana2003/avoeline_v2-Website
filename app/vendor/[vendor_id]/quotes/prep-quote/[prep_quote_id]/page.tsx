@@ -3,55 +3,226 @@
 
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
+import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { formatDate } from "@/src/lib/datetime";
 import { notFound } from "next/navigation";
 import PrepareQuoteClient from "@/src/features/bookings/shared_components/VendorPrepBookingClient";
-import { BookingData } from "@/src/features/bookings/types";
-import { BreakdownItem } from "@/src/features/bookings/types";
-import { VendorQuote } from "@/src/features/bookings/types";
-import { NegotiationMessage } from "@/src/features/bookings/types";
 
+import {
+    BookingData,
+    BreakdownItem,
+    VendorQuote,
+    Requirements,
+    Quote,
+    Communication,
+    Documents,
+    Payment,
+} from "@/src/features/bookings/types";
+
+import { VendorData } from "@/src/services/models/vendor.model";
+import { EventModel } from "@/src/services/models/event.model";
+
+// --- Types for Server Props ---
+interface PageParams {
+    vendor_id: string;
+    prep_quote_id: string;
+}
+
+// --- Types for Serialized Data Passed to Client ---
+
+interface SerializedVendorService {
+    id: string;
+    name: string;
+    description: string;
+    basePrice: number;
+}
+
+interface SerializedEventDetails {
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    guestCount: number;
+}
+
+interface SerializedExistingQuote {
+    basePrice: number;
+    additionalCharges: { description: string; amount: number }[];
+    discount: number;
+    totalAmount: number;
+    breakdown: { item: string; quantity: number; unitPrice: number; total: number }[];
+    terms: string;
+    validity: string;
+}
+
+interface SerializedRequirements {
+    description: string;
+    serviceDate: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    guestCount: number;
+    specialInstructions: string;
+}
+
+interface SerializedInitialData {
+    bookingId: string;
+    eventId: string;
+    eventDetails: SerializedEventDetails;
+    organizerId: string;
+    organizerName: string;
+    requirements: SerializedRequirements;
+    existingQuote: SerializedExistingQuote | null;
+    currency: string;
+    communications: Communication[];
+    documents: Documents;
+    vendorServices: SerializedVendorService[];
+    status: string;
+}
+
+// --- Server Action Payload Type ---
+interface PrepQuotePayload {
+    bookingId: string;
+    vendorId: string;
+    servicePackage: string;
+    items: { description: string; quantity: number; unitPrice: number }[];
+    taxRate: number;
+    discountAmount: number;
+    customizations: string[];
+    terms: string;
+    validityDate: string;
+    internalNotes: string;
+    totalAmount: number;
+    currency: string;
+}
 
 export default async function PrepareQuotePage({
-    params
+    params,
 }: {
-    params: Promise<{ vendor_id: string; prep_quote_id: string }>
+    params: Promise<PageParams>;
 }) {
     const { vendor_id, prep_quote_id } = await params;
 
-    // Fetch booking data on server
+    // Fetch booking data on server using the prep_quote_id (which IS the bookingId)
     const booking: BookingData | null = await BookingServices.getBookingById(prep_quote_id);
 
-    if (!booking) {
-        console.log()
-        notFound();
-    }
-
-    // Fetch event details
-    let event = null;
+    // Fetch vendor details and services regardless of booking existence
+    let vendor: VendorData | null = null;
     try {
-        event = await EventService.getEventByID(booking.eventId);
+        vendor = await EventVendorService.getVendorById(vendor_id);
     } catch {
-        // Event not found
+        // Vendor not found
     }
 
+    // Extract vendor services
+    const vendorServices: SerializedVendorService[] =
+        vendor?.services?.map((service: any) => ({
+            id: String(service?.id || service?._id || ""),
+            name: String(service?.name || "Unnamed Service"),
+            description: String(service?.description || ""),
+            basePrice: Number(service?.basePrice || service?.price || 0),
+        })) || [];
 
-    //ya sari subkission hanfdle kareewga
-    async function handling_prep_quote(payload: {
-        bookingId: string;
-        vendorId: string;
-        servicePackage: string;
-        items: { description: string; quantity: number; unitPrice: number }[];
-        taxRate: number;
-        discountAmount: number;
-        customizations: string[];
-        terms: string;
-        validityDate: string;
-        internalNotes: string;
-        totalAmount: number;
-        currency: string;
-    }) {
-        'use server';
+    // If booking exists, fetch event and build full data
+    let eventDetails: SerializedEventDetails = {
+        title: "New Event",
+        date: "",
+        startTime: "",
+        endTime: "",
+        location: "TBD",
+        guestCount: 0,
+    };
+    let organizerName = "Unknown Organizer";
+    let requirements: SerializedRequirements = {
+        description: "",
+        serviceDate: "",
+        startTime: "",
+        endTime: "",
+        location: "",
+        guestCount: 0,
+        specialInstructions: "",
+    };
+    let existingQuote: SerializedExistingQuote | null = null;
+    let currency = "PKR";
+    let communications: Communication[] = [];
+    let documents: Documents = {
+        quotePdf: null,
+        invoicePdf: null,
+        receiptPdf: null,
+    };
+    let status = "quote_requested";
+
+    if (booking) {
+        // Fetch event details
+        let event = null;
+        try {
+            event = await EventService.getEventByID(booking.eventId);
+        } catch {
+            // Event not found
+        }
+
+        // Build proper event details from event + booking requirements
+        eventDetails = {
+            title:
+                event?.title ||
+
+                "New Event",
+            date:
+                event?.schedule.startDate ||
+             
+                booking.requirements?.serviceDate ||
+                "",
+            startTime:
+                event?.schedule.startTime  || "",
+            endTime: event?.schedule.endTime || "",
+            location:event?.location.venueName ||
+                "not mentioned",
+            guestCount:
+                event?.capacity.totalSeats ||
+                booking.requirements?.guestCount ||
+                0,
+        };
+
+        organizerName =
+            event?.organizerId || booking.organizerId || "Unknown Organizer";
+
+        requirements = {
+            description: booking.requirements?.description || "",
+            serviceDate: booking.requirements?.serviceDate || "",
+            startTime: booking.requirements?.startTime || "",
+            endTime: booking.requirements?.endTime || "",
+            location: booking.requirements?.location || "",
+            guestCount: booking.requirements?.guestCount || 0,
+            specialInstructions: booking.requirements?.specialInstructions || "",
+        };
+
+        existingQuote = booking.quote?.vendorQuote
+            ? {
+                  basePrice: booking.quote.vendorQuote.basePrice || 0,
+                  additionalCharges:
+                      booking.quote.vendorQuote.additionalCharges || [],
+                  discount: booking.quote.vendorQuote.discount || 0,
+                  totalAmount: booking.quote.vendorQuote.totalAmount || 0,
+                  breakdown: booking.quote.vendorQuote.breakdown || [],
+                  terms: booking.quote.vendorQuote.terms || "",
+                  validity: booking.quote.vendorQuote.validity || "",
+              }
+            : null;
+
+        currency = booking.payment?.currency || "PKR";
+        communications = booking.communications || [];
+        documents = booking.documents || {
+            quotePdf: null,
+            invoicePdf: null,
+            receiptPdf: null,
+        };
+        status = booking.status || "quote_requested";
+    }
+
+    // Server action to handle quote submission
+    async function handling_prep_quote(payload: PrepQuotePayload): Promise<void> {
+        "use server";
 
         let {
             bookingId,
@@ -60,96 +231,94 @@ export default async function PrepareQuotePage({
             terms,
             validityDate,
             totalAmount,
-            taxRate
+            taxRate,
         } = payload;
 
+        terms = `${terms}. Tax on this is ${taxRate}.`;
 
-        terms  = `${terms } . Tax on this is ${taxRate}.`
         // Fetch the booking fresh — don't rely on outer closure scope
-        const booking: BookingData | null = await BookingServices.getBookingById(bookingId);
-        if (!booking) {
+        const freshBooking: BookingData | null =
+            await BookingServices.getBookingById(bookingId);
+
+        if (!freshBooking) {
             throw new Error(`Booking not found for id: ${bookingId}`);
         }
 
-        const basePrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+        const basePrice = items.reduce(
+            (sum, item) => sum + item.quantity * item.unitPrice,
+            0
+        );
 
-        const breakdownItems: BreakdownItem[] = items.map(item => ({
+        const breakdownItems: BreakdownItem[] = items.map((item) => ({
             item: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
-            total: item.quantity * item.unitPrice
+            total: item.quantity * item.unitPrice,
         }));
 
         const updatedVendorQuote: VendorQuote = {
             basePrice,
-            additionalCharges: booking.quote.vendorQuote?.additionalCharges || [],
+            additionalCharges:
+                freshBooking.quote?.vendorQuote?.additionalCharges || [],
             discount: discountAmount,
             totalAmount,
             breakdown: breakdownItems,
-            terms: terms ?? "",          // fallback instead of undefined
-            validity: validityDate ? formatDate(validityDate) : "" // DD/MM/YYYY (input is ISO from the date picker)
+            terms: terms ?? "",
+            validity: validityDate ? formatDate(validityDate) : "",
         };
 
-
         const updatedBooking: BookingData = {
-            ...booking, // Maintain original fields (ids, customer specs, requirements)
+            ...freshBooking,
             status: "quote_sent",
             quote: {
-                ...booking.quote,
+                ...freshBooking.quote,
                 respondedAt: new Date(),
                 vendorQuote: updatedVendorQuote,
                 negotiation: [
-                    ...(booking.quote?.negotiation || []),
+                    ...(freshBooking.quote?.negotiation || []),
                     {
                         from: "vendor",
                         message: `Quote prepared. Total: Rs ${totalAmount.toLocaleString()}`,
-                        timestamp: new Date()
-                    }
-                ]
+                        timestamp: new Date(),
+                    },
+                ],
             },
             statusHistory: [
-                ...(booking.statusHistory || []),
+                ...(freshBooking.statusHistory || []),
                 {
                     status: "quote_sent",
-                    timestamp: new Date()
-                }
+                    timestamp: new Date(),
+                },
             ],
-            updatedAt: new Date()
+            updatedAt: new Date(),
         };
 
         console.log("about to update booking on vendor side");
         await BookingServices.update_booking(updatedBooking);
         console.log("booking updated");
     }
+
     // Serialize data for client component
-    const initialData = {
-        bookingId: booking.bookingId,
-        eventId: booking.eventId,
-        eventTitle: event?.title || booking.eventId,
-        organizerId: booking.organizerId,
-        organizerName: booking.organizerId, // Replace with UserService fetch
-        requirements: {
-            description: booking.requirements?.description || "",
-            serviceDate: booking.requirements?.serviceDate || "",
-            startTime: booking.requirements?.startTime || "",
-            endTime: booking.requirements?.endTime || "",
-            location: booking.requirements?.location || "",
-            guestCount: booking.requirements?.guestCount || 0,
-            specialInstructions: booking.requirements?.specialInstructions || "",
-        },
-        existingQuote: booking.quote?.vendorQuote ? {
-            basePrice: booking.quote.vendorQuote.basePrice || 0,
-            additionalCharges: booking.quote.vendorQuote.additionalCharges || [],
-            discount: booking.quote.vendorQuote.discount || 0,
-            totalAmount: booking.quote.vendorQuote.totalAmount || 0,
-            breakdown: booking.quote.vendorQuote.breakdown || [],
-            terms: booking.quote.vendorQuote.terms || "",
-            validity: booking.quote.vendorQuote.validity || "",
-        } : null,
-        currency: booking.payment?.currency || "PKR",
-        communications: booking.communications || [],
-        documents: booking.documents || {},
+    const initialData: SerializedInitialData = {
+        bookingId: prep_quote_id,
+        eventId: booking?.eventId || "",
+        eventDetails,
+        organizerId: booking?.organizerId || "",
+        organizerName,
+        requirements,
+        existingQuote,
+        currency,
+        communications,
+        documents,
+        vendorServices,
+        status,
     };
 
-    return <PrepareQuoteClient vendorId={vendor_id} initialData={initialData} handling_prep_quote={handling_prep_quote} />;
+    return (
+        <PrepareQuoteClient
+            vendorId={vendor_id}
+            initialData={initialData}
+            handling_prep_quote={handling_prep_quote}
+        />
+    );
 }
