@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import AddSocialsModal from './AddSocialsModal';
+import ProfileLoadingState from './ProfileLoadingState';
 import { Camera, CheckCircle2, Plus, X } from 'lucide-react';
 
 interface VendorProfileStepProps {
@@ -33,6 +34,7 @@ export default function VendorProfileStep({
   const [services, setServices] = useState<string[]>(['Catering', 'Music', 'Music']);
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,16 +73,28 @@ export default function VendorProfileStep({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(true);
+    setIsLoading(true);
     if (onSave) onSave({ ...formData, services, profileImage, socialLinks });
     setTimeout(() => {
-      setSavedSuccess(false);
-      if (onNext) onNext();
-    }, 1000);
+      setIsLoading(false);
+      setSavedSuccess(true);
+      setTimeout(() => {
+        setSavedSuccess(false);
+        if (onNext) onNext();
+      }, 1000);
+    }, 1200);
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center relative">
+      {isLoading && (
+        <ProfileLoadingState
+          title="Saving Vendor Profile"
+          subtitle="Updating your business details, services, and profile settings..."
+          isOverlay
+        />
+      )}
+
       {/* Header title outside card */}
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 tracking-wide mb-4 text-center">
         Setting Up Vendor Profile
