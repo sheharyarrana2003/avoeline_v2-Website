@@ -7,9 +7,9 @@ import { SubmitButton } from "@/src/shared_components/SubmitButton";
 
 
 export default async function ReqQuotePage({
-    params}: {
-    params: Promise<{ id: string, organizer_id: string, vendor_id: string }>;
-}) {
+    params }: {
+        params: Promise<{ id: string, organizer_id: string, vendor_id: string }>;
+    }) {
     const { organizer_id } = await params;
     const { vendor_id } = await params;
 
@@ -23,15 +23,15 @@ export default async function ReqQuotePage({
 
     // const vendor : VendorData |null = await EventVendorService.getVendorById(vendor_id);
     // const all_events_of_organizer  : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
-    
 
-    const [vendor,all_events_of_organizer ] = await Promise.all([
+
+    const [vendor, all_events_of_organizer] = await Promise.all([
         EventVendorService.getVendorById(vendor_id),
-         EventService.getAllEventsByOrganizer(organizer_id)
+        EventService.getAllEventsByOrganizer(organizer_id)
     ])
 
-    const activeEvents : EventModel[]= all_events_of_organizer.filter(x => 
-    ['published', 'registration_open', 'ongoing'].includes(x.status))
+    const activeEvents: EventModel[] = all_events_of_organizer.filter(x =>
+        ['published', 'registration_open', 'ongoing'].includes(x.status))
 
 
     return (
@@ -79,7 +79,7 @@ export default async function ReqQuotePage({
                                     <div className="relative">
                                         {/* Added name="serviceType" */}
                                         <select name="serviceType" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                            {vendor?.serviceCategories.map(s=><option>{s}</option>)}
+                                            {vendor?.serviceCategories.map(s => <option>{s}</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -89,9 +89,9 @@ export default async function ReqQuotePage({
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Service Name</label>
                                     {/* Added name="serviceName" */}
 
-                                     <select name="serviceName" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                            {vendor?.services.map(s=><option>{s.name}</option>)}
-                                        </select>
+                                    <select name="serviceName" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
+                                        {vendor?.services.map(s => <option>{s.name}</option>)}
+                                    </select>
                                 </div>
 
                                 {/* Requirements */}
@@ -128,12 +128,15 @@ export default async function ReqQuotePage({
                                     </div>
                                 </div>
 
-                                {/* Toggle */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-gray-700">Send to all eligible vendors</span>
-                                    <button type="button" className="relative w-11 h-6 bg-black rounded-full transition-colors">
-                                        <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" />
-                                    </button>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Budget</label>
+                                    {/* Added name="serviceName" */}
+                                    <input
+                                        name="budget"
+                                        type="number"
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                                    />
+
                                 </div>
 
                                 {/* Submit */}
