@@ -88,12 +88,10 @@ export default async function ReqQuotePage({
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Service Name</label>
                                     {/* Added name="serviceName" */}
-                                    <input
-                                        name="serviceName"
-                                        type="text"
-                                        placeholder="e.g Premium Lunch Buffet"
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
-                                    />
+
+                                     <select name="serviceName" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
+                                            {vendor?.services.map(s=><option>{s.name}</option>)}
+                                        </select>
                                 </div>
 
                                 {/* Requirements */}
