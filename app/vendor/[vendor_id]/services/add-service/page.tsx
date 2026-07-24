@@ -2,13 +2,15 @@
 // Fully Server Component - Add New Service
 
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
-import { PricingPackage, VendorData } from "@/src/services/models/vendor.model";
+import { PricingPackage, Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { adminDb } from "@/data/admin_db"
 import { SubmitButton } from "@/src/shared_components/SubmitButton"
 import { MediaUploadField } from "@/src/features/media/MediaUploadField"
 import { isVideoUrl } from "@/src/features/media/media.utils"
+import AddCategoryButton from "./AddCategorybutton";
+import { COLLECTIONS } from "@/data/collections";
 
 // Helper to get category options from vendor
 const getCategoryOptions = (categories: string[]) => {
@@ -45,9 +47,11 @@ const PRICING_MODELS = [
 ];
 
 export default async function AddNewServicePage({
-    params
+    params,
+    searchParams
 }: {
-    params: Promise<{ vendor_id: string }>
+    params: Promise<{ vendor_id: string }>,
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const { vendor_id } = await params;
 
@@ -60,7 +64,8 @@ export default async function AddNewServicePage({
     const serviceCategories = vendor?.serviceCategories || [];
     const categoryOptions = getCategoryOptions(serviceCategories);
     const businessName = vendor?.businessName || "Vendor";
-
+    const resolvedSearchParams = await searchParams;
+    const addCategory = resolvedSearchParams?.addCategory === 'true';
     return (
         <div className="min-h-screen bg-[#f5f5f5]">
 
@@ -92,36 +97,63 @@ export default async function AddNewServicePage({
 
                     {/* Form */}
                     <form action={createServiceAction} className="space-y-6">
+
                         <input type="hidden" name="vendorId" value={vendor_id} />
+                        <input type="hidden" name="add-category" value={addCategory ? "true" : "false"} />
 
                         {/* Service Name & Category */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Service Name</label>
+                        {/* Service Name & Category Section */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
+
+                            {/* Service Name Field */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-900 leading-none h-4 flex items-center">
+                                    Service Name
+                                </label>
                                 <input
                                     type="text"
                                     name="serviceName"
                                     placeholder="e.g. Premium Buffet"
                                     required
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                                    className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-4 text-sm text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                                <div className="relative">
-                                    <select
-                                        name="category"
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
-                                    >
-                                        {categoryOptions.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </select>
-                                    <svg className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+
+                            {/* Category Field */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between h-4">
+                                    <label className="text-sm font-semibold text-gray-900 leading-none">
+                                        Category
+                                    </label>
+                                    <AddCategoryButton />
                                 </div>
+
+                                {addCategory ? (
+                                    <input
+                                        type="text"
+                                        name="category"
+                                        placeholder="Enter custom category..."
+                                        required
+                                        autoFocus
+                                        className="w-full h-11 bg-white border-2 border-black rounded-xl px-4 text-sm text-gray-900 placeholder-gray-400 outline-none transition"
+                                    />
+                                ) : (
+                                    <div className="relative w-full">
+                                        <select
+                                            name="category"
+                                            className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-4 pr-10 text-sm text-gray-900 appearance-none outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition cursor-pointer"
+                                        >
+                                            {categoryOptions.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                        <svg className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                )}
                             </div>
+
                         </div>
 
                         {/* Description */}
@@ -131,11 +163,6 @@ export default async function AddNewServicePage({
                                 <span className="text-xs text-gray-400">0/500</span>
                             </div>
                             <div className="border border-gray-200 rounded-xl overflow-hidden">
-                                <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50">
-                                    <button type="button" className="p-1 hover:bg-gray-200 rounded text-xs font-bold">B</button>
-                                    <button type="button" className="p-1 hover:bg-gray-200 rounded text-xs italic">I</button>
-                                    <button type="button" className="p-1 hover:bg-gray-200 rounded text-xs">≡</button>
-                                </div>
                                 <textarea
                                     name="description"
                                     rows={4}
@@ -262,43 +289,49 @@ export default async function AddNewServicePage({
 }
 
 // Server Action
+
 async function createServiceAction(formData: FormData) {
     'use server';
+    console.log("in submission form")
 
     const vendorId = formData.get('vendorId') as string;
     const serviceName = formData.get('serviceName') as string;
-    const category = formData.get('category') as string;
-    const description = formData.get('description') as string;
-    const pricingModel = formData.get('pricingModel') as string;
-    const price = parseFloat(formData.get('price') as string) || 0;
-    const minOrder = parseInt(formData.get('minOrder') as string) || 1;
-    const terms = formData.get('terms') as string;
+    const add_category = formData.get('add-category') as string;
 
-    const inclusions = formData.getAll('inclusions') as string[];
     const serviceMedia = (formData.getAll('serviceImages') as string[]).filter(Boolean);
     // Split by type so each service card can show its own image/video.
     const serviceImageUrls = serviceMedia.filter((u) => !isVideoUrl(u));
     const serviceVideoUrls = serviceMedia.filter((u) => isVideoUrl(u));
 
-    const payload: PricingPackage = {
-        packageId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
+    const payload: Service = {
+        serviceId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
         name: formData.get('packageName') as string || formData.get('serviceName') as string, // Fallbacks handled gently
         description: formData.get('description') as string,
+        category: formData.get('category') as string,
         price: parseFloat(formData.get('price') as string) || 0,
         minOrder: parseInt(formData.get('minOrder') as string) || 1,
 
         // formData.getAll() correctly handles multiple inputs with the same name attribute
         inclusions: formData.getAll('inclusions') as string[],
-        customizationOptions: formData.getAll('customizations') as string[],
-
         // Media stored ON the service — the source of truth for each service card.
         images: serviceImageUrls,
         videos: serviceVideoUrls,
     };
+    console.log("in submission form  2")
+
+
 
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
+
+
     if (vendor) {
-        vendor.pricingPackages.push(payload);
+        if (add_category === "true") {
+            console.log("insertinggg  ", formData.get('category') as string)
+            vendor?.serviceCategories.push(formData.get('category') as string);
+        } else {
+            console.log("not isnertingg");
+        }
+        vendor.services.push(payload);
 
         // Also mirror into the vendor's portfolio so the aggregate portfolio
         // galleries still show everything. NOTE: per-service cards read the
@@ -316,7 +349,9 @@ async function createServiceAction(formData: FormData) {
         // Vendor docs are keyed by the auth uid (== vendor.userId), NOT the
         // vendorId field — write to the correct document.
         const docId = vendor.userId || vendorId;
-        await adminDb.collection("vendor").doc(docId).update({ ...vendor });
+        await adminDb.collection(COLLECTIONS.VENDORS).doc(docId).update({ ...vendor });
+    }else{
+        console.log("vendor nahi milaaa");
     }
 
     // Redirect back to services page
