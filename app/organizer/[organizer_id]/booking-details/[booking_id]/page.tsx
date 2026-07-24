@@ -120,33 +120,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
                             </div>
                         </div>
 
-                        {/* 3. DELIVERY & LOGISTICS */}
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                    Delivery & Logistics
-                                </h3>
-                                <button className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 transition">REPORT ISSUE</button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div className="border border-gray-100 rounded-xl p-4">
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Delivery Schedule</p>
-                                    <p className="font-bold text-lg">{formatTime(raw_booking?.delivery?.scheduledTime)}</p>
-                                    <p className="text-[10px] font-bold text-green-600 mt-2 flex items-center gap-1">
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                        ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime || "")}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="bg-gray-50 rounded-xl p-4 flex gap-3 text-sm text-gray-600">
-                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                <p>"{raw_booking?.delivery?.deliveryNotes || 'No delivery notes provided.'}"</p>
-                            </div>
-                        </div>
-
+                       
                     </div>
 
                     {/* ================= RIGHT COLUMN (Col span 4) ================= */}
