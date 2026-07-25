@@ -156,269 +156,125 @@ const getStyleForBinding = (
 
 // Standard layout coordinates fallback map
 const DEFAULT_POSITIONS: Record<string, { x: number; y: number; width: number; height: number }> = {
-  heading: { x: 100, y: 80, width: 500, height: 50 },
-  title: { x: 150, y: 150, width: 400, height: 24 },
-  name: { x: 100, y: 190, width: 500, height: 48 },
-  achievement: { x: 100, y: 250, width: 500, height: 60 },
-  date: { x: 80, y: 400, width: 180, height: 24 },
-  issuer_name: { x: 440, y: 390, width: 180, height: 28 },
-  issuer_designation: { x: 440, y: 420, width: 180, height: 20 },
-  signature: { x: 480, y: 330, width: 100, height: 50 },
-  logo: { x: 326, y: 20, width: 48, height: 48 },
+    heading: { x: 100, y: 80, width: 500, height: 50 },
+    title: { x: 150, y: 150, width: 400, height: 24 },
+    name: { x: 100, y: 190, width: 500, height: 48 },
+    achievement: { x: 100, y: 250, width: 500, height: 60 },
+    date: { x: 80, y: 400, width: 180, height: 24 },
+    issuer_name: { x: 440, y: 390, width: 180, height: 28 },
+    issuer_designation: { x: 440, y: 420, width: 180, height: 20 },
+    signature: { x: 480, y: 330, width: 100, height: 50 },
+    logo: { x: 326, y: 20, width: 48, height: 48 },
 };
 
 // Helper for rendering text elements with exact coordinates
 const renderTextElement = (
-  content: string,
-  elementStyle: Style_attributes = {},
-  fallbackKey: keyof typeof DEFAULT_POSITIONS,
-  styleOverrides: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: string;
-    color?: string;
-    textAlign?: "left" | "center" | "right" | "justify";
-    lineHeight?: number;
-  }
+    content: string,
+    elementStyle: Style_attributes = {},
+    fallbackKey: keyof typeof DEFAULT_POSITIONS,
+    styleOverrides: {
+        fontFamily?: string;
+        fontSize?: number;
+        fontWeight?: string;
+        color?: string;
+        textAlign?: "left" | "center" | "right" | "justify";
+        lineHeight?: number;
+    }
 ) => {
-  const fallback = DEFAULT_POSITIONS[fallbackKey];
-  const posX = elementStyle.x ?? fallback.x;
-  const posY = elementStyle.y ?? fallback.y;
-  const posW = elementStyle.width ?? fallback.width;
-  const posH = elementStyle.height ?? fallback.height;
+    const fallback = DEFAULT_POSITIONS[fallbackKey];
+    const posX = elementStyle.x ?? fallback.x;
+    const posY = elementStyle.y ?? fallback.y;
+    const posW = elementStyle.width ?? fallback.width;
+    const posH = elementStyle.height ?? fallback.height;
 
-  const align = styleOverrides.textAlign || elementStyle.align || "center";
+    const align = styleOverrides.textAlign || elementStyle.align || "center";
 
-  const style: React.CSSProperties = {
-    position: "absolute",
-    left: `${posX}px`,
-    top: `${posY}px`,
-    width: `${posW}px`,
-    height: `${posH}px`,
-    fontFamily: styleOverrides.fontFamily || elementStyle.fontFamily || "sans-serif",
-    fontSize: styleOverrides.fontSize
-      ? `${styleOverrides.fontSize}px`
-      : elementStyle.fontSize
-      ? `${elementStyle.fontSize}px`
-      : "16px",
-    fontWeight: (styleOverrides.fontWeight || elementStyle.fontWeight || "normal") as React.CSSProperties["fontWeight"],
-    color: styleOverrides.color || elementStyle.color || "#000000",
-    lineHeight: styleOverrides.lineHeight || elementStyle.lineHeight || 1.2,
-    textAlign: align as React.CSSProperties["textAlign"],
-    display: "flex",
-    alignItems: "center",
-    justifyContent:
-      align === "center"
-        ? "center"
-        : align === "right"
-        ? "flex-end"
-        : "flex-start",
-    boxSizing: "border-box",
-    whiteSpace: "pre-wrap",
-    wordBreak: "break-word",
-  };
+    const style: React.CSSProperties = {
+        position: "absolute",
+        left: `${posX}px`,
+        top: `${posY}px`,
+        width: `${posW}px`,
+        height: `${posH}px`,
+        fontFamily: styleOverrides.fontFamily || elementStyle.fontFamily || "sans-serif",
+        fontSize: styleOverrides.fontSize
+            ? `${styleOverrides.fontSize}px`
+            : elementStyle.fontSize
+                ? `${elementStyle.fontSize}px`
+                : "16px",
+        fontWeight: (styleOverrides.fontWeight || elementStyle.fontWeight || "normal") as React.CSSProperties["fontWeight"],
+        color: styleOverrides.color || elementStyle.color || "#000000",
+        lineHeight: styleOverrides.lineHeight || elementStyle.lineHeight || 1.2,
+        textAlign: align as React.CSSProperties["textAlign"],
+        display: "flex",
+        alignItems: "center",
+        justifyContent:
+            align === "center"
+                ? "center"
+                : align === "right"
+                    ? "flex-end"
+                    : "flex-start",
+        boxSizing: "border-box",
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word",
+    };
 
-  return (
-    <div key={elementStyle.id || fallbackKey} style={style}>
-      {content}
-    </div>
-  );
+    return (
+        <div key={elementStyle.id || fallbackKey} style={style}>
+            {content}
+        </div>
+    );
 };
 
 // Helper for rendering images with fallback coordinates
 const renderImageElement = (
-  src: string | undefined,
-  elementStyle: Style_attributes = {},
-  fallbackKey: keyof typeof DEFAULT_POSITIONS,
-  altText: string
+    src: string | undefined,
+    elementStyle: Style_attributes = {},
+    fallbackKey: keyof typeof DEFAULT_POSITIONS,
+    altText: string
 ) => {
-  if (!src) return null;
+    if (!src) return null;
 
-  const fallback = DEFAULT_POSITIONS[fallbackKey];
-  const posX = elementStyle.x ?? fallback.x;
-  const posY = elementStyle.y ?? fallback.y;
-  const posW = elementStyle.width ?? fallback.width;
-  const posH = elementStyle.height ?? fallback.height;
+    const fallback = DEFAULT_POSITIONS[fallbackKey];
+    const posX = elementStyle.x ?? fallback.x;
+    const posY = elementStyle.y ?? fallback.y;
+    const posW = elementStyle.width ?? fallback.width;
+    const posH = elementStyle.height ?? fallback.height;
 
-  const style: React.CSSProperties = {
-    position: "absolute",
-    left: `${posX}px`,
-    top: `${posY}px`,
-    width: `${posW}px`,
-    height: `${posH}px`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  };
+    const style: React.CSSProperties = {
+        position: "absolute",
+        left: `${posX}px`,
+        top: `${posY}px`,
+        width: `${posW}px`,
+        height: `${posH}px`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    };
 
-  return (
-    <div key={elementStyle.id || fallbackKey} style={style}>
-      <img
-        src={src}
-        alt={altText}
-        onError={(e) => {
-          // Hide image wrapper if link breaks/fails to load
-          (e.target as HTMLElement).style.display = "none";
-        }}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-  );
+    return (
+        <div key={elementStyle.id || fallbackKey} style={style}>
+            <img
+                src={src}
+                alt={altText}
+                onError={(e) => {
+                    // Hide image wrapper if link breaks/fails to load
+                    (e.target as HTMLElement).style.display = "none";
+                }}
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                }}
+            />
+        </div>
+    );
 };
 
-// Main Component
-export function Certificate({
-  template,
-  template_styling,
-}: {
-  template: CertificateTemplate;
-  template_styling: styling_options;
-}) {
-  const canvasWidth = template.canvas?.width || 700;
-  const canvasHeight = template.canvas?.height || 500;
-
-  const canvasStyle: React.CSSProperties = {
-    position: "relative",
-    width: `${canvasWidth}px`,
-    height: `${canvasHeight}px`,
-    background: template.canvas?.background || "#ffffff",
-    border: `${template_styling.border_size ?? 4}px ${template_styling.border_style || "solid"} ${template_styling.border_color || "#1A365D"}`,
-    boxSizing: "border-box",
-    overflow: "hidden",
-  };
-
-  return (
-    <div className="certificate-canvas shadow-2xl rounded-sm" style={canvasStyle}>
-      {/* 1. Logo */}
-      {renderImageElement(
-        template_styling.logo || template.logo_src,
-        {},
-        "logo",
-        "Logo"
-      )}
-
-      {/* 2. Certificate Heading */}
-      {renderTextElement(
-        template_styling.heading_of_certificate || template.heading_content,
-        template.heading_styling,
-        "heading",
-        {
-          fontFamily: template_styling.heading_font_family,
-          fontSize: template_styling.heading_font_size,
-          fontWeight: template_styling.heading_font_weight,
-          color: template_styling.heading_color || template_styling.primary_color,
-          textAlign: template_styling.heading_text_align,
-        }
-      )}
-
-      {/* 3. Title */}
-      {renderTextElement(
-        template_styling.title || template.title_content,
-        template.title_styling,
-        "title",
-        {
-          fontFamily: template_styling.title_font_family,
-          fontSize: template_styling.title_font_size,
-          fontWeight: template_styling.title_font_weight,
-          color: template_styling.title_color,
-          textAlign: template_styling.title_text_align,
-        }
-      )}
-
-      {/* 4. Recipient Name */}
-      {renderTextElement(
-        template_styling.name || template.name_content,
-        template.name_styling,
-        "name",
-        {
-          fontFamily: template_styling.name_font_family,
-          fontSize: template_styling.name_font_size,
-          fontWeight: template_styling.name_font_weight,
-          color: template_styling.name_color || template_styling.secondary_color,
-          textAlign: template_styling.name_text_align,
-        }
-      )}
-
-      {/* 5. Achievement Body */}
-      {renderTextElement(
-        template_styling.achievement_statement || template.achievement_content,
-        template.achievement_styling,
-        "achievement",
-        {
-          fontFamily: template_styling.achievement_font_family,
-          fontSize: template_styling.achievement_font_size,
-          fontWeight: template_styling.achievement_font_weight,
-          color: template_styling.achievement_color,
-          lineHeight: template_styling.achievement_line_height,
-          textAlign: template_styling.achievement_text_align,
-        }
-      )}
-
-      {/* 6. Date */}
-      {renderTextElement(
-        template_styling.date || template.date_content,
-        template.date_styling,
-        "date",
-        {
-          fontFamily: template_styling.date_font_family,
-          fontSize: template_styling.date_font_size,
-          fontWeight: template_styling.date_font_weight,
-          color: template_styling.date_text_color,
-        }
-      )}
-
-      {/* 7. Issuer Name */}
-      {renderTextElement(
-        template_styling.issuer_name || template.issuer_name_content,
-        template.issuer_name_styling,
-        "issuer_name",
-        {
-          fontFamily: template_styling.issuer_name_font_family,
-          fontSize: template_styling.issuer_name_font_size,
-          fontWeight: template_styling.issuer_name_font_weight,
-          color: template_styling.issuer_name_color || template_styling.primary_color,
-        }
-      )}
-
-      {/* 8. Issuer Designation */}
-      {renderTextElement(
-        template_styling.issuer_designation || template.issuer_designation_content,
-        template.issuer_designation_styling,
-        "issuer_designation",
-        {
-          fontFamily: template_styling.issuer_designation_font_family,
-          fontSize: template_styling.issuer_designation_font_size,
-          fontWeight: template_styling.issuer_designation_font_weight,
-          color: template_styling.issuer_designation_color,
-        }
-      )}
-
-      {/* 9. Signature */}
-      {renderImageElement(
-        template_styling.signature_of_issuer || template.signature_src,
-        template.signature_styling,
-        "signature",
-        "Signature"
-      )}
-    </div>
-  );
-}
-
-// --- Main Panel Component ---
-
-export default function MakingTemplateUi({
-    initialTemplate,
-    save_template,
-}: {
-    initialTemplate: CertificateTemplate;
-    save_template: (template: CertificateTemplate) => Promise<void>;
-}) {
-    const [template, setTemplate] = useState<CertificateTemplate>(initialTemplate);
-
+// Main Componentexport function Certificate({
+export function extractStylingOptions(
+    template?: Partial<CertificateTemplate> | null,
+    customOverrides?: Partial<styling_options>
+): styling_options {
     const defaultStylingOptions: styling_options = {
         primary_color: "#1A365D",
         secondary_color: "#D69E2E",
@@ -479,21 +335,104 @@ export default function MakingTemplateUi({
         issuer_designation_color: "#718096",
     };
 
-    // Initialize styling from template if it already has styling data, otherwise use defaults
-    const [template_styling, setTemplateStyling] = useState<styling_options>(() => {
-        const existing = (initialTemplate as any)?.styling;
-        return existing ? { ...defaultStylingOptions, ...existing } : defaultStylingOptions;
-    });
+    if (!template) {
+        return { ...defaultStylingOptions, ...customOverrides };
+    }
 
+    // Extract structured properties if present in the template
+    const mappedFromTemplate: Partial<styling_options> = {
+        // Theme & Frame
+        primary_color: template.primary_color ?? defaultStylingOptions.primary_color,
+        secondary_color: template.secondary_color ?? defaultStylingOptions.secondary_color,
+        border_color: template.border_color ?? defaultStylingOptions.border_color,
+        border_size: template.border_size ?? defaultStylingOptions.border_size,
+        border_style: template.border_style ?? defaultStylingOptions.border_style,
+        logo: template.logo_src || defaultStylingOptions.logo,
+
+        // Heading
+        heading_of_certificate: template.heading_content ?? defaultStylingOptions.heading_of_certificate,
+        heading_font_family: template.heading_styling?.fontFamily ?? defaultStylingOptions.heading_font_family,
+        heading_font_size: template.heading_styling?.fontSize ?? defaultStylingOptions.heading_font_size,
+        heading_font_weight: template.heading_styling?.fontWeight ?? defaultStylingOptions.heading_font_weight,
+        heading_color: template.heading_styling?.color ?? defaultStylingOptions.heading_color,
+        heading_text_align: (template.heading_styling?.align as any) ?? defaultStylingOptions.heading_text_align,
+
+        // Title
+        title: template.title_content ?? defaultStylingOptions.title,
+        title_font_family: template.title_styling?.fontFamily ?? defaultStylingOptions.title_font_family,
+        title_font_size: template.title_styling?.fontSize ?? defaultStylingOptions.title_font_size,
+        title_font_weight: template.title_styling?.fontWeight ?? defaultStylingOptions.title_font_weight,
+        title_color: template.title_styling?.color ?? defaultStylingOptions.title_color,
+        title_text_align: (template.title_styling?.align as any) ?? defaultStylingOptions.title_text_align,
+
+        // Name
+        name: template.name_content ?? defaultStylingOptions.name,
+        name_font_family: template.name_styling?.fontFamily ?? defaultStylingOptions.name_font_family,
+        name_font_size: template.name_styling?.fontSize ?? defaultStylingOptions.name_font_size,
+        name_font_weight: template.name_styling?.fontWeight ?? defaultStylingOptions.name_font_weight,
+        name_color: template.name_styling?.color ?? defaultStylingOptions.name_color,
+        name_text_align: (template.name_styling?.align as any) ?? defaultStylingOptions.name_text_align,
+
+        // Achievement
+        achievement_statement: template.achievement_content ?? defaultStylingOptions.achievement_statement,
+        achievement_font_family: template.achievement_styling?.fontFamily ?? defaultStylingOptions.achievement_font_family,
+        achievement_font_size: template.achievement_styling?.fontSize ?? defaultStylingOptions.achievement_font_size,
+        achievement_font_weight: template.achievement_styling?.fontWeight ?? defaultStylingOptions.achievement_font_weight,
+        achievement_color: template.achievement_styling?.color ?? defaultStylingOptions.achievement_color,
+        achievement_line_height: template.achievement_styling?.lineHeight ?? defaultStylingOptions.achievement_line_height,
+        achievement_text_align: (template.achievement_styling?.align as any) ?? defaultStylingOptions.achievement_text_align,
+
+        // Date
+        date: template.date_content ?? defaultStylingOptions.date,
+        date_font_family: template.date_styling?.fontFamily ?? defaultStylingOptions.date_font_family,
+        date_font_size: template.date_styling?.fontSize ?? defaultStylingOptions.date_font_size,
+        date_font_weight: template.date_styling?.fontWeight ?? defaultStylingOptions.date_font_weight,
+        date_text_color: template.date_styling?.color ?? defaultStylingOptions.date_text_color,
+
+        // Issuer
+        issuer_name: template.issuer_name_content ?? defaultStylingOptions.issuer_name,
+        issuer_name_font_family: template.issuer_name_styling?.fontFamily ?? defaultStylingOptions.issuer_name_font_family,
+        issuer_name_font_size: template.issuer_name_styling?.fontSize ?? defaultStylingOptions.issuer_name_font_size,
+        issuer_name_font_weight: template.issuer_name_styling?.fontWeight ?? defaultStylingOptions.issuer_name_font_weight,
+        issuer_name_color: template.issuer_name_styling?.color ?? defaultStylingOptions.issuer_name_color,
+
+        issuer_designation: template.issuer_designation_content ?? defaultStylingOptions.issuer_designation,
+        issuer_designation_font_family: template.issuer_designation_styling?.fontFamily ?? defaultStylingOptions.issuer_designation_font_family,
+        issuer_designation_font_size: template.issuer_designation_styling?.fontSize ?? defaultStylingOptions.issuer_designation_font_size,
+        issuer_designation_font_weight: template.issuer_designation_styling?.fontWeight ?? defaultStylingOptions.issuer_designation_font_weight,
+        issuer_designation_color: template.issuer_designation_styling?.color ?? defaultStylingOptions.issuer_designation_color,
+
+        signature_of_issuer: template.signature_src || defaultStylingOptions.signature_of_issuer,
+    };
+
+    return {
+        ...defaultStylingOptions,
+        ...mappedFromTemplate,
+        ...(template as any)?.styling, // Also supports nested `.styling` key if present
+        ...customOverrides,
+    };
+}
+
+// --- Main Panel Component ---
+
+export default function MakingTemplateUi({
+    initialTemplate,
+    save_template,
+}: {
+    initialTemplate: CertificateTemplate;
+    save_template: (template: CertificateTemplate) => Promise<void>;
+}) {
+    const [template, setTemplate] = useState<CertificateTemplate>(initialTemplate);
+
+    const [template_styling, setTemplateStyling] = useState<styling_options>(() =>
+        extractStylingOptions(initialTemplate)
+    );
     const [isSaving, setIsSaving] = useState(false);
     const router = useRouter();
 
     // Sync template_styling back into template so the saved object always carries the latest styling
     useEffect(() => {
-        setTemplate((prev) => ({
-            ...prev,
-            styling: template_styling,
-        } as CertificateTemplate));
+         <Certificate cert_template={template} template_styling={template_styling} />
     }, [template_styling]);
 
     const handleStyleChange = (key: keyof styling_options, value: any) => {
@@ -506,6 +445,7 @@ export default function MakingTemplateUi({
     const handleSave = async () => {
         setIsSaving(true);
         try {
+
             await save_template(template);
         } catch (error) {
             console.error("Failed to save template:", error);
@@ -513,6 +453,244 @@ export default function MakingTemplateUi({
             setIsSaving(false);
         }
     };
+
+
+    function Certificate({
+        cert_template,
+        template_styling,
+    }: {
+        cert_template: CertificateTemplate;
+        template_styling: styling_options;
+    }) {
+        // 1. Initialize and mutate template properties using template_styling
+        const updatedTemplate: CertificateTemplate = {
+            ...cert_template,
+
+            // Canvas & Frame Updates
+            primary_color: template_styling.primary_color,
+            secondary_color: template_styling.secondary_color,
+            border_color: template_styling.border_color,
+            border_size: template_styling.border_size,
+            border_style: template_styling.border_style,
+            logo_src: template_styling.logo,
+            canvas: {
+                ...cert_template.canvas,
+                background: template_styling.primary_color || "#ffffff",
+            },
+
+            // Heading Updates
+            heading_content: template_styling.heading_of_certificate,
+            heading_styling: {
+                ...cert_template.heading_styling,
+                fontFamily: template_styling.heading_font_family || cert_template.heading_styling?.fontFamily,
+                fontSize: template_styling.heading_font_size ?? cert_template.heading_styling?.fontSize,
+                fontWeight: template_styling.heading_font_weight || cert_template.heading_styling?.fontWeight,
+                color: template_styling.heading_color || template_styling.secondary_color || cert_template.heading_styling?.color,
+                align: template_styling.heading_text_align || cert_template.heading_styling?.align,
+            },
+
+            // Title Updates
+            title_content: template_styling.title || cert_template.title_content,
+            title_styling: {
+                ...cert_template.title_styling,
+                fontFamily: template_styling.title_font_family || cert_template.title_styling?.fontFamily,
+                fontSize: template_styling.title_font_size ?? cert_template.title_styling?.fontSize,
+                fontWeight: template_styling.title_font_weight || cert_template.title_styling?.fontWeight,
+                color: template_styling.title_color || cert_template.title_styling?.color,
+                align: template_styling.title_text_align || cert_template.title_styling?.align,
+            },
+
+            // Recipient Name Updates
+            name_content: template_styling.name || cert_template.name_content,
+            name_styling: {
+                ...cert_template.name_styling,
+                fontFamily: template_styling.name_font_family || cert_template.name_styling?.fontFamily,
+                fontSize: template_styling.name_font_size ?? cert_template.name_styling?.fontSize,
+                fontWeight: template_styling.name_font_weight || cert_template.name_styling?.fontWeight,
+                color: template_styling.name_color || template_styling.secondary_color || cert_template.name_styling?.color,
+                align: template_styling.name_text_align || cert_template.name_styling?.align,
+            },
+
+            // Achievement Body Updates
+            achievement_content: template_styling.achievement_statement || cert_template.achievement_content,
+            achievement_styling: {
+                ...cert_template.achievement_styling,
+                fontFamily: template_styling.achievement_font_family || cert_template.achievement_styling?.fontFamily,
+                fontSize: template_styling.achievement_font_size ?? cert_template.achievement_styling?.fontSize,
+                fontWeight: template_styling.achievement_font_weight || cert_template.achievement_styling?.fontWeight,
+                color: template_styling.achievement_color || cert_template.achievement_styling?.color,
+                lineHeight: template_styling.achievement_line_height ?? cert_template.achievement_styling?.lineHeight,
+                align: template_styling.achievement_text_align || cert_template.achievement_styling?.align,
+            },
+
+            // Date Updates
+            date_content: template_styling.date || cert_template.date_content,
+            date_styling: {
+                ...cert_template.date_styling,
+                fontFamily: template_styling.date_font_family || cert_template.date_styling?.fontFamily,
+                fontSize: template_styling.date_font_size ?? cert_template.date_styling?.fontSize,
+                fontWeight: template_styling.date_font_weight || cert_template.date_styling?.fontWeight,
+                color: template_styling.date_text_color || cert_template.date_styling?.color,
+            },
+
+            // Issuer Name Updates
+            issuer_name_content: template_styling.issuer_name || cert_template.issuer_name_content,
+            issuer_name_styling: {
+                ...cert_template.issuer_name_styling,
+                fontFamily: template_styling.issuer_name_font_family || cert_template.issuer_name_styling?.fontFamily,
+                fontSize: template_styling.issuer_name_font_size ?? cert_template.issuer_name_styling?.fontSize,
+                fontWeight: template_styling.issuer_name_font_weight || cert_template.issuer_name_styling?.fontWeight,
+                color: template_styling.issuer_name_color || cert_template.issuer_name_styling?.color,
+            },
+
+            // Issuer Designation Updates
+            issuer_designation_content: template_styling.issuer_designation || cert_template.issuer_designation_content,
+            issuer_designation_styling: {
+                ...cert_template.issuer_designation_styling,
+                fontFamily: template_styling.issuer_designation_font_family || cert_template.issuer_designation_styling?.fontFamily,
+                fontSize: template_styling.issuer_designation_font_size ?? cert_template.issuer_designation_styling?.fontSize,
+                fontWeight: template_styling.issuer_designation_font_weight || cert_template.issuer_designation_styling?.fontWeight,
+                color: template_styling.issuer_designation_color || cert_template.issuer_designation_styling?.color,
+            },
+
+            // Signature Image Updates
+            signature_src: template_styling.signature_of_issuer || cert_template.signature_src,
+            signature_styling: {
+                ...cert_template.signature_styling,
+            },
+        };
+        setTemplate(updatedTemplate)
+        // 2. Setup canvas styles directly from the updatedTemplate properties
+        const canvasWidth = updatedTemplate.canvas?.width || 700;
+        const canvasHeight = updatedTemplate.canvas?.height || 500;
+
+        const canvasStyle: React.CSSProperties = {
+            position: "relative",
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
+            background: updatedTemplate.canvas.background,
+            border: `${updatedTemplate.border_size}px ${updatedTemplate.border_style} ${updatedTemplate.border_color}`,
+            boxSizing: "border-box",
+            overflow: "hidden",
+        };
+
+        // 3. Render directly using updatedTemplate values
+        return (
+            <div className="certificate-canvas shadow-2xl rounded-sm" style={canvasStyle}>
+                {/* 1. Logo */}
+                {renderImageElement(
+                    updatedTemplate.logo_src,
+                    {},
+                    "logo",
+                    "Logo"
+                )}
+
+                {/* 2. Certificate Heading */}
+                {renderTextElement(
+                    updatedTemplate.heading_content,
+                    updatedTemplate.heading_styling,
+                    "heading",
+                    {
+                        fontFamily: updatedTemplate.heading_styling.fontFamily,
+                        fontSize: updatedTemplate.heading_styling.fontSize,
+                        fontWeight: updatedTemplate.heading_styling.fontWeight,
+                        color: updatedTemplate.heading_styling.color,
+                        textAlign: updatedTemplate.heading_styling.align,
+                    }
+                )}
+
+                {/* 3. Title */}
+                {renderTextElement(
+                    updatedTemplate.title_content,
+                    updatedTemplate.title_styling,
+                    "title",
+                    {
+                        fontFamily: updatedTemplate.title_styling.fontFamily,
+                        fontSize: updatedTemplate.title_styling.fontSize,
+                        fontWeight: updatedTemplate.title_styling.fontWeight,
+                        color: updatedTemplate.title_styling.color,
+                        textAlign: updatedTemplate.title_styling.align,
+                    }
+                )}
+
+                {/* 4. Recipient Name */}
+                {renderTextElement(
+                    updatedTemplate.name_content,
+                    updatedTemplate.name_styling,
+                    "name",
+                    {
+                        fontFamily: updatedTemplate.name_styling.fontFamily,
+                        fontSize: updatedTemplate.name_styling.fontSize,
+                        fontWeight: updatedTemplate.name_styling.fontWeight,
+                        color: updatedTemplate.name_styling.color,
+                        textAlign: updatedTemplate.name_styling.align,
+                    }
+                )}
+
+                {/* 5. Achievement Body */}
+                {renderTextElement(
+                    updatedTemplate.achievement_content,
+                    updatedTemplate.achievement_styling,
+                    "achievement",
+                    {
+                        fontFamily: updatedTemplate.achievement_styling.fontFamily,
+                        fontSize: updatedTemplate.achievement_styling.fontSize,
+                        fontWeight: updatedTemplate.achievement_styling.fontWeight,
+                        color: updatedTemplate.achievement_styling.color,
+                        lineHeight: updatedTemplate.achievement_styling.lineHeight,
+                        textAlign: updatedTemplate.achievement_styling.align,
+                    }
+                )}
+
+                {/* 6. Date */}
+                {renderTextElement(
+                    updatedTemplate.date_content,
+                    updatedTemplate.date_styling,
+                    "date",
+                    {
+                        fontFamily: updatedTemplate.date_styling.fontFamily,
+                        fontSize: updatedTemplate.date_styling.fontSize,
+                        fontWeight: updatedTemplate.date_styling.fontWeight,
+                        color: updatedTemplate.date_styling.color,
+                    }
+                )}
+
+                {/* 7. Issuer Name */}
+                {renderTextElement(
+                    updatedTemplate.issuer_name_content,
+                    updatedTemplate.issuer_name_styling,
+                    "issuer_name",
+                    {
+                        fontFamily: updatedTemplate.issuer_name_styling.fontFamily,
+                        fontSize: updatedTemplate.issuer_name_styling.fontSize,
+                        fontWeight: updatedTemplate.issuer_name_styling.fontWeight,
+                        color: updatedTemplate.issuer_name_styling.color,
+                    }
+                )}
+
+                {/* 8. Issuer Designation */}
+                {renderTextElement(
+                    updatedTemplate.issuer_designation_content,
+                    updatedTemplate.issuer_designation_styling,
+                    "issuer_designation",
+                    {
+                        fontFamily: updatedTemplate.issuer_designation_styling.fontFamily,
+                        fontSize: updatedTemplate.issuer_designation_styling.fontSize,
+                        fontWeight: updatedTemplate.issuer_designation_styling.fontWeight,
+                        color: updatedTemplate.issuer_designation_styling.color,
+                    }
+                )}
+
+                {/* 9. Signature */}
+                {renderImageElement(
+                    updatedTemplate.signature_src,
+                    updatedTemplate.signature_styling,
+                    "signature",
+                    "Signature"
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen bg-stone-100 text-stone-800 overflow-hidden font-sans">
@@ -980,7 +1158,7 @@ export default function MakingTemplateUi({
             {/* Main Canvas Workspace */}
             <main className="flex-1 flex flex-col items-center justify-center p-8 overflow-auto bg-stone-200">
                 <div className="bg-white p-4 rounded-xl shadow-xl border border-stone-300 flex items-center justify-center">
-                    <Certificate template={template} template_styling={template_styling} />
+                    <Certificate cert_template={template} template_styling={template_styling} />
                 </div>
             </main>
         </div>

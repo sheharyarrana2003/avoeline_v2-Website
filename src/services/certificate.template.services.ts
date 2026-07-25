@@ -76,24 +76,36 @@ export interface CertificateTemplate {
     blockchain: Blockchain;
 }
 
-// Helper to map dynamic style blocks safely with standard defaults
+// Helper to map dynamic style blocks safely with standard defaults (Firestore Safe)
 function mapStyleAttributes(data: any, defaults: Partial<Style_attributes> = {}): Style_attributes {
-    if (!data) return defaults;
+    const raw = data || {};
+    
     return {
-        fontFamily: data.fontFamily ?? defaults.fontFamily ?? "Arial, sans-serif",
-        fontSize: data.fontSize ? Number(data.fontSize) : defaults.fontSize ?? 14,
-        fontWeight: data.fontWeight ?? defaults.fontWeight ?? "normal",
-        align: ["left", "center", "right", "justify"].includes(data.align)
-            ? data.align
+        id: raw.id ?? defaults.id ?? "",
+        type: raw.type ?? defaults.type ?? "text",
+        content: raw.content ?? defaults.content ?? "",
+        src: raw.src ?? defaults.src ?? "",
+        
+        // Coordinates and Dimensions (fallback to 0 or defaults, never undefined)
+        x: Number(raw.x ?? defaults.x) || 0,
+        y: Number(raw.y ?? defaults.y) || 0,
+        width: Number(raw.width ?? defaults.width) || 0,
+        height: Number(raw.height ?? defaults.height) || 0,
+
+        // Typography
+        fontFamily: raw.fontFamily ?? defaults.fontFamily ?? "Arial, sans-serif",
+        fontSize: raw.fontSize ? Number(raw.fontSize) : defaults.fontSize ?? 14,
+        fontWeight: raw.fontWeight ?? defaults.fontWeight ?? "normal",
+        align: ["left", "center", "right", "justify"].includes(raw.align)
+            ? raw.align
             : defaults.align ?? "center",
-        color: data.color ?? defaults.color ?? "#333333",
-        lineHeight: data.lineHeight ? Number(data.lineHeight) : defaults.lineHeight,
-        x: Number(data.x) || defaults.x || 0,
-        y: Number(data.y) || defaults.y || 0,
-        width: Number(data.width) || defaults.width || 0,
-        height: Number(data.height) || defaults.height || 0,
-        editable: Boolean(data.editable ?? defaults.editable ?? true),
-        binding: data.binding ?? defaults.binding ?? "",
+        color: raw.color ?? defaults.color ?? "#333333",
+
+        // LineHeight: Use null or default number instead of undefined for Firestore safety
+        lineHeight: raw.lineHeight ? Number(raw.lineHeight) : defaults.lineHeight ?? 1.2,
+
+        editable: Boolean(raw.editable ?? defaults.editable ?? true),
+        binding: raw.binding ?? defaults.binding ?? "",
     };
 }
 
@@ -124,6 +136,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             color: data.heading_color ?? data.primary_color ?? "#1A365D",
             align: data.heading_text_align ?? "center",
             binding: "heading_of_certificate",
+            x: 100, y: 80, width: 500, height: 50
         }),
 
         // Title
@@ -135,6 +148,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             color: data.title_color ?? "#718096",
             align: data.title_text_align ?? "center",
             binding: "title",
+            x: 150, y: 150, width: 400, height: 24
         }),
 
         // Recipient Name
@@ -146,6 +160,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             color: data.name_color ?? data.secondary_color ?? "#D69E2E",
             align: data.name_text_align ?? "center",
             binding: "name",
+            x: 100, y: 190, width: 500, height: 48
         }),
 
         // Achievement Body
@@ -158,6 +173,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             lineHeight: data.achievement_line_height ?? 1.6,
             align: data.achievement_text_align ?? "center",
             binding: "achievement_statement",
+            x: 100, y: 250, width: 500, height: 60
         }),
 
         // Date
@@ -168,6 +184,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.date_font_weight ?? "normal",
             color: data.date_text_color ?? "#4A5568",
             binding: "date",
+            x: 80, y: 400, width: 180, height: 24
         }),
 
         // Issuer Details
@@ -178,6 +195,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.issuer_name_font_weight ?? "bold",
             color: data.issuer_name_color ?? data.primary_color ?? "#1A365D",
             binding: "issuer_name",
+            x: 440, y: 390, width: 180, height: 28
         }),
 
         issuer_designation_content: data.issuer_designation_content ?? data.issuer_designation ?? "Director of Operations",
@@ -187,11 +205,13 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.issuer_designation_font_weight ?? "normal",
             color: data.issuer_designation_color ?? "#718096",
             binding: "issuer_designation",
+            x: 440, y: 420, width: 180, height: 20
         }),
 
         signature_src: data.signature_src ?? data.signature_of_issuer ?? "",
         signature_styling: mapStyleAttributes(data.signature_styling, {
             binding: "signature_of_issuer",
+            x: 480, y: 330, width: 100, height: 50
         }),
 
         // Canvas & Blockchain configuration
@@ -206,7 +226,8 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             network: data.blockchain?.network ?? "Polygon",
         },
     };
-}export const initialTemplate: CertificateTemplate = {
+}
+export const initialTemplate: CertificateTemplate = {
     templateId: "techverse-hackathon-2026",
     templateName: "Event Name",
     organizer_id: "",
@@ -372,14 +393,18 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
         network: "Polygon",
     },
 };
+
 export const CertificateTemplateService = {
     async save_template_of_organizer(template: CertificateTemplate, organizer_id: string) {
+        console.log("about to save ",template);
         const template_to_be_added: CertificateTemplate = mapJsonToTemplate(template);
         template_to_be_added.organizer_id = organizer_id; 
         template_to_be_added.templateId = organizer_id;
 
+        const cleanTemplate = JSON.parse(JSON.stringify(template_to_be_added));
+    
         await adminDb.collection(COLLECTIONS.CERTIFICATE_TEMPLATE).doc(organizer_id).set({
-            ...template_to_be_added
+            ...cleanTemplate
         })
         return organizer_id;
 
