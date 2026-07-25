@@ -3,11 +3,8 @@ import { adminAuth, adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { QuerySnapshot } from "firebase-admin/firestore";
 
+// --- Interfaces ---
 export interface Style_attributes {
-    id?: string;
-    type?: "text" | "image";
-    content?: string;
-    src?: string;
     x?: number;
     y?: number;
     width?: number;
@@ -15,18 +12,15 @@ export interface Style_attributes {
     fontFamily?: string;
     fontSize?: number;
     fontWeight?: string;
-    align?: "left" | "center" | "right" | "justify";
     color?: string;
+    align?: "left" | "center" | "right" | "justify";
     lineHeight?: number;
-    editable?: boolean;
-    binding?: string;
 }
 
 export interface Canvas {
     width: number;
     height: number;
-    background: string;
-    showGrid: boolean;
+    showGrid?: boolean;
 }
 
 export interface Blockchain {
@@ -38,16 +32,18 @@ export interface CertificateTemplate {
     templateId: string;
     organizer_id: string;
     templateName: string;
+    canvas: Canvas;
+    blockchain: Blockchain;
 
-    // Theme & Frame Styling
     primary_color: string;
     secondary_color: string;
     border_color: string;
     border_size: number;
     border_style: string;
-    logo_src: string;
 
-    // Content & Styling Attributes for every element
+    logo_src: string;
+    logo_styling: Style_attributes;
+
     heading_content: string;
     heading_styling: Style_attributes;
 
@@ -71,9 +67,6 @@ export interface CertificateTemplate {
 
     signature_src: string;
     signature_styling: Style_attributes;
-
-    canvas: Canvas;
-    blockchain: Blockchain;
 }
 
 // Helper to map dynamic style blocks safely with standard defaults (Firestore Safe)
@@ -81,18 +74,11 @@ function mapStyleAttributes(data: any, defaults: Partial<Style_attributes> = {})
     const raw = data || {};
     
     return {
-        id: raw.id ?? defaults.id ?? "",
-        type: raw.type ?? defaults.type ?? "text",
-        content: raw.content ?? defaults.content ?? "",
-        src: raw.src ?? defaults.src ?? "",
-        
-        // Coordinates and Dimensions (fallback to 0 or defaults, never undefined)
         x: Number(raw.x ?? defaults.x) || 0,
         y: Number(raw.y ?? defaults.y) || 0,
         width: Number(raw.width ?? defaults.width) || 0,
         height: Number(raw.height ?? defaults.height) || 0,
 
-        // Typography
         fontFamily: raw.fontFamily ?? defaults.fontFamily ?? "Arial, sans-serif",
         fontSize: raw.fontSize ? Number(raw.fontSize) : defaults.fontSize ?? 14,
         fontWeight: raw.fontWeight ?? defaults.fontWeight ?? "normal",
@@ -101,11 +87,7 @@ function mapStyleAttributes(data: any, defaults: Partial<Style_attributes> = {})
             : defaults.align ?? "center",
         color: raw.color ?? defaults.color ?? "#333333",
 
-        // LineHeight: Use null or default number instead of undefined for Firestore safety
         lineHeight: raw.lineHeight ? Number(raw.lineHeight) : defaults.lineHeight ?? 1.2,
-
-        editable: Boolean(raw.editable ?? defaults.editable ?? true),
-        binding: raw.binding ?? defaults.binding ?? "",
     };
 }
 
@@ -125,7 +107,15 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
         border_color: data.border_color ?? "#1A365D",
         border_size: Number(data.border_size) || 4,
         border_style: data.border_style ?? "solid",
+
+        // Logo
         logo_src: data.logo_src ?? data.logo ?? "",
+        logo_styling: mapStyleAttributes(data.logo_styling, {
+            x: 326,
+            y: 20,
+            width: 48,
+            height: 48,
+        }),
 
         // Heading
         heading_content: data.heading_content ?? data.heading_of_certificate ?? "CERTIFICATE OF APPRECIATION",
@@ -135,8 +125,10 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.heading_font_weight ?? "bold",
             color: data.heading_color ?? data.primary_color ?? "#1A365D",
             align: data.heading_text_align ?? "center",
-            binding: "heading_of_certificate",
-            x: 100, y: 80, width: 500, height: 50
+            x: 100,
+            y: 80,
+            width: 500,
+            height: 50,
         }),
 
         // Title
@@ -147,8 +139,10 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.title_font_weight ?? "normal",
             color: data.title_color ?? "#718096",
             align: data.title_text_align ?? "center",
-            binding: "title",
-            x: 150, y: 150, width: 400, height: 24
+            x: 150,
+            y: 150,
+            width: 400,
+            height: 24,
         }),
 
         // Recipient Name
@@ -159,8 +153,10 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontWeight: data.name_font_weight ?? "bold",
             color: data.name_color ?? data.secondary_color ?? "#D69E2E",
             align: data.name_text_align ?? "center",
-            binding: "name",
-            x: 100, y: 190, width: 500, height: 48
+            x: 100,
+            y: 190,
+            width: 500,
+            height: 48,
         }),
 
         // Achievement Body
@@ -172,8 +168,10 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             color: data.achievement_color ?? "#2D3748",
             lineHeight: data.achievement_line_height ?? 1.6,
             align: data.achievement_text_align ?? "center",
-            binding: "achievement_statement",
-            x: 100, y: 250, width: 500, height: 60
+            x: 100,
+            y: 250,
+            width: 500,
+            height: 60,
         }),
 
         // Date
@@ -183,19 +181,25 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontSize: data.date_font_size ?? 12,
             fontWeight: data.date_font_weight ?? "normal",
             color: data.date_text_color ?? "#4A5568",
-            binding: "date",
-            x: 80, y: 400, width: 180, height: 24
+            align: "left",
+            x: 80,
+            y: 400,
+            width: 180,
+            height: 24,
         }),
 
         // Issuer Details
         issuer_name_content: data.issuer_name_content ?? data.issuer_name ?? "Jane Doe",
         issuer_name_styling: mapStyleAttributes(data.issuer_name_styling, {
-            fontFamily: data.issuer_name_font_family ?? "Arial, sans-serif",
+            fontFamily: data.issuer_name_font_family ?? "Georgia, serif",
             fontSize: data.issuer_name_font_size ?? 16,
             fontWeight: data.issuer_name_font_weight ?? "bold",
             color: data.issuer_name_color ?? data.primary_color ?? "#1A365D",
-            binding: "issuer_name",
-            x: 440, y: 390, width: 180, height: 28
+            align: "center",
+            x: 440,
+            y: 390,
+            width: 180,
+            height: 28,
         }),
 
         issuer_designation_content: data.issuer_designation_content ?? data.issuer_designation ?? "Director of Operations",
@@ -204,21 +208,26 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             fontSize: data.issuer_designation_font_size ?? 12,
             fontWeight: data.issuer_designation_font_weight ?? "normal",
             color: data.issuer_designation_color ?? "#718096",
-            binding: "issuer_designation",
-            x: 440, y: 420, width: 180, height: 20
+            align: "center",
+            x: 440,
+            y: 420,
+            width: 180,
+            height: 20,
         }),
 
+        // Signature
         signature_src: data.signature_src ?? data.signature_of_issuer ?? "",
         signature_styling: mapStyleAttributes(data.signature_styling, {
-            binding: "signature_of_issuer",
-            x: 480, y: 330, width: 100, height: 50
+            x: 480,
+            y: 330,
+            width: 100,
+            height: 50,
         }),
 
-        // Canvas & Blockchain configuration
+        // Canvas & Blockchain Configuration
         canvas: {
             width: Number(data.canvas?.width) || 700,
             height: Number(data.canvas?.height) || 500,
-            background: data.canvas?.background ?? "#ffffff",
             showGrid: Boolean(data.canvas?.showGrid),
         },
         blockchain: {
@@ -227,6 +236,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
         },
     };
 }
+
 export const initialTemplate: CertificateTemplate = {
     templateId: "techverse-hackathon-2026",
     templateName: "Event Name",
@@ -238,13 +248,19 @@ export const initialTemplate: CertificateTemplate = {
     border_color: "#cbd5e1",
     border_size: 2,
     border_style: "solid",
-    logo_src: "",
 
-    // Heading (Mapped from el_cert_type)
+    // Logo
+    logo_src: "",
+    logo_styling: {
+        x: 326,
+        y: 20,
+        width: 48,
+        height: 48,
+    },
+
+    // Heading
     heading_content: "CERTIFICATE OF EXCELLENCE",
     heading_styling: {
-        id: "el_cert_type",
-        type: "text",
         x: 150,
         y: 215,
         width: 400,
@@ -254,15 +270,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "center",
         color: "#64748b",
-        editable: true,
-        binding: "certificateType",
+        lineHeight: 1.2,
     },
 
-    // Title (Mapped from el_intro)
+    // Title
     title_content: "this is to certify that",
     title_styling: {
-        id: "el_intro",
-        type: "text",
         x: 150,
         y: 265,
         width: 400,
@@ -272,15 +285,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "center",
         color: "#94a3b8",
-        editable: false,
-        binding: "introLabel",
+        lineHeight: 1.2,
     },
 
-    // Recipient Name (Mapped from el_recipient_name)
+    // Recipient Name
     name_content: "Attendee Name",
     name_styling: {
-        id: "el_recipient_name",
-        type: "text",
         x: 130,
         y: 288,
         width: 440,
@@ -290,15 +300,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "bold",
         align: "center",
         color: "#111111",
-        editable: true,
-        binding: "recipientName",
+        lineHeight: 1.2,
     },
 
-    // Achievement Body (Mapped from el_custom_statement)
+    // Achievement Body
     achievement_content: "For outstanding performance and technical innovation demonstrated during event",
     achievement_styling: {
-        id: "el_custom_statement",
-        type: "text",
         x: 110,
         y: 335,
         width: 480,
@@ -308,15 +315,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "center",
         color: "#475569",
-        editable: true,
-        binding: "customStatement",
+        lineHeight: 1.6,
     },
 
-    // Date (Mapped from el_issue_date)
+    // Date
     date_content: "March 15, 2026",
     date_styling: {
-        id: "el_issue_date",
-        type: "text",
         x: 60,
         y: 425,
         width: 160,
@@ -326,15 +330,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "left",
         color: "#94a3b8",
-        editable: true,
-        binding: "issueDate",
+        lineHeight: 1.2,
     },
 
-    // Issuer Name (Mapped from el_issuer_name)
+    // Issuer Name
     issuer_name_content: "Dr. Sarah Khan",
     issuer_name_styling: {
-        id: "el_issuer_name",
-        type: "text",
         x: 260,
         y: 405,
         width: 220,
@@ -344,15 +345,12 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "center",
         color: "#111111",
-        editable: true,
-        binding: "issuerName",
+        lineHeight: 1.2,
     },
 
-    // Issuer Designation (Mapped from el_issuer_title)
+    // Issuer Designation
     issuer_designation_content: "HEAD OF ENGINEERING",
     issuer_designation_styling: {
-        id: "el_issuer_title",
-        type: "text",
         x: 260,
         y: 438,
         width: 220,
@@ -362,28 +360,22 @@ export const initialTemplate: CertificateTemplate = {
         fontWeight: "normal",
         align: "center",
         color: "#64748b",
-        editable: true,
-        binding: "issuerTitle",
+        lineHeight: 1.2,
     },
 
-    // Signature / Verification QR Position (Mapped from el_qr)
+    // Signature
     signature_src: "",
     signature_styling: {
-        id: "el_qr",
-        type: "image",
         x: 560,
         y: 405,
         width: 48,
         height: 48,
-        editable: false,
-        binding: "verificationQr",
     },
 
     // Canvas Properties
     canvas: {
         width: 700,
         height: 500,
-        background: "#fdfdfb",
         showGrid: true,
     },
 
@@ -393,6 +385,7 @@ export const initialTemplate: CertificateTemplate = {
         network: "Polygon",
     },
 };
+
 
 export const CertificateTemplateService = {
     async save_template_of_organizer(template: CertificateTemplate, organizer_id: string) {
