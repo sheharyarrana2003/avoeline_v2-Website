@@ -235,141 +235,139 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
             network: data.blockchain?.network ?? "Polygon",
         },
     };
-}
-
-export const initialTemplate: CertificateTemplate = {
+}export const initialTemplate: CertificateTemplate = {
     templateId: "techverse-hackathon-2026",
     templateName: "Event Name",
     organizer_id: "",
 
     // Frame & Theme Styling
-    primary_color: "#111111",
-    secondary_color: "#64748b",
-    border_color: "#cbd5e1",
-    border_size: 2,
+    primary_color: "#ffffff",
+    secondary_color: "#1e293b",
+    border_color: "#0f172a",
+    border_size: 4,
     border_style: "solid",
 
-    // Logo
+    // Logo (Centered: (700 - 56) / 2 = 322)
     logo_src: "",
     logo_styling: {
-        x: 326,
-        y: 20,
-        width: 48,
-        height: 48,
+        x: 322,
+        y: 30,
+        width: 56,
+        height: 56,
     },
 
-    // Heading
+    // Heading Badge / Certificate Header
     heading_content: "CERTIFICATE OF EXCELLENCE",
     heading_styling: {
-        x: 150,
-        y: 215,
-        width: 400,
-        height: 24,
-        fontFamily: "Inter",
-        fontSize: 13,
-        fontWeight: "normal",
+        x: 100,
+        y: 95,
+        width: 500,
+        height: 32,
+        fontFamily: "'Inter', 'Arial', sans-serif",
+        fontSize: 16,
+        fontWeight: "600",
         align: "center",
-        color: "#64748b",
+        color: "#475569",
         lineHeight: 1.2,
     },
 
-    // Title
-    title_content: "this is to certify that",
+    // Title / Intro Line
+    title_content: "THIS IS TO CERTIFY THAT",
     title_styling: {
-        x: 150,
-        y: 265,
-        width: 400,
+        x: 100,
+        y: 145,
+        width: 500,
         height: 20,
-        fontFamily: "Georgia",
+        fontFamily: "'Inter', 'Arial', sans-serif",
+        fontSize: 12,
+        fontWeight: "normal",
+        align: "center",
+        color: "#94a3b8",
+        lineHeight: 1.2,
+    },
+
+    // Recipient Name (Prominent Elegant Serif)
+    name_content: "Attendee Name",
+    name_styling: {
+        x: 50,
+        y: 175,
+        width: 600,
+        height: 48,
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontSize: 32,
+        fontWeight: "bold",
+        align: "center",
+        color: "#0f172a",
+        lineHeight: 1.2,
+    },
+
+    // Achievement Statement Body
+    achievement_content: "for outstanding performance and technical innovation demonstrated during the event",
+    achievement_styling: {
+        x: 75,
+        y: 235,
+        width: 550,
+        height: 50,
+        fontFamily: "'Inter', 'Arial', sans-serif",
         fontSize: 14,
         fontWeight: "normal",
         align: "center",
-        color: "#94a3b8",
-        lineHeight: 1.2,
+        color: "#334155",
+        lineHeight: 1.5,
     },
 
-    // Recipient Name
-    name_content: "Attendee Name",
-    name_styling: {
-        x: 130,
-        y: 288,
-        width: 440,
-        height: 36,
-        fontFamily: "Georgia",
-        fontSize: 26,
-        fontWeight: "bold",
-        align: "center",
-        color: "#111111",
-        lineHeight: 1.2,
-    },
-
-    // Achievement Body
-    achievement_content: "For outstanding performance and technical innovation demonstrated during event",
-    achievement_styling: {
-        x: 110,
-        y: 335,
-        width: 480,
-        height: 44,
-        fontFamily: "Inter",
-        fontSize: 13,
-        fontWeight: "normal",
-        align: "center",
-        color: "#475569",
-        lineHeight: 1.6,
-    },
-
-    // Date
+    // Date Field (Footer Left)
     date_content: "March 15, 2026",
     date_styling: {
         x: 60,
-        y: 425,
+        y: 410,
         width: 160,
-        height: 20,
-        fontFamily: "Inter",
-        fontSize: 13,
+        height: 22,
+        fontFamily: "'Inter', 'Arial', sans-serif",
+        fontSize: 12,
         fontWeight: "normal",
         align: "left",
-        color: "#94a3b8",
+        color: "#64748b",
         lineHeight: 1.2,
     },
 
-    // Issuer Name
+    // Issuer Name (Footer Center)
     issuer_name_content: "Dr. Sarah Khan",
     issuer_name_styling: {
-        x: 260,
-        y: 405,
-        width: 220,
-        height: 30,
-        fontFamily: "Georgia",
-        fontSize: 20,
-        fontWeight: "normal",
+        x: 250,
+        y: 395,
+        width: 200,
+        height: 28,
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontSize: 18,
+        fontWeight: "bold",
         align: "center",
-        color: "#111111",
+        color: "#0f172a",
         lineHeight: 1.2,
     },
 
-    // Issuer Designation
+    // Issuer Designation (Footer Center)
     issuer_designation_content: "HEAD OF ENGINEERING",
     issuer_designation_styling: {
-        x: 260,
-        y: 438,
-        width: 220,
+        x: 250,
+        y: 423,
+        width: 200,
         height: 18,
-        fontFamily: "Inter",
+        fontFamily: "'Inter', 'Arial', sans-serif",
         fontSize: 10,
-        fontWeight: "normal",
+        fontWeight: "600",
         align: "center",
         color: "#64748b",
         lineHeight: 1.2,
     },
 
-    // Signature
+    // Signature / QR (Footer Right)
     signature_src: "",
     signature_styling: {
-        x: 560,
-        y: 405,
-        width: 48,
-        height: 48,
+        x: 570,
+        y: 390,
+        width: 50,
+        height: 50,
     },
 
     // Canvas Properties

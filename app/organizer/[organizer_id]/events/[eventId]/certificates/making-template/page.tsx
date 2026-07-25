@@ -3,15 +3,15 @@ import { CertificateTemplate, CertificateTemplateService, initialTemplate } from
 import MakingTemplateUi from "./makingTemplateUi";
 
 
-export default async function MakingTemplate({ params }: { params: Promise<{ organizer_id: string }> }) {
+export default async function MakingTemplate({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
-    const organizerId = resolvedParams.organizer_id;
-    const template = await CertificateTemplateService.get_template_of_organizer(organizerId) || initialTemplate ;
+    const eventId = resolvedParams.eventId;
+    const template = await CertificateTemplateService.get_template_of_organizer(eventId) || initialTemplate ;
 
     const save_template_to_server = async (template: CertificateTemplate) => {
         'use server'
         // basically update certificate template in colllection
-        await CertificateTemplateService.save_template_of_organizer(template, organizerId);
+        await CertificateTemplateService.save_template_of_organizer(template, eventId);
     }
 
    

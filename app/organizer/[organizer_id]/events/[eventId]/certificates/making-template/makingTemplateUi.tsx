@@ -224,7 +224,7 @@ export default function MakingTemplateUi({
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-6">
                     {/* FRAME & THEME */}
                     <section className="space-y-3 bg-stone-50 p-3 rounded-lg border border-stone-200">
                         <h3 className="text-xs uppercase font-bold tracking-wider text-stone-600">Frame & Theme</h3>
@@ -270,6 +270,16 @@ export default function MakingTemplateUi({
                             <label className="block text-xs font-medium text-stone-700">Logo URL</label>
                             <input type="text" value={template.logo_src} onChange={(e) => setField("logo_src", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Logo X</label>
+                                <input type="number" value={template.logo_styling.x} onChange={(e) => setStyle("logo_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Logo Y</label>
+                                <input type="number" value={template.logo_styling.y} onChange={(e) => setStyle("logo_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
+                            </div>
+                        </div>
                     </section>
 
                     {/* HEADING */}
@@ -278,6 +288,16 @@ export default function MakingTemplateUi({
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Heading Text</label>
                             <input type="text" value={template.heading_content} onChange={(e) => setField("heading_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">X Position</label>
+                                <input type="number" value={template.heading_styling.x} onChange={(e) => setStyle("heading_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Y Position</label>
+                                <input type="number" value={template.heading_styling.y} onChange={(e) => setStyle("heading_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div>
@@ -322,6 +342,16 @@ export default function MakingTemplateUi({
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div>
+                                <label className="block text-xs font-medium text-stone-700">X Position</label>
+                                <input type="number" value={template.title_styling.x} onChange={(e) => setStyle("title_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Y Position</label>
+                                <input type="number" value={template.title_styling.y} onChange={(e) => setStyle("title_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
                                 <label className="block text-xs font-medium text-stone-700">Font Family</label>
                                 <select value={template.title_styling.fontFamily} onChange={(e) => setStyle("title_styling", "fontFamily", e.target.value)} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded bg-white">
                                     {FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f.split(",")[0]}</option>))}
@@ -354,6 +384,16 @@ export default function MakingTemplateUi({
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Default Name</label>
                             <input type="text" value={template.name_content} onChange={(e) => setField("name_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">X Position</label>
+                                <input type="number" value={template.name_styling.x} onChange={(e) => setStyle("name_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Y Position</label>
+                                <input type="number" value={template.name_styling.y} onChange={(e) => setStyle("name_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div>
@@ -390,6 +430,16 @@ export default function MakingTemplateUi({
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div>
+                                <label className="block text-xs font-medium text-stone-700">X Position</label>
+                                <input type="number" value={template.achievement_styling.x} onChange={(e) => setStyle("achievement_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Y Position</label>
+                                <input type="number" value={template.achievement_styling.y} onChange={(e) => setStyle("achievement_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
                                 <label className="block text-xs font-medium text-stone-700">Font Family</label>
                                 <select value={template.achievement_styling.fontFamily} onChange={(e) => setStyle("achievement_styling", "fontFamily", e.target.value)} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded bg-white">
                                     {FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f.split(",")[0]}</option>))}
@@ -419,6 +469,16 @@ export default function MakingTemplateUi({
                             <label className="block text-xs font-medium text-stone-700">Date Text</label>
                             <input type="text" value={template.date_content} onChange={(e) => setField("date_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">X Position</label>
+                                <input type="number" value={template.date_styling.x} onChange={(e) => setStyle("date_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Y Position</label>
+                                <input type="number" value={template.date_styling.y} onChange={(e) => setStyle("date_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
                         <div className="grid grid-cols-3 gap-2">
                             <div>
                                 <label className="block text-xs font-medium text-stone-700">Font Size</label>
@@ -440,18 +500,52 @@ export default function MakingTemplateUi({
                     {/* ISSUER */}
                     <section className="space-y-3 bg-stone-50 p-3 rounded-lg border border-stone-200">
                         <h3 className="text-xs uppercase font-bold tracking-wider text-stone-600">Issuer Details & Signature</h3>
+                        
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Issuer Name</label>
                             <input type="text" value={template.issuer_name_content} onChange={(e) => setField("issuer_name_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Name X</label>
+                                <input type="number" value={template.issuer_name_styling.x} onChange={(e) => setStyle("issuer_name_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Name Y</label>
+                                <input type="number" value={template.issuer_name_styling.y} onChange={(e) => setStyle("issuer_name_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
+
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Issuer Designation</label>
                             <input type="text" value={template.issuer_designation_content} onChange={(e) => setField("issuer_designation_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Designation X</label>
+                                <input type="number" value={template.issuer_designation_styling.x} onChange={(e) => setStyle("issuer_designation_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Designation Y</label>
+                                <input type="number" value={template.issuer_designation_styling.y} onChange={(e) => setStyle("issuer_designation_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
+
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Signature URL</label>
                             <input type="text" value={template.signature_src} onChange={(e) => setField("signature_src", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Signature X</label>
+                                <input type="number" value={template.signature_styling.x} onChange={(e) => setStyle("signature_styling", "x", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-stone-700">Signature Y</label>
+                                <input type="number" value={template.signature_styling.y} onChange={(e) => setStyle("signature_styling", "y", Number(e.target.value))} className="mt-1 w-full text-xs p-1 border border-stone-300 rounded" />
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-2">
                             <div>
                                 <label className="block text-xs font-medium text-stone-700">Issuer Name Color</label>
@@ -467,8 +561,8 @@ export default function MakingTemplateUi({
             </aside>
 
             {/* Preview */}
-            <main className="flex-1 flex flex-col items-center justify-center p-8 overflow-auto bg-stone-200">
-                <div className="bg-white p-4 rounded-xl shadow-xl border border-stone-300 flex items-center justify-center">
+            <main className="flex-1 flex flex-col items-center justify-start p-4 overflow-auto bg-stone-200">
+                <div className="bg-white rounded-xl shadow-xl border border-stone-300">
                     <Certificate template={template} />
                 </div>
             </main>
