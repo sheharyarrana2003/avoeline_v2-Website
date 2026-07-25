@@ -5,6 +5,7 @@ import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 import { formatDate, formatTime } from "@/src/lib/datetime";
+import { CertificateTemplateService } from "./certificate.template.services";
 
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
@@ -278,6 +279,8 @@ export const EventService = {
     await adminDb.collection(COLLECTIONS.EVENTS).doc(id_generated).set({
       ...event_to_be_added
     })
+                await CertificateTemplateService.insert_generic_Template(id_generated);
+            console.log("Firestore write to certificate template done.");
     return id_generated;
   }
 }

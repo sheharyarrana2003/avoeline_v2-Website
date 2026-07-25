@@ -300,8 +300,7 @@ export const AuthService = {
             temp_organizer.address.country = formData.country || "Pakistan";
             await adminDb.collection(COLLECTIONS.ORGANIZERS).doc(user_id).set(temp_organizer.toFirestoreObject());
             console.log("Firestore write to organizer done.");
-            await CertificateTemplateService.insert_generic_Template(user_id);
-            console.log("Firestore write to certificate template done.");
+
 
         } else if (userTypeLower === 'vendor') {
             const businessName = formData.name?.trim() || email;
