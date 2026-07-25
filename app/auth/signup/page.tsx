@@ -23,10 +23,17 @@ export default function SignIn() {
 
             if (user === null) {
                 redirect("/auth/signup");
-            } else {
-                const user_role = user.userType || "";
-                redirect(`/${user_role.toLowerCase()}/${user.userId}/dashboard`);
             }
+
+            const role = String(user.userType || "").toLowerCase();
+            if (role === "organizer") {
+                redirect("/auth/signup/organizerSetup");
+            }
+            if (role === "vendor") {
+                redirect("/auth/signup/vendorSetup");
+            }
+            // Attendees (and any other role) go straight to their dashboard.
+            redirect(`/${role}/${user.userId}/dashboard`);
 
         } catch (error) {
             if (isRedirectError(error)) {

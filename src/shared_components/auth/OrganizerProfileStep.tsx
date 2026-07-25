@@ -4,25 +4,30 @@ import React, { useState } from 'react';
 import AddSocialsModal from './AddSocialsModal';
 import ProfileLoadingState from './ProfileLoadingState';
 import { Camera, CheckCircle2 } from 'lucide-react';
+import { uploadMedia } from '@/src/features/media/uploadMedia.action';
+import type { OrganizerSetupProfileData } from '@/src/features/auth/authService';
 
 interface OrganizerProfileStepProps {
   onNext?: () => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: OrganizerSetupProfileData) => Promise<boolean | void> | boolean | void;
+  initialEmail?: string;
 }
 
 export default function OrganizerProfileStep({
   onNext,
   onSave,
+  initialEmail = '',
 }: OrganizerProfileStepProps) {
   const [isSocialsOpen, setIsSocialsOpen] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [organizerName, setOrganizerName] = useState<string>('OPA');
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [organizerName] = useState<string>('OPA');
 
   const [formData, setFormData] = useState({
     username: '',
     description: '',
     address: '',
-    email: '',
+    email: initialEmail,
     contactNo: '',
     established: '',
     recoveryContact: '',
@@ -33,6 +38,7 @@ export default function OrganizerProfileStep({
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,6 +49,7 @@ export default function OrganizerProfileStep({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setProfileFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
@@ -51,18 +58,48 @@ export default function OrganizerProfileStep({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (onSave) onSave({ ...formData, profileImage, socialLinks });
-    setTimeout(() => {
-      setIsLoading(false);
+    setError(null);
+
+    try {
+      let logoUrl: string | null = null;
+      if (profileFile) {
+        const fd = new FormData();
+        fd.append('file', profileFile);
+        fd.append('folder', 'organizer-logos');
+        const upload = await uploadMedia(fd);
+        if (!upload.success) {
+          setError(upload.error || 'Logo upload failed.');
+          setIsLoading(false);
+          return;
+        }
+        logoUrl = upload.url;
+      }
+
+      const payload: OrganizerSetupProfileData = {
+        ...formData,
+        socialLinks,
+        logoUrl,
+      };
+
+      const ok = onSave ? await onSave(payload) : true;
+      if (ok === false) {
+        setIsLoading(false);
+        return;
+      }
+
       setSavedSuccess(true);
       setTimeout(() => {
         setSavedSuccess(false);
         if (onNext) onNext();
-      }, 1000);
-    }, 1200);
+      }, 800);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save profile.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -75,12 +112,10 @@ export default function OrganizerProfileStep({
         />
       )}
 
-      {/* Header title outside card */}
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 tracking-wide mb-4 text-center">
         Setting Up Organizer Profile
       </h2>
 
-      {/* Main Desktop Card - bg-[#F5F5F5] matching Signin/Signup */}
       <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
         {savedSuccess && (
           <div className="absolute top-6 right-6 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
@@ -88,8 +123,13 @@ export default function OrganizerProfileStep({
           </div>
         )}
 
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-full px-4 py-2 text-center">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
-          {/* Circular Logo / Avatar Container */}
           <div className="flex flex-col items-center mb-8">
             <label className="relative group cursor-pointer block">
               <div className="w-28 h-28 rounded-full border-2 border-[#407BFF] p-1 flex items-center justify-center bg-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
@@ -100,7 +140,6 @@ export default function OrganizerProfileStep({
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
-                  // Default OPA UMT logo design
                   <div className="w-full h-full rounded-full border border-sky-200 flex flex-col items-center justify-center bg-sky-50/40 p-2 text-center">
                     <svg className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
@@ -126,14 +165,12 @@ export default function OrganizerProfileStep({
             </span>
           </div>
 
-          {/* Desktop 2-Column Form Layout with project-consistent inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-8">
-            {/* Column 1: Personal Information */}
             <div className="w-full text-left space-y-3.5">
               <h3 className="text-xs md:text-sm font-bold text-gray-900 uppercase tracking-wider pb-1.5 border-b border-gray-300">
                 Personal Information
               </h3>
-              
+
               <div>
                 <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Username</label>
                 <input
@@ -201,7 +238,6 @@ export default function OrganizerProfileStep({
               </div>
             </div>
 
-            {/* Column 2: Professional Information */}
             <div className="w-full text-left space-y-3.5">
               <h3 className="text-xs md:text-sm font-bold text-gray-900 uppercase tracking-wider pb-1.5 border-b border-gray-300">
                 Professional Information
@@ -257,7 +293,6 @@ export default function OrganizerProfileStep({
             </div>
           </div>
 
-          {/* Action Buttons Row */}
           <div className="w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
             <button
               type="button"
@@ -269,7 +304,8 @@ export default function OrganizerProfileStep({
 
             <button
               type="submit"
-              className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm cursor-pointer"
+              disabled={isLoading}
+              className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm cursor-pointer disabled:opacity-60"
             >
               Save
             </button>
@@ -277,7 +313,6 @@ export default function OrganizerProfileStep({
         </form>
       </div>
 
-      {/* Modal for adding socials */}
       <AddSocialsModal
         isOpen={isSocialsOpen}
         onClose={() => setIsSocialsOpen(false)}

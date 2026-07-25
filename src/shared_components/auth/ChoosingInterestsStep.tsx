@@ -4,18 +4,16 @@ import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
 interface ChoosingInterestsStepProps {
-  onComplete?: (selectedInterests: string[]) => void;
+  onComplete?: (selectedInterests: string[]) => Promise<boolean | void> | boolean | void;
 }
 
 export default function ChoosingInterestsStep({
   onComplete,
 }: ChoosingInterestsStepProps) {
-  const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({
-    'tech-0-0': true,
-    'tech-0-3': true,
-    'politics-0-1': true,
-  });
+  const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
   const [completedSuccess, setCompletedSuccess] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = [
     {
@@ -51,24 +49,44 @@ export default function ChoosingInterestsStep({
     }));
   };
 
-  const handleChoose = () => {
-    setCompletedSuccess(true);
-    if (onComplete) {
-      onComplete(Object.keys(selectedTags).filter((k) => selectedTags[k]));
+  const handleChoose = async () => {
+    setError(null);
+    setIsSaving(true);
+
+    const selectedLabels = categories.flatMap((cat) =>
+      cat.items
+        .map((item, idx) => ({ key: `${cat.id}-${idx}`, label: item }))
+        .filter(({ key }) => selectedTags[key])
+        .map(({ label }) => label)
+    );
+
+    try {
+      const ok = onComplete ? await onComplete(selectedLabels) : true;
+      if (ok === false) {
+        setIsSaving(false);
+        return;
+      }
+      setCompletedSuccess(true);
+      setTimeout(() => setCompletedSuccess(false), 1500);
+    } catch (err: any) {
+      // redirect() from a server action must not be swallowed
+      if (
+        typeof err?.digest === 'string' && err.digest.startsWith('NEXT_REDIRECT')
+      ) {
+        throw err;
+      }
+      setError(err instanceof Error ? err.message : 'Failed to save interests.');
+    } finally {
+      setIsSaving(false);
     }
-    setTimeout(() => {
-      setCompletedSuccess(false);
-    }, 1500);
   };
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Header title outside card */}
       <h2 className="text-xl md:text-2xl font-bold text-gray-700 tracking-wide mb-4 text-center">
         Choosing Interests
       </h2>
 
-      {/* Main Desktop Card - bg-[#F5F5F5] matching Signin/Signup */}
       <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative flex flex-col items-center">
         {completedSuccess && (
           <div className="absolute top-6 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
@@ -76,7 +94,12 @@ export default function ChoosingInterestsStep({
           </div>
         )}
 
-        {/* Diamond Logo */}
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-full px-4 py-2">
+            {error}
+          </div>
+        )}
+
         <div className="mb-3 flex flex-col items-center">
           <div className="w-12 h-12 text-black flex items-center justify-center">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -94,12 +117,10 @@ export default function ChoosingInterestsStep({
           </div>
         </div>
 
-        {/* Title */}
         <h1 className="text-xl md:text-2xl font-bold text-gray-900 text-center max-w-md leading-snug mt-1 mb-8">
           In which things you actually interested in
         </h1>
 
-        {/* Category List with Responsive Desktop Tag Grids */}
         <div className="w-full space-y-8 text-left">
           {categories.map((cat) => (
             <div key={cat.id} className="w-full border-b border-gray-300/60 pb-6 last:border-b-0">
@@ -130,13 +151,13 @@ export default function ChoosingInterestsStep({
           ))}
         </div>
 
-        {/* Choose Button */}
         <button
           type="button"
           onClick={handleChoose}
-          className="bg-black text-white font-medium py-3.5 px-16 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm mt-10 cursor-pointer"
+          disabled={isSaving}
+          className="bg-black text-white font-medium py-3.5 px-16 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm mt-10 cursor-pointer disabled:opacity-60"
         >
-          Choose
+          {isSaving ? 'Saving…' : 'Choose'}
         </button>
       </div>
     </div>
