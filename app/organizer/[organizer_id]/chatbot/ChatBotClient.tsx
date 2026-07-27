@@ -145,7 +145,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                 <div className="border-b border-black/10 px-5 md:px-8 py-5 shrink-0 flex items-start justify-between">
                     <div>
                         <div className="text-2xl md:text-[28px] font-semibold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            Avoleine
+                            Avoeline
                         </div>
                         <div className="text-gray-400 text-sm md:text-base mt-0.5">
                             Your AI event planning assistant
@@ -263,7 +263,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                         </button>
                     </form>
                     <div className="text-[11px] text-gray-400 text-center mt-3">
-                        Avoleine may display inaccurate info, so double-check its responses.
+                        Avoeline may display inaccurate info, so double-check its responses.
                     </div>
                 </div>
             </div>
