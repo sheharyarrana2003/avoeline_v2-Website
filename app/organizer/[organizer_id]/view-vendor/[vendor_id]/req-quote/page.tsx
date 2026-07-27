@@ -4,6 +4,7 @@ import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import { VendorData } from "@/src/services/models/vendor.model";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
+import { DateField } from "@/src/shared_components/DateField";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
@@ -95,7 +96,7 @@ export default async function ReqQuotePage({
                                     <div className="relative">
                                         {/* Added name="serviceType" */}
                                         <select name="serviceType" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                            {vendor?.serviceCategories.map(s => <option key={s}>{s}</option>)}
+                                            {vendor?.serviceCategories.map(s => <option key={s} value={s.trim()}>{s.trim()}</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -105,8 +106,12 @@ export default async function ReqQuotePage({
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Service Name</label>
                                     {/* Added name="serviceName" */}
 
-                                    <select name="serviceName" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
-                                        {vendor?.services.map(s => <option  key={s.serviceId}>{s.name}</option>)}
+                                    {/* Value is the service's uuid, label is its name — without an
+                                        explicit value the option text was submitted, so bookings
+                                        stored the service NAME in serviceId and couldn't be joined
+                                        back to vendor.services. serviceName carries the label. */}
+                                    <select name="serviceId" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 appearance-none outline-none focus:ring-2 focus:ring-gray-200">
+                                        {vendor?.services.map(s => <option key={s.serviceId} value={s.serviceId}>{s.name}</option>)}
                                     </select>
                                 </div>
 
@@ -127,9 +132,8 @@ export default async function ReqQuotePage({
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Event Date</label>
                                         {/* Added name="serviceDate" */}
-                                        <input
+                                        <DateField
                                             name="serviceDate"
-                                            type="date"
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
                                         />
                                     </div>
