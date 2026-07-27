@@ -307,7 +307,9 @@ async function createServiceAction(formData: FormData) {
         serviceId: formData.get('packageId') as string || crypto.randomUUID(), // Generates an ID if not passed from frontend
         name: formData.get('packageName') as string || formData.get('serviceName') as string, // Fallbacks handled gently
         description: formData.get('description') as string,
-        category: formData.get('category') as string,
+        // Trimmed: a stray newline from the custom-category input ("Catering\r\n")
+        // breaks the label lookup and every category filter downstream.
+        category: ((formData.get('category') as string) || "").trim(),
         price: parseFloat(formData.get('price') as string) || 0,
         minOrder: parseInt(formData.get('minOrder') as string) || 1,
 
@@ -326,8 +328,9 @@ async function createServiceAction(formData: FormData) {
 
     if (vendor) {
         if (add_category === "true") {
-            console.log("insertinggg  ", formData.get('category') as string)
-            vendor?.serviceCategories.push(formData.get('category') as string);
+            // Trimmed here too: an untrimmed value persisted into serviceCategories
+            // is then re-served as a <select> option value, reinfecting later writes.
+            vendor?.serviceCategories.push(((formData.get('category') as string) || "").trim());
         } else {
             console.log("not isnertingg");
         }

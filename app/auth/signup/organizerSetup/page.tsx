@@ -5,12 +5,44 @@ import OrganizerSetupClient from './OrganizerSetupClient';
 
 export default async function SignUpOrganizerPage() {
   const user = await AuthService.getCurrentUser();
+  // Signed out (or an expired session) belongs at sign-in, not at the signup form
+  // — the account already exists by the time anyone reaches setup.
   if (!user) {
-    redirect('/auth/signup');
+    redirect('/auth/signin?next=/auth/signup/organizerSetup');
   }
-  if (String(user.userType).toLowerCase() !== 'organizer') {
-    redirect('/auth/signup');
+  const userType = String(user.userType).toLowerCase();
+  if (userType !== 'organizer') {
+    // Signed in as someone else: send them to their own setup rather than a
+    // signup form they don't need.
+    redirect(userType === 'vendor' ? '/auth/signup/vendorSetup' : '/auth/signin');
   }
+
+  // Verification state is read live from Firebase Auth — the emailed link is
+  // clicked outside the app, so nothing else tells us it happened.
+  const { verified: initialVerified } = await AuthService.getEmailVerificationStatus();
+
+  const handleCheckVerification = async () => {
+    'use server';
+    try {
+      return await AuthService.getEmailVerificationStatus();
+    } catch (error) {
+      console.error('[organizerSetup] verification check failed', error);
+      return { verified: false };
+    }
+  };
+
+  const handleResendVerification = async () => {
+    'use server';
+    try {
+      return await AuthService.resendVerificationEmail();
+    } catch (error) {
+      console.error('[organizerSetup] resend verification failed', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send the email.',
+      };
+    }
+  };
 
   const handleSaveProfile = async (data: OrganizerSetupProfileData) => {
     'use server';
@@ -26,17 +58,17 @@ export default async function SignUpOrganizerPage() {
     }
   };
 
-  const handleCompleteInterests = async (interests: string[]) => {
+  const handleFinishSetup = async () => {
     'use server';
     try {
-      const result = await AuthService.completeSetupInterests(interests);
+      const result = await AuthService.finalizeSetup();
       redirect(`/organizer/${result.userId}/dashboard`);
     } catch (error) {
       if (isRedirectError(error)) throw error;
-      console.error('[organizerSetup] save interests failed', error);
+      console.error('[organizerSetup] finish setup failed', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to save interests.',
+        error: error instanceof Error ? error.message : 'Failed to finish setup.',
       };
     }
   };
@@ -44,8 +76,11 @@ export default async function SignUpOrganizerPage() {
   return (
     <OrganizerSetupClient
       email={user.email || ''}
+      initialVerified={initialVerified}
+      onCheckVerification={handleCheckVerification}
+      onResendVerification={handleResendVerification}
       onSaveProfile={handleSaveProfile}
-      onCompleteInterests={handleCompleteInterests}
+      onFinishSetup={handleFinishSetup}
     />
   );
 }

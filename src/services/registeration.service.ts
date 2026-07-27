@@ -5,13 +5,15 @@ import { COLLECTIONS } from "@/data/collections";
 import { toIsoString } from "@/src/lib/datetime";
 
 
- function mapToRegistration(raw: any): Registration {
+ function mapToRegistration(raw: any, fallbackId?: string): Registration {
   if (!raw) {
     throw new Error("Cannot map an empty or undefined raw object to Registration");
   }
 
   return {
-    registrationId: String(raw.registrationId || ""),
+    // Live docs don't carry a registrationId field, so fall back to the Firestore
+    // doc id — callers key list rows off this and need it to be unique.
+    registrationId: String(raw.registrationId || fallbackId || ""),
     eventId: String(raw.eventId || ""),
     userId: String(raw.userId || ""),
     organizerId: String(raw.organizerId || ""),
@@ -106,7 +108,7 @@ export const RegService = {
             return mapToRegistration({});
         }
 
-        return  mapToRegistration(querySnapshot.docs[0].data());
+        return  mapToRegistration(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
 
     },
 
@@ -117,6 +119,6 @@ export const RegService = {
             .collection(COLLECTIONS.REGISTRATIONS)
             .where("eventId", "==", event_id)
             .get();
-        return querySnapshot.docs.map(d => mapToRegistration(d.data()));
+        return querySnapshot.docs.map(d => mapToRegistration(d.data(), d.id));
     }
 }

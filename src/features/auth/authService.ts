@@ -1,6 +1,11 @@
 
 import { cache } from "react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signInWithCustomToken,
+} from 'firebase/auth';
 import { auth } from '@/data/db';
 import { Organizer } from "@/src/services/models/organizer.model";
 import { Vendor } from "@/src/services/models/vendor.model";
@@ -243,6 +248,16 @@ export const AuthService = {
 
         const user = user_credintials.user;
         const user_id = user_credintials.user.uid;
+
+        // Fire off Firebase's built-in verification email. Non-fatal: a mail
+        // failure must not lose an account that was just created — the setup
+        // screen can resend.
+        try {
+            await sendEmailVerification(user);
+        } catch (error) {
+            console.error("[signUpWithEmail] verification email failed", error);
+        }
+
         const userTypeLower = String(formData.userType).trim().toLowerCase();
         const now = new Date().toISOString();
 
@@ -401,6 +416,11 @@ export const AuthService = {
                 inclusions: [],
                 price: 0,
                 minOrder: 1,
+                // Present-but-empty so the stored shape matches the Service type and
+                // the edit form has real arrays to work from (mapToService back-fills
+                // these on read, but the document itself was missing the keys).
+                images: [],
+                videos: [],
             }];
         }
 
@@ -411,18 +431,65 @@ export const AuthService = {
     /**
      * Persist interest tags from the final setup step and mark setup complete.
      */
-    async completeSetupInterests(interests: string[]) {
+    /**
+     * Live email-verification state for the signed-in user, read from Firebase
+     * Auth (the source of truth — the flag flips when they click the emailed
+     * link, which never touches our app). When it has flipped, mirror it onto the
+     * user document so the rest of the app can read it without an Auth call.
+     */
+    async getEmailVerificationStatus() {
+        const current = await AuthService.getCurrentUser();
+        if (!current?.userId) return { verified: false, email: "" };
+
+        const record = await adminAuth.getUser(current.userId);
+        const verified = Boolean(record.emailVerified);
+
+        if (verified) {
+            const snap = await adminDb.collection(COLLECTIONS.USERS).doc(current.userId).get();
+            if (snap.exists && !snap.data()?.verification?.isEmailVerified) {
+                await snap.ref.update({
+                    "verification.isEmailVerified": true,
+                    "verification.emailVerifiedAt": new Date(),
+                    updatedAt: new Date(),
+                });
+            }
+        }
+
+        return { verified, email: record.email || current.email || "" };
+    },
+
+    /**
+     * Re-sends Firebase's verification email. `sendEmailVerification` needs a
+     * signed-in client `User`, and we only hold an admin session here — so mint a
+     * custom token for the account and exchange it for one. Already-verified
+     * accounts are a no-op so this can't be used to spam an inbox.
+     */
+    async resendVerificationEmail() {
         const current = await AuthService.getCurrentUser();
         if (!current?.userId) throw new Error("Not authenticated.");
 
-        const cleaned = Array.from(
-            new Set((interests || []).map((i) => String(i).trim()).filter(Boolean))
-        );
+        const record = await adminAuth.getUser(current.userId);
+        if (record.emailVerified) return { success: true as const, alreadyVerified: true };
+
+        const customToken = await adminAuth.createCustomToken(current.userId);
+        const credential = await signInWithCustomToken(auth, customToken);
+        await sendEmailVerification(credential.user);
+
+        return { success: true as const, alreadyVerified: false };
+    },
+
+    /**
+     * Marks signup setup as finished. Called once the profile step saves — the
+     * interests/recommendation step it used to live behind has been removed, so
+     * the profile is the last thing a new organizer or vendor fills in.
+     */
+    async finalizeSetup() {
+        const current = await AuthService.getCurrentUser();
+        if (!current?.userId) throw new Error("Not authenticated.");
 
         await adminDb.collection(COLLECTIONS.USERS).doc(current.userId).update({
-            interests: cleaned,
             setupComplete: true,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date(),
         });
 
         return { success: true as const, userId: current.userId, userType: current.userType };

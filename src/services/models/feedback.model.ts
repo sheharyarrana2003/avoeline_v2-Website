@@ -3,14 +3,23 @@ export interface EventFeedback {
     id?: string; // Firestore Document ID
     feedbackId?: string;
     targetId: string;
-    targetType: "event" | string;
-    type: "event" | string;
-    
+    targetType: "event" | "vendor" | string;
+    type: "event" | "vendor" | string;
+
     // Reviewer & User info
     reviewerId: string;
     reviewerType: "attendee" | "organizer" | string;
     userId?: string;
-    
+    /** Denormalized reviewer label so review lists don't need an extra read. */
+    reviewerName?: string;
+
+    // Scoping. `organizerId` exists on live docs and is queried directly
+    // (FeedbackService.getFeedbackByOrganizer, anaylService.fetchReviews).
+    // `bookingId` is set on vendor reviews and enforces one review per booking.
+    organizerId?: string;
+    bookingId?: string;
+    eventId?: string;
+
     // Content
     title: string;
     comment: string;

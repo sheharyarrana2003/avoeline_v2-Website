@@ -23,19 +23,21 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
 
     // Stable identities so the memoized AttendeeListItem rows don't re-render
     // on every parent state change (search keystroke, selection toggle).
-    const handleOnClick = useCallback((attendee_id: string, user_id: string) => {
-        const target = attendees.find((a) => a.user.userId === user_id) || null;
+    // Identify a row by its registration, not its user: one user can register for
+    // the same event several times, so matching on userId always opened row one.
+    const handleOnClick = useCallback((registration_id: string) => {
+        const target = attendees.find((a) => a.register.registrationId === registration_id) || null;
         if (target) {
             set_single_attendee_view(target);
         }
     }, [attendees]);
 
-    const handleCheckBoxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, attendee_id: string) => {
+    const handleCheckBoxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, registration_id: string) => {
         const isChecked = e.target.checked;
         set_selected_ids((prev_arr) =>
             isChecked
-                ? [...prev_arr, attendee_id]
-                : prev_arr.filter(item => item !== attendee_id)
+                ? [...prev_arr, registration_id]
+                : prev_arr.filter(item => item !== registration_id)
         );
     }, []);
 
@@ -126,13 +128,13 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                     <div className="space-y-0 mt-2">
                         {attendee.map((acs) => (
                             <AttendeeListItem
-                                key={acs.a.attendeeId}
+                                key={acs.register.registrationId}
                                 single_attendee={acs.a}
                                 attendee_user={acs.user}
                                 attendee_reg={acs.register}
                                 handleOnClick={handleOnClick}
                                 handleCheckBoxChange={handleCheckBoxChange}
-                                isSelected={selected_ids.includes(acs.a.attendeeId)}
+                                isSelected={selected_ids.includes(acs.register.registrationId)}
                             />
                         ))}
                     </div>

@@ -7,6 +7,7 @@ import { CustomField } from '@/src/services/models/event.model';
 import { MediaUpload } from '@/src/features/media/MediaUpload';
 import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from '@/src/features/media/media.utils';
 import { formatDate, formatTime } from '@/src/lib/datetime';
+import { DateField } from '@/src/shared_components/DateField';
 
 // Preview-friendly formatters: show the pretty value once parseable, but fall
 // back to the raw (partially-typed) string so the live preview isn't a dash.
@@ -341,8 +342,12 @@ export default function CreateEventPage({ handle_submission }: any) {
                             value={formData.bannerImage ?? ''}
                             label="Upload Event Banner"
                             onUploaded={(url) => updateForm('bannerImage', url)}
+                            // Square dropzone/preview so the upload box matches the 1:1
+                            // banner the event page renders — the default is a short, wide
+                            // strip that implied a much wider banner than we display.
+                            buttonClassName="relative mx-auto flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400 transition hover:border-gray-400 disabled:opacity-60"
                         />
-                        <p className="text-xs text-gray-400 mt-1">1600 × 900px recommended (JPG, PNG)</p>
+                        <p className="text-xs text-gray-400 mt-1">1080 × 1080px square recommended (JPG, PNG)</p>
                     </div>
 
                     {/* Gallery */}
@@ -426,8 +431,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                     <div>
                         <label className="block text-xs text-gray-500 mb-2">Start Date</label>
                         <div className="relative">
-                            <input
-                                type="date"
+                            <DateField
                                 value={formData.startDate}
                                 onChange={(e) => updateForm('startDate', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
@@ -440,8 +444,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                     <div>
                         <label className="block text-xs text-gray-500 mb-2">End Date</label>
                         <div className="relative">
-                            <input
-                                type="date"
+                            <DateField
                                 value={formData.endDate}
                                 onChange={(e) => updateForm('endDate', e.target.value)}
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
@@ -887,8 +890,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available Until</label>
                                     <div className="relative">
-                                        <input
-                                            type="date"
+                                        <DateField
                                             value={tier.availableUntil}
                                             onChange={(e) => {
                                                 const updated = formData.ticketTiers.map(t =>
@@ -1206,8 +1208,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
                         <p className="text-sm font-medium text-gray-700 mb-2">Starting Date Of Registeration</p>
-                        <input
-                            type="date"
+                        <DateField
                             value={formData.registrationOpenDate}
                             onChange={(e) => updateForm('registrationOpenDate', e.target.value)}
                             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
@@ -1216,8 +1217,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                         <p className="text-sm font-medium text-gray-700 mb-2">Closing Date Of Registeration</p>
-                        <input
-                            type="date"
+                        <DateField
                             value={formData.registrationCloseDate}
                             onChange={(e) => updateForm('registrationCloseDate', e.target.value)}
                             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
@@ -1237,7 +1237,9 @@ export default function CreateEventPage({ handle_submission }: any) {
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <div>{serverError}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2">
-                    <div className="relative h-48 md:h-auto min-h-[200px] bg-gray-800 flex items-center justify-center overflow-hidden">
+                    {/* Square, matching the 1:1 banner the event page renders. Capped on
+                        narrow screens so a full-width column doesn't make it huge. */}
+                    <div className="relative mx-auto aspect-square w-full max-w-sm md:max-w-none bg-gray-800 flex items-center justify-center overflow-hidden">
                         {formData.bannerImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img

@@ -8,8 +8,8 @@ import { VendorLogoUpload } from "@/src/features/event_vendors/components/Vendor
 import { VendorCoverUpload } from "@/src/features/event_vendors/components/VendorCoverUpload";
 import { PortfolioImageManager } from "@/src/features/event_vendors/components/PortfolioImageManager";
 import { PortfolioVideoManager } from "@/src/features/event_vendors/components/PortfolioVideoManager";
-import { ClientReviewManager } from "@/src/features/event_vendors/components/ClientReviewManager";
 import { PastEventsManager } from "@/src/features/event_vendors/components/PastEventsManager";
+import { FeedbackService } from "@/src/services/feedback.service";
 import { formatDate } from "@/src/lib/datetime";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -71,8 +71,11 @@ export default async function VendorProfilePage({
     const awaitedSearchParams = await searchParams;
     const isPreview = awaitedSearchParams?.preview === 'true';
     
-    // Fetch vendor data
-    const vendor = await EventVendorService.getVendorById(vendor_id);
+    // Fetch vendor data alongside the reviews organizers have left for them.
+    const [vendor, vendorReviews] = await Promise.all([
+        EventVendorService.getVendorById(vendor_id),
+        FeedbackService.getVendorReviews(vendor_id),
+    ]);
     if (!vendor) {
         notFound();
     }
@@ -341,10 +344,6 @@ const tabs = [
                                                     <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Past Events</p>
                                                     <PastEventsManager vendorId={vendor_id} pastEvents={pastEventIds} bookedEvents={bookedEvents} />
                                                 </div>
-                                                <div>
-                                                    <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Client Reviews</p>
-                                                    <ClientReviewManager vendorId={vendor_id} testimonials={clientTestimonials} />
-                                                </div>
                                             </div>
                                         ) : (
                                             <div className="space-y-6">
@@ -387,22 +386,59 @@ const tabs = [
                                     )}
                                     
                                     {activeTab === 'reviews' && (
-                                            <div className="space-y-4">
-                                                {clientTestimonials.length > 0 ? clientTestimonials.map((t: any, i: number) => (
-                                                    <div key={i} className="bg-gray-50 rounded-xl p-4">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <div className="flex">
-                                                                {[...Array(5)].map((_, si) => (
-                                                                    <svg key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
-                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                    </svg>
-                                                                ))}
+                                            <div className="space-y-6">
+                                                {/* Reviews come from organizers after a completed booking — the
+                                                    vendor can't author these, only read them. */}
+                                                {vendorReviews.length > 0 && (
+                                                    <div className="space-y-3">
+                                                        {vendorReviews.map((r) => (
+                                                            <div key={r.id} className="rounded-xl bg-gray-50 p-4">
+                                                                <div className="mb-2 flex items-center gap-2">
+                                                                    <div className="flex">
+                                                                        {[...Array(5)].map((_, si) => (
+                                                                            <svg key={si} className={`w-3 h-3 ${si < r.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}`} viewBox="0 0 20 20">
+                                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                            </svg>
+                                                                        ))}
+                                                                    </div>
+                                                                    <span className="ml-auto rounded-full bg-gray-900 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">Verified booking</span>
+                                                                </div>
+                                                                {r.title && <p className="text-sm font-bold text-gray-900">{r.title}</p>}
+                                                                <p className="text-sm text-gray-600">{r.comment}</p>
+                                                                <p className="mt-2 text-xs text-gray-400">
+                                                                    — {r.reviewerName || 'Event organizer'}{r.createdAt ? ` • ${formatDate(r.createdAt)}` : ""}
+                                                                </p>
                                                             </div>
-                                                        </div>
-                                                        <p className="text-sm text-gray-600 italic">"{t?.testimonial}"</p>
-                                                        <p className="text-xs text-gray-400 mt-2">— {t?.clientName}{t?.eventDate ? ` • ${t.eventDate}` : ""}</p>
+                                                        ))}
                                                     </div>
-                                                )) : <p className="text-sm text-gray-400 text-center py-8">No reviews yet.</p>}
+                                                )}
+
+                                                {clientTestimonials.length > 0 && (
+                                                    <div className="space-y-3">
+                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Your older testimonials</p>
+                                                        {clientTestimonials.map((t: any, i: number) => (
+                                                            <div key={i} className="bg-gray-50 rounded-xl p-4">
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <div className="flex">
+                                                                        {[...Array(5)].map((_, si) => (
+                                                                            <svg key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
+                                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                            </svg>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-sm text-gray-600 italic">&quot;{t?.testimonial}&quot;</p>
+                                                                <p className="text-xs text-gray-400 mt-2">— {t?.clientName}{t?.eventDate ? ` • ${t.eventDate}` : ""}</p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {vendorReviews.length === 0 && clientTestimonials.length === 0 && (
+                                                    <p className="text-sm text-gray-400 text-center py-8">
+                                                        No reviews yet. Organizers can review you once a booking is completed.
+                                                    </p>
+                                                )}
                                             </div>
                                     )}
 

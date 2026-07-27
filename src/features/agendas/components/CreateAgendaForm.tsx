@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { createAgendaAction } from "@/src/features/agendas/actions/createAgenda.action";
 import { Speaker } from "@/src/services/models/event.model";
+import { DateField } from "@/src/shared_components/DateField";
 
 interface CreateAgendaFormProps {
     eventId: string;
@@ -123,8 +124,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Calendar size={18} className="text-gray-400" />
                                 </div>
-                                <input
-                                    type="date"
+                                <DateField
                                     name="date"
                                     required
                                     className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"

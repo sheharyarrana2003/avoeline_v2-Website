@@ -59,34 +59,43 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     </div>
                 </header>
 
-                {/* Hero Banner */}
-                <section className="relative min-h-60 overflow-hidden rounded-3xl bg-slate-950 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
-                    {event.bannerImage ? (
-                        <img
-                            src={event.bannerImage}
-                            alt={event.title}
-                            className="absolute inset-0 h-full w-full object-cover opacity-60 grayscale"
-                        />
-                    ) : (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.36),transparent_28%),linear-gradient(115deg,#111827,#64748b_52%,#111827)] opacity-80 grayscale" />
-                    )}
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.68),rgba(0,0,0,0.15),rgba(0,0,0,0.62))]" />
-                    <div className="relative flex min-h-60 items-end p-6 sm:p-8">
-                        <div className="flex flex-wrap gap-3 rounded-2xl bg-black/55 p-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(0,0,0,0.24)] backdrop-blur">
-                            <span className="flex items-center gap-2">
-                                <CalendarDays size={16} />
-                                {formatDate(event.schedule?.startDate)}
-                            </span>
-                            <span className="hidden h-5 w-px bg-white/25 sm:block" />
-                            <span className="flex items-center gap-2">
-                                <MapPin size={16} />
-                                {event.location?.city}
-                            </span>
-                            <span className="hidden h-5 w-px bg-white/25 sm:block" />
-                            <span className="flex items-center gap-2">
-                                <Users size={16} />
-                                {registrationsCount} Registrations
-                            </span>
+                {/* Hero Banner — banners are square (1080×1080), so it's shown at 1:1
+                    beside the event facts rather than cropped into a wide strip. */}
+                <section className="overflow-hidden rounded-3xl bg-slate-950 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                    <div className="flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center">
+                        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 sm:w-64 md:w-72 lg:w-80">
+                            {event.bannerImage ? (
+                                <img
+                                    src={event.bannerImage}
+                                    alt={event.title}
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.36),transparent_28%),linear-gradient(115deg,#111827,#64748b_52%,#111827)] opacity-80" />
+                            )}
+                        </div>
+
+                        {/* Facts sit in a row next to a small banner on mobile, and stack
+                            into a labelled column on wider screens so they fill the space
+                            beside the square instead of leaving it empty. */}
+                        <div className="min-w-0 flex-1">
+                            <dl className="grid grid-cols-1 gap-3 rounded-2xl bg-black/55 p-4 text-white shadow-[0_12px_28px_rgba(0,0,0,0.24)] backdrop-blur sm:grid-cols-3 md:grid-cols-1 md:gap-5 md:p-6">
+                                {[
+                                    { icon: <CalendarDays size={18} />, label: "Date", value: formatDate(event.schedule?.startDate) },
+                                    { icon: <MapPin size={18} />, label: "Location", value: event.location?.city || "—" },
+                                    { icon: <Users size={18} />, label: "Registrations", value: `${registrationsCount}` },
+                                ].map((item) => (
+                                    <div key={item.label} className="flex items-center gap-3">
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80">
+                                            {item.icon}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <dt className="text-[10px] font-bold uppercase tracking-wider text-white/50">{item.label}</dt>
+                                            <dd className="truncate text-sm font-bold md:text-base">{item.value}</dd>
+                                        </div>
+                                    </div>
+                                ))}
+                            </dl>
                         </div>
                     </div>
                 </section>

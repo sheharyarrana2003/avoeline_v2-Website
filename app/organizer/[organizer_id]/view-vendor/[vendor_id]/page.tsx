@@ -3,6 +3,7 @@ import { EventService } from "@/src/services/event.service";
 import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
+import { FeedbackService } from "@/src/services/feedback.service";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number) => {
@@ -56,8 +57,11 @@ export default async function VendorProfilePage({
 
     const activeTab = (awaitedSearchParams?.tab as string) || "services";
 
-    // Fetch vendor data
-    const v = await EventVendorService.getVendorById(vendor_id);
+    // Fetch vendor data alongside the reviews organizers have written about them.
+    const [v, vendorReviews] = await Promise.all([
+        EventVendorService.getVendorById(vendor_id),
+        FeedbackService.getVendorReviews(vendor_id),
+    ]);
 
 
     const businessName = v?.businessName || "Vendor Profile";
@@ -153,7 +157,7 @@ export default async function VendorProfilePage({
                                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                                     <StarRating rating={rating} size="sm" light />
                                     <span className="font-bold text-sm text-white">{rating || "N/A"}</span>
-                                    <span className="text-xs text-gray-400">({totalReviews} reviews)</span>
+                                    <span className="text-xs text-gray-400">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
                                     {yearsInBusiness !== null && yearsInBusiness > 0 && (
                                         <>
                                             <span className="text-gray-600">•</span>
@@ -481,16 +485,46 @@ export default async function VendorProfilePage({
                                 </div>
                             </div>
 
-                            {/* Testimonials */}
-                            {testimonials.length > 0 ? (
+                            {/* Organizer reviews — written after a completed booking */}
+                            {vendorReviews.length > 0 && (
+                                <div className="space-y-4 mb-8">
+                                    {vendorReviews.map((r) => (
+                                        <div key={r.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <StarRating rating={r.rating} size="sm" />
+                                                <span className="text-xs text-gray-400 ml-1">{r.rating}.0</span>
+                                                <span className="ml-auto bg-gray-900 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                                                    Verified booking
+                                                </span>
+                                            </div>
+                                            {r.title && <p className="text-sm font-bold text-gray-900 mb-1">{r.title}</p>}
+                                            <p className="text-sm text-gray-600 mb-4 leading-relaxed">{r.comment}</p>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">
+                                                        {(r.reviewerName || "O")[0]}
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-gray-900">{r.reviewerName || 'Event organizer'}</span>
+                                                </div>
+                                                <span className="text-xs text-gray-400">{r.createdAt ? formatDate(r.createdAt) : ''}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Legacy vendor-submitted testimonials (read-only; vendors no
+                                longer add these — reviews come from organizers) */}
+                            {testimonials.length > 0 && (
                                 <div className="space-y-4">
+                                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Vendor-submitted testimonials</p>
                                     {testimonials.map((t: any, i: number) => (
                                         <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                                             <div className="flex items-center gap-2 mb-3">
                                                 <StarRating rating={t?.rating || 5} size="sm" />
                                                 <span className="text-xs text-gray-400 ml-1">{t?.rating || 5}.0</span>
                                             </div>
-                                            <p className="text-sm text-gray-600 italic mb-4 leading-relaxed">"{t?.testimonial || 'No testimonial text.'}"</p>
+                                            <p className="text-sm text-gray-600 italic mb-4 leading-relaxed">&quot;{t?.testimonial || 'No testimonial text.'}&quot;</p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">
@@ -503,7 +537,9 @@ export default async function VendorProfilePage({
                                         </div>
                                     ))}
                                 </div>
-                            ) : (
+                            )}
+
+                            {vendorReviews.length === 0 && testimonials.length === 0 && (
                                 <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-100">
                                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                         <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
