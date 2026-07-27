@@ -13,6 +13,12 @@ interface MediaUploadFieldProps {
   label?: string;
   bucket?: string;
   buttonClassName?: string;
+  /**
+   * Media the form already has (edit flows). Rendered as removable thumbnails and
+   * submitted alongside anything newly uploaded, so an edit that touches nothing
+   * else preserves the existing URLs instead of clearing them.
+   */
+  initialUrls?: string[];
 }
 
 /**
@@ -27,8 +33,9 @@ export function MediaUploadField({
   label = "Upload",
   bucket,
   buttonClassName,
+  initialUrls,
 }: MediaUploadFieldProps) {
-  const [urls, setUrls] = useState<string[]>([]);
+  const [urls, setUrls] = useState<string[]>(initialUrls ?? []);
 
   return (
     <div className="flex flex-wrap items-center gap-3">

@@ -328,8 +328,10 @@ export const BookingServices = {
     const now = new Date(); // system timestamps → Firebase Timestamp
 
     // Extract basic textual values safely out of the form payload
-    const serviceType = (formData.get('serviceType') as string) || '';
-    const serviceId = (formData.get('serviceName') as string) || ''; // Using serviceName field to match context
+    const serviceType = ((formData.get('serviceType') as string) || '').trim();
+    // The RFQ form now posts the service's uuid as `serviceId`. Older forms sent the
+    // selected option's text under `serviceName`, so fall back to that.
+    const serviceId = ((formData.get('serviceId') as string) || (formData.get('serviceName') as string) || '').trim();
     const description = (formData.get('requirementsDescription') as string) || '';
     // Human date/time → DD/MM/YYYY and 12h. Inputs may arrive as ISO (date
     // picker) or 24h (time picker); the formatters normalize both.

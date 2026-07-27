@@ -4,6 +4,7 @@ import { EventVendorService } from "@/src/features/event_vendors/event_venders.s
 import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string = "PKR") => {
@@ -25,13 +26,16 @@ const getCategoryLabel = (category: string) => {
         'music': 'Music',
         'av_equipment': 'AV Equipment',
     };
-    return labels[category?.toLowerCase()] || category;
+    // Trimmed: categories written before the add-service trim fix can carry a
+    // trailing newline ("Catering\r\n"), which misses every lookup below.
+    return labels[category?.trim().toLowerCase()] || category?.trim();
 };
 
+const sameCategory = (a?: string, b?: string) =>
+    (a || "").trim().toLowerCase() === (b || "").trim().toLowerCase();
+
 const getCategoryCount = (services: any[], category: string) => {
-    return services.filter(
-        (s: any) => s.category?.toLowerCase() === category.toLowerCase()
-    ).length;
+    return services.filter((s: any) => sameCategory(s.category, category)).length;
 };
 
 const getServiceStatus = (service: any, index: number) => {
@@ -67,7 +71,9 @@ export default async function VendorServicesPage({
     const categoryTabs = [
         { id: 'all', label: 'All Services', count: services.length },
         ...serviceCategories.map((cat: string) => ({
-            id: cat.toLowerCase(),
+            // Trimmed so the tab's href/filter value matches a trimmed service
+            // category — legacy values carry a trailing newline.
+            id: cat.trim().toLowerCase(),
             label: getCategoryLabel(cat),
             count: getCategoryCount(services, cat),
         })),
@@ -76,9 +82,7 @@ export default async function VendorServicesPage({
     // Filter services by category
     let displayServices = services;
     if (filter !== 'all') {
-        displayServices = services.filter((s: any) => {
-            return s.category?.toLowerCase() === filter.toLowerCase();
-        });
+        displayServices = services.filter((s: any) => sameCategory(s.category, filter));
     }
 
     // Add status and metadata to services
@@ -245,19 +249,16 @@ async function deleteServiceAction(formData: FormData) {
     const vendorId = formData.get('vendorId') as string;
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
 
-   if(vendor){ console.log("vendor found before ", vendor?.services);
-    const new_arr = vendor?.services.filter(s => {
-        if (s.serviceId !== serviceId) {
-            return s;
-        } else {
-            console.log("foundddddd");
-        }
-    })
-    vendor.services = new_arr;
+    if (vendor) {
+        const services = (vendor.services || []).filter(s => s.serviceId !== serviceId);
 
-    console.log("vendor found after ", vendor?.services);
-
-    console.log("updatingggg");
-    await adminDb.collection(COLLECTIONS.VENDORS).doc(vendorId).update({ ...vendor });}
+        // Vendor docs are keyed by the auth uid (== vendor.userId), not the vendorId
+        // field getVendorById queries on — doc(vendorId) targeted a document that
+        // doesn't exist, so deletes silently did nothing. Targeted field write, to
+        // match add/edit and avoid a whole-document spread.
+        const docId = vendor.userId || vendorId;
+        await adminDb.collection(COLLECTIONS.VENDORS).doc(docId).update({ services });
+        revalidatePath(`/vendor/${vendorId}/services`);
+    }
 }
 

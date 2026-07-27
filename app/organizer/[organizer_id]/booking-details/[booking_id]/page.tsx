@@ -5,6 +5,23 @@ import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, formatTime } from "@/src/lib/datetime";
+import { FeedbackService } from "@/src/services/feedback.service";
+import { OrganizerReviewForm } from "@/src/features/bookings/components/OrganizerReviewForm";
+
+const STAR_PATH =
+    "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
+
+function Stars({ rating }: { rating: number }) {
+    return (
+        <div className="flex">
+            {[1, 2, 3, 4, 5].map((s) => (
+                <svg key={s} className={`h-4 w-4 ${s <= rating ? "fill-yellow-400" : "fill-gray-200"}`} viewBox="0 0 20 20">
+                    <path d={STAR_PATH} />
+                </svg>
+            ))}
+        </div>
+    );
+}
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number, currency: string) => {
@@ -26,10 +43,13 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
     }
 
 
-    const [vendor,event] = await Promise.all([
+    const [vendor,event,existingReview] = await Promise.all([
         EventVendorService.getVendorById(raw_booking?.vendorId || ''),
-         EventService.getEventByID(raw_booking?.eventId || '')
+         EventService.getEventByID(raw_booking?.eventId || ''),
+         FeedbackService.getVendorReviewByBooking(booking_id)
     ])
+
+    const isCompleted = raw_booking?.status === "completed";
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] p-4 md:p-8 font-sans text-gray-900">
@@ -120,7 +140,44 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
                             </div>
                         </div>
 
-                       
+                        {/* 3. VENDOR REVIEW */}
+                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+                            <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-6 flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                                Your Review
+                            </h3>
+
+                            {existingReview ? (
+                                <div className="rounded-xl bg-gray-50 p-5">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Stars rating={existingReview.rating} />
+                                        <span className="text-sm font-bold text-gray-900">{existingReview.rating}.0</span>
+                                        <span className="ml-auto text-xs text-gray-400">
+                                            {existingReview.createdAt ? formatDate(existingReview.createdAt) : ''}
+                                        </span>
+                                    </div>
+                                    {existingReview.title && (
+                                        <p className="text-sm font-bold text-gray-900 mb-1">{existingReview.title}</p>
+                                    )}
+                                    <p className="text-sm text-gray-600 leading-relaxed">{existingReview.comment}</p>
+                                    <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                        Published on {vendor?.businessName || "the vendor"}&apos;s profile
+                                    </p>
+                                </div>
+                            ) : isCompleted ? (
+                                <OrganizerReviewForm
+                                    bookingId={booking_id}
+                                    organizerId={organizer_id}
+                                    vendorId={raw_booking?.vendorId || ''}
+                                    vendorName={vendor?.businessName || "this vendor"}
+                                />
+                            ) : (
+                                <p className="text-sm text-gray-400">
+                                    You can review this vendor once the booking is completed.
+                                </p>
+                            )}
+                        </div>
+
                     </div>
 
                     {/* ================= RIGHT COLUMN (Col span 4) ================= */}

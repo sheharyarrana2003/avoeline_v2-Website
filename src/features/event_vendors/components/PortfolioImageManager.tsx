@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { PortfolioImage } from "@/src/services/models/vendor.model";
+import { DateField } from "@/src/shared_components/DateField";
 import { addPortfolioImage, removePortfolioImage } from "../actions/updateVendorPortfolio.action";
 
 export function PortfolioImageManager({ vendorId, images }: { vendorId: string; images: PortfolioImage[] }) {
@@ -61,7 +62,7 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                             <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption" className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
                             <input value={eventType} onChange={(e) => setEventType(e.target.value)} placeholder="Event type" className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
-                            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-200" />
+                            <DateField value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-200" />
                         </div>
                         <button type="button" onClick={save} disabled={saving} className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60">
                             {saving ? "Saving…" : "Add to portfolio"}

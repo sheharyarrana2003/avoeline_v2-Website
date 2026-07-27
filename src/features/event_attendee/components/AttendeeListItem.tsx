@@ -12,8 +12,8 @@ function AttendeeListItemBase(
             single_attendee: Attendee,
             attendee_user: User,
             attendee_reg: Registration
-            handleOnClick: (attendee_id: string, user_id: string) => void,
-            handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>, attendee_id: string) => void,
+            handleOnClick: (registration_id: string) => void,
+            handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>, registration_id: string) => void,
             isSelected: boolean
         }) {
 
@@ -29,7 +29,7 @@ function AttendeeListItemBase(
     return (
         <div 
             className={`grid grid-cols-[40px_2.5fr_1fr_1fr_1fr_40px] items-center px-6 py-4 rounded-xl transition-all cursor-pointer relative mb-1 group ${isSelected ? 'bg-white shadow-sm' : 'hover:bg-gray-100/50'}`}
-            onClick={() => handleOnClick(single_attendee.attendeeId, attendee_user.userId)}
+            onClick={() => handleOnClick(attendee_reg.registrationId)}
         >
             {/* Active Left Border Marker */}
             {isSelected && <div className="absolute left-0 top-2 bottom-2 w-1 bg-black rounded-r-md"></div>}
@@ -40,7 +40,7 @@ function AttendeeListItemBase(
                     <input
                         type="checkbox"
                         className="peer w-[18px] h-[18px] appearance-none border-2 border-gray-300 rounded-full checked:bg-black checked:border-black cursor-pointer transition-colors"
-                        onChange={(e) => handleCheckBoxChange(e, single_attendee.attendeeId)}
+                        onChange={(e) => handleCheckBoxChange(e, attendee_reg.registrationId)}
                         checked={isSelected}
                     />
                     <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
