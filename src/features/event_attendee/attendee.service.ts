@@ -111,6 +111,10 @@ export const AttendeeService = {
 
     },
 
+    async getAttendeebyuserid(user_id:string){
+         const attendee = await adminDb.collection(COLLECTIONS.ATTENDEES).where("userId", "==",user_id).get();
+         return mapToAttendee(attendee);
+    },
     // Fetch attendee PROFILES for a set of user ids, returned as a Map keyed by
     // userId. Unlike getAttendeeOfEvent, this lets callers drive a list off the
     // registrations and treat the attendee profile as an optional left-join —
