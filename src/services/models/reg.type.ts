@@ -1,3 +1,5 @@
+import { CertificateType } from "./event.model";
+
 export interface StatusHistoryEntry {
   status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show" | "awaiting_payment";
   timestamp: string;
@@ -36,6 +38,7 @@ export interface QRCodeInfo {
 }
 
 export interface RegistrationCertificate {
+  type : CertificateType
   issued: boolean;
   certificateId: string | null;
   issueDate: string | null;

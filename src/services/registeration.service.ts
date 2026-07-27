@@ -64,6 +64,7 @@ import { toIsoString } from "@/src/lib/datetime";
     },
 
     certificate: {
+      type: raw?.type || "digital",
       issued: Boolean(raw.certificate?.issued ?? false),
       certificateId: raw.certificate?.certificateId ?? null,
       issueDate: raw.certificate?.issueDate ?? null,
