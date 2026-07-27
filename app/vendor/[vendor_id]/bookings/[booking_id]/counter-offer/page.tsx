@@ -41,6 +41,9 @@ export default async function CounterOfferFormOrganizer({ params }: { params: Pr
         if (booking && booking.quote.vendorQuote) {
             booking.quote.vendorQuote.totalAmount = targetBudget;
         }
+          if (booking?.payment?.totalAmount) {
+            booking.payment.totalAmount = targetBudget
+        }
         await BookingServices.update_booking(booking);
     }
 

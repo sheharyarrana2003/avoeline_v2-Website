@@ -56,7 +56,6 @@ const getDisplayServices = (pricingPackages: any[]) => {
         name: pkg.name,
         price: pkg.price,
         unit: pkg.minOrder ? `pp` : 'flat',
-        description: pkg.minOrder ? `Min ${pkg.minOrder} - Max ${pkg.minOrder * 2} persons` : pkg.description,
     }));
 };
 
@@ -96,7 +95,7 @@ export default async function VendorProfilePage({
     const yearsInBusiness = getYearsInBusiness(v?.createdAt);
     
     // Services for display — real pricing packages only (no mock filler).
-    const services = getDisplayServices(pricingPackages);
+    const services = getDisplayServices(v?.services);
 
     // Real booking-derived stats from the bookings collection.
     const bookings = (await BookingServices.getAllBookingsOfVendor(vendor_id)) ?? [];

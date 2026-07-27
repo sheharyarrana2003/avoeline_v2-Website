@@ -291,7 +291,11 @@ export default async function PrepareQuotePage({
                 },
             ],
             updatedAt: new Date(),
-        };
+        };  
+        
+        if (updatedBooking?.payment?.totalAmount) {
+            updatedBooking.payment.totalAmount = totalAmount
+        }
 
         console.log("about to update booking on vendor side");
         await BookingServices.update_booking(updatedBooking);

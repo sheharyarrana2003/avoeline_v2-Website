@@ -24,18 +24,18 @@ export default function OrganizerCounterOfferForm ({
     e.preventDefault();
     if (isPending) return; // guard against duplicate submissions
 
-    if (targetBudget <= 0) {
-      setError('Please enter a valid counter-offer amount.');
-      return;
-    }
-    if (targetBudget >= currentTotal) {
-      setError('Your counter-offer should generally be less than the current total price.');
-      return;
-    }
-    if (!organizerMessage.trim()) {
-      setError('Please include a message to explain your requested changes to the vendor.');
-      return;
-    }
+    // if (targetBudget <= 0) {
+    //   setError('Please enter a valid counter-offer amount.');
+    //   return;
+    // }
+    // if (targetBudget >= currentTotal) {
+    //   setError('Your counter-offer should generally be less than the current total price.');
+    //   return;
+    // }
+    // if (!organizerMessage.trim()) {
+    //   setError('Please include a message to explain your requested changes to the vendor.');
+    //   return;
+    // }
 
     setError('');
     startTransition(async () => {
