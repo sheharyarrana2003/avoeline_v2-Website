@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import EmailVerificationStep from '@/src/shared_components/auth/EmailVerificationStep';
 import OrganizerProfileStep from '@/src/shared_components/auth/OrganizerProfileStep';
-import ChoosingInterestsStep from '@/src/shared_components/auth/ChoosingInterestsStep';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import type { OrganizerSetupProfileData } from '@/src/features/auth/authService';
 
@@ -11,14 +10,23 @@ type ActionResult = { success: boolean; error?: string };
 
 interface OrganizerSetupClientProps {
   email: string;
+  initialVerified?: boolean;
+  onCheckVerification: () => Promise<{ verified: boolean; email?: string }>;
+  onResendVerification: () => Promise<{ success: boolean; alreadyVerified?: boolean; error?: string }>;
   onSaveProfile: (data: OrganizerSetupProfileData) => Promise<ActionResult>;
-  onCompleteInterests: (interests: string[]) => Promise<ActionResult>;
+  /** Marks setup complete and redirects to the dashboard. */
+  onFinishSetup: () => Promise<ActionResult>;
 }
+
+const LAST_STEP = 2;
 
 export default function OrganizerSetupClient({
   email,
+  initialVerified = false,
+  onCheckVerification,
+  onResendVerification,
   onSaveProfile,
-  onCompleteInterests,
+  onFinishSetup,
 }: OrganizerSetupClientProps) {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +34,6 @@ export default function OrganizerSetupClient({
   const steps = [
     { id: 1, label: 'Email Verification' },
     { id: 2, label: 'Organizer Profile' },
-    { id: 3, label: 'Choosing Interests' },
   ];
 
   return (
@@ -77,6 +84,9 @@ export default function OrganizerSetupClient({
         {currentStep === 1 && (
           <EmailVerificationStep
             email={email}
+            initialVerified={initialVerified}
+            onCheckStatus={onCheckVerification}
+            onResend={onResendVerification}
             onNext={() => {
               setError(null);
               setCurrentStep(2);
@@ -96,20 +106,13 @@ export default function OrganizerSetupClient({
               }
               return true;
             }}
-            onNext={() => setCurrentStep(3)}
-          />
-        )}
-
-        {currentStep === 3 && (
-          <ChoosingInterestsStep
-            onComplete={async (selectedInterests) => {
-              setError(null);
-              const res = await onCompleteInterests(selectedInterests);
-              if (!res.success) {
-                setError(res.error || 'Failed to save interests.');
-                return false;
+            // Profile is the final step: finishing it completes setup and the
+            // server action redirects to the dashboard.
+            onNext={async () => {
+              const res = await onFinishSetup();
+              if (res && !res.success) {
+                setError(res.error || 'Failed to finish setup.');
               }
-              return true;
             }}
           />
         )}
@@ -127,8 +130,8 @@ export default function OrganizerSetupClient({
 
         <button
           type="button"
-          onClick={() => setCurrentStep((prev) => Math.min(3, prev + 1))}
-          disabled={currentStep === 3}
+          onClick={() => setCurrentStep((prev) => Math.min(LAST_STEP, prev + 1))}
+          disabled={currentStep === LAST_STEP}
           className="flex-1 py-2.5 px-6 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
         >
           Next <ArrowRight className="w-4 h-4" />
