@@ -37,6 +37,7 @@ export default async function CertificateIssuancePage({
         await CertificateService.generateCertificatesForEvent(eventId, organizer_id,)
     }
 
+   
     return (
         <CertificateIssuanceClient
             attendees={attendeesWithData}
