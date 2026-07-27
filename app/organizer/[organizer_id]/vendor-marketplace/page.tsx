@@ -226,7 +226,7 @@ export default async function Vendor_Marketplace({
                                             <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{vendor?.businessName}</h3>
                                             <div className="flex items-center gap-1.5 mt-0.5">
                                                 <span className="font-bold text-sm text-gray-900">{rating}</span>
-                                                <span className="text-xs text-gray-400">({totalReviews} reviews)</span>
+                                                <span className="text-xs text-gray-400">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
                                             </div>
                                         </div>
                                     </div>

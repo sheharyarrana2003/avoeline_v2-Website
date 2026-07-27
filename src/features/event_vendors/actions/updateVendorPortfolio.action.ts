@@ -2,7 +2,7 @@
 
 import { adminDb } from "@/data/admin_db";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
-import { PortfolioImage, ClientTestimonial, VendorPortfolio } from "@/src/services/models/vendor.model";
+import { PortfolioImage, VendorPortfolio } from "@/src/services/models/vendor.model";
 import { formatDate } from "@/src/lib/datetime";
 import { revalidatePath } from "next/cache";
 
@@ -63,26 +63,10 @@ export async function removePortfolioVideo(vendorId: string, url: string): Promi
     return mutatePortfolio(vendorId, (p) => { p.videos = p.videos.filter((v) => v !== url); });
 }
 
-// ── Client testimonials ───────────────────────────────────────────────────────
-export async function addClientTestimonial(
-    vendorId: string,
-    review: { clientName?: string; testimonial?: string; rating?: number; eventDate?: string }
-): Promise<ActionResult> {
-    if (!review?.testimonial?.trim()) return { success: false, error: "Testimonial text is required." };
-    const entry: ClientTestimonial = {
-        clientName: review.clientName?.trim() || "Anonymous",
-        testimonial: review.testimonial.trim(),
-        rating: Math.min(5, Math.max(0, Number(review.rating) || 0)),
-        eventDate: review.eventDate ? formatDate(review.eventDate) : "",
-    };
-    return mutatePortfolio(vendorId, (p) => { p.clientTestimonials.push(entry); });
-}
-
-export async function removeClientTestimonial(vendorId: string, index: number): Promise<ActionResult> {
-    return mutatePortfolio(vendorId, (p) => {
-        if (index >= 0 && index < p.clientTestimonials.length) p.clientTestimonials.splice(index, 1);
-    });
-}
+// NOTE: client testimonials are no longer vendor-authored — reviews are written
+// by organizers against a completed booking (see
+// src/features/bookings/actions/reviewVendor.action.ts). Existing
+// portfolio.clientTestimonials entries are still read and displayed.
 
 // ── Past events ───────────────────────────────────────────────────────────────
 export async function addPastEvent(vendorId: string, eventId: string): Promise<ActionResult> {
