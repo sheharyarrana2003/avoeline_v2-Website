@@ -63,17 +63,10 @@ export async function removePortfolioVideo(vendorId: string, url: string): Promi
     return mutatePortfolio(vendorId, (p) => { p.videos = p.videos.filter((v) => v !== url); });
 }
 
-// NOTE: client testimonials are no longer vendor-authored — reviews are written
-// by organizers against a completed booking (see
-// src/features/bookings/actions/reviewVendor.action.ts). Existing
-// portfolio.clientTestimonials entries are still read and displayed.
-
-// ── Past events ───────────────────────────────────────────────────────────────
-export async function addPastEvent(vendorId: string, eventId: string): Promise<ActionResult> {
-    if (!eventId) return { success: false, error: "Missing event id." };
-    return mutatePortfolio(vendorId, (p) => { if (!p.pastEvents.includes(eventId)) p.pastEvents.push(eventId); });
-}
-
-export async function removePastEvent(vendorId: string, eventId: string): Promise<ActionResult> {
-    return mutatePortfolio(vendorId, (p) => { p.pastEvents = p.pastEvents.filter((e) => e !== eventId); });
-}
+// NOTE: two things here are no longer vendor-authored.
+//   - Client testimonials: reviews are written by organizers against a completed
+//     booking (src/features/bookings/actions/reviewVendor.action.ts).
+//   - Past events: derived from the vendor's completed bookings rather than
+//     picked from a dropdown, so the list is a record of delivered work.
+// Existing portfolio.clientTestimonials / portfolio.pastEvents values are left in
+// place; the testimonials still render read-only.
