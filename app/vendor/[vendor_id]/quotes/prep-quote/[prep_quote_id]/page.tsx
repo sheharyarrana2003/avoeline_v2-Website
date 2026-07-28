@@ -5,7 +5,8 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { formatDate } from "@/src/lib/datetime";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import PrepareQuoteClient from "@/src/features/bookings/shared_components/VendorPrepBookingClient";
 
 import {
@@ -44,6 +45,14 @@ interface SerializedEventDetails {
     endTime: string;
     location: string;
     guestCount: number;
+    /** True for fields the request left blank that fall back to the event's own
+     *  schedule/venue, so the UI can say where the value came from. */
+    fromEvent: {
+        date: boolean;
+        startTime: boolean;
+        endTime: boolean;
+        location: boolean;
+    };
 }
 
 interface SerializedExistingQuote {
@@ -130,8 +139,9 @@ export default async function PrepareQuotePage({
         date: "",
         startTime: "",
         endTime: "",
-        location: "TBD",
+        location: "",
         guestCount: 0,
+        fromEvent: { date: false, startTime: false, endTime: false, location: false },
     };
     let organizerName = "Unknown Organizer";
     let requirements: SerializedRequirements = {
@@ -162,26 +172,29 @@ export default async function PrepareQuotePage({
             // Event not found
         }
 
-        // Build proper event details from event + booking requirements
+        // This panel is labelled "Original Request", so what the organizer actually
+        // asked for wins; the event's own schedule is only a fallback for fields the
+        // request left blank. Previously the event won, so the page showed the event
+        // date and the event's total seats instead of the requested date and guest
+        // count — figures the organizer never typed.
+        const req = booking.requirements;
         eventDetails = {
-            title:
-                event?.title ||
-
-                "New Event",
-            date:
-                event?.schedule.startDate ||
-             
-                booking.requirements?.serviceDate ||
-                "",
-            startTime:
-                event?.schedule.startTime  || "",
-            endTime: event?.schedule.endTime || "",
-            location:event?.location.venueName ||
-                "not mentioned",
-            guestCount:
-                event?.capacity.totalSeats ||
-                booking.requirements?.guestCount ||
-                0,
+            title: event?.title || "New Event",
+            date: req?.serviceDate || event?.schedule?.startDate || "",
+            startTime: req?.startTime || event?.schedule?.startTime || "",
+            endTime: req?.endTime || event?.schedule?.endTime || "",
+            location: req?.location || event?.location?.venueName || "",
+            // Never borrow the event's capacity here: an unanswered guest count is
+            // unknown, not "however many seats the event has".
+            guestCount: Number(req?.guestCount) || 0,
+            // Flag anything the organizer didn't actually state, so the panel can
+            // attribute it to the event instead of presenting it as the request.
+            fromEvent: {
+                date: !req?.serviceDate && Boolean(event?.schedule?.startDate),
+                startTime: !req?.startTime && Boolean(event?.schedule?.startTime),
+                endTime: !req?.endTime && Boolean(event?.schedule?.endTime),
+                location: !req?.location && Boolean(event?.location?.venueName),
+            },
         };
 
         organizerName =
@@ -297,9 +310,14 @@ export default async function PrepareQuotePage({
             updatedBooking.payment.totalAmount = totalAmount
         }
 
-        console.log("about to update booking on vendor side");
         await BookingServices.update_booking(updatedBooking);
-        console.log("booking updated");
+
+        // Send the vendor back to their quotes list instead of leaving them on a
+        // form they've already submitted, and refresh the views whose status changed.
+        revalidatePath(`/vendor/${vendor_id}/quotes`);
+        revalidatePath(`/vendor/${vendor_id}/dashboard`);
+        revalidatePath(`/organizer/${freshBooking.organizerId}/quotes`);
+        redirect(`/vendor/${vendor_id}/quotes`);
     }
 
     // Serialize data for client component
