@@ -138,7 +138,7 @@ function Certificate({ template }: { template: CertificateTemplate }) {
         position: "relative",
         width: `${template.canvas.width}px`,
         height: `${template.canvas.height}px`,
-        background:  template.primary_color || "#ffffff",
+        background: template.primary_color || "#ffffff",
         border: `${template.border_size}px ${template.border_style} ${template.border_color}`,
         boxSizing: "border-box",
         overflow: "hidden",
@@ -193,6 +193,12 @@ export default function MakingTemplateUi({
         setTemplate((prev) => ({
             ...prev,
             [styleKey]: { ...(prev as any)[styleKey], [attr]: value },
+        }));
+
+    const setBlockchain = (key: keyof Blockchain, value: any) =>
+        setTemplate((prev) => ({
+            ...prev,
+            blockchain: { ...prev.blockchain, [key]: value },
         }));
 
     const handleSave = async () => {
@@ -500,7 +506,7 @@ export default function MakingTemplateUi({
                     {/* ISSUER */}
                     <section className="space-y-3 bg-stone-50 p-3 rounded-lg border border-stone-200">
                         <h3 className="text-xs uppercase font-bold tracking-wider text-stone-600">Issuer Details & Signature</h3>
-                        
+
                         <div>
                             <label className="block text-xs font-medium text-stone-700">Issuer Name</label>
                             <input type="text" value={template.issuer_name_content} onChange={(e) => setField("issuer_name_content", e.target.value)} className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded" />
@@ -556,6 +562,39 @@ export default function MakingTemplateUi({
                                 <input type="color" value={template.issuer_designation_styling.color} onChange={(e) => setStyle("issuer_designation_styling", "color", e.target.value)} className="mt-1 w-full h-7 rounded border border-stone-300 cursor-pointer" />
                             </div>
                         </div>
+                    </section>
+                    {/* BLOCKCHAIN OPTIONS */}
+                    <section className="space-y-3 bg-stone-50 p-3 rounded-lg border border-stone-200">
+                        <h3 className="text-xs uppercase font-bold tracking-wider text-stone-600">Blockchain Settings</h3>
+
+                        <div className="flex items-center justify-between">
+                            <label htmlFor="blockchain-toggle" className="text-xs font-medium text-stone-700 cursor-pointer">
+                                Enable Blockchain Verification
+                            </label>
+                            <input
+                                id="blockchain-toggle"
+                                type="checkbox"
+                                checked={template.blockchain?.enabled ?? false}
+                                onChange={(e) => setBlockchain("enabled", e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500 cursor-pointer"
+                            />
+                        </div>
+
+                        {/* Optional: Select network if enabled */}
+                        {template.blockchain?.enabled && (
+                            <div className="pt-2">
+                                <label className="block text-xs font-medium text-stone-700">Network</label>
+                                <select
+                                    value={template.blockchain.network || "ethereum"}
+                                    onChange={(e) => setBlockchain("network", e.target.value)}
+                                    className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded bg-white"
+                                >
+                                    <option value="ethereum">Ethereum</option>
+                                    <option value="polygon">Polygon</option>
+                                    <option value="solana">Solana</option>
+                                </select>
+                            </div>
+                        )}
                     </section>
                 </div>
             </aside>
