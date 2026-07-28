@@ -9,7 +9,7 @@ interface LoginResult {
 }
 
 interface SignInClientProps {
-    handleEmailLogin: (email: string, password: string) => Promise<LoginResult>;
+    handleEmailLogin: (email: string, password: string, next?: string) => Promise<LoginResult>;
 }
 
 export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
@@ -25,7 +25,10 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
         setError(null); // Clear previous errors
 
         startTransition(async () => {
-            const result = await handleEmailLogin(email, password);
+            // Read ?next= at submit time rather than relying on it being captured
+            // when the page rendered — the server re-validates it before using it.
+            const next = new URLSearchParams(window.location.search).get('next') ?? '';
+            const result = await handleEmailLogin(email, password, next);
 
             if (!result.success && result.error) {
                 setError(result.error);

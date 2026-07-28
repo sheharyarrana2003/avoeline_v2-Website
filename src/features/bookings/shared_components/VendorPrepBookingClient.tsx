@@ -41,6 +41,12 @@ interface EventDetails {
     endTime: string;
     location: string;
     guestCount: number;
+    fromEvent?: {
+        date?: boolean;
+        startTime?: boolean;
+        endTime?: boolean;
+        location?: boolean;
+    };
 }
 
 interface Requirements {
@@ -603,17 +609,20 @@ export default function PrepareQuoteClient({
                                         Event Date & Time
                                     </p>
                                     <p className="text-sm font-medium text-slate-900">
-                                        {eventDetails.date
-                                            ? formatDate(eventDetails.date)
-                                            : "TBD"}
-                                        ,{" "}
-                                        {eventDetails.startTime
-                                            ? formatTime(eventDetails.startTime)
-                                            : "TBD"}{" "}
-                                        -{" "}
-                                        {eventDetails.endTime
-                                            ? formatTime(eventDetails.endTime)
-                                            : "TBD"}
+                                        {eventDetails.date ? formatDate(eventDetails.date) : "Not specified"}
+                                        {eventDetails.date && eventDetails.fromEvent?.date && (
+                                            <span className="text-xs font-normal text-slate-400"> (event date)</span>
+                                        )}
+                                        {eventDetails.startTime && (
+                                            <>
+                                                {", "}
+                                                {formatTime(eventDetails.startTime)}
+                                                {eventDetails.endTime ? ` - ${formatTime(eventDetails.endTime)}` : ""}
+                                                {(eventDetails.fromEvent?.startTime || eventDetails.fromEvent?.endTime) && (
+                                                    <span className="text-xs font-normal text-slate-400"> (event schedule)</span>
+                                                )}
+                                            </>
+                                        )}
                                     </p>
                                 </div>
                                 <div>
@@ -621,9 +630,9 @@ export default function PrepareQuoteClient({
                                         Guests
                                     </p>
                                     <p className="text-sm font-medium text-slate-900">
-                                        {eventDetails.guestCount ||
-                                            requirements.guestCount}{" "}
-                                        People
+                                        {(eventDetails.guestCount || requirements.guestCount)
+                                            ? `${eventDetails.guestCount || requirements.guestCount} People`
+                                            : "Not specified"}
                                     </p>
                                 </div>
                                 <div>
@@ -631,9 +640,10 @@ export default function PrepareQuoteClient({
                                         Location
                                     </p>
                                     <p className="text-sm font-medium text-slate-900">
-                                        {eventDetails.location ||
-                                            requirements.location ||
-                                            "TBD"}
+                                        {eventDetails.location || requirements.location || "Not specified"}
+                                        {eventDetails.location && eventDetails.fromEvent?.location && (
+                                            <span className="text-xs font-normal text-slate-400"> (event venue)</span>
+                                        )}
                                     </p>
                                 </div>
                             </div>
