@@ -46,7 +46,7 @@ export default async function SignIn({
                 throw error;
             }
 
-            console.error("Event creation failed:", error);
+            console.error("user creation failed:", error);
 
             // Returning this keeps the user on the current page and sends back the error
             return {

@@ -5,7 +5,7 @@ import { COLLECTIONS } from "@/data/collections";
 import { toIsoString } from "@/src/lib/datetime";
 
 
- function mapToRegistration(raw: any, fallbackId?: string): Registration {
+function mapToRegistration(raw: any, fallbackId?: string): Registration {
   if (!raw) {
     throw new Error("Cannot map an empty or undefined raw object to Registration");
   }
@@ -20,12 +20,12 @@ import { toIsoString } from "@/src/lib/datetime";
     registrationDate: String(raw.registrationDate || new Date().toISOString()),
     registrationSource: raw.registrationSource || "web",
     status: raw.status || "pending",
-    
+
     statusHistory: Array.isArray(raw.statusHistory)
       ? raw.statusHistory.map((h: any) => ({
-          status: h.status || "pending",
-          timestamp: String(h.timestamp || new Date().toISOString()),
-        }))
+        status: h.status || "pending",
+        timestamp: String(h.timestamp || new Date().toISOString()),
+      }))
       : [],
 
     payment: {
@@ -40,14 +40,14 @@ import { toIsoString } from "@/src/lib/datetime";
 
     pricingTier: String(raw.pricingTier || ""),
     finalPrice: Number(raw.finalPrice ?? 0),
-    
+
     discountApplied: raw.discountApplied
       ? {
-          type: String(raw.discountApplied.type || ""),
-          percentage: Number(raw.discountApplied.percentage ?? 0),
-          originalPrice: Number(raw.discountApplied.originalPrice ?? 0),
-          discountedPrice: Number(raw.discountApplied.discountedPrice ?? 0),
-        }
+        type: String(raw.discountApplied.type || ""),
+        percentage: Number(raw.discountApplied.percentage ?? 0),
+        originalPrice: Number(raw.discountApplied.originalPrice ?? 0),
+        discountedPrice: Number(raw.discountApplied.discountedPrice ?? 0),
+      }
       : null,
 
     checkIn: {
@@ -76,11 +76,11 @@ import { toIsoString } from "@/src/lib/datetime";
 
     communications: Array.isArray(raw.communications)
       ? raw.communications.map((c: any) => ({
-          type: String(c.type || "registration_confirmation"),
-          sentAt: String(c.sentAt || new Date().toISOString()),
-          channel: c.channel || "email",
-          status: c.status || "sent",
-        }))
+        type: String(c.type || "registration_confirmation"),
+        sentAt: String(c.sentAt || new Date().toISOString()),
+        channel: c.channel || "email",
+        status: c.status || "sent",
+      }))
       : [],
 
     feedbackSubmitted: Boolean(raw.feedbackSubmitted ?? false),
@@ -99,26 +99,38 @@ import { toIsoString } from "@/src/lib/datetime";
   };
 }
 export const RegService = {
-    async getRegOfUser(user_id:string){
-        // Only the first match is used, so cap the read at one document.
-        const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId","==",user_id).limit(1);
-        const querySnapshot :  QuerySnapshot= await q.get();
+  async getRegOfUser(user_id: string) {
+    // Only the first match is used, so cap the read at one document.
+    const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId", "==", user_id).limit(1);
+    const querySnapshot: QuerySnapshot = await q.get();
 
-        if(querySnapshot.empty){
-            return mapToRegistration({});
-        }
-
-        return  mapToRegistration(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
-
-    },
-
-    // Fetch every registration for an event in one query. Used to resolve each
-    // attendee's this-event registration without an extra read per attendee.
-    async getRegsOfEvent(event_id: string): Promise<Registration[]> {
-        const querySnapshot: QuerySnapshot = await adminDb
-            .collection(COLLECTIONS.REGISTRATIONS)
-            .where("eventId", "==", event_id)
-            .get();
-        return querySnapshot.docs.map(d => mapToRegistration(d.data(), d.id));
+    if (querySnapshot.empty) {
+      return mapToRegistration({});
     }
+
+    return mapToRegistration(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
+
+  },
+
+  // Fetch every registration for an event in one query. Used to resolve each
+  // attendee's this-event registration without an extra read per attendee.
+  async getRegsOfEvent(event_id: string): Promise<Registration[]> {
+    const querySnapshot: QuerySnapshot = await adminDb
+      .collection(COLLECTIONS.REGISTRATIONS)
+      .where("eventId", "==", event_id)
+      .get();
+    return querySnapshot.docs.map(d => mapToRegistration(d.data(), d.id));
+  }
+  , async updateReg(updated_reg: Registration) {
+
+    const regDocRef = adminDb
+      .collection(COLLECTIONS.REGISTRATIONS)
+      .doc(updated_reg.registrationId);
+
+    // Filter out registrationId if it's stored separately as doc ID, or pass updated_reg directly
+    await regDocRef.set({
+      ...updated_reg,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  }
 }

@@ -29,6 +29,8 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
 
             if (!result.success && result.error) {
                 setError(result.error);
+            }else{
+                console.log("status changeddd")
             }
             // If success is true, the server action will redirect (handled by Next.js)
         });

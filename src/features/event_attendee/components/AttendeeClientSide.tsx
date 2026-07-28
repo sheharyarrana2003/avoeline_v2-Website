@@ -16,7 +16,7 @@ export interface AttendeeClientSideProp {
     register: Registration
 }
 
-export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attendees" }: { attendees: AttendeeClientSideProp[]|[], eventTitle?: string }) {
+export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attendees",handle_reg_status }: { attendees: AttendeeClientSideProp[]|[], eventTitle?: string ,handle_reg_status : (reg:Registration)=>Promise<void>}) {
     const [selected_ids, set_selected_ids] = useState<String[]>([]);
     const [single_attendee_view, set_single_attendee_view] = useState<AttendeeClientSideProp | null>(null);
     const searchParams = useSearchParams();
@@ -147,6 +147,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                     <SingleAttendeeView
                         combined_data={single_attendee_view}
                         onClose={() => set_single_attendee_view(null)}
+                        update_registration ={handle_reg_status}
                     />
                 </div>
             )}

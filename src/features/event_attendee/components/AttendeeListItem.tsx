@@ -17,12 +17,9 @@ function AttendeeListItemBase(
             isSelected: boolean
         }) {
 
-    const status = (attendee_user?.accountStatus === "active" ? "REGISTERED" : "PENDING");
     // Derive check-in from the real registration, not a hardcoded truthy value.
     const isCheckedIn = Boolean(attendee_reg?.checkIn?.checkedIn) || attendee_reg?.status === "checked_in";
-    const statusLabel = isCheckedIn
-        ? "CHECKED IN"
-        : (attendee_reg?.status || "confirmed").toUpperCase().replace(/_/g, " ");
+    const statusLabel = attendee_reg.status;
     const checkInTime = attendee_reg?.checkIn?.checkInTime || null;
     const ticketType = attendee_reg?.pricingTier || "General";
 

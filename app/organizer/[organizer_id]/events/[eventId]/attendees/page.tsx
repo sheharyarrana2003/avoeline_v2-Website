@@ -3,6 +3,7 @@ import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 import { EventService } from "@/src/services/event.service";
+import { Registration } from "@/src/services/models/reg.type";
 
 export default async function speaker({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
@@ -30,9 +31,13 @@ export default async function speaker({ params }: { params: Promise<{ eventId: s
         }));
     }
 
+    const handle_reg_status = async(registeration: Registration)=>{
+        'use server'
+        await RegService.updateReg(registeration)
+    }
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans overflow-hidden">
-            <AttendeeClientSide attendees={attendeesWithUsers} eventTitle={event?.title ?? "Event Attendees"} />
+            <AttendeeClientSide attendees={attendeesWithUsers} handle_reg_status={handle_reg_status} eventTitle={event?.title ?? "Event Attendees"} />
         </div>
     )
 }
