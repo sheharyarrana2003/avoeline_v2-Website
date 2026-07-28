@@ -24,8 +24,13 @@ export default async function SignIn({
     // so signing in returns them to where they were going.
     const nextPath = safeNext((await searchParams)?.next);
 
-    const handleEmailLogin = async (email: string, password: string) => {
+    const handleEmailLogin = async (email: string, password: string, next?: string) => {
         'use server'
+
+        // The client sends whatever ?next= is on the URL at submit time; it is
+        // untrusted input, so re-validate it here. Falls back to the value bound
+        // when this page rendered.
+        const target = safeNext(next) ?? nextPath;
 
         try {
             await AuthService.loginWithEmail(email, password);
@@ -34,8 +39,8 @@ export default async function SignIn({
             console.log("user data after signup", user);
             if (user === null) {
                 redirect("/auth/signup");
-            } else if (nextPath) {
-                redirect(nextPath);
+            } else if (target) {
+                redirect(target);
             } else {
                 const user_role = user.userType;
                 redirect(`/${user_role.toLowerCase()}/${user.userId}/dashboard`);

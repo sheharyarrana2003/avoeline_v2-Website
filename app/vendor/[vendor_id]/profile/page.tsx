@@ -8,7 +8,6 @@ import { VendorLogoUpload } from "@/src/features/event_vendors/components/Vendor
 import { VendorCoverUpload } from "@/src/features/event_vendors/components/VendorCoverUpload";
 import { PortfolioImageManager } from "@/src/features/event_vendors/components/PortfolioImageManager";
 import { PortfolioVideoManager } from "@/src/features/event_vendors/components/PortfolioVideoManager";
-import { PastEventsManager } from "@/src/features/event_vendors/components/PastEventsManager";
 import { FeedbackService } from "@/src/services/feedback.service";
 import { formatDate } from "@/src/lib/datetime";
 import Link from "next/link";
@@ -112,10 +111,9 @@ export default async function VendorProfilePage({
     // Portfolio sections (normalized by mapToPortfolio, so always arrays).
     const portfolioVideos: string[] = v?.portfolio?.videos || [];
     const clientTestimonials = v?.portfolio?.clientTestimonials || [];
-    const pastEventIds: string[] = v?.portfolio?.pastEvents || [];
 
-    // Resolve the vendor's booked events (id → title) for the past-events picker
-    // and to show past events by title rather than raw ID.
+    // Resolve the vendor's booked events (id → title) so past events read as
+    // titles rather than raw IDs.
     const bookedEventIds = [...new Set(bookings.map((b: any) => b?.eventId).filter(Boolean))] as string[];
     const bookedEvents = (
         await Promise.all(
@@ -130,7 +128,17 @@ export default async function VendorProfilePage({
         )
     );
     const eventTitleById = new Map(bookedEvents.map((e) => [e.id, e.title]));
-    const pastEventTitle = (id: string) => eventTitleById.get(id) || id;
+
+    // Past events are *earned*, not chosen: every event this vendor actually
+    // completed a booking for. The vendor used to hand-pick these from a
+    // dropdown, which made the list a claim rather than a record.
+    const completedEvents = [
+        ...new Map(
+            bookings
+                .filter((b: any) => b?.status === "completed" && b?.eventId)
+                .map((b: any) => [b.eventId, { id: b.eventId, title: eventTitleById.get(b.eventId) || b.eventId }])
+        ).values(),
+    ];
 const tabs = [
         { id: 'services', label: 'Services' },
         { id: 'portfolio', label: 'Portfolio' },
@@ -341,7 +349,17 @@ const tabs = [
                                                 </div>
                                                 <div>
                                                     <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Past Events</p>
-                                                    <PastEventsManager vendorId={vendor_id} pastEvents={pastEventIds} bookedEvents={bookedEvents} />
+                                                    {completedEvents.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {completedEvents.map((e) => (
+                                                                <span key={e.id} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">{e.title}</span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-gray-400">
+                                                            Events you complete will appear here automatically.
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         ) : (
@@ -370,12 +388,12 @@ const tabs = [
                                                         </div>
                                                     </div>
                                                 )}
-                                                {pastEventIds.length > 0 && (
+                                                {completedEvents.length > 0 && (
                                                     <div>
                                                         <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Past Events</p>
                                                         <div className="flex flex-wrap gap-2">
-                                                            {pastEventIds.map((id: string) => (
-                                                                <span key={id} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">{pastEventTitle(id)}</span>
+                                                            {completedEvents.map((e) => (
+                                                                <span key={e.id} className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">{e.title}</span>
                                                             ))}
                                                         </div>
                                                     </div>

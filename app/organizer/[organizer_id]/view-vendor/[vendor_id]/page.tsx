@@ -4,6 +4,7 @@ import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
 import { FeedbackService } from "@/src/services/feedback.service";
+import { BookingServices } from "@/src/features/bookings/bookings.service";
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number) => {
@@ -89,10 +90,19 @@ export default async function VendorProfilePage({
         ? new Date().getFullYear() - new Date(createdAt).getFullYear()
         : null;
 
-    // Resolve past-event IDs → titles (fall back to the raw ID) for display.
-    const pastEventIds: string[] = v?.portfolio?.pastEvents || [];
+    // Past events are derived from the vendor's completed bookings, not from a
+    // list they picked themselves — an organizer reading this needs a record of
+    // work actually delivered. Titles resolved, falling back to the raw id.
+    const vendorBookings = (await BookingServices.getAllBookingsOfVendor(vendor_id)) ?? [];
+    const completedEventIds: string[] = [
+        ...new Set<string>(
+            vendorBookings
+                .filter((b: any) => b?.status === "completed" && b?.eventId)
+                .map((b: any) => String(b.eventId))
+        ),
+    ];
     const pastEvents = await Promise.all(
-        pastEventIds.map(async (id) => {
+        completedEventIds.map(async (id) => {
             try {
                 const ev = await EventService.getEventByID(id);
                 return { id, title: ev?.title || id };
@@ -434,19 +444,9 @@ export default async function VendorProfilePage({
                                 )}
                             </div>
                         )}
-                        {/* Past Events */}
-                        {v?.portfolio?.pastEvents && v.portfolio.pastEvents.length > 0 && (
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-4">Past Events</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {v.portfolio.pastEvents.map((evt: string, i: number) => (
-                                        <span key={i} className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full">
-                                            {evt}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        {/* Past Events used to be rendered a second time here, outside the
+                            Portfolio tab, printing raw event ids — the list inside the tab
+                            above is the one that stays. */}
                     </div>
 
 
