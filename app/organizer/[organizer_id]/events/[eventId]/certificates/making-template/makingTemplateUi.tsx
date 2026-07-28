@@ -580,21 +580,7 @@ export default function MakingTemplateUi({
                             />
                         </div>
 
-                        {/* Optional: Select network if enabled */}
-                        {template.blockchain?.enabled && (
-                            <div className="pt-2">
-                                <label className="block text-xs font-medium text-stone-700">Network</label>
-                                <select
-                                    value={template.blockchain.network || "ethereum"}
-                                    onChange={(e) => setBlockchain("network", e.target.value)}
-                                    className="mt-1 w-full text-xs p-1.5 border border-stone-300 rounded bg-white"
-                                >
-                                    <option value="ethereum">Ethereum</option>
-                                    <option value="polygon">Polygon</option>
-                                    <option value="solana">Solana</option>
-                                </select>
-                            </div>
-                        )}
+                       
                     </section>
                 </div>
             </aside>

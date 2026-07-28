@@ -49,7 +49,7 @@ export function SingleAttendeeView({
     
     const organization = a?.academic?.university || "Not Provided";
     const currency = registration?.payment?.currency || "PKR";
-    const amountPaid = `${currency} ${(registration?.payment?.amountPaid ?? 0).toLocaleString("en-US")}`;
+    const amountPaid = `PKR ${(registration?.payment?.amountPaid ?? 0).toLocaleString("en-US")}`;
     const ticketType = registration?.pricingTier || "General";
 
     const isCheckedIn = Boolean(registration?.checkIn?.checkedIn) || registration?.status === "checked_in";
