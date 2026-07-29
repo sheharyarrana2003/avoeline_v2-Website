@@ -93,8 +93,10 @@ function mapToRegistration(raw: any, fallbackId?: string): Registration {
       deviceType: String(raw.metadata?.deviceType || "desktop"),
     },
 
-    createdAt: String(raw.createdAt || new Date().toISOString()),
-    updatedAt: String(raw.updatedAt || new Date().toISOString()),
+    // String(Timestamp) yields "[object Object]" — three live registration docs
+    // already store that, which is what crashed the analytics trend.
+    createdAt: toIsoString(raw.createdAt) || new Date().toISOString(),
+    updatedAt: toIsoString(raw.updatedAt) || new Date().toISOString(),
     cancelledAt: raw.cancelledAt ?? null,
   };
 }
