@@ -213,7 +213,7 @@ export const CertificateService = {
           organizerId: organizer_id,
           type: template.blockchain.enabled ? "both" : "digital",
           title: template.heading_content,
-          description: `Successfully completed ${event?.title}`,
+          description: template.achievement_content,
           status: 'ready',
           content: {
             recipientName: registrationData.userName || 'Attendee',
