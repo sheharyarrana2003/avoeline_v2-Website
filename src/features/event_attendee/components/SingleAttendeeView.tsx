@@ -4,9 +4,9 @@ import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 
 import { 
-    Mail, Phone, CheckCircle2, Trash2, X, QrCode, Clock, 
+    Mail, Phone, CheckCircle2, Trash2, X, Clock, 
     CreditCard, Tag, Award, MessageSquare, ShieldCheck, 
-    Smartphone, History, ChevronDown 
+    Smartphone, History, ChevronDown, Star, Calendar, Ban
 } from "lucide-react";
 
 import { useState } from "react";
@@ -29,6 +29,18 @@ const STATUS_OPTIONS: Registration["status"][] = [
     "awaiting_payment",
 ];
 
+const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
+    "pending",
+    "completed",
+    "failed",
+    "refunded",
+];
+
+function formatCurrency(amount: number | null | undefined, currency: string) {
+    const value = amount ?? 0;
+    return `${currency} ${value.toLocaleString("en-US")}`;
+}
+
 export function SingleAttendeeView({ 
     combined_data, 
     onClose, 
@@ -49,23 +61,28 @@ export function SingleAttendeeView({
     
     const organization = a?.academic?.university || "Not Provided";
     const currency = registration?.payment?.currency || "PKR";
-    const amountPaid = `PKR ${(registration?.payment?.amountPaid ?? 0).toLocaleString("en-US")}`;
+
+    const amountPaid = registration?.payment?.amountPaid ?? 0;
+    const finalPrice = registration?.finalPrice ?? amountPaid;
     const ticketType = registration?.pricingTier || "General";
+    const discount = registration?.discountApplied;
 
     const isCheckedIn = Boolean(registration?.checkIn?.checkedIn) || registration?.status === "checked_in";
 
     const checkInTime = registration?.checkIn?.checkInTime ? formatDateTime(registration.checkIn.checkInTime) : null;
-    const checkInMethod = registration?.checkIn?.checkInMethod || "—";
-    const checkInDesk = registration?.checkIn?.deviceId || "—";
+    const checkInMethod = registration?.checkIn?.checkInMethod
+        ? registration.checkIn.checkInMethod.replace("_", " ")
+        : "—";
 
     const department = a?.academic?.department || "Not Specified";
-    const studentId = a?.academic?.studentId || "Not Specified";
     const gradYear = a?.academic?.graduationYear || "Not Specified";
     const locationInfo = u?.location ? `${u.location.city}, ${u.location.country}` : "Not Specified";
 
+    const registeredOn = registration?.registrationDate ? formatDateTime(registration.registrationDate) : null;
+    const cancelledOn = registration?.cancelledAt ? formatDateTime(registration.cancelledAt) : null;
+
     // Handler to handle status change and invoke prop
     const handleStatusChange = async (newStatus: Registration["status"]) => {
-        console.log("about to change")
         const updated = {
             ...registration,
             status: newStatus,
@@ -82,6 +99,29 @@ export function SingleAttendeeView({
                 await update_registration(updated);
             } catch (err) {
                 console.error("Failed to update registration status:", err);
+            } finally {
+                setIsUpdating(false);
+            }
+        }
+    };
+
+    // Handler to handle payment status change and invoke prop
+    const handlePaymentStatusChange = async (newPaymentStatus: Registration["payment"]["paymentStatus"]) => {
+        const updated = {
+            ...registration,
+            payment: {
+                ...registration.payment,
+                paymentStatus: newPaymentStatus,
+            },
+        };
+        setRegistration(updated);
+
+        if (update_registration) {
+            setIsUpdating(true);
+            try {
+                await update_registration(updated);
+            } catch (err) {
+                console.error("Failed to update payment status:", err);
             } finally {
                 setIsUpdating(false);
             }
@@ -148,7 +188,7 @@ export function SingleAttendeeView({
                 </div>
             </div>
 
-            {/* Organization & Payment Card */}
+            {/* Organization & Ticket Card */}
             <div className="bg-[#e4e7ed] rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
                 <div className="flex justify-between items-start">
                     <div className="max-w-[65%]">
@@ -161,10 +201,10 @@ export function SingleAttendeeView({
                     </div>
                     <div className="text-right">
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
-                            AMOUNT PAID
+                            FINAL PRICE
                         </p>
                         <p className="font-black text-slate-900 text-[14px]">
-                            {amountPaid}
+                            {formatCurrency(finalPrice, currency)}
                         </p>
                     </div>
                 </div>
@@ -174,7 +214,7 @@ export function SingleAttendeeView({
                     </span>
                     {registration?.registrationSource && (
                         <span className="bg-stone-200 text-stone-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            Source: {registration.registrationSource}
+                            Source: {registration.registrationSource.replace("_", " ")}
                         </span>
                     )}
                 </div>
@@ -188,7 +228,7 @@ export function SingleAttendeeView({
                     </div>
                     <div>
                         <p className="font-extrabold text-slate-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
-                        <p className="text-xs text-gray-400 font-medium">Method: {checkInMethod} • Desk {checkInDesk}</p>
+                        <p className="text-xs text-gray-400 font-medium capitalize">Method: {checkInMethod}</p>
                     </div>
                 </div>
             )}
@@ -207,92 +247,87 @@ export function SingleAttendeeView({
                             <span className="font-bold text-slate-800">{department}</span>
                         </div>
                         <div>
-                            <span className="text-gray-400 font-medium block">Student ID</span>
-                            <span className="font-bold text-slate-800">{studentId}</span>
-                        </div>
-                        <div>
                             <span className="text-gray-400 font-medium block">Graduation Year</span>
                             <span className="font-bold text-slate-800">{gradYear}</span>
                         </div>
-                        <div>
+                        <div className="col-span-2">
                             <span className="text-gray-400 font-medium block">Location</span>
                             <span className="font-bold text-slate-800">{locationInfo}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. Detailed Payment & Discount Info */}
+                {/* 2. Payment, Pricing & Discount Breakdown */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
                     <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <CreditCard size={14} /> Payment & Billing Details
+                        <CreditCard size={14} /> Payment & Pricing
                     </h3>
-                    <div className="grid grid-cols-2 gap-3 text-xs mb-3">
+
+                    <div className="grid grid-cols-2 gap-3 text-xs mb-1">
                         <div>
-                            <span className="text-gray-400 font-medium block">Payment ID</span>
-                            <span className="font-mono text-slate-800 font-semibold">{registration?.payment?.paymentId || "N/A"}</span>
+                            <span className="text-gray-400 font-medium block">Payment Method</span>
+                            <span className="font-bold text-slate-800 uppercase">
+                                {registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
+                            </span>
                         </div>
                         <div>
-                            <span className="text-gray-400 font-medium block">Method</span>
-                            <span className="font-bold text-slate-800 uppercase">{registration?.payment?.paymentMethod || "N/A"}</span>
-                        </div>
-                        <div>
-                            <span className="text-gray-400 font-medium block">Payment Status</span>
-                            <span className="font-extrabold text-slate-900 uppercase">{registration?.payment?.paymentStatus || "N/A"}</span>
-                        </div>
-                        <div>
-                            <span className="text-gray-400 font-medium block">Transaction ID</span>
-                            <span className="font-mono text-slate-800 font-semibold">{registration?.payment?.transactionId || "N/A"}</span>
+                            <span className="text-gray-400 font-medium block mb-1">Payment Status</span>
+                            <div className="relative inline-block">
+                                <select
+                                    value={registration?.payment?.paymentStatus || "pending"}
+                                    disabled={isUpdating}
+                                    onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
+                                    className="appearance-none bg-stone-100 text-slate-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                                >
+                                    {PAYMENT_STATUS_OPTIONS.map((status) => (
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
-                    {registration?.discountApplied && (
-                        <div className="mt-3 pt-3 border-t border-gray-100 text-xs">
-                            <span className="text-stone-500 font-medium flex items-center gap-1.5 mb-1">
-                                <Tag size={12} /> Discount Applied ({registration.discountApplied.type}):
-                            </span>
-                            <div className="flex justify-between font-bold text-slate-800">
-                                <span>{registration.discountApplied.percentage}% OFF</span>
-                                <span>
-                                    <span className="line-through text-gray-400 mr-2">{registration.discountApplied.originalPrice}</span>
-                                    {registration.discountApplied.discountedPrice} {currency}
-                                </span>
+                    {/* Pricing summary block - grouped together */}
+                    <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs">
+                        {discount && (
+                            <div className="flex justify-between items-center text-slate-500">
+                                <span>Original Price</span>
+                                <span className="line-through">{formatCurrency(discount.originalPrice, currency)}</span>
                             </div>
+                        )}
+
+                        {discount && (
+                            <div className="flex justify-between items-center bg-emerald-50 text-emerald-700 font-bold px-3 py-2 rounded-xl">
+                                <span className="flex items-center gap-1.5">
+                                    <Tag size={12} /> {discount.type} Discount
+                                </span>
+                                <span>-{discount.percentage}%</span>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between items-center font-bold text-slate-800 pt-1">
+                            <span>Final Price</span>
+                            <span>{formatCurrency(finalPrice, currency)}</span>
                         </div>
-                    )}
+
+                        <div className="flex justify-between items-center font-black text-slate-900">
+                            <span>Amount Paid</span>
+                            <span>{formatCurrency(amountPaid, currency)}</span>
+                        </div>
+
+                        {finalPrice > amountPaid && (
+                            <div className="flex justify-between items-center text-red-500 font-semibold">
+                                <span>Balance Due</span>
+                                <span>{formatCurrency(finalPrice - amountPaid, currency)}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* 3. QR Code & Ticket Info */}
-                {registration?.qrCode && (
-                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <QrCode size={14} /> Ticket QR Code
-                        </h3>
-                        <div className="flex items-center gap-4">
-                            {registration.qrCode.imageUrl ? (
-                                <img 
-                                    src={registration.qrCode.imageUrl} 
-                                    alt="QR Code" 
-                                    className="w-20 h-20 border rounded-xl p-1 bg-stone-50"
-                                />
-                            ) : (
-                                <div className="w-20 h-20 rounded-xl bg-stone-100 flex items-center justify-center text-xs text-stone-400">
-                                    No Image
-                                </div>
-                            )}
-                            <div className="space-y-1 text-xs">
-                                <p className="font-bold text-slate-800">Scans: {registration.qrCode.scanCount || 0}</p>
-                                <p className="text-gray-500">
-                                    Last Scanned: {registration.qrCode.lastScanned ? formatDateTime(registration.qrCode.lastScanned) : "Never"}
-                                </p>
-                                <p className="font-mono text-[10px] text-gray-400 truncate max-w-[180px]">
-                                    Data: {registration.qrCode.data || "—"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* 4. Certificate Info */}
+                {/* 3. Certificate Info */}
                 {registration?.certificate && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
                         <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -300,30 +335,25 @@ export function SingleAttendeeView({
                         </h3>
                         <div className="grid grid-cols-2 gap-3 text-xs">
                             <div>
-                                <span className="text-gray-400 font-medium block">Issued Status</span>
+                                <span className="text-gray-400 font-medium block">Status</span>
                                 <span className="font-bold text-slate-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
                             </div>
                             <div>
-                                <span className="text-gray-400 font-medium block">Certificate ID</span>
-                                <span className="font-mono text-slate-800">{registration.certificate.certificateId || "N/A"}</span>
+                                <span className="text-gray-400 font-medium block">Type</span>
+                                <span className="font-bold text-slate-800 capitalize">{registration.certificate.type || "N/A"}</span>
                             </div>
-                            {registration.certificate.downloadUrl && (
-                                <div className="col-span-2 pt-1">
-                                    <a 
-                                        href={registration.certificate.downloadUrl} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        className="text-blue-600 hover:underline font-bold text-xs"
-                                    >
-                                        Download Certificate
-                                    </a>
+                            {registration.certificate.issueDate && (
+                                <div>
+                                    <span className="text-gray-400 font-medium block">Issue Date</span>
+                                    <span className="font-bold text-slate-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
                                 </div>
                             )}
+                           
                         </div>
                     </div>
                 )}
 
-                {/* 5. Communication Log & Metadata */}
+                {/* 4. Communication Log */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
                     <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <MessageSquare size={14} /> Communication History
@@ -334,7 +364,7 @@ export function SingleAttendeeView({
                                 <div key={idx} className="flex justify-between items-center text-xs p-2 bg-stone-50 rounded-xl">
                                     <div>
                                         <p className="font-bold text-slate-800 capitalize">{comm.type.replace("_", " ")}</p>
-                                        <p className="text-[10px] text-gray-400">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
+                                        <p className="text-[10px] text-gray-400 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
                                     </div>
                                     <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-stone-200">
                                         {comm.status}
@@ -347,22 +377,53 @@ export function SingleAttendeeView({
                     )}
                 </div>
 
-                {/* 6. Metadata & Device Log */}
+                {/* 5. Feedback */}
+                {registration?.feedbackSubmitted && (
+                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
+                        <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <Star size={14} /> Feedback
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className="text-gray-400 font-medium">Rating:</span>
+                            <span className="font-bold text-slate-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* 6. Device Metadata */}
                 {registration?.metadata && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60 text-xs">
                         <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <Smartphone size={14} /> Device & System Metadata
+                            <Smartphone size={14} /> Device
                         </h3>
                         <div className="grid grid-cols-2 gap-2 text-[11px]">
                             <div>
-                                <span className="text-gray-400">Device:</span> <span className="font-semibold text-slate-700">{registration.metadata.deviceType}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-400">IP:</span> <span className="font-mono text-slate-700">{registration.metadata.ipAddress}</span>
+                                <span className="text-gray-400">Device Type:</span> <span className="font-semibold text-slate-700 capitalize">{registration.metadata.deviceType}</span>
                             </div>
                         </div>
                     </div>
                 )}
+
+                {/* 7. Timeline */}
+                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60 text-xs">
+                    <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Calendar size={14} /> Timeline
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        {registeredOn && (
+                            <div>
+                                <span className="text-gray-400 block">Registered On</span>
+                                <span className="font-semibold text-slate-700">{registeredOn}</span>
+                            </div>
+                        )}
+                        {cancelledOn && (
+                            <div>
+                                <span className="text-red-400 flex items-center gap-1"><Ban size={11} /> Cancelled On</span>
+                                <span className="font-semibold text-slate-700">{cancelledOn}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
             </div>
         </div>
