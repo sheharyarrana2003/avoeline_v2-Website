@@ -106,12 +106,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                         <div className="flex-1">
                             <AttendeeInput />
                         </div>
-                        <button className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Calendar size={16} className="text-gray-400" /> Date
-                        </button>
-                        <button className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Ticket size={16} className="text-gray-400" /> Ticket Type
-                        </button>
+               
                     </div>
 
                     {/* List Headers */}

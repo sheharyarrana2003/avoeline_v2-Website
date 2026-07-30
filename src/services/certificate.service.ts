@@ -1,17 +1,13 @@
 
-import { adminAuth, adminDb } from "@/data/admin_db";
+import {  adminDb } from "@/data/admin_db";
 import { CertificateDocument } from "./models/certificate.model";
 import { EventService } from "./event.service";
-import { EventModel } from "./models/event.model";
 import { RegistrationCertificate } from "./models/reg.type";
 import { COLLECTIONS } from "@/data/collections";
-import { formatDate } from "@/src/lib/datetime";
 import { BlockchainService } from "./blockchain.service";
 import { CertificateTemplate, CertificateTemplateService, initialTemplate } from "./certificate.template.services";
 
 import { PinataSDK } from "pinata";
-import { AttendeeService } from "../features/event_attendee/attendee.service";
-import { Attendee } from "../features/event_attendee/type";
 import { UserService } from "./user.service";
 
 // Initialize Pinata SDK instance

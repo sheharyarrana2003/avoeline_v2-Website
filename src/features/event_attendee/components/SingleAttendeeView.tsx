@@ -390,41 +390,7 @@ export function SingleAttendeeView({
                     </div>
                 )}
 
-                {/* 6. Device Metadata */}
-                {registration?.metadata && (
-                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60 text-xs">
-                        <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <Smartphone size={14} /> Device
-                        </h3>
-                        <div className="grid grid-cols-2 gap-2 text-[11px]">
-                            <div>
-                                <span className="text-gray-400">Device Type:</span> <span className="font-semibold text-slate-700 capitalize">{registration.metadata.deviceType}</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* 7. Timeline */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60 text-xs">
-                    <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <Calendar size={14} /> Timeline
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                        {registeredOn && (
-                            <div>
-                                <span className="text-gray-400 block">Registered On</span>
-                                <span className="font-semibold text-slate-700">{registeredOn}</span>
-                            </div>
-                        )}
-                        {cancelledOn && (
-                            <div>
-                                <span className="text-red-400 flex items-center gap-1"><Ban size={11} /> Cancelled On</span>
-                                <span className="font-semibold text-slate-700">{cancelledOn}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
+             
             </div>
         </div>
     );
