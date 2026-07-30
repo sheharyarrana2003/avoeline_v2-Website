@@ -205,3 +205,27 @@ export function formatDateMedium(value: unknown): string {
   if (!d) return EMPTY;
   return `${String(d.getDate()).padStart(2, "0")} ${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`;
 }
+
+/**
+ * Relative label for recent activity: "Just now", "3 MINUTES AGO", "2 HOURS AGO",
+ * "4 DAYS AGO". Past a week the relative form stops being useful, so it falls back
+ * to the canonical DD/MM/YYYY date. A future timestamp (clock skew between the
+ * server that wrote it and the one reading it) reads as "Just now" rather than a
+ * negative count. Returns "—" for empty/unparseable input.
+ */
+export function timeAgo(value: unknown): string {
+  const d = toDate(value);
+  if (!d) return EMPTY;
+
+  const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} MINUTE${mins > 1 ? "S" : ""} AGO`;
+
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} HOUR${hours > 1 ? "S" : ""} AGO`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} DAY${days > 1 ? "S" : ""} AGO`;
+
+  return formatDate(d);
+}

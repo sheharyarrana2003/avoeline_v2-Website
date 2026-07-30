@@ -7,7 +7,7 @@ import {
 import { DashboardEvent, RecentRegistration, DailyRegistrationTrend } from "@/src/features/dashboard/types";
 import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
-import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime, toIsoString } from "@/src/lib/datetime";
 import { COLLECTIONS } from "@/data/collections";
 
 
@@ -205,12 +205,10 @@ function deriveRegTrend(regDocs: Docs): DailyRegistrationTrend[] {
     }
 
     regDocs.forEach((doc) => {
-        const createdAt = doc.data().createdAt;
-        if (createdAt) {
-            const d = typeof createdAt.toDate === "function" ? createdAt.toDate() : new Date(createdAt);
-            const dateStr = d.toISOString().slice(0, 10);
-            if (dateStr in countMap) countMap[dateStr]++;
-        }
+        // toIsoString returns null for unparseable values; the old inline
+        // coercion produced an Invalid Date and threw on .toISOString().
+        const dateStr = toIsoString(doc.data().createdAt)?.slice(0, 10);
+        if (dateStr && dateStr in countMap) countMap[dateStr]++;
     });
 
     return dayKeys.map((key) => {
@@ -283,13 +281,10 @@ function deriveDailyRegistrations(regDocs: Docs): DailyAnalyticsRegistration[] {
 
     const countMap: Record<string, number> = {};
     regDocs.forEach((doc) => {
-        const createdAt = doc.data().createdAt;
-        if (createdAt) {
-            const d = typeof createdAt.toDate === "function" ? createdAt.toDate() : new Date(createdAt);
-            if (d >= thirtyDaysAgo) {
-                const dateStr = d.toISOString().slice(0, 10);
-                countMap[dateStr] = (countMap[dateStr] ?? 0) + 1;
-            }
+        const iso = toIsoString(doc.data().createdAt);
+        if (iso && new Date(iso) >= thirtyDaysAgo) {
+            const dateStr = iso.slice(0, 10);
+            countMap[dateStr] = (countMap[dateStr] ?? 0) + 1;
         }
     });
 

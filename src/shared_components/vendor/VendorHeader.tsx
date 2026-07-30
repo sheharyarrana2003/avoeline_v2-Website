@@ -3,15 +3,9 @@
 import { CurrentUserData } from "@/src/services/models/user.type";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "@/src/shared_components/NotificationBell";
 
-interface UserProp {
-    id: string;
-    name: string;
-    role: string;
-    email: string;
-}
-
-export function VendorHeader({ user, logoUrl }: { user: CurrentUserData; logoUrl?: string }) {
+export function VendorHeader({ user, logoUrl, unreadCount = 0 }: { user: CurrentUserData; logoUrl?: string; unreadCount?: number }) {
     const current_tab = usePathname();
 
     const basePath = `/vendor/${user.roleId}`;
@@ -43,6 +37,7 @@ export function VendorHeader({ user, logoUrl }: { user: CurrentUserData; logoUrl
             </nav>
             
             <div className="flex items-center space-x-4">
+                <NotificationBell href={`${basePath}/notifications`} unreadCount={unreadCount} />
                 <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden font-semibold text-gray-700">
                     {logoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
