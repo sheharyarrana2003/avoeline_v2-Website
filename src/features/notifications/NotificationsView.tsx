@@ -2,39 +2,21 @@ import Link from "next/link";
 import { NotificationServices } from "@/src/services/notification.services";
 import { NotificationData } from "@/src/services/models/notification.model";
 import { timeAgo } from "@/src/lib/datetime";
+import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { markAllNotificationsRead, markNotificationRead } from "./actions/markRead.action";
 
-type TabKey = "all" | "unread" | "registrations" | "vendors" | "system";
+type TabKey = "all" | "unread";
 
+// ponytail: two tabs, because only two notification types are ever written
+// (vendor_quote and booking_confirmation) and both roles receive both. The
+// previous Registrations/Vendors/System tabs were organizer-shaped and actively
+// wrong when reused here: a vendor got a "Vendors" tab that is structurally
+// always 0 for them, and "Quote accepted" filed under "Registrations". Add
+// category tabs back when there are enough distinct types to sort, and make them
+// role-aware when the two roles stop receiving the same set.
 const TABS: { key: TabKey; label: string; filter: (n: NotificationData) => boolean }[] = [
     { key: "all", label: "All", filter: () => true },
-    {
-        key: "unread",
-        label: "Unread",
-        filter: (n) => n.status !== "read",
-    },
-    {
-        key: "registrations",
-        label: "Registrations",
-        filter: (n) =>
-            n.type === "registration_confirmation" ||
-            n.type === "booking_confirmation" ||
-            n.title.toLowerCase().includes("registration"),
-    },
-    {
-        key: "vendors",
-        label: "Vendors",
-        filter: (n) =>
-            n.type === "vendor_quote" || n.title.toLowerCase().includes("vendor"),
-    },
-    {
-        key: "system",
-        label: "System",
-        filter: (n) =>
-            n.type === "event_reminder" ||
-            n.type === "certificate_ready" ||
-            n.priority === "high",
-    },
+    { key: "unread", label: "Unread", filter: (n) => n.status !== "read" },
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -130,12 +112,12 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                     </div>
                     {unreadCount > 0 && (
                         <form action={markAllNotificationsRead}>
-                            <button
-                                type="submit"
-                                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] bg-white hover:bg-[#f0f0f0] transition-colors"
+                            <SubmitButton
+                                pendingText="Marking…"
+                                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] bg-white hover:bg-[#f0f0f0] transition-colors disabled:opacity-60"
                             >
                                 Mark all read
-                            </button>
+                            </SubmitButton>
                         </form>
                     )}
                 </div>
@@ -231,12 +213,12 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                                             name="notificationId"
                                                             value={notification.notificationId}
                                                         />
-                                                        <button
-                                                            type="submit"
-                                                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
+                                                        <SubmitButton
+                                                            pendingText="Marking…"
+                                                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors disabled:opacity-60"
                                                         >
                                                             Mark read
-                                                        </button>
+                                                        </SubmitButton>
                                                     </form>
                                                 )}
                                             </div>
