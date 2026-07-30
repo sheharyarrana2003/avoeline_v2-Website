@@ -9,6 +9,7 @@ import { EventService } from "@/src/services/event.service";
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
+import { NotificationServices } from "@/src/services/notification.services";
 import { formatDate, formatTime } from "@/src/lib/datetime";
 
 // Normalize a stored timestamp (Firebase Timestamp | ISO string | Date) to a
@@ -437,6 +438,19 @@ export const BookingServices = {
     };
 
     await adminDb.collection(COLLECTIONS.BOOKINGS).doc(id_generated).set({ ...booking_object });
+
+    // Tell the vendor work has arrived — without this they only discover a request
+    // by happening to open their quotes list. Addressed to vendorId, the id vendor
+    // routes and vendor notifications are both keyed by. createNotification never
+    // throws and no-ops on an empty userId, so a bare RFQ with no vendor attached
+    // cannot break the booking write above.
+    await NotificationServices.createNotification({
+      userId: vendorId,
+      type: "vendor_quote",
+      title: "New quote request",
+      message: `An organizer requested a quote for ${serviceType || "a service"} (budget Rs ${baseBudget.toLocaleString()}).`,
+      deepLink: `/vendor/${vendorId}/quotes/${id_generated}`,
+    });
   },
 
   async update_booking(updated_booking: BookingData | null) {
