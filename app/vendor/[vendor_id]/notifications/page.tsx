@@ -2,14 +2,14 @@ import { redirect } from "next/navigation";
 import { NotificationsView } from "@/src/features/notifications/NotificationsView";
 import { resolveNotificationRecipient } from "@/src/features/notifications/recipient";
 
-export default async function OrganizerNotificationsPage({
+export default async function VendorNotificationsPage({
     params,
     searchParams,
 }: {
-    params: Promise<{ organizer_id: string }>;
+    params: Promise<{ vendor_id: string }>;
     searchParams: Promise<{ tab?: string }>;
 }) {
-    const { organizer_id } = await params;
+    const { vendor_id } = await params;
     const { tab } = await searchParams;
 
     const me = await resolveNotificationRecipient();
@@ -21,7 +21,7 @@ export default async function OrganizerNotificationsPage({
     // session, so the URL cannot be edited to read someone else's notifications.
     // Send anyone who lands on a foreign id to their own page rather than quietly
     // showing their notifications under somebody else's URL.
-    if (organizer_id !== me.ownerId) {
+    if (vendor_id !== me.ownerId) {
         redirect(`${me.basePath}/notifications`);
     }
 

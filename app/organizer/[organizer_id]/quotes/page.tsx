@@ -2,6 +2,8 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData, Quote, VendorQuote } from "@/src/features/bookings/types";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
+import { NotificationServices } from "@/src/services/notification.services";
+import { revalidatePath } from "next/cache";
 import { EventModel } from "@/src/services/models/event.model";
 import Link from "next/link";
 import { AcceptButton } from "./Acceptbutton";
@@ -92,7 +94,32 @@ const accept_quote = async (booking: BookingData) => {
     booking?.statusHistory.push(new_status_history);
     booking.status = 'quote_accepted'
     await BookingServices.update_booking(booking);
-    console.log("This booking is accepteddd");
+
+    // Recipient read back from Firestore, not taken from the `booking` argument:
+    // that argument arrives from a Client Component (see Acceptbutton.tsx), so its
+    // vendorId is caller-controlled and would let anyone address an arbitrary
+    // vendor's inbox.
+    // ponytail: this action still has no ownership check at all — a pre-existing
+    // gap, tracked separately. Whoever adds one should authorize on the re-read
+    // doc and drop the client-supplied booking entirely.
+    const fresh = await BookingServices.getBookingById(booking.bookingId);
+    if (fresh) {
+        await NotificationServices.createNotification({
+            userId: fresh.vendorId,
+            type: "booking_confirmation",
+            title: "Quote accepted",
+            message: "The organizer accepted your quote.",
+            deepLink: `/vendor/${fresh.vendorId}/quotes/${fresh.bookingId}`,
+        });
+    }
+
+    // Without these the write lands but nothing on screen changes, so accepting a
+    // quote looks like it did nothing. Refresh the organizer's own list, and the
+    // vendor's views under "layout" scope so their header unread badge picks up
+    // the notification just written above.
+    const target = fresh ?? booking;
+    revalidatePath(`/organizer/${target.organizerId}/quotes`);
+    revalidatePath(`/vendor/${target.vendorId}`, "layout");
 }
 
 

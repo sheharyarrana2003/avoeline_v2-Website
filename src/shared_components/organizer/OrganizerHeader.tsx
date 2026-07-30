@@ -3,9 +3,10 @@
 import { CurrentUserData } from "@/src/services/models/user.type";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "@/src/shared_components/NotificationBell";
 
 
-export function OrganizerHeader({ user, logoUrl }: { user: CurrentUserData; logoUrl?: string }) {
+export function OrganizerHeader({ user, logoUrl, unreadCount = 0 }: { user: CurrentUserData; logoUrl?: string; unreadCount?: number }) {
     const current_tab = usePathname();
     const basePath = `/organizer/${user.userId}`;
 
@@ -52,14 +53,6 @@ export function OrganizerHeader({ user, logoUrl }: { user: CurrentUserData; logo
                     </li>
                     <li>
                         <Link 
-                            href={`${basePath}/notifications`} 
-                            className={current_tab === `${basePath}/notifications` ? "font-bold text-black" : "text-gray-500 hover:text-black"}
-                        >
-                            Notifications
-                        </Link>
-                    </li>
-                    <li>
-                        <Link 
                             href={`${basePath}/quotes`} 
                             className={current_tab === `${basePath}/quotes` ? "font-bold text-black" : "text-gray-500 hover:text-black"}
                         >
@@ -71,6 +64,7 @@ export function OrganizerHeader({ user, logoUrl }: { user: CurrentUserData; logo
             
             {/* 3. The User Profile area */}
             <div className="flex items-center space-x-4">
+                <NotificationBell href={`${basePath}/notifications`} unreadCount={unreadCount} />
                 {/* Kept the profile route as an example, adjust if you have a specific settings route */}
                 <Link href={`${basePath}/profile`} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden font-semibold text-gray-700">
                     {logoUrl ? (
