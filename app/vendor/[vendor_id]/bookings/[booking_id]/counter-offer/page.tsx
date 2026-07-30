@@ -1,4 +1,5 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { NotificationServices } from "@/src/services/notification.services";
 import { BookingData } from "@/src/features/bookings/types";
 import { NegotiationMessage } from "@/src/features/bookings/types";
 import { notFound, redirect } from "next/navigation";
@@ -45,6 +46,17 @@ export default async function CounterOfferFormOrganizer({ params }: { params: Pr
             booking.payment.totalAmount = targetBudget
         }
         await BookingServices.update_booking(booking);
+
+        // `booking` was read server-side above, so its organizerId is trustworthy.
+        if (booking) {
+            await NotificationServices.createNotification({
+                userId: booking.organizerId,
+                type: "vendor_quote",
+                title: "Counter-offer received",
+                message: `A vendor countered with Rs ${targetBudget.toLocaleString()}.`,
+                deepLink: `/organizer/${booking.organizerId}/quotes?quote=${booking.bookingId}`,
+            });
+        }
     }
 
 

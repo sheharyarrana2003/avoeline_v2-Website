@@ -4,6 +4,7 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { NotificationServices } from "@/src/services/notification.services";
 import { formatDate } from "@/src/lib/datetime";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -311,6 +312,17 @@ export default async function PrepareQuotePage({
         }
 
         await BookingServices.update_booking(updatedBooking);
+
+        // Awaited, and before the redirect below: an un-awaited promise would be
+        // killed when the response is sent. createNotification never throws, so
+        // this cannot fail the write above.
+        await NotificationServices.createNotification({
+            userId: freshBooking.organizerId,
+            type: "vendor_quote",
+            title: "New quote received",
+            message: `A vendor sent a quote of Rs ${totalAmount.toLocaleString()}.`,
+            deepLink: `/organizer/${freshBooking.organizerId}/quotes?quote=${bookingId}`,
+        });
 
         // Send the vendor back to their quotes list instead of leaving them on a
         // form they've already submitted, and refresh the views whose status changed.
