@@ -38,7 +38,9 @@ export async function markNotificationRead(formData: FormData): Promise<void> {
 
         await ref.update({ status: "read", readAt: new Date() });
 
-        // "layout" scope so the header's unread badge refreshes alongside the page.
+        // "layout" scope on the role root so the header's unread badge refreshes
+        // along with the page below it. Note the round trip is slow (~6s observed
+        // in dev): the list and badge do update on their own, just not instantly.
         revalidatePath(me.basePath, "layout");
     } catch (err) {
         console.error("[markNotificationRead]", err);
