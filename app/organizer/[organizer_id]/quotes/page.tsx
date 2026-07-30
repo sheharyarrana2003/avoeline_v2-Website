@@ -3,6 +3,7 @@ import { BookingData, Quote, VendorQuote } from "@/src/features/bookings/types";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { NotificationServices } from "@/src/services/notification.services";
+import { revalidatePath } from "next/cache";
 import { EventModel } from "@/src/services/models/event.model";
 import Link from "next/link";
 import { AcceptButton } from "./Acceptbutton";
@@ -111,6 +112,14 @@ const accept_quote = async (booking: BookingData) => {
             deepLink: `/vendor/${fresh.vendorId}/quotes/${fresh.bookingId}`,
         });
     }
+
+    // Without these the write lands but nothing on screen changes, so accepting a
+    // quote looks like it did nothing. Refresh the organizer's own list, and the
+    // vendor's views under "layout" scope so their header unread badge picks up
+    // the notification just written above.
+    const target = fresh ?? booking;
+    revalidatePath(`/organizer/${target.organizerId}/quotes`);
+    revalidatePath(`/vendor/${target.vendorId}`, "layout");
 }
 
 

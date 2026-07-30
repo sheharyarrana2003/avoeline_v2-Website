@@ -22,7 +22,10 @@ export default async function CounterOfferFormOrganizer({ params }: { params: Pr
 
     async function onSubmitCounter(targetBudget: number, message: string) {
         'use server'
-        const message_String = `This is target Budget from organizer ${targetBudget}. ${message}`;
+        // "from vendor": this is the vendor's own counter-offer. The organizer twin
+        // of this page says "from organizer"; this side was a copy-paste that left
+        // the wrong role in the text the other party reads.
+        const message_String = `This is target Budget from vendor ${targetBudget}. ${message}`;
 
         const new_neg_message: NegotiationMessage = {
             from: 'vendor',
