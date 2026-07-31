@@ -19,15 +19,6 @@ interface CertificateIssuanceClientProps {
     onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<void>;
 }
 
-// --- Helper Functions ---
-const getInitials = (name: string): string => {
-    return name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-};
 
 const getStatusColor = (status: string): string => {
     const colors: Record<string, string> = {
@@ -202,21 +193,7 @@ export default function CertificateIssuanceClient({
                         </div>
                     </div>
 
-                    <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs font-bold text-gray-700">Issuance Progress</p>
-                            <p className="text-xs font-bold text-gray-900">{issuanceProgress}%</p>
-                        </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-black rounded-full transition-all duration-500"
-                                style={{ width: `${issuanceProgress}%` }}
-                            />
-                        </div>
-                        <p className="text-xs text-gray-400 mt-2">
-                            {issuedAttendees.length} of {totalAttendees} certificates have been distributed
-                        </p>
-                    </div>
+                   
                 </div>
 
                 {/* Search */}
@@ -277,9 +254,7 @@ export default function CertificateIssuanceClient({
                                         <tr key={attendee.a.attendeeId} className="border-b border-gray-50 hover:bg-gray-50 transition">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
-                                                        <span className="text-xs font-bold text-gray-600">{getInitials(name)}</span>
-                                                    </div>
+                                                  
                                                     <div>
                                                         <p className="text-sm font-semibold text-gray-900">
                                                             {cert?.content?.recipientName || name}
@@ -409,7 +384,6 @@ export default function CertificateIssuanceClient({
                     <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider items-center">
                         <div className="col-span-4">Attendee</div>
                         <div className="col-span-2">Attendance</div>
-                        <div className="col-span-2">Survey</div>
                         <div className="col-span-2">Status</div>
                         <div className="col-span-2 text-right">Action</div>
                     </div>
@@ -438,9 +412,7 @@ export default function CertificateIssuanceClient({
                                         onChange={() => toggleAttendee(attendee.a.attendeeId)}
                                         className="rounded"
                                     />
-                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                        <span className="text-sm font-bold text-gray-600">{getInitials(name)}</span>
-                                    </div>
+                                 
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{name}</p>
                                         <p className="text-xs text-gray-400">{email}</p>
