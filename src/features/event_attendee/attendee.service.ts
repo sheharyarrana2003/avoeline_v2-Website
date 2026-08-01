@@ -82,7 +82,7 @@ export const AttendeeService = {
             return null;
         }
         const user_ids_of_attendees: string[] = [
-            ...new Set(querySnapshot.docs.map(doc => doc.data().userId).filter(Boolean))
+            ...querySnapshot.docs.map(doc => doc.data().userId).filter(Boolean)
         ];
 
         // Batch the attendee lookups into Firestore's 30-per-"in" chunks, fetched
