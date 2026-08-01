@@ -1,9 +1,9 @@
 import { AttendeeService } from "@/src/features/event_attendee/attendee.service";
 import { UserService } from "@/src/services/user.service";
 import { CertificateService } from "@/src/services/certificate.service";
+import type { CertificateGenerationResult } from "@/src/services/models/certificate.model";
 import CertificateIssuanceClient from "./certificateClient";
 import { AttendeeCertProp } from "./certificateClient";
-import { adminAuth } from "@/data/admin_db";
 
 export default async function CertificateIssuancePage({
     params
@@ -32,9 +32,13 @@ export default async function CertificateIssuancePage({
         }));
     }
 
-    async function handleGenerateCertificates(selectedAttendeeIds: string[]) {
+    async function handleGenerateCertificates(selectedAttendeeIds: string[]): Promise<CertificateGenerationResult> {
         "use server";
-        await CertificateService.generateCertificatesForEvent(eventId, organizer_id,)
+        const selectedUserIds = attendeesWithData
+            .filter((item) => selectedAttendeeIds.includes(item.a.attendeeId))
+            .map((item) => String(item.a.userId));
+
+        return CertificateService.generateCertificatesForEvent(eventId, organizer_id, selectedUserIds);
     }
 
    

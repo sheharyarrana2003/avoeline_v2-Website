@@ -82,3 +82,19 @@ export interface CertificateDocument {
   expiresAt?: Date | string | null;
   updatedAt: Date | string;
 }
+
+export type CertificateGenerationAttendeeResult = {
+  userId: string;
+  registrationId: string;
+  recipientName: string;
+  success: boolean;
+  error?: string;
+};
+
+export type CertificateGenerationResult = {
+  success: boolean;
+  count: number;
+  failedCount: number;
+  message: string;
+  results: CertificateGenerationAttendeeResult[];
+};

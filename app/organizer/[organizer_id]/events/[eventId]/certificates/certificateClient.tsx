@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { Attendee } from '@/src/features/event_attendee/type';
 import { User } from '@/src/services/models/user.type';
 import { CertificateDocument, CertificateStatus } from '@/src/services/models/certificate.model';
+import type {
+    CertificateGenerationAttendeeResult,
+    CertificateGenerationResult,
+} from '@/src/services/models/certificate.model';
 
 export interface AttendeeCertProp {
     a: Attendee;
@@ -16,7 +20,7 @@ export interface AttendeeCertProp {
 interface CertificateIssuanceClientProps {
     attendees: AttendeeCertProp[];
     eventId: string;
-    onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<void>;
+    onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<CertificateGenerationResult>;
 }
 
 
@@ -27,6 +31,9 @@ const getStatusColor = (status: string): string => {
         issued: 'bg-green-100 text-green-700 border-green-200',
         revoked: 'bg-red-100 text-red-700 border-red-200',
         pending: 'bg-gray-100 text-gray-600 border-gray-200',
+        success: 'bg-green-100 text-green-700 border-green-200',
+        failed: 'bg-red-100 text-red-700 border-red-200',
+        warning: 'bg-amber-100 text-amber-700 border-amber-200',
     };
     return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
 };
@@ -67,6 +74,10 @@ export default function CertificateIssuanceClient({
     const [pendingPage, setPendingPage] = useState<number>(1);
     const [issuedPage, setIssuedPage] = useState<number>(1);
     const [isGenerating, startGenerating] = useTransition();
+    const [generationResultsByUserId, setGenerationResultsByUserId] = useState<
+        Record<string, CertificateGenerationAttendeeResult>
+    >({});
+    const [generationSummary, setGenerationSummary] = useState<string | null>(null);
 
     const pathName = usePathname();
 
@@ -143,10 +154,47 @@ export default function CertificateIssuanceClient({
         setSelectAll(newSet.size === filteredPendingAttendees.length && newSet.size > 0);
     };
 
+    const resolvePendingDisplayStatus = (
+        userId: string,
+        certStatus?: CertificateDocument | null,
+    ): { label: string; colorKey: string; detail?: string } => {
+        const genResult = generationResultsByUserId[userId];
+        if (genResult) {
+            if (!genResult.success) {
+                return { label: 'failed', colorKey: 'failed', detail: genResult.error };
+            }
+            if (genResult.error) {
+                return { label: 'ready', colorKey: 'warning', detail: genResult.error };
+            }
+            return { label: 'success', colorKey: 'success' };
+        }
+        return {
+            label: certStatus?.status || 'pending',
+            colorKey: certStatus?.status || 'pending',
+        };
+    };
+
     const handleGenerateClick = () => {
         if (isGenerating) return; // guard against duplicate submissions
         startGenerating(async () => {
-            await onGenerateCertificates(Array.from(selectedAttendees));
+            setGenerationSummary(null);
+            try {
+                const result = await onGenerateCertificates(Array.from(selectedAttendees));
+                setGenerationResultsByUserId((prev) => {
+                    const nextByUser = { ...prev };
+                    for (const item of result.results) {
+                        nextByUser[item.userId] = item;
+                    }
+                    return nextByUser;
+                });
+                setGenerationSummary(result.message);
+                if (result.count > 0) {
+                    setSelectedAttendees(new Set());
+                    setSelectAll(false);
+                }
+            } catch (error: any) {
+                setGenerationSummary(error?.message || 'Certificate generation failed.');
+            }
         });
     };
 
@@ -193,7 +241,11 @@ export default function CertificateIssuanceClient({
                         </div>
                     </div>
 
-                   
+                    {generationSummary && (
+                        <p className="text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                            {generationSummary}
+                        </p>
+                    )}
                 </div>
 
                 {/* Search */}
@@ -398,7 +450,10 @@ export default function CertificateIssuanceClient({
                         const isSelected = selectedAttendees.has(attendee.a.attendeeId);
                         const name = attendee.user.profile.fullName;
                         const email = attendee.user.email;
-                        const currentCertStatus = attendee.certStatus?.status || 'pending';
+                        const displayStatus = resolvePendingDisplayStatus(
+                            String(attendee.a.userId),
+                            attendee.certStatus,
+                        );
 
                         return (
                             <div
@@ -434,11 +489,19 @@ export default function CertificateIssuanceClient({
                                
 
                                 <div className="col-span-2">
-                                    <span
-                                        className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(currentCertStatus)}`}
-                                    >
-                                        {currentCertStatus}
-                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <span
+                                            className={`inline-block w-fit text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(displayStatus.colorKey)}`}
+                                            title={displayStatus.detail}
+                                        >
+                                            {displayStatus.label}
+                                        </span>
+                                        {displayStatus.detail && (
+                                            <span className="text-[10px] text-red-500 line-clamp-2" title={displayStatus.detail}>
+                                                {displayStatus.detail}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="col-span-2 text-right">
