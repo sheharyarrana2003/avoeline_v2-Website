@@ -12,6 +12,7 @@ import { CertificateTemplate, CertificateTemplateService, initialTemplate } from
 
 import { PinataSDK } from "pinata";
 import { UserService } from "./user.service";
+import { QuerySnapshot } from "firebase-admin/firestore";
 
 export type { CertificateGenerationAttendeeResult, CertificateGenerationResult };
 
@@ -170,7 +171,7 @@ export const CertificateService = {
       const event = await EventService.getEventByID(event_id);
       console.log(`[CERT_GEN] Fetched Event Data:`, JSON.stringify(event, null, 2));
 
-      const registrationsSnapshot = await adminDb.collection(COLLECTIONS.REGISTRATIONS).where("eventId", "==", event_id).get();
+      const registrationsSnapshot : QuerySnapshot= await adminDb.collection(COLLECTIONS.REGISTRATIONS).where("eventId", "==", event_id).get();
       console.log(`[CERT_GEN] Registrations Query returned ${registrationsSnapshot.size} document(s).`);
 
       if (registrationsSnapshot.empty) {
