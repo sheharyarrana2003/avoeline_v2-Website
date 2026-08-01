@@ -83,12 +83,12 @@ export default function CertificateIssuanceClient({
 
     // Split attendees into issued vs. pending based on the certificate collection
     const issuedAttendees = useMemo(
-        () => attendees.filter((a) => a.certStatus?.status?.toUpperCase() === ('ISSUED' as Uppercase<CertificateStatus>)),
+        () => attendees.filter((a) => a.certStatus?.status?.toUpperCase() === ('READY' as Uppercase<CertificateStatus>)),
         [attendees],
     );
 
     const pendingAttendees = useMemo(
-        () => attendees.filter((a) => a.certStatus?.status?.toUpperCase() !== ('ISSUED' as Uppercase<CertificateStatus>)),
+        () => attendees.filter((a) => a.certStatus?.status?.toUpperCase() !== ('READY' as Uppercase<CertificateStatus>)),
         [attendees],
     );
 

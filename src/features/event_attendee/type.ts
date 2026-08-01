@@ -38,7 +38,7 @@ export interface AttendeeCertificate {
   certificateId: string;
   eventId: string;
   issuedAt: string;
-  type: "digital" | "blockchain";
+  type: "digital" | "blockchain"|string;
   verificationUrl: string;
 }
 
