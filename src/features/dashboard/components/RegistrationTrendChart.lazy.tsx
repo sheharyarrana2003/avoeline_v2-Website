@@ -11,7 +11,7 @@ const RegistrationTrendChart = dynamic(() => import("./RegistrationTrendChart"),
   loading: () => (
     <section className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
       <div
-        className="w-full animate-pulse rounded-lg bg-slate-100"
+        className="w-full animate-pulse rounded-lg bg-gray-100"
         style={{ height: 400 }}
         aria-label="Loading chart"
       />

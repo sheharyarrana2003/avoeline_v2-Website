@@ -51,7 +51,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
             </div>
              <Link
                 href={`${basePath}/vendor-marketplace`}
-                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
               >
 
                 Visit Vendor Marketplace
@@ -143,7 +143,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   {/* Button - Moved outside the search input container */}
   <Link
     href={`${basePath}/vendor-marketplace`}
-    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
   >
     Visit Vendor Marketplace
   </Link>

@@ -142,7 +142,7 @@ export function SingleAttendeeView({
             {/* Header Section */}
             <div className="mb-6 pr-8">
                 <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-[32px] leading-none font-black text-slate-900 tracking-tight">
+                    <h2 className="text-[32px] leading-none font-black text-gray-900 tracking-tight">
                         {fullName}
                     </h2>
                     {isCheckedIn && (
@@ -169,14 +169,14 @@ export function SingleAttendeeView({
                     <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
                         REGISTRATION STATUS
                     </p>
-                    <p className="text-xs text-stone-500">Change attendee registration state</p>
+                    <p className="text-xs text-gray-500">Change attendee registration state</p>
                 </div>
                 <div className="relative">
                     <select
                         value={registration.status || "pending"}
                         disabled={isUpdating}
                         onChange={(e) => handleStatusChange(e.target.value as Registration["status"])}
-                        className="appearance-none bg-stone-100 text-stone-900 font-extrabold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                        className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                     >
                         {STATUS_OPTIONS.map((status) => (
                             <option key={status} value={status}>
@@ -184,7 +184,7 @@ export function SingleAttendeeView({
                             </option>
                         ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                 </div>
             </div>
 
@@ -195,7 +195,7 @@ export function SingleAttendeeView({
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
                             ORGANIZATION
                         </p>
-                        <p className="font-extrabold text-slate-900 text-[13px] leading-tight pr-4">
+                        <p className="font-extrabold text-gray-900 text-[13px] leading-tight pr-4">
                             {organization}
                         </p>
                     </div>
@@ -203,7 +203,7 @@ export function SingleAttendeeView({
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
                             FINAL PRICE
                         </p>
-                        <p className="font-black text-slate-900 text-[14px]">
+                        <p className="font-black text-gray-900 text-[14px]">
                             {formatCurrency(finalPrice, currency)}
                         </p>
                     </div>
@@ -213,7 +213,7 @@ export function SingleAttendeeView({
                         {ticketType}
                     </span>
                     {registration?.registrationSource && (
-                        <span className="bg-stone-200 text-stone-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        <span className="bg-gray-200 text-gray-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
                             Source: {registration.registrationSource.replace("_", " ")}
                         </span>
                     )}
@@ -227,7 +227,7 @@ export function SingleAttendeeView({
                         <CheckCircle2 size={20} className="text-black" />
                     </div>
                     <div>
-                        <p className="font-extrabold text-slate-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
+                        <p className="font-extrabold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
                         <p className="text-xs text-gray-400 font-medium capitalize">Method: {checkInMethod}</p>
                     </div>
                 </div>
@@ -244,15 +244,15 @@ export function SingleAttendeeView({
                     <div className="grid grid-cols-2 gap-3 text-xs">
                         <div>
                             <span className="text-gray-400 font-medium block">Department</span>
-                            <span className="font-bold text-slate-800">{department}</span>
+                            <span className="font-bold text-gray-800">{department}</span>
                         </div>
                         <div>
                             <span className="text-gray-400 font-medium block">Graduation Year</span>
-                            <span className="font-bold text-slate-800">{gradYear}</span>
+                            <span className="font-bold text-gray-800">{gradYear}</span>
                         </div>
                         <div className="col-span-2">
                             <span className="text-gray-400 font-medium block">Location</span>
-                            <span className="font-bold text-slate-800">{locationInfo}</span>
+                            <span className="font-bold text-gray-800">{locationInfo}</span>
                         </div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ export function SingleAttendeeView({
                     <div className="grid grid-cols-2 gap-3 text-xs mb-1">
                         <div>
                             <span className="text-gray-400 font-medium block">Payment Method</span>
-                            <span className="font-bold text-slate-800 uppercase">
+                            <span className="font-bold text-gray-800 uppercase">
                                 {registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
                             </span>
                         </div>
@@ -277,7 +277,7 @@ export function SingleAttendeeView({
                                     value={registration?.payment?.paymentStatus || "pending"}
                                     disabled={isUpdating}
                                     onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
-                                    className="appearance-none bg-stone-100 text-slate-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                                    className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                                 >
                                     {PAYMENT_STATUS_OPTIONS.map((status) => (
                                         <option key={status} value={status}>
@@ -285,7 +285,7 @@ export function SingleAttendeeView({
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -293,7 +293,7 @@ export function SingleAttendeeView({
                     {/* Pricing summary block - grouped together */}
                     <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs">
                         {discount && (
-                            <div className="flex justify-between items-center text-slate-500">
+                            <div className="flex justify-between items-center text-gray-500">
                                 <span>Original Price</span>
                                 <span className="line-through">{formatCurrency(discount.originalPrice, currency)}</span>
                             </div>
@@ -308,12 +308,12 @@ export function SingleAttendeeView({
                             </div>
                         )}
 
-                        <div className="flex justify-between items-center font-bold text-slate-800 pt-1">
+                        <div className="flex justify-between items-center font-bold text-gray-800 pt-1">
                             <span>Final Price</span>
                             <span>{formatCurrency(finalPrice, currency)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center font-black text-slate-900">
+                        <div className="flex justify-between items-center font-black text-gray-900">
                             <span>Amount Paid</span>
                             <span>{formatCurrency(amountPaid, currency)}</span>
                         </div>
@@ -336,16 +336,16 @@ export function SingleAttendeeView({
                         <div className="grid grid-cols-2 gap-3 text-xs">
                             <div>
                                 <span className="text-gray-400 font-medium block">Status</span>
-                                <span className="font-bold text-slate-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
+                                <span className="font-bold text-gray-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
                             </div>
                             <div>
                                 <span className="text-gray-400 font-medium block">Type</span>
-                                <span className="font-bold text-slate-800 capitalize">{registration.certificate.type || "N/A"}</span>
+                                <span className="font-bold text-gray-800 capitalize">{registration.certificate.type || "N/A"}</span>
                             </div>
                             {registration.certificate.issueDate && (
                                 <div>
                                     <span className="text-gray-400 font-medium block">Issue Date</span>
-                                    <span className="font-bold text-slate-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
+                                    <span className="font-bold text-gray-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
                                 </div>
                             )}
                            
@@ -361,12 +361,12 @@ export function SingleAttendeeView({
                     {registration?.communications && registration.communications.length > 0 ? (
                         <div className="space-y-2">
                             {registration.communications.map((comm, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-xs p-2 bg-stone-50 rounded-xl">
+                                <div key={idx} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-xl">
                                     <div>
-                                        <p className="font-bold text-slate-800 capitalize">{comm.type.replace("_", " ")}</p>
+                                        <p className="font-bold text-gray-800 capitalize">{comm.type.replace("_", " ")}</p>
                                         <p className="text-[10px] text-gray-400 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
                                     </div>
-                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-stone-200">
+                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-gray-200">
                                         {comm.status}
                                     </span>
                                 </div>
@@ -385,7 +385,7 @@ export function SingleAttendeeView({
                         </h3>
                         <div className="flex items-center gap-2 text-xs">
                             <span className="text-gray-400 font-medium">Rating:</span>
-                            <span className="font-bold text-slate-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
+                            <span className="font-bold text-gray-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
                         </div>
                     </div>
                 )}

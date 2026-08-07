@@ -76,19 +76,19 @@ export default async function AnalyticsPage({
     };
 
     return (
-        <main className="min-h-screen bg-white px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg-white px-4 py-8 text-gray-950 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl space-y-6">
 
                 <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
+                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">
                             Analytics Overview
                         </h1>
-                        <p className="mt-1 text-sm font-semibold text-slate-500">
+                        <p className="mt-1 text-sm font-semibold text-gray-500">
                             Data insights and performance metrics
                         </p>
                     </div>
-                    <p className="text-sm font-bold text-slate-500">{dateRange}</p>
+                    <p className="text-sm font-bold text-gray-500">{dateRange}</p>
                 </header>
 
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -97,21 +97,21 @@ export default async function AnalyticsPage({
                         return (
                             <article
                                 key={metric.label}
-                                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.04)]"
+                                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.04)]"
                             >
                                 <div className="mb-4 flex items-center justify-between">
-                                    <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
                                         {metric.label}
                                     </p>
-                                    <span className="flex size-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
                                         <Icon size={18} />
                                     </span>
                                 </div>
-                                <p className="text-3xl font-extrabold text-slate-950">
+                                <p className="text-3xl font-extrabold text-gray-950">
                                     {metric.value}
                                 </p>
                                 {metric.helper && (
-                                    <p className="mt-3 text-xs font-bold text-slate-400">
+                                    <p className="mt-3 text-xs font-bold text-gray-400">
                                         {metric.helper}
                                     </p>
                                 )}
@@ -121,13 +121,13 @@ export default async function AnalyticsPage({
                 </section>
 
                 {/* ── Daily Registrations Chart ─────────────────────────────── */}
-                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-base font-extrabold text-slate-950">
+                            <h2 className="text-base font-extrabold text-gray-950">
                                 Daily Registrations
                             </h2>
-                            <p className="mt-1 text-xs font-semibold text-slate-400">
+                            <p className="mt-1 text-xs font-semibold text-gray-400">
                                 Registration volume over the last 30 days
                             </p>
                         </div>
@@ -138,7 +138,7 @@ export default async function AnalyticsPage({
                     </div>
 
                     {dailyRegistrations.length === 0 ? (
-                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-slate-400">
+                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-gray-400">
                             No registration data available yet.
                         </div>
                     ) : (
@@ -180,7 +180,7 @@ export default async function AnalyticsPage({
                                             x={x}
                                             y="268"
                                             textAnchor="middle"
-                                            className="fill-slate-400 text-[13px] font-bold"
+                                            className="fill-gray-400 text-[13px] font-bold"
                                         >
                                             {item.label}
                                         </text>
@@ -192,38 +192,38 @@ export default async function AnalyticsPage({
                 </section>
 
                 {/* ── Event Performance Table ───────────────────────────────── */}
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center justify-between border-b border-slate-100 p-6">
+                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between border-b border-gray-100 p-6">
                         <div className="flex items-center gap-3">
-                            <span className="flex size-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
                                 <Activity size={18} />
                             </span>
-                            <h2 className="text-base font-extrabold text-slate-950">
+                            <h2 className="text-base font-extrabold text-gray-950">
                                 Event Performance
                             </h2>
                         </div>
                     </div>
 
                     {eventPerformance.length === 0 ? (
-                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-slate-400">
+                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-gray-400">
                             No events found for this organizer.
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[860px] border-collapse">
-                                <thead className="bg-slate-50">
+                                <thead className="bg-gray-50">
                                     <tr className="text-left">
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
                                             Event Name
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
                                             Date
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
                                             Registrations
                                         </th>
                                       
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
                                             Revenue
                                         </th>
                                        
@@ -233,23 +233,23 @@ export default async function AnalyticsPage({
                                     {eventPerformance.map((event) => (
                                         <tr
                                             key={event.id}
-                                            className="border-t border-slate-100"
+                                            className="border-t border-gray-100"
                                         >
                                             <td className="px-6 py-5">
-                                                <p className="text-sm font-extrabold text-slate-950">
+                                                <p className="text-sm font-extrabold text-gray-950">
                                                     {event.eventName}
                                                 </p>
-                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
                                                     {event.eventType}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-bold text-slate-500">
+                                            <td className="px-6 py-5 text-sm font-bold text-gray-500">
                                                 {event.date}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
+                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
                                                 {event.registrations.toLocaleString("en-US")}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-slate-950">
+                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
                                                 {formatCurrency(event.revenue)}
                                             </td>
                                            

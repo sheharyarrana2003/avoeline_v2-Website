@@ -14,13 +14,13 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
 
    const renderIcon = (categories: string[]) => {
         if (categories.includes('catering') || categories.includes('food')) {
-            return <Utensils size={24} className="text-slate-700" />;
+            return <Utensils size={24} className="text-gray-700" />;
         } else if (categories.includes('av') || categories.includes('sound')) {
-            return <Volume2 size={24} className="text-slate-700" />;
+            return <Volume2 size={24} className="text-gray-700" />;
         } else if (categories.includes('photography') || categories.includes('video')) {
-            return <Aperture size={24} className="text-slate-700" />;
+            return <Aperture size={24} className="text-gray-700" />;
         }
-        return <LayoutDashboard size={24} className="text-slate-700" />;
+        return <LayoutDashboard size={24} className="text-gray-700" />;
     };
 
     const renderBadge = (status: string, verified: boolean) => {
@@ -46,7 +46,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 
                 <div className="flex justify-between items-start mb-16">
                     <div>
-                        <h1 className="text-[40px] font-extrabold text-slate-900 tracking-tight leading-none mb-4">
+                        <h1 className="text-[40px] font-extrabold text-gray-900 tracking-tight leading-none mb-4">
                             Event Vendors
                         </h1>
                         <div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                         </div>
                     </div>
                     
-                    <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className="bg-black hover:bg-slate-800 text-white px-5 py-3 rounded-xl font-bold text-[13px] transition-colors shadow-sm">
+                    <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className="bg-black hover:bg-gray-800 text-white px-5 py-3 rounded-xl font-bold text-[13px] transition-colors shadow-sm">
                         Find Vendors
                     </Link>
                 </div>
@@ -85,13 +85,13 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
 
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-[18px] font-extrabold text-slate-900">
+                                            <h3 className="text-[18px] font-extrabold text-gray-900">
                                                 {vendor.businessName}
                                             </h3>
                                         </div>
                                         
                                         <div className="flex items-center gap-4 mb-4 text-[13px] text-gray-500 font-medium">
-                                            <span className="flex items-center gap-1 text-slate-700">
+                                            <span className="flex items-center gap-1 text-gray-700">
                                                 <Star size={14} className="text-amber-400 fill-amber-400" /> 
                                                 {vendor.ratings.averageRating.toFixed(1)} 
                                                 <span className="text-gray-400 text-xs">({vendor.ratings.totalReviews})</span>
@@ -103,10 +103,10 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         </div>
 
                                         <div className="flex gap-2">
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-gray-100 text-slate-700 hover:bg-gray-200">
+                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
                                                 View Profile
                                             </Link>
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-slate-800">
+                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-gray-800">
                                                 Request Quote
                                             </Link>
                                         </div>
@@ -121,7 +121,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         <p className="text-[11px] font-bold text-gray-400 mb-0.5">
                                             {startingPrice ? 'Starting Price' : 'Estimated'}
                                         </p>
-                                        <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-slate-900' : 'text-gray-400'}`}>
+                                        <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-400'}`}>
                                             {startingPrice ? `PKR ${startingPrice.toLocaleString()}` : 'TBD'}
                                         </p>
                                     </div>

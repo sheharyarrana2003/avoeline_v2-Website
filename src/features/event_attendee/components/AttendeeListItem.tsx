@@ -65,7 +65,7 @@ function AttendeeListItemBase(
                     </span>
                 </span>
                 <span className="block">
-                    <span className="block text-[15px] font-bold text-slate-900 leading-tight">
+                    <span className="block text-[15px] font-bold text-gray-900 leading-tight">
                         {attendee_user.profile.fullName}
                     </span>
                     <span className="block text-[13px] text-gray-500 font-medium">
@@ -76,7 +76,7 @@ function AttendeeListItemBase(
 
             {/* Ticket Badge */}
             <div>
-                <span className="bg-white border border-gray-200 text-slate-800 text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
+                <span className="bg-white border border-gray-200 text-gray-800 text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
                     {ticketType}
                 </span>
             </div>
@@ -91,7 +91,7 @@ function AttendeeListItemBase(
             {/* Check-in Time */}
             <div>
                 {isCheckedIn ? (
-                    <p className="text-[13px] font-bold text-slate-900">
+                    <p className="text-[13px] font-bold text-gray-900">
                         {checkInTime ? formatDateTime(checkInTime) : "Checked in"}
                     </p>
                 ) : (

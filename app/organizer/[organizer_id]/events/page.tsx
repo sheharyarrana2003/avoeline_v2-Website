@@ -42,24 +42,24 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     ];
 
     return (
-        <main className="min-h-screen bg-white px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+        <main className="min-h-screen bg-white px-4 py-8 text-gray-950 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
-                <header className="flex flex-col gap-5 border-b border-slate-200 pb-8 md:flex-row md:items-center md:justify-between">
+                <header className="flex flex-col gap-5 border-b border-gray-200 pb-8 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">My Events</h1>
-                        <p className="mt-2 text-sm font-bold text-slate-400">{organizerEvents.length} total events</p>
+                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">My Events</h1>
+                        <p className="mt-2 text-sm font-bold text-gray-400">{organizerEvents.length} total events</p>
                     </div>
 
                     <Link
                         href={`${base_address}/events/create`}
-                        className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+                        className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
                     >
                         <Plus size={18} />
                         Create New Event
                     </Link>
                 </header>
 
-                <nav className="flex gap-7 overflow-x-auto border-b border-slate-200 pt-5" aria-label="Event status filters">
+                <nav className="flex gap-7 overflow-x-auto border-b border-gray-200 pt-5" aria-label="Event status filters">
                     {tabs.map((tab) => {
                         const isActive = currentTab === tab.value;
 
@@ -68,8 +68,8 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                 key={tab.value}
                                 href={tab.href}
                                 className={`shrink-0 border-b-2 pb-4 text-sm font-extrabold transition ${isActive
-                                        ? "border-black text-slate-950"
-                                        : "border-transparent text-slate-400 hover:text-slate-700"
+                                        ? "border-black text-gray-950"
+                                        : "border-transparent text-gray-400 hover:text-gray-700"
                                     }`}
                             >
                                 {tab.label} ({tab.count})
@@ -80,7 +80,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                 <section className="pt-8">
                     <div className="mb-5 flex items-center justify-between">
-                        <h2 className="text-2xl font-extrabold text-slate-900">
+                        <h2 className="text-2xl font-extrabold text-gray-900">
                             {currentTab === "all" ? "All Events" : `${toTitleCase(currentTab)} Events`}
                         </h2>
                         
@@ -91,47 +91,47 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                             <li
                                 key={event.id}
-                                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-slate-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
+                                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-gray-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
                             >
                                 <article className="flex items-center gap-5">
-                                    <div className="flex size-[76px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-950 to-slate-500 text-sm font-extrabold uppercase tracking-widest text-white">
+                                    <div className="flex size-[76px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-950 to-gray-500 text-sm font-extrabold uppercase tracking-widest text-white">
                                         {event.category.slice(0, 2)}
                                     </div>
 
                                     <div className="min-w-0 flex-1">
                                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                                            <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-extrabold uppercase tracking-widest text-slate-700">
+                                            <span className="rounded-md bg-gray-100 px-2 py-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-700">
                                                 {event.category}
                                             </span>
                                             <StatusBadge status={event.status} />
                                         </div>
-                                        <h3 className="truncate text-lg font-extrabold text-slate-950">{event.title}</h3>
-                                        <p className="mt-1 line-clamp-1 text-sm font-semibold text-slate-400">{event.description}</p>
+                                        <h3 className="truncate text-lg font-extrabold text-gray-950">{event.title}</h3>
+                                        <p className="mt-1 line-clamp-1 text-sm font-semibold text-gray-400">{event.description}</p>
                                     </div>
 
-                                    <div className="shrink-0 space-y-2 text-sm font-bold text-slate-500">
+                                    <div className="shrink-0 space-y-2 text-sm font-bold text-gray-500">
                                         <p className="flex items-center gap-2">
-                                            <Calendar size={16} className="text-slate-400" />
+                                            <Calendar size={16} className="text-gray-400" />
                                             {formatDate(event.schedule.startDate)}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                            <Calendar size={16} className="text-slate-400" />
+                                            <Calendar size={16} className="text-gray-400" />
                                             {event.id}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                            <MapPin size={16} className="text-slate-400" />
+                                            <MapPin size={16} className="text-gray-400" />
                                             {event.location.venueName}
                                         </p>
                                     </div>
 
                                     <div className="shrink-0 w-[200px]">
                                         <div className="mb-2 flex items-center justify-between gap-4 text-sm font-extrabold">
-                                            <span className="text-slate-950">
+                                            <span className="text-gray-950">
                                                 {event.analytics.registrations}/{event.capacity.totalSeats}
                                             </span>
-                                            <span className="text-slate-400">registered</span>
+                                            <span className="text-gray-400">registered</span>
                                         </div>
-                                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                                        <div className="h-2 overflow-hidden rounded-full bg-gray-100">
                                             <div
                                                 className="h-full rounded-full bg-black"
                                                 style={{ width: `${getProgress(event)}%` }}
@@ -142,7 +142,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     <div className="flex shrink-0 items-center justify-start gap-2">
                                         <Link
                                             href={`${base_address}/events/${event.id}`}
-                                            className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
+                                            className="flex size-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-800"
                                             aria-label={`View ${event.title}`}
                                         >
                                             <Eye size={25} />
@@ -181,7 +181,7 @@ function toTitleCase(value: string) {
 
 function StatusBadge({ status }: { status: EventStatus }) {
     const styles: Record<EventStatus, string> = {
-        draft: "bg-slate-100 text-slate-500",
+        draft: "bg-gray-100 text-gray-500",
         published: "bg-black text-white",
         ongoing: "bg-blue-100 text-blue-700",
         completed: "bg-emerald-100 text-emerald-700",

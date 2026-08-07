@@ -47,7 +47,7 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 								<span
 									className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full transition-colors ${isActive
 										? 'bg-black text-white'
-										: 'bg-slate-100 text-slate-400'
+										: 'bg-gray-100 text-gray-400'
 										}`}
 								>
 									{sessionCount} sessions

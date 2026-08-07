@@ -89,7 +89,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}
                     <div className="flex items-center gap-4 mb-8">
-                        <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">{eventTitle}</h1>
+                        <h1 className="text-[28px] font-extrabold text-gray-900 tracking-tight">{eventTitle}</h1>
                         <span className="bg-gray-200 h-6 w-12 rounded-full"></span>
                     </div>
 

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 type Tone = "danger" | "neutral";
 
 const TONE: Record<Tone, string> = {
-    // Red reads "something failed"; slate reads "nothing here". Keeping the two
+    // Red reads "something failed"; grey reads "nothing here". Keeping the two
     // apart is the whole point of having a tone at all.
     danger: "bg-red-50 text-red-600 ring-1 ring-red-600/20",
     neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-600/10",
