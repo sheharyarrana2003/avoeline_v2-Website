@@ -61,6 +61,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                     <input
                         type="text"
                         name="name"
+                        aria-label="Full name"
                         placeholder="Name"
                         value={formData.name}
                         onChange={handleChange}
@@ -70,6 +71,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                     <input
                         type="email"
                         name="email"
+                        aria-label="Email address"
                         placeholder="Email"
                         value={formData.email}
                         onChange={handleChange}
@@ -79,6 +81,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                     <input
                         type="tel"
                         name="contactNo"
+                        aria-label="Contact number"
                         placeholder="Contact No"
                         value={formData.contactNo}
                         onChange={handleChange}
@@ -88,6 +91,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                     <input
                         type="text"
                         name="gender"
+                        aria-label="Gender"
                         placeholder="Gender"
                         value={formData.gender}
                         onChange={handleChange}
@@ -96,6 +100,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                       <input
                         type="password"
                         name="password"
+                        aria-label="Password"
                         placeholder="password"
                         value={formData.password}
                         onChange={handleChange}

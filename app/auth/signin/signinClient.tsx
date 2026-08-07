@@ -92,6 +92,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                     <div className="relative">
                         <input
                             type="email"
+                            aria-label="Email address"
                             placeholder="Email"
                             value={email}
                             onChange={(e) => {
@@ -109,6 +110,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                     <div className="relative">
                         <input
                             type="password"
+                            aria-label="Password"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => {
