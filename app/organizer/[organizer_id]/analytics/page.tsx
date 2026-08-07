@@ -3,20 +3,9 @@ import { analyzeOrganizerFeedback } from "@/src/features/analytics/feedbackAnaly
 import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
 import { DailyAnalyticsRegistration } from "@/src/services/models/feedback.model";
 import EventFeedbackAnalysis from "./EventFeedbackAnalysis";
+import { formatCurrencyCompact } from "@/src/lib/money";
 
 // ─── Helpers (server-side only) ───────────────────────────────────────────────
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 1,
-});
-
-function formatCurrency(value: number) {
-    if (value >= 1_000_000)
-        return `PKR ${currencyFormatter.format(value / 1_000_000)}M`;
-    if (value >= 1_000)
-        return `PKR ${currencyFormatter.format(value / 1_000)}K`;
-    return `PKR ${value}`;
-}
 
 function buildChartPoints(data: DailyAnalyticsRegistration[]) {
     const width = 720;
@@ -250,7 +239,7 @@ export default async function AnalyticsPage({
                                                 {event.registrations.toLocaleString("en-US")}
                                             </td>
                                             <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
-                                                {formatCurrency(event.revenue)}
+                                                {formatCurrencyCompact(event.revenue)}
                                             </td>
                                            
                                         </tr>

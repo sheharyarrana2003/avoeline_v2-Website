@@ -5,17 +5,9 @@ import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
         'catering': 'Catering',

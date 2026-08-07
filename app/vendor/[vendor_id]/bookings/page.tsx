@@ -7,17 +7,9 @@ import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
         'confirmed': 'bg-black text-white',

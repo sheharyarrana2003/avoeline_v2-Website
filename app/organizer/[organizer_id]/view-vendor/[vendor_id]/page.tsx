@@ -5,40 +5,11 @@ import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
 import { FeedbackService } from "@/src/services/feedback.service";
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { formatCurrency } from "@/src/lib/money";
+import { StarRating } from "@/src/shared_components/ui/StarRating";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number) => {
-    if (!amount && amount !== 0) return "Custom";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: 'PKR',
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 // --- Star Rating Component ---
-const StarRating = ({ rating, size = "sm", light = false }: { rating: number; size?: "sm" | "md" | "lg"; light?: boolean }) => {
-    const fullStars = Math.floor(rating || 0);
-    const hasHalf = (rating || 0) % 1 >= 0.5;
-    const sizeClass = size === "lg" ? "w-5 h-5" : size === "md" ? "w-4 h-4" : "w-3.5 h-3.5";
-    const activeClass = light ? "text-white fill-white" : "text-gray-900 fill-gray-900";
-    const inactiveClass = light ? "text-white/25 fill-white/25" : "text-gray-300 fill-gray-300";
-
-    return (
-        <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-                <svg
-                    key={i}
-                    className={`${sizeClass} ${i < fullStars ? activeClass : i === fullStars && hasHalf ? activeClass : inactiveClass}`}
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            ))}
-        </div>
-    );
-};
-
 // --- Verification Badge ---
 const VerificationBadge = ({ label }: { label: string }) => (
     <span className="bg-white text-gray-900 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap shadow-sm">

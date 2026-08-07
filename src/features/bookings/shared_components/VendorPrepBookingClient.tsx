@@ -6,6 +6,7 @@ import { formatDate, formatTime } from "@/src/lib/datetime";
 import {
     Documents,
 } from "@/src/features/bookings/types";
+import { formatCurrency } from "@/src/lib/money";
 // --- Types ---
 
 interface QuoteItem {
@@ -107,14 +108,6 @@ interface PrepareQuoteClientProps {
 }
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR"): string => {
-    return new Intl.NumberFormat("en-PK", {
-        style: "currency",
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount || 0);
-};
-
 const parseValidityDate = (validity: string | undefined): string => {
     if (!validity) {
         const date = new Date();

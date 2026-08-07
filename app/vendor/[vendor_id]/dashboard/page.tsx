@@ -5,30 +5,11 @@ import { EventService } from "@/src/services/event.service";
 import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime, timeAgo } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { StarRating } from "@/src/shared_components/ui/StarRating";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
-const timeAgo = (timestamp: string) => {
-    if (!timestamp) return "Recently";
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}d ago`;
-    const months = Math.floor(days / 30);
-    return `${months}m ago`;
-};
-
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
         'quote_requested': 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -56,23 +37,6 @@ const getStatusLabel = (status: string) => {
 };
 
 // --- Star Rating Component ---
-const StarRating = ({ rating }: { rating: number }) => {
-    const fullStars = Math.floor(rating || 0);
-    return (
-        <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-                <svg
-                    key={i}
-                    className={`w-3 h-3 ${i < fullStars ? 'text-black fill-black' : 'text-gray-300 fill-gray-300'}`}
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            ))}
-        </div>
-    );
-};
-
 // --- Mini Bar Chart Component ---
 const MiniBarChart = ({ data }: { data: number[] }) => {
     const max = Math.max(...data, 1);

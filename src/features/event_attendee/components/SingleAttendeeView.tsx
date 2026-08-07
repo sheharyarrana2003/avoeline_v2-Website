@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
 import { formatDateTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
 
 interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
@@ -35,11 +36,6 @@ const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
     "failed",
     "refunded",
 ];
-
-function formatCurrency(amount: number | null | undefined, currency: string) {
-    const value = amount ?? 0;
-    return `${currency} ${value.toLocaleString("en-US")}`;
-}
 
 export function SingleAttendeeView({ 
     combined_data, 

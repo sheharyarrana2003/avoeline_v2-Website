@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatDate, formatTime } from "@/src/lib/datetime";
+import { formatDate, formatTime, timeAgo } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Types ---
 interface Task {
@@ -62,25 +63,6 @@ interface InitialData {
 }
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
-const timeAgo = (timestamp: string) => {
-    if (!timestamp) return "Recently";
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-};
-
 const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
         'quote_requested': 'bg-gray-100 text-gray-600',

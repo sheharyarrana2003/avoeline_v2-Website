@@ -12,17 +12,9 @@ import { FeedbackService } from "@/src/services/feedback.service";
 import { formatDate } from "@/src/lib/datetime";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 const getYearsInBusiness = (createdAt: string | Date) => {
     if (!createdAt) return 0;
     return new Date().getFullYear() - new Date(createdAt).getFullYear();

@@ -9,16 +9,9 @@ import Link from "next/link";
 import { AcceptButton } from "./Acceptbutton";
 import { VendorData } from "@/src/services/models/vendor.model";
 import { notFound } from "next/navigation";
-import { formatDate } from "@/src/lib/datetime";
-
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
+import { formatDate, timeAgo } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { StarRating } from "@/src/shared_components/ui/StarRating";
 
 function sanitizeForClient<T>(obj: T): T {
     if (!obj) return obj;
@@ -30,16 +23,6 @@ function sanitizeForClient<T>(obj: T): T {
         return value;
     }));
 }
-
-const timeAgo = (timestamp: string | Date) => {
-    if (!timestamp) return "Recently";
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-};
 
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -63,25 +46,6 @@ const getStatusLabel = (status: string) => {
         'cancelled': 'QUOTE CANCELLED'
     };
     return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
-const StarRating = ({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) => {
-    const fullStars = Math.floor(rating || 0);
-    const sizeClass = size === "md" ? "w-4 h-4" : "w-3 h-3";
-
-    return (
-        <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-                <svg
-                    key={i}
-                    className={`${sizeClass} ${i < fullStars ? 'text-indigo-500 fill-indigo-500' : 'text-gray-200 fill-gray-200'}`}
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            ))}
-        </div>
-    );
 };
 
 const accept_quote = async (booking: BookingData) => {

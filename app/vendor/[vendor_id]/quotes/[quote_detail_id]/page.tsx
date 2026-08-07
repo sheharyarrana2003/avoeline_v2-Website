@@ -1,28 +1,10 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
-import { formatDate, formatTime, formatDateTime, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatDate, formatTime, formatDateTime, parseScheduleDateTime, timeAgo } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number = 0, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
-const timeAgo = (timestamp: string ="") => {
-    if (!timestamp) return "Recently";
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-};
-
 const getDaysRemaining = (validityDate: string="") => {
     if (!validityDate) return null;
     // validity is stored DD/MM/YYYY (or legacy ISO) — new Date() can't parse

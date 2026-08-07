@@ -5,16 +5,9 @@ import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/src/lib/datetime";
 import { MediaUploadField } from "@/src/features/media/MediaUploadField";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency || 'PKR',
-        maximumFractionDigits: 0,
-    }).format(amount || 0);
-};
-
 export default async function EventDetailsPage({ params }: { params: Promise<{ vendor_id: string, booking_id: string }> }) {
     const { vendor_id, booking_id } = await params;
 

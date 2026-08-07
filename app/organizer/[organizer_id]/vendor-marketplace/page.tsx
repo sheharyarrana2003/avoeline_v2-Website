@@ -1,6 +1,7 @@
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
+import { formatCurrency } from "@/src/lib/money";
 
 const CATEGORIES = [
     { id: "all", label: "All", icon: "☰", count: 245 },
@@ -11,14 +12,6 @@ const CATEGORIES = [
     { id: "music", label: "Music", icon: "🎵" },
     { id: "events", label: "Events", icon: "✨" },
 ];
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: 'PKR',
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
 
 // const RatingBars = ({ breakdown }: { breakdown: any }) => {
 //     const total = Object.values(breakdown || {}).reduce((a: any, b: any) => Number(a) + Number(b), 0);
