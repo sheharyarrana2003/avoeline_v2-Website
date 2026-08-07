@@ -12,6 +12,7 @@ import type {
 } from '@/src/services/models/certificate.model';
 import { formatDateMedium } from '@/src/lib/datetime';
 import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
+import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
 
 export interface AttendeeCertProp {
     a: Attendee;
@@ -185,14 +186,18 @@ export default function CertificateIssuanceClient({
                         >
                             Edit Template
                         </Link>
-                        <button
-                            onClick={handleGenerateClick}
+                        <ConfirmButton
+                            tone="danger"
+                            title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
+                            description="Each certificate is written to the blockchain and pinned to IPFS. That is permanent and costs real resources — it cannot be undone, and re-issuing to the same attendee will not replace it."
+                            confirmLabel={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}`}
                             disabled={isGenerating || selectedAttendees.size === 0}
-                            aria-busy={isGenerating}
-                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                            busy={isGenerating}
+                            onConfirm={handleGenerateClick}
+                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         >
                             {isGenerating ? 'Generating…' : 'Generate Certificates'}
-                        </button>
+                        </ConfirmButton>
                     </div>
                 </div>
 
