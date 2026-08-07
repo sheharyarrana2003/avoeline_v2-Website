@@ -1,26 +1,39 @@
 "use client";
 
+import { useToast } from "@/src/shared_components/ui/Toast";
+
 interface ShareRowProps {
   eventUrl: string;
   eventTitle: string;
 }
 
 export default function ShareRow({ eventUrl, eventTitle }: ShareRowProps) {
-  
+  const toast = useToast();
+
   const handleShare = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: eventTitle,
-        url: eventUrl,
-      });
-    } else {
-      alert(`Share this link: ${eventUrl}`);
+    if (!navigator.share) {
+      // No share sheet on this browser, so fall back to the clipboard rather
+      // than showing the user a URL they then have to select by hand.
+      await handleCopyLink();
+      return;
+    }
+    try {
+      await navigator.share({ title: eventTitle, url: eventUrl });
+    } catch (err) {
+      // Dismissing the share sheet rejects with AbortError; that is not a failure.
+      if ((err as Error)?.name !== "AbortError") {
+        toast.error("Could not open the share menu. The link was not shared.");
+      }
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(eventUrl);
-    alert("Link copied to clipboard!");
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(eventUrl);
+      toast.success("Event link copied to your clipboard.");
+    } catch {
+      toast.error("Could not copy the link. Your browser blocked clipboard access.");
+    }
   };
 
   return (

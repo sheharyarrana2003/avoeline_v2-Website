@@ -6,7 +6,8 @@ import { NotificationServices } from "@/src/services/notification.services";
 import { revalidatePath } from "next/cache";
 import { EventModel } from "@/src/services/models/event.model";
 import Link from "next/link";
-import { AcceptButton } from "./Acceptbutton";
+import { AcceptQuoteButton } from "@/src/features/bookings/components/AcceptQuoteButton";
+import { ok, fail, type ActionResult } from "@/src/lib/action";
 import { VendorData } from "@/src/services/models/vendor.model";
 import { notFound } from "next/navigation";
 import { formatDate, timeAgo } from "@/src/lib/datetime";
@@ -23,8 +24,9 @@ function sanitizeForClient<T>(obj: T): T {
     }));
 }
 
-const accept_quote = async (booking: BookingData) => {
+const accept_quote = async (booking: BookingData): Promise<ActionResult> => {
     'use server'
+    try {
     const new_status_history = {
         status: 'quote_accepted',
         timestamp: new Date().toISOString()
@@ -59,6 +61,11 @@ const accept_quote = async (booking: BookingData) => {
     const target = fresh ?? booking;
     revalidatePath(`/organizer/${target.organizerId}/quotes`);
     revalidatePath(`/vendor/${target.vendorId}`, "layout");
+    return ok();
+    } catch (err) {
+        console.error("[accept_quote:organizer]", err);
+        return fail("Could not accept the quote. Please try again.");
+    }
 }
 
 
@@ -269,7 +276,7 @@ export default async function QuoteManagementPage({
                                         </svg>
                                         Accept Quote
                                     </button> */}
-                       <AcceptButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
+                       <AcceptQuoteButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
                     </div>
                 </div>
             </>

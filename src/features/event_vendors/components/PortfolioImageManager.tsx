@@ -6,6 +6,7 @@ import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { PortfolioImage } from "@/src/services/models/vendor.model";
 import { DateField } from "@/src/shared_components/DateField";
 import { addPortfolioImage, removePortfolioImage } from "../actions/updateVendorPortfolio.action";
+import { useToast } from "@/src/shared_components/ui/Toast";
 
 export function PortfolioImageManager({ vendorId, images }: { vendorId: string; images: PortfolioImage[] }) {
     const router = useRouter();
@@ -14,6 +15,7 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
     const [eventType, setEventType] = useState("");
     const [date, setDate] = useState("");
     const [saving, setSaving] = useState(false);
+    const toast = useToast();
 
     const reset = () => { setUrl(""); setCaption(""); setEventType(""); setDate(""); };
 
@@ -22,12 +24,23 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
         setSaving(true);
         const res = await addPortfolioImage(vendorId, { url, caption, eventType, date });
         setSaving(false);
-        if (res.success) { reset(); router.refresh(); }
+        if (res.success) {
+            reset();
+            router.refresh();
+            toast.success("Image added to your portfolio.");
+        } else {
+            toast.error(res.error ?? "Could not add the image. Please try again.");
+        }
     };
 
     const remove = async (u: string) => {
         const res = await removePortfolioImage(vendorId, u);
-        if (res.success) router.refresh();
+        if (res.success) {
+            router.refresh();
+            toast.success("Image removed.");
+        } else {
+            toast.error(res.error ?? "Could not remove the image. Please try again.");
+        }
     };
 
     return (

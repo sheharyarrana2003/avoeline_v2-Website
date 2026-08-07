@@ -2,7 +2,7 @@
 
 import { Calendar, Clock, MapPin, ChevronDown, X, User, CheckCircle, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { createAgendaAction } from "@/src/features/agendas/actions/createAgenda.action";
 import { Speaker } from "@/src/services/models/event.model";
 import { DateField } from "@/src/shared_components/DateField";
@@ -19,10 +19,14 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
     const boundAction = createAgendaAction.bind(null, eventId, organizerId);
     const [state, formAction, isPending] = useActionState(boundAction, null);
 
-    // Close / redirect back after success
-    if (state?.success) {
-        router.push(`/organizer/${organizerId}/events/${eventId}/agenda`);
-    }
+    // Navigating during render is a side effect in the render phase: React can
+    // call this twice, and the push fires before the tree has committed. It
+    // belongs in an effect.
+    useEffect(() => {
+        if (state?.success) {
+            router.push(`/organizer/${organizerId}/events/${eventId}/agenda`);
+        }
+    }, [state?.success, router, organizerId, eventId]);
 
     return (
         <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-4xl p-8 border border-gray-100">

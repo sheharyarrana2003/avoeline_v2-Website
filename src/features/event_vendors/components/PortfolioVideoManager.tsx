@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addPortfolioVideo, removePortfolioVideo } from "../actions/updateVendorPortfolio.action";
+import { useToast } from "@/src/shared_components/ui/Toast";
 
 export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; videos: string[] }) {
     const router = useRouter();
     const [url, setUrl] = useState("");
     const [saving, setSaving] = useState(false);
+    const toast = useToast();
 
     const add = async () => {
         const value = url.trim();
@@ -15,12 +17,23 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
         setSaving(true);
         const res = await addPortfolioVideo(vendorId, value);
         setSaving(false);
-        if (res.success) { setUrl(""); router.refresh(); }
+        if (res.success) {
+            setUrl("");
+            router.refresh();
+            toast.success("Video added to your portfolio.");
+        } else {
+            toast.error(res.error ?? "Could not add the video. Please try again.");
+        }
     };
 
     const remove = async (v: string) => {
         const res = await removePortfolioVideo(vendorId, v);
-        if (res.success) router.refresh();
+        if (res.success) {
+            router.refresh();
+            toast.success("Video removed.");
+        } else {
+            toast.error(res.error ?? "Could not remove the video. Please try again.");
+        }
     };
 
     return (

@@ -277,10 +277,6 @@ export default function PrepareQuoteClient({
         });
     };
 
-    const handleSaveDraft = (): void => {
-        alert("Quote saved as draft.");
-    };
-
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Top Navigation */}

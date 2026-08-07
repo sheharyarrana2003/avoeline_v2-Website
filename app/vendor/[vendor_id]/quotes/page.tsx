@@ -1,4 +1,6 @@
-import { AcceptButton } from "@/app/organizer/[organizer_id]/quotes/Acceptbutton";
+import { AcceptQuoteButton } from "@/src/features/bookings/components/AcceptQuoteButton";
+import { ok, fail, type ActionResult } from "@/src/lib/action";
+import { revalidatePath } from "next/cache";
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData } from "@/src/features/bookings/types";
 import { EventService } from "@/src/services/event.service";
@@ -17,16 +19,31 @@ function sanitizeForClient<T>(obj: T): T {
         return value;
     }));
 }
-const accept_quote = async (booking: BookingData) => {
+const accept_quote = async (booking: BookingData): Promise<ActionResult> => {
     'use server'
-    const new_status_history = {
-        status: 'quote_accepted',
-        timestamp: new Date().toISOString()
-    }
+    try {
+        const new_status_history = {
+            status: 'quote_accepted',
+            timestamp: new Date().toISOString()
+        }
 
-    booking?.statusHistory.push(new_status_history);
-    booking.status = 'quote_accepted'
-    await BookingServices.update_booking(booking);
+        booking?.statusHistory.push(new_status_history);
+        booking.status = 'quote_accepted'
+        await BookingServices.update_booking(booking);
+
+        // This had no revalidation at all, so the write landed and the page
+        // never changed -- indistinguishable from a failure. Re-read rather
+        // than trusting the client-supplied booking for the ids, and refresh
+        // the organizer under "layout" scope so their side updates too.
+        const fresh = await BookingServices.getBookingById(booking.bookingId);
+        const target = fresh ?? booking;
+        revalidatePath(`/vendor/${target.vendorId}/quotes`);
+        revalidatePath(`/organizer/${target.organizerId}`, "layout");
+        return ok();
+    } catch (err) {
+        console.error("[accept_quote:vendor]", err);
+        return fail("Could not accept the quote. Please try again.");
+    }
 }
 
 export default async function VendorQuoteManagementPage({
@@ -216,7 +233,7 @@ export default async function VendorQuoteManagementPage({
                             View Details
                         </Link>
 
-                      <AcceptButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
+                      <AcceptQuoteButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
                     </div>
                 </div>
             </>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/src/shared_components/ui/Toast";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { updateOrganizerLogo } from "./updateOrganizerLogo.action";
 
@@ -13,6 +14,7 @@ export function OrganizerLogoUpload({
   currentLogo?: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [logo, setLogo] = useState<string>(currentLogo ?? "");
 
   return (
@@ -25,7 +27,12 @@ export function OrganizerLogoUpload({
       onUploaded={async (url) => {
         setLogo(url);
         const res = await updateOrganizerLogo(organizerId, url);
-        if (res.success) router.refresh();
+        if (res.success) {
+          router.refresh();
+          toast.success("Logo updated.");
+        } else {
+          toast.error(res.error ?? "Could not update your logo. Please try again.");
+        }
       }}
     />
   );

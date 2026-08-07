@@ -99,6 +99,8 @@ export default function BookingDetailClient({
     });
 
     const [newMessage, setNewMessage] = useState("");
+    const [newTask, setNewTask] = useState("");
+    const [addingTask, setAddingTask] = useState(false);
 
     const completedTasks = tasks.filter(t => t.completed).length;
     const taskProgress = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
@@ -117,15 +119,14 @@ export default function BookingDetailClient({
         ));
     };
 
+    // An inline field rather than window.prompt(): the native dialog is
+    // unstyleable, blocks the page, and gives no way to cancel gracefully.
     const addTask = () => {
-        const label = prompt("Enter task name:");
-        if (label) {
-            setTasks(prev => [...prev, { 
-                id: Date.now().toString(), 
-                label, 
-                completed: false 
-            }]);
-        }
+        const label = newTask.trim();
+        if (!label) return;
+        setTasks(prev => [...prev, { id: Date.now().toString(), label, completed: false }]);
+        setNewTask("");
+        setAddingTask(false);
     };
 
     const sendMessage = () => {
@@ -318,17 +319,41 @@ export default function BookingDetailClient({
                                     </h3>
                                     <p className="text-xs text-gray-400 mt-1">{taskProgress}% of preparation tasks completed</p>
                                 </div>
-                                <button 
-                                    onClick={addTask}
+                                <button
+                                    type="button"
+                                    onClick={() => setAddingTask(true)}
                                     className="bg-black text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 hover:bg-gray-800 transition"
                                 >
                                     <span>+</span> Add Task
                                 </button>
                             </div>
 
+                            {addingTask && (
+                                <form
+                                    onSubmit={(e) => { e.preventDefault(); addTask(); }}
+                                    className="mb-4 flex gap-2"
+                                >
+                                    <input
+                                        autoFocus
+                                        value={newTask}
+                                        onChange={(e) => setNewTask(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === "Escape") { setAddingTask(false); setNewTask(""); } }}
+                                        placeholder="What needs doing?"
+                                        aria-label="New task"
+                                        className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-200"
+                                    />
+                                    <button type="submit" disabled={!newTask.trim()} className="rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-40">
+                                        Add
+                                    </button>
+                                    <button type="button" onClick={() => { setAddingTask(false); setNewTask(""); }} className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
+                                        Cancel
+                                    </button>
+                                </form>
+                            )}
+
                             {/* Progress Bar */}
                             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-6">
-                                <div 
+                                <div
                                     className="h-full bg-black rounded-full transition-all duration-500"
                                     style={{ width: `${taskProgress}%` }}
                                 />
