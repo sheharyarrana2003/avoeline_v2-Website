@@ -29,7 +29,8 @@ body {
    could tab, but nothing told you where you had got to. This is the floor.
    Components that want something tighter override it with their own
    focus-visible: utilities; :focus-visible only matches keyboard focus, so
-   mouse users never see it. */
+   mouse users never see it.
+
    Elements carrying `focus:outline-none` plus their own ring keep it: that
    class is more specific than this rule, which is the right outcome since
    they already show focus their own way. */
