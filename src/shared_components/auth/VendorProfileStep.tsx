@@ -137,7 +137,7 @@ export default function VendorProfileStep({
         Setting Up Vendor Profile
       </h2>
 
-      <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
+      <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
         {savedSuccess && (
           <div className="absolute top-6 right-6 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
             <CheckCircle2 className="w-4 h-4" /> Profile Saved Successfully!

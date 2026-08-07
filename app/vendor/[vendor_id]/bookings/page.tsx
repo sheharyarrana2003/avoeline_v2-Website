@@ -195,7 +195,7 @@ export default async function VendorBookingsPage({
     ];
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             
             
 

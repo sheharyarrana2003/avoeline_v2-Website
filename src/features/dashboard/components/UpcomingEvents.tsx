@@ -3,7 +3,7 @@ import { formatDate } from "@/src/lib/datetime";
 
 export default function UpcomingEvents({ events }: { events: DashboardEvent[] }) {
   return (
-    <section className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
+    <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
       <h2 className="mb-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300/60 pb-3">
         Upcoming Events
       </h2>

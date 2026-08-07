@@ -129,7 +129,7 @@ export function SingleAttendeeView({
     };
 
     return (
-        <div className="h-full w-full bg-[#eef0f4] p-8 relative flex flex-col overflow-y-auto">
+        <div className="h-full w-full bg-gray-100 p-8 relative flex flex-col overflow-y-auto">
             {onClose && (
                 <button
                     onClick={onClose}
@@ -189,7 +189,7 @@ export function SingleAttendeeView({
             </div>
 
             {/* Organization & Ticket Card */}
-            <div className="bg-[#e4e7ed] rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
+            <div className="bg-gray-200 rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
                 <div className="flex justify-between items-start">
                     <div className="max-w-[65%]">
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">

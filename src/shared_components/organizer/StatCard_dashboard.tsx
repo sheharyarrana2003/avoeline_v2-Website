@@ -8,7 +8,7 @@ interface StatCardDashboardProps {
 
 export function StatCard_dashboard({ title, value, icon }: StatCardDashboardProps) {
   return (
-    <div className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 shadow-xs flex items-center justify-between transition-all hover:border-gray-400">
+    <div className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 shadow-xs flex items-center justify-between transition-all hover:border-gray-400">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
           {title}

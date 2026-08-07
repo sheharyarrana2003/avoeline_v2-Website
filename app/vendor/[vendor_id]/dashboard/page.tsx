@@ -32,7 +32,7 @@ const timeAgo = (timestamp: string) => {
 const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
         'quote_requested': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        'quote_sent': 'bg-[#EAEAEA] text-gray-800 border-gray-300',
+        'quote_sent': 'bg-gray-200 text-gray-800 border-gray-300',
         'quote_accepted': 'bg-blue-100 text-blue-800 border-blue-200',
         'confirmed': 'bg-emerald-100 text-emerald-800 border-emerald-200',
         'in_progress': 'bg-purple-100 text-purple-800 border-purple-200',
@@ -211,11 +211,11 @@ export default async function VendorDashboardPage({
     };
 
     return (
-        <div className="min-h-screen bg-[#E5E5E5] px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
+        <div className="min-h-screen bg-gray-200 px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
             <div className="max-w-7xl mx-auto space-y-6">
                 
                 {/* Welcome Header Card - Matching Project Aesthetics */}
-                <div className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         {v?.logo ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -247,22 +247,22 @@ export default async function VendorDashboardPage({
 
                 {/* Compact Stats Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Quotes</p>
                         <p className="text-2xl font-extrabold text-gray-900">{activeQuotes.length}</p>
                     </div>
 
-                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirmed Bookings</p>
                         <p className="text-2xl font-extrabold text-gray-900">{confirmedBookings.length}</p>
                     </div>
 
-                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">This Month Revenue</p>
                         <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
                     </div>
 
-                    <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
+                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Average Rating</p>
                         <div className="flex items-baseline gap-2">
                             <p className="text-2xl font-extrabold text-gray-900">{vendorRating || 'N/A'}</p>
@@ -281,7 +281,7 @@ export default async function VendorDashboardPage({
                     <div className="lg:col-span-2 space-y-6">
                         
                         {/* Recent Quote Requests */}
-                        <div className="bg-[#F5F5F5] rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
+                        <div className="bg-gray-100 rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
                             <div className="flex items-center justify-between mb-4 border-b border-gray-300/60 pb-3">
                                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">Recent Quote Requests</h3>
                                 <Link href={`/vendor/${vendor_id}/quotes`} className="text-xs font-semibold text-black hover:underline">
@@ -339,7 +339,7 @@ export default async function VendorDashboardPage({
                         </div>
 
                         {/* Upcoming Bookings */}
-                        <div className="bg-[#F5F5F5] rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
+                        <div className="bg-gray-100 rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
                             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-4 border-b border-gray-300/60 pb-3">Upcoming Bookings</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {upcomingBookings.length > 0 ? (
@@ -399,7 +399,7 @@ export default async function VendorDashboardPage({
 
                     {/* Right Column: Revenue Overview & Quick Actions */}
                     <div className="space-y-6">
-                        <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs">
+                        <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs">
                             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Revenue Overview</h3>
                             <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Total This Month</p>
                             <p className="text-xl font-extrabold text-gray-900 mb-4">{formatCurrency(thisMonthRevenue)}</p>
@@ -414,7 +414,7 @@ export default async function VendorDashboardPage({
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="bg-[#F5F5F5] rounded-2xl p-5 border border-gray-300/60 shadow-xs">
+                        <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs">
                             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Quick Actions</h3>
                             <div className="space-y-2">
                                 <Link 

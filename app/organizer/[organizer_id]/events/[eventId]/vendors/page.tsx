@@ -41,7 +41,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
     };
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] p-10 font-sans">
+        <div className="min-h-screen bg-gray-50 p-10 font-sans">
             <div className="max-w-4xl mx-auto">
                 
                 <div className="flex justify-between items-start mb-16">
@@ -63,7 +63,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 </div>
 
                 <div className="flex justify-between items-end mb-5">
-                    <h2 className="text-[22px] font-extrabold text-[#1a202c]">
+                    <h2 className="text-[22px] font-extrabold text-gray-900">
                         Assigned Vendors
                     </h2>
                     
@@ -79,7 +79,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                 className="bg-white border border-gray-200/60 rounded-[1.5rem] p-6 shadow-sm flex items-center justify-between transition-all hover:shadow-md"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="w-16 h-16 bg-[#f4f5f7] rounded-[1rem] flex items-center justify-center shrink-0">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-[1rem] flex items-center justify-center shrink-0">
                                         {renderIcon(vendor.serviceCategories)}
                                     </div>
 
@@ -103,7 +103,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         </div>
 
                                         <div className="flex gap-2">
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-[#f4f5f7] text-slate-700 hover:bg-gray-200">
+                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-gray-100 text-slate-700 hover:bg-gray-200">
                                                 View Profile
                                             </Link>
                                             <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-slate-800">

@@ -32,9 +32,9 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#E5E5E5]">
+        <div className="min-h-screen flex items-center justify-center bg-gray-200">
             {/* Main Card */}
-            <div className="bg-[#F5F5F5] p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
+            <div className="bg-gray-100 p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
 
                 {/* Logo Area */}
                 <div className="mb-10 flex flex-col items-center">

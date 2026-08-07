@@ -138,7 +138,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
     }
 
     return (
-        <div className="h-screen w-full bg-[#f5f5f5] flex items-center justify-center p-3 md:p-8 font-sans">
+        <div className="h-screen w-full bg-gray-100 flex items-center justify-center p-3 md:p-8 font-sans">
             <div className="w-full h-full max-w-5xl mx-auto flex flex-col bg-white border border-black/10 rounded-3xl shadow-2xl overflow-hidden">
 
                 {/* Header */}

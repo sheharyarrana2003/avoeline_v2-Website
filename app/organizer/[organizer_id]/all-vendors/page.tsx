@@ -17,7 +17,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   
   if (!bookings) {
     return (<>
-      <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">
+      <div className="min-h-screen bg-gray-50 p-8 font-sans">
 
         <div className="max-w-7xl mx-auto">
 
@@ -104,7 +104,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
 
   return (
 
-    <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">
+    <div className="min-h-screen bg-gray-50 p-8 font-sans">
 
       <div className="max-w-7xl mx-auto">
 

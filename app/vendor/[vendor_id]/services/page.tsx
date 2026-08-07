@@ -92,7 +92,7 @@ export default async function VendorServicesPage({
     }));
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
                 {/* Header */}

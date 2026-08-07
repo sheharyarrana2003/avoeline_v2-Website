@@ -37,9 +37,9 @@ export default function VendorSetupClient({
   ];
 
   return (
-    <div className="min-h-screen bg-[#E5E5E5] py-8 px-4 md:px-8 flex flex-col items-center justify-between font-sans">
+    <div className="min-h-screen bg-gray-200 py-8 px-4 md:px-8 flex flex-col items-center justify-between font-sans">
       <div className="w-full max-w-2xl mb-6">
-        <div className="bg-[#F5F5F5] border border-gray-300 shadow-sm p-1.5 rounded-full flex items-center justify-between">
+        <div className="bg-gray-100 border border-gray-300 shadow-sm p-1.5 rounded-full flex items-center justify-between">
           {steps.map((step) => {
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
@@ -123,7 +123,7 @@ export default function VendorSetupClient({
           type="button"
           onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
           disabled={currentStep === 1}
-          className="flex-1 py-2.5 px-6 rounded-full border border-gray-400 bg-[#F5F5F5] text-gray-800 hover:bg-gray-200/80 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+          className="flex-1 py-2.5 px-6 rounded-full border border-gray-400 bg-gray-100 text-gray-800 hover:bg-gray-200/80 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
         >
           <ArrowLeft className="w-4 h-4" /> Previous
         </button>

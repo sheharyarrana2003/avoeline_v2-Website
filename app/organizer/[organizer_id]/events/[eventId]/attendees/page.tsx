@@ -36,7 +36,7 @@ export default async function speaker({ params }: { params: Promise<{ eventId: s
         await RegService.updateReg(registeration)
     }
     return (
-        <div className="min-h-screen bg-[#f8f9fa] font-sans overflow-hidden">
+        <div className="min-h-screen bg-gray-50 font-sans overflow-hidden">
             <AttendeeClientSide attendees={attendeesWithUsers} handle_reg_status={handle_reg_status} eventTitle={event?.title ?? "Event Attendees"} />
         </div>
     )

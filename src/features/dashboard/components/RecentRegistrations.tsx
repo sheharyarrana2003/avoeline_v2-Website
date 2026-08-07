@@ -2,7 +2,7 @@ import { RecentRegistration } from "@/src/features/dashboard/types";
 
 export default function RecentRegistrations({ registerations }: { registerations: RecentRegistration[] }) {
   return (
-    <section className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans overflow-hidden">
+    <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans overflow-hidden">
       <h2 className="mb-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300/60 pb-3">
         Recent Registrations
       </h2>

@@ -29,7 +29,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
     ])
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] p-4 md:p-8 font-sans text-gray-900">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header / Title */}

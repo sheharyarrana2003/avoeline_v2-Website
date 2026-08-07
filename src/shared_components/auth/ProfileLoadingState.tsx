@@ -37,8 +37,8 @@ export default function ProfileLoadingState({
         <p className="text-xs text-gray-500 mt-1 max-w-xs">{subtitle}</p>
       </div>
 
-      {/* Main Skeleton Card - Matching bg-[#F5F5F5] */}
-      <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center">
+      {/* Main Skeleton Card - Matching bg-gray-100 */}
+      <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center">
         {/* Profile Avatar Skeleton */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-28 h-28 rounded-full bg-gray-300/70 animate-pulse border-2 border-gray-300 flex items-center justify-center">
@@ -83,14 +83,14 @@ export default function ProfileLoadingState({
 
   if (isOverlay) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#E5E5E5]/90 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+      <div className="fixed inset-0 z-50 bg-gray-200/90 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
         {content}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#E5E5E5] py-10 px-4 md:px-8 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-200 py-10 px-4 md:px-8 flex items-center justify-center">
       {content}
     </div>
   );
