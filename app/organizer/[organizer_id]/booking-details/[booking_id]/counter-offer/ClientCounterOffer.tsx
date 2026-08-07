@@ -24,18 +24,21 @@ export default function OrganizerCounterOfferForm ({
     e.preventDefault();
     if (isPending) return; // guard against duplicate submissions
 
-    // if (targetBudget <= 0) {
-    //   setError('Please enter a valid counter-offer amount.');
-    //   return;
-    // }
-    // if (targetBudget >= currentTotal) {
-    //   setError('Your counter-offer should generally be less than the current total price.');
-    //   return;
-    // }
-    // if (!organizerMessage.trim()) {
-    //   setError('Please include a message to explain your requested changes to the vendor.');
-    //   return;
-    // }
+    // These three were commented out here while the vendor's identical form
+    // enforced them, so an organizer could send a counter-offer of zero with
+    // no message and the vendor could not. Same rules, both directions.
+    if (targetBudget <= 0) {
+      setError('Please enter a valid counter-offer amount.');
+      return;
+    }
+    if (targetBudget >= currentTotal) {
+      setError('Your counter-offer should generally be less than the current total price.');
+      return;
+    }
+    if (!organizerMessage.trim()) {
+      setError('Please include a message to explain your requested changes to the vendor.');
+      return;
+    }
 
     setError('');
     startTransition(async () => {
