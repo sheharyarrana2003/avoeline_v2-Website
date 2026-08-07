@@ -1,3 +1,4 @@
+import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
@@ -173,14 +174,17 @@ export default async function VendorServicesPage({
                                             <form action={deleteServiceAction} className="inline">
                                                 <input type="hidden" name="serviceId" value={service.serviceId} />
                                                 <input type="hidden" name="vendorId" value={vendor_id} />
-                                                <button
-                                                    type="submit"
-                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
+                                                <ConfirmSubmit
+                                                    title="Delete this service?"
+                                                    description={`"${service.name}" will be permanently removed from your profile. Organizers browsing the marketplace will no longer see it. This cannot be undone.`}
+                                                    confirmLabel="Delete service"
+                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-red-600 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                                                 >
-                                                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <span className="sr-only">Delete {service.name}</span>
+                                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
-                                                </button>
+                                                </ConfirmSubmit>
                                             </form>
                                         </div>
                                     </div>

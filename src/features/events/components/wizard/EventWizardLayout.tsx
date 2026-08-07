@@ -1,5 +1,6 @@
 'use client';
 
+import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { EventFormData } from '@/src/services/models/event.model';
@@ -1514,12 +1515,22 @@ export default function CreateEventPage({ handle_submission }: any) {
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button onClick={()=>{
-                            formData.isDraft = true;
-                            handling_submission_client(formData);
-                        }} className="text-sm text-gray-500 hover:text-gray-700 transition">
+                        <ConfirmButton
+                            tone="default"
+                            title="Save as draft?"
+                            description="Your event will be saved but not published, so nobody can find or register for it until you publish. You can come back and finish it later."
+                            confirmLabel="Save as draft"
+                            disabled={isPublishing}
+                            onConfirm={() => {
+                                // Copied, not mutated: assigning to formData.isDraft
+                                // wrote straight through the state object, so React
+                                // never saw the change and a later render could undo it.
+                                handling_submission_client({ ...formData, isDraft: true });
+                            }}
+                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                        >
                             Save as Draft
-                        </button>
+                        </ConfirmButton>
                         {currentStep > 1 && (
                             <button
                                 onClick={prevStep}

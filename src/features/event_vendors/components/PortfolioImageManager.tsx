@@ -7,6 +7,7 @@ import { PortfolioImage } from "@/src/services/models/vendor.model";
 import { DateField } from "@/src/shared_components/DateField";
 import { addPortfolioImage, removePortfolioImage } from "../actions/updateVendorPortfolio.action";
 import { useToast } from "@/src/shared_components/ui/Toast";
+import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 
 export function PortfolioImageManager({ vendorId, images }: { vendorId: string; images: PortfolioImage[] }) {
     const router = useRouter();
@@ -51,14 +52,20 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
                         <div key={img.url + i} className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={img.url} alt={img.caption || "portfolio image"} className="h-full w-full object-cover" />
-                            <button
-                                type="button"
-                                onClick={() => remove(img.url)}
-                                aria-label="Remove image"
-                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-sm leading-none text-white opacity-0 transition group-hover:opacity-100"
+                            <ConfirmButton
+                                title="Remove this image?"
+                                description={
+                                    img.caption
+                                        ? `"${img.caption}" will be taken off your public portfolio. This cannot be undone.`
+                                        : "This image will be taken off your public portfolio. This cannot be undone."
+                                }
+                                confirmLabel="Remove image"
+                                onConfirm={() => remove(img.url)}
+                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-sm leading-none text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                             >
-                                ×
-                            </button>
+                                <span className="sr-only">Remove image</span>
+                                <span aria-hidden="true">×</span>
+                            </ConfirmButton>
                             {img.caption && (
                                 <div className="absolute inset-x-0 bottom-0 truncate bg-black/50 px-2 py-1 text-[10px] text-white">{img.caption}</div>
                             )}

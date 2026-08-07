@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addPortfolioVideo, removePortfolioVideo } from "../actions/updateVendorPortfolio.action";
 import { useToast } from "@/src/shared_components/ui/Toast";
+import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 
 export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; videos: string[] }) {
     const router = useRouter();
@@ -46,7 +47,16 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                             <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-blue-600 hover:underline">{v}</a>
-                            <button type="button" onClick={() => remove(v)} aria-label="Remove video" className="shrink-0 text-gray-400 hover:text-gray-700">×</button>
+                            <ConfirmButton
+                                title="Remove this video?"
+                                description="This video will be taken off your public portfolio. This cannot be undone."
+                                confirmLabel="Remove video"
+                                onConfirm={() => remove(v)}
+                                className="shrink-0 rounded text-gray-400 transition hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                            >
+                                <span className="sr-only">Remove video</span>
+                                <span aria-hidden="true">×</span>
+                            </ConfirmButton>
                         </li>
                     ))}
                 </ul>
