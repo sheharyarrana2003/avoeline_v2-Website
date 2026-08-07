@@ -60,149 +60,8 @@ body {
   }
 }
 
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 /* ── Custom component classes (inside @layer so Tailwind respects them) ── */
 @layer components {
-
-  /* ---- Buttons ---- */
-  .btn-primary {
-    display: inline-block;
-    background-color: #6C5CE7;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 13px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
-    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-    white-space: nowrap;
-    border: none;
-    cursor: pointer;
-  }
-
-  .btn-primary:hover {
-    background-color: #5a4bd1;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
-    color: #ffffff;
-  }
-
-  .btn-secondary {
-    display: inline-block;
-    background-color: #FFFFFF;
-    color: #14141A;
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 13px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    border: 1.5px solid #E8E7E4;
-    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  .btn-secondary:hover {
-    background-color: #F5F3FF;
-    border-color: rgba(108, 92, 231, 0.4);
-    color: #14141A;
-    transform: translateY(-1px);
-  }
-
-  .btn-header-signin {
-    display: inline-block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #6B6B76;
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid #E8E7E4;
-    background-color: transparent;
-    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
-    white-space: nowrap;
-  }
-
-  .btn-header-signin:hover {
-    color: #14141A;
-    border-color: #14141A;
-    background-color: #FAFAF9;
-  }
-
-  .btn-header-primary {
-    display: inline-block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #ffffff;
-    text-decoration: none;
-    padding: 8px 20px;
-    border-radius: 8px;
-    background-color: #6C5CE7;
-    box-shadow: 0 1px 6px rgba(108, 92, 231, 0.3);
-    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
-    white-space: nowrap;
-  }
-
-  .btn-header-primary:hover {
-    background-color: #5a4bd1;
-    box-shadow: 0 4px 14px rgba(108, 92, 231, 0.4);
-    color: #ffffff;
-    transform: translateY(-1px);
-  }
-
-  .btn-cta-primary {
-    display: inline-block;
-    background-color: #ffffff;
-    color: #6C5CE7;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 14px 30px;
-    border-radius: 10px;
-    text-decoration: none;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .btn-cta-primary:hover {
-    background-color: #F5F3FF;
-    color: #5a4bd1;
-    transform: translateY(-2px);
-  }
-
-  .btn-cta-secondary {
-    display: inline-block;
-    background-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 14px 30px;
-    border-radius: 10px;
-    text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .btn-cta-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    transform: translateY(-2px);
-  }
 
   /* ---- Nav ---- */
   .home-nav-link {
@@ -235,25 +94,6 @@ body {
     box-shadow: 0 16px 40px rgba(108, 92, 231, 0.10);
   }
 
-  /* ---- Gradient text ---- */
-  .gradient-text {
-    background: linear-gradient(135deg, #6C5CE7 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ---- CTA card ---- */
-  .cta-card {
-    background: linear-gradient(135deg, #6C5CE7 0%, #8b7cf7 60%, #a78bfa 100%);
-    background-size: 200% 200%;
-    animation: gradient-shift 6s ease infinite;
-    border-radius: 24px;
-    padding: 72px 56px;
-    box-shadow: 0 24px 64px rgba(108, 92, 231, 0.28), 0 4px 16px rgba(108, 92, 231, 0.15);
-    text-align: center;
-  }
-
   /* ---- Animations ---- */
   .animate-pulse-dot {
     animation: pulse-dot 2s ease-in-out infinite;
@@ -271,46 +111,11 @@ body {
 
   /* Respect users who prefer reduced motion: stop the always-running loops. */
   @media (prefers-reduced-motion: reduce) {
-    .cta-card,
     .animate-pulse-dot,
     .animate-float-card,
     .animate-sparkline {
       animation: none;
     }
   }
-}
-
-.canvas {
-  position: relative;
-  margin: 0 auto;
-  border: 1px solid #e2e2e2;
-}
-
-.certificate-element {
-  position: absolute;
-  cursor: pointer;
-  outline: 1px solid transparent;
-  transition: outline-color 0.15s ease;
-}
-
-.certificate-element.is-selected {
-  outline: 1px solid #000;
-}
-
-.certificate-element.is-editable:hover {
-  outline: 1px dashed #94a3b8;
-}
-
-.certificate-element.is-locked {
-  cursor: default;
-  pointer-events: none; /* not editable, so skip selection entirely */
-}
-
-.certificate-text {
-  white-space: pre-wrap;
-}
-
-.certificate-image {
-  object-fit: contain;
 }
 
