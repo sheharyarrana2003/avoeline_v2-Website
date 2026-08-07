@@ -7,6 +7,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { formatDate, formatTime, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 // --- Types ---
 interface Task {
@@ -63,19 +64,6 @@ interface InitialData {
 }
 
 // --- Helper Functions ---
-const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-        'quote_requested': 'bg-gray-100 text-gray-600',
-        'quote_sent': 'bg-yellow-100 text-yellow-700',
-        'quote_accepted': 'bg-blue-100 text-blue-700',
-        'confirmed': 'bg-green-100 text-green-700',
-        'in_progress': 'bg-purple-100 text-purple-700',
-        'completed': 'bg-gray-100 text-gray-500',
-        'cancelled': 'bg-red-100 text-red-700',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600';
-};
-
 export default function BookingDetailClient({ 
     organizerId, 
     initialData 
@@ -174,9 +162,7 @@ export default function BookingDetailClient({
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(status)}`}>
-                            Preparation Status
-                        </span>
+                        <StatusBadge status={status} size="md" className="px-4 py-1.5 text-xs" />
                         <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />

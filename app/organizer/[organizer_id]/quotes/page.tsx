@@ -11,7 +11,6 @@ import { VendorData } from "@/src/services/models/vendor.model";
 import { notFound } from "next/navigation";
 import { formatDate, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
-import { StarRating } from "@/src/shared_components/ui/StarRating";
 
 function sanitizeForClient<T>(obj: T): T {
     if (!obj) return obj;

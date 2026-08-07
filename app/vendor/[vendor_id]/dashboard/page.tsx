@@ -8,34 +8,9 @@ import { notFound } from "next/navigation";
 import { formatDate, parseScheduleDateTime, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StarRating } from "@/src/shared_components/ui/StarRating";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 // --- Helper Functions ---
-const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-        'quote_requested': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        'quote_sent': 'bg-gray-200 text-gray-800 border-gray-300',
-        'quote_accepted': 'bg-blue-100 text-blue-800 border-blue-200',
-        'confirmed': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-        'in_progress': 'bg-purple-100 text-purple-800 border-purple-200',
-        'completed': 'bg-gray-200 text-gray-700 border-gray-300',
-        'cancelled': 'bg-rose-100 text-rose-800 border-rose-200',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 border-gray-200';
-};
-
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'quote_requested': 'QUOTE REQUESTED',
-        'quote_sent': 'QUOTE SENT',
-        'quote_accepted': 'QUOTE ACCEPTED',
-        'confirmed': 'CONFIRMED',
-        'in_progress': 'IN PROGRESS',
-        'completed': 'COMPLETED',
-        'cancelled': 'CANCELLED',
-    };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
 // --- Star Rating Component ---
 // --- Mini Bar Chart Component ---
 const MiniBarChart = ({ data }: { data: number[] }) => {
@@ -316,9 +291,7 @@ export default async function VendorDashboardPage({
                                             <div key={booking?.bookingId || index} className="bg-white rounded-xl p-4 border border-gray-300/50 shadow-2xs flex flex-col justify-between">
                                                 <div>
                                                     <div className="flex items-center justify-between mb-2">
-                                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${getStatusBadge(booking?.status)}`}>
-                                                            {getStatusLabel(booking?.status)}
-                                                        </span>
+                                                        <StatusBadge status={booking?.status} size="sm" />
                                                         <span className="text-[10px] text-gray-400 font-mono">
                                                             {booking?.bookingId}
                                                         </span>

@@ -20,32 +20,6 @@ const getDaysRemaining = (validityDate: string="") => {
     return { label: `${diffDays} days remaining`, urgent: false };
 };
 
-const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-        'quote_requested': 'bg-black text-white',
-        'quote_sent': 'bg-gray-100 text-gray-600',
-        'quote_accepted': 'bg-blue-100 text-blue-700',
-        'confirmed': 'bg-green-100 text-green-700',
-        'in_progress': 'bg-purple-100 text-purple-700',
-        'completed': 'bg-gray-100 text-gray-500',
-        'cancelled': 'bg-red-100 text-red-700',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600';
-};
-
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'quote_requested': 'NEW',
-        'quote_sent': 'RESPONDED',
-        'quote_accepted': 'ACCEPTED',
-        'confirmed': 'CONFIRMED',
-        'in_progress': 'IN PROGRESS',
-        'completed': 'COMPLETED',
-        'cancelled': 'CANCELLED',
-    };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
 export default async function QuoteDetailPage({
     params
 }: {
@@ -104,8 +78,6 @@ export default async function QuoteDetailPage({
     const organizerPhone = "(555) 123-4567";
 
     const deadline = getDaysRemaining(vendorQuote?.validity ||"");
-    const statusLabel = getStatusLabel(b?.status);
-    const statusBadge = getStatusBadge(b?.status);
 
     // Mock attachments (in real app, these would come from booking documents or a separate attachments field)
     const attachments = [

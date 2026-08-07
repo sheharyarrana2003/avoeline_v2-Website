@@ -5,7 +5,7 @@ import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
 import { formatDate, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
-import { StarRating } from "@/src/shared_components/ui/StarRating";
+import { statusMeta } from "@/src/lib/status";
 
 function sanitizeForClient<T>(obj: T): T {
     if (!obj) return obj;
@@ -17,33 +17,6 @@ function sanitizeForClient<T>(obj: T): T {
         return value;
     }));
 }
-const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-        'negotiating': 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20',
-        'new': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20',
-        'quote_accepted': 'bg-sky-50 text-sky-700 ring-1 ring-sky-600/20',
-        'confirmed': 'bg-gray-50 text-gray-700 ring-1 ring-gray-600/20',
-        'completed': 'bg-gray-50 text-gray-500 ring-1 ring-gray-600/20',
-        'quote_received': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20',
-        'quote_sent': 'bg-violet-50 text-violet-700 ring-1 ring-violet-600/20',
-        'quote_requested': 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-50 text-gray-600 ring-1 ring-gray-600/20';
-};
-
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'quote_requested': 'QUOTE REQUESTED',
-        'quote_sent': 'QUOTE SENT',
-        'quote_accepted': 'ACCEPTED',
-        'confirmed': 'CONFIRMED',
-        'completed': 'COMPLETED',
-        'quote_received': 'QUOTE RECEIVED',
-        'cancelled': 'QUOTE CANCELLED'
-    };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
 const accept_quote = async (booking: BookingData) => {
     'use server'
     const new_status_history = {
@@ -332,7 +305,7 @@ export default async function VendorQuoteManagementPage({
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900">Organizer {booking?.organizerId}</p>
                                                     <p className="text-xs text-gray-400 mt-0.5">
-                                                        {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {getStatusLabel(booking?.status)}
+                                                        {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
                                                     </p>
                                                 </div>
                                             </div>

@@ -8,32 +8,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 // --- Helper Functions ---
-const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-        'confirmed': 'bg-black text-white',
-        'in_progress': 'bg-black text-white',
-        'completed': 'bg-green-50 text-green-600 border border-green-200',
-        'cancelled': 'bg-red-50 text-red-600 border border-red-200',
-        'quote_requested': 'bg-gray-100 text-gray-600',
-        'quote_sent': 'bg-gray-100 text-gray-600',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-600';
-};
-
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'confirmed': 'CONFIRMED',
-        'in_progress': 'IN PROGRESS',
-        'completed': 'COMPLETED',
-        'cancelled': 'CANCELLED',
-        'quote_requested': 'QUOTE REQUESTED',
-        'quote_sent': 'QUOTE SENT',
-    };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
 const getServiceIcon = (serviceType: string) => {
     const icons: Record<string, string> = {
         'catering': '🍴',
@@ -258,8 +235,6 @@ export default async function VendorBookingsPage({
                         {displayBookings.map((booking: any) => {
                             const eventTitle = getEventTitle(booking?.eventId);
                             const status = booking?.status || 'unknown';
-                            const statusBadge = getStatusBadge(status);
-                            const statusLabel = getStatusLabel(status);
                             const serviceType = booking?.serviceType || '';
                             const serviceName = getServiceName(serviceType);
                             const serviceIcon = getServiceIcon(serviceType);
@@ -280,9 +255,7 @@ export default async function VendorBookingsPage({
                                     
                                     {/* Card Header */}
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${statusBadge}`}>
-                                            {statusLabel}
-                                        </span>
+                                        <StatusBadge status={status} size="md" />
                                         <span className="text-sm font-bold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
                                     </div>
                                     
