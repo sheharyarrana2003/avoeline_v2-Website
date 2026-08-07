@@ -13,6 +13,9 @@ import { useState } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
 import { formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import { statusMeta } from "@/src/lib/status";
+import { useToast } from "@/src/shared_components/ui/Toast";
+import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
 
 interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
@@ -37,6 +40,14 @@ const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
     "refunded",
 ];
 
+/**
+ * Values worth stopping for. These were one scroll-wheel tick away on a
+ * focused <select> that wrote straight to Firestore -- cancelling a
+ * registration or marking a payment refunded took a single accidental gesture.
+ */
+const SERIOUS_STATUS = new Set<string>(["cancelled", "no_show"]);
+const SERIOUS_PAYMENT = new Set<string>(["refunded", "failed"]);
+
 export function SingleAttendeeView({ 
     combined_data, 
     onClose, 
@@ -50,6 +61,10 @@ export function SingleAttendeeView({
     // State for local registration updates
     const [registration, setRegistration] = useState<Registration>(r);
     const [isUpdating, setIsUpdating] = useState(false);
+    // A change waiting on the confirmation dialog. The selects stay controlled
+    // by `registration`, so cancelling snaps them back on its own.
+    const [pending, setPending] = useState<{ kind: "status" | "payment"; value: string } | null>(null);
+    const toast = useToast();
 
     const fullName = u?.profile?.fullName || "Unknown Attendee";
     const email = u?.email || "No email provided";
@@ -77,50 +92,78 @@ export function SingleAttendeeView({
     const registeredOn = registration?.registrationDate ? formatDateTime(registration.registrationDate) : null;
     const cancelledOn = registration?.cancelledAt ? formatDateTime(registration.cancelledAt) : null;
 
-    // Handler to handle status change and invoke prop
-    const handleStatusChange = async (newStatus: Registration["status"]) => {
-        const updated = {
-            ...registration,
-            status: newStatus,
-            statusHistory: [
-                ...(registration.statusHistory || []),
-                { status: newStatus, timestamp: new Date().toISOString() }
-            ]
-        };
+    /**
+     * Commit an optimistic update, and put the old value back if the write
+     * fails. Previously the local state was set before the await and never
+     * reverted, so a failed write left the screen showing a status Firestore
+     * had refused -- and the only trace was a console.error.
+     */
+    const commit = async (updated: Registration, what: string) => {
+        const previous = registration;
         setRegistration(updated);
 
-        if (update_registration) {
-            setIsUpdating(true);
-            try {
-                await update_registration(updated);
-            } catch (err) {
-                console.error("Failed to update registration status:", err);
-            } finally {
-                setIsUpdating(false);
-            }
+        if (!update_registration) return;
+
+        setIsUpdating(true);
+        try {
+            await update_registration(updated);
+            toast.success(`${what} updated.`);
+        } catch (err) {
+            console.error(`Failed to update ${what.toLowerCase()}:`, err);
+            setRegistration(previous);
+            toast.error(`Could not update the ${what.toLowerCase()}. Nothing was changed.`);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
-    // Handler to handle payment status change and invoke prop
-    const handlePaymentStatusChange = async (newPaymentStatus: Registration["payment"]["paymentStatus"]) => {
-        const updated = {
-            ...registration,
-            payment: {
-                ...registration.payment,
-                paymentStatus: newPaymentStatus,
-            },
-        };
-        setRegistration(updated);
+    const withStatus = (newStatus: Registration["status"]): Registration => ({
+        ...registration,
+        status: newStatus,
+        statusHistory: [
+            ...(registration.statusHistory || []),
+            { status: newStatus, timestamp: new Date().toISOString() },
+        ],
+    });
 
-        if (update_registration) {
-            setIsUpdating(true);
-            try {
-                await update_registration(updated);
-            } catch (err) {
-                console.error("Failed to update payment status:", err);
-            } finally {
-                setIsUpdating(false);
-            }
+    const withPaymentStatus = (
+        newPaymentStatus: Registration["payment"]["paymentStatus"],
+    ): Registration => ({
+        ...registration,
+        payment: { ...registration.payment, paymentStatus: newPaymentStatus },
+    });
+
+    const handleStatusChange = (newStatus: Registration["status"]) => {
+        // Only the consequential ones ask. Confirming every change would train
+        // people to click through the dialog without reading it.
+        if (SERIOUS_STATUS.has(newStatus)) {
+            setPending({ kind: "status", value: newStatus });
+            return;
+        }
+        void commit(withStatus(newStatus), "Registration status");
+    };
+
+    const handlePaymentStatusChange = (
+        newPaymentStatus: Registration["payment"]["paymentStatus"],
+    ) => {
+        if (SERIOUS_PAYMENT.has(newPaymentStatus)) {
+            setPending({ kind: "payment", value: newPaymentStatus });
+            return;
+        }
+        void commit(withPaymentStatus(newPaymentStatus), "Payment status");
+    };
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const { kind, value } = pending;
+        setPending(null);
+        if (kind === "status") {
+            void commit(withStatus(value as Registration["status"]), "Registration status");
+        } else {
+            void commit(
+                withPaymentStatus(value as Registration["payment"]["paymentStatus"]),
+                "Payment status",
+            );
         }
     };
 
@@ -169,6 +212,7 @@ export function SingleAttendeeView({
                 </div>
                 <div className="relative">
                     <select
+                        aria-label="Registration status"
                         value={registration.status || "pending"}
                         disabled={isUpdating}
                         onChange={(e) => handleStatusChange(e.target.value as Registration["status"])}
@@ -270,6 +314,7 @@ export function SingleAttendeeView({
                             <span className="text-gray-400 font-medium block mb-1">Payment Status</span>
                             <div className="relative inline-block">
                                 <select
+                                    aria-label="Payment status"
                                     value={registration?.payment?.paymentStatus || "pending"}
                                     disabled={isUpdating}
                                     onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
@@ -386,8 +431,26 @@ export function SingleAttendeeView({
                     </div>
                 )}
 
-             
+
             </div>
+
+            <ConfirmDialog
+                open={pending !== null}
+                title={
+                    pending?.kind === "status"
+                        ? `Mark ${fullName} as ${statusMeta(pending.value).label.toLowerCase()}?`
+                        : `Mark this payment ${statusMeta(pending?.value).label.toLowerCase()}?`
+                }
+                description={
+                    pending?.kind === "status"
+                        ? "This changes the attendee's registration and is recorded in their status history. They may lose access to the event."
+                        : "This changes the recorded payment state for this registration. Make sure it matches what actually happened with the money."
+                }
+                confirmLabel="Yes, change it"
+                busy={isUpdating}
+                onConfirm={confirmPending}
+                onCancel={() => setPending(null)}
+            />
         </div>
     );
 }
