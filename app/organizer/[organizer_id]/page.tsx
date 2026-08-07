@@ -1,10 +1,15 @@
-export default async function OrganizerIDPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    return (
+import { redirect } from "next/navigation";
 
-        <div>
-            <h1>Default Organizer id page {id}</h1>
-        </div>
-    );
+/**
+ * `/organizer/<id>` is not a screen of its own -- every entry point links
+ * straight to one of the tabs. Send it to the dashboard rather than 404ing a
+ * URL people paste and shorten by hand.
+ */
+export default async function OrganizerIndexPage({
+    params,
+}: {
+    params: Promise<{ organizer_id: string }>;
+}) {
+    const { organizer_id } = await params;
+    redirect(`/organizer/${organizer_id}/dashboard`);
 }
-
