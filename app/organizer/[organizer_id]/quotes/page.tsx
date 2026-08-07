@@ -24,30 +24,6 @@ function sanitizeForClient<T>(obj: T): T {
     }));
 }
 
-const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-        'negotiating': 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20',
-        'new': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20',
-        'quote_accepted': 'bg-sky-50 text-sky-700 ring-1 ring-sky-600/20',
-        'confirmed': 'bg-gray-50 text-gray-700 ring-1 ring-gray-600/20',
-        'completed': 'bg-gray-50 text-gray-500 ring-1 ring-gray-600/20',
-        'quote_received': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-50 text-gray-600 ring-1 ring-gray-600/20';
-};
-
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'quote_sent': 'QUOTE SENT',
-        'quote_accepted': 'ACCEPTED',
-        'confirmed': 'CONFIRMED',
-        'completed': 'COMPLETED',
-        'quote_received': 'QUOTE RECEIVED',
-        'cancelled': 'QUOTE CANCELLED'
-    };
-    return labels[status?.toLowerCase()] || status?.toUpperCase() || 'UNKNOWN';
-};
-
 const accept_quote = async (booking: BookingData) => {
     'use server'
     const new_status_history = {

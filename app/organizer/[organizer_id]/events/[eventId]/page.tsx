@@ -1,8 +1,7 @@
 import { EventService } from "@/src/services/event.service";
-import { EventModel, EventStatus } from "@/src/services/models/event.model";
+import { EventModel } from "@/src/services/models/event.model";
 import {
     CalendarDays,
-    Eye,
     MapPin,
     MoreHorizontal,
     Star,
@@ -22,6 +21,9 @@ import { RecentRegistration } from '@/src/features/dashboard/types';
 import { isVideoUrl } from "@/src/features/media/media.utils";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
     const event: EventModel | null = await EventService.getEventByID(eventId);
@@ -54,7 +56,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         </h1>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                        <StatusPill status={event.status} />
+                        <StatusBadge status={event.status} size="md" className="h-8 px-4 text-xs" />
                       
                     </div>
                 </header>
@@ -118,7 +120,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     />
                     <MetricCard
                         label="Revenue"
-                        value={`${event.pricing?.currency} ${revenue.toLocaleString("en-US")}`}
+                        value={formatCurrency(revenue, event.pricing?.currency)}
                         helper={`${revenuePercent}% of Target`}
                         progress={revenuePercent}
                     />
@@ -396,14 +398,6 @@ function getPercent(value: number, total: number) {
     return Math.min(100, Math.round((value / total) * 100));
 }
 
-function StatusPill({ status }: { status: EventStatus }) {
-    return (
-        <span className="inline-flex h-8 items-center gap-2 rounded-full bg-black px-4 text-xs font-extrabold uppercase tracking-wider text-white">
-            <Eye size={14} />
-            {status.replace("-", " ")}
-        </span>
-    );
-}
 
 function MetricCard({
     label,

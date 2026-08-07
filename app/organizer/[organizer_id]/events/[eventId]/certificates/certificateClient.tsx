@@ -10,6 +10,8 @@ import type {
     CertificateGenerationAttendeeResult,
     CertificateGenerationResult,
 } from '@/src/services/models/certificate.model';
+import { formatDateMedium } from '@/src/lib/datetime';
+import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
 
 export interface AttendeeCertProp {
     a: Attendee;
@@ -23,36 +25,6 @@ interface CertificateIssuanceClientProps {
     onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<CertificateGenerationResult>;
 }
 
-
-const getStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-        generating: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        ready: 'bg-purple-100 text-purple-700 border-purple-200',
-        issued: 'bg-green-100 text-green-700 border-green-200',
-        revoked: 'bg-red-100 text-red-700 border-red-200',
-        pending: 'bg-gray-100 text-gray-600 border-gray-200',
-        success: 'bg-green-100 text-green-700 border-green-200',
-        failed: 'bg-red-100 text-red-700 border-red-200',
-        warning: 'bg-amber-100 text-amber-700 border-amber-200',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
-};
-
-const getSurveyStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-        completed: 'bg-green-100 text-green-700 border-green-200',
-        missing: 'bg-gray-100 text-gray-600 border-gray-200',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
-};
-
-
-const formatDate = (value?: Date | string | null): string => {
-    if (!value) return '—';
-    const date = typeof value === 'string' ? new Date(value) : value;
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
 
 const truncateHash = (hash?: string | null): string => {
     if (!hash) return '—';
@@ -319,7 +291,7 @@ export default function CertificateIssuanceClient({
                                                 <span className="text-xs font-medium text-gray-700 capitalize">{cert?.type ?? '—'}</span>
                                             </td>
                                             <td className="px-4 py-4">
-                                                <span className="text-xs text-gray-600">{formatDate(cert?.issuedAt)}</span>
+                                                <span className="text-xs text-gray-600">{formatDateMedium(cert?.issuedAt)}</span>
                                             </td>
                                             <td className="px-4 py-4">
                                                 {isDigital && cert?.digital?.pdfUrl ? (
@@ -382,9 +354,7 @@ export default function CertificateIssuanceClient({
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4">
-                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(status)}`}>
-                                                    {status}
-                                                </span>
+                                                <StatusBadge status={status} size="sm" />
                                             </td>
                                         </tr>
                                     );
@@ -490,12 +460,12 @@ export default function CertificateIssuanceClient({
 
                                 <div className="col-span-2">
                                     <div className="flex flex-col gap-1">
-                                        <span
-                                            className={`inline-block w-fit text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(displayStatus.colorKey)}`}
-                                            title={displayStatus.detail}
-                                        >
-                                            {displayStatus.label}
-                                        </span>
+                                        <StatusBadge
+                                            status={displayStatus.colorKey}
+                                            label={displayStatus.label}
+                                            size="sm"
+                                            className="w-fit"
+                                        />
                                         {displayStatus.detail && (
                                             <span className="text-[10px] text-red-500 line-clamp-2" title={displayStatus.detail}>
                                                 {displayStatus.detail}

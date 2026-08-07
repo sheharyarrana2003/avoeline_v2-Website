@@ -5,6 +5,7 @@ import { CurrentUserData } from "@/src/services/models/user.type";
 import { Calendar, Eye, LayoutList, MapPin, MoreVertical, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
     const resolvedParams = await searchParams;
@@ -179,19 +180,3 @@ function toTitleCase(value: string) {
         .join(" ");
 }
 
-function StatusBadge({ status }: { status: EventStatus }) {
-    const styles: Record<EventStatus, string> = {
-        draft: "bg-gray-100 text-gray-500",
-        published: "bg-black text-white",
-        ongoing: "bg-blue-100 text-blue-700",
-        completed: "bg-emerald-100 text-emerald-700",
-        cancelled: "bg-rose-100 text-rose-700",
-        registration_open: "bg-rose-100 text-rose-700",
-    };
-
-    return (
-        <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ${styles[status]}`}>
-            {status.replace("-", " ")}
-        </span>
-    );
-}

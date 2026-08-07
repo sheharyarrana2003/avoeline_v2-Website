@@ -1,4 +1,6 @@
-import Link from 'next/link'; 
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { formatCurrency } from "@/src/lib/money";
+import Link from 'next/link';
 import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
 import { VendorData } from '@/src/services/models/vendor.model';
@@ -24,14 +26,16 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
     };
 
     const renderBadge = (status: string, verified: boolean) => {
+        // A verified, active vendor is the good outcome, so it gets the success
+        // tone; anything else is still pending someone's attention.
         if (status === 'active' && verified) {
-            return <span className="bg-[#e8f6ed] text-[#2c8a53] text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1 w-fit ml-auto">
-                <CheckCircle2 size={12} /> Verified
-            </span>;
+            return (
+                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-600/20">
+                    <CheckCircle2 size={12} aria-hidden="true" /> Verified
+                </span>
+            );
         }
-        return <span className="bg-[#fcf1e8] text-[#d97743] text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider w-fit ml-auto">
-            {status}
-        </span>;
+        return <StatusBadge status={status} size="md" className="ml-auto w-fit py-1.5" />;
     };
 
     const getStartingPrice = (packages: PricingPackage[]) => {
@@ -122,7 +126,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                             {startingPrice ? 'Starting Price' : 'Estimated'}
                                         </p>
                                         <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-400'}`}>
-                                            {startingPrice ? `PKR ${startingPrice.toLocaleString()}` : 'TBD'}
+                                            {startingPrice ? formatCurrency(startingPrice) : 'TBD'}
                                         </p>
                                     </div>
                                 </div>
