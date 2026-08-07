@@ -1,6 +1,6 @@
 import { AuthService } from "@/src/features/auth/authService";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
-import { VendorHeader } from "@/src/shared_components/vendor/VendorHeader";
+import { DashboardHeader } from "@/src/shared_components/DashboardHeader";
 import { NotificationServices } from "@/src/services/notification.services";
 import { redirect } from "next/navigation";
 
@@ -24,10 +24,24 @@ export default async function OrganizerLayout({
     const notifications = await NotificationServices.getAllNotificationsOfUser(u.roleId);
     const unreadCount = notifications.filter((n) => n.status !== "read").length;
 
+    // Vendor routes are keyed by roleId, not the auth uid the organizer side uses.
+    const basePath = `/vendor/${u.roleId}`;
+
     return (
         <>
-            <VendorHeader user={u} logoUrl={vendor?.logo || undefined} unreadCount={unreadCount} />
-            <section>{children}</section>
+            <DashboardHeader
+                basePath={basePath}
+                name={u?.name ?? ""}
+                logoUrl={vendor?.logo || undefined}
+                unreadCount={unreadCount}
+                items={[
+                    { label: "Dashboard", href: `${basePath}/dashboard` },
+                    { label: "Quotes", href: `${basePath}/quotes` },
+                    { label: "Services", href: `${basePath}/services` },
+                    { label: "Bookings", href: `${basePath}/bookings` },
+                ]}
+            />
+            <main className="flex-1 pb-12">{children}</main>
         </>
     )
 
