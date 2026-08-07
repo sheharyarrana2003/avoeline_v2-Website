@@ -43,7 +43,7 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
                 <ul className="space-y-2">
                     {videos.map((v, i) => (
                         <li key={v + i} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
-                            <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                             <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-blue-600 hover:underline">{v}</a>

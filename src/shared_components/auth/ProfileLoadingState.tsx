@@ -21,7 +21,7 @@ export default function ProfileLoadingState({
           {/* Subtle Logo Emblem with rotating ring */}
           <div className="relative w-10 h-10 flex items-center justify-center">
             <div className="absolute inset-0 rounded-full border-2 border-t-black border-r-gray-300 border-b-gray-300 border-l-gray-300 animate-spin" />
-            <svg width="20" height="20" viewBox="0 0 48 48" fill="none" className="text-black">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48" fill="none" className="text-black">
               <path
                 d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
                 stroke="currentColor"

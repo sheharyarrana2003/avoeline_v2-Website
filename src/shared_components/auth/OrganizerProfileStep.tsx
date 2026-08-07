@@ -141,7 +141,7 @@ export default function OrganizerProfileStep({
                   />
                 ) : (
                   <div className="w-full h-full rounded-full border border-sky-200 flex flex-col items-center justify-center bg-sky-50/40 p-2 text-center">
-                    <svg className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <svg aria-hidden="true" className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
                       <path d="M12 6v12M6 12h12" stroke="currentColor" strokeWidth="1.5" />
                       <circle cx="12" cy="12" r="4" fill="#0055A5" />

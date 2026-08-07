@@ -1,5 +1,6 @@
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { formatCurrency } from "@/src/lib/money";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import Link from 'next/link';
 import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
@@ -74,6 +75,23 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 </div>
 
                 <div className="space-y-4">
+                    {!vendors?.length && (
+                        <div className="rounded-[1.5rem] border border-gray-200/60 bg-white">
+                            <EmptyState
+                                icon={<LayoutDashboard size={22} aria-hidden="true" />}
+                                title="No vendors assigned yet"
+                                description="Book a vendor from the marketplace and they will appear here alongside their quote and contact details."
+                                action={
+                                    <Link
+                                        href={`/organizer/${organizer_id}/vendor-marketplace`}
+                                        className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800"
+                                    >
+                                        Browse the marketplace
+                                    </Link>
+                                }
+                            />
+                        </div>
+                    )}
                     {vendors?.map((vendor, index) => {
                         const startingPrice = getStartingPrice(vendor.pricingPackages);
 

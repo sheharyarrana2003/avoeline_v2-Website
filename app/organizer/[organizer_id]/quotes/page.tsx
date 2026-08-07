@@ -257,13 +257,13 @@ export default async function QuoteManagementPage({
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 mt-10 pt-8 border-t border-gray-100">
                         {/* <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
                                         Message Vendor
                                     </button> */}
                         <Link href={`/organizer/${organizer_id}/booking-details/${selectedQuote.bookingId}/counter-offer`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                             Counter Offer
@@ -271,7 +271,7 @@ export default async function QuoteManagementPage({
                         {/* <button 
                                     onClick={()=>{accept_quote(selectedQuote)}}
                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 px-5 rounded-lg text-sm font-medium hover:bg-gray-800 transition ml-auto">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                         Accept Quote
@@ -338,7 +338,7 @@ export default async function QuoteManagementPage({
                                     {selectedQuote?.serviceType || "Catering Services"}
                                 </span>
                                 <button className="ml-auto text-gray-400 hover:text-gray-600 transition">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                     </svg>
                                 </button>
@@ -369,7 +369,7 @@ export default async function QuoteManagementPage({
                                                     <p className="text-xs text-gray-400 mt-0.5">{formatCurrency(bq?.totalAmount , booking?.payment?.currency || "PKR")} • Pending response</p>
                                                 </div>
                                             </div>
-                                            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </Link>

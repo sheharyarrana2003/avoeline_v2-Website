@@ -310,7 +310,7 @@ export default function PrepareQuoteClient({
                         {/* Service Package */}
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
                             <div className="flex items-center gap-2 mb-4">
-                                <svg
+                                <svg aria-hidden="true"
                                     className="w-4 h-4 text-gray-400"
                                     fill="none"
                                     viewBox="0 0 24 24"
@@ -353,7 +353,7 @@ export default function PrepareQuoteClient({
                                         <option>Custom Quote</option>
                                     )}
                                 </select>
-                                <svg
+                                <svg aria-hidden="true"
                                     className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
                                     fill="none"
                                     viewBox="0 0 24 24"
@@ -373,7 +373,7 @@ export default function PrepareQuoteClient({
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
-                                    <svg
+                                    <svg aria-hidden="true"
                                         className="w-4 h-4 text-gray-400"
                                         fill="none"
                                         viewBox="0 0 24 24"
@@ -470,7 +470,7 @@ export default function PrepareQuoteClient({
                                                 }
                                                 className="text-gray-300 hover:text-red-500 transition"
                                             >
-                                                <svg
+                                                <svg aria-hidden="true"
                                                     className="w-4 h-4"
                                                     fill="none"
                                                     viewBox="0 0 24 24"
@@ -544,7 +544,7 @@ export default function PrepareQuoteClient({
                         {/* Terms & Conditions */}
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
                             <div className="flex items-center gap-2 mb-4">
-                                <svg
+                                <svg aria-hidden="true"
                                     className="w-4 h-4 text-gray-400"
                                     fill="none"
                                     viewBox="0 0 24 24"

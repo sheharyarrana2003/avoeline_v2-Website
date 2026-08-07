@@ -48,7 +48,7 @@ export function HomeHeader() {
               justifyContent: "center",
             }}
           >
-            <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 16 16" fill="none">
               <path d="M3 12L8 4L13 12" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M5.5 9.5H10.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
             </svg>

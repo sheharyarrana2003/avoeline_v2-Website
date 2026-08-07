@@ -207,7 +207,7 @@ export default async function VendorQuoteManagementPage({
                             href={`/vendor/${vendor_id}/quotes/prep-quote/${selectedQuote.bookingId}`}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                             Prepare Offer
@@ -217,7 +217,7 @@ export default async function VendorQuoteManagementPage({
                             href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}/counter-offer`}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
                             Counter Offer
@@ -226,7 +226,7 @@ export default async function VendorQuoteManagementPage({
                             href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}`}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -293,7 +293,7 @@ export default async function VendorQuoteManagementPage({
                                     {selectedQuote?.serviceType || ""}
                                 </span>
                                 <button className="ml-auto text-gray-400 hover:text-gray-600 transition">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                     </svg>
                                 </button>
@@ -326,7 +326,7 @@ export default async function VendorQuoteManagementPage({
                                                     </p>
                                                 </div>
                                             </div>
-                                            <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </Link>

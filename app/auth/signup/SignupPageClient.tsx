@@ -40,7 +40,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                 <div className="mb-10 flex flex-col items-center">
                     <div className="w-12 h-12 text-black flex items-center justify-center mb-3">
                         {/* Logo matching the image - diamond with three dots */}
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none">
                             <path
                                 d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
                                 stroke="currentColor"
@@ -121,7 +121,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                             <option value="india">India</option>
                             <option value="japan">Japan</option>
                         </select>
-                        <svg
+                        <svg aria-hidden="true"
                             className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
                             fill="none"
                             stroke="currentColor"
@@ -149,7 +149,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                             <option value="mumbai">Mumbai</option>
                             <option value="tokyo">Tokyo</option>
                         </select>
-                        <svg
+                        <svg aria-hidden="true"
                             className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
                             fill="none"
                             stroke="currentColor"

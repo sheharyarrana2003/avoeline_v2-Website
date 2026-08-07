@@ -58,7 +58,7 @@ export function HomeFooter() {
                   justifyContent: "center",
                 }}
               >
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M3 12L8 4L13 12"
                     stroke="white"
