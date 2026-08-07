@@ -369,43 +369,48 @@ export default function BookingDetailClient({
                             {/* Tasks Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {tasks.map((task) => (
-                                    <div 
+                                    <button
+                                        type="button"
                                         key={task.id}
                                         onClick={() => toggleTask(task.id)}
-                                        className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${
-                                            task.completed 
-                                                ? 'bg-gray-50 border-gray-100' 
+                                        aria-pressed={task.completed}
+                                        className={`w-full text-left flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${
+                                            task.completed
+                                                ? 'bg-gray-50 border-gray-100'
                                                 : 'bg-white border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                            task.completed 
-                                                ? 'bg-black border-black' 
+                                        <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                            task.completed
+                                                ? 'bg-black border-black'
                                                 : 'border-gray-300'
                                         }`}>
                                             {task.completed && (
-                                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg aria-hidden="true" className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                                        </span>
+                                        {/* Spans, not divs and paragraphs: this is a
+                                            <button> now, so its content has to stay
+                                            phrasing content to be valid. */}
+                                        <span className="flex-1 min-w-0 block">
+                                            <span className={`block text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
                                                 {task.label}
-                                            </p>
+                                            </span>
                                             {task.progress !== undefined && task.total && (
-                                                <div className="mt-2">
-                                                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className="h-full bg-black rounded-full"
+                                                <span className="mt-2 block">
+                                                    <span className="block h-1 bg-gray-100 rounded-full overflow-hidden">
+                                                        <span
+                                                            className="block h-full bg-black rounded-full"
                                                             style={{ width: `${(task.progress / task.total) * 100}%` }}
                                                         />
-                                                    </div>
-                                                    <p className="text-[10px] text-gray-400 mt-1">{task.progress}/{task.total} {task.unit}</p>
-                                                </div>
+                                                    </span>
+                                                    <span className="block text-[10px] text-gray-400 mt-1">{task.progress}/{task.total} {task.unit}</span>
+                                                </span>
                                             )}
-                                        </div>
-                                    </div>
+                                        </span>
+                                    </button>
                                 ))}
                             </div>
                         </div>
