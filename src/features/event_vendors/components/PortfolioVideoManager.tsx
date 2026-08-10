@@ -46,13 +46,13 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
                             <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
-                            <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-blue-600 hover:underline">{v}</a>
+                            <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-gray-900 hover:underline">{v}</a>
                             <ConfirmButton
                                 title="Remove this video?"
                                 description="This video will be taken off your public portfolio. This cannot be undone."
                                 confirmLabel="Remove video"
                                 onConfirm={() => remove(v)}
-                                className="shrink-0 rounded text-gray-400 transition hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                className="shrink-0 rounded text-gray-400 transition hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                             >
                                 <span className="sr-only">Remove video</span>
                                 <span aria-hidden="true">×</span>

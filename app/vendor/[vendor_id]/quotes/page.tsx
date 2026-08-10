@@ -122,7 +122,7 @@ export default async function VendorQuoteManagementPage({
                     {/* Header */}
                     <div className="flex items-start justify-between mb-8">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center ring-1 ring-indigo-100">
+                            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center ring-1 ring-gray-200">
                                 <span className="text-xl">📋</span>
                             </div>
                             <div>
@@ -174,7 +174,7 @@ export default async function VendorQuoteManagementPage({
                                         const isOrganizer = n?.from === "organizer";
                                         return (
                                             <div key={i} className="flex gap-3">
-                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-indigo-500'}`} />
+                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`} />
                                                 <div>
                                                     <p className="text-xs font-semibold text-gray-900">
                                                         {isOrganizer ? organizerName : "You (Vendor)"}

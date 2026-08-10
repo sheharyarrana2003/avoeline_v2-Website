@@ -276,9 +276,9 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                                 <p className="truncate text-xs font-semibold text-gray-400">
                                                     PKR {reg.amountPaid.toLocaleString("en-US")} •{" "}
                                                     <span className={`font-bold ${
-                                                        reg.status === "CONFIRMED" ? "text-emerald-600"
-                                                        : reg.status === "PENDING"  ? "text-amber-500"
-                                                        : "text-red-500"
+                                                        reg.status === "CONFIRMED" ? "text-gray-900"
+                                                        : reg.status === "PENDING"  ? "text-gray-900"
+                                                        : "text-gray-900"
                                                     }`}>{reg.status}</span>
                                                 </p>
                                             </div>
@@ -379,7 +379,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                         href={event.promoVideoUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:underline"
+                                        className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 hover:underline"
                                     >
                                         Watch promo video ↗
                                     </a>

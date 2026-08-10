@@ -5,17 +5,23 @@ import { TriangleAlert, HelpCircle } from "lucide-react";
 
 export type ConfirmTone = "danger" | "default";
 
+/**
+ * The two tones differ by the weight of the badge and by their icon, not by hue.
+ * Both confirm buttons are solid ink: the dialog itself is the safety mechanism,
+ * so making the destructive button quieter than the cancel button would just make
+ * it harder to find. Pass a `confirmLabel` that names the act ("Delete event",
+ * not "Confirm") -- that wording is the channel that actually prevents mistakes.
+ */
 const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: string }> = {
     danger: {
         icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-red-50 text-red-600 ring-1 ring-red-600/20",
-        confirm:
-            "bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600",
+        badge: "bg-gray-900 text-white ring-1 ring-gray-900",
+        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-gray-900",
     },
     default: {
         icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-gray-100 text-gray-600 ring-1 ring-gray-600/10",
-        confirm: "bg-black text-white hover:bg-gray-800 focus-visible:outline-black",
+        badge: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
+        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-gray-900",
     },
 };
 

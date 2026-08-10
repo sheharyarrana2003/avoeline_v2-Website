@@ -283,7 +283,7 @@ export default function BookingDetailClient({
                                         </p>
                                     </div>
                                     <div className="col-span-4 flex flex-wrap gap-2">
-                                        <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span className="text-[10px] bg-gray-50 text-gray-900 px-2 py-0.5 rounded-full flex items-center gap-1">
                                             <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                             </svg>
@@ -420,11 +420,11 @@ export default function BookingDetailClient({
                             <div className="space-y-4 mb-6">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">TechVerse (Client)</span>
-                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
+                                    <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">Vendor (You)</span>
-                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
+                                    <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
                                 </div>
                             </div>
 
@@ -475,10 +475,10 @@ export default function BookingDetailClient({
                                                 }
                                             </p>
                                             {inst.status !== 'paid' && (
-                                                <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">Due {formatDate(inst.dueDate)}</p>
+                                                <p className="text-[10px] text-gray-900 font-bold mt-1 uppercase">Due {formatDate(inst.dueDate)}</p>
                                             )}
                                         </div>
-                                        <span className={`text-sm font-bold ${inst.status === 'paid' ? 'text-gray-900' : 'text-red-600'}`}>
+                                        <span className={`text-sm font-bold ${inst.status === 'paid' ? 'text-gray-900' : 'text-gray-900'}`}>
                                             {formatCurrency(inst.amount, currency)}
                                         </span>
                                     </div>
@@ -499,7 +499,7 @@ export default function BookingDetailClient({
                                 <div className="flex-1">
                                     <p className="text-sm font-bold text-gray-900">TechVerse Admin</p>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                                        <span className="w-2 h-2 bg-gray-900 rounded-full" />
                                         <span className="text-xs text-gray-400">Online</span>
                                     </div>
                                 </div>

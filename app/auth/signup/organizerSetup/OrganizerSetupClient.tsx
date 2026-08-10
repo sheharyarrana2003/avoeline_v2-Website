@@ -75,7 +75,7 @@ export default function OrganizerSetupClient({
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-full px-4 py-2">
+        <p className="mb-4 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-full px-4 py-2">
           {error}
         </p>
       )}

@@ -144,7 +144,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                     ({count})
                                 </span>
                                 {tabDef.key === "all" && unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-gray-900" />
                                 )}
                             </Link>
                         );
@@ -175,7 +175,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                         style={{ position: "relative" }}
                                     >
                                         {isUnread && (
-                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-indigo-500" />
+                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-gray-900" />
                                         )}
                                         <div className="flex items-start gap-3 mb-2">
                                             <div

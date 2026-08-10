@@ -33,7 +33,7 @@ const getCategoryCount = (services: any[], category: string) => {
 
 const getServiceStatus = (service: any, index: number) => {
     // Mock status logic - first 2 active, rest inactive
-    if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-green-500 text-white' };
+    if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-gray-900 text-white' };
     return { status: 'inactive', label: 'INACTIVE', color: 'bg-white text-gray-500' };
 };
 
@@ -178,7 +178,7 @@ export default async function VendorServicesPage({
                                                     title="Delete this service?"
                                                     description={`"${service.name}" will be permanently removed from your profile. Organizers browsing the marketplace will no longer see it. This cannot be undone.`}
                                                     confirmLabel="Delete service"
-                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-red-600 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-gray-900 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                                                 >
                                                     <span className="sr-only">Delete {service.name}</span>
                                                     <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -295,7 +295,7 @@ export default async function VendorProfilePage({
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mb-4">
                                                                 {inclusions.map((item: string, i: number) => (
                                                                     <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                                                                        <svg aria-hidden="true" className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                         </svg>
                                                                         {item}

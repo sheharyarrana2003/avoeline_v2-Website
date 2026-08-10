@@ -5,9 +5,9 @@ import { MessageSquareText } from "lucide-react";
 import { EventFeedbackAnalysisRow } from "@/src/services/models/feedback.model";
 
 const SENTIMENT_STYLES: Record<string, string> = {
-    Positive: "bg-emerald-50 text-emerald-700",
-    Mixed: "bg-amber-50 text-amber-700",
-    Negative: "bg-rose-50 text-rose-700",
+    Positive: "bg-gray-50 text-gray-900",
+    Mixed: "bg-gray-50 text-gray-900",
+    Negative: "bg-gray-50 text-gray-900",
 };
 
 export default function EventFeedbackAnalysis({
@@ -72,7 +72,7 @@ export default function EventFeedbackAnalysis({
                     Analyzing feedback with AI...
                 </div>
             ) : error ? (
-                <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-rose-500">
+                <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-gray-900">
                     {error}
                 </div>
             ) : rows.length === 0 ? (

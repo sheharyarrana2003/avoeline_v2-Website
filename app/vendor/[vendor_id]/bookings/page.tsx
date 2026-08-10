@@ -309,7 +309,7 @@ export default async function VendorBookingsPage({
                                     {/* Review Badge (for completed) */}
                                     {isCompleted && (
                                         <div className="mb-4">
-                                            <span className="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2.5 py-1 rounded-full">
+                                            <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full">
                                                 Review Received
                                             </span>
                                         </div>

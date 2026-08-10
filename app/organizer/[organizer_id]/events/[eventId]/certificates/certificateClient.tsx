@@ -304,7 +304,7 @@ export default function CertificateIssuanceClient({
                                                         href={cert.digital.pdfUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-xs font-semibold text-blue-600 hover:underline"
+                                                        className="text-xs font-semibold text-gray-900 hover:underline"
                                                     >
                                                         View PDF
                                                     </a>
@@ -319,7 +319,7 @@ export default function CertificateIssuanceClient({
                                                             href={cert.blockchain.verificationUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-xs font-mono text-blue-600 hover:underline"
+                                                            className="text-xs font-mono text-gray-900 hover:underline"
                                                             title={cert.blockchain.transactionHash}
                                                         >
                                                             {truncateHash(cert.blockchain.transactionHash)}
@@ -336,17 +336,17 @@ export default function CertificateIssuanceClient({
                                             <td className="px-4 py-4">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     {social?.sharedOnLinkedIn && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             LinkedIn
                                                         </span>
                                                     )}
                                                     {social?.sharedOnTwitter && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             Twitter
                                                         </span>
                                                     )}
                                                     {social?.sharedOnFacebook && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             Facebook
                                                         </span>
                                                     )}
@@ -472,7 +472,7 @@ export default function CertificateIssuanceClient({
                                             className="w-fit"
                                         />
                                         {displayStatus.detail && (
-                                            <span className="text-[10px] text-red-500 line-clamp-2" title={displayStatus.detail}>
+                                            <span className="text-[10px] text-gray-900 line-clamp-2" title={displayStatus.detail}>
                                                 {displayStatus.detail}
                                             </span>
                                         )}

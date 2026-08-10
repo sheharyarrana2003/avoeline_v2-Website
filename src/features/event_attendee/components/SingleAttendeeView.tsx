@@ -341,7 +341,7 @@ export function SingleAttendeeView({
                         )}
 
                         {discount && (
-                            <div className="flex justify-between items-center bg-emerald-50 text-emerald-700 font-bold px-3 py-2 rounded-xl">
+                            <div className="flex justify-between items-center bg-gray-50 text-gray-900 font-bold px-3 py-2 rounded-xl">
                                 <span className="flex items-center gap-1.5">
                                     <Tag size={12} /> {discount.type} Discount
                                 </span>
@@ -360,7 +360,7 @@ export function SingleAttendeeView({
                         </div>
 
                         {finalPrice > amountPaid && (
-                            <div className="flex justify-between items-center text-red-500 font-semibold">
+                            <div className="flex justify-between items-center text-gray-900 font-semibold">
                                 <span>Balance Due</span>
                                 <span>{formatCurrency(finalPrice - amountPaid, currency)}</span>
                             </div>

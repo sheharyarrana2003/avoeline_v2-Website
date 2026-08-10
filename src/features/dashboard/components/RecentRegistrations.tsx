@@ -34,10 +34,10 @@ export default function RecentRegistrations({ registerations }: { registerations
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       registration.status === "CONFIRMED"
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                        ? "bg-gray-100 text-gray-900 border border-gray-200"
                         : registration.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                          : "bg-rose-100 text-rose-800 border border-rose-200"
+                          ? "bg-gray-100 text-gray-900 border border-gray-200"
+                          : "bg-gray-100 text-gray-900 border border-gray-200"
                     }`}
                   >
                     {registration.status}

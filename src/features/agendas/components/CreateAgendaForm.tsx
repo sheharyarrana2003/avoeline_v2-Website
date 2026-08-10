@@ -45,7 +45,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
 
             {/* Error Banner */}
             {state?.error && (
-                <div className="mx-8 mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                <div className="mx-8 mt-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900">
                     <AlertCircle size={16} />
                     {state.error}
                 </div>
@@ -58,14 +58,14 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                     {/* Session Title */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Session Title <span className="text-red-400">*</span>
+                            Session Title <span className="text-gray-900">*</span>
                         </label>
                         <input
                             type="text"
                             name="title"
                             required
                             placeholder="e.g., Opening Ceremony"
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder-gray-400"
                         />
                     </div>
 
@@ -73,13 +73,13 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Session Type <span className="text-red-400">*</span>
+                                Session Type <span className="text-gray-900">*</span>
                             </label>
                             <div className="relative">
                                 <select
                                     name="sessionType"
                                     required
-                                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 text-gray-700 appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 text-gray-700 appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-gray-900"
                                 >
                                     <option value="talk">Talk</option>
                                     <option value="workshop">Workshop</option>
@@ -104,7 +104,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                             <div className="relative">
                                 <select
                                     name="status"
-                                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 text-gray-700 appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 text-gray-700 appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-gray-900"
                                 >
                                     <option value="confirmed">Confirmed</option>
                                     <option value="tentative">Tentative</option>
@@ -122,7 +122,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Date <span className="text-red-400">*</span>
+                                Date <span className="text-gray-900">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -131,13 +131,13 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                                 <DateField
                                     name="date"
                                     required
-                                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900"
                                 />
                             </div>
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Start Time <span className="text-red-400">*</span>
+                                Start Time <span className="text-gray-900">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -147,7 +147,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                                     type="time"
                                     name="startTime"
                                     required
-                                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900"
                                 />
                             </div>
                         </div>
@@ -156,7 +156,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                     {/* End Time */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                            End Time <span className="text-red-400">*</span>
+                            End Time <span className="text-gray-900">*</span>
                         </label>
                         <div className="relative w-full md:w-1/2">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -166,7 +166,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                                 type="time"
                                 name="endTime"
                                 required
-                                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900"
                             />
                         </div>
                     </div>
@@ -184,7 +184,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                                 type="text"
                                 name="location"
                                 placeholder="e.g., Main Hall A"
-                                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900"
                             />
                         </div>
                     </div>
@@ -212,7 +212,7 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                             name="description"
                             rows={3}
                             placeholder="Provide a brief overview of what attendees can expect..."
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 placeholder-gray-400 resize-none"
                         />
                     </div>
                 </div>

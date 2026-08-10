@@ -63,7 +63,7 @@ export function ProfileEventsTabs({
                         <li key={event.id} className="group">
                             <Link href={`${basePath}/events/${event.id}`} className="block">
                                 <div className="flex items-center justify-between gap-3">
-                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-gray-900">
                                         {event.title}
                                     </h3>
                                     <span className="shrink-0 text-xs font-semibold text-gray-400">

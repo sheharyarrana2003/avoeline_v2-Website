@@ -118,7 +118,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 <div className="border border-gray-100 rounded-xl p-4">
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Delivery Schedule</p>
                                     <p className="font-bold text-lg">{formatTime(raw_booking?.delivery?.scheduledTime || "")}</p>
-                                    <p className="text-[10px] font-bold text-green-600 mt-2 flex items-center gap-1">
+                                    <p className="text-[10px] font-bold text-gray-900 mt-2 flex items-center gap-1">
                                         <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                                         ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime || "")}
                                     </p>
@@ -151,7 +151,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 {raw_booking?.payment?.paymentSchedule?.map((installment: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl bg-gray-50">
                                         <div className="flex items-center gap-2">
-                                            <svg aria-hidden="true" className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                            <svg aria-hidden="true" className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-gray-900' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                             <span className="text-sm font-medium">{installment?.installment || 'Unknown'} Installment</span>
                                         </div>
                                         {installment?.status === 'paid'

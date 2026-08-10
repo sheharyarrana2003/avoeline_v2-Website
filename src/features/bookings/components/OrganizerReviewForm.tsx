@@ -65,7 +65,7 @@ export function OrganizerReviewForm({
                             className="p-0.5 transition-transform hover:scale-110"
                         >
                             <svg aria-hidden="true"
-                                className={`h-7 w-7 ${star <= shown ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"}`}
+                                className={`h-7 w-7 ${star <= shown ? "fill-gray-900 text-gray-900" : "fill-gray-200 text-gray-200"}`}
                                 viewBox="0 0 20 20"
                             >
                                 <path d={STAR_PATH} />
@@ -91,7 +91,7 @@ export function OrganizerReviewForm({
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
             />
 
-            {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+            {error && <p className="text-sm font-medium text-gray-900">{error}</p>}
 
             <button
                 type="button"

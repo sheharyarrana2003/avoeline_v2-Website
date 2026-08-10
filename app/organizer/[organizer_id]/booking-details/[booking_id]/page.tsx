@@ -16,7 +16,7 @@ function Stars({ rating }: { rating: number }) {
     return (
         <div className="flex">
             {[1, 2, 3, 4, 5].map((s) => (
-                <svg aria-hidden="true" key={s} className={`h-4 w-4 ${s <= rating ? "fill-yellow-400" : "fill-gray-200"}`} viewBox="0 0 20 20">
+                <svg aria-hidden="true" key={s} className={`h-4 w-4 ${s <= rating ? "fill-gray-900" : "fill-gray-200"}`} viewBox="0 0 20 20">
                     <path d={STAR_PATH} />
                 </svg>
             ))}
@@ -194,7 +194,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
                                 {raw_booking?.payment?.paymentSchedule?.map((installment: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl bg-gray-50">
                                         <div className="flex items-center gap-2">
-                                            <svg aria-hidden="true" className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                            <svg aria-hidden="true" className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-gray-900' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                             <span className="text-sm font-medium">{installment?.installment || 'Unknown'} Installment</span>
                                         </div>
                                         {installment?.status === 'paid'

@@ -108,7 +108,7 @@ export function MediaUpload({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {error && <p className="mt-1 text-xs font-medium text-red-600">⚠️ {error}</p>}
+      {error && <p className="mt-1 text-xs font-medium text-gray-900">⚠️ {error}</p>}
     </div>
   );
 }

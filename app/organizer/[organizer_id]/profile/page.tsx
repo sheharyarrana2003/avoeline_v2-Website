@@ -60,7 +60,7 @@ function Field({ label, value, badge }: { label: string; value: string; badge?: 
                     {value || "—"}
                 </div>
                 {badge && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded bg-green-50 px-2 py-0.5 text-xs font-bold text-green-600">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded bg-gray-50 px-2 py-0.5 text-xs font-bold text-gray-900">
                         {badge}
                     </span>
                 )}
@@ -142,7 +142,7 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                     {organizer.organization.name || organizer.contact.primaryEmail}
                                 </h1>
                                 {organizer.verification.isVerified && (
-                                    <BadgeCheck size={20} className="shrink-0 text-blue-500" />
+                                    <BadgeCheck size={20} className="shrink-0 text-gray-900" />
                                 )}
                             </div>
                             <p className="mb-4 text-sm capitalize text-gray-500">{organizer.organization.type}</p>
@@ -190,10 +190,10 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                 {/* RIGHT COLUMN */}
                 <div className="space-y-6 lg:col-span-8">
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <TopStat icon={<CalendarDays size={18} className="text-indigo-600" />} value={String(stats.upcomingEvents)} label="Upcoming" tone="bg-indigo-50" />
-                        <TopStat icon={<ShieldCheck size={18} className="text-green-600" />} value={String(stats.completedEvents)} label="Completed" tone="bg-green-50" />
-                        <TopStat icon={<TrendingUp size={18} className="text-violet-600" />} value={String(stats.publishedEvents)} label="Published" tone="bg-violet-50" />
-                        <TopStat icon={<Star size={18} className="text-amber-500" />} value={stats.averageAttendeesPerEvent.toFixed(0)} label="Avg/Event" tone="bg-amber-50" />
+                        <TopStat icon={<CalendarDays size={18} className="text-gray-900" />} value={String(stats.upcomingEvents)} label="Upcoming" tone="bg-gray-50" />
+                        <TopStat icon={<ShieldCheck size={18} className="text-gray-900" />} value={String(stats.completedEvents)} label="Completed" tone="bg-gray-50" />
+                        <TopStat icon={<TrendingUp size={18} className="text-gray-900" />} value={String(stats.publishedEvents)} label="Published" tone="bg-gray-50" />
+                        <TopStat icon={<Star size={18} className="text-gray-900" />} value={stats.averageAttendeesPerEvent.toFixed(0)} label="Avg/Event" tone="bg-gray-50" />
                     </div>
 
                     {/* Account Settings */}
@@ -232,7 +232,7 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <SectionTitle icon={<ShieldCheck size={18} />} title="Verification Status" />
                         <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-4">
-                            <BadgeCheck size={22} className={organizer.verification.isVerified ? "text-green-500" : "text-gray-400"} />
+                            <BadgeCheck size={22} className={organizer.verification.isVerified ? "text-gray-900" : "text-gray-400"} />
                             <div>
                                 <p className="text-sm font-bold text-gray-900">
                                     {organizer.verification.isVerified ? "Verified" : "Unverified"}

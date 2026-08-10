@@ -224,7 +224,7 @@ export default function MakingTemplateUi({
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded text-xs font-semibold shadow transition"
+                        className="px-3 py-1.5 bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-xs font-semibold shadow transition"
                     >
                         {isSaving ? "Saving..." : "Save"}
                     </button>
@@ -576,7 +576,7 @@ export default function MakingTemplateUi({
                                 type="checkbox"
                                 checked={template.blockchain?.enabled ?? false}
                                 onChange={(e) => setBlockchain("enabled", e.target.checked)}
-                                className="w-4 h-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500 cursor-pointer"
+                                className="w-4 h-4 text-gray-900 rounded border-stone-300 focus:ring-gray-900 cursor-pointer"
                             />
                         </div>
 

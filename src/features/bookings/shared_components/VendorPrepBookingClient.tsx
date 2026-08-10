@@ -468,7 +468,7 @@ export default function PrepareQuoteClient({
                                                 onClick={() =>
                                                     removeItem(item.id)
                                                 }
-                                                className="text-gray-300 hover:text-red-500 transition"
+                                                className="text-gray-300 hover:text-gray-900 transition"
                                             >
                                                 <svg aria-hidden="true"
                                                     className="w-4 h-4"
@@ -665,7 +665,7 @@ export default function PrepareQuoteClient({
                                     <span className="text-sm text-gray-500">
                                         Discount
                                     </span>
-                                    <span className="text-sm font-semibold text-emerald-600">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         -
                                         {formatCurrency(discountAmount, currency)}
                                     </span>
