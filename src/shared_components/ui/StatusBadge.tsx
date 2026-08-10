@@ -19,7 +19,10 @@ import { statusMeta, type StatusTone } from "@/src/lib/status";
 const TONE: Record<StatusTone, { box: string; label: string; Icon: LucideIcon | null }> = {
     success: { box: "bg-gray-900 text-white border-gray-900", label: "", Icon: Check },
     danger: { box: "bg-white text-gray-900 border-gray-900", label: "line-through", Icon: X },
-    warning: { box: "bg-white text-gray-700 border-gray-400 border-dashed", label: "", Icon: Clock },
+    // gray-500, not gray-400: the dashed border is one of the three channels that
+    // replaces hue, so it has to clear WCAG 1.4.11's 3:1 for UI components. gray-400
+    // measures 2.58:1 on white and fails; gray-500 is 4.74:1.
+    warning: { box: "bg-white text-gray-700 border-gray-500 border-dashed", label: "", Icon: Clock },
     info: { box: "bg-gray-100 text-gray-700 border-gray-200", label: "", Icon: Loader },
     neutral: { box: "bg-transparent text-gray-500 border-gray-200", label: "", Icon: null },
 };
