@@ -1,8 +1,7 @@
 import { EventService } from "@/src/services/event.service";
-import { EventModel, EventStatus } from "@/src/services/models/event.model";
+import { EventModel } from "@/src/services/models/event.model";
 import {
     CalendarDays,
-    Eye,
     MapPin,
     MoreHorizontal,
     Star,
@@ -22,6 +21,9 @@ import { RecentRegistration } from '@/src/features/dashboard/types';
 import { isVideoUrl } from "@/src/features/media/media.utils";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
     const event: EventModel | null = await EventService.getEventByID(eventId);
@@ -44,26 +46,26 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
     const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
 
     return (
-        <main className="px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+        <main className="px-4 py-6 text-gray-950 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl space-y-8">
                 {/* Header */}
                 <header className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-4">
-                        <h1 className="truncate text-2xl font-extrabold uppercase tracking-tight text-slate-950">
+                        <h1 className="truncate text-2xl font-extrabold uppercase tracking-tight text-gray-950">
                             {event.title}
                         </h1>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                        <StatusPill status={event.status} />
+                        <StatusBadge status={event.status} size="md" className="h-8 px-4 text-xs" />
                       
                     </div>
                 </header>
 
                 {/* Hero Banner — banners are square (1080×1080), so it's shown at 1:1
                     beside the event facts rather than cropped into a wide strip. */}
-                <section className="overflow-hidden rounded-3xl bg-slate-950 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                <section className="overflow-hidden rounded-3xl bg-gray-950 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
                     <div className="flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center">
-                        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 sm:w-64 md:w-72 lg:w-80">
+                        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-gray-900 sm:w-64 md:w-72 lg:w-80">
                             {event.bannerImage ? (
                                 <img
                                     src={event.bannerImage}
@@ -118,7 +120,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     />
                     <MetricCard
                         label="Revenue"
-                        value={`${event.pricing?.currency} ${revenue.toLocaleString("en-US")}`}
+                        value={formatCurrency(revenue, event.pricing?.currency)}
                         helper={`${revenuePercent}% of Target`}
                         progress={revenuePercent}
                     />
@@ -138,10 +140,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         {/* Two-Column Info Cards Subgrid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Schedule Box */}
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <Clock size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Schedule</h2>
+                                    <Clock size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Schedule</h2>
                                 </div>
                                 <div className="space-y-4">
                                     <InfoBlock label="Start Date" value={formatDate(event.schedule?.startDate)} />
@@ -154,10 +156,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             </article>
 
                             {/* Location Box */}
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <MapPin size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Location</h2>
+                                    <MapPin size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Location</h2>
                                 </div>
                                 <div className="space-y-4">
                                     <InfoBlock label="Venue" value={event.location?.venueName} />
@@ -170,10 +172,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             </article>
 
                             {/* Capacity Box */}
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <Users size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Capacity</h2>
+                                    <Users size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Capacity</h2>
                                 </div>
                                 <div className="space-y-4">
                                     <InfoBlock label="Total Seats" value={event.capacity.totalSeats.toLocaleString("en-US")} />
@@ -183,10 +185,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             </article>
 
                             {/* Registration Box */}
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <UserCheck size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Registration</h2>
+                                    <UserCheck size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Registration</h2>
                                 </div>
                                 <div className="space-y-4">
                                     <InfoBlock label="Opens" value={formatDate(event.registration?.registrationOpenDate)} />
@@ -197,36 +199,36 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         </div>
 
                         {/* Pricing & Tickets Box (Spanned beautifully below the subgrid) */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                        <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <div className="flex items-center gap-2 mb-5">
-                                <Ticket size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Pricing & Tickets</h2>
+                                <Ticket size={18} className="text-gray-400" />
+                                <h2 className="text-lg font-extrabold uppercase text-gray-950">Pricing & Tickets</h2>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <InfoBlock label="Free Event" value={event.pricing?.isFree ? "Yes" : "No"} />
                                     <InfoBlock label="Currency" value={event.pricing?.currency} />
                                     {(event.pricing?.studentDiscount || event.pricing?.groupDiscount) && (
-                                        <div className="pt-4 border-t border-slate-100 space-y-1">
-                                            <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1">Available Discounts</h4>
+                                        <div className="pt-4 border-t border-gray-100 space-y-1">
+                                            <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-1">Available Discounts</h4>
                                             {event.pricing?.studentDiscount?.enabled && (
-                                                <p className="text-sm font-semibold text-slate-700">Student: {event.pricing.studentDiscount.percentage}% off</p>
+                                                <p className="text-sm font-semibold text-gray-700">Student: {event.pricing.studentDiscount.percentage}% off</p>
                                             )}
                                             {event.pricing?.groupDiscount?.enabled && (
-                                                <p className="text-sm font-semibold text-slate-700">Group ({event.pricing.groupDiscount.minGroupSize}+): {event.pricing.groupDiscount.percentage}% off</p>
+                                                <p className="text-sm font-semibold text-gray-700">Group ({event.pricing.groupDiscount.minGroupSize}+): {event.pricing.groupDiscount.percentage}% off</p>
                                             )}
                                         </div>
                                     )}
                                 </div>
                                 {event.pricing?.tiers && event.pricing.tiers.length > 0 && (
-                                    <div className="border-t pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-6 border-slate-100">
-                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Ticket Tiers</h4>
+                                    <div className="border-t pt-4 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-6 border-gray-100">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-3">Ticket Tiers</h4>
                                         <div className="space-y-3">
                                             {event.pricing.tiers.map((tier, index) => (
-                                                <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{tier.name}</p>
-                                                    <p className="text-base font-extrabold text-slate-950">{event.pricing?.currency} {tier.price.toLocaleString("en-US")}</p>
-                                                    <p className="text-xs text-slate-500">Until {formatDate(tier.availableUntil)} • {tier.seats} seats</p>
+                                                <div key={index} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                                    <p className="text-xs font-extrabold uppercase tracking-wider text-gray-400">{tier.name}</p>
+                                                    <p className="text-base font-extrabold text-gray-950">{event.pricing?.currency} {tier.price.toLocaleString("en-US")}</p>
+                                                    <p className="text-xs text-gray-500">Until {formatDate(tier.availableUntil)} • {tier.seats} seats</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -236,14 +238,14 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         </article>
 
                         {/* Description Box */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                        <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <div className="flex items-center gap-2 mb-5">
-                                <FileText size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Event Description</h2>
+                                <FileText size={18} className="text-gray-400" />
+                                <h2 className="text-lg font-extrabold uppercase text-gray-950">Event Description</h2>
                             </div>
-                            <div className="space-y-4 text-base font-semibold leading-7 text-slate-600">
+                            <div className="space-y-4 text-base font-semibold leading-7 text-gray-600">
                                 <p>{event.description}</p>
-                                <p className="text-sm italic text-slate-400">{event.shortDescription}</p>
+                                <p className="text-sm italic text-gray-400">{event.shortDescription}</p>
                             </div>
                         </article>
                     </div>
@@ -251,27 +253,27 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     {/* Right Column Sidebar Stack */}
                     <div className="space-y-6">
                         {/* Recent Registrations Sidebar */}
-                        <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                        <aside className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <div className="mb-6 flex items-center justify-between">
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Recent Registrations</h2>
-                                <Link href="#" className="text-xs font-extrabold uppercase tracking-widest text-slate-400 hover:text-slate-950 transition">
+                                <h2 className="text-lg font-extrabold uppercase text-gray-950">Recent Registrations</h2>
+                                <Link href="#" className="text-xs font-extrabold uppercase tracking-widest text-gray-400 hover:text-gray-950 transition">
                                     View All
                                 </Link>
                             </div>
                             <ul className="space-y-4">
                                 {recentRegistrations.length === 0 ? (
-                                    <li className="text-sm font-semibold text-slate-400 text-center py-4">
+                                    <li className="text-sm font-semibold text-gray-400 text-center py-4">
                                         No registrations yet.
                                     </li>
                                 ) : (
                                     recentRegistrations.map((reg, index) => (
                                         <li key={reg.id} className="flex items-center gap-4">
-                                            <span className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-xs font-extrabold text-slate-600">
+                                            <span className="flex size-10 items-center justify-center rounded-full bg-gray-100 text-xs font-extrabold text-gray-600">
                                                 {index + 1}
                                             </span>
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-extrabold text-slate-950">{reg.attendeeName}</p>
-                                                <p className="truncate text-xs font-semibold text-slate-400">
+                                                <p className="truncate text-sm font-extrabold text-gray-950">{reg.attendeeName}</p>
+                                                <p className="truncate text-xs font-semibold text-gray-400">
                                                     PKR {reg.amountPaid.toLocaleString("en-US")} •{" "}
                                                     <span className={`font-bold ${
                                                         reg.status === "CONFIRMED" ? "text-emerald-600"
@@ -287,10 +289,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         </aside>
 
                         {/* Timestamps Card */}
-                        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                        <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                             <div className="flex items-center gap-2 mb-5">
-                                <Clock size={18} className="text-slate-400" />
-                                <h2 className="text-lg font-extrabold uppercase text-slate-950">Timestamps</h2>
+                                <Clock size={18} className="text-gray-400" />
+                                <h2 className="text-lg font-extrabold uppercase text-gray-950">Timestamps</h2>
                             </div>
                             <div className="space-y-4">
                                 <InfoBlock label="Created At" value={formatDateTime(event.createdAt)} />
@@ -302,10 +304,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
                         {/* Speakers & Certificate Card Stacked Together */}
                         {event.speakers && event.speakers.length > 0 && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <Users size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Speakers</h2>
+                                    <Users size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Speakers</h2>
                                 </div>
                                 <div className="space-y-3">
                                     {event.speakers.map((speaker) => (
@@ -313,13 +315,13 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                             {speaker.profileImage ? (
                                                 <img src={speaker.profileImage} alt={speaker.name} loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
                                             ) : (
-                                                <div className="flex size-8 items-center justify-center rounded-full bg-slate-200 text-xs font-extrabold text-slate-500">
+                                                <div className="flex size-8 items-center justify-center rounded-full bg-gray-200 text-xs font-extrabold text-gray-500">
                                                     {speaker.name.charAt(0)}
                                                 </div>
                                             )}
                                             <div className="min-w-0">
-                                                <p className="truncate text-sm font-extrabold text-slate-950">{speaker.name}</p>
-                                                <p className="truncate text-xs font-semibold text-slate-400">{speaker.designation}</p>
+                                                <p className="truncate text-sm font-extrabold text-gray-950">{speaker.name}</p>
+                                                <p className="truncate text-xs font-semibold text-gray-400">{speaker.designation}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -328,10 +330,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         )}
 
                         {event.certificateConfig && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <Award size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Certificate</h2>
+                                    <Award size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Certificate</h2>
                                 </div>
                                 <div className="space-y-3">
                                     <InfoBlock label="Issue Certificates" value={event.certificateConfig.issueCertificates ? "Yes" : "No"} />
@@ -343,14 +345,14 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
                         {/* Gallery */}
                         {event.galleryImages && event.galleryImages.length > 0 && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <ImageIcon size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Gallery</h2>
+                                    <ImageIcon size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Gallery</h2>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     {event.galleryImages.map((url: string, i: number) => (
-                                        <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+                                        <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
                                             {isVideoUrl(url) ? (
                                                 <video src={url} controls className="h-full w-full object-cover" />
                                             ) : (
@@ -365,10 +367,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
                         {/* Promo Video */}
                         {event.promoVideoUrl && (
-                            <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                            <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center gap-2 mb-5">
-                                    <ImageIcon size={18} className="text-slate-400" />
-                                    <h2 className="text-lg font-extrabold uppercase text-slate-950">Promo Video</h2>
+                                    <ImageIcon size={18} className="text-gray-400" />
+                                    <h2 className="text-lg font-extrabold uppercase text-gray-950">Promo Video</h2>
                                 </div>
                                 {isVideoUrl(event.promoVideoUrl) ? (
                                     <video src={event.promoVideoUrl} controls className="w-full rounded-xl bg-black" />
@@ -396,14 +398,6 @@ function getPercent(value: number, total: number) {
     return Math.min(100, Math.round((value / total) * 100));
 }
 
-function StatusPill({ status }: { status: EventStatus }) {
-    return (
-        <span className="inline-flex h-8 items-center gap-2 rounded-full bg-black px-4 text-xs font-extrabold uppercase tracking-wider text-white">
-            <Eye size={14} />
-            {status.replace("-", " ")}
-        </span>
-    );
-}
 
 function MetricCard({
     label,
@@ -423,13 +417,13 @@ function MetricCard({
     rating?: boolean;
 }) {
     return (
-        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
-            <p className="text-sm font-extrabold text-slate-400">{label}</p>
+        <article className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+            <p className="text-sm font-extrabold text-gray-400">{label}</p>
             <div className="mt-4 flex items-end gap-1">
-                <p className="text-3xl font-extrabold leading-none text-slate-950">{value}</p>
-                {suffix && <span className="text-xl font-bold text-slate-300">{suffix}</span>}
+                <p className="text-3xl font-extrabold leading-none text-gray-950">{value}</p>
+                {suffix && <span className="text-xl font-bold text-gray-300">{suffix}</span>}
                 {rating && (
-                    <span className="mb-1 ml-1 flex text-slate-950">
+                    <span className="mb-1 ml-1 flex text-gray-950">
                         {Array.from({ length: 5 }).map((_, index) => (
                             <Star key={index} size={14} />
                         ))}
@@ -441,17 +435,17 @@ function MetricCard({
                     {[45, 62, 74, 100, 68].map((height, index) => (
                         <span
                             key={height}
-                            className={`flex-1 rounded-t-sm ${index === 3 ? "bg-black" : "bg-slate-300"}`}
+                            className={`flex-1 rounded-t-sm ${index === 3 ? "bg-black" : "bg-gray-300"}`}
                             style={{ height: `${height}%` }}
                         />
                     ))}
                 </div>
             ) : progress !== undefined ? (
-                <div className="mt-6 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-6 h-2 overflow-hidden rounded-full bg-gray-100">
                     <div className="h-full rounded-full bg-black" style={{ width: `${progress}%` }} />
                 </div>
             ) : null}
-            <p className="mt-4 text-sm font-extrabold text-slate-600">{helper}</p>
+            <p className="mt-4 text-sm font-extrabold text-gray-600">{helper}</p>
         </article>
     );
 }
@@ -459,8 +453,8 @@ function MetricCard({
 function InfoBlock({ label, value }: { label: string | null; value: string | null }) {
     return (
         <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">{label}</p>
-            <p className="mt-1 font-extrabold text-slate-950 break-words">{value ?? "N/A"}</p>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">{label}</p>
+            <p className="mt-1 font-extrabold text-gray-950 break-words">{value ?? "N/A"}</p>
         </div>
     );
 }

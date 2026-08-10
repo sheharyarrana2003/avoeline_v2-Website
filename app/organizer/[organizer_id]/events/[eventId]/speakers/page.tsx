@@ -50,7 +50,7 @@ export default async function SpeakerPage(
                         href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
                         className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                        <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                         Add Speaker
                     </Link>
                 </div>

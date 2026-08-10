@@ -5,7 +5,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatDate, formatTime } from "@/src/lib/datetime";
+import { formatDate, formatTime, timeAgo } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 // --- Types ---
 interface Task {
@@ -62,38 +64,6 @@ interface InitialData {
 }
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
-const timeAgo = (timestamp: string) => {
-    if (!timestamp) return "Recently";
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-};
-
-const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-        'quote_requested': 'bg-gray-100 text-gray-600',
-        'quote_sent': 'bg-yellow-100 text-yellow-700',
-        'quote_accepted': 'bg-blue-100 text-blue-700',
-        'confirmed': 'bg-green-100 text-green-700',
-        'in_progress': 'bg-purple-100 text-purple-700',
-        'completed': 'bg-gray-100 text-gray-500',
-        'cancelled': 'bg-red-100 text-red-700',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600';
-};
-
 export default function BookingDetailClient({ 
     organizerId, 
     initialData 
@@ -129,6 +99,8 @@ export default function BookingDetailClient({
     });
 
     const [newMessage, setNewMessage] = useState("");
+    const [newTask, setNewTask] = useState("");
+    const [addingTask, setAddingTask] = useState(false);
 
     const completedTasks = tasks.filter(t => t.completed).length;
     const taskProgress = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
@@ -147,15 +119,14 @@ export default function BookingDetailClient({
         ));
     };
 
+    // An inline field rather than window.prompt(): the native dialog is
+    // unstyleable, blocks the page, and gives no way to cancel gracefully.
     const addTask = () => {
-        const label = prompt("Enter task name:");
-        if (label) {
-            setTasks(prev => [...prev, { 
-                id: Date.now().toString(), 
-                label, 
-                completed: false 
-            }]);
-        }
+        const label = newTask.trim();
+        if (!label) return;
+        setTasks(prev => [...prev, { id: Date.now().toString(), label, completed: false }]);
+        setNewTask("");
+        setAddingTask(false);
     };
 
     const sendMessage = () => {
@@ -172,7 +143,7 @@ export default function BookingDetailClient({
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             
             {/* Top Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -182,7 +153,7 @@ export default function BookingDetailClient({
                             href={`/organizer/${organizerId}/bookings`}
                             className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </Link>
@@ -192,11 +163,9 @@ export default function BookingDetailClient({
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(status)}`}>
-                            Preparation Status
-                        </span>
+                        <StatusBadge status={status} size="md" className="px-4 py-1.5 text-xs" />
                         <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
@@ -213,7 +182,7 @@ export default function BookingDetailClient({
                         {/* EVENT LOGISTICS */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-5 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 Event Logistics
@@ -222,7 +191,7 @@ export default function BookingDetailClient({
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <div>
@@ -233,7 +202,7 @@ export default function BookingDetailClient({
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div>
@@ -244,7 +213,7 @@ export default function BookingDetailClient({
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
@@ -257,7 +226,7 @@ export default function BookingDetailClient({
 
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                         <div>
@@ -266,7 +235,7 @@ export default function BookingDetailClient({
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         <div>
@@ -289,7 +258,7 @@ export default function BookingDetailClient({
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="p-6 flex items-center justify-between">
                                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Agreed Services
@@ -315,7 +284,7 @@ export default function BookingDetailClient({
                                     </div>
                                     <div className="col-span-4 flex flex-wrap gap-2">
                                         <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                             </svg>
                                             Included
@@ -343,24 +312,48 @@ export default function BookingDetailClient({
                             <div className="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
                                         Preparation Checklist
                                     </h3>
                                     <p className="text-xs text-gray-400 mt-1">{taskProgress}% of preparation tasks completed</p>
                                 </div>
-                                <button 
-                                    onClick={addTask}
+                                <button
+                                    type="button"
+                                    onClick={() => setAddingTask(true)}
                                     className="bg-black text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1 hover:bg-gray-800 transition"
                                 >
                                     <span>+</span> Add Task
                                 </button>
                             </div>
 
+                            {addingTask && (
+                                <form
+                                    onSubmit={(e) => { e.preventDefault(); addTask(); }}
+                                    className="mb-4 flex gap-2"
+                                >
+                                    <input
+                                        autoFocus
+                                        value={newTask}
+                                        onChange={(e) => setNewTask(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === "Escape") { setAddingTask(false); setNewTask(""); } }}
+                                        placeholder="What needs doing?"
+                                        aria-label="New task"
+                                        className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-200"
+                                    />
+                                    <button type="submit" disabled={!newTask.trim()} className="rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-40">
+                                        Add
+                                    </button>
+                                    <button type="button" onClick={() => { setAddingTask(false); setNewTask(""); }} className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
+                                        Cancel
+                                    </button>
+                                </form>
+                            )}
+
                             {/* Progress Bar */}
                             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-6">
-                                <div 
+                                <div
                                     className="h-full bg-black rounded-full transition-all duration-500"
                                     style={{ width: `${taskProgress}%` }}
                                 />
@@ -369,43 +362,48 @@ export default function BookingDetailClient({
                             {/* Tasks Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {tasks.map((task) => (
-                                    <div 
+                                    <button
+                                        type="button"
                                         key={task.id}
                                         onClick={() => toggleTask(task.id)}
-                                        className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${
-                                            task.completed 
-                                                ? 'bg-gray-50 border-gray-100' 
+                                        aria-pressed={task.completed}
+                                        className={`w-full text-left flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${
+                                            task.completed
+                                                ? 'bg-gray-50 border-gray-100'
                                                 : 'bg-white border-gray-200 hover:border-gray-300'
                                         }`}
                                     >
-                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                            task.completed 
-                                                ? 'bg-black border-black' 
+                                        <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                            task.completed
+                                                ? 'bg-black border-black'
                                                 : 'border-gray-300'
                                         }`}>
                                             {task.completed && (
-                                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg aria-hidden="true" className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                                        </span>
+                                        {/* Spans, not divs and paragraphs: this is a
+                                            <button> now, so its content has to stay
+                                            phrasing content to be valid. */}
+                                        <span className="flex-1 min-w-0 block">
+                                            <span className={`block text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
                                                 {task.label}
-                                            </p>
+                                            </span>
                                             {task.progress !== undefined && task.total && (
-                                                <div className="mt-2">
-                                                    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className="h-full bg-black rounded-full"
+                                                <span className="mt-2 block">
+                                                    <span className="block h-1 bg-gray-100 rounded-full overflow-hidden">
+                                                        <span
+                                                            className="block h-full bg-black rounded-full"
                                                             style={{ width: `${(task.progress / task.total) * 100}%` }}
                                                         />
-                                                    </div>
-                                                    <p className="text-[10px] text-gray-400 mt-1">{task.progress}/{task.total} {task.unit}</p>
-                                                </div>
+                                                    </span>
+                                                    <span className="block text-[10px] text-gray-400 mt-1">{task.progress}/{task.total} {task.unit}</span>
+                                                </span>
                                             )}
-                                        </div>
-                                    </div>
+                                        </span>
+                                    </button>
                                 ))}
                             </div>
                         </div>
@@ -452,7 +450,7 @@ export default function BookingDetailClient({
                                     className="w-full block text-center bg-black text-white py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition"
                                 >
                                     <span className="flex items-center justify-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         View Contract PDF
@@ -539,7 +537,7 @@ export default function BookingDetailClient({
                                     onClick={sendMessage}
                                     className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
                                 >
-                                    <svg className="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                     </svg>
                                 </button>

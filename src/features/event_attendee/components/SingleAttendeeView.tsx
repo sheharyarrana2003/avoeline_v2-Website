@@ -12,6 +12,10 @@ import {
 import { useState } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
 import { formatDateTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
+import { statusMeta } from "@/src/lib/status";
+import { useToast } from "@/src/shared_components/ui/Toast";
+import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
 
 interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
@@ -36,10 +40,13 @@ const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
     "refunded",
 ];
 
-function formatCurrency(amount: number | null | undefined, currency: string) {
-    const value = amount ?? 0;
-    return `${currency} ${value.toLocaleString("en-US")}`;
-}
+/**
+ * Values worth stopping for. These were one scroll-wheel tick away on a
+ * focused <select> that wrote straight to Firestore -- cancelling a
+ * registration or marking a payment refunded took a single accidental gesture.
+ */
+const SERIOUS_STATUS = new Set<string>(["cancelled", "no_show"]);
+const SERIOUS_PAYMENT = new Set<string>(["refunded", "failed"]);
 
 export function SingleAttendeeView({ 
     combined_data, 
@@ -54,6 +61,10 @@ export function SingleAttendeeView({
     // State for local registration updates
     const [registration, setRegistration] = useState<Registration>(r);
     const [isUpdating, setIsUpdating] = useState(false);
+    // A change waiting on the confirmation dialog. The selects stay controlled
+    // by `registration`, so cancelling snaps them back on its own.
+    const [pending, setPending] = useState<{ kind: "status" | "payment"; value: string } | null>(null);
+    const toast = useToast();
 
     const fullName = u?.profile?.fullName || "Unknown Attendee";
     const email = u?.email || "No email provided";
@@ -81,55 +92,83 @@ export function SingleAttendeeView({
     const registeredOn = registration?.registrationDate ? formatDateTime(registration.registrationDate) : null;
     const cancelledOn = registration?.cancelledAt ? formatDateTime(registration.cancelledAt) : null;
 
-    // Handler to handle status change and invoke prop
-    const handleStatusChange = async (newStatus: Registration["status"]) => {
-        const updated = {
-            ...registration,
-            status: newStatus,
-            statusHistory: [
-                ...(registration.statusHistory || []),
-                { status: newStatus, timestamp: new Date().toISOString() }
-            ]
-        };
+    /**
+     * Commit an optimistic update, and put the old value back if the write
+     * fails. Previously the local state was set before the await and never
+     * reverted, so a failed write left the screen showing a status Firestore
+     * had refused -- and the only trace was a console.error.
+     */
+    const commit = async (updated: Registration, what: string) => {
+        const previous = registration;
         setRegistration(updated);
 
-        if (update_registration) {
-            setIsUpdating(true);
-            try {
-                await update_registration(updated);
-            } catch (err) {
-                console.error("Failed to update registration status:", err);
-            } finally {
-                setIsUpdating(false);
-            }
+        if (!update_registration) return;
+
+        setIsUpdating(true);
+        try {
+            await update_registration(updated);
+            toast.success(`${what} updated.`);
+        } catch (err) {
+            console.error(`Failed to update ${what.toLowerCase()}:`, err);
+            setRegistration(previous);
+            toast.error(`Could not update the ${what.toLowerCase()}. Nothing was changed.`);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
-    // Handler to handle payment status change and invoke prop
-    const handlePaymentStatusChange = async (newPaymentStatus: Registration["payment"]["paymentStatus"]) => {
-        const updated = {
-            ...registration,
-            payment: {
-                ...registration.payment,
-                paymentStatus: newPaymentStatus,
-            },
-        };
-        setRegistration(updated);
+    const withStatus = (newStatus: Registration["status"]): Registration => ({
+        ...registration,
+        status: newStatus,
+        statusHistory: [
+            ...(registration.statusHistory || []),
+            { status: newStatus, timestamp: new Date().toISOString() },
+        ],
+    });
 
-        if (update_registration) {
-            setIsUpdating(true);
-            try {
-                await update_registration(updated);
-            } catch (err) {
-                console.error("Failed to update payment status:", err);
-            } finally {
-                setIsUpdating(false);
-            }
+    const withPaymentStatus = (
+        newPaymentStatus: Registration["payment"]["paymentStatus"],
+    ): Registration => ({
+        ...registration,
+        payment: { ...registration.payment, paymentStatus: newPaymentStatus },
+    });
+
+    const handleStatusChange = (newStatus: Registration["status"]) => {
+        // Only the consequential ones ask. Confirming every change would train
+        // people to click through the dialog without reading it.
+        if (SERIOUS_STATUS.has(newStatus)) {
+            setPending({ kind: "status", value: newStatus });
+            return;
+        }
+        void commit(withStatus(newStatus), "Registration status");
+    };
+
+    const handlePaymentStatusChange = (
+        newPaymentStatus: Registration["payment"]["paymentStatus"],
+    ) => {
+        if (SERIOUS_PAYMENT.has(newPaymentStatus)) {
+            setPending({ kind: "payment", value: newPaymentStatus });
+            return;
+        }
+        void commit(withPaymentStatus(newPaymentStatus), "Payment status");
+    };
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const { kind, value } = pending;
+        setPending(null);
+        if (kind === "status") {
+            void commit(withStatus(value as Registration["status"]), "Registration status");
+        } else {
+            void commit(
+                withPaymentStatus(value as Registration["payment"]["paymentStatus"]),
+                "Payment status",
+            );
         }
     };
 
     return (
-        <div className="h-full w-full bg-[#eef0f4] p-8 relative flex flex-col overflow-y-auto">
+        <div className="h-full w-full bg-gray-100 p-8 relative flex flex-col overflow-y-auto">
             {onClose && (
                 <button
                     onClick={onClose}
@@ -142,7 +181,7 @@ export function SingleAttendeeView({
             {/* Header Section */}
             <div className="mb-6 pr-8">
                 <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-[32px] leading-none font-black text-slate-900 tracking-tight">
+                    <h2 className="text-[32px] leading-none font-black text-gray-900 tracking-tight">
                         {fullName}
                     </h2>
                     {isCheckedIn && (
@@ -169,14 +208,15 @@ export function SingleAttendeeView({
                     <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
                         REGISTRATION STATUS
                     </p>
-                    <p className="text-xs text-stone-500">Change attendee registration state</p>
+                    <p className="text-xs text-gray-500">Change attendee registration state</p>
                 </div>
                 <div className="relative">
                     <select
+                        aria-label="Registration status"
                         value={registration.status || "pending"}
                         disabled={isUpdating}
                         onChange={(e) => handleStatusChange(e.target.value as Registration["status"])}
-                        className="appearance-none bg-stone-100 text-stone-900 font-extrabold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                        className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                     >
                         {STATUS_OPTIONS.map((status) => (
                             <option key={status} value={status}>
@@ -184,18 +224,18 @@ export function SingleAttendeeView({
                             </option>
                         ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                 </div>
             </div>
 
             {/* Organization & Ticket Card */}
-            <div className="bg-[#e4e7ed] rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
+            <div className="bg-gray-200 rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
                 <div className="flex justify-between items-start">
                     <div className="max-w-[65%]">
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
                             ORGANIZATION
                         </p>
-                        <p className="font-extrabold text-slate-900 text-[13px] leading-tight pr-4">
+                        <p className="font-extrabold text-gray-900 text-[13px] leading-tight pr-4">
                             {organization}
                         </p>
                     </div>
@@ -203,7 +243,7 @@ export function SingleAttendeeView({
                         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
                             FINAL PRICE
                         </p>
-                        <p className="font-black text-slate-900 text-[14px]">
+                        <p className="font-black text-gray-900 text-[14px]">
                             {formatCurrency(finalPrice, currency)}
                         </p>
                     </div>
@@ -213,7 +253,7 @@ export function SingleAttendeeView({
                         {ticketType}
                     </span>
                     {registration?.registrationSource && (
-                        <span className="bg-stone-200 text-stone-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        <span className="bg-gray-200 text-gray-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
                             Source: {registration.registrationSource.replace("_", " ")}
                         </span>
                     )}
@@ -227,7 +267,7 @@ export function SingleAttendeeView({
                         <CheckCircle2 size={20} className="text-black" />
                     </div>
                     <div>
-                        <p className="font-extrabold text-slate-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
+                        <p className="font-extrabold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
                         <p className="text-xs text-gray-400 font-medium capitalize">Method: {checkInMethod}</p>
                     </div>
                 </div>
@@ -244,15 +284,15 @@ export function SingleAttendeeView({
                     <div className="grid grid-cols-2 gap-3 text-xs">
                         <div>
                             <span className="text-gray-400 font-medium block">Department</span>
-                            <span className="font-bold text-slate-800">{department}</span>
+                            <span className="font-bold text-gray-800">{department}</span>
                         </div>
                         <div>
                             <span className="text-gray-400 font-medium block">Graduation Year</span>
-                            <span className="font-bold text-slate-800">{gradYear}</span>
+                            <span className="font-bold text-gray-800">{gradYear}</span>
                         </div>
                         <div className="col-span-2">
                             <span className="text-gray-400 font-medium block">Location</span>
-                            <span className="font-bold text-slate-800">{locationInfo}</span>
+                            <span className="font-bold text-gray-800">{locationInfo}</span>
                         </div>
                     </div>
                 </div>
@@ -266,7 +306,7 @@ export function SingleAttendeeView({
                     <div className="grid grid-cols-2 gap-3 text-xs mb-1">
                         <div>
                             <span className="text-gray-400 font-medium block">Payment Method</span>
-                            <span className="font-bold text-slate-800 uppercase">
+                            <span className="font-bold text-gray-800 uppercase">
                                 {registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
                             </span>
                         </div>
@@ -274,10 +314,11 @@ export function SingleAttendeeView({
                             <span className="text-gray-400 font-medium block mb-1">Payment Status</span>
                             <div className="relative inline-block">
                                 <select
+                                    aria-label="Payment status"
                                     value={registration?.payment?.paymentStatus || "pending"}
                                     disabled={isUpdating}
                                     onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
-                                    className="appearance-none bg-stone-100 text-slate-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                                    className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                                 >
                                     {PAYMENT_STATUS_OPTIONS.map((status) => (
                                         <option key={status} value={status}>
@@ -285,7 +326,7 @@ export function SingleAttendeeView({
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                             </div>
                         </div>
                     </div>
@@ -293,7 +334,7 @@ export function SingleAttendeeView({
                     {/* Pricing summary block - grouped together */}
                     <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs">
                         {discount && (
-                            <div className="flex justify-between items-center text-slate-500">
+                            <div className="flex justify-between items-center text-gray-500">
                                 <span>Original Price</span>
                                 <span className="line-through">{formatCurrency(discount.originalPrice, currency)}</span>
                             </div>
@@ -308,12 +349,12 @@ export function SingleAttendeeView({
                             </div>
                         )}
 
-                        <div className="flex justify-between items-center font-bold text-slate-800 pt-1">
+                        <div className="flex justify-between items-center font-bold text-gray-800 pt-1">
                             <span>Final Price</span>
                             <span>{formatCurrency(finalPrice, currency)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center font-black text-slate-900">
+                        <div className="flex justify-between items-center font-black text-gray-900">
                             <span>Amount Paid</span>
                             <span>{formatCurrency(amountPaid, currency)}</span>
                         </div>
@@ -336,16 +377,16 @@ export function SingleAttendeeView({
                         <div className="grid grid-cols-2 gap-3 text-xs">
                             <div>
                                 <span className="text-gray-400 font-medium block">Status</span>
-                                <span className="font-bold text-slate-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
+                                <span className="font-bold text-gray-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
                             </div>
                             <div>
                                 <span className="text-gray-400 font-medium block">Type</span>
-                                <span className="font-bold text-slate-800 capitalize">{registration.certificate.type || "N/A"}</span>
+                                <span className="font-bold text-gray-800 capitalize">{registration.certificate.type || "N/A"}</span>
                             </div>
                             {registration.certificate.issueDate && (
                                 <div>
                                     <span className="text-gray-400 font-medium block">Issue Date</span>
-                                    <span className="font-bold text-slate-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
+                                    <span className="font-bold text-gray-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
                                 </div>
                             )}
                            
@@ -361,12 +402,12 @@ export function SingleAttendeeView({
                     {registration?.communications && registration.communications.length > 0 ? (
                         <div className="space-y-2">
                             {registration.communications.map((comm, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-xs p-2 bg-stone-50 rounded-xl">
+                                <div key={idx} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-xl">
                                     <div>
-                                        <p className="font-bold text-slate-800 capitalize">{comm.type.replace("_", " ")}</p>
+                                        <p className="font-bold text-gray-800 capitalize">{comm.type.replace("_", " ")}</p>
                                         <p className="text-[10px] text-gray-400 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
                                     </div>
-                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-stone-200">
+                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-gray-200">
                                         {comm.status}
                                     </span>
                                 </div>
@@ -385,13 +426,31 @@ export function SingleAttendeeView({
                         </h3>
                         <div className="flex items-center gap-2 text-xs">
                             <span className="text-gray-400 font-medium">Rating:</span>
-                            <span className="font-bold text-slate-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
+                            <span className="font-bold text-gray-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
                         </div>
                     </div>
                 )}
 
-             
+
             </div>
+
+            <ConfirmDialog
+                open={pending !== null}
+                title={
+                    pending?.kind === "status"
+                        ? `Mark ${fullName} as ${statusMeta(pending.value).label.toLowerCase()}?`
+                        : `Mark this payment ${statusMeta(pending?.value).label.toLowerCase()}?`
+                }
+                description={
+                    pending?.kind === "status"
+                        ? "This changes the attendee's registration and is recorded in their status history. They may lose access to the event."
+                        : "This changes the recorded payment state for this registration. Make sure it matches what actually happened with the money."
+                }
+                confirmLabel="Yes, change it"
+                busy={isUpdating}
+                onConfirm={confirmPending}
+                onCancel={() => setPending(null)}
+            />
         </div>
     );
 }

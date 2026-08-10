@@ -40,15 +40,15 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#E5E5E5]">
+        <div className="min-h-screen flex items-center justify-center bg-gray-200">
             {/* Main Card */}
-            <div className="bg-[#F5F5F5] p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
+            <div className="bg-gray-100 p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
 
                 {/* Logo Area */}
                 <div className="mb-10 flex flex-col items-center">
                     <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-t-full rounded-bl-full rounded-br-md mb-3">
                         {/* Simple logo placeholder to match the diamond/V shape */}
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 2L2 22h20L12 2z" />
                             <circle cx="12" cy="14" r="2" fill="white" />
                         </svg>
@@ -59,7 +59,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                 {/* Error Alert */}
                 {error && (
                     <div className="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                        <svg 
+                        <svg aria-hidden="true" 
                             className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" 
                             fill="none" 
                             viewBox="0 0 24 24" 
@@ -80,7 +80,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                             onClick={() => setError(null)}
                             className="text-red-400 hover:text-red-600 transition"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
@@ -92,6 +92,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                     <div className="relative">
                         <input
                             type="email"
+                            aria-label="Email address"
                             placeholder="Email"
                             value={email}
                             onChange={(e) => {
@@ -109,6 +110,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                     <div className="relative">
                         <input
                             type="password"
+                            aria-label="Password"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => {

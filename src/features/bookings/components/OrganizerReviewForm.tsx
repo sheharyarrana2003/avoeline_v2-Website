@@ -64,7 +64,7 @@ export function OrganizerReviewForm({
                             onMouseEnter={() => setHovered(star)}
                             className="p-0.5 transition-transform hover:scale-110"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 className={`h-7 w-7 ${star <= shown ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"}`}
                                 viewBox="0 0 20 20"
                             >

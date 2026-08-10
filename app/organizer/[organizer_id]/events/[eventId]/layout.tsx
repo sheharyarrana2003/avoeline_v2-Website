@@ -27,7 +27,7 @@ export default async function EventLayout({
     ];
 
     return (
-        <div className="flex min-h-screen bg-[#f5f6f8]">
+        <div className="flex min-h-screen bg-gray-100">
             {/* Vertical Sidebar */}
             <aside className="w-[260px] flex flex-col bg-white border-r border-gray-200 shadow-[4px_0_12px_rgba(0,0,0,0.03)] z-10">
 

@@ -37,7 +37,7 @@ export function AttendeeInput() {
                 type="text" 
                 onChange={handleOnChange}  
                 placeholder="Search attendees by name, email or ID..." 
-                className="w-full pl-12 pr-6 py-3 bg-white border border-gray-200/80 rounded-full text-sm font-medium text-slate-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 shadow-sm"
+                className="w-full pl-12 pr-6 py-3 bg-white border border-gray-200/80 rounded-full text-sm font-medium text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 shadow-sm"
             />
         </div>
     )

@@ -1,10 +1,15 @@
+import { redirect } from "next/navigation";
 
-import Link from "next/link"
-export default async function IndividualVendorPage({params} : {params:Promise<{vendor_id:string}>}){
-    const resolved_params = await params;
-    return (
-        <>
-            <h1>A specific vendor with the id {resolved_params.vendor_id}</h1>  
-        </>
-    )
+/**
+ * A vendor profile only exists at `view-vendor/<vendor_id>`. Hitting the
+ * segment on its own means no vendor was chosen, so send the organizer to the
+ * marketplace to pick one.
+ */
+export default async function ViewVendorIndexPage({
+    params,
+}: {
+    params: Promise<{ organizer_id: string }>;
+}) {
+    const { organizer_id } = await params;
+    redirect(`/organizer/${organizer_id}/vendor-marketplace`);
 }

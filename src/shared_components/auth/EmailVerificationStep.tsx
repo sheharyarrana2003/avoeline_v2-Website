@@ -115,7 +115,7 @@ export default function EmailVerificationStep({
         Email Verification
       </h2>
 
-      <div className="bg-[#F5F5F5] w-full max-w-2xl md:max-w-3xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center text-center font-sans relative">
+      <div className="bg-gray-100 w-full max-w-2xl md:max-w-3xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center text-center font-sans relative">
         {toastMsg && (
           <div className="absolute top-4 bg-black text-white text-xs px-5 py-2.5 rounded-full shadow-lg z-20">
             {toastMsg}
@@ -124,13 +124,13 @@ export default function EmailVerificationStep({
 
         {/* Top Mail Badge */}
         <div className="mb-6 relative">
-          <div className="bg-[#EAEAEA] rounded-3xl px-9 py-5 flex items-center justify-center relative border border-gray-300/50">
-            <svg className="w-14 h-11 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <div className="bg-gray-200 rounded-3xl px-9 py-5 flex items-center justify-center relative border border-gray-300/50">
+            <svg aria-hidden="true" className="w-14 h-11 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
               <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {verified && (
-              <div className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-[#F5F5F5]">
+              <div className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
                 <Check className="w-4 h-4 stroke-[3]" />
               </div>
             )}
@@ -145,7 +145,7 @@ export default function EmailVerificationStep({
           {verified ? 'Verified address' : 'We’ve sent a verification link to'}
         </p>
 
-        <div className="bg-[#EAEAEA] text-gray-800 font-semibold px-5 py-2 rounded-full text-sm inline-block mb-3 border border-gray-300">
+        <div className="bg-gray-200 text-gray-800 font-semibold px-5 py-2 rounded-full text-sm inline-block mb-3 border border-gray-300">
           {address || '—'}
         </div>
 
@@ -187,7 +187,7 @@ export default function EmailVerificationStep({
                 <div key={s.id} className="flex flex-col items-center">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      reached ? 'bg-black text-white shadow-sm scale-105' : 'bg-[#F5F5F5] border-2 border-gray-400 text-gray-400'
+                      reached ? 'bg-black text-white shadow-sm scale-105' : 'bg-gray-100 border-2 border-gray-400 text-gray-400'
                     }`}
                   >
                     {reached ? <Check className="w-4 h-4 stroke-[3]" /> : <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />}
@@ -219,7 +219,7 @@ export default function EmailVerificationStep({
                 }`}
               >
                 {isResending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 )}
@@ -253,7 +253,7 @@ export default function EmailVerificationStep({
         )}
 
         {!verified && (
-          <div className="bg-[#EAEAEA]/70 border border-gray-300/60 rounded-2xl p-4 flex items-start gap-3 w-full max-w-md text-left">
+          <div className="bg-gray-200/70 border border-gray-300/60 rounded-2xl p-4 flex items-start gap-3 w-full max-w-md text-left">
             <Info className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
             <p className="text-xs text-gray-600 leading-relaxed">
               Didn’t receive the email? Check your spam folder. Verification isn’t required to finish

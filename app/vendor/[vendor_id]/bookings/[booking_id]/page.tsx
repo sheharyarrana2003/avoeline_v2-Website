@@ -5,16 +5,9 @@ import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/src/lib/datetime";
 import { MediaUploadField } from "@/src/features/media/MediaUploadField";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency || 'PKR',
-        maximumFractionDigits: 0,
-    }).format(amount || 0);
-};
-
 export default async function EventDetailsPage({ params }: { params: Promise<{ vendor_id: string, booking_id: string }> }) {
     const { vendor_id, booking_id } = await params;
 
@@ -29,7 +22,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
     ])
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] p-4 md:p-8 font-sans text-gray-900">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header / Title */}
@@ -46,7 +39,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         {/* 1. BOOKING JOURNEY */}
                         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-6 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 Booking Journey
                             </h3>
 
@@ -58,7 +51,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                             {/* Timeline Dot */}
                                             <div className="absolute -left-[25px] bg-white p-1 rounded-full">
                                                 <div className={`w-4 h-4 rounded-full flex items-center justify-center ${isCompleted ? 'bg-black text-white' : 'border-2 border-gray-300'}`}>
-                                                    {isCompleted && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                                                    {isCompleted && <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                                 </div>
                                             </div>
 
@@ -74,7 +67,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 }) || <p className="text-sm text-gray-400">No status history available.</p>}
                             </div>
                             <div className="border-t border-gray-100 pt-4 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 <span className="text-sm font-medium text-gray-600">Completed: <strong>{formatDate(raw_booking?.completedAt || "")}</strong></span>
                             </div>
                         </div>
@@ -82,7 +75,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         {/* 2. SERVICE OVERVIEW */}
                         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-6 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                                 Service Overview
                             </h3>
 
@@ -115,7 +108,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                     Delivery & Logistics
                                 </h3>
                                 <button className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50 transition">REPORT ISSUE</button>
@@ -126,7 +119,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                     <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Delivery Schedule</p>
                                     <p className="font-bold text-lg">{formatTime(raw_booking?.delivery?.scheduledTime || "")}</p>
                                     <p className="text-[10px] font-bold text-green-600 mt-2 flex items-center gap-1">
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                        <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                                         ARRIVED {formatTime(raw_booking?.delivery?.actualDeliveryTime || "")}
                                     </p>
                                 </div>
@@ -144,7 +137,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-4 flex justify-between items-center">
                                 <span className="flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     Financials
                                 </span>
                                 <span className="text-[10px]">AGREED BUDGET</span>
@@ -158,7 +151,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                                 {raw_booking?.payment?.paymentSchedule?.map((installment: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl bg-gray-50">
                                         <div className="flex items-center gap-2">
-                                            <svg className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                            <svg aria-hidden="true" className={`w-4 h-4 ${installment?.status === 'paid' ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                             <span className="text-sm font-medium">{installment?.installment || 'Unknown'} Installment</span>
                                         </div>
                                         {installment?.status === 'paid'
@@ -176,7 +169,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         {/* 5. CONTRACT */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-4 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                 Contract
                             </h3>
 
@@ -215,7 +208,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ v
                         {/* 7. DOCUMENTS */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-4 flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
                                 Documents
                             </h3>
 

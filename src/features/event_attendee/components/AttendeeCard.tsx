@@ -11,7 +11,7 @@ export function AttendeeCard({ title, value, subValue }: AttendeeCardProps) {
                 {title}
             </h3>
             <div className="flex items-baseline gap-2 mt-auto">
-                <span className="text-[28px] font-black text-slate-900 tracking-tight">
+                <span className="text-[28px] font-black text-gray-900 tracking-tight">
                     {value}
                 </span>
                 {subValue && (

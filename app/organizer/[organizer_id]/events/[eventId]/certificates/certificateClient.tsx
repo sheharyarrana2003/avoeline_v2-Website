@@ -10,6 +10,9 @@ import type {
     CertificateGenerationAttendeeResult,
     CertificateGenerationResult,
 } from '@/src/services/models/certificate.model';
+import { formatDateMedium } from '@/src/lib/datetime';
+import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
+import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
 
 export interface AttendeeCertProp {
     a: Attendee;
@@ -23,36 +26,6 @@ interface CertificateIssuanceClientProps {
     onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<CertificateGenerationResult>;
 }
 
-
-const getStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-        generating: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        ready: 'bg-purple-100 text-purple-700 border-purple-200',
-        issued: 'bg-green-100 text-green-700 border-green-200',
-        revoked: 'bg-red-100 text-red-700 border-red-200',
-        pending: 'bg-gray-100 text-gray-600 border-gray-200',
-        success: 'bg-green-100 text-green-700 border-green-200',
-        failed: 'bg-red-100 text-red-700 border-red-200',
-        warning: 'bg-amber-100 text-amber-700 border-amber-200',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
-};
-
-const getSurveyStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-        completed: 'bg-green-100 text-green-700 border-green-200',
-        missing: 'bg-gray-100 text-gray-600 border-gray-200',
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-600 border-gray-200';
-};
-
-
-const formatDate = (value?: Date | string | null): string => {
-    if (!value) return '—';
-    const date = typeof value === 'string' ? new Date(value) : value;
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
 
 const truncateHash = (hash?: string | null): string => {
     if (!hash) return '—';
@@ -213,14 +186,18 @@ export default function CertificateIssuanceClient({
                         >
                             Edit Template
                         </Link>
-                        <button
-                            onClick={handleGenerateClick}
+                        <ConfirmButton
+                            tone="danger"
+                            title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
+                            description="Each certificate is written to the blockchain and pinned to IPFS. That is permanent and costs real resources — it cannot be undone, and re-issuing to the same attendee will not replace it."
+                            confirmLabel={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}`}
                             disabled={isGenerating || selectedAttendees.size === 0}
-                            aria-busy={isGenerating}
-                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                            busy={isGenerating}
+                            onConfirm={handleGenerateClick}
+                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         >
                             {isGenerating ? 'Generating…' : 'Generate Certificates'}
-                        </button>
+                        </ConfirmButton>
                     </div>
                 </div>
 
@@ -319,7 +296,7 @@ export default function CertificateIssuanceClient({
                                                 <span className="text-xs font-medium text-gray-700 capitalize">{cert?.type ?? '—'}</span>
                                             </td>
                                             <td className="px-4 py-4">
-                                                <span className="text-xs text-gray-600">{formatDate(cert?.issuedAt)}</span>
+                                                <span className="text-xs text-gray-600">{formatDateMedium(cert?.issuedAt)}</span>
                                             </td>
                                             <td className="px-4 py-4">
                                                 {isDigital && cert?.digital?.pdfUrl ? (
@@ -382,9 +359,7 @@ export default function CertificateIssuanceClient({
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4">
-                                                <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(status)}`}>
-                                                    {status}
-                                                </span>
+                                                <StatusBadge status={status} size="sm" />
                                             </td>
                                         </tr>
                                     );
@@ -490,12 +465,12 @@ export default function CertificateIssuanceClient({
 
                                 <div className="col-span-2">
                                     <div className="flex flex-col gap-1">
-                                        <span
-                                            className={`inline-block w-fit text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(displayStatus.colorKey)}`}
-                                            title={displayStatus.detail}
-                                        >
-                                            {displayStatus.label}
-                                        </span>
+                                        <StatusBadge
+                                            status={displayStatus.colorKey}
+                                            label={displayStatus.label}
+                                            size="sm"
+                                            className="w-fit"
+                                        />
                                         {displayStatus.detail && (
                                             <span className="text-[10px] text-red-500 line-clamp-2" title={displayStatus.detail}>
                                                 {displayStatus.detail}
@@ -506,7 +481,7 @@ export default function CertificateIssuanceClient({
 
                                 <div className="col-span-2 text-right">
                                     <button className="text-gray-400 hover:text-gray-600 transition">
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                                         </svg>
                                     </button>

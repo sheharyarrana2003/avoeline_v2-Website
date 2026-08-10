@@ -1,4 +1,4 @@
-import { OrganizerHeader } from "@/src/shared_components/organizer/OrganizerHeader";
+import { DashboardHeader } from "@/src/shared_components/DashboardHeader";
 import { AuthService } from "@/src/features/auth/authService";
 import { OrganizerService } from "@/src/services/organizer.service";
 import { OrganizerFooter } from "@/src/shared_components/organizer/OrganizerFooter";
@@ -24,17 +24,26 @@ export default async function OrganizerLayout({
     const notifications = await NotificationServices.getAllNotificationsOfUser(u.userId);
     const unreadCount = notifications.filter((n) => n.status !== "read").length;
 
+    // Organizer routes are keyed by the auth uid, vendor ones by roleId.
+    const basePath = `/organizer/${u.userId}`;
+
     return (
         <>
-            <OrganizerHeader
-                user={u}
+            <DashboardHeader
+                basePath={basePath}
+                name={u?.name ?? ""}
                 logoUrl={organizer.organization.logo || undefined}
                 unreadCount={unreadCount}
+                items={[
+                    { label: "Dashboard", href: `${basePath}/dashboard` },
+                    { label: "Events", href: `${basePath}/events` },
+                    { label: "Analytics", href: `${basePath}/analytics` },
+                    { label: "Vendors", href: `${basePath}/vendor-marketplace` },
+                    { label: "Quotes", href: `${basePath}/quotes` },
+                ]}
             />
-            <section>{children}</section>
-            <br />
-            <br />
-            <OrganizerFooter></OrganizerFooter>
+            <main className="flex-1 pb-12">{children}</main>
+            <OrganizerFooter />
         </>
     )
 

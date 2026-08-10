@@ -62,7 +62,7 @@ export default async function EditServicePage({
     const inclusions = service.inclusions || [];
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             <div className="max-w-2xl mx-auto px-4 md:px-8 py-8">
 
                 {/* Breadcrumb */}
@@ -81,7 +81,7 @@ export default async function EditServicePage({
                             href={`/vendor/${vendor_id}/services`}
                             className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </Link>
@@ -122,7 +122,7 @@ export default async function EditServicePage({
                                             <option key={cat} value={cat}>{categoryLabel(cat)}</option>
                                         ))}
                                     </select>
-                                    <svg className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>

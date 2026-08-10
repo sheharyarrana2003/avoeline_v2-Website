@@ -207,11 +207,15 @@ export function formatDateMedium(value: unknown): string {
 }
 
 /**
- * Relative label for recent activity: "Just now", "3 MINUTES AGO", "2 HOURS AGO",
- * "4 DAYS AGO". Past a week the relative form stops being useful, so it falls back
+ * Relative label for recent activity: "Just now", "3 minutes ago", "2 hours ago",
+ * "4 days ago". Past a week the relative form stops being useful, so it falls back
  * to the canonical DD/MM/YYYY date. A future timestamp (clock skew between the
  * server that wrote it and the one reading it) reads as "Just now" rather than a
  * negative count. Returns "—" for empty/unparseable input.
+ *
+ * Sentence case on purpose. Screens that want it shouted (the notification feed)
+ * already carry a `uppercase` class, so casing is the stylesheet's business and
+ * this returns something readable everywhere else.
  */
 export function timeAgo(value: unknown): string {
   const d = toDate(value);
@@ -219,13 +223,13 @@ export function timeAgo(value: unknown): string {
 
   const mins = Math.floor((Date.now() - d.getTime()) / 60000);
   if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins} MINUTE${mins > 1 ? "S" : ""} AGO`;
+  if (mins < 60) return `${mins} minute${mins > 1 ? "s" : ""} ago`;
 
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} HOUR${hours > 1 ? "S" : ""} AGO`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
 
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} DAY${days > 1 ? "S" : ""} AGO`;
+  if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
 
   return formatDate(d);
 }

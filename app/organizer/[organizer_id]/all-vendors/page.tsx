@@ -17,7 +17,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   
   if (!bookings) {
     return (<>
-      <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">
+      <div className="min-h-screen bg-gray-50 p-8 font-sans">
 
         <div className="max-w-7xl mx-auto">
 
@@ -39,7 +39,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
 
             {/* Search Bar (Matches Top Right of Image) */}
             <div className="relative w-full md:w-80">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
               <input
@@ -51,7 +51,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
             </div>
              <Link
                 href={`${basePath}/vendor-marketplace`}
-                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
               >
 
                 Visit Vendor Marketplace
@@ -104,7 +104,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
 
   return (
 
-    <div className="min-h-screen bg-[#f9fafb] p-8 font-sans">
+    <div className="min-h-screen bg-gray-50 p-8 font-sans">
 
       <div className="max-w-7xl mx-auto">
 
@@ -125,7 +125,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
          <div className="flex flex-col items-start gap-6 w-full">
   {/* Search Bar Container */}
   <div className="relative w-full md:w-80">
-    <svg 
+    <svg aria-hidden="true" 
       className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" 
       fill="none" 
       stroke="currentColor" 
@@ -143,7 +143,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   {/* Button - Moved outside the search input container */}
   <Link
     href={`${basePath}/vendor-marketplace`}
-    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
   >
     Visit Vendor Marketplace
   </Link>

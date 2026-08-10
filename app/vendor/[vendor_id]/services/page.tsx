@@ -1,3 +1,4 @@
+import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
@@ -5,17 +6,9 @@ import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { formatCurrency } from "@/src/lib/money";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number, currency: string = "PKR") => {
-    if (!amount && amount !== 0) return "N/A";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: currency,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
         'catering': 'Catering',
@@ -92,7 +85,7 @@ export default async function VendorServicesPage({
     }));
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
                 {/* Header */}
@@ -174,21 +167,24 @@ export default async function VendorServicesPage({
                                                 href={`/vendor/${vendor_id}/services/${service.serviceId}/edit`}
                                                 className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
                                             >
-                                                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg aria-hidden="true" className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                 </svg>
                                             </Link>
                                             <form action={deleteServiceAction} className="inline">
                                                 <input type="hidden" name="serviceId" value={service.serviceId} />
                                                 <input type="hidden" name="vendorId" value={vendor_id} />
-                                                <button
-                                                    type="submit"
-                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
+                                                <ConfirmSubmit
+                                                    title="Delete this service?"
+                                                    description={`"${service.name}" will be permanently removed from your profile. Organizers browsing the marketplace will no longer see it. This cannot be undone.`}
+                                                    confirmLabel="Delete service"
+                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-red-600 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                                                 >
-                                                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <span className="sr-only">Delete {service.name}</span>
+                                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
-                                                </button>
+                                                </ConfirmSubmit>
                                             </form>
                                         </div>
                                     </div>
@@ -223,7 +219,7 @@ export default async function VendorServicesPage({
                 ) : (
                     <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>

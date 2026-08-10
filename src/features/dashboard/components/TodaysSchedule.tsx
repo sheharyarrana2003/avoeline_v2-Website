@@ -4,7 +4,7 @@ import { formatTime } from "@/src/lib/datetime";
 
 export default function TodaysSchedule({ events }: { events: DashboardEvent[] }) {
   return (
-    <section className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
+    <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
       <div className="mb-4 flex items-center justify-between border-b border-gray-300/60 pb-3">
         <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">
           Today&apos;s Schedule

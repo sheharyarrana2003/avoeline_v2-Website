@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/src/shared_components/ui/Toast";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { updateVendorLogo } from "@/src/features/event_vendors/actions/updateVendorLogo.action";
 
 export function VendorLogoUpload({ vendorId, currentLogo }: { vendorId: string; currentLogo?: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [logo, setLogo] = useState<string>(currentLogo ?? "");
 
   return (
@@ -19,7 +21,12 @@ export function VendorLogoUpload({ vendorId, currentLogo }: { vendorId: string; 
       onUploaded={async (url) => {
         setLogo(url);
         const res = await updateVendorLogo(vendorId, url);
-        if (res.success) router.refresh();
+        if (res.success) {
+          router.refresh();
+          toast.success("Logo updated.");
+        } else {
+          toast.error(res.error ?? "Could not update your logo. Please try again.");
+        }
       }}
     />
   );

@@ -9,13 +9,8 @@ import { adminDb } from "@/data/admin_db";
 import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
 import { formatDate, parseScheduleDateTime, toIsoString } from "@/src/lib/datetime";
 import { COLLECTIONS } from "@/data/collections";
+import { formatCurrencyCompact } from "@/src/lib/money";
 
-
-function formatCurrency(value: number): string {
-    if (value >= 1_000_000) return `PKR ${(value / 1_000_000).toFixed(1)}M`;
-    if (value >= 1_000) return `PKR ${(value / 1_000).toFixed(0)}k`;
-    return `PKR ${value}`;
-}
 
 function toDate(val: any): Date {
     if (!val) return new Date(0);
@@ -100,7 +95,7 @@ function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
     return {
         activeEvents,
         registrations: totalRegistrations.toLocaleString("en-US"),
-        revenue: formatCurrency(totalRevenue),
+        revenue: formatCurrencyCompact(totalRevenue),
         avgRating,
     };
 }
@@ -239,7 +234,7 @@ function deriveProfit(eventDocs: Docs): AnalyticsMetric {
     // Simple proxy: profit ≈ 70 % of revenue (platform fee placeholder until a costs collection exists)
     const estimatedProfit = Math.round(totalRevenue * 0.7);
     return {
-        value: formatCurrency(estimatedProfit),
+        value: formatCurrencyCompact(estimatedProfit),
         helper: "Estimated after platform fees",
     };
 }
@@ -251,8 +246,8 @@ function deriveTotalRevenue(eventDocs: Docs): AnalyticsMetric {
     });
     const avg = eventDocs.length > 0 ? Math.round(totalRevenue / eventDocs.length) : 0;
     return {
-        value: formatCurrency(totalRevenue),
-        helper: `Avg: ${formatCurrency(avg)}/event`,
+        value: formatCurrencyCompact(totalRevenue),
+        helper: `Avg: ${formatCurrencyCompact(avg)}/event`,
     };
 }
 

@@ -22,10 +22,10 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
     }
 
     return (
-        <main className="min-h-screen bg-[#E5E5E5] px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
+        <main className="min-h-screen bg-gray-200 px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
             <div className="mx-auto max-w-7xl space-y-6">
                 {/* Welcome Header Card */}
-                <section className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-base shadow-xs">
                             {u.name ? u.name.charAt(0).toUpperCase() : 'O'}
@@ -62,7 +62,7 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
                     <aside className="space-y-6">
                         {/* Quick Create Event Card */}
-                        <div className="bg-[#F5F5F5] rounded-2xl border border-gray-300/60 p-5 shadow-xs">
+                        <div className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 shadow-xs">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3">Quick Action</h3>
                             <Link
                                 href={`/organizer/${organizer_id}/events/create`}
@@ -119,7 +119,7 @@ function StatsSkeleton() {
     return (
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-2xl border border-gray-300/60 bg-[#F5F5F5]" />
+                <div key={i} className="h-24 animate-pulse rounded-2xl border border-gray-300/60 bg-gray-100" />
             ))}
         </section>
     );
@@ -127,6 +127,6 @@ function StatsSkeleton() {
 
 function WidgetSkeleton({ height }: { height: string }) {
     return (
-        <div className={`${height} animate-pulse rounded-2xl border border-gray-300/60 bg-[#F5F5F5]`} />
+        <div className={`${height} animate-pulse rounded-2xl border border-gray-300/60 bg-gray-100`} />
     );
 }

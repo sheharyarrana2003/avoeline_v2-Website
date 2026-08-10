@@ -5,40 +5,11 @@ import Link from "next/link";
 import { formatDate } from "@/src/lib/datetime";
 import { FeedbackService } from "@/src/services/feedback.service";
 import { BookingServices } from "@/src/features/bookings/bookings.service";
+import { formatCurrency } from "@/src/lib/money";
+import { StarRating } from "@/src/shared_components/ui/StarRating";
 
 // --- Helper Functions ---
-const formatCurrency = (amount: number) => {
-    if (!amount && amount !== 0) return "Custom";
-    return new Intl.NumberFormat('en-PK', {
-        style: 'currency',
-        currency: 'PKR',
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
 // --- Star Rating Component ---
-const StarRating = ({ rating, size = "sm", light = false }: { rating: number; size?: "sm" | "md" | "lg"; light?: boolean }) => {
-    const fullStars = Math.floor(rating || 0);
-    const hasHalf = (rating || 0) % 1 >= 0.5;
-    const sizeClass = size === "lg" ? "w-5 h-5" : size === "md" ? "w-4 h-4" : "w-3.5 h-3.5";
-    const activeClass = light ? "text-white fill-white" : "text-gray-900 fill-gray-900";
-    const inactiveClass = light ? "text-white/25 fill-white/25" : "text-gray-300 fill-gray-300";
-
-    return (
-        <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-                <svg
-                    key={i}
-                    className={`${sizeClass} ${i < fullStars ? activeClass : i === fullStars && hasHalf ? activeClass : inactiveClass}`}
-                    viewBox="0 0 20 20"
-                >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            ))}
-        </div>
-    );
-};
-
 // --- Verification Badge ---
 const VerificationBadge = ({ label }: { label: string }) => (
     <span className="bg-white text-gray-900 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap shadow-sm">
@@ -180,7 +151,7 @@ export default async function VendorProfilePage({
 
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
                                     <span className="flex items-center gap-1">
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
@@ -188,7 +159,7 @@ export default async function VendorProfilePage({
                                     </span>
                                     {street && (
                                         <span className="flex items-center gap-1 text-gray-500">
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                             Serving: {street}
@@ -206,7 +177,7 @@ export default async function VendorProfilePage({
                                     className="w-full bg-black text-white py-3 px-6 rounded-full font-semibold text-sm hover:bg-gray-800 transition flex items-center justify-center gap-2"
                                 >
                                     Request Quote
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </Link>
@@ -324,7 +295,7 @@ export default async function VendorProfilePage({
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mb-4">
                                                                 {inclusions.map((item: string, i: number) => (
                                                                     <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                                                                        <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <svg aria-hidden="true" className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                         </svg>
                                                                         {item}
@@ -350,7 +321,7 @@ export default async function VendorProfilePage({
                                 ) : (
                                     <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-100">
                                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                             </svg>
                                         </div>
@@ -401,7 +372,7 @@ export default async function VendorProfilePage({
                                 ) : (
                                     <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-100 mb-8">
                                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                         </div>
@@ -471,7 +442,7 @@ export default async function VendorProfilePage({
                                             return (
                                                 <div key={star} className="flex items-center gap-2">
                                                     <span className="text-xs text-gray-500 w-3">{star}</span>
-                                                    <svg className="w-3 h-3 text-gray-900 fill-gray-900" viewBox="0 0 20 20">
+                                                    <svg aria-hidden="true" className="w-3 h-3 text-gray-900 fill-gray-900" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
                                                     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -542,7 +513,7 @@ export default async function VendorProfilePage({
                             {vendorReviews.length === 0 && testimonials.length === 0 && (
                                 <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-100">
                                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                        <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                         </svg>
                                     </div>
@@ -561,7 +532,7 @@ export default async function VendorProfilePage({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {primaryPhone && (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                     {primaryPhone}
@@ -569,7 +540,7 @@ export default async function VendorProfilePage({
                             )}
                             {businessEmail && (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                     {businessEmail}
@@ -577,7 +548,7 @@ export default async function VendorProfilePage({
                             )}
                             {website && (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9m-9 9h18" />
                                     </svg>
                                     <a href={website} target="_blank" rel="noopener noreferrer" className="hover:underline">{website.replace('https://', '')}</a>
@@ -585,7 +556,7 @@ export default async function VendorProfilePage({
                             )}
                             {street && (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>

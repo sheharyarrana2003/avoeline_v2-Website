@@ -3,7 +3,6 @@ import { memo } from "react";
 import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 import { Registration } from "@/src/services/models/reg.type";
-import { MoreHorizontal } from "lucide-react";
 import { formatDateTime } from "@/src/lib/datetime";
 
 function AttendeeListItemBase(
@@ -36,36 +35,48 @@ function AttendeeListItemBase(
                 <div className="relative flex items-center justify-center">
                     <input
                         type="checkbox"
-                        className="peer w-[18px] h-[18px] appearance-none border-2 border-gray-300 rounded-full checked:bg-black checked:border-black cursor-pointer transition-colors"
+                        aria-label={`Select ${attendee_user.profile.fullName}`}
+                        className="peer w-[18px] h-[18px] appearance-none border-2 border-gray-300 rounded-full checked:bg-black checked:border-black cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         onChange={(e) => handleCheckBoxChange(e, attendee_reg.registrationId)}
                         checked={isSelected}
                     />
-                    <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <svg aria-hidden="true" className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                 </div>
             </div>
 
-            {/* Attendee Info */}
-            <div className="flex items-center gap-3">
-                <div className="w-[38px] h-[38px] bg-gradient-to-tr from-orange-200 to-amber-100 rounded-full flex-shrink-0 border border-white shadow-sm overflow-hidden flex items-center justify-center">
+            {/* Attendee Info — the real control. The row-wide onClick above is a
+                pointer convenience; this button is what keyboard and screen
+                reader users actually reach, and the attendee's name is the best
+                label it could have. */}
+            <button
+                type="button"
+                aria-pressed={isSelected}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    handleOnClick(attendee_reg.registrationId);
+                }}
+                className="flex items-center gap-3 text-left rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+                <span className="w-[38px] h-[38px] bg-gradient-to-tr from-orange-200 to-amber-100 rounded-full flex-shrink-0 border border-white shadow-sm overflow-hidden flex items-center justify-center">
                     <span className="text-orange-800 font-bold text-sm">
                         {attendee_user.profile.fullName.charAt(0)}
                     </span>
-                </div>
-                <div>
-                    <p className="text-[15px] font-bold text-slate-900 leading-tight">
+                </span>
+                <span className="block">
+                    <span className="block text-[15px] font-bold text-gray-900 leading-tight">
                         {attendee_user.profile.fullName}
-                    </p>
-                    <p className="text-[13px] text-gray-500 font-medium">
+                    </span>
+                    <span className="block text-[13px] text-gray-500 font-medium">
                         {attendee_user.email}
-                    </p>
-                </div>
-            </div>
+                    </span>
+                </span>
+            </button>
 
             {/* Ticket Badge */}
             <div>
-                <span className="bg-white border border-gray-200 text-slate-800 text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
+                <span className="bg-white border border-gray-200 text-gray-800 text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
                     {ticketType}
                 </span>
             </div>
@@ -80,7 +91,7 @@ function AttendeeListItemBase(
             {/* Check-in Time */}
             <div>
                 {isCheckedIn ? (
-                    <p className="text-[13px] font-bold text-slate-900">
+                    <p className="text-[13px] font-bold text-gray-900">
                         {checkInTime ? formatDateTime(checkInTime) : "Checked in"}
                     </p>
                 ) : (
@@ -88,12 +99,10 @@ function AttendeeListItemBase(
                 )}
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-center">
-                <button className="text-gray-400 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal size={18} />
-                </button>
-            </div>
+            {/* Actions column, kept empty to stay aligned with the header row.
+                It used to hold a hover-revealed "more" button with no onClick --
+                an affordance that did nothing when clicked. */}
+            <div />
         </div>
     )
 }

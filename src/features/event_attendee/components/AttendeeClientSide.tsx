@@ -82,14 +82,14 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
     }, [attendees, query]);
 
     return (
-        <div className="flex h-screen w-full relative overflow-hidden bg-[#f8f9fa]">
+        <div className="flex h-screen w-full relative overflow-hidden bg-gray-50">
             
             {/* Main Left Content */}
             <div className="flex-1 overflow-y-auto p-8 pb-32">
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}
                     <div className="flex items-center gap-4 mb-8">
-                        <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">{eventTitle}</h1>
+                        <h1 className="text-[28px] font-extrabold text-gray-900 tracking-tight">{eventTitle}</h1>
                         <span className="bg-gray-200 h-6 w-12 rounded-full"></span>
                     </div>
 
@@ -138,7 +138,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
 
             {/* Right Sidebar */}
             {single_attendee_view && (
-                <div className="w-[400px] shrink-0 border-l border-gray-200 h-full overflow-y-auto bg-[#eef0f4] shadow-[-8px_0_30px_rgba(0,0,0,0.04)] animate-in slide-in-from-right-8 duration-300">
+                <div className="w-[400px] shrink-0 border-l border-gray-200 h-full overflow-y-auto bg-gray-100 shadow-[-8px_0_30px_rgba(0,0,0,0.04)] animate-in slide-in-from-right-8 duration-300">
                     <SingleAttendeeView
                         combined_data={single_attendee_view}
                         onClose={() => set_single_attendee_view(null)}
@@ -149,7 +149,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
 
             {/* Floating Selection Action Bar */}
             {selected_ids.length > 0 && (
-                <div className="absolute bottom-8 left-[calc(50%-200px)] -translate-x-1/2 bg-[#0a0a0a] text-white pl-6 pr-8 py-3 rounded-[2rem] flex items-center gap-6 shadow-2xl z-50 animate-in slide-in-from-bottom-8">
+                <div className="absolute bottom-8 left-[calc(50%-200px)] -translate-x-1/2 bg-black text-white pl-6 pr-8 py-3 rounded-[2rem] flex items-center gap-6 shadow-2xl z-50 animate-in slide-in-from-bottom-8">
                     <div className="flex items-center gap-4 border-r border-gray-700 pr-6">
                         <span className="font-black text-xl leading-none">{selected_ids.length}</span>
                         <span className="text-[10px] font-extrabold tracking-widest text-gray-400 mt-0.5">SELECTED</span>

@@ -98,15 +98,15 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
     );
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="min-h-screen bg-gray-100">
             <div className="max-w-[1200px] mx-auto px-6 py-6">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h1 className="text-[22px] font-semibold text-[#111] mb-1">
+                        <h1 className="text-[22px] font-semibold text-gray-900 mb-1">
                             Notifications & Alerts
                         </h1>
-                        <p className="text-[13px] text-[#888]">
+                        <p className="text-[13px] text-gray-500">
                             Stay updated with all platform activities
                         </p>
                     </div>
@@ -114,7 +114,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                         <form action={markAllNotificationsRead}>
                             <SubmitButton
                                 pendingText="Marking…"
-                                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] bg-white hover:bg-[#f0f0f0] transition-colors disabled:opacity-60"
+                                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 bg-white hover:bg-gray-100 transition-colors disabled:opacity-60"
                             >
                                 Mark all read
                             </SubmitButton>
@@ -123,7 +123,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-5 border-b border-[#e5e5e5] mb-6">
+                <div className="flex gap-5 border-b border-gray-200 mb-6">
                     {TABS.map((tabDef) => {
                         const count = notifications.filter(tabDef.filter).length;
                         const isActive = activeTab === tabDef.key;
@@ -132,19 +132,19 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                 key={tabDef.key}
                                 href={`?tab=${tabDef.key}`}
                                 className={`relative pb-2.5 text-[13px] font-medium transition-colors ${isActive
-                                        ? "text-[#111] border-b-2 border-[#111]"
-                                        : "text-[#999] hover:text-[#555]"
+                                        ? "text-gray-900 border-b-2 border-gray-900"
+                                        : "text-gray-400 hover:text-gray-600"
                                     }`}
                                 style={{ marginBottom: "-1px" }}
                             >
                                 {tabDef.label}{" "}
                                 <span
-                                    className={`${isActive ? "text-[#666]" : "text-[#999]"} font-normal`}
+                                    className={`${isActive ? "text-gray-500" : "text-gray-400"} font-normal`}
                                 >
                                     ({count})
                                 </span>
                                 {tabDef.key === "all" && unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-[#6366f1]" />
+                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
                                 )}
                             </Link>
                         );
@@ -156,9 +156,9 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                     {/* Left: Notifications List */}
                     <div>
                         {filtered.length === 0 ? (
-                            <div className="bg-white rounded-[14px] p-12 text-center border border-[#eee]">
+                            <div className="bg-white rounded-[14px] p-12 text-center border border-gray-200">
                                 <div className="text-4xl mb-3">🔔</div>
-                                <p className="text-[#888] text-sm font-medium">No notifications yet</p>
+                                <p className="text-gray-500 text-sm font-medium">No notifications yet</p>
                             </div>
                         ) : (
                             filtered.map((notification) => {
@@ -171,11 +171,11 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                 return (
                                     <div
                                         key={notification.notificationId}
-                                        className="bg-[#f9f9f9] rounded-[14px] p-5 mb-3.5 border border-transparent transition-all hover:border-[#e0e0e0] hover:bg-[#f5f5f5]"
+                                        className="bg-gray-50 rounded-[14px] p-5 mb-3.5 border border-transparent transition-all hover:border-gray-200 hover:bg-gray-100"
                                         style={{ position: "relative" }}
                                     >
                                         {isUnread && (
-                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-[#6366f1]" />
+                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-indigo-500" />
                                         )}
                                         <div className="flex items-start gap-3 mb-2">
                                             <div
@@ -185,13 +185,13 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                                 {icon}
                                             </div>
                                             <div className="flex-1 min-w-0 pr-4">
-                                                <h3 className="text-sm font-semibold text-[#111] mb-1">
+                                                <h3 className="text-sm font-semibold text-gray-900 mb-1">
                                                     {notification.title}
                                                 </h3>
-                                                <p className="text-xs text-[#888] mb-1.5 leading-relaxed">
+                                                <p className="text-xs text-gray-500 mb-1.5 leading-relaxed">
                                                     {notification.message}
                                                 </p>
-                                                <span className="text-[11px] text-[#bbb] font-medium uppercase tracking-wide">
+                                                <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">
                                                     {timeAgo(notification.createdAt)}
                                                 </span>
                                             </div>
@@ -201,7 +201,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                                 {link && (
                                                     <Link
                                                         href={link.href}
-                                                        className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[#111] text-white hover:bg-[#333] transition-colors"
+                                                        className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
                                                     >
                                                         {link.label}
                                                     </Link>
@@ -215,7 +215,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                                         />
                                                         <SubmitButton
                                                             pendingText="Marking…"
-                                                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors disabled:opacity-60"
+                                                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-60"
                                                         >
                                                             Mark read
                                                         </SubmitButton>
@@ -231,15 +231,15 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
 
                     {/* Right Sidebar */}
                     <div className="space-y-4">
-                        <div className="bg-white rounded-[14px] p-5 border border-[#eee]">
-                            <h4 className="text-[11px] font-semibold text-[#aaa] uppercase tracking-widest mb-4">
+                        <div className="bg-white rounded-[14px] p-5 border border-gray-200">
+                            <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
                                 Unread Activity
                             </h4>
                             <div className="text-center py-4">
-                                <div className="text-[52px] font-bold text-[#111] leading-none mb-1 tabular-nums">
+                                <div className="text-[52px] font-bold text-gray-900 leading-none mb-1 tabular-nums">
                                     {unreadCount}
                                 </div>
-                                <div className="text-[13px] text-[#888] font-medium">New alerts</div>
+                                <div className="text-[13px] text-gray-500 font-medium">New alerts</div>
                             </div>
                         </div>
                     </div>

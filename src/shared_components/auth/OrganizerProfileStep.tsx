@@ -116,7 +116,7 @@ export default function OrganizerProfileStep({
         Setting Up Organizer Profile
       </h2>
 
-      <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
+      <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
         {savedSuccess && (
           <div className="absolute top-6 right-6 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
             <CheckCircle2 className="w-4 h-4" /> Profile Saved Successfully!
@@ -141,7 +141,7 @@ export default function OrganizerProfileStep({
                   />
                 ) : (
                   <div className="w-full h-full rounded-full border border-sky-200 flex flex-col items-center justify-center bg-sky-50/40 p-2 text-center">
-                    <svg className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <svg aria-hidden="true" className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
                       <path d="M12 6v12M6 12h12" stroke="currentColor" strokeWidth="1.5" />
                       <circle cx="12" cy="12" r="4" fill="#0055A5" />

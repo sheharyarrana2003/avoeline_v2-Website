@@ -12,7 +12,7 @@ export default async function Create_speaker({ params }: { params: Promise<{ org
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-md p-4 overflow-y-auto">
             <div className="relative w-full max-w-4xl shadow-2xl rounded-2xl drop-shadow-2xl">
                 <CreateSpeakerForm handle_speaker_submission={handle_speaker_submission} />
             </div>

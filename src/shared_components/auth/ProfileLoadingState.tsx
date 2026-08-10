@@ -21,7 +21,7 @@ export default function ProfileLoadingState({
           {/* Subtle Logo Emblem with rotating ring */}
           <div className="relative w-10 h-10 flex items-center justify-center">
             <div className="absolute inset-0 rounded-full border-2 border-t-black border-r-gray-300 border-b-gray-300 border-l-gray-300 animate-spin" />
-            <svg width="20" height="20" viewBox="0 0 48 48" fill="none" className="text-black">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48" fill="none" className="text-black">
               <path
                 d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
                 stroke="currentColor"
@@ -37,8 +37,8 @@ export default function ProfileLoadingState({
         <p className="text-xs text-gray-500 mt-1 max-w-xs">{subtitle}</p>
       </div>
 
-      {/* Main Skeleton Card - Matching bg-[#F5F5F5] */}
-      <div className="bg-[#F5F5F5] w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center">
+      {/* Main Skeleton Card - Matching bg-gray-100 */}
+      <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center">
         {/* Profile Avatar Skeleton */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-28 h-28 rounded-full bg-gray-300/70 animate-pulse border-2 border-gray-300 flex items-center justify-center">
@@ -83,14 +83,14 @@ export default function ProfileLoadingState({
 
   if (isOverlay) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#E5E5E5]/90 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+      <div className="fixed inset-0 z-50 bg-gray-200/90 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
         {content}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#E5E5E5] py-10 px-4 md:px-8 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-200 py-10 px-4 md:px-8 flex items-center justify-center">
       {content}
     </div>
   );

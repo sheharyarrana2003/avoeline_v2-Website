@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ToastProvider } from "@/src/shared_components/ui/Toast";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-heading",
@@ -39,7 +40,11 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* children stay a server-rendered slot, so mounting the provider here
+          costs nothing -- no page becomes a Client Component because of it. */}
+      <body className="min-h-full flex flex-col">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
       <SpeedInsights/>
     </html>
   );

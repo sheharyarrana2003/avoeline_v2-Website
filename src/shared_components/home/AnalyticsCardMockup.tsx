@@ -78,7 +78,7 @@ export function AnalyticsCardMockup() {
       </div>
 
       {/* Sparkline SVG — black line, no purple fill */}
-      <svg
+      <svg aria-hidden="true"
         width="272"
         height="64"
         viewBox="0 0 272 64"
