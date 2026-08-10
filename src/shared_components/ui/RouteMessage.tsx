@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 type Tone = "danger" | "neutral";
 
 const TONE: Record<Tone, string> = {
-    // Red reads "something failed"; grey reads "nothing here". Keeping the two
-    // apart is the whole point of having a tone at all.
-    danger: "bg-red-50 text-red-600 ring-1 ring-red-600/20",
-    neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-600/10",
+    // Solid ink reads "something failed"; a soft fill reads "nothing here".
+    // Keeping the two apart is the whole point of having a tone at all -- it is
+    // now weight rather than hue that does it.
+    danger: "bg-gray-900 text-white ring-1 ring-gray-900",
+    neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
 };
 
 export type RouteMessageProps = {

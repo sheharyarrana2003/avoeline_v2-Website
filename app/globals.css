@@ -1,15 +1,101 @@
 @import "tailwindcss";
 
-/* ── Design tokens ── */
+/* ── Raw tokens ──
+   A plain :root rather than @theme on purpose. These are always emitted (Tailwind
+   tree-shakes unused @theme variables), and they are the single place a future dark
+   mode re-points. The @theme block below only *names* them for the utility engine. */
 :root {
-  --bg: #FAFAF9;
-  --surface: #FFFFFF;
-  --border: #E8E7E4;
-  --ink: #14141A;
-  --ink-soft: #6B6B76;
+  /* Product surface. Achromatic — chroma is literally 0.
+       paper      cards, dialogs, the top surface
+       canvas     page background
+       line       hairline
+       line-loud  input + interactive borders
+       ink        primary text, primary fill
+       ink-soft   secondary text — 4.7:1 on white
+       ink-faint  decorative ONLY — 2.5:1, never text */
+  --paper: #FFFFFF;
+  --canvas: oklch(0.985 0 0);
+  --line: oklch(0.922 0 0);
+  --line-loud: oklch(0.870 0 0);
+  --ink: oklch(0.205 0 0);
+  --ink-soft: oklch(0.556 0 0);
+  --ink-faint: oklch(0.708 0 0);
+  --ink-invert: #FFFFFF;
+
+  /* Legacy names. `home/` consumes these by name via inline styles, so they stay
+     defined rather than being renamed across the marketing components. */
+  --bg: var(--canvas);
+  --surface: var(--paper);
+  --border: var(--line);
+
+  /* Marketing identity — deliberately NOT monochrome. app/page.tsx and
+     src/shared_components/home/* keep violet; the product is black and white.
+     Two systems on purpose, as recorded in .claude/NOTES.md. */
   --violet: #6C5CE7;
   --violet-soft: #EFECFD;
   --success: #22C55E;
+}
+
+@theme {
+  /* ── One achromatic ramp. Repaints every existing gray-* utility, ~2.6k of them,
+     with zero file edits — this is what makes the conversion a single reviewable
+     diff instead of a 21,000-line sweep.
+
+     Contrast on white:  400 → 2.5:1 (decoration)   500 → 4.7:1 (AA body)
+                         600 → 7.4:1 (AAA)          900 → 16.1:1                */
+  --color-gray-50: oklch(0.985 0 0);
+  --color-gray-100: oklch(0.970 0 0);
+  --color-gray-200: oklch(0.922 0 0);
+  --color-gray-300: oklch(0.870 0 0);
+  --color-gray-400: oklch(0.708 0 0);
+  --color-gray-500: oklch(0.556 0 0);
+  --color-gray-600: oklch(0.439 0 0);
+  --color-gray-700: oklch(0.371 0 0);
+  --color-gray-800: oklch(0.269 0 0);
+  --color-gray-900: oklch(0.205 0 0);
+  --color-gray-950: oklch(0.145 0 0);
+
+  /* ── Semantic names for new code: bg-paper, text-ink, border-line. ── */
+  --color-paper: var(--paper);
+  --color-canvas: var(--canvas);
+  --color-line: var(--line);
+  --color-line-loud: var(--line-loud);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-invert: var(--ink-invert);
+
+  /* The chromatic namespaces (red, blue, emerald, …) are still live at this point.
+     Removing them is what forces all 141 remaining colour usages to be converted, so
+     the two have to land together or the app renders white-on-transparent for a day.
+     They come out in the file-conversion change, not here. */
+
+  /* ── Radius: 15 distinct values in use → 4 real steps, zero file edits.
+     rounded-xl folds onto lg, rounded-3xl onto 2xl. ── */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1rem;
+  --radius-4xl: 1rem;
+
+  /* ── Shadow: black and white leans on borders, not depth. 15 values → 3.
+     The three smallest all collapse to one hairline. ── */
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 8px 24px -4px rgb(0 0 0 / 0.10);
+  --shadow-xl: 0 8px 24px -4px rgb(0 0 0 / 0.10);
+  --shadow-2xl: 0 24px 48px -12px rgb(0 0 0 / 0.18);
+
+  /* ── Type. --font-heading/-body/-mono are set by next/font on <html> in
+     app/layout.tsx. Do NOT redeclare them here: `--font-heading: var(--font-heading)`
+     is a self-reference that resolves to nothing. Reference them instead. ── */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
 }
 
 html {
@@ -17,8 +103,10 @@ html {
 }
 
 body {
-  background-color: #FAFAF9;
-  color: #14141A;
+  background-color: var(--canvas);
+  color: var(--ink);
+  /* Set explicitly rather than relying on --default-font-family. */
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,6 +125,14 @@ body {
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+/* A black ring on a black surface is invisible. `outline-offset` rescues an ink
+   button sitting on a white page, but not a control *inside* an ink-filled panel.
+   Anything painted with ink opts its subtree into a white ring by adding `on-ink`. */
+.on-ink:focus-visible,
+.on-ink :focus-visible {
+  outline-color: var(--ink-invert);
 }
 
 /* ── Animations (must live outside @layer for SVG stroke-dasharray) ── */

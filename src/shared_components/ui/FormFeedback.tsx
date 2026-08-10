@@ -1,9 +1,9 @@
 import { Check, TriangleAlert } from "lucide-react";
 
 export type FormFeedbackProps = {
-    /** Rendered red. Takes precedence over `success` if both are somehow set. */
+    /** Rendered as solid ink. Takes precedence over `success` if both are somehow set. */
     error?: string | null;
-    /** Rendered green. */
+    /** Rendered outlined. */
     success?: string | null;
     className?: string;
 };
@@ -16,8 +16,10 @@ export type FormFeedbackProps = {
  * happened. Renders nothing when there is nothing to say.
  *
  * Errors are assertive so a screen reader interrupts with them; successes are
- * polite so they wait their turn. Both carry an icon as well as colour, since
- * colour alone is not a message everyone receives.
+ * polite so they wait their turn. Visually the two are separated by weight rather
+ * than hue: an error inverts to solid ink because it has to stop you, a success
+ * stays on paper with an ink outline. The icon is the third channel, and the
+ * assertive/polite split was never a visual channel to begin with.
  */
 export function FormFeedback({ error, success, className = "" }: FormFeedbackProps) {
     if (!error && !success) return null;
@@ -30,14 +32,14 @@ export function FormFeedback({ error, success, className = "" }: FormFeedbackPro
             aria-live={isError ? "assertive" : "polite"}
             className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ring-1 ${
                 isError
-                    ? "bg-red-50 text-red-800 ring-red-600/20"
-                    : "bg-emerald-50 text-emerald-800 ring-emerald-600/20"
+                    ? "bg-gray-900 text-white ring-gray-900 on-ink"
+                    : "bg-white text-gray-900 ring-gray-900"
             } ${className}`}
         >
             {isError ? (
-                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
+                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-white" aria-hidden="true" />
             ) : (
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-gray-900" aria-hidden="true" />
             )}
             <span className="leading-snug">{error || success}</span>
         </div>
