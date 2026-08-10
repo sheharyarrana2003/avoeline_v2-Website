@@ -1,20 +1,32 @@
+import { Check, X, Clock, Loader } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { statusMeta, type StatusTone } from "@/src/lib/status";
 
 /**
- * Full class strings, not built from a template. Tailwind scans source text,
- * so `bg-${tone}-50` would compile to nothing at all.
+ * Five tones, no hue. Meaning is carried by three channels instead:
+ *
+ *   1. the text label      -- always present, so WCAG 1.4.1 was never at risk
+ *   2. fill weight         -- solid ink / soft fill / no fill
+ *   3. border style        -- dashed reads as "not settled yet"
+ *
+ * `success` and `danger` are deliberately maximal opposites (inverted fill, same
+ * border weight): they are the pair a user must never confuse at a glance. Every
+ * tone keeps a 1px border so swapping between them never shifts layout.
+ *
+ * Full class strings, not built from a template. Tailwind scans source text, so
+ * `bg-${tone}-50` would compile to nothing at all.
  */
-const TONE: Record<StatusTone, string> = {
-    success: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-    danger: "bg-red-50 text-red-700 ring-red-600/20",
-    warning: "bg-amber-50 text-amber-700 ring-amber-600/20",
-    info: "bg-sky-50 text-sky-700 ring-sky-600/20",
-    neutral: "bg-gray-50 text-gray-600 ring-gray-600/20",
+const TONE: Record<StatusTone, { box: string; label: string; Icon: LucideIcon | null }> = {
+    success: { box: "bg-gray-900 text-white border-gray-900", label: "", Icon: Check },
+    danger: { box: "bg-white text-gray-900 border-gray-900", label: "line-through", Icon: X },
+    warning: { box: "bg-white text-gray-700 border-gray-400 border-dashed", label: "", Icon: Clock },
+    info: { box: "bg-gray-100 text-gray-700 border-gray-200", label: "", Icon: Loader },
+    neutral: { box: "bg-transparent text-gray-500 border-gray-200", label: "", Icon: null },
 };
 
 const SIZE = {
-    sm: "px-2 py-0.5 text-[10px]",
-    md: "px-3 py-1 text-[11px]",
+    sm: "gap-1 px-2 py-0.5 text-[10px]",
+    md: "gap-1.5 px-3 py-1 text-[11px]",
 } as const;
 
 export type StatusBadgeProps = {
@@ -32,11 +44,16 @@ export type StatusBadgeProps = {
  */
 export function StatusBadge({ status, label, size = "md", className = "" }: StatusBadgeProps) {
     const meta = statusMeta(status);
+    const tone = TONE[meta.tone];
+    const Icon = tone.Icon;
     return (
         <span
-            className={`inline-flex items-center whitespace-nowrap rounded-full font-extrabold uppercase tracking-wider ring-1 ${TONE[meta.tone]} ${SIZE[size]} ${className}`}
+            className={`inline-flex items-center whitespace-nowrap rounded-full border font-extrabold uppercase tracking-wider ${tone.box} ${SIZE[size]} ${className}`}
         >
-            {label ?? meta.label}
+            {Icon && <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
+            {/* The strike on `danger` is decorative -- screen readers announce the
+                label unchanged, so this adds a channel without removing one. */}
+            <span className={tone.label}>{label ?? meta.label}</span>
         </span>
     );
 }
