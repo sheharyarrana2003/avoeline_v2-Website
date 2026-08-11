@@ -23,17 +23,11 @@ export default async function EventLayout({
     ];
 
     return (
-        <div className="flex min-h-screen flex-col bg-gray-100 lg:flex-row">
-            {/* Section nav for one event. Deliberately quieter and narrower than the
-                global rail it now sits beside: no shadow, a plain hairline, and it
-                stacks above the content below lg rather than eating half the width. */}
-            <aside className="shrink-0 border-b border-gray-200 bg-white lg:w-56 lg:border-r lg:border-b-0">
-                <nav>
-                    <EventsTab tabs={tabs} />
-                </nav>
-            </aside>
+        <div className="flex min-h-full flex-col bg-gray-50">
+            {/* EventsTab renders its own <nav>; wrapping it in an <aside> here was
+                what produced two stacked sidebars. */}
+            <EventsTab tabs={tabs} />
 
-            {/* Main Content */}
             <main className="min-w-0 flex-1 p-6 lg:p-8">
                 {children}
             </main>
