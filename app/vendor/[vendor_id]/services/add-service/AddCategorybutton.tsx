@@ -29,7 +29,7 @@ export default function AddCategoryButton() {
                 <span>Select Existing</span>
             ) : (
                 <>
-                    <span className="text-emerald-600 font-bold text-sm line-none">+</span>
+                    <span className="text-gray-900 font-bold text-sm line-none">+</span>
                     <span>Custom Category</span>
                 </>
             )}

@@ -32,7 +32,7 @@ export function AttendeeInput() {
 
     return (
         <div className="relative flex items-center w-full">
-            <Search className="absolute left-5 text-gray-400" size={18} />
+            <Search className="absolute left-5 text-gray-500" size={18} />
             <input 
                 type="text" 
                 onChange={handleOnChange}  

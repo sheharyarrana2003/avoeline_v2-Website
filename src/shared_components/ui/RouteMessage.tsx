@@ -54,7 +54,7 @@ export function RouteMessage({
 
                 {details ? (
                     <details className="mt-8 text-left">
-                        <summary className="cursor-pointer text-xs font-medium text-gray-400 hover:text-gray-600">
+                        <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-600">
                             Technical details
                         </summary>
                         <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-100 p-3 text-[11px] leading-relaxed text-gray-600">

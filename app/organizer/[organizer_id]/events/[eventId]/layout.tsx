@@ -1,8 +1,4 @@
 import { EventsTab } from "@/src/shared_components/organizer/EventTab";
-import { EventService } from "@/src/services/event.service";
-import { EventModel } from "@/src/services/models/event.model";
-import { revalidatePath } from "next/cache";
-import { notFound } from 'next/navigation';
 
 export default async function EventLayout({
     children,
@@ -27,21 +23,12 @@ export default async function EventLayout({
     ];
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
-            {/* Vertical Sidebar */}
-            <aside className="w-[260px] flex flex-col bg-white border-r border-gray-200 shadow-[4px_0_12px_rgba(0,0,0,0.03)] z-10">
+        <div className="flex min-h-full flex-col bg-gray-50">
+            {/* EventsTab renders its own <nav>; wrapping it in an <aside> here was
+                what produced two stacked sidebars. */}
+            <EventsTab tabs={tabs} />
 
-                {/* 1. Techverse Brand Header */}
-               
-
-                {/* 3. Vertical Tabs */}
-                <nav className=" flex-1">
-                    <EventsTab tabs={tabs} />
-                </nav>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 min-w-0 p-8">
+            <main className="min-w-0 flex-1 p-6 lg:p-8">
                 {children}
             </main>
         </div>

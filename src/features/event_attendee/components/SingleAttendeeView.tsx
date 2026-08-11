@@ -172,7 +172,7 @@ export function SingleAttendeeView({
             {onClose && (
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors"
+                    className="absolute top-6 right-6 text-gray-500 hover:text-black transition-colors"
                 >
                     <X size={20} />
                 </button>
@@ -192,11 +192,11 @@ export function SingleAttendeeView({
                 </div>
                 <div className="space-y-1 mt-3">
                     <div className="flex items-center gap-2.5 text-gray-500 text-[13px] font-medium">
-                        <Mail size={14} className="text-gray-400" />
+                        <Mail size={14} className="text-gray-500" />
                         {email}
                     </div>
                     <div className="flex items-center gap-2.5 text-gray-500 text-[13px] font-medium">
-                        <Phone size={14} className="text-gray-400" />
+                        <Phone size={14} className="text-gray-500" />
                         {phone}
                     </div>
                 </div>
@@ -205,7 +205,7 @@ export function SingleAttendeeView({
             {/* Organizer Controls: Registration Status Dropdown */}
             <div className="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+                    <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">
                         REGISTRATION STATUS
                     </p>
                     <p className="text-xs text-gray-500">Change attendee registration state</p>
@@ -232,7 +232,7 @@ export function SingleAttendeeView({
             <div className="bg-gray-200 rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
                 <div className="flex justify-between items-start">
                     <div className="max-w-[65%]">
-                        <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
+                        <p className="text-[9px] font-extrabold text-gray-500 uppercase tracking-widest mb-1.5">
                             ORGANIZATION
                         </p>
                         <p className="font-extrabold text-gray-900 text-[13px] leading-tight pr-4">
@@ -240,7 +240,7 @@ export function SingleAttendeeView({
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">
+                        <p className="text-[9px] font-extrabold text-gray-500 uppercase tracking-widest mb-1.5">
                             FINAL PRICE
                         </p>
                         <p className="font-black text-gray-900 text-[14px]">
@@ -268,7 +268,7 @@ export function SingleAttendeeView({
                     </div>
                     <div>
                         <p className="font-extrabold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
-                        <p className="text-xs text-gray-400 font-medium capitalize">Method: {checkInMethod}</p>
+                        <p className="text-xs text-gray-500 font-medium capitalize">Method: {checkInMethod}</p>
                     </div>
                 </div>
             )}
@@ -278,20 +278,20 @@ export function SingleAttendeeView({
                 
                 {/* 1. Academic & User Profile Info */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         Academic Details
                     </h3>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                         <div>
-                            <span className="text-gray-400 font-medium block">Department</span>
+                            <span className="text-gray-500 font-medium block">Department</span>
                             <span className="font-bold text-gray-800">{department}</span>
                         </div>
                         <div>
-                            <span className="text-gray-400 font-medium block">Graduation Year</span>
+                            <span className="text-gray-500 font-medium block">Graduation Year</span>
                             <span className="font-bold text-gray-800">{gradYear}</span>
                         </div>
                         <div className="col-span-2">
-                            <span className="text-gray-400 font-medium block">Location</span>
+                            <span className="text-gray-500 font-medium block">Location</span>
                             <span className="font-bold text-gray-800">{locationInfo}</span>
                         </div>
                     </div>
@@ -299,19 +299,19 @@ export function SingleAttendeeView({
 
                 {/* 2. Payment, Pricing & Discount Breakdown */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <CreditCard size={14} /> Payment & Pricing
                     </h3>
 
                     <div className="grid grid-cols-2 gap-3 text-xs mb-1">
                         <div>
-                            <span className="text-gray-400 font-medium block">Payment Method</span>
+                            <span className="text-gray-500 font-medium block">Payment Method</span>
                             <span className="font-bold text-gray-800 uppercase">
                                 {registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
                             </span>
                         </div>
                         <div>
-                            <span className="text-gray-400 font-medium block mb-1">Payment Status</span>
+                            <span className="text-gray-500 font-medium block mb-1">Payment Status</span>
                             <div className="relative inline-block">
                                 <select
                                     aria-label="Payment status"
@@ -341,7 +341,7 @@ export function SingleAttendeeView({
                         )}
 
                         {discount && (
-                            <div className="flex justify-between items-center bg-emerald-50 text-emerald-700 font-bold px-3 py-2 rounded-xl">
+                            <div className="flex justify-between items-center bg-gray-50 text-gray-900 font-bold px-3 py-2 rounded-xl">
                                 <span className="flex items-center gap-1.5">
                                     <Tag size={12} /> {discount.type} Discount
                                 </span>
@@ -360,7 +360,7 @@ export function SingleAttendeeView({
                         </div>
 
                         {finalPrice > amountPaid && (
-                            <div className="flex justify-between items-center text-red-500 font-semibold">
+                            <div className="flex justify-between items-center text-gray-900 font-semibold">
                                 <span>Balance Due</span>
                                 <span>{formatCurrency(finalPrice - amountPaid, currency)}</span>
                             </div>
@@ -371,21 +371,21 @@ export function SingleAttendeeView({
                 {/* 3. Certificate Info */}
                 {registration?.certificate && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <Award size={14} /> Certificate Info
                         </h3>
                         <div className="grid grid-cols-2 gap-3 text-xs">
                             <div>
-                                <span className="text-gray-400 font-medium block">Status</span>
+                                <span className="text-gray-500 font-medium block">Status</span>
                                 <span className="font-bold text-gray-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
                             </div>
                             <div>
-                                <span className="text-gray-400 font-medium block">Type</span>
+                                <span className="text-gray-500 font-medium block">Type</span>
                                 <span className="font-bold text-gray-800 capitalize">{registration.certificate.type || "N/A"}</span>
                             </div>
                             {registration.certificate.issueDate && (
                                 <div>
-                                    <span className="text-gray-400 font-medium block">Issue Date</span>
+                                    <span className="text-gray-500 font-medium block">Issue Date</span>
                                     <span className="font-bold text-gray-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
                                 </div>
                             )}
@@ -396,7 +396,7 @@ export function SingleAttendeeView({
 
                 {/* 4. Communication Log */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <MessageSquare size={14} /> Communication History
                     </h3>
                     {registration?.communications && registration.communications.length > 0 ? (
@@ -405,27 +405,27 @@ export function SingleAttendeeView({
                                 <div key={idx} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-xl">
                                     <div>
                                         <p className="font-bold text-gray-800 capitalize">{comm.type.replace("_", " ")}</p>
-                                        <p className="text-[10px] text-gray-400 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
+                                        <p className="text-[10px] text-gray-500 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
                                     </div>
-                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-gray-200">
+                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded-xs bg-gray-200">
                                         {comm.status}
                                     </span>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-xs text-gray-400">No communication logs available.</p>
+                        <p className="text-xs text-gray-500">No communication logs available.</p>
                     )}
                 </div>
 
                 {/* 5. Feedback */}
                 {registration?.feedbackSubmitted && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <Star size={14} /> Feedback
                         </h3>
                         <div className="flex items-center gap-2 text-xs">
-                            <span className="text-gray-400 font-medium">Rating:</span>
+                            <span className="text-gray-500 font-medium">Rating:</span>
                             <span className="font-bold text-gray-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
                         </div>
                     </div>

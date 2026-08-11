@@ -164,7 +164,7 @@ export default function BookingDetailClient({
                     </div>
                     <div className="flex items-center gap-3">
                         <StatusBadge status={status} size="md" className="px-4 py-1.5 text-xs" />
-                        <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600">
+                        <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-600">
                             <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
@@ -191,34 +191,34 @@ export default function BookingDetailClient({
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
-                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Dates</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Dates</p>
                                             <p className="text-sm font-semibold text-gray-900">
                                                 {formatDate(requirements.serviceDate)} - {formatDate(requirements.serviceDate)}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Shift Times</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Shift Times</p>
                                             <p className="text-sm font-semibold text-gray-900">
                                                 {formatTime(requirements.startTime)} — {formatTime(requirements.endTime)}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                         <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Location</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Location</p>
                                             <p className="text-sm font-semibold text-gray-900">{requirements.location}</p>
                                         </div>
                                     </div>
@@ -226,27 +226,27 @@ export default function BookingDetailClient({
 
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
-                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                         <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Person</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contact Person</p>
                                             <p className="text-sm font-semibold text-gray-900">Dr. Sarah Khan</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Expected Guests</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Expected Guests</p>
                                             <p className="text-sm font-semibold text-gray-900">{requirements.guestCount} Attendees</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Special Instructions</p>
+                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Special Instructions</p>
                                     <p className="text-sm text-gray-600 italic leading-relaxed">
                                         "{requirements.specialInstructions || 'Strict policy: No plastic bottled water. Provide glass carafes or reusable hydration stations only. All staff must wear formal black uniforms.'}"
                                     </p>
@@ -263,11 +263,11 @@ export default function BookingDetailClient({
                                     </svg>
                                     Agreed Services
                                 </h3>
-                                <span className="text-[10px] text-gray-400 font-medium">CONTRACT #{bookingId}</span>
+                                <span className="text-[10px] text-gray-500 font-medium">CONTRACT #{bookingId}</span>
                             </div>
 
                             {/* Table Header */}
-                            <div className="grid grid-cols-12 gap-4 px-6 py-3 border-y border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <div className="grid grid-cols-12 gap-4 px-6 py-3 border-y border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                 <div className="col-span-5">Service Item</div>
                                 <div className="col-span-4">Inclusions / Status</div>
                                 <div className="col-span-3 text-right">Amount (PKR)</div>
@@ -278,12 +278,12 @@ export default function BookingDetailClient({
                                 <div key={i} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center">
                                     <div className="col-span-5">
                                         <p className="text-sm font-semibold text-gray-900">{item.item}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5">
+                                        <p className="text-xs text-gray-500 mt-0.5">
                                             {item.quantity} {item.quantity > 1 ? 'units' : 'unit'}
                                         </p>
                                     </div>
                                     <div className="col-span-4 flex flex-wrap gap-2">
-                                        <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span className="text-[10px] bg-gray-50 text-gray-900 px-2 py-0.5 rounded-full flex items-center gap-1">
                                             <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                             </svg>
@@ -296,7 +296,7 @@ export default function BookingDetailClient({
                                 </div>
                             )) : (
                                 <div className="px-6 py-8 text-center">
-                                    <p className="text-sm text-gray-400">No service items in this quote.</p>
+                                    <p className="text-sm text-gray-500">No service items in this quote.</p>
                                 </div>
                             )}
 
@@ -317,7 +317,7 @@ export default function BookingDetailClient({
                                         </svg>
                                         Preparation Checklist
                                     </h3>
-                                    <p className="text-xs text-gray-400 mt-1">{taskProgress}% of preparation tasks completed</p>
+                                    <p className="text-xs text-gray-500 mt-1">{taskProgress}% of preparation tasks completed</p>
                                 </div>
                                 <button
                                     type="button"
@@ -388,7 +388,7 @@ export default function BookingDetailClient({
                                             <button> now, so its content has to stay
                                             phrasing content to be valid. */}
                                         <span className="flex-1 min-w-0 block">
-                                            <span className={`block text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                                            <span className={`block text-sm font-medium ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
                                                 {task.label}
                                             </span>
                                             {task.progress !== undefined && task.total && (
@@ -399,7 +399,7 @@ export default function BookingDetailClient({
                                                             style={{ width: `${(task.progress / task.total) * 100}%` }}
                                                         />
                                                     </span>
-                                                    <span className="block text-[10px] text-gray-400 mt-1">{task.progress}/{task.total} {task.unit}</span>
+                                                    <span className="block text-[10px] text-gray-500 mt-1">{task.progress}/{task.total} {task.unit}</span>
                                                 </span>
                                             )}
                                         </span>
@@ -420,11 +420,11 @@ export default function BookingDetailClient({
                             <div className="space-y-4 mb-6">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">TechVerse (Client)</span>
-                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
+                                    <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">Vendor (You)</span>
-                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
+                                    <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full uppercase">Signed</span>
                                 </div>
                             </div>
 
@@ -468,17 +468,17 @@ export default function BookingDetailClient({
                                     <div key={i} className="flex items-start justify-between">
                                         <div>
                                             <p className="text-sm font-semibold text-gray-900">{inst.installment} Payment ({i === 0 ? '35%' : '65%'})</p>
-                                            <p className="text-xs text-gray-400 mt-0.5">
+                                            <p className="text-xs text-gray-500 mt-0.5">
                                                 {inst.status === 'paid' 
                                                     ? `Paid on ${formatDate(inst.dueDate)}` 
                                                     : `Due ${formatDate(inst.dueDate)}`
                                                 }
                                             </p>
                                             {inst.status !== 'paid' && (
-                                                <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">Due {formatDate(inst.dueDate)}</p>
+                                                <p className="text-[10px] text-gray-900 font-bold mt-1 uppercase">Due {formatDate(inst.dueDate)}</p>
                                             )}
                                         </div>
-                                        <span className={`text-sm font-bold ${inst.status === 'paid' ? 'text-gray-900' : 'text-red-600'}`}>
+                                        <span className={`text-sm font-bold ${inst.status === 'paid' ? 'text-gray-900' : 'text-gray-900'}`}>
                                             {formatCurrency(inst.amount, currency)}
                                         </span>
                                     </div>
@@ -499,8 +499,8 @@ export default function BookingDetailClient({
                                 <div className="flex-1">
                                     <p className="text-sm font-bold text-gray-900">TechVerse Admin</p>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                                        <span className="text-xs text-gray-400">Online</span>
+                                        <span className="w-2 h-2 bg-gray-900 rounded-full" />
+                                        <span className="text-xs text-gray-500">Online</span>
                                     </div>
                                 </div>
                             </div>
@@ -515,7 +515,7 @@ export default function BookingDetailClient({
                                                 : 'bg-gray-100 text-gray-900 rounded-bl-none'
                                         }`}>
                                             <p className="text-sm">{msg.text}</p>
-                                            <p className={`text-[10px] mt-1 ${msg.from === 'organizer' ? 'text-gray-400' : 'text-gray-400'}`}>
+                                            <p className={`text-[10px] mt-1 ${msg.from === 'organizer' ? 'text-gray-500' : 'text-gray-500'}`}>
                                                 {msg.from === 'organizer' ? 'Delivered' : ''} • {timeAgo(msg.timestamp)}
                                             </p>
                                         </div>

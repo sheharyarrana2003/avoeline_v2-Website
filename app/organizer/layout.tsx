@@ -1,4 +1,4 @@
-import { DashboardHeader } from "@/src/shared_components/DashboardHeader";
+import { DashboardNav } from "@/src/shared_components/DashboardNav";
 import { AuthService } from "@/src/features/auth/authService";
 import { OrganizerService } from "@/src/services/organizer.service";
 import { OrganizerFooter } from "@/src/shared_components/organizer/OrganizerFooter";
@@ -29,21 +29,24 @@ export default async function OrganizerLayout({
 
     return (
         <>
-            <DashboardHeader
+            <DashboardNav
                 basePath={basePath}
                 name={u?.name ?? ""}
                 logoUrl={organizer.organization.logo || undefined}
                 unreadCount={unreadCount}
                 items={[
-                    { label: "Dashboard", href: `${basePath}/dashboard` },
-                    { label: "Events", href: `${basePath}/events` },
-                    { label: "Analytics", href: `${basePath}/analytics` },
-                    { label: "Vendors", href: `${basePath}/vendor-marketplace` },
-                    { label: "Quotes", href: `${basePath}/quotes` },
+                    { label: "Dashboard", href: `${basePath}/dashboard`, icon: "dashboard" },
+                    { label: "Events", href: `${basePath}/events`, icon: "events" },
+                    { label: "Analytics", href: `${basePath}/analytics`, icon: "analytics" },
+                    { label: "Vendors", href: `${basePath}/vendor-marketplace`, icon: "vendors" },
+                    { label: "Quotes", href: `${basePath}/quotes`, icon: "quotes" },
                 ]}
             />
-            <main className="flex-1 pb-12">{children}</main>
-            <OrganizerFooter />
+            {/* Offsets the fixed rail, which only exists from lg up. */}
+            <div className="flex flex-1 flex-col lg:pl-64">
+                <main className="flex-1 pb-12">{children}</main>
+                <OrganizerFooter />
+            </div>
         </>
     )
 

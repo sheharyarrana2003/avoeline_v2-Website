@@ -110,7 +110,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                     </div>
 
                     {/* List Headers */}
-                    <div className="grid grid-cols-[40px_2.5fr_1fr_1fr_1fr_40px] px-6 py-3 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-200/50">
+                    <div className="grid grid-cols-[40px_2.5fr_1fr_1fr_1fr_40px] px-6 py-3 text-[10px] font-extrabold text-gray-500 uppercase tracking-widest border-b border-gray-200/50">
                         <div className="flex justify-center"><div className="w-4 h-4 rounded-full border-2 border-gray-300"></div></div>
                         <div>Attendee</div>
                         <div>Ticket</div>
@@ -152,7 +152,7 @@ export function AttendeeClientSide({ attendees = [], eventTitle = "Event Attende
                 <div className="absolute bottom-8 left-[calc(50%-200px)] -translate-x-1/2 bg-black text-white pl-6 pr-8 py-3 rounded-[2rem] flex items-center gap-6 shadow-2xl z-50 animate-in slide-in-from-bottom-8">
                     <div className="flex items-center gap-4 border-r border-gray-700 pr-6">
                         <span className="font-black text-xl leading-none">{selected_ids.length}</span>
-                        <span className="text-[10px] font-extrabold tracking-widest text-gray-400 mt-0.5">SELECTED</span>
+                        <span className="text-[10px] font-extrabold tracking-widest text-gray-500 mt-0.5">SELECTED</span>
                     </div>
                     <div className="flex items-center gap-5">
                         <button className="text-gray-300 hover:text-white transition-colors"><Mail size={18} /></button>

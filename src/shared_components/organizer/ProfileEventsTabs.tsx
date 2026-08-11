@@ -38,7 +38,7 @@ export function ProfileEventsTabs({
                         key={tab}
                         type="button"
                         onClick={() => setActiveTab(tab)}
-                        className={`relative px-3 pb-2 text-sm font-medium transition-colors ${activeTab === tab ? "text-black" : "text-gray-400 hover:text-gray-600"
+                        className={`relative px-3 pb-2 text-sm font-medium transition-colors ${activeTab === tab ? "text-black" : "text-gray-500 hover:text-gray-600"
                             }`}
                     >
                         {tab}
@@ -54,7 +54,7 @@ export function ProfileEventsTabs({
                     {about?.trim() ? about : "No description provided."}
                 </p>
             ) : list.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-400">
+                <p className="py-8 text-center text-sm text-gray-500">
                     No {activeTab === "Upcoming Events" ? "upcoming" : "past"} events found.
                 </p>
             ) : (
@@ -63,10 +63,10 @@ export function ProfileEventsTabs({
                         <li key={event.id} className="group">
                             <Link href={`${basePath}/events/${event.id}`} className="block">
                                 <div className="flex items-center justify-between gap-3">
-                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-gray-900">
                                         {event.title}
                                     </h3>
-                                    <span className="shrink-0 text-xs font-semibold text-gray-400">
+                                    <span className="shrink-0 text-xs font-semibold text-gray-500">
                                         {event.date || "—"}
                                     </span>
                                 </div>

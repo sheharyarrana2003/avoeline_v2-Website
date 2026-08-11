@@ -87,7 +87,7 @@ export default async function AddNewServicePage({
                         <h1 className="text-xl font-bold text-gray-900">Add New Service</h1>
                         <Link
                             href={`/vendor/${vendor_id}/services`}
-                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition"
+                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-600 transition"
                         >
                             <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -147,7 +147,7 @@ export default async function AddNewServicePage({
                                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                                             ))}
                                         </select>
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </div>
@@ -160,7 +160,7 @@ export default async function AddNewServicePage({
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <label className="text-sm font-medium text-gray-700">Description</label>
-                                <span className="text-xs text-gray-400">0/500</span>
+                                <span className="text-xs text-gray-500">0/500</span>
                             </div>
                             <div className="border border-gray-200 rounded-xl overflow-hidden">
                                 <textarea
@@ -198,7 +198,7 @@ export default async function AddNewServicePage({
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">PKR</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500">PKR</span>
                                     <input
                                         type="number"
                                         name="price"
@@ -229,7 +229,7 @@ export default async function AddNewServicePage({
                                             name="inclusions"
                                             value={inc.id}
                                             defaultChecked={inc.checked}
-                                            className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
+                                            className="w-5 h-5 rounded-xs border-gray-300 text-black focus:ring-black"
                                         />
                                         <span className="text-sm text-gray-700">{inc.label}</span>
                                     </label>
@@ -251,7 +251,7 @@ export default async function AddNewServicePage({
                                 folder="service-images"
                                 multiple
                                 accept="image/*,video/*"
-                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-200 text-[10px] text-gray-400 transition hover:border-gray-300 disabled:opacity-60"
+                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-200 text-[10px] text-gray-500 transition hover:border-gray-300 disabled:opacity-60"
                             />
                         </div>
 

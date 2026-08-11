@@ -31,7 +31,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
         // tone; anything else is still pending someone's attention.
         if (status === 'active' && verified) {
             return (
-                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-600/20">
+                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-gray-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-gray-900 ring-1 ring-gray-200/20">
                     <CheckCircle2 size={12} aria-hidden="true" /> Verified
                 </span>
             );
@@ -114,12 +114,12 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         
                                         <div className="flex items-center gap-4 mb-4 text-[13px] text-gray-500 font-medium">
                                             <span className="flex items-center gap-1 text-gray-700">
-                                                <Star size={14} className="text-amber-400 fill-amber-400" /> 
+                                                <Star size={14} className="text-gray-900 fill-gray-900" /> 
                                                 {vendor.ratings.averageRating.toFixed(1)} 
-                                                <span className="text-gray-400 text-xs">({vendor.ratings.totalReviews})</span>
+                                                <span className="text-gray-500 text-xs">({vendor.ratings.totalReviews})</span>
                                             </span>
                                             <span className="flex items-center gap-1.5">
-                                                <Phone size={14} className="text-gray-400" /> 
+                                                <Phone size={14} className="text-gray-500" /> 
                                                 {vendor.contact.primaryPhone}
                                             </span>
                                         </div>
@@ -140,10 +140,10 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         {renderBadge(vendor.status, vendor.verification.verified)}
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-bold text-gray-400 mb-0.5">
+                                        <p className="text-[11px] font-bold text-gray-500 mb-0.5">
                                             {startingPrice ? 'Starting Price' : 'Estimated'}
                                         </p>
-                                        <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-400'}`}>
+                                        <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-500'}`}>
                                             {startingPrice ? formatCurrency(startingPrice) : 'TBD'}
                                         </p>
                                     </div>

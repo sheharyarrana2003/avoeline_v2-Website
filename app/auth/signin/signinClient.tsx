@@ -58,9 +58,9 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
 
                 {/* Error Alert */}
                 {error && (
-                    <div className="w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                    <div className="w-full mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-3">
                         <svg aria-hidden="true" 
-                            className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" 
+                            className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" 
                             fill="none" 
                             viewBox="0 0 24 24" 
                             stroke="currentColor"
@@ -73,12 +73,12 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                             />
                         </svg>
                         <div className="flex-1">
-                            <p className="text-sm font-medium text-red-800">Login failed</p>
-                            <p className="text-sm text-red-600 mt-0.5">{error}</p>
+                            <p className="text-sm font-medium text-gray-900">Login failed</p>
+                            <p className="text-sm text-gray-900 mt-0.5">{error}</p>
                         </div>
                         <button 
                             onClick={() => setError(null)}
-                            className="text-red-400 hover:text-red-600 transition"
+                            className="text-gray-900 hover:text-gray-900 transition"
                         >
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -101,7 +101,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                             }}
                             className={`w-full px-6 py-3 border bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-1 transition-all ${
                                 error 
-                                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500' 
+                                    ? 'border-gray-200 focus:border-gray-900 focus:ring-gray-900' 
                                     : 'border-gray-400 focus:border-black focus:ring-black'
                             }`}
                             required
@@ -119,7 +119,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                             }}
                             className={`w-full px-6 py-3 border bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-1 transition-all ${
                                 error 
-                                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500' 
+                                    ? 'border-gray-200 focus:border-gray-900 focus:ring-gray-900' 
                                     : 'border-gray-400 focus:border-black focus:ring-black'
                             }`}
                             required

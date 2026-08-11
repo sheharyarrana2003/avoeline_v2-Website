@@ -16,9 +16,9 @@ function SparkleIcon({ className = "" }: { className?: string }) {
         <svg aria-hidden="true" viewBox="0 0 24 24" className={className}>
             <defs>
                 <linearGradient id="sparkleGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#818cf8" />
-                    <stop offset="50%" stopColor="#a855f7" />
-                    <stop offset="100%" stopColor="#ec4899" />
+                    <stop offset="0%" stopColor="#171717" />
+                    <stop offset="50%" stopColor="#737373" />
+                    <stop offset="100%" stopColor="#171717" />
                 </linearGradient>
             </defs>
             <path
@@ -144,16 +144,18 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                 {/* Header */}
                 <div className="border-b border-black/10 px-5 md:px-8 py-5 shrink-0 flex items-start justify-between">
                     <div>
-                        <div className="text-2xl md:text-[28px] font-semibold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        {/* Gradient TEXT, not a gradient fill -- the stops have to stay
+                            dark or the wordmark disappears against the white panel. */}
+                        <div className="text-2xl md:text-[28px] font-semibold tracking-tight bg-gradient-to-r from-gray-900 via-gray-500 to-gray-900 bg-clip-text text-transparent">
                             Avoeline
                         </div>
-                        <div className="text-gray-400 text-sm md:text-base mt-0.5">
+                        <div className="text-gray-500 text-sm md:text-base mt-0.5">
                             Your AI event planning assistant
                         </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-900" />
                             Online
                         </div>
                         <SparkleIcon className="w-7 h-7 md:w-8 md:h-8" />
@@ -165,7 +167,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                     <div className="w-full space-y-6">
                         {messages.length === 0 && (
                             <div className="min-h-[45vh] flex flex-col items-center justify-center gap-8">
-                                <div className="text-center text-gray-400 text-sm max-w-sm">
+                                <div className="text-center text-gray-500 text-sm max-w-sm">
                                     Ask me anything about planning, marketing, or running your event.
                                 </div>
 
@@ -208,7 +210,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                                         <div className="w-7 h-7 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
                                             <SparkleIcon className="w-3.5 h-3.5" />
                                         </div>
-                                        <div className="text-[15px] leading-relaxed text-gray-800 prose  prose-sm max-w-none prose-p:my-2 prose-headings:my-3 prose-headings:font-medium prose-headings:text-gray-900 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:text-gray-900 prose-pre:bg-gray-100 prose-pre:border prose-pre:border-black/10 prose-pre:rounded-lg prose-code:text-purple-600 prose-code:bg-black/5 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-a:text-purple-600 prose-a:underline prose-a:underline-offset-2 prose-blockquote:border-l-2 prose-blockquote:border-black/20 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-gray-500">
+                                        <div className="text-[15px] leading-relaxed text-gray-800 prose  prose-sm max-w-none prose-p:my-2 prose-headings:my-3 prose-headings:font-medium prose-headings:text-gray-900 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:text-gray-900 prose-pre:bg-gray-100 prose-pre:border prose-pre:border-black/10 prose-pre:rounded-lg prose-code:text-gray-900 prose-code:bg-black/5 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-xs prose-code:before:content-none prose-code:after:content-none prose-a:text-gray-900 prose-a:underline prose-a:underline-offset-2 prose-blockquote:border-l-2 prose-blockquote:border-black/20 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-gray-500">
                                             <ReactMarkdown>
                                                 {String(m.content)}
                                             </ReactMarkdown>
@@ -248,7 +250,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                             <button
                                 type="submit"
                                 disabled={!!loading || !input.trim()}
-                                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:bg-black/10 disabled:text-gray-400 disabled:cursor-not-allowed shrink-0"
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:bg-black/10 disabled:text-gray-500 disabled:cursor-not-allowed shrink-0"
                             >
                                 <SendIcon className="w-4 h-4" />
                             </button>
@@ -257,12 +259,12 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                             type="button"
                             onClick={() => { setMessages([]); SetInput(""); }}
                             title="Clear conversation"
-                            className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 border border-black/10 text-gray-400 hover:text-red-500 hover:border-red-500/30 transition-colors shrink-0"
+                            className="w-10 h-10 rounded-full flex items-center justify-center bg-black/5 border border-black/10 text-gray-500 hover:text-gray-900 hover:border-gray-900/30 transition-colors shrink-0"
                         >
                             <TrashIcon className="w-4 h-4" />
                         </button>
                     </form>
-                    <div className="text-[11px] text-gray-400 text-center mt-3">
+                    <div className="text-[11px] text-gray-500 text-center mt-3">
                         Avoeline may display inaccurate info, so double-check its responses.
                     </div>
                 </div>

@@ -122,12 +122,12 @@ export default async function VendorQuoteManagementPage({
                     {/* Header */}
                     <div className="flex items-start justify-between mb-8">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center ring-1 ring-indigo-100">
+                            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center ring-1 ring-gray-200">
                                 <span className="text-xl">📋</span>
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-900 text-lg">{eventName}</h3>
-                                <p className="text-sm text-gray-400 mt-0.5">
+                                <p className="text-sm text-gray-500 mt-0.5">
                                     {organizerName} • Submitted {timeAgo(submittedAt)} • Proposal #{proposalNumber}
                                 </p>
                             </div>
@@ -135,7 +135,7 @@ export default async function VendorQuoteManagementPage({
                         <div className="text-right">
                             <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(totalAmount, currency)}</p>
                             {validity && (
-                                <p className="text-sm text-gray-400 mt-1">Validity: {formatDate(validity)}</p>
+                                <p className="text-sm text-gray-500 mt-1">Validity: {formatDate(validity)}</p>
                             )}
                         </div>
                     </div>
@@ -143,7 +143,7 @@ export default async function VendorQuoteManagementPage({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {/* Itemized Pricing */}
                         <div>
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Itemized Pricing</h4>
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-5">Itemized Pricing</h4>
                             <div className="space-y-4">
                                 {breakdown.length > 0 ? (
                                     breakdown.map((item: any, i: number) => (
@@ -153,7 +153,7 @@ export default async function VendorQuoteManagementPage({
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-gray-400">No itemized breakdown provided.</p>
+                                    <p className="text-sm text-gray-500">No itemized breakdown provided.</p>
                                 )}
 
                                 <div className="border-t border-gray-100 pt-4 mt-4">
@@ -167,14 +167,14 @@ export default async function VendorQuoteManagementPage({
 
                         {/* Negotiation History */}
                         <div>
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Negotiation History</h4>
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-5">Negotiation History</h4>
                             <div className="space-y-5">
                                 {negotiations.length > 0 ? (
                                     negotiations.map((n: any, i: number) => {
                                         const isOrganizer = n?.from === "organizer";
                                         return (
                                             <div key={i} className="flex gap-3">
-                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-indigo-500'}`} />
+                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`} />
                                                 <div>
                                                     <p className="text-xs font-semibold text-gray-900">
                                                         {isOrganizer ? organizerName : "You (Vendor)"}
@@ -187,12 +187,12 @@ export default async function VendorQuoteManagementPage({
                                         );
                                     })
                                 ) : (
-                                    <p className="text-sm text-gray-400">No negotiation history yet.</p>
+                                    <p className="text-sm text-gray-500">No negotiation history yet.</p>
                                 )}
 
                                 {/* Terms */}
                                 <div className="mt-6 pt-6 border-t border-gray-100">
-                                    <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Terms & Conditions</h5>
+                                    <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Terms & Conditions</h5>
                                     <p className="text-xs text-gray-500 leading-relaxed">
                                         {terms || "No terms specified."}
                                     </p>
@@ -261,7 +261,7 @@ export default async function VendorQuoteManagementPage({
                                 href={`?tab=active`}
                                 className={`pb-4 text-sm font-medium transition relative ${activeTab === "active"
                                     ? "text-gray-900"
-                                    : "text-gray-400 hover:text-gray-600"
+                                    : "text-gray-500 hover:text-gray-600"
                                     }`}
                             >
                                 Active Quotes ({activeQuotes.length})
@@ -273,7 +273,7 @@ export default async function VendorQuoteManagementPage({
                                 href={`?tab=past`}
                                 className={`pb-4 text-sm font-medium transition relative ${activeTab === "past"
                                     ? "text-gray-900"
-                                    : "text-gray-400 hover:text-gray-600"
+                                    : "text-gray-500 hover:text-gray-600"
                                     }`}
                             >
                                 Past Quotes
@@ -292,7 +292,7 @@ export default async function VendorQuoteManagementPage({
                                 <span className="text-sm text-gray-500">
                                     {selectedQuote?.serviceType || ""}
                                 </span>
-                                <button className="ml-auto text-gray-400 hover:text-gray-600 transition">
+                                <button className="ml-auto text-gray-500 hover:text-gray-600 transition">
                                     <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                     </svg>
@@ -306,7 +306,7 @@ export default async function VendorQuoteManagementPage({
                         {/* Other Quotes Accordion */}
                         {activeTab === "active" && activeQuotes.length > 1 && (
                             <div className="space-y-3 mt-8">
-                                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Other Requests</h3>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Other Requests</h3>
                                 {activeQuotes.filter((b: any) => b?.bookingId !== selectedQuote?.bookingId).map((booking: any, i: number) => {
                                     const bq = booking?.quote?.vendorQuote || {};
                                     return (
@@ -321,12 +321,12 @@ export default async function VendorQuoteManagementPage({
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900">Organizer {booking?.organizerId}</p>
-                                                    <p className="text-xs text-gray-400 mt-0.5">
+                                                    <p className="text-xs text-gray-500 mt-0.5">
                                                         {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </Link>

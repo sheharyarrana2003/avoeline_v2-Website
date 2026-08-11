@@ -3,8 +3,10 @@ import { AuthService } from "@/src/features/auth/authService"
 import Link from "next/link";
 import { SpeakerSearchBar } from "@/src/features/event_speakers/components/SpeakerSearchBar";
 import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCard";
-import { Speaker } from "@/src/services/models/event.model";
 import { EventService } from "@/src/services/event.service";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import { UserRoundCog, Plus } from "lucide-react";
 
 export default async function SpeakerPage(
     { params, searchParams }:
@@ -33,7 +35,8 @@ export default async function SpeakerPage(
     const count_of_speakers = allSpeaker.length;
 
     return (
-        <div className="max-w-7xl mx-auto p-8 bg-gray-50 min-h-screen font-sans">
+        // The layout already supplies the page background and padding.
+        <div className="mx-auto max-w-7xl font-sans">
             {/* Top Header Row */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
@@ -64,12 +67,38 @@ export default async function SpeakerPage(
  
             </div>
 
-            {/* Grid Container */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {allSpeaker.map(speaker => (
-                    <SpeakerCard key={speaker.speakerId} speaker={speaker} />
-                ))}
-            </div>
+            {/* Grid Container. Without the empty branch this rendered a blank page:
+                a heading, a search box, and then nothing at all. */}
+            {count_of_speakers > 0 ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {allSpeaker.map(speaker => (
+                        <SpeakerCard key={speaker.speakerId} speaker={speaker} />
+                    ))}
+                </div>
+            ) : (
+                <div className="rounded-2xl border border-gray-200 bg-white">
+                    <EmptyState
+                        icon={<UserRoundCog className="h-5 w-5" />}
+                        title={resolvedParams.input_val ? "No speakers match that search" : "No speakers yet"}
+                        description={
+                            resolvedParams.input_val
+                                ? "Try a different name, company or session."
+                                : "Add the people presenting at this event so attendees can see who is speaking."
+                        }
+                        action={
+                            resolvedParams.input_val ? undefined : (
+                                <Link
+                                    href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
+                                    className={buttonClass("primary")}
+                                >
+                                    <Plus className="h-4 w-4" aria-hidden="true" />
+                                    Add speaker
+                                </Link>
+                            )
+                        }
+                    />
+                </div>
+            )}
         </div>
     )
 }

@@ -233,15 +233,15 @@ const tabs = [
 
                                 <div className="flex items-center gap-2 mt-2">
                                     <div className="flex items-center gap-1">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-900 fill-gray-900" viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                         <span className="text-sm font-bold text-gray-900">{rating}</span>
                                     </div>
-                                    <span className="text-sm text-gray-400">({totalReviews} reviews)</span>
+                                    <span className="text-sm text-gray-500">({totalReviews} reviews)</span>
                                 </div>
 
-                                <p className="text-sm text-gray-400 mt-3 leading-relaxed">
+                                <p className="text-sm text-gray-500 mt-3 leading-relaxed">
                                     No bio added yet.
                                 </p>
 
@@ -279,19 +279,19 @@ const tabs = [
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-2 gap-3 mt-6">
                                     <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Bookings</p>
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Bookings</p>
                                         <p className="text-xl font-bold text-gray-900 mt-1">{totalBookings}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Years</p>
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years</p>
                                         <p className="text-xl font-bold text-gray-900 mt-1">{yearsInBusiness || 0}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Response</p>
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Response</p>
                                         <p className="text-xl font-bold text-gray-900 mt-1">{avgResponseTime}</p>
                                     </div>
                                     <div className="bg-gray-50 rounded-xl p-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Repeat</p>
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Repeat</p>
                                         <p className="text-xl font-bold text-gray-900 mt-1">{repeatPct}%</p>
                                     </div>
                                 </div>
@@ -305,7 +305,7 @@ const tabs = [
                                             className={`pb-3 text-sm font-medium transition relative ${
                                                 activeTab === tab.id
                                                     ? "text-gray-900 border-b-2 border-black"
-                                                    : "text-gray-400 hover:text-gray-600"
+                                                    : "text-gray-500 hover:text-gray-600"
                                             }`}
                                         >
                                             {tab.label}
@@ -316,17 +316,17 @@ const tabs = [
                                 {/* Tab Content */}
                                 <div className="mt-6 space-y-4">
                                     {activeTab === 'services' && services.length === 0 && (
-                                        <p className="text-sm text-gray-400 text-center py-8">No services added yet.</p>
+                                        <p className="text-sm text-gray-500 text-center py-8">No services added yet.</p>
                                     )}
                                     {activeTab === 'services' && services.map((service: any, i: number) => (
                                         <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-900">{service.name}</p>
-                                                <p className="text-xs text-gray-400 mt-0.5">{service.description}</p>
+                                                <p className="text-xs text-gray-500 mt-0.5">{service.description}</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm font-bold text-gray-900">{formatCurrency(service.price)}</p>
-                                                <p className="text-[10px] text-gray-400">/{service.unit}</p>
+                                                <p className="text-[10px] text-gray-500">/{service.unit}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -348,7 +348,7 @@ const tabs = [
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-sm text-gray-400">
+                                                        <p className="text-sm text-gray-500">
                                                             Events you complete will appear here automatically.
                                                         </p>
                                                     )}
@@ -367,7 +367,7 @@ const tabs = [
                                                         </div>
                                                     ))}
                                                     {portfolioImages.length === 0 && (
-                                                        <p className="text-sm text-gray-400 col-span-2 text-center py-8">No portfolio images yet.</p>
+                                                        <p className="text-sm text-gray-500 col-span-2 text-center py-8">No portfolio images yet.</p>
                                                     )}
                                                 </div>
                                                 {portfolioVideos.length > 0 && (
@@ -405,7 +405,7 @@ const tabs = [
                                                                 <div className="mb-2 flex items-center gap-2">
                                                                     <div className="flex">
                                                                         {[...Array(5)].map((_, si) => (
-                                                                            <svg aria-hidden="true" key={si} className={`w-3 h-3 ${si < r.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}`} viewBox="0 0 20 20">
+                                                                            <svg aria-hidden="true" key={si} className={`w-3 h-3 ${si < r.rating ? 'text-gray-900 fill-gray-900' : 'text-gray-300 fill-gray-300'}`} viewBox="0 0 20 20">
                                                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                                             </svg>
                                                                         ))}
@@ -414,7 +414,7 @@ const tabs = [
                                                                 </div>
                                                                 {r.title && <p className="text-sm font-bold text-gray-900">{r.title}</p>}
                                                                 <p className="text-sm text-gray-600">{r.comment}</p>
-                                                                <p className="mt-2 text-xs text-gray-400">
+                                                                <p className="mt-2 text-xs text-gray-500">
                                                                     — {r.reviewerName || 'Event organizer'}{r.createdAt ? ` • ${formatDate(r.createdAt)}` : ""}
                                                                 </p>
                                                             </div>
@@ -424,27 +424,27 @@ const tabs = [
 
                                                 {clientTestimonials.length > 0 && (
                                                     <div className="space-y-3">
-                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Your older testimonials</p>
+                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Your older testimonials</p>
                                                         {clientTestimonials.map((t: any, i: number) => (
                                                             <div key={i} className="bg-gray-50 rounded-xl p-4">
                                                                 <div className="flex items-center gap-2 mb-2">
                                                                     <div className="flex">
                                                                         {[...Array(5)].map((_, si) => (
-                                                                            <svg aria-hidden="true" key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20">
+                                                                            <svg aria-hidden="true" key={si} className={`w-3 h-3 ${si < (t?.rating || 5) ? 'text-gray-900 fill-gray-900' : 'text-gray-300'}`} viewBox="0 0 20 20">
                                                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                                             </svg>
                                                                         ))}
                                                                     </div>
                                                                 </div>
                                                                 <p className="text-sm text-gray-600 italic">&quot;{t?.testimonial}&quot;</p>
-                                                                <p className="text-xs text-gray-400 mt-2">— {t?.clientName}{t?.eventDate ? ` • ${t.eventDate}` : ""}</p>
+                                                                <p className="text-xs text-gray-500 mt-2">— {t?.clientName}{t?.eventDate ? ` • ${t.eventDate}` : ""}</p>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 )}
 
                                                 {vendorReviews.length === 0 && clientTestimonials.length === 0 && (
-                                                    <p className="text-sm text-gray-400 text-center py-8">
+                                                    <p className="text-sm text-gray-500 text-center py-8">
                                                         No reviews yet. Organizers can review you once a booking is completed.
                                                     </p>
                                                 )}
@@ -453,7 +453,7 @@ const tabs = [
 
                                     {activeTab === 'availability' && (
                                         <div className="text-center py-8">
-                                            <p className="text-sm text-gray-400">Availability calendar coming soon.</p>
+                                            <p className="text-sm text-gray-500">Availability calendar coming soon.</p>
                                         </div>
                                     )}
                                 </div>
@@ -468,14 +468,14 @@ const tabs = [
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Account Settings</h3>
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                                 </svg>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
                                     <input
                                         type="email"
                                         defaultValue={contact?.businessEmail || ''}
@@ -484,7 +484,7 @@ const tabs = [
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Phone Number</label>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
                                     <input
                                         type="tel"
                                         defaultValue={contact?.primaryPhone || ''}
@@ -497,7 +497,7 @@ const tabs = [
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-bold text-gray-900">Two-Factor Authentication</p>
-                                    <p className="text-xs text-gray-400">Secure your account with an extra layer of protection</p>
+                                    <p className="text-xs text-gray-500">Secure your account with an extra layer of protection</p>
                                 </div>
                                 <form action={toggle2FAAction}>
                                     <input type="hidden" name="vendorId" value={vendor_id} />
@@ -515,14 +515,14 @@ const tabs = [
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Business Profile</h3>
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                             
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Business Name</label>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Business Name</label>
                                     <input
                                         type="text"
                                         defaultValue={businessName}
@@ -530,7 +530,7 @@ const tabs = [
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Short Bio</label>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Short Bio</label>
                                     <textarea
                                         rows={3}
                                         defaultValue=""
@@ -545,7 +545,7 @@ const tabs = [
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
@@ -584,7 +584,7 @@ const tabs = [
                         {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-sm font-bold text-gray-900">Payments & Tax</h3>
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
@@ -594,21 +594,21 @@ const tabs = [
                                     <svg aria-hidden="true" className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    <p className="text-xs text-gray-400">No payout method added yet.</p>
+                                    <p className="text-xs text-gray-500">No payout method added yet.</p>
                                 </div>
                             </div>
                         </div> */}
 
                         {/* Danger Zone */}
                         {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                            <h3 className="text-sm font-bold text-red-600 mb-4">Danger Zone</h3>
+                            <h3 className="text-sm font-bold text-gray-900 mb-4">Danger Zone</h3>
                             
                             <div className="flex items-center gap-3">
                                 <form action={pauseAccountAction}>
                                     <input type="hidden" name="vendorId" value={vendor_id} />
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 border border-red-200 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition"
+                                        className="px-4 py-2 border border-gray-200 text-gray-900 rounded-full text-sm font-medium hover:bg-gray-100 transition"
                                     >
                                         Pause Account
                                     </button>
@@ -617,7 +617,7 @@ const tabs = [
                                     <input type="hidden" name="vendorId" value={vendor_id} />
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 border border-red-200 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition"
+                                        className="px-4 py-2 border border-gray-200 text-gray-900 rounded-full text-sm font-medium hover:bg-gray-100 transition"
                                     >
                                         Deactivate
                                     </button>
@@ -626,7 +626,7 @@ const tabs = [
                                     <input type="hidden" name="vendorId" value={vendor_id} />
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-red-600 text-white rounded-full text-sm font-medium hover:bg-red-700 transition"
+                                        className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition"
                                     >
                                         Delete Profile
                                     </button>

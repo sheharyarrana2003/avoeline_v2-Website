@@ -33,7 +33,7 @@ const getCategoryCount = (services: any[], category: string) => {
 
 const getServiceStatus = (service: any, index: number) => {
     // Mock status logic - first 2 active, rest inactive
-    if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-green-500 text-white' };
+    if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-gray-900 text-white' };
     return { status: 'inactive', label: 'INACTIVE', color: 'bg-white text-gray-500' };
 };
 
@@ -178,7 +178,7 @@ export default async function VendorServicesPage({
                                                     title="Delete this service?"
                                                     description={`"${service.name}" will be permanently removed from your profile. Organizers browsing the marketplace will no longer see it. This cannot be undone.`}
                                                     confirmLabel="Delete service"
-                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-red-600 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-gray-900 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                                                 >
                                                     <span className="sr-only">Delete {service.name}</span>
                                                     <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -192,7 +192,7 @@ export default async function VendorServicesPage({
                                     {/* Card Content */}
                                     <div className="p-5">
                                         {/* Category */}
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">
                                             {getCategoryLabel(service.category || 'general')}
                                         </p>
 
@@ -208,7 +208,7 @@ export default async function VendorServicesPage({
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <span className="text-lg font-bold text-gray-900">{formatCurrency(service.price)}</span>
-                                                <span className="text-xs text-gray-400 ml-1">/ {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                                <span className="text-xs text-gray-500 ml-1">/ {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -219,7 +219,7 @@ export default async function VendorServicesPage({
                 ) : (
                     <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg aria-hidden="true" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>

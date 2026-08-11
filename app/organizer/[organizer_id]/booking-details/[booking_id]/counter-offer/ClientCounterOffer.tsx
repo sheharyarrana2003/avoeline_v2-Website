@@ -113,7 +113,7 @@ export default function OrganizerCounterOfferForm ({
 
       {/* ERROR HANDLING */}
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100 font-medium">
+        <p className="text-xs text-gray-900 bg-gray-50 p-2.5 rounded-lg border border-gray-200 font-medium">
           ⚠️ {error}
         </p>
       )}
