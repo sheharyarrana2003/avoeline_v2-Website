@@ -36,26 +36,26 @@ function getNotificationIcon(type: NotificationData["type"]): string {
 
 function getNotificationAccent(type: NotificationData["type"]): string {
     const map: Record<string, string> = {
-        event_reminder: "#fef3c7",
+        event_reminder: "#f5f5f5",
         registration_confirmation: "#e8e8e8",
         payment_success: "#e8e8e8",
-        certificate_ready: "#f0fdf4",
-        new_message: "#eff6ff",
+        certificate_ready: "#f5f5f5",
+        new_message: "#f5f5f5",
         vendor_quote: "#f0f0f0",
-        booking_confirmation: "#f0fdf4",
+        booking_confirmation: "#f5f5f5",
     };
     return map[type] || "#f5f5f5";
 }
 
 function getNotificationIconColor(type: NotificationData["type"]): string {
     const map: Record<string, string> = {
-        event_reminder: "#d97706",
+        event_reminder: "#171717",
         registration_confirmation: "#333",
         payment_success: "#333",
-        certificate_ready: "#16a34a",
-        new_message: "#2563eb",
+        certificate_ready: "#171717",
+        new_message: "#171717",
         vendor_quote: "#555",
-        booking_confirmation: "#16a34a",
+        booking_confirmation: "#171717",
     };
     return map[type] || "#666";
 }
@@ -133,18 +133,18 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                 href={`?tab=${tabDef.key}`}
                                 className={`relative pb-2.5 text-[13px] font-medium transition-colors ${isActive
                                         ? "text-gray-900 border-b-2 border-gray-900"
-                                        : "text-gray-400 hover:text-gray-600"
+                                        : "text-gray-500 hover:text-gray-600"
                                     }`}
                                 style={{ marginBottom: "-1px" }}
                             >
                                 {tabDef.label}{" "}
                                 <span
-                                    className={`${isActive ? "text-gray-500" : "text-gray-400"} font-normal`}
+                                    className={`${isActive ? "text-gray-500" : "text-gray-500"} font-normal`}
                                 >
                                     ({count})
                                 </span>
                                 {tabDef.key === "all" && unreadCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                    <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-gray-900" />
                                 )}
                             </Link>
                         );
@@ -175,7 +175,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                         style={{ position: "relative" }}
                                     >
                                         {isUnread && (
-                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-indigo-500" />
+                                            <span className="absolute top-4.5 right-4.5 w-2 h-2 rounded-full bg-gray-900" />
                                         )}
                                         <div className="flex items-start gap-3 mb-2">
                                             <div
@@ -191,7 +191,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                                 <p className="text-xs text-gray-500 mb-1.5 leading-relaxed">
                                                     {notification.message}
                                                 </p>
-                                                <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">
+                                                <span className="text-[11px] text-gray-500 font-medium uppercase tracking-wide">
                                                     {timeAgo(notification.createdAt)}
                                                 </span>
                                             </div>
@@ -232,7 +232,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                     {/* Right Sidebar */}
                     <div className="space-y-4">
                         <div className="bg-white rounded-[14px] p-5 border border-gray-200">
-                            <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
+                            <h4 className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-4">
                                 Unread Activity
                             </h4>
                             <div className="text-center py-4">

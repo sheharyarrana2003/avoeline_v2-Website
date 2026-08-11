@@ -86,10 +86,10 @@ export default async function AnalyticsPage({
                         return (
                             <article
                                 key={metric.label}
-                                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.04)]"
+                                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
                             >
                                 <div className="mb-4 flex items-center justify-between">
-                                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                         {metric.label}
                                     </p>
                                     <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
@@ -100,7 +100,7 @@ export default async function AnalyticsPage({
                                     {metric.value}
                                 </p>
                                 {metric.helper && (
-                                    <p className="mt-3 text-xs font-bold text-gray-400">
+                                    <p className="mt-3 text-xs font-bold text-gray-500">
                                         {metric.helper}
                                     </p>
                                 )}
@@ -110,24 +110,24 @@ export default async function AnalyticsPage({
                 </section>
 
                 {/* ── Daily Registrations Chart ─────────────────────────────── */}
-                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 className="text-base font-extrabold text-gray-950">
                                 Daily Registrations
                             </h2>
-                            <p className="mt-1 text-xs font-semibold text-gray-400">
+                            <p className="mt-1 text-xs font-semibold text-gray-500">
                                 Registration volume over the last 30 days
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#7454f6]">
-                            <span className="size-2 rounded-full bg-[#7454f6]" />
+                        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#171717]">
+                            <span className="size-2 rounded-full bg-[#171717]" />
                             Registrations
                         </div>
                     </div>
 
                     {dailyRegistrations.length === 0 ? (
-                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-gray-400">
+                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-gray-500">
                             No registration data available yet.
                         </div>
                     ) : (
@@ -145,14 +145,14 @@ export default async function AnalyticsPage({
                                         x2="698"
                                         y1={y}
                                         y2={y}
-                                        stroke="#edf0f4"
+                                        stroke="#e5e5e5"
                                         strokeWidth="1"
                                     />
                                 ))}
                                 <polyline
                                     fill="none"
                                     points={chartPoints}
-                                    stroke="#7454f6"
+                                    stroke="#171717"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth="5"
@@ -181,7 +181,7 @@ export default async function AnalyticsPage({
                 </section>
 
                 {/* ── Event Performance Table ───────────────────────────────── */}
-                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                     <div className="flex items-center justify-between border-b border-gray-100 p-6">
                         <div className="flex items-center gap-3">
                             <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
@@ -194,7 +194,7 @@ export default async function AnalyticsPage({
                     </div>
 
                     {eventPerformance.length === 0 ? (
-                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-gray-400">
+                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-gray-500">
                             No events found for this organizer.
                         </div>
                     ) : (
@@ -202,17 +202,17 @@ export default async function AnalyticsPage({
                             <table className="w-full min-w-[860px] border-collapse">
                                 <thead className="bg-gray-50">
                                     <tr className="text-left">
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                             Event Name
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                             Date
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                             Registrations
                                         </th>
                                       
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                             Revenue
                                         </th>
                                        
@@ -228,7 +228,7 @@ export default async function AnalyticsPage({
                                                 <p className="text-sm font-extrabold text-gray-950">
                                                     {event.eventName}
                                                 </p>
-                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
+                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-500">
                                                     {event.eventType}
                                                 </p>
                                             </td>

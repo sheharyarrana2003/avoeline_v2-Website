@@ -17,7 +17,7 @@ export function NotificationBell({ href, unreadCount = 0 }: { href: string; unre
         >
             <Bell className="w-5 h-5" aria-hidden="true" />
             {hasUnread && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-indigo-500 text-white text-[10px] font-semibold leading-4 text-center tabular-nums">
+                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-gray-900 text-white text-[10px] font-semibold leading-4 text-center tabular-nums">
                     {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
             )}

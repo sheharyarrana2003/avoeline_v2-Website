@@ -68,7 +68,7 @@ export function DashboardHeader({
 
                     <Link
                         href={`${basePath}/dashboard`}
-                        className="text-xl font-bold text-gray-900 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                        className="text-xl font-bold text-gray-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                     >
                         Avoeline
                     </Link>
@@ -81,7 +81,7 @@ export function DashboardHeader({
                                 <Link
                                     href={item.href}
                                     aria-current={item.href === activeHref ? "page" : undefined}
-                                    className={`rounded text-sm transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black ${linkClass(item.href)}`}
+                                    className={`rounded-xs text-sm transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black ${linkClass(item.href)}`}
                                 >
                                     {item.label}
                                 </Link>

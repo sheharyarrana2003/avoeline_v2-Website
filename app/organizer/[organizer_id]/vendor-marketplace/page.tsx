@@ -77,7 +77,7 @@ export default async function Vendor_Marketplace({
                                 <span className="text-base">{cat.icon}</span>
                                 <span>{cat.label}</span>
                                 {cat.count && (
-                                    <span className={`text-xs ${isActive ? "text-gray-300" : "text-gray-400"}`}>
+                                    <span className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"}`}>
                                         ({cat.count})
                                     </span>
                                 )}
@@ -134,7 +134,7 @@ export default async function Vendor_Marketplace({
                                 <span className="text-base">{cat.icon}</span>
                                 <span>{cat.label}</span>
                                 {cat.count && (
-                                    <span className={`text-xs ${isActive ? "text-gray-300" : "text-gray-400"}`}>
+                                    <span className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"}`}>
                                         ({cat.count})
                                     </span>
                                 )}
@@ -152,7 +152,7 @@ export default async function Vendor_Marketplace({
                         </span>
                         <Link
                             href={base_url}
-                            className="text-xs text-gray-400 hover:text-gray-600 underline ml-2"
+                            className="text-xs text-gray-500 hover:text-gray-600 underline ml-2"
                         >
                             Clear filter
                         </Link>
@@ -219,18 +219,18 @@ export default async function Vendor_Marketplace({
                                             <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{vendor?.businessName}</h3>
                                             <div className="flex items-center gap-1.5 mt-0.5">
                                                 <span className="font-bold text-sm text-gray-900">{rating}</span>
-                                                <span className="text-xs text-gray-400">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
+                                                <span className="text-xs text-gray-500">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Category Tags */}
                                     <div className="flex gap-2 mb-3">
-                                        <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
+                                        <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded-xs uppercase tracking-wider">
                                             {primaryCategory}
                                         </span>
                                         {secondaryCategory && (
-                                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
+                                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2.5 py-1 rounded-xs uppercase tracking-wider">
                                                 {secondaryCategory}
                                             </span>
                                         )}
@@ -238,7 +238,7 @@ export default async function Vendor_Marketplace({
 
                                     {/* Location & Rating Bars */}
                                     <div className="flex items-center gap-2 mb-4">
-                                        <svg aria-hidden="true" className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
@@ -249,7 +249,7 @@ export default async function Vendor_Marketplace({
                                     {/* Price */}
                                     <div className="mb-5">
                                         <span className="text-xl font-extrabold text-gray-900">{formatCurrency(price)}</span>
-                                        <span className="text-xs text-gray-400 ml-1">/ {pricePackage?.minOrder ? `min ${pricePackage.minOrder}` : 'start'}</span>
+                                        <span className="text-xs text-gray-500 ml-1">/ {pricePackage?.minOrder ? `min ${pricePackage.minOrder}` : 'start'}</span>
                                     </div>
 
                                     {/* Action Buttons */}
@@ -270,7 +270,7 @@ export default async function Vendor_Marketplace({
                                 </div>
                             </div>
                         );
-                    }) || <p className="text-gray-400 col-span-3 text-center py-12">No vendors found.</p>}
+                    }) || <p className="text-gray-500 col-span-3 text-center py-12">No vendors found.</p>}
                 </div>
 
             </div>

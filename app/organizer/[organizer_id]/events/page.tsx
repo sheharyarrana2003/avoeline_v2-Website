@@ -48,7 +48,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                 <header className="flex flex-col gap-5 border-b border-gray-200 pb-8 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">My Events</h1>
-                        <p className="mt-2 text-sm font-bold text-gray-400">{organizerEvents.length} total events</p>
+                        <p className="mt-2 text-sm font-bold text-gray-500">{organizerEvents.length} total events</p>
                     </div>
 
                     <Link
@@ -70,7 +70,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                 href={tab.href}
                                 className={`shrink-0 border-b-2 pb-4 text-sm font-extrabold transition ${isActive
                                         ? "border-black text-gray-950"
-                                        : "border-transparent text-gray-400 hover:text-gray-700"
+                                        : "border-transparent text-gray-500 hover:text-gray-700"
                                     }`}
                             >
                                 {tab.label} ({tab.count})
@@ -107,20 +107,20 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                             <StatusBadge status={event.status} />
                                         </div>
                                         <h3 className="truncate text-lg font-extrabold text-gray-950">{event.title}</h3>
-                                        <p className="mt-1 line-clamp-1 text-sm font-semibold text-gray-400">{event.description}</p>
+                                        <p className="mt-1 line-clamp-1 text-sm font-semibold text-gray-500">{event.description}</p>
                                     </div>
 
                                     <div className="shrink-0 space-y-2 text-sm font-bold text-gray-500">
                                         <p className="flex items-center gap-2">
-                                            <Calendar size={16} className="text-gray-400" />
+                                            <Calendar size={16} className="text-gray-500" />
                                             {formatDate(event.schedule.startDate)}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                            <Calendar size={16} className="text-gray-400" />
+                                            <Calendar size={16} className="text-gray-500" />
                                             {event.id}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                            <MapPin size={16} className="text-gray-400" />
+                                            <MapPin size={16} className="text-gray-500" />
                                             {event.location.venueName}
                                         </p>
                                     </div>
@@ -130,7 +130,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                             <span className="text-gray-950">
                                                 {event.analytics.registrations}/{event.capacity.totalSeats}
                                             </span>
-                                            <span className="text-gray-400">registered</span>
+                                            <span className="text-gray-500">registered</span>
                                         </div>
                                         <div className="h-2 overflow-hidden rounded-full bg-gray-100">
                                             <div
@@ -143,7 +143,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     <div className="flex shrink-0 items-center justify-start gap-2">
                                         <Link
                                             href={`${base_address}/events/${event.id}`}
-                                            className="flex size-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-800"
+                                            className="flex size-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
                                             aria-label={`View ${event.title}`}
                                         >
                                             <Eye size={25} />

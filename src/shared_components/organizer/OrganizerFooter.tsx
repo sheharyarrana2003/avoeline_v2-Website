@@ -12,7 +12,7 @@ export function OrganizerFooter() {
                 </div>
 
                 {/* Right Side: Links */}
-                <nav className="flex space-x-6 font-semibold tracking-wider text-gray-400 text-xs">
+                <nav className="flex space-x-6 font-semibold tracking-wider text-gray-500 text-xs">
                     <Link href="/help" className="hover:text-gray-700 transition-colors">
                         HELP CENTER
                     </Link>

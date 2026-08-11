@@ -8,7 +8,7 @@ import { formatTime } from "@/src/lib/datetime";
 /* ------------------------------------------------------------------ */
 function MicrophoneIcon() {
 	return (
-		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
 			<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
 			<path d="M19 10v2a7 7 0 0 1-14 0v-2" />
 			<line x1="12" x2="12" y1="19" y2="22" />
@@ -18,7 +18,7 @@ function MicrophoneIcon() {
 
 function CoffeeIcon() {
 	return (
-		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
 			<path d="M17 8h1a4 4 0 1 1 0 8h-1" />
 			<path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
 			<line x1="6" x2="6" y1="2" y2="4" />
@@ -30,7 +30,7 @@ function CoffeeIcon() {
 
 function LightbulbIcon() {
 	return (
-		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
 			<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
 			<path d="M9 18h6" />
 			<path d="M10 22h4" />
@@ -40,7 +40,7 @@ function LightbulbIcon() {
 
 function UsersIcon() {
 	return (
-		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
 			<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
 			<circle cx="9" cy="7" r="4" />
 			<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -51,7 +51,7 @@ function UsersIcon() {
 
 function PanelIcon() {
 	return (
-		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+		<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#404040" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
 			<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
 			<line x1="9" x2="15" y1="10" y2="10" />
 		</svg>
@@ -113,9 +113,9 @@ function Badge({ type }: { type: SessionType }) {
 				letterSpacing: "0.06em",
 				padding: "2px 8px",
 				borderRadius: "999px",
-				background: isDark ? "#1f2937" : "transparent",
+				background: isDark ? "#262626" : "transparent",
 				color: isDark ? "#ffffff" : "#6b7280",
-				border: isDark ? "none" : "1px solid #d1d5db",
+				border: isDark ? "none" : "1px solid #d4d4d4",
 				textTransform: "uppercase",
 				lineHeight: "16px",
 			}}
@@ -139,12 +139,12 @@ function getInitials(name: string) {
 
 // Muted pastel avatar backgrounds
 const avatarColors = [
-	"#e8d5f5",
-	"#d5e8f5",
-	"#f5d5d5",
-	"#d5f5e8",
-	"#f5e8d5",
-	"#d5d5f5",
+	"#eeeeee",
+	"#e4e4e4",
+	"#ededed",
+	"#e8e8e8",
+	"#f0f0f0",
+	"#e0e0e0",
 ];
 
 function hashCode(str: string) {
@@ -179,7 +179,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 						height: "40px",
 						borderRadius: "50%",
 						background: "#ffffff",
-						border: "1.5px solid #d1d5db",
+						border: "1.5px solid #d4d4d4",
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
@@ -196,7 +196,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 						style={{
 							width: "1.5px",
 							flex: 1,
-							background: "#e5e7eb",
+							background: "#e5e5e5",
 							marginTop: "0px",
 						}}
 					/>
@@ -207,7 +207,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 			<div
 				style={{
 					flex: 1,
-					background: "#f9fafb",
+					background: "#fafafa",
 					border: "1px solid #f0f1f3",
 					borderRadius: "14px",
 					padding: "18px 22px",
@@ -245,7 +245,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 						style={{
 							fontSize: "13px",
 							fontWeight: 500,
-							color: "#8b97a8",
+							color: "#a1a1a1",
 							letterSpacing: "0.01em",
 						}}
 					>
@@ -259,7 +259,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 					style={{
 						fontSize: "15px",
 						fontWeight: 700,
-						color: "#111827",
+						color: "#171717",
 						margin: "0 0 10px 0",
 						lineHeight: 1.35,
 					}}
@@ -299,7 +299,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 									justifyContent: "center",
 									fontSize: "10px",
 									fontWeight: 700,
-									color: "#4b5563",
+									color: "#525252",
 									flexShrink: 0,
 								}}
 							>
@@ -309,7 +309,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 								style={{
 									fontSize: "13px",
 									fontWeight: 600,
-									color: "#1f2937",
+									color: "#262626",
 								}}
 							>
 								{session.speaker.name}

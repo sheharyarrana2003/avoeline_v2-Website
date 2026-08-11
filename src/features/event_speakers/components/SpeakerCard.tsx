@@ -27,7 +27,7 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
                         className="w-full h-full object-cover grayscale"
                     />
                 ) : (
-                    <span className="text-2xl font-bold text-gray-400">
+                    <span className="text-2xl font-bold text-gray-500">
                         {speaker.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                     </span>
                 )}

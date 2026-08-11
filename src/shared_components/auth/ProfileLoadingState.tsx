@@ -51,10 +51,10 @@ export default function ProfileLoadingState({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-8">
           {/* Column 1 */}
           <div className="space-y-4">
-            <div className="h-4 w-36 bg-gray-300/90 rounded animate-pulse mb-2" />
+            <div className="h-4 w-36 bg-gray-300/90 rounded-xs animate-pulse mb-2" />
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-1">
-                <div className="h-2.5 w-16 bg-gray-300/60 rounded ml-3" />
+                <div className="h-2.5 w-16 bg-gray-300/60 rounded-xs ml-3" />
                 <div className="h-10 w-full bg-gray-300/50 rounded-full animate-pulse" />
               </div>
             ))}
@@ -62,10 +62,10 @@ export default function ProfileLoadingState({
 
           {/* Column 2 */}
           <div className="space-y-4">
-            <div className="h-4 w-36 bg-gray-300/90 rounded animate-pulse mb-2" />
+            <div className="h-4 w-36 bg-gray-300/90 rounded-xs animate-pulse mb-2" />
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="space-y-1">
-                <div className="h-2.5 w-16 bg-gray-300/60 rounded ml-3" />
+                <div className="h-2.5 w-16 bg-gray-300/60 rounded-xs ml-3" />
                 <div className="h-10 w-full bg-gray-300/50 rounded-full animate-pulse" />
               </div>
             ))}

@@ -65,10 +65,33 @@
   --color-ink-faint: var(--ink-faint);
   --color-ink-invert: var(--ink-invert);
 
-  /* The chromatic namespaces (red, blue, emerald, …) are still live at this point.
-     Removing them is what forces all 141 remaining colour usages to be converted, so
-     the two have to land together or the app renders white-on-transparent for a day.
-     They come out in the file-conversion change, not here. */
+  /* ── Delete every chromatic namespace.
+     `initial` rather than an alias onto gray, deliberately: a leftover `bg-red-500`
+     then compiles to NOTHING and is loud in review, instead of silently rendering a
+     wrong-but-plausible grey that nobody ever goes back to fix.
+
+     `stone` survives — its uses are all in the certificate design canvas, which
+     simulates warm printed paper. That is content, not chrome. */
+  --color-red-*: initial;
+  --color-orange-*: initial;
+  --color-amber-*: initial;
+  --color-yellow-*: initial;
+  --color-lime-*: initial;
+  --color-green-*: initial;
+  --color-emerald-*: initial;
+  --color-teal-*: initial;
+  --color-cyan-*: initial;
+  --color-sky-*: initial;
+  --color-blue-*: initial;
+  --color-indigo-*: initial;
+  --color-violet-*: initial;
+  --color-purple-*: initial;
+  --color-fuchsia-*: initial;
+  --color-pink-*: initial;
+  --color-rose-*: initial;
+  --color-slate-*: initial;
+  --color-zinc-*: initial;
+  --color-neutral-*: initial;
 
   /* ── Radius: 15 distinct values in use → 4 real steps, zero file edits.
      rounded-xl folds onto lg, rounded-3xl onto 2xl. ── */

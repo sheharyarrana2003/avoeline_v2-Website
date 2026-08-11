@@ -35,7 +35,7 @@ export function EmptyState({
         <div className={`flex flex-col items-center justify-center px-6 text-center ${pad} ${className}`}>
             {icon ? (
                 <div
-                    className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400"
+                    className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500"
                     aria-hidden="true"
                 >
                     {icon}

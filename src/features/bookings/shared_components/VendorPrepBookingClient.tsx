@@ -286,7 +286,7 @@ export default function PrepareQuoteClient({
                         <h1 className="text-lg font-bold text-gray-900">
                             Prepare Quote
                         </h1>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-500">
                             {eventDetails.title} • Request from {organizerName}
                         </p>
                     </div>
@@ -311,7 +311,7 @@ export default function PrepareQuoteClient({
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
                             <div className="flex items-center gap-2 mb-4">
                                 <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-400"
+                                    className="w-4 h-4 text-gray-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -354,7 +354,7 @@ export default function PrepareQuoteClient({
                                     )}
                                 </select>
                                 <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                                    className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -374,7 +374,7 @@ export default function PrepareQuoteClient({
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
                                     <svg aria-hidden="true"
-                                        className="w-4 h-4 text-gray-400"
+                                        className="w-4 h-4 text-gray-500"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -393,7 +393,7 @@ export default function PrepareQuoteClient({
                             </div>
 
                             {/* Table Header */}
-                            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-widest">
                                 <div className="col-span-5">Description</div>
                                 <div className="col-span-2 text-center">Qty</div>
                                 <div className="col-span-2 text-center">
@@ -468,7 +468,7 @@ export default function PrepareQuoteClient({
                                                 onClick={() =>
                                                     removeItem(item.id)
                                                 }
-                                                className="text-gray-300 hover:text-red-500 transition"
+                                                className="text-gray-300 hover:text-gray-900 transition"
                                             >
                                                 <svg aria-hidden="true"
                                                     className="w-4 h-4"
@@ -491,7 +491,7 @@ export default function PrepareQuoteClient({
 
                             <button
                                 onClick={addLineItem}
-                                className="w-full mt-4 py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-400 hover:border-gray-300 hover:text-gray-600 transition flex items-center justify-center gap-2"
+                                className="w-full mt-4 py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-600 transition flex items-center justify-center gap-2"
                             >
                                 <span>+</span> Add Line Item
                             </button>
@@ -500,7 +500,7 @@ export default function PrepareQuoteClient({
                         {/* Tax & Discount */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-900/5">
-                                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
                                     Tax Rate (%)
                                 </label>
                                 <div className="relative">
@@ -514,13 +514,13 @@ export default function PrepareQuoteClient({
                                         }
                                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pr-8"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                                         %
                                     </span>
                                 </div>
                             </div>
                             <div className="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-900/5">
-                                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
                                     Discount Amount ({currency})
                                 </label>
                                 <div className="relative">
@@ -534,7 +534,7 @@ export default function PrepareQuoteClient({
                                         }
                                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pr-12"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                                         {currency}
                                     </span>
                                 </div>
@@ -545,7 +545,7 @@ export default function PrepareQuoteClient({
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
                             <div className="flex items-center gap-2 mb-4">
                                 <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-400"
+                                    className="w-4 h-4 text-gray-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -564,13 +564,13 @@ export default function PrepareQuoteClient({
 
                             <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
                                 <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50">
-                                    <button className="p-1 hover:bg-gray-200 rounded text-xs font-bold">
+                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs font-bold">
                                         B
                                     </button>
-                                    <button className="p-1 hover:bg-gray-200 rounded text-xs italic">
+                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs italic">
                                         I
                                     </button>
-                                    <button className="p-1 hover:bg-gray-200 rounded text-xs">
+                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">
                                         ≡
                                     </button>
                                 </div>
@@ -588,19 +588,19 @@ export default function PrepareQuoteClient({
                     <div className="lg:col-span-4 space-y-6">
                         {/* Original Request */}
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
-                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
                                 Original Request
                             </h3>
 
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-xs text-gray-400 uppercase tracking-widest">
+                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
                                         Event Date & Time
                                     </p>
                                     <p className="text-sm font-medium text-gray-900">
                                         {eventDetails.date ? formatDate(eventDetails.date) : "Not specified"}
                                         {eventDetails.date && eventDetails.fromEvent?.date && (
-                                            <span className="text-xs font-normal text-gray-400"> (event date)</span>
+                                            <span className="text-xs font-normal text-gray-500"> (event date)</span>
                                         )}
                                         {eventDetails.startTime && (
                                             <>
@@ -608,14 +608,14 @@ export default function PrepareQuoteClient({
                                                 {formatTime(eventDetails.startTime)}
                                                 {eventDetails.endTime ? ` - ${formatTime(eventDetails.endTime)}` : ""}
                                                 {(eventDetails.fromEvent?.startTime || eventDetails.fromEvent?.endTime) && (
-                                                    <span className="text-xs font-normal text-gray-400"> (event schedule)</span>
+                                                    <span className="text-xs font-normal text-gray-500"> (event schedule)</span>
                                                 )}
                                             </>
                                         )}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400 uppercase tracking-widest">
+                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
                                         Guests
                                     </p>
                                     <p className="text-sm font-medium text-gray-900">
@@ -625,13 +625,13 @@ export default function PrepareQuoteClient({
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400 uppercase tracking-widest">
+                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
                                         Location
                                     </p>
                                     <p className="text-sm font-medium text-gray-900">
                                         {eventDetails.location || requirements.location || "Not specified"}
                                         {eventDetails.location && eventDetails.fromEvent?.location && (
-                                            <span className="text-xs font-normal text-gray-400"> (event venue)</span>
+                                            <span className="text-xs font-normal text-gray-500"> (event venue)</span>
                                         )}
                                     </p>
                                 </div>
@@ -640,7 +640,7 @@ export default function PrepareQuoteClient({
 
                         {/* Quote Summary */}
                         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5 sticky top-24">
-                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
                                 Quote Summary
                             </h3>
 
@@ -665,7 +665,7 @@ export default function PrepareQuoteClient({
                                     <span className="text-sm text-gray-500">
                                         Discount
                                     </span>
-                                    <span className="text-sm font-semibold text-emerald-600">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         -
                                         {formatCurrency(discountAmount, currency)}
                                     </span>
@@ -692,7 +692,7 @@ export default function PrepareQuoteClient({
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">
+                                <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">
                                     Payment Terms
                                 </p>
                                 <p className="text-sm text-gray-600">

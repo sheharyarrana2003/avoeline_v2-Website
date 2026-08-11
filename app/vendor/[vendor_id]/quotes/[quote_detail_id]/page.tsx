@@ -115,9 +115,9 @@ export default async function QuoteDetailPage({
                                     </svg>
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Expanded View</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Expanded View</span>
                                     <h2 className="text-xl font-bold text-gray-900 mt-0.5">{eventTitle}</h2>
-                                    <p className="text-sm text-gray-400 mt-1">
+                                    <p className="text-sm text-gray-500 mt-1">
                                         Request ID: #{b?.bookingId} • Event Date: {formatDate(eventDate || "")}
                                     </p>
                                 </div>
@@ -143,7 +143,7 @@ export default async function QuoteDetailPage({
                             {/* Left: Full Requirements */}
                             <div className="space-y-6">
                                 <div>
-                                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Full Requirements</h3>
+                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Full Requirements</h3>
                                     <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
                                         {requirements?.description || "No description provided."}
                                     </p>
@@ -152,7 +152,7 @@ export default async function QuoteDetailPage({
                                 {/* Special Instructions */}
                                 {requirements?.specialInstructions && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Special Instructions</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Special Instructions</h3>
                                         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                                             <p className="text-sm text-gray-600 leading-relaxed">
                                                 "{requirements.specialInstructions}"
@@ -163,7 +163,7 @@ export default async function QuoteDetailPage({
 
                                 {/* Service Details */}
                                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Service Details</h3>
+                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-4">Service Details</h3>
                                     <div className="space-y-3">
                                         <div className="flex justify-between">
                                             <span className="text-sm text-gray-500">Service Type</span>
@@ -191,15 +191,15 @@ export default async function QuoteDetailPage({
                                 {/* Negotiation History */}
                                 {negotiation.length > 0 && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Negotiation History</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Negotiation History</h3>
                                         <div className="space-y-3">
                                             {negotiation.map((n: any, i: number) => (
-                                                <div key={i} className={`flex gap-3 p-4 rounded-2xl ${n?.from === 'organizer' ? 'bg-gray-50 border border-gray-100' : 'bg-blue-50 border border-blue-100'}`}>
-                                                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n?.from === 'organizer' ? 'bg-gray-400' : 'bg-blue-500'}`} />
+                                                <div key={i} className={`flex gap-3 p-4 rounded-2xl ${n?.from === 'organizer' ? 'bg-gray-50 border border-gray-100' : 'bg-gray-50 border border-gray-200'}`}>
+                                                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n?.from === 'organizer' ? 'bg-gray-400' : 'bg-gray-900'}`} />
                                                     <div>
                                                         <p className="text-xs font-bold text-gray-700 capitalize">{n?.from === 'organizer' ? 'Organizer' : 'You (Vendor)'}</p>
                                                         <p className="text-sm text-gray-600 mt-1">{n?.message}</p>
-                                                        <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n?.timestamp)}</p>
+                                                        <p className="text-[10px] text-gray-500 mt-1">{timeAgo(n?.timestamp)}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -210,7 +210,7 @@ export default async function QuoteDetailPage({
                                 {/* Communications */}
                                 {communications.length > 0 && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Communications</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Communications</h3>
                                         <div className="space-y-3">
                                             {communications.map((comm: any, i: number) => (
                                                 <div key={i} className="flex gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-100">
@@ -218,7 +218,7 @@ export default async function QuoteDetailPage({
                                                     <div>
                                                         <p className="text-xs font-bold text-gray-700 capitalize">{comm?.from} → {comm?.to}</p>
                                                         <p className="text-sm text-gray-600 mt-1">{comm?.message}</p>
-                                                        <p className="text-[10px] text-gray-400 mt-1">{timeAgo(comm?.timestamp)}</p>
+                                                        <p className="text-[10px] text-gray-500 mt-1">{timeAgo(comm?.timestamp)}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -232,22 +232,22 @@ export default async function QuoteDetailPage({
 
                                 {/* Attachments */}
                                 <div>
-                                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Attachments</h3>
+                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Attachments</h3>
                                     <div className="space-y-3">
                                         {attachments.map((file, i) => (
                                             <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-gray-100 transition">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                         </svg>
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-semibold text-gray-900">{file.name}</p>
-                                                        <p className="text-xs text-gray-400">{file.size}</p>
+                                                        <p className="text-xs text-gray-500">{file.size}</p>
                                                     </div>
                                                 </div>
-                                                <a href={file.url} target="_blank" className="text-gray-400 hover:text-gray-600 transition">
+                                                <a href={file.url} target="_blank" className="text-gray-500 hover:text-gray-600 transition">
                                                     <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                                     </svg>
@@ -259,7 +259,7 @@ export default async function QuoteDetailPage({
 
                                 {/* Contact Info */}
                                 <div>
-                                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Contact Info</h3>
+                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Contact Info</h3>
                                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600">
@@ -267,7 +267,7 @@ export default async function QuoteDetailPage({
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-900">{organizerName}</p>
-                                                <p className="text-xs text-gray-400">{organizerEmail} • {organizerPhone}</p>
+                                                <p className="text-xs text-gray-500">{organizerEmail} • {organizerPhone}</p>
                                             </div>
                                         </div>
                                         <button className="px-4 py-2 border border-gray-200 rounded-full text-xs font-semibold text-gray-700 hover:bg-white transition">
@@ -279,7 +279,7 @@ export default async function QuoteDetailPage({
                                 {/* Quote Summary (if quote exists) */}
                                 {vendorQuote?.totalAmount || 0> 0 && (
                                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4">Current Quote</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-4">Current Quote</h3>
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Base Price</span>
@@ -296,7 +296,7 @@ export default async function QuoteDetailPage({
                                             {vendorQuote?.discount || 0 > 0 && (
                                                 <div className="flex justify-between">
                                                     <span className="text-sm text-gray-500">Discount</span>
-                                                    <span className="text-sm font-semibold text-green-600">-{formatCurrency(vendorQuote?.discount || 0)}</span>
+                                                    <span className="text-sm font-semibold text-gray-900">-{formatCurrency(vendorQuote?.discount || 0)}</span>
                                                 </div>
                                             )}
 
@@ -308,7 +308,7 @@ export default async function QuoteDetailPage({
                                             </div>
 
                                             {vendorQuote?.terms && (
-                                                <p className="text-xs text-gray-400 mt-2">{vendorQuote.terms}</p>
+                                                <p className="text-xs text-gray-500 mt-2">{vendorQuote.terms}</p>
                                             )}
                                         </div>
                                     </div>
@@ -317,12 +317,12 @@ export default async function QuoteDetailPage({
                                 {/* Payment Status */}
                                 {payment?.paymentSchedule && payment.paymentSchedule.length > 0 && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Payment Schedule</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Payment Schedule</h3>
                                         <div className="space-y-2">
                                             {payment.paymentSchedule.map((inst: any, i: number) => (
                                                 <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                                                     <div className="flex items-center gap-2">
-                                                        <div className={`w-2 h-2 rounded-full ${inst?.status === 'paid' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                        <div className={`w-2 h-2 rounded-full ${inst?.status === 'paid' ? 'bg-gray-900' : 'bg-gray-300'}`} />
                                                         <span className="text-sm font-medium text-gray-700">{inst?.installment}</span>
                                                     </div>
                                                     <span className="text-sm font-semibold text-gray-900">{formatCurrency(inst?.amount)}</span>
@@ -335,7 +335,7 @@ export default async function QuoteDetailPage({
                                 {/* Delivery Status */}
                                 {delivery?.scheduledDate && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Delivery</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Delivery</h3>
                                         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
@@ -345,11 +345,11 @@ export default async function QuoteDetailPage({
                                                 {delivery?.actualDeliveryTime && (
                                                     <div className="flex justify-between">
                                                         <span className="text-sm text-gray-500">Actual</span>
-                                                        <span className="text-sm font-semibold text-green-600">{delivery?.actualDeliveryTime}</span>
+                                                        <span className="text-sm font-semibold text-gray-900">{delivery?.actualDeliveryTime}</span>
                                                     </div>
                                                 )}
                                                 {delivery?.deliveryNotes && (
-                                                    <p className="text-xs text-gray-400 mt-2">"{delivery.deliveryNotes}"</p>
+                                                    <p className="text-xs text-gray-500 mt-2">"{delivery.deliveryNotes}"</p>
                                                 )}
                                             </div>
                                         </div>
@@ -359,12 +359,12 @@ export default async function QuoteDetailPage({
                                 {/* Quality Check */}
                                 {qualityCheck?.organizerCheck?.checked && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Quality Review</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Quality Review</h3>
                                         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="flex">
                                                     {[...Array(5)].map((_, i) => (
-                                                        <svg aria-hidden="true" key={i} className={`w-4 h-4 ${i < (qualityCheck.organizerCheck?.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}`} viewBox="0 0 20 20">
+                                                        <svg aria-hidden="true" key={i} className={`w-4 h-4 ${i < (qualityCheck.organizerCheck?.rating || 0) ? 'text-gray-900 fill-gray-900' : 'text-gray-300 fill-gray-300'}`} viewBox="0 0 20 20">
                                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                         </svg>
                                                     ))}
@@ -379,11 +379,11 @@ export default async function QuoteDetailPage({
                                 {/* Documents */}
                                 {documents && (documents.quotePdf || documents.invoicePdf || documents.receiptPdf) && (
                                     <div>
-                                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Documents</h3>
+                                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Documents</h3>
                                         <div className="space-y-2">
                                             {documents.quotePdf && (
                                                 <a href={documents.quotePdf} target="_blank" className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition">
-                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
                                                     <span className="text-sm font-medium text-gray-700">Quote PDF</span>
@@ -391,7 +391,7 @@ export default async function QuoteDetailPage({
                                             )}
                                             {documents.invoicePdf && (
                                                 <a href={documents.invoicePdf} target="_blank" className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition">
-                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
                                                     <span className="text-sm font-medium text-gray-700">Invoice PDF</span>
@@ -399,7 +399,7 @@ export default async function QuoteDetailPage({
                                             )}
                                             {documents.receiptPdf && (
                                                 <a href={documents.receiptPdf} target="_blank" className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition">
-                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
                                                     <span className="text-sm font-medium text-gray-700">Receipt PDF</span>
@@ -416,18 +416,18 @@ export default async function QuoteDetailPage({
                     {/* Card Footer */}
                     <div className="px-6 md:px-8 py-4 border-t border-gray-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <svg aria-hidden="true" className="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             {deadline ? (
-                                <span className={`text-sm font-semibold ${deadline.urgent ? 'text-red-600' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-semibold ${deadline.urgent ? 'text-gray-900' : 'text-gray-600'}`}>
                                     {deadline.label}
                                 </span>
                             ) : (
-                                <span className="text-sm text-gray-400">No deadline set</span>
+                                <span className="text-sm text-gray-500">No deadline set</span>
                             )}
                         </div>
-                        <button className="text-gray-400 hover:text-gray-600 transition">
+                        <button className="text-gray-500 hover:text-gray-600 transition">
                             <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                             </svg>
@@ -448,9 +448,9 @@ export default async function QuoteDetailPage({
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h4 className="font-bold text-sm text-gray-900 capitalize">{s?.status?.replace('_', ' ')}</h4>
-                                            <p className="text-xs text-gray-400 mt-0.5">Status updated</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">Status updated</p>
                                         </div>
-                                        <span className="text-xs text-gray-400">{formatDateTime(s?.timestamp)}</span>
+                                        <span className="text-xs text-gray-500">{formatDateTime(s?.timestamp)}</span>
                                     </div>
                                 </div>
                             ))}

@@ -36,7 +36,7 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 							scroll={false}
 							className={`flex items-center gap-2 pb-4 border-b-2 transition-all whitespace-nowrap ${isActive
 								? 'border-black text-gray-900'
-								: 'border-transparent text-gray-400 hover:text-gray-600'
+								: 'border-transparent text-gray-500 hover:text-gray-600'
 								}`}
 						>
 							<span className={`text-sm ${isActive ? 'font-bold' : 'font-semibold'}`}>
@@ -47,7 +47,7 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 								<span
 									className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full transition-colors ${isActive
 										? 'bg-black text-white'
-										: 'bg-gray-100 text-gray-400'
+										: 'bg-gray-100 text-gray-500'
 										}`}
 								>
 									{sessionCount} sessions

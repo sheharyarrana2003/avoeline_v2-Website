@@ -11,7 +11,7 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
         </h2>
         <button
           type="button"
-          className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
           aria-label="Schedule options"
         >
           <MoreHorizontal size={16} />
@@ -44,7 +44,7 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                     </p>
                     <h3 className="mt-1 text-sm font-bold text-gray-900">{event.title}</h3>
                     <p className="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-gray-400" />
+                      <MapPin className="w-3 h-3 text-gray-500" />
                       {event.location}
                     </p>
                   </div>

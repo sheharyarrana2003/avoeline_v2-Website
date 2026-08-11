@@ -40,7 +40,7 @@ export default function RegistrationTrendChart({ data }: { data: DailyRegistrati
             <Line
               type="monotone"
               dataKey="registrations"
-              stroke="#8884d8"
+              stroke="#171717"
               activeDot={{ r: 8 }}
               strokeWidth={2}
             />

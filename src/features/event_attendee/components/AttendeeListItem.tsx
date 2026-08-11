@@ -59,8 +59,8 @@ function AttendeeListItemBase(
                 }}
                 className="flex items-center gap-3 text-left rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
-                <span className="w-[38px] h-[38px] bg-gradient-to-tr from-orange-200 to-amber-100 rounded-full flex-shrink-0 border border-white shadow-sm overflow-hidden flex items-center justify-center">
-                    <span className="text-orange-800 font-bold text-sm">
+                <span className="w-[38px] h-[38px] bg-gradient-to-tr from-gray-200 to-gray-300 rounded-full flex-shrink-0 border border-white shadow-sm overflow-hidden flex items-center justify-center">
+                    <span className="text-gray-900 font-bold text-sm">
                         {attendee_user.profile.fullName.charAt(0)}
                     </span>
                 </span>
@@ -83,7 +83,7 @@ function AttendeeListItemBase(
 
             {/* Status Badge */}
             <div>
-                <span className={`text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-400 border border-gray-300'}`}>
+                <span className={`text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-500 border border-gray-300'}`}>
                     {statusLabel}
                 </span>
             </div>
@@ -95,7 +95,7 @@ function AttendeeListItemBase(
                         {checkInTime ? formatDateTime(checkInTime) : "Checked in"}
                     </p>
                 ) : (
-                    <p className="text-[13px] font-bold text-gray-400">—</p>
+                    <p className="text-[13px] font-bold text-gray-500">—</p>
                 )}
             </div>
 

@@ -205,15 +205,15 @@ export default function CertificateIssuanceClient({
                 <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 mb-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Attendees</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Total Attendees</p>
                             <p className="text-3xl font-bold text-gray-900">{totalAttendees}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Already Issued</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Already Issued</p>
                             <p className="text-3xl font-bold text-gray-900">{issuedAttendees.length}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pending</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Pending</p>
                             <p className="text-3xl font-bold text-gray-900">{pendingAttendees.length}</p>
                         </div>
                     </div>
@@ -246,13 +246,13 @@ export default function CertificateIssuanceClient({
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
                     <div className="px-6 py-4 border-b border-gray-100">
                         <h2 className="text-sm font-bold text-gray-900">Issued Certificates</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">{filteredIssuedAttendees.length} certificate(s) issued</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{filteredIssuedAttendees.length} certificate(s) issued</p>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                <tr className="border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                     <th className="text-left px-6 py-3">Recipient</th>
                                     <th className="text-left px-4 py-3">Type</th>
                                     <th className="text-left px-4 py-3">Issued</th>
@@ -265,7 +265,7 @@ export default function CertificateIssuanceClient({
                             <tbody>
                                 {paginatedIssuedAttendees.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-400">
+                                        <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                                             No certificates issued yet.
                                         </td>
                                     </tr>
@@ -288,7 +288,7 @@ export default function CertificateIssuanceClient({
                                                         <p className="text-sm font-semibold text-gray-900">
                                                             {cert?.content?.recipientName || name}
                                                         </p>
-                                                        <p className="text-xs text-gray-400">{email}</p>
+                                                        <p className="text-xs text-gray-500">{email}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -304,7 +304,7 @@ export default function CertificateIssuanceClient({
                                                         href={cert.digital.pdfUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-xs font-semibold text-blue-600 hover:underline"
+                                                        className="text-xs font-semibold text-gray-900 hover:underline"
                                                     >
                                                         View PDF
                                                     </a>
@@ -319,7 +319,7 @@ export default function CertificateIssuanceClient({
                                                             href={cert.blockchain.verificationUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-xs font-mono text-blue-600 hover:underline"
+                                                            className="text-xs font-mono text-gray-900 hover:underline"
                                                             title={cert.blockchain.transactionHash}
                                                         >
                                                             {truncateHash(cert.blockchain.transactionHash)}
@@ -336,17 +336,17 @@ export default function CertificateIssuanceClient({
                                             <td className="px-4 py-4">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     {social?.sharedOnLinkedIn && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             LinkedIn
                                                         </span>
                                                     )}
                                                     {social?.sharedOnTwitter && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             Twitter
                                                         </span>
                                                     )}
                                                     {social?.sharedOnFacebook && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
                                                             Facebook
                                                         </span>
                                                     )}
@@ -354,7 +354,7 @@ export default function CertificateIssuanceClient({
                                                         <span className="text-xs text-gray-300">Not shared</span>
                                                     )}
                                                     {!!social?.shareCount && (
-                                                        <span className="text-[10px] text-gray-400">({social.shareCount})</span>
+                                                        <span className="text-[10px] text-gray-500">({social.shareCount})</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -370,7 +370,7 @@ export default function CertificateIssuanceClient({
 
                     {filteredIssuedAttendees.length > 0 && (
                         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 Showing {(issuedPage - 1) * ITEMS_PER_PAGE + 1}-
                                 {Math.min(issuedPage * ITEMS_PER_PAGE, filteredIssuedAttendees.length)} of{' '}
                                 {filteredIssuedAttendees.length} issued
@@ -400,15 +400,15 @@ export default function CertificateIssuanceClient({
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                         <div>
                             <h2 className="text-sm font-bold text-gray-900">Pending Attendees</h2>
-                            <p className="text-xs text-gray-400 mt-0.5">{filteredPendingAttendees.length} awaiting certificate generation</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{filteredPendingAttendees.length} awaiting certificate generation</p>
                         </div>
                         <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded" />
+                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs" />
                             Select All ({selectedAttendees.size} Selected)
                         </label>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider items-center">
+                    <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider items-center">
                         <div className="col-span-4">Attendee</div>
                         <div className="col-span-2">Attendance</div>
                         <div className="col-span-2">Status</div>
@@ -416,7 +416,7 @@ export default function CertificateIssuanceClient({
                     </div>
 
                     {paginatedPendingAttendees.length === 0 && (
-                        <div className="px-6 py-8 text-center text-sm text-gray-400">No pending attendees.</div>
+                        <div className="px-6 py-8 text-center text-sm text-gray-500">No pending attendees.</div>
                     )}
 
                     {paginatedPendingAttendees.map((attendee) => {
@@ -440,12 +440,12 @@ export default function CertificateIssuanceClient({
                                         type="checkbox"
                                         checked={isSelected}
                                         onChange={() => toggleAttendee(attendee.a.attendeeId)}
-                                        className="rounded"
+                                        className="rounded-xs"
                                     />
                                  
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{name}</p>
-                                        <p className="text-xs text-gray-400">{email}</p>
+                                        <p className="text-xs text-gray-500">{email}</p>
                                     </div>
                                 </div>
 
@@ -472,7 +472,7 @@ export default function CertificateIssuanceClient({
                                             className="w-fit"
                                         />
                                         {displayStatus.detail && (
-                                            <span className="text-[10px] text-red-500 line-clamp-2" title={displayStatus.detail}>
+                                            <span className="text-[10px] text-gray-900 line-clamp-2" title={displayStatus.detail}>
                                                 {displayStatus.detail}
                                             </span>
                                         )}
@@ -480,7 +480,7 @@ export default function CertificateIssuanceClient({
                                 </div>
 
                                 <div className="col-span-2 text-right">
-                                    <button className="text-gray-400 hover:text-gray-600 transition">
+                                    <button className="text-gray-500 hover:text-gray-600 transition">
                                         <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                                         </svg>
@@ -492,7 +492,7 @@ export default function CertificateIssuanceClient({
 
                     {filteredPendingAttendees.length > 0 && (
                         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 Showing {(pendingPage - 1) * ITEMS_PER_PAGE + 1}-
                                 {Math.min(pendingPage * ITEMS_PER_PAGE, filteredPendingAttendees.length)} of{' '}
                                 {filteredPendingAttendees.length} pending

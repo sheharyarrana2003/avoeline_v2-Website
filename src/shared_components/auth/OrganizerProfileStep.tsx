@@ -118,13 +118,13 @@ export default function OrganizerProfileStep({
 
       <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
         {savedSuccess && (
-          <div className="absolute top-6 right-6 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
+          <div className="absolute top-6 right-6 bg-gray-900 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
             <CheckCircle2 className="w-4 h-4" /> Profile Saved Successfully!
           </div>
         )}
 
         {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-full px-4 py-2 text-center">
+          <div className="mb-4 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-center">
             {error}
           </div>
         )}
@@ -132,7 +132,7 @@ export default function OrganizerProfileStep({
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
           <div className="flex flex-col items-center mb-8">
             <label className="relative group cursor-pointer block">
-              <div className="w-28 h-28 rounded-full border-2 border-[#407BFF] p-1 flex items-center justify-center bg-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
+              <div className="w-28 h-28 rounded-full border-2 border-[#171717] p-1 flex items-center justify-center bg-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
                 {profileImage ? (
                   <img
                     src={profileImage}
@@ -140,13 +140,13 @@ export default function OrganizerProfileStep({
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
-                  <div className="w-full h-full rounded-full border border-sky-200 flex flex-col items-center justify-center bg-sky-50/40 p-2 text-center">
-                    <svg aria-hidden="true" className="w-9 h-9 text-[#0055A5] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <div className="w-full h-full rounded-full border border-gray-200 flex flex-col items-center justify-center bg-gray-50/40 p-2 text-center">
+                    <svg aria-hidden="true" className="w-9 h-9 text-[#171717] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
                       <path d="M12 6v12M6 12h12" stroke="currentColor" strokeWidth="1.5" />
-                      <circle cx="12" cy="12" r="4" fill="#0055A5" />
+                      <circle cx="12" cy="12" r="4" fill="#171717" />
                     </svg>
-                    <span className="text-[8px] font-bold text-[#0055A5] leading-none uppercase tracking-wider">OPA UMT</span>
+                    <span className="text-[8px] font-bold text-[#171717] leading-none uppercase tracking-wider">OPA UMT</span>
                   </div>
                 )}
               </div>

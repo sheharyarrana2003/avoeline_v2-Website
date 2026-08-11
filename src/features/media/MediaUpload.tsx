@@ -25,7 +25,7 @@ interface MediaUploadProps {
 }
 
 const DEFAULT_BUTTON =
-  "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400 transition hover:border-gray-400 disabled:opacity-60";
+  "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-500 transition hover:border-gray-400 disabled:opacity-60";
 
 // Keep in step with uploadMedia.action MAX_BYTES and next.config proxyClientMaxBodySize.
 // Guarding here avoids a raw 500 ("Unexpected end of form") when the body would be
@@ -108,7 +108,7 @@ export function MediaUpload({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {error && <p className="mt-1 text-xs font-medium text-red-600">⚠️ {error}</p>}
+      {error && <p className="mt-1 text-xs font-medium text-gray-900">⚠️ {error}</p>}
     </div>
   );
 }

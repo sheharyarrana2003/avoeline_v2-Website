@@ -5,9 +5,9 @@ import { MessageSquareText } from "lucide-react";
 import { EventFeedbackAnalysisRow } from "@/src/services/models/feedback.model";
 
 const SENTIMENT_STYLES: Record<string, string> = {
-    Positive: "bg-emerald-50 text-emerald-700",
-    Mixed: "bg-amber-50 text-amber-700",
-    Negative: "bg-rose-50 text-rose-700",
+    Positive: "bg-gray-50 text-gray-900",
+    Mixed: "bg-gray-50 text-gray-900",
+    Negative: "bg-gray-50 text-gray-900",
 };
 
 export default function EventFeedbackAnalysis({
@@ -50,7 +50,7 @@ export default function EventFeedbackAnalysis({
     }, [analyzeFeedback]);
 
     return (
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.04)]">
+        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-100 p-6">
                 <div className="flex items-center gap-3">
                     <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
@@ -60,7 +60,7 @@ export default function EventFeedbackAnalysis({
                         <h2 className="text-base font-extrabold text-gray-950">
                             Event Feedback Analysis
                         </h2>
-                        <p className="mt-1 text-xs font-semibold text-gray-400">
+                        <p className="mt-1 text-xs font-semibold text-gray-500">
                             AI-powered insights from attendee feedback
                         </p>
                     </div>
@@ -68,15 +68,15 @@ export default function EventFeedbackAnalysis({
             </div>
 
             {loading ? (
-                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-400">
+                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-500">
                     Analyzing feedback with AI...
                 </div>
             ) : error ? (
-                <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-rose-500">
+                <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-gray-900">
                     {error}
                 </div>
             ) : rows.length === 0 ? (
-                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-400">
+                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-500">
                     No feedback submitted for your events yet.
                 </div>
             ) : (
@@ -84,25 +84,25 @@ export default function EventFeedbackAnalysis({
                     <table className="w-full min-w-[960px] border-collapse">
                         <thead className="bg-gray-50">
                             <tr className="text-left">
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Event
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Event ID
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Feedback
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Summary
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Strengths
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Improvements
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-400">
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
                                     Sentiment
                                 </th>
                             </tr>
@@ -116,7 +116,7 @@ export default function EventFeedbackAnalysis({
                                     <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
                                         {row.eventName}
                                     </td>
-                                    <td className="px-6 py-5 text-xs font-bold text-gray-400">
+                                    <td className="px-6 py-5 text-xs font-bold text-gray-500">
                                         {row.eventId}
                                     </td>
                                     <td className="px-6 py-5 text-sm font-extrabold text-gray-950">

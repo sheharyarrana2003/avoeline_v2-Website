@@ -130,7 +130,7 @@ export default function EmailVerificationStep({
               <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {verified && (
-              <div className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
+              <div className="absolute -top-1.5 -right-1.5 bg-gray-900 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
                 <Check className="w-4 h-4 stroke-[3]" />
               </div>
             )}
@@ -152,12 +152,12 @@ export default function EmailVerificationStep({
         {/* Live status pill */}
         <div className="mb-6">
           {verified ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-900 border border-gray-200">
               <Check className="w-3.5 h-3.5 stroke-[3]" /> Verified
             </span>
           ) : (
-            <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-700 border border-amber-200">
-              {isChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-amber-500" />}
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-900 border border-gray-200">
+              {isChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-gray-900" />}
               Awaiting verification
             </span>
           )}
@@ -187,12 +187,12 @@ export default function EmailVerificationStep({
                 <div key={s.id} className="flex flex-col items-center">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      reached ? 'bg-black text-white shadow-sm scale-105' : 'bg-gray-100 border-2 border-gray-400 text-gray-400'
+                      reached ? 'bg-black text-white shadow-sm scale-105' : 'bg-gray-100 border-2 border-gray-400 text-gray-500'
                     }`}
                   >
                     {reached ? <Check className="w-4 h-4 stroke-[3]" /> : <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />}
                   </div>
-                  <span className={`text-[10px] md:text-xs font-bold mt-2.5 uppercase tracking-wider ${reached ? 'text-black' : 'text-gray-400'}`}>
+                  <span className={`text-[10px] md:text-xs font-bold mt-2.5 uppercase tracking-wider ${reached ? 'text-black' : 'text-gray-500'}`}>
                     {s.label}
                   </span>
                 </div>
@@ -202,7 +202,7 @@ export default function EmailVerificationStep({
         </div>
 
         {error && (
-          <p className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-full px-4 py-2">{error}</p>
+          <p className="mb-4 text-xs text-gray-900 bg-gray-50 border border-gray-200 rounded-full px-4 py-2">{error}</p>
         )}
 
         {!verified && (
