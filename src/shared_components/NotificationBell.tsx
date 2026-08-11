@@ -2,22 +2,39 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 
 /**
- * Header bell with an unread badge. Used by both the organizer and vendor
- * headers; the count is resolved server-side in each layout and passed down,
- * because the headers are Client Components and can't read Firestore.
+ * Bell with an unread badge. Used by both dashboards; the count is resolved
+ * server-side in each layout and passed down, because the nav is a Client
+ * Component and can't read Firestore.
+ *
+ * `onInk` flips it for the dark sidebar rail -- the badge has to invert there or
+ * a near-black pill on a near-black rail disappears.
  */
-export function NotificationBell({ href, unreadCount = 0 }: { href: string; unreadCount?: number }) {
+export function NotificationBell({
+    href,
+    unreadCount = 0,
+    onInk = false,
+}: {
+    href: string;
+    unreadCount?: number;
+    onInk?: boolean;
+}) {
     const hasUnread = unreadCount > 0;
 
     return (
         <Link
             href={href}
             aria-label={hasUnread ? `Notifications, ${unreadCount} unread` : "Notifications"}
-            className="relative text-gray-500 hover:text-black transition-colors"
+            className={`relative transition-colors ${
+                onInk ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-black"
+            }`}
         >
             <Bell className="w-5 h-5" aria-hidden="true" />
             {hasUnread && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-gray-900 text-white text-[10px] font-semibold leading-4 text-center tabular-nums">
+                <span
+                    className={`absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full text-[10px] font-semibold leading-4 text-center tabular-nums ${
+                        onInk ? "bg-white text-gray-950" : "bg-gray-900 text-white"
+                    }`}
+                >
                     {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
             )}

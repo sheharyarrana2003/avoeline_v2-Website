@@ -1,10 +1,10 @@
 import { AuthService } from "@/src/features/auth/authService";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
-import { DashboardHeader } from "@/src/shared_components/DashboardHeader";
+import { DashboardNav } from "@/src/shared_components/DashboardNav";
 import { NotificationServices } from "@/src/services/notification.services";
 import { redirect } from "next/navigation";
 
-export default async function OrganizerLayout({
+export default async function VendorLayout({
     children,
 }: {
     children: React.ReactNode
@@ -29,19 +29,22 @@ export default async function OrganizerLayout({
 
     return (
         <>
-            <DashboardHeader
+            <DashboardNav
                 basePath={basePath}
                 name={u?.name ?? ""}
                 logoUrl={vendor?.logo || undefined}
                 unreadCount={unreadCount}
                 items={[
-                    { label: "Dashboard", href: `${basePath}/dashboard` },
-                    { label: "Quotes", href: `${basePath}/quotes` },
-                    { label: "Services", href: `${basePath}/services` },
-                    { label: "Bookings", href: `${basePath}/bookings` },
+                    { label: "Dashboard", href: `${basePath}/dashboard`, icon: "dashboard" },
+                    { label: "Quotes", href: `${basePath}/quotes`, icon: "quotes" },
+                    { label: "Services", href: `${basePath}/services`, icon: "services" },
+                    { label: "Bookings", href: `${basePath}/bookings`, icon: "bookings" },
                 ]}
             />
-            <main className="flex-1 pb-12">{children}</main>
+            {/* Offsets the fixed rail, which only exists from lg up. */}
+            <div className="flex flex-1 flex-col lg:pl-64">
+                <main className="flex-1 pb-12">{children}</main>
+            </div>
         </>
     )
 
