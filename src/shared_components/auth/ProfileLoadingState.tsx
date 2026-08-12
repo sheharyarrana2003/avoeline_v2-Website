@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { BrandMark } from '@/src/shared_components/ui/BrandMark';
 
 interface ProfileLoadingStateProps {
   title?: string;
@@ -34,10 +35,7 @@ export default function ProfileLoadingState({
             one is nearly still, so the mark reads as held rather than spun. */}
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-gray-900 [animation-duration:1.1s]" />
         <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-gray-300 [animation-direction:reverse] [animation-duration:1.8s]" />
-        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-6 w-6 text-ink">
-          <path d="M3 12L8 4L13 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
+        <BrandMark className="h-7 w-7" />
       </div>
 
       <div>

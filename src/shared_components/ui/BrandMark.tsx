@@ -1,13 +1,17 @@
 /**
- * The Avoeline mark: a stylised A — a peak with a crossbar.
+ * The Avoeline mark: a filled disc with a triangle cut out of it.
  *
- * This is the shape the marketing header has always used. It existed only as
- * inline SVG in three unrelated files, one of which drew a completely different
- * emblem, so the product showed two different logos depending on where you were.
- * One definition, so that cannot happen again.
+ * Taken from app/favicon.ico, which is the only real logo asset in the repo —
+ * there is no SVG or PNG of it anywhere, and public/ holds nothing but the
+ * framework's defaults. Three different invented emblems were in the codebase
+ * before this (a mountain with one dot, the same mountain with three, and a
+ * stylised A with a crossbar on the marketing header), so the product showed a
+ * different logo depending on which page you were on.
  *
- * `inverted` flips it for a dark surface: on the marketing site the tile is black
- * with a white glyph, on the dashboard rail it is the other way round.
+ * Drawn rather than imported so it stays crisp at any size and can invert. The
+ * triangle is a hole punched through the disc with fill-rule evenodd, not a white
+ * shape painted on top — so on a dark surface the page shows through it instead
+ * of a white triangle floating on nothing.
  */
 export function BrandMark({
     className = "",
@@ -17,22 +21,18 @@ export function BrandMark({
     inverted?: boolean;
 }) {
     return (
-        <span
-            className={`flex items-center justify-center rounded-lg ${
-                inverted ? "bg-white text-gray-950" : "bg-gray-950 text-white"
-            } ${className}`}
+        <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className={`${inverted ? "text-white" : "text-gray-950"} ${className}`}
         >
-            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-[55%] w-[55%]">
-                <path
-                    d="M3 12L8 4L13 12"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-                <path d="M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-        </span>
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0ZM12 5.9 17.9 16.2H6.1L12 5.9Z"
+                fill="currentColor"
+            />
+        </svg>
     );
 }
 

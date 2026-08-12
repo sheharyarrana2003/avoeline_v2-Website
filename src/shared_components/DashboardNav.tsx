@@ -108,7 +108,7 @@ export function DashboardNav({
                 >
                     {/* Inverted: the marketing header is a black tile with a white glyph,
                         so on the dark rail it is the other way round. */}
-                    <BrandMark inverted className="h-8 w-8 shrink-0 transition group-hover/brand:bg-white/90" />
+                    <BrandMark inverted className="h-8 w-8 shrink-0 transition group-hover/brand:opacity-80" />
                     <span className="font-display text-lg tracking-tight">Avoeline</span>
                 </Link>
 
