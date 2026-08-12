@@ -76,7 +76,7 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
                         aria-current={isActive ? "page" : undefined}
                         className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
                             isActive
-                                ? "border-gray-900 font-semibold text-gray-900"
+                                ? "border-accent font-semibold text-ink"
                                 : "border-transparent font-medium text-gray-500 hover:border-gray-300 hover:text-gray-900"
                         }`}
                     >

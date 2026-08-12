@@ -134,7 +134,7 @@ export function DashboardNav({
                                     >
                                         <span
                                             aria-hidden="true"
-                                            className={`absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-white transition-opacity ${
+                                            className={`absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-accent transition-opacity ${
                                                 active ? "opacity-100" : "opacity-0"
                                             }`}
                                         />
@@ -187,14 +187,14 @@ export function DashboardNav({
                             aria-expanded={menuOpen}
                             aria-controls="dashboard-nav"
                             aria-label={menuOpen ? "Close menu" : "Open menu"}
-                            className="rounded-lg p-1.5 text-gray-600 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                            className="rounded-lg p-1.5 text-gray-600 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             {menuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
                         </button>
 
                         <Link
                             href={`${basePath}/dashboard`}
-                            className="text-xl font-bold text-gray-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                            className="text-xl font-bold text-gray-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             Avoeline
                         </Link>
@@ -208,7 +208,7 @@ export function DashboardNav({
                             letter, so a screen reader announced a bare initial. */}
                         <Link
                             href={`${basePath}/profile`}
-                            className="flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                            className="flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             {avatar(false)}
                             <span className="hidden font-medium text-gray-900 sm:inline">{name}</span>
@@ -237,7 +237,7 @@ export function DashboardNav({
                                         // panel is closed here rather than by watching the
                                         // pathname from an effect.
                                         onClick={() => setMenuOpen(false)}
-                                        className={`flex items-center gap-3 rounded-lg px-2 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${
+                                        className={`flex items-center gap-3 rounded-lg px-2 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                                             active ? "font-bold text-black" : "font-medium text-gray-500 hover:text-black"
                                         }`}
                                     >

@@ -168,7 +168,7 @@ export function SingleAttendeeView({
                     type="button"
                     onClick={onClose}
                     aria-label="Close attendee details"
-                    className="absolute right-4 top-4 rounded-lg p-1 text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                    className="absolute right-4 top-4 rounded-lg p-1 text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                     <X size={18} aria-hidden="true" />
                 </button>

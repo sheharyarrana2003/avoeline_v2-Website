@@ -16,12 +16,12 @@ const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: strin
     danger: {
         icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
         badge: "bg-gray-900 text-white ring-1 ring-gray-900",
-        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-gray-900",
+        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-accent",
     },
     default: {
         icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
         badge: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
-        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-gray-900",
+        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-accent",
     },
 };
 
@@ -100,7 +100,7 @@ export function ConfirmDialog({
                         type="button"
                         onClick={onCancel}
                         disabled={busy}
-                        className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                        className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
                         {cancelLabel}
                     </button>

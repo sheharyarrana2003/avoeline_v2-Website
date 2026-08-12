@@ -58,7 +58,7 @@ export default function RegistrationTrendChart({ data }: { data: DailyRegistrati
                 type="monotone"
                 dataKey="registrations"
                 name="Registrations"
-                stroke="var(--ink)"
+                stroke="var(--accent)"
                 activeDot={{ r: 6 }}
                 strokeWidth={2}
                 dot={false}

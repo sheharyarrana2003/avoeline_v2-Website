@@ -36,7 +36,7 @@ export default function UpcomingEvents({ events }: { events: DashboardEvent[] })
                 {/* The fill is the only thing carrying the proportion visually, so the
                     count below it states the same fact in words. */}
                 <div className="h-1 overflow-hidden rounded-full bg-gray-200">
-                  <div className="h-full bg-ink" style={{ width: `${percent}%` }} />
+                  <div className="h-full bg-accent" style={{ width: `${percent}%` }} />
                 </div>
 
                 <div className="mt-2 flex items-center justify-between">
@@ -45,7 +45,7 @@ export default function UpcomingEvents({ events }: { events: DashboardEvent[] })
                   </p>
                   <a
                     href={`/organizer/events/${event.id}`}
-                    className="text-xs font-medium text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="text-xs font-medium text-accent-strong underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     Manage
                   </a>

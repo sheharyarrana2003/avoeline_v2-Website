@@ -116,7 +116,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                 aria-current={isActive ? "page" : undefined}
                                 className={`border-b-2 pb-2.5 text-sm font-medium transition-colors ${
                                     isActive
-                                        ? "border-gray-900 text-ink"
+                                        ? "border-accent text-ink"
                                         : "border-transparent text-ink-soft hover:text-ink"
                                 }`}
                             >

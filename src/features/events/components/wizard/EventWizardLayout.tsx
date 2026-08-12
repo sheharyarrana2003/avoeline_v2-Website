@@ -1527,7 +1527,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 // never saw the change and a later render could undo it.
                                 handling_submission_client({ ...formData, isDraft: true });
                             }}
-                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             Save as Draft
                         </ConfirmButton>

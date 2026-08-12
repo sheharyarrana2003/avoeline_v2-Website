@@ -28,11 +28,30 @@
   --surface: var(--paper);
   --border: var(--line);
 
-  /* Marketing identity — deliberately NOT monochrome. app/page.tsx and
-     src/shared_components/home/* keep violet; the product is black and white.
-     Two systems on purpose, as recorded in .claude/NOTES.md. */
-  --violet: #6C5CE7;
-  --violet-soft: #EFECFD;
+  /* ── Accent ──
+     The product is monochrome except here. The accent is the brand violet the
+     marketing site already used, which means this reunites two systems that had
+     drifted apart rather than introducing a third.
+
+     It earns its place on interactive and stateful things only — active nav,
+     focus, links, selection, chart series, progress fills. Never on decoration,
+     never on surfaces, never on a button (a filled black button is stronger).
+     Kept to a few percent of pixels, which is what makes an accent read as
+     deliberate rather than as decoration.
+
+     Contrast, measured: --accent is 4.86:1 on paper and 4.65:1 on canvas, so it
+     clears AA as text on light. On ink it is only 3.69:1 — fine for an indicator
+     bar, NOT for text, which is why rail labels stay white and --accent-on-ink
+     exists for the cases that do need to read on a dark surface. */
+  --accent: #6C5CE7;
+  --accent-strong: #5646D4;   /* 6.5:1 on paper — small text, links that must shout */
+  --accent-on-ink: #C3B8F7;   /* 9.8:1 on ink — the accent that survives a dark surface */
+  --accent-soft: #EFECFD;     /* tinted surface, decorative only */
+  --accent-line: #DDD7FB;
+
+  /* Legacy names. `home/` consumes these by name via inline styles. */
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
   --success: #22C55E;
 }
 
@@ -54,6 +73,14 @@
   --color-gray-800: oklch(0.269 0 0);
   --color-gray-900: oklch(0.205 0 0);
   --color-gray-950: oklch(0.145 0 0);
+
+  /* ── The one chromatic namespace that survives. Deliberately narrow: five
+     values, not a 10-step ramp, so there is nowhere to reach for a sixth. ── */
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-on-ink: var(--accent-on-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
 
   /* ── Semantic names for new code: bg-paper, text-ink, border-line. ── */
   --color-paper: var(--paper);
@@ -239,7 +266,10 @@ body {
    class is more specific than this rule, which is the right outcome since
    they already show focus their own way. */
 :focus-visible {
-  outline: 2px solid var(--ink);
+  /* Accent, not ink. A black ring on a black-and-white page is indistinguishable
+     from a border; the accent makes keyboard position unmistakable at a glance,
+     which is the whole job of a focus indicator. 3:1 against both surfaces. */
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -248,7 +278,7 @@ body {
    Anything painted with ink opts its subtree into a white ring by adding `on-ink`. */
 .on-ink:focus-visible,
 .on-ink :focus-visible {
-  outline-color: var(--ink-invert);
+  outline-color: var(--accent-on-ink);
 }
 
 /* ── Animations (must live outside @layer for SVG stroke-dasharray) ── */

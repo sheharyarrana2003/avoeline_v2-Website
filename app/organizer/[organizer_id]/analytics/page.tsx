@@ -117,7 +117,7 @@ export default async function AnalyticsPage({
                                 <polyline
                                     fill="none"
                                     points={chartPoints}
-                                    className="stroke-gray-900"
+                                    className="stroke-accent"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth="4"

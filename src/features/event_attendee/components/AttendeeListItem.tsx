@@ -28,7 +28,7 @@ function AttendeeListItemBase(
             type="button"
             aria-expanded={isOpen}
             onClick={() => handleOnClick(attendee_reg.registrationId)}
-            className={`grid w-full grid-cols-[2.5fr_1fr_1fr_1fr] items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 ${isOpen ? "bg-gray-100" : "hover:bg-gray-50"}`}
+            className={`grid w-full grid-cols-[2.5fr_1fr_1fr_1fr] items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${isOpen ? "bg-gray-100" : "hover:bg-gray-50"}`}
         >
             <span className="flex min-w-0 items-center gap-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-ink">
