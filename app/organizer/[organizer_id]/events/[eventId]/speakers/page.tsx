@@ -37,26 +37,21 @@ export default async function SpeakerPage(
     return (
         // The layout already supplies the page background and padding.
         <div className="mx-auto max-w-7xl font-sans">
-            {/* Top Header Row */}
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 uppercase">
-                        {event?.title ?? "Event Speakers"}
-                    </h1>
-                    <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">
-                        {count_of_speakers} Speakers
-                    </span>
-                </div>
+            {/* Section header, not a page header: the event layout already renders the
+                event's name, status and breadcrumb above this. */}
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <h2 className="flex items-center gap-3 font-display text-xl text-ink">
+                    Speakers
+                    <span className="text-sm text-ink-soft tabular-nums">{count_of_speakers}</span>
+                </h2>
 
-                <div className="flex items-center gap-3">
-                    <Link
-                        href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
-                        className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition"
-                    >
-                        <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Speaker
-                    </Link>
-                </div>
+                <Link
+                    href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
+                    className={buttonClass("primary")}
+                >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    Add speaker
+                </Link>
             </div>
 
             {/* Controls Row (Search, Filter, Sort) */}

@@ -46,21 +46,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
     const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
 
     return (
-        <main className="px-4 py-6 text-gray-950 sm:px-6 lg:px-8">
+        // No <main> and no title here: the event layout renders both, along with the
+        // breadcrumb, the status and the section tabs. This page is one section of it.
+        <div className="text-gray-950">
             <div className="mx-auto max-w-7xl space-y-8">
-                {/* Header */}
-                <header className="flex items-center justify-between gap-4">
-                    <div className="flex min-w-0 items-center gap-4">
-                        <h1 className="truncate text-2xl font-extrabold uppercase tracking-tight text-gray-950">
-                            {event.title}
-                        </h1>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                        <StatusBadge status={event.status} size="md" className="h-8 px-4 text-xs" />
-                      
-                    </div>
-                </header>
-
                 {/* Hero Banner — banners are square (1080×1080), so it's shown at 1:1
                     beside the event facts rather than cropped into a wide strip. */}
                 <section className="overflow-hidden rounded-3xl bg-gray-950 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
@@ -389,7 +378,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     </div>
                 </section>
             </div>
-        </main>
+        </div>
     );
 }
 

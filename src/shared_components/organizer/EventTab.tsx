@@ -58,9 +58,12 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
         .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
     return (
+        // No surface, padding or bottom rule of its own: the event header supplies all
+        // three. -mb-px drops the active underline onto that header's border so the two
+        // read as one line rather than two stacked ones.
         <nav
             aria-label="Event sections"
-            className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-white px-4 sm:px-6"
+            className="-mb-px mt-5 flex gap-1 overflow-x-auto"
         >
             {tabs.map((tab) => {
                 const isActive = tab.href === activeHref;
