@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import OrganizerChatBotClient from "./ChatBotClient"
 
 export default function OrganizerChatBot() {
@@ -54,10 +53,7 @@ Avoeline is Pakistan's all-in-one event management platform. Key capabilities in
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        } else {
-            console.log(`recievied response now parsing it`);
         }
-        console.log("after calling")
         const res: any = await response.json();
 
         // string[] - accumulated AI text responses from all candidates
@@ -77,15 +73,10 @@ Avoeline is Pakistan's all-in-one event management platform. Key capabilities in
             })
         }
 
-        console.log(`Response From Gemini ${JSON.stringify(res, null, 2)}`);
-
-        console.log(ai_response);
-        return ai_response;
+        // Joined here rather than in the client: a string[] rendered through
+        // String() came out comma-separated, which broke the markdown.
+        return ai_response.join("\n\n");
 
     }
-    return (
-        <>
-            <OrganizerChatBotClient handleSubmitServer={handleSubmitServer} />
-        </>
-    )
+    return <OrganizerChatBotClient handleSubmitServer={handleSubmitServer} />;
 }

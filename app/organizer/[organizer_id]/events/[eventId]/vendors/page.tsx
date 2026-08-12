@@ -1,159 +1,135 @@
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { formatCurrency } from "@/src/lib/money";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
 import Link from 'next/link';
-import { Utensils, Volume2, Aperture, Star, Phone, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react';
+import { Utensils, Volume2, Aperture, Star, Phone, LayoutDashboard } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
 import { VendorData } from '@/src/services/models/vendor.model';
-import {PricingPackage} from '@/src/services/models/vendor.model';
+import { PricingPackage } from '@/src/services/models/vendor.model';
 
-
-export default async function Vendors({params} : {params : Promise<{eventId:string; organizer_id:string}>}) {
+export default async function Vendors({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const resolvedParams = await params;
     const event_id = resolvedParams.eventId;
     const organizer_id = resolvedParams.organizer_id;
 
-    const vendors : VendorData[] |null= await EventVendorService.getVendorsByEvent(event_id);
+    const vendors: VendorData[] | null = await EventVendorService.getVendorsByEvent(event_id);
 
-   const renderIcon = (categories: string[]) => {
+    const renderIcon = (categories: string[]) => {
         if (categories.includes('catering') || categories.includes('food')) {
-            return <Utensils size={24} className="text-gray-700" />;
+            return <Utensils size={20} aria-hidden="true" />;
         } else if (categories.includes('av') || categories.includes('sound')) {
-            return <Volume2 size={24} className="text-gray-700" />;
+            return <Volume2 size={20} aria-hidden="true" />;
         } else if (categories.includes('photography') || categories.includes('video')) {
-            return <Aperture size={24} className="text-gray-700" />;
+            return <Aperture size={20} aria-hidden="true" />;
         }
-        return <LayoutDashboard size={24} className="text-gray-700" />;
-    };
-
-    const renderBadge = (status: string, verified: boolean) => {
-        // A verified, active vendor is the good outcome, so it gets the success
-        // tone; anything else is still pending someone's attention.
-        if (status === 'active' && verified) {
-            return (
-                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-gray-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 ring-1 ring-gray-200/20">
-                    <CheckCircle2 size={12} aria-hidden="true" /> Verified
-                </span>
-            );
-        }
-        return <StatusBadge status={status} size="md" className="ml-auto w-fit py-1.5" />;
+        return <LayoutDashboard size={20} aria-hidden="true" />;
     };
 
     const getStartingPrice = (packages: PricingPackage[]) => {
         if (!packages || packages.length === 0) return null;
-        const prices = packages.map(pkg => pkg.price);
-        return Math.min(...prices);
+        return Math.min(...packages.map(pkg => pkg.price));
     };
 
     return (
-        <div className="px-4 py-8 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-4xl mx-auto">
-                
-                <div className="flex justify-between items-start mb-16">
-                    <div>
-                        <h1 className="text-[40px] font-bold text-gray-900 tracking-tight leading-none mb-4">
-                            Event Vendors
-                        </h1>
-                        <div className="flex items-center gap-3">
-                            <span className="bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
-                                {vendors?.length} Active Vendors
-                            </span>
-                      
-                        </div>
-                    </div>
-                    
-                    <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className="bg-black hover:bg-gray-800 text-white px-5 py-3 rounded-xl font-bold text-[13px] transition-colors shadow-sm">
-                        Find Vendors
-                    </Link>
-                </div>
+        // No padding and no <h1>: the event layout renders the event's name, status
+        // and tabs. This page is the Vendors section of it.
+        <div className="mx-auto max-w-4xl">
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+                <h2 className="flex items-center gap-3 font-display text-xl text-ink">
+                    Vendors
+                    <span className="text-sm text-ink-soft tabular-nums">{vendors?.length ?? 0}</span>
+                </h2>
 
-                <div className="flex justify-between items-end mb-5">
-                    <h2 className="text-[22px] font-bold text-gray-900">
-                        Assigned Vendors
-                    </h2>
-                    
-                </div>
+                <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className={buttonClass("primary")}>
+                    Find vendors
+                </Link>
+            </div>
 
-                <div className="space-y-4">
-                    {!vendors?.length && (
-                        <div className="rounded-[1.5rem] border border-gray-200/60 bg-white">
-                            <EmptyState
-                                icon={<LayoutDashboard size={22} aria-hidden="true" />}
-                                title="No vendors assigned yet"
-                                description="Book a vendor from the marketplace and they will appear here alongside their quote and contact details."
-                                action={
-                                    <Link
-                                        href={`/organizer/${organizer_id}/vendor-marketplace`}
-                                        className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800"
-                                    >
-                                        Browse the marketplace
-                                    </Link>
-                                }
-                            />
-                        </div>
-                    )}
-                    {vendors?.map((vendor, index) => {
+            {!vendors?.length ? (
+                <EmptyState
+                    icon={<LayoutDashboard className="h-5 w-5" />}
+                    title="No vendors assigned yet"
+                    description="Book a vendor from the marketplace and they will appear here alongside their quote and contact details."
+                    action={
+                        <Link href={`/organizer/${organizer_id}/vendor-marketplace`} className={buttonClass("primary")}>
+                            Browse the marketplace
+                        </Link>
+                    }
+                />
+            ) : (
+                <ul className="space-y-4">
+                    {vendors.map((vendor, index) => {
                         const startingPrice = getStartingPrice(vendor.pricingPackages);
 
                         return (
-                            <div
+                            // A real card here: each row is its own clickable record.
+                            <li
                                 key={vendor.vendorId || index}
-                                className="bg-white border border-gray-200/60 rounded-[1.5rem] p-6 shadow-sm flex items-center justify-between transition-all hover:shadow-md"
+                                className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-5 sm:flex-row sm:items-start sm:justify-between"
                             >
-                                <div className="flex items-center gap-5">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-[1rem] flex items-center justify-center shrink-0">
+                                <div className="flex min-w-0 items-start gap-4">
+                                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-ink">
                                         {renderIcon(vendor.serviceCategories)}
-                                    </div>
+                                    </span>
 
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-[18px] font-bold text-gray-900">
-                                                {vendor.businessName}
-                                            </h3>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-4 mb-4 text-[13px] text-gray-500 font-medium">
-                                            <span className="flex items-center gap-1 text-gray-700">
-                                                <Star size={14} className="text-gray-900 fill-gray-900" /> 
-                                                {vendor.ratings.averageRating.toFixed(1)} 
-                                                <span className="text-gray-500 text-xs">({vendor.ratings.totalReviews})</span>
+                                    <div className="min-w-0">
+                                        <h3 className="truncate text-base font-medium text-ink">{vendor.businessName}</h3>
+
+                                        <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-ink-soft tabular-nums">
+                                            <span className="flex items-center gap-1">
+                                                <Star size={13} className="fill-gray-900 text-gray-900" aria-hidden="true" />
+                                                {vendor.ratings.averageRating.toFixed(1)}
+                                                <span>({vendor.ratings.totalReviews})</span>
                                             </span>
                                             <span className="flex items-center gap-1.5">
-                                                <Phone size={14} className="text-gray-500" /> 
+                                                {/* gray-400 = 2.5:1, decoration only -- the number beside it is the content. */}
+                                                <Phone size={13} className="text-gray-400" aria-hidden="true" />
                                                 {vendor.contact.primaryPhone}
                                             </span>
                                         </div>
 
-                                        <div className="flex gap-2">
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`} className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
-                                                View Profile
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            <Link
+                                                href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}`}
+                                                className={buttonClass("secondary", "sm")}
+                                            >
+                                                View profile
                                             </Link>
-                                            <Link  href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}  className="text-[13px] font-bold px-4 py-2 rounded-full transition-colors bg-black text-white hover:bg-gray-800">
-                                                Request Quote
+                                            <Link
+                                                href={`/organizer/${organizer_id}/view-vendor/${vendor.vendorId}/req-quote`}
+                                                className={buttonClass("primary", "sm")}
+                                            >
+                                                Request quote
                                             </Link>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="text-right flex flex-col justify-between h-[88px]">
-                                    <div>
-                                        {renderBadge(vendor.status, vendor.verification.verified)}
-                                    </div>
-                                    <div>
-                                        <p className="text-[11px] font-bold text-gray-500 mb-0.5">
-                                            {startingPrice ? 'Starting Price' : 'Estimated'}
+                                <div className="flex shrink-0 flex-row items-center justify-between gap-4 sm:flex-col sm:items-end">
+                                    {/* A verified, active vendor is the good outcome, so it
+                                        borrows the confirmed tone; anything else still needs
+                                        somebody's attention. `verified` is not a key in
+                                        src/lib/status.ts, hence the label override. */}
+                                    <StatusBadge
+                                        status={vendor.status === "active" && vendor.verification.verified ? "confirmed" : vendor.status}
+                                        label={vendor.status === "active" && vendor.verification.verified ? "Verified" : undefined}
+                                        size="sm"
+                                    />
+                                    <div className="sm:text-right">
+                                        <p className="text-2xs font-medium uppercase text-ink-soft">
+                                            {startingPrice ? 'Starting price' : 'Estimated'}
                                         </p>
-                                        <p className={`text-[22px] font-bold tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-500'}`}>
+                                        <p className="text-lg font-medium text-ink tabular-nums">
                                             {startingPrice ? formatCurrency(startingPrice) : 'TBD'}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </li>
                         );
                     })}
-                </div>
-                
-            </div>
+                </ul>
+            )}
         </div>
     );
 }

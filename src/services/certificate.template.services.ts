@@ -332,7 +332,7 @@ export function mapJsonToTemplate(data: any): CertificateTemplate {
     },
 
     // Issuer Name (Footer Center)
-    issuer_name_content: "Dr. Sarah Khan",
+    issuer_name_content: "Event Organizer",
     issuer_name_styling: {
         x: 250,
         y: 395,

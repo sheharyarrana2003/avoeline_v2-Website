@@ -8,6 +8,11 @@ import Link from "next/link";
 import { formatDate, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import { ChevronRight, Eye, FileText, PenLine, Repeat } from "lucide-react";
 
 function sanitizeForClient<T>(obj: T): T {
     if (!obj) return obj;
@@ -53,7 +58,7 @@ export default async function VendorQuoteManagementPage({
     params: Promise<{ id: string, organizer_id: string, vendor_id: string }>;
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    const { organizer_id, vendor_id } = await params;
+    const { vendor_id } = await params;
     const awaitedSearchParams = await searchParams;
 
     // Get active tab from URL (active or past)
@@ -91,7 +96,7 @@ export default async function VendorQuoteManagementPage({
     }
 
     const ev = selectedEvent;
-    const eventName = ev?.eventName || ev?.name || selectedQuote?.eventId || "Unknown Event";
+    const eventName = ev?.eventName || ev?.name || ev?.title || selectedQuote?.eventId || "Unknown Event";
     const organizerName = ev?.organizerName || selectedQuote?.organizerId || "Unknown Organizer";
 
     const quote = selectedQuote?.quote;
@@ -107,236 +112,214 @@ export default async function VendorQuoteManagementPage({
     // Negotiation history
     const negotiations = quote?.negotiation || [];
 
-    // Inclusions (from breakdown items)
-    const inclusions = breakdown.map((item: any) => item?.item).filter(Boolean);
-
-    const displaying_selected_quote = () => {
-        if (!selectedQuote) {
-            return <></>;
-        }
-
-        return (
-            <>
-                <div className="bg-white rounded-xl p-6 md:p-8 shadow-sm ring-1 ring-gray-900/5">
-
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center ring-1 ring-gray-200">
-                                <span className="text-xl">📋</span>
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900 text-lg">{eventName}</h3>
-                                <p className="text-sm text-gray-500 mt-0.5">
-                                    {organizerName} • Submitted {timeAgo(submittedAt)} • Proposal #{proposalNumber}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(totalAmount, currency)}</p>
-                            {validity && (
-                                <p className="text-sm text-gray-500 mt-1">Validity: {formatDate(validity)}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        {/* Itemized Pricing */}
-                        <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-5">Itemized Pricing</h4>
-                            <div className="space-y-4">
-                                {breakdown.length > 0 ? (
-                                    breakdown.map((item: any, i: number) => (
-                                        <div key={i} className="flex justify-between items-center py-2">
-                                            <span className="text-sm text-gray-600">{item?.item || 'Item'}</span>
-                                            <span className="text-sm font-semibold text-gray-900">{formatCurrency(item?.total || 0, currency)}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-gray-500">No itemized breakdown provided.</p>
-                                )}
-
-                                <div className="border-t border-gray-100 pt-4 mt-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-semibold text-gray-900">Total Amount</span>
-                                        <span className="text-xl font-bold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Negotiation History */}
-                        <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-5">Negotiation History</h4>
-                            <div className="space-y-5">
-                                {negotiations.length > 0 ? (
-                                    negotiations.map((n: any, i: number) => {
-                                        const isOrganizer = n?.from === "organizer";
-                                        return (
-                                            <div key={i} className="flex gap-3">
-                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`} />
-                                                <div>
-                                                    <p className="text-xs font-semibold text-gray-900">
-                                                        {isOrganizer ? organizerName : "You (Vendor)"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                                        {n?.message || "No message"}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-sm text-gray-500">No negotiation history yet.</p>
-                                )}
-
-                                {/* Terms */}
-                                <div className="mt-6 pt-6 border-t border-gray-100">
-                                    <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Terms & Conditions</h5>
-                                    <p className="text-xs text-gray-500 leading-relaxed">
-                                        {terms || "No terms specified."}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3 mt-10 pt-8 border-t border-gray-100">
-                        <Link
-                            href={`/vendor/${vendor_id}/quotes/prep-quote/${selectedQuote.bookingId}`}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-                        >
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                            Prepare Offer
-                        </Link>
-
-                        <Link
-                            href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}/counter-offer`}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-                        >
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                            Counter Offer
-                        </Link>
-                        <Link
-                            href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}`}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-gray-200 py-2.5 px-5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-                        >
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            View Details
-                        </Link>
-
-                      <AcceptQuoteButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
-                    </div>
-                </div>
-            </>
-        );
-    };
+    const tabs = [
+        { id: "active", label: `Active quotes (${activeQuotes.length})` },
+        { id: "past", label: `Past quotes (${pastQuotes.length})` },
+    ];
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto px-4 md:px-8 py-10">
+            <div className="mx-auto max-w-5xl">
+                <PageHeader
+                    title="Quotes"
+                    description="Review incoming requests, price them, and respond."
+                />
 
-                {/* Page Header */}
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Quote Management</h1>
-                    <p className="text-base text-gray-500 mt-2">Review and respond to booking requests</p>
-                </div>
+                <nav aria-label="Filter quotes" className="mb-8 flex gap-6 border-b border-line">
+                    {tabs.map((tab) => (
+                        <Link
+                            key={tab.id}
+                            href={`?tab=${tab.id}`}
+                            aria-current={activeTab === tab.id ? "page" : undefined}
+                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
+                                activeTab === tab.id
+                                    ? "border-gray-900 text-ink"
+                                    : "border-transparent text-ink-soft hover:text-ink"
+                            }`}
+                        >
+                            {tab.label}
+                        </Link>
+                    ))}
+                </nav>
 
-                <div className="">
-
-                    {/* ================= Quote List & Detail ================= */}
-                    <div className="">
-
-                        {/* Tabs */}
-                        <div className="flex gap-8 border-b border-gray-200 mb-6">
-                            <Link
-                                href={`?tab=active`}
-                                className={`pb-4 text-sm font-medium transition relative ${activeTab === "active"
-                                    ? "text-gray-900"
-                                    : "text-gray-500 hover:text-gray-600"
-                                    }`}
-                            >
-                                Active Quotes ({activeQuotes.length})
-                                {activeTab === "active" && (
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 rounded-full" />
-                                )}
-                            </Link>
-                            <Link
-                                href={`?tab=past`}
-                                className={`pb-4 text-sm font-medium transition relative ${activeTab === "past"
-                                    ? "text-gray-900"
-                                    : "text-gray-500 hover:text-gray-600"
-                                    }`}
-                            >
-                                Past Quotes
-                                {activeTab === "past" && (
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 rounded-full" />
-                                )}
-                            </Link>
-                        </div>
-
-                        {/* Summary Badge */}
-                        {activeTab === "active" && activeQuotes.length > 0 && (
-                            <div className="flex items-center gap-3 mb-6">
-                                <span className="bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                                    {activeQuotes.length} Active Requests
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                    {selectedQuote?.serviceType || ""}
-                                </span>
-                                <button className="ml-auto text-gray-500 hover:text-gray-600 transition">
-                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                    </svg>
-                                </button>
+                {selectedQuote ? (
+                    <>
+                        <article>
+                            {/* Header */}
+                            <div className="mb-8 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex items-start gap-4">
+                                    <span
+                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line text-ink-soft"
+                                        aria-hidden="true"
+                                    >
+                                        <FileText size={18} />
+                                    </span>
+                                    <div>
+                                        <h2 className="font-display text-xl text-ink">{eventName}</h2>
+                                        <p className="mt-1 text-sm text-ink-soft">
+                                            {organizerName} • Submitted {timeAgo(submittedAt)} • Proposal {proposalNumber}
+                                        </p>
+                                        <div className="mt-2">
+                                            <StatusBadge status={selectedQuote?.status} size="sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="sm:text-right">
+                                    <p className="font-display text-2xl text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</p>
+                                    {validity && (
+                                        <p className="mt-1 text-sm text-ink-soft tabular-nums">Valid until {formatDate(validity)}</p>
+                                    )}
+                                </div>
                             </div>
-                        )}
 
-                        {/* Quote Detail Card */}
-                        {selectedQuote && displaying_selected_quote()}
+                            <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+                                {/* Itemized Pricing */}
+                                <section>
+                                    <h3 className="mb-4 border-b border-line pb-3 text-2xs font-medium uppercase text-ink-soft">Itemized pricing</h3>
+                                    {breakdown.length > 0 ? (
+                                        <ul className="divide-y divide-line">
+                                            {breakdown.map((item: any, i: number) => (
+                                                <li key={i} className="flex items-center justify-between gap-3 py-3">
+                                                    <span className="text-sm text-ink-soft">{item?.item || 'Item'}</span>
+                                                    <span className="text-sm font-medium text-ink tabular-nums">{formatCurrency(item?.total || 0, currency)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <EmptyState
+                                            size="sm"
+                                            title="No breakdown yet"
+                                            description="Line items appear here once you price this request."
+                                        />
+                                    )}
 
-                        {/* Other Quotes Accordion */}
-                        {activeTab === "active" && activeQuotes.length > 1 && (
-                            <div className="space-y-3 mt-8">
-                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Other Requests</h3>
-                                {activeQuotes.filter((b: any) => b?.bookingId !== selectedQuote?.bookingId).map((booking: any, i: number) => {
-                                    const bq = booking?.quote?.vendorQuote || {};
-                                    return (
-                                        <Link
-                                            key={booking?.bookingId || i}
-                                            href={`?tab=active&quote=${booking?.bookingId}`}
-                                            className="bg-white rounded-xl p-4 shadow-sm ring-1 ring-gray-900/5 flex items-center justify-between hover:bg-gray-50/50 transition group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-xs ring-1 ring-gray-100 group-hover:ring-gray-200 transition">
-                                                    📋
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900">Organizer {booking?.organizerId}</p>
-                                                    <p className="text-xs text-gray-500 mt-0.5">
-                                                        {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 group-hover:text-gray-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </Link>
-                                    );
-                                })}
+                                    <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+                                        <span className="text-sm font-medium text-ink">Total amount</span>
+                                        <span className="font-display text-xl text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</span>
+                                    </div>
+                                </section>
+
+                                {/* Negotiation History */}
+                                <section>
+                                    <h3 className="mb-4 border-b border-line pb-3 text-2xs font-medium uppercase text-ink-soft">Negotiation history</h3>
+                                    {negotiations.length > 0 ? (
+                                        <ul className="space-y-5">
+                                            {negotiations.map((n: any, i: number) => {
+                                                const isOrganizer = n?.from === "organizer";
+                                                return (
+                                                    <li key={i} className="flex gap-3">
+                                                        {/* Position, not colour, says who spoke: the label below
+                                                            names them, so the dot is pure decoration. */}
+                                                        <span
+                                                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <div>
+                                                            <p className="text-xs font-medium text-ink">
+                                                                {isOrganizer ? organizerName : "You (vendor)"}
+                                                            </p>
+                                                            <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                                                                {n?.message || "No message"}
+                                                            </p>
+                                                            <p className="mt-1 text-2xs text-ink-soft tabular-nums">{timeAgo(n?.timestamp)}</p>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    ) : (
+                                        <EmptyState
+                                            size="sm"
+                                            title="Nothing discussed yet"
+                                            description="Messages exchanged while agreeing a price show up here."
+                                        />
+                                    )}
+
+                                    <div className="mt-6 border-t border-line pt-6">
+                                        <h4 className="mb-2 text-2xs font-medium uppercase text-ink-soft">Terms &amp; conditions</h4>
+                                        <p className="text-sm leading-relaxed text-ink-soft">
+                                            {terms || "No terms specified."}
+                                        </p>
+                                    </div>
+                                </section>
                             </div>
-                        )}
 
-                    </div>
-                </div>
+                            {/* Action Buttons */}
+                            <div className="mt-10 flex flex-col gap-2 border-t border-line pt-6 sm:flex-row">
+                                <Link
+                                    href={`/vendor/${vendor_id}/quotes/prep-quote/${selectedQuote.bookingId}`}
+                                    className={buttonClass("primary")}
+                                >
+                                    <PenLine size={16} />
+                                    Prepare offer
+                                </Link>
+
+                                <Link
+                                    href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}/counter-offer`}
+                                    className={buttonClass("secondary")}
+                                >
+                                    <Repeat size={16} />
+                                    Counter offer
+                                </Link>
+
+                                <Link
+                                    href={`/vendor/${vendor_id}/bookings/${selectedQuote.bookingId}`}
+                                    className={buttonClass("secondary")}
+                                >
+                                    <Eye size={16} />
+                                    View details
+                                </Link>
+
+                                <AcceptQuoteButton quote={sanitizeForClient(selectedQuote)} accept_quote={accept_quote} />
+                            </div>
+                        </article>
+
+                        {/* Other Quotes */}
+                        {displayQuotes.length > 1 && (
+                            <section className="mt-12">
+                                <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Other requests</h2>
+                                <ul className="divide-y divide-line">
+                                    {displayQuotes.filter((b: any) => b?.bookingId !== selectedQuote?.bookingId).map((booking: any, i: number) => {
+                                        const bq = booking?.quote?.vendorQuote || {};
+                                        return (
+                                            <li key={booking?.bookingId || i}>
+                                                <Link
+                                                    href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
+                                                    className="flex items-center justify-between gap-3 py-4 transition hover:bg-gray-50"
+                                                >
+                                                    <div>
+                                                        <p className="text-sm font-medium text-ink">Organizer {booking?.organizerId}</p>
+                                                        <p className="mt-0.5 text-xs text-ink-soft tabular-nums">
+                                                            {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
+                                                        </p>
+                                                    </div>
+                                                    <ChevronRight size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                </Link>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </section>
+                        )}
+                    </>
+                ) : (
+                    <EmptyState
+                        icon={<FileText size={26} />}
+                        title={activeTab === "active" ? "No active quote requests" : "No past quotes"}
+                        description={
+                            activeTab === "active"
+                                ? "Organizers request quotes from the services on your profile. A fuller catalogue with prices gets you found."
+                                : "Completed and cancelled quotes are archived here."
+                        }
+                        action={
+                            activeTab === "active" ? (
+                                <Link href={`/vendor/${vendor_id}/services`} className={buttonClass("primary")}>
+                                    Manage services
+                                </Link>
+                            ) : undefined
+                        }
+                    />
+                )}
             </div>
         </div>
     );

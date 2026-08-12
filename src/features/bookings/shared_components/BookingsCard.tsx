@@ -1,71 +1,54 @@
-import React from 'react';
 import Link from 'next/link';
 import { formatDate } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
-import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { buttonClass } from "@/src/lib/ui";
 
-
-export async function  BookingsCard({params, booking }: {params : Promise<{ organizer_id: string }>, booking: any }) {
-    const resolvedParams = await params;
-  const organizerId = resolvedParams.organizer_id; 
+export async function BookingsCard({ params, booking }: { params: Promise<{ organizer_id: string }>, booking: any }) {
+  const resolvedParams = await params;
+  const organizerId = resolvedParams.organizer_id;
   const basePath = `/organizer/${organizerId}`;
 
   // Safe destructuring based on typical data shape. Adjust to your exact schema.
   const vendorName = booking?.vendor?.businessName || "Unknown Vendor";
   const vendorInitials = vendorName.substring(0, 2).toUpperCase();
-  const serviceType = booking?.vendor?.serviceCategories?.[0]?.replace('_', ' ') || "Service";
+  const serviceType = booking?.vendor?.serviceCategories?.[0]?.replace(/_/g, ' ') || "Service";
   const eventName = booking?.eventName || "Event";
-  const date = booking?.requirements?.serviceDate ? formatDate(booking.requirements.serviceDate) : "TBD";
-  
+  const date = formatDate(booking?.requirements?.serviceDate);
+
   // Try to get total amount, default to 0
   const amount = booking?.quote?.vendorQuote?.totalAmount || booking?.estimatedAmount || 0;
   const status = booking?.status || "pending";
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
-      
-      {/* Top Row: Avatar, Name, Status Badge */}
-      <div className="flex justify-between items-start mb-6">
+    <div className="flex h-full flex-col rounded-2xl border border-line bg-paper p-6">
+
+      <div className="mb-6 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-50 text-gray-700 border border-gray-100 font-semibold flex items-center justify-center text-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-canvas text-sm font-medium text-ink-soft" aria-hidden="true">
             {vendorInitials}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 leading-tight">
-              {vendorName}
-            </h3>
-            <p className="text-sm text-gray-500 capitalize">
-              {serviceType}
-            </p>
+            <h3 className="font-medium leading-tight text-ink">{vendorName}</h3>
+            <p className="text-sm capitalize text-ink-soft">{serviceType}</p>
           </div>
         </div>
         <StatusBadge status={status} size="sm" />
       </div>
 
-      {/* Middle Row: Pricing & Event Info */}
       <div className="mb-6">
-        <div className="text-xl font-bold text-gray-900 mb-1">
-          {formatCurrency(amount)}
-        </div>
-        <div className="text-sm text-gray-500">
-          {eventName} • {date}
-        </div>
+        <p className="font-display text-xl text-ink tabular-nums">{formatCurrency(amount)}</p>
+        <p className="mt-1 text-sm text-ink-soft tabular-nums">{eventName} • {date}</p>
       </div>
 
-      {/* Bottom Row: Simple Status & Generic Button */}
-      <div className="mt-auto pt-4 border-t border-gray-50">
-        <p className="text-sm text-gray-600 mb-4 flex items-center gap-2">
-          Current status: <span className="font-medium">{statusMeta(status).label}</span>
-        </p>
-        
-        <Link 
-         href={`${basePath}/booking-details/${booking?.bookingId}`}
-        className="w-full bg-black text-white hover:bg-gray-800 transition-colors py-3 px-4 rounded-xl font-semibold text-sm">
-          View Details
-        </Link>
-      </div>
-
+      {/* buttonClass, not a hand-rolled pill: the old one was `w-full` on a <Link>,
+          which renders an inline <a> where width does nothing at all. */}
+      <Link
+        href={`${basePath}/booking-details/${booking?.bookingId}`}
+        className={buttonClass("primary", "md", "mt-auto w-full")}
+      >
+        View details
+      </Link>
     </div>
   );
 }

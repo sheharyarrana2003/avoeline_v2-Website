@@ -2,6 +2,9 @@
 import React, { useState, useTransition } from 'react';
 import { BookingData } from '@/src/features/bookings/types';
 import { useRouter } from 'next/navigation';
+import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
+import { formatCurrency } from '@/src/lib/money';
+import { AlertTriangle } from 'lucide-react';
 
 interface OrganizerCounterProps {
   bookingData: BookingData;
@@ -52,86 +55,76 @@ export default function VendorCounterOfferForm ({
     router.push(`/vendor/${bookingData.vendorId}/dashboard`);
   }
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white border border-gray-200 p-6 rounded-xl shadow-sm space-y-5">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">Make a Counter Offer</h2>
-        <p className="text-sm text-gray-500">
-          Propose a revised budget or request structural adjustments to the current quote.
-        </p>
-      </div>
-
-      <hr className="border-gray-200" />
-
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* CURRENT QUOTE SUMMARY */}
-      <div className="bg-gray-50 p-4 rounded-lg flex justify-between items-center text-sm border border-gray-100">
-        <div>
-          <span className="text-gray-500 block">Organizer's Current Offer</span>
-          <span className="font-semibold text-gray-700">PKR {currentTotal.toLocaleString()}</span>
+      <dl className="grid grid-cols-2 gap-y-4 border-y border-line py-6 sm:divide-x sm:divide-line">
+        <div className="sm:pr-6">
+          <dt className="text-2xs font-medium uppercase text-ink-soft">Current offer</dt>
+          <dd className="mt-1 font-display text-2xl text-ink tabular-nums">{formatCurrency(currentTotal)}</dd>
         </div>
-        <div className="text-right">
-          <span className="text-gray-500 block">Guest Count</span>
-          <span className="font-semibold text-gray-700">{bookingData.requirements.guestCount} guests</span>
+        <div className="sm:pl-6">
+          <dt className="text-2xs font-medium uppercase text-ink-soft">Guest count</dt>
+          <dd className="mt-1 font-display text-2xl text-ink tabular-nums">{bookingData.requirements.guestCount}</dd>
         </div>
-      </div>
+      </dl>
 
       {/* TARGET BUDGET INPUT */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
-          Your Proposed Target Price (PKR)
+        <label htmlFor="targetBudget" className={labelClass}>
+          Your proposed total (PKR)
         </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-gray-500 text-sm">PKR</span>
-          </div>
-          <input
-            type="number"
-            value={targetBudget || ''}
-            onChange={(e) => setTargetBudget(parseFloat(e.target.value) || 0)}
-            placeholder="e.g. 130000"
-            className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium focus:ring-1 focus:ring-black focus:outline-none"
-            required
-          />
-        </div>
+        <input
+          id="targetBudget"
+          name="targetBudget"
+          type="number"
+          value={targetBudget || ''}
+          onChange={(e) => setTargetBudget(parseFloat(e.target.value) || 0)}
+          placeholder="e.g. 130000"
+          className={`${fieldClass} mt-2 tabular-nums`}
+          required
+        />
       </div>
 
       {/* NEGOTIATION MESSAGE */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label htmlFor="counterMessage" className={labelClass}>
           What would you like to adjust?
         </label>
         <textarea
+          id="counterMessage"
+          name="counterMessage"
           rows={4}
-          placeholder="e.g., 'Can we remove the live dessert platter to bring the price down?' or 'Our maximum hard budget for this setup is PKR 130,000. Is that workable?'"
+          placeholder="e.g. 'Removing the live dessert platter brings this within your budget.'"
           value={organizerMessage}
           onChange={(e) => setOrganizerMessage(e.target.value)}
-          className="w-full border border-gray-300 p-3 rounded-lg text-sm focus:ring-1 focus:ring-black focus:outline-none"
+          className={`${fieldClass} mt-2 resize-none`}
           required
         />
       </div>
 
       {/* ERROR HANDLING */}
       {error && (
-        <p className="text-xs text-gray-900 bg-gray-50 p-2.5 rounded-lg border border-gray-200 font-medium">
-          ⚠️ {error}
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-gray-900 px-3 py-2.5 text-sm font-medium text-ink"
+        >
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+          {error}
         </p>
       )}
 
       {/* ACTIONS */}
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={OnCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
-        >
+      <div className="flex justify-end gap-2 border-t border-line pt-6">
+        <button type="button" onClick={OnCancel} className={buttonClass('ghost')}>
           Cancel
         </button>
         <button
           type="submit"
           disabled={isPending}
           aria-busy={isPending}
-          className="bg-black hover:bg-gray-800 text-white font-medium text-sm px-5 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className={buttonClass('primary')}
         >
-          {isPending ? 'Sending…' : 'Send Counter Offer'}
+          {isPending ? 'Sending…' : 'Send counter offer'}
         </button>
       </div>
     </form>

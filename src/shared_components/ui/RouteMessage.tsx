@@ -36,7 +36,10 @@ export function RouteMessage({
     tone = "danger",
 }: RouteMessageProps) {
     return (
-        <main className="flex min-h-[60vh] flex-1 items-center justify-center bg-gray-50 px-4 py-16">
+        // A <div>, not a <main>. DashboardBoundary wraps this and the four organizer and
+        // vendor error/not-found routes re-export it, so a <main> here opened a second
+        // landmark inside the layout's — and the background fought the canvas beneath it.
+        <div className="flex min-h-[60vh] flex-1 items-center justify-center px-4 py-16">
             <div className="w-full max-w-md text-center">
                 <div
                     className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${TONE[tone]}`}
@@ -63,7 +66,7 @@ export function RouteMessage({
                     </details>
                 ) : null}
             </div>
-        </main>
+        </div>
     );
 }
 

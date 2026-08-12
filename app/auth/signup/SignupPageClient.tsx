@@ -1,9 +1,14 @@
-
 'use client';
 import React, { useState, useTransition } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { buttonClass, fieldClass } from '@/src/lib/ui';
+import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
 
-export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:any}) {
+type SignupResult = { success: boolean; error?: string } | void;
+
+export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin: (formData: unknown) => Promise<SignupResult> }) {
     const [isPending, startTransition] = useTransition();
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -26,20 +31,26 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isPending) return; // guard against duplicate submissions
+        setError(null);
         startTransition(async () => {
-            await handleSubmitLogin(formData);
+            // The action returns { success:false, error } instead of throwing. This
+            // result used to be dropped on the floor, so a rejected signup — a taken
+            // email, a weak password — rendered nothing at all and looked like a
+            // dead button.
+            const res = await handleSubmitLogin(formData);
+            if (res && !res.success) {
+                setError(res.error ?? 'Failed to setup an account. Please try again.');
+            }
         });
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-200">
-            {/* Main Card */}
-            <div className="bg-gray-100 p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
+        <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-12">
+            <div className="flex w-full max-w-[440px] flex-col items-center rounded-2xl border border-line bg-paper p-8 sm:p-12">
 
-                {/* Logo Area */}
                 <div className="mb-10 flex flex-col items-center">
-                    <div className="w-12 h-12 text-black flex items-center justify-center mb-3">
-                        {/* Logo matching the image - diamond with three dots */}
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center text-ink">
+                        {/* Brand mark, not iconography — no lucide equivalent exists. */}
                         <svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none">
                             <path
                                 d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
@@ -53,11 +64,12 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                             <circle cx="30" cy="18" r="2.5" fill="currentColor" />
                         </svg>
                     </div>
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">Avoeline</h1>
+                    <h1 className="font-display text-xl text-ink">Avoeline</h1>
                 </div>
 
-                {/* Signup Form */}
-                <form onSubmit={handleSubmit} className="w-full space-y-3 mb-6">
+                <form onSubmit={handleSubmit} className="w-full space-y-3">
+                    <FormFeedback error={error} />
+
                     <input
                         type="text"
                         name="name"
@@ -65,7 +77,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         placeholder="Name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
+                        className={fieldClass}
                         required
                     />
                     <input
@@ -75,7 +87,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         placeholder="Email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
+                        className={fieldClass}
                         required
                     />
                     <input
@@ -85,7 +97,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         placeholder="Contact No"
                         value={formData.contactNo}
                         onChange={handleChange}
-                        className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
+                        className={fieldClass}
                         required
                     />
                     <input
@@ -95,26 +107,26 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         placeholder="Gender"
                         value={formData.gender}
                         onChange={handleChange}
-                        className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
+                        className={fieldClass}
                     />
-                      <input
+                    <input
                         type="password"
                         name="password"
                         aria-label="Password"
-                        placeholder="password"
+                        placeholder="Password"
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm"
+                        className={fieldClass}
                     />
 
-                    {/* Country Dropdown */}
                     <div className="relative">
                         <select
                             name="country"
+                            aria-label="Country"
                             value={formData.country}
                             onChange={handleChange}
-                            className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm appearance-none cursor-pointer"
+                            className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
                             <option value="" disabled>Country</option>
                             <option value="usa">United States</option>
@@ -126,23 +138,19 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                             <option value="india">India</option>
                             <option value="japan">Japan</option>
                         </select>
-                        <svg aria-hidden="true"
-                            className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <ChevronDown
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
+                        />
                     </div>
 
-                    {/* City Dropdown */}
                     <div className="relative">
                         <select
                             name="city"
+                            aria-label="City"
                             value={formData.city}
                             onChange={handleChange}
-                            className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-gray-800 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all text-sm appearance-none cursor-pointer"
+                            className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
                             <option value="" disabled>City</option>
                             <option value="new-york">New York</option>
@@ -154,28 +162,25 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                             <option value="mumbai">Mumbai</option>
                             <option value="tokyo">Tokyo</option>
                         </select>
-                        <svg aria-hidden="true"
-                            className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <ChevronDown
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
+                        />
                     </div>
 
-                    {/* Role Selector */}
-                    <div className="flex items-center justify-center w-full border border-gray-400 rounded-full overflow-hidden">
+                    {/* Segmented control, so aria-pressed carries the selection for anyone
+                        who cannot see the inverted fill. */}
+                    <div className="flex w-full items-center overflow-hidden rounded-lg border border-line-loud" role="group" aria-label="Account type">
                         {['Attendee', 'Organizer', 'Vendor'].map((role) => (
                             <button
                                 key={role}
                                 type="button"
+                                aria-pressed={formData.userType === role}
                                 onClick={() => handleRoleSelect(role)}
-                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                                    formData.userType === role
-                                        ? 'bg-black text-white'
-                                        : 'bg-transparent text-gray-600 hover:bg-gray-200/50'
-                                }`}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${formData.userType === role
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-transparent text-ink-soft hover:bg-gray-100'
+                                    }`}
                             >
                                 {role}
                             </button>
@@ -186,7 +191,7 @@ export default function SignInClient({handleSubmitLogin} : {handleSubmitLogin:an
                         type="submit"
                         disabled={isPending}
                         aria-busy={isPending}
-                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className={buttonClass('primary', 'lg', 'mt-2 w-full')}
                     >
                         {isPending ? 'Creating account…' : 'Sign up'}
                     </button>

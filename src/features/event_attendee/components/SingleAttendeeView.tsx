@@ -1,21 +1,18 @@
 "use client"
 import { Registration } from "@/src/services/models/reg.type";
-import { Attendee } from "../type";
-import { User } from "@/src/services/models/user.type";
 
-import { 
-    Mail, Phone, CheckCircle2, Trash2, X, Clock, 
-    CreditCard, Tag, Award, MessageSquare, ShieldCheck, 
-    Smartphone, History, ChevronDown, Star, Calendar, Ban
-} from "lucide-react";
+import { Mail, Phone, CheckCircle2, X, CreditCard, Tag, Award, MessageSquare, Star, ChevronDown } from "lucide-react";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
 import { formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { useToast } from "@/src/shared_components/ui/Toast";
 import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
+import { fieldClass, labelClass } from "@/src/lib/ui";
 
 interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
@@ -48,10 +45,10 @@ const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
 const SERIOUS_STATUS = new Set<string>(["cancelled", "no_show"]);
 const SERIOUS_PAYMENT = new Set<string>(["refunded", "failed"]);
 
-export function SingleAttendeeView({ 
-    combined_data, 
-    onClose, 
-    update_registration 
+export function SingleAttendeeView({
+    combined_data,
+    onClose,
+    update_registration
 }: SingleAttendeeViewProps) {
     // 1. Safely extract core data
     const a = combined_data?.a || {} as any;
@@ -68,8 +65,8 @@ export function SingleAttendeeView({
 
     const fullName = u?.profile?.fullName || "Unknown Attendee";
     const email = u?.email || "No email provided";
-    const phone = u?.profile?.phoneNumber || "No phone provided"; 
-    
+    const phone = u?.profile?.phoneNumber || "No phone provided";
+
     const organization = a?.academic?.university || "Not Provided";
     const currency = registration?.payment?.currency || "PKR";
 
@@ -88,9 +85,6 @@ export function SingleAttendeeView({
     const department = a?.academic?.department || "Not Specified";
     const gradYear = a?.academic?.graduationYear || "Not Specified";
     const locationInfo = u?.location ? `${u.location.city}, ${u.location.country}` : "Not Specified";
-
-    const registeredOn = registration?.registrationDate ? formatDateTime(registration.registrationDate) : null;
-    const cancelledOn = registration?.cancelledAt ? formatDateTime(registration.cancelledAt) : null;
 
     /**
      * Commit an optimistic update, and put the old value back if the write
@@ -168,55 +162,43 @@ export function SingleAttendeeView({
     };
 
     return (
-        <div className="h-full w-full bg-gray-100 p-8 relative flex flex-col overflow-y-auto">
+        <div className="relative flex flex-col gap-8 p-6">
             {onClose && (
                 <button
+                    type="button"
                     onClick={onClose}
-                    className="absolute top-6 right-6 text-gray-500 hover:text-black transition-colors"
+                    aria-label="Close attendee details"
+                    className="absolute right-4 top-4 rounded-lg p-1 text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                 >
-                    <X size={20} />
+                    <X size={18} aria-hidden="true" />
                 </button>
             )}
 
-            {/* Header Section */}
-            <div className="mb-6 pr-8">
-                <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-[32px] leading-none font-bold text-gray-900 tracking-tight">
-                        {fullName}
-                    </h2>
-                    {isCheckedIn && (
-                        <span className="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider uppercase mt-1">
-                            CHECKED IN
-                        </span>
-                    )}
+            <header className="pr-8">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-display text-2xl text-ink">{fullName}</h3>
+                    <StatusBadge status={registration.status} size="sm" />
                 </div>
-                <div className="space-y-1 mt-3">
-                    <div className="flex items-center gap-2.5 text-gray-500 text-[13px] font-medium">
-                        <Mail size={14} className="text-gray-500" />
-                        {email}
-                    </div>
-                    <div className="flex items-center gap-2.5 text-gray-500 text-[13px] font-medium">
-                        <Phone size={14} className="text-gray-500" />
-                        {phone}
-                    </div>
-                </div>
-            </div>
+                <p className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
+                    {/* gray-400 is 2.5:1 -- decoration only; the address beside it is the content. */}
+                    <Mail size={14} className="text-gray-400" aria-hidden="true" />
+                    {email}
+                </p>
+                <p className="mt-1 flex items-center gap-2 text-sm text-ink-soft tabular-nums">
+                    <Phone size={14} className="text-gray-400" aria-hidden="true" />
+                    {phone}
+                </p>
+            </header>
 
-            {/* Organizer Controls: Registration Status Dropdown */}
-            <div className="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        REGISTRATION STATUS
-                    </p>
-                    <p className="text-xs text-gray-500">Change attendee registration state</p>
-                </div>
-                <div className="relative">
+            <section>
+                <label className={labelClass} htmlFor="attendee-registration-status">Registration status</label>
+                <div className="relative mt-2">
                     <select
-                        aria-label="Registration status"
+                        id="attendee-registration-status"
                         value={registration.status || "pending"}
                         disabled={isUpdating}
                         onChange={(e) => handleStatusChange(e.target.value as Registration["status"])}
-                        className="appearance-none bg-gray-100 text-gray-900 font-bold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                        className={`${fieldClass} appearance-none pr-9 capitalize`}
                     >
                         {STATUS_OPTIONS.map((status) => (
                             <option key={status} value={status}>
@@ -224,215 +206,144 @@ export function SingleAttendeeView({
                             </option>
                         ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                    <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft" aria-hidden="true" />
                 </div>
-            </div>
+            </section>
 
-            {/* Organization & Ticket Card */}
-            <div className="bg-gray-200 rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
-                <div className="flex justify-between items-start">
-                    <div className="max-w-[65%]">
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                            ORGANIZATION
-                        </p>
-                        <p className="font-bold text-gray-900 text-[13px] leading-tight pr-4">
-                            {organization}
-                        </p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                            FINAL PRICE
-                        </p>
-                        <p className="font-bold text-gray-900 text-[14px]">
-                            {formatCurrency(finalPrice, currency)}
-                        </p>
-                    </div>
-                </div>
-                <div className="mt-5 flex gap-2 items-center flex-wrap">
-                    <span className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-                        {ticketType}
-                    </span>
+            <section>
+                <Heading>Ticket</Heading>
+                <div className="grid grid-cols-2 gap-4">
+                    <Field label="Ticket type" value={ticketType} />
+                    <Field label="Final price" value={formatCurrency(finalPrice, currency)} />
+                    <Field label="Organization" value={organization} />
                     {registration?.registrationSource && (
-                        <span className="bg-gray-200 text-gray-700 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            Source: {registration.registrationSource.replace("_", " ")}
-                        </span>
+                        <Field label="Source" value={registration.registrationSource.replace("_", " ")} />
                     )}
                 </div>
-            </div>
+            </section>
 
-            {/* Check-in Status Card */}
             {isCheckedIn && (
-                <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full border-2 border-gray-100 flex items-center justify-center shrink-0">
-                        <CheckCircle2 size={20} className="text-black" />
-                    </div>
+                <section className="flex items-center gap-3 rounded-2xl border border-line bg-paper p-4">
+                    <CheckCircle2 size={20} className="shrink-0 text-ink" aria-hidden="true" />
                     <div>
-                        <p className="font-bold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
-                        <p className="text-xs text-gray-500 font-medium capitalize">Method: {checkInMethod}</p>
+                        <p className="text-sm font-medium text-ink">Checked in{checkInTime ? ` at ${checkInTime}` : ""}</p>
+                        <p className="text-xs capitalize text-ink-soft">Method: {checkInMethod}</p>
                     </div>
-                </div>
+                </section>
             )}
 
-            {/* DETAILED REGISTRATION DATA BREAKDOWN */}
-            <div className="space-y-4 mb-6">
-                
-                {/* 1. Academic & User Profile Info */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        Academic Details
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <span className="text-gray-500 font-medium block">Department</span>
-                            <span className="font-bold text-gray-800">{department}</span>
-                        </div>
-                        <div>
-                            <span className="text-gray-500 font-medium block">Graduation Year</span>
-                            <span className="font-bold text-gray-800">{gradYear}</span>
-                        </div>
-                        <div className="col-span-2">
-                            <span className="text-gray-500 font-medium block">Location</span>
-                            <span className="font-bold text-gray-800">{locationInfo}</span>
+            <section>
+                <Heading>Academic details</Heading>
+                <div className="grid grid-cols-2 gap-4">
+                    <Field label="Department" value={department} />
+                    <Field label="Graduation year" value={String(gradYear)} />
+                    <Field label="Location" value={locationInfo} />
+                </div>
+            </section>
+
+            <section>
+                <Heading icon={<CreditCard size={14} />}>Payment and pricing</Heading>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <Field
+                        label="Payment method"
+                        value={registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
+                    />
+                    <div>
+                        <label className={labelClass} htmlFor="attendee-payment-status">Payment status</label>
+                        <div className="relative mt-1">
+                            <select
+                                id="attendee-payment-status"
+                                value={registration?.payment?.paymentStatus || "pending"}
+                                disabled={isUpdating}
+                                onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
+                                className={`${fieldClass} appearance-none pr-9 capitalize`}
+                            >
+                                {PAYMENT_STATUS_OPTIONS.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft" aria-hidden="true" />
                         </div>
                     </div>
                 </div>
 
-                {/* 2. Payment, Pricing & Discount Breakdown */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <CreditCard size={14} /> Payment & Pricing
-                    </h3>
-
-                    <div className="grid grid-cols-2 gap-3 text-xs mb-1">
-                        <div>
-                            <span className="text-gray-500 font-medium block">Payment Method</span>
-                            <span className="font-bold text-gray-800 uppercase">
-                                {registration?.payment?.paymentMethod?.replace("_", " ") || "N/A"}
-                            </span>
+                <dl className="mt-4 space-y-2 border-t border-line pt-4 text-sm tabular-nums">
+                    {discount && (
+                        <div className="flex items-center justify-between text-ink-soft">
+                            <dt>Original price</dt>
+                            <dd className="line-through">{formatCurrency(discount.originalPrice, currency)}</dd>
                         </div>
-                        <div>
-                            <span className="text-gray-500 font-medium block mb-1">Payment Status</span>
-                            <div className="relative inline-block">
-                                <select
-                                    aria-label="Payment status"
-                                    value={registration?.payment?.paymentStatus || "pending"}
-                                    disabled={isUpdating}
-                                    onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
-                                    className="appearance-none bg-gray-100 text-gray-900 font-bold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
-                                >
-                                    {PAYMENT_STATUS_OPTIONS.map((status) => (
-                                        <option key={status} value={status}>
-                                            {status}
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Pricing summary block - grouped together */}
-                    <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs">
-                        {discount && (
-                            <div className="flex justify-between items-center text-gray-500">
-                                <span>Original Price</span>
-                                <span className="line-through">{formatCurrency(discount.originalPrice, currency)}</span>
-                            </div>
-                        )}
-
-                        {discount && (
-                            <div className="flex justify-between items-center bg-gray-50 text-gray-900 font-bold px-3 py-2 rounded-xl">
-                                <span className="flex items-center gap-1.5">
-                                    <Tag size={12} /> {discount.type} Discount
-                                </span>
-                                <span>-{discount.percentage}%</span>
-                            </div>
-                        )}
-
-                        <div className="flex justify-between items-center font-bold text-gray-800 pt-1">
-                            <span>Final Price</span>
-                            <span>{formatCurrency(finalPrice, currency)}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center font-bold text-gray-900">
-                            <span>Amount Paid</span>
-                            <span>{formatCurrency(amountPaid, currency)}</span>
-                        </div>
-
-                        {finalPrice > amountPaid && (
-                            <div className="flex justify-between items-center text-gray-900 font-semibold">
-                                <span>Balance Due</span>
-                                <span>{formatCurrency(finalPrice - amountPaid, currency)}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 3. Certificate Info */}
-                {registration?.certificate && (
-                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <Award size={14} /> Certificate Info
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                            <div>
-                                <span className="text-gray-500 font-medium block">Status</span>
-                                <span className="font-bold text-gray-800">{registration.certificate.issued ? "Issued" : "Not Issued"}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-500 font-medium block">Type</span>
-                                <span className="font-bold text-gray-800 capitalize">{registration.certificate.type || "N/A"}</span>
-                            </div>
-                            {registration.certificate.issueDate && (
-                                <div>
-                                    <span className="text-gray-500 font-medium block">Issue Date</span>
-                                    <span className="font-bold text-gray-800">{formatDateTime(registration.certificate.issueDate) || "-"}</span>
-                                </div>
-                            )}
-                           
-                        </div>
-                    </div>
-                )}
-
-                {/* 4. Communication Log */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <MessageSquare size={14} /> Communication History
-                    </h3>
-                    {registration?.communications && registration.communications.length > 0 ? (
-                        <div className="space-y-2">
-                            {registration.communications.map((comm, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-xl">
-                                    <div>
-                                        <p className="font-bold text-gray-800 capitalize">{comm.type.replace("_", " ")}</p>
-                                        <p className="text-[10px] text-gray-500 capitalize">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
-                                    </div>
-                                    <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded-xs bg-gray-200">
-                                        {comm.status}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-xs text-gray-500">No communication logs available.</p>
                     )}
-                </div>
 
-                {/* 5. Feedback */}
-                {registration?.feedbackSubmitted && (
-                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <Star size={14} /> Feedback
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs">
-                            <span className="text-gray-500 font-medium">Rating:</span>
-                            <span className="font-bold text-gray-800">{registration.rating ? `${registration.rating} / 5` : "Not rated"}</span>
+                    {discount && (
+                        <div className="flex items-center justify-between text-ink">
+                            <dt className="flex items-center gap-1.5 capitalize">
+                                <Tag size={12} aria-hidden="true" /> {discount.type} discount
+                            </dt>
+                            <dd>-{discount.percentage}%</dd>
                         </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-ink">
+                        <dt>Final price</dt>
+                        <dd>{formatCurrency(finalPrice, currency)}</dd>
                     </div>
+
+                    <div className="flex items-center justify-between font-medium text-ink">
+                        <dt>Amount paid</dt>
+                        <dd>{formatCurrency(amountPaid, currency)}</dd>
+                    </div>
+
+                    {finalPrice > amountPaid && (
+                        <div className="flex items-center justify-between font-medium text-ink">
+                            <dt>Balance due</dt>
+                            <dd>{formatCurrency(finalPrice - amountPaid, currency)}</dd>
+                        </div>
+                    )}
+                </dl>
+            </section>
+
+            {registration?.certificate && (
+                <section>
+                    <Heading icon={<Award size={14} />}>Certificate</Heading>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field label="Status" value={registration.certificate.issued ? "Issued" : "Not issued"} />
+                        <Field label="Type" value={registration.certificate.type || "N/A"} />
+                        {registration.certificate.issueDate && (
+                            <Field label="Issue date" value={formatDateTime(registration.certificate.issueDate)} />
+                        )}
+                    </div>
+                </section>
+            )}
+
+            <section>
+                <Heading icon={<MessageSquare size={14} />}>Communication history</Heading>
+                {registration?.communications && registration.communications.length > 0 ? (
+                    <ul className="space-y-2">
+                        {registration.communications.map((comm, idx) => (
+                            <li key={idx} className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm capitalize text-ink">{comm.type.replace("_", " ")}</p>
+                                    <p className="truncate text-xs capitalize text-ink-soft tabular-nums">{comm.channel} • {formatDateTime(comm.sentAt)}</p>
+                                </div>
+                                <StatusBadge status={comm.status} size="sm" />
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-sm text-ink-soft">Nothing has been sent to this attendee yet.</p>
                 )}
+            </section>
 
-
-            </div>
+            {registration?.feedbackSubmitted && (
+                <section>
+                    <Heading icon={<Star size={14} />}>Feedback</Heading>
+                    <Field label="Rating" value={registration.rating ? `${registration.rating} / 5` : "Not rated"} />
+                </section>
+            )}
 
             <ConfirmDialog
                 open={pending !== null}
@@ -451,6 +362,25 @@ export function SingleAttendeeView({
                 onConfirm={confirmPending}
                 onCancel={() => setPending(null)}
             />
+        </div>
+    );
+}
+
+/** Panel sub-heading. A rule instead of yet another card inside the drawer. */
+function Heading({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
+    return (
+        <h4 className="mb-3 flex items-center gap-2 border-b border-line pb-2 text-2xs font-medium uppercase text-ink-soft">
+            {icon ? <span aria-hidden="true">{icon}</span> : null}
+            {children}
+        </h4>
+    );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+    return (
+        <div>
+            <p className={labelClass}>{label}</p>
+            <p className="mt-1 break-words text-sm capitalize text-ink tabular-nums">{value}</p>
         </div>
     );
 }

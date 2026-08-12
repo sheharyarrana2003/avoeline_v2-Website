@@ -2,9 +2,12 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { NotificationServices } from "@/src/services/notification.services";
 import { BookingData } from "@/src/features/bookings/types";
 import { NegotiationMessage } from "@/src/features/bookings/types";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { StatusHistoryEntry } from "@/src/features/bookings/types";
 import VendorCounterOfferForm from "./VendorCounterOffer";
+import Link from "next/link";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { buttonClass } from "@/src/lib/ui";
 
 
 
@@ -14,10 +17,7 @@ export default async function CounterOfferFormOrganizer({ params }: { params: Pr
     const booking: BookingData | null = await BookingServices.getBookingById(booking_id);
 
     if (!booking) {
-        console.log("booking not found in counter-offer form");
         notFound();
-    } else {
-        console.log("Dipplaying tyhe booking");
     }
 
     async function onSubmitCounter(targetBudget: number, message: string) {
@@ -64,8 +64,22 @@ export default async function CounterOfferFormOrganizer({ params }: { params: Pr
 
 
     return (
-        <>
-            <VendorCounterOfferForm bookingData={booking} onSubmitCounter={onSubmitCounter} />
-        </>
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl">
+                <PageHeader
+                    title="Counter offer"
+                    description="Propose a revised total, and say what changes to make it work."
+                    actions={
+                        <Link
+                            href={`/vendor/${vendor_id}/quotes?tab=active&quote=${booking.bookingId}`}
+                            className={buttonClass("secondary", "md")}
+                        >
+                            Back to quote
+                        </Link>
+                    }
+                />
+                <VendorCounterOfferForm bookingData={booking} onSubmitCounter={onSubmitCounter} />
+            </div>
+        </div>
     )
 }

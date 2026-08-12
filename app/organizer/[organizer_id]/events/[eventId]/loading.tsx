@@ -1,12 +1,17 @@
 export default function EventDetailLoading() {
     return (
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-6xl space-y-6">
-                <div className="h-56 animate-pulse rounded-2xl border border-gray-200 bg-white/70" />
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className="h-64 animate-pulse rounded-2xl border border-gray-200 bg-white/70 lg:col-span-2" />
-                    <div className="h-64 animate-pulse rounded-2xl border border-gray-200 bg-white/70" />
-                </div>
+        // The event layout already pads this slot; a second px/py here inset the
+        // skeleton from where the real page actually starts.
+        <div className="mx-auto max-w-7xl space-y-10">
+            <div className="h-72 animate-pulse rounded-2xl bg-gray-200" />
+            <div className="grid grid-cols-2 gap-8 border-y border-line py-8 sm:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-14 animate-pulse rounded-xs bg-gray-200" />
+                ))}
+            </div>
+            <div className="grid gap-10 lg:grid-cols-3">
+                <div className="h-64 animate-pulse rounded-2xl bg-gray-200 lg:col-span-2" />
+                <div className="h-64 animate-pulse rounded-2xl bg-gray-200" />
             </div>
         </div>
     );

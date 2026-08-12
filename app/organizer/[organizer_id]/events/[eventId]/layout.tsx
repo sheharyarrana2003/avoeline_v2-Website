@@ -32,9 +32,12 @@ export default async function EventLayout({
     // describe the same event, and when the tabs sat ABOVE the title they read as global
     // chrome — a peer of the sidebar rather than something scoped to this event. Order is
     // now where-you-are, what-you-are-looking-at, which-part-of-it.
+    // The page padding lives here rather than in each of the six sections, and the
+    // grey second surface is gone: every other screen in the product sits directly
+    // on the canvas, so the event sections looked like a different app.
     return (
-        <div className="flex min-h-full flex-col bg-gray-50">
-            <header className="border-b border-line bg-paper px-4 pt-5 sm:px-6">
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <header className="mb-8 border-b border-line">
                 <nav aria-label="Breadcrumb" className="mb-3">
                     <ol className="flex items-center gap-1 text-xs text-ink-soft">
                         <li>
@@ -58,7 +61,7 @@ export default async function EventLayout({
                 <EventsTab tabs={tabs} />
             </header>
 
-            <div className="min-w-0 flex-1 p-6 lg:p-8">
+            <div className="min-w-0">
                 {children}
             </div>
         </div>

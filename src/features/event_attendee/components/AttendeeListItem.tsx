@@ -1,112 +1,60 @@
 "use client"
 import { memo } from "react";
-import { Attendee } from "../type";
 import { User } from "@/src/services/models/user.type";
 import { Registration } from "@/src/services/models/reg.type";
 import { formatDateTime } from "@/src/lib/datetime";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 
 function AttendeeListItemBase(
-    { single_attendee, attendee_user, attendee_reg,handleOnClick, handleCheckBoxChange, isSelected }:
+    { attendee_user, attendee_reg, handleOnClick, isOpen }:
         {
-            single_attendee: Attendee,
             attendee_user: User,
             attendee_reg: Registration
             handleOnClick: (registration_id: string) => void,
-            handleCheckBoxChange: (e: React.ChangeEvent<HTMLInputElement>, registration_id: string) => void,
-            isSelected: boolean
+            isOpen: boolean
         }) {
 
     // Derive check-in from the real registration, not a hardcoded truthy value.
     const isCheckedIn = Boolean(attendee_reg?.checkIn?.checkedIn) || attendee_reg?.status === "checked_in";
-    const statusLabel = attendee_reg.status;
     const checkInTime = attendee_reg?.checkIn?.checkInTime || null;
     const ticketType = attendee_reg?.pricingTier || "General";
 
     return (
-        <div 
-            className={`grid grid-cols-[40px_2.5fr_1fr_1fr_1fr_40px] items-center px-6 py-4 rounded-xl transition-all cursor-pointer relative mb-1 group ${isSelected ? 'bg-white shadow-sm' : 'hover:bg-gray-100/50'}`}
+        // One control per row rather than a row-wide onClick plus a nested button:
+        // the whole row is the thing you click, so it should be the thing that
+        // focuses. The selection checkboxes that used to sit here drove nothing
+        // but a floating toolbar whose four buttons had no handlers at all.
+        <button
+            type="button"
+            aria-expanded={isOpen}
             onClick={() => handleOnClick(attendee_reg.registrationId)}
+            className={`grid w-full grid-cols-[2.5fr_1fr_1fr_1fr] items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 ${isOpen ? "bg-gray-100" : "hover:bg-gray-50"}`}
         >
-            {/* Active Left Border Marker */}
-            {isSelected && <div className="absolute left-0 top-2 bottom-2 w-1 bg-black rounded-r-md"></div>}
-            
-            {/* Checkbox */}
-            <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-                <div className="relative flex items-center justify-center">
-                    <input
-                        type="checkbox"
-                        aria-label={`Select ${attendee_user.profile.fullName}`}
-                        className="peer w-[18px] h-[18px] appearance-none border-2 border-gray-300 rounded-full checked:bg-black checked:border-black cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                        onChange={(e) => handleCheckBoxChange(e, attendee_reg.registrationId)}
-                        checked={isSelected}
-                    />
-                    <svg aria-hidden="true" className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            {/* Attendee Info — the real control. The row-wide onClick above is a
-                pointer convenience; this button is what keyboard and screen
-                reader users actually reach, and the attendee's name is the best
-                label it could have. */}
-            <button
-                type="button"
-                aria-pressed={isSelected}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleOnClick(attendee_reg.registrationId);
-                }}
-                className="flex items-center gap-3 text-left rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-            >
-                <span className="w-[38px] h-[38px] bg-gradient-to-tr from-gray-200 to-gray-300 rounded-full flex-shrink-0 border border-white shadow-sm overflow-hidden flex items-center justify-center">
-                    <span className="text-gray-900 font-bold text-sm">
-                        {attendee_user.profile.fullName.charAt(0)}
-                    </span>
+            <span className="flex min-w-0 items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-ink">
+                    {attendee_user.profile.fullName.charAt(0)}
                 </span>
-                <span className="block">
-                    <span className="block text-[15px] font-bold text-gray-900 leading-tight">
+                <span className="block min-w-0">
+                    <span className="block truncate text-sm font-medium text-ink">
                         {attendee_user.profile.fullName}
                     </span>
-                    <span className="block text-[13px] text-gray-500 font-medium">
+                    <span className="block truncate text-xs text-ink-soft">
                         {attendee_user.email}
                     </span>
                 </span>
-            </button>
+            </span>
 
-            {/* Ticket Badge */}
-            <div>
-                <span className="bg-white border border-gray-200 text-gray-800 text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
-                    {ticketType}
-                </span>
-            </div>
+            <span className="truncate text-xs uppercase text-ink-soft">{ticketType}</span>
 
-            {/* Status Badge */}
-            <div>
-                <span className={`text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-500 border border-gray-300'}`}>
-                    {statusLabel}
-                </span>
-            </div>
+            <span><StatusBadge status={attendee_reg.status} size="sm" /></span>
 
-            {/* Check-in Time */}
-            <div>
-                {isCheckedIn ? (
-                    <p className="text-[13px] font-bold text-gray-900">
-                        {checkInTime ? formatDateTime(checkInTime) : "Checked in"}
-                    </p>
-                ) : (
-                    <p className="text-[13px] font-bold text-gray-500">—</p>
-                )}
-            </div>
-
-            {/* Actions column, kept empty to stay aligned with the header row.
-                It used to hold a hover-revealed "more" button with no onClick --
-                an affordance that did nothing when clicked. */}
-            <div />
-        </div>
+            <span className="truncate text-xs text-ink-soft tabular-nums">
+                {isCheckedIn ? (checkInTime ? formatDateTime(checkInTime) : "Checked in") : "—"}
+            </span>
+        </button>
     )
 }
 
 // Memoized so rows don't all re-render when the parent state changes (search
-// keystroke, selecting another row); only rows whose props changed re-render.
+// keystroke, opening another row); only rows whose props changed re-render.
 export const AttendeeListItem = memo(AttendeeListItemBase);

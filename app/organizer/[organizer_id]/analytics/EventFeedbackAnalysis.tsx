@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import { MessageSquareText } from "lucide-react";
 import { EventFeedbackAnalysisRow } from "@/src/services/models/feedback.model";
-
-const SENTIMENT_STYLES: Record<string, string> = {
-    Positive: "bg-gray-50 text-gray-900",
-    Mixed: "bg-gray-50 text-gray-900",
-    Negative: "bg-gray-50 text-gray-900",
-};
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { tableCell, tableHead, tableRow } from "@/src/lib/ui";
 
 export default function EventFeedbackAnalysis({
     analyzeFeedback,
@@ -50,96 +47,58 @@ export default function EventFeedbackAnalysis({
     }, [analyzeFeedback]);
 
     return (
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-100 p-6">
-                <div className="flex items-center gap-3">
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
-                        <MessageSquareText size={18} />
-                    </span>
-                    <div>
-                        <h2 className="text-base font-bold text-gray-950">
-                            Event Feedback Analysis
-                        </h2>
-                        <p className="mt-1 text-xs font-semibold text-gray-500">
-                            AI-powered insights from attendee feedback
-                        </p>
-                    </div>
-                </div>
+        <section>
+            <div className="flex flex-col gap-1 border-b border-line pb-3 sm:flex-row sm:items-end sm:justify-between">
+                <h2 className="font-display text-xl text-ink">Event Feedback Analysis</h2>
+                <p className="text-sm text-ink-soft">AI-powered insights from attendee feedback</p>
             </div>
 
             {loading ? (
-                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-500">
-                    Analyzing feedback with AI...
-                </div>
+                <p className="py-12 text-center text-sm text-ink-soft" aria-live="polite">
+                    Analyzing feedback with AI…
+                </p>
             ) : error ? (
-                <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-gray-900">
-                    {error}
-                </div>
+                <EmptyState
+                    size="sm"
+                    className="mt-6"
+                    icon={<MessageSquareText size={24} />}
+                    title="Feedback analysis failed"
+                    description={error}
+                />
             ) : rows.length === 0 ? (
-                <div className="flex h-40 items-center justify-center text-sm font-semibold text-gray-500">
-                    No feedback submitted for your events yet.
-                </div>
+                <EmptyState
+                    size="sm"
+                    className="mt-6"
+                    icon={<MessageSquareText size={24} />}
+                    title="No feedback yet"
+                    description="Once attendees rate a completed event, their comments are summarised here."
+                />
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[960px] border-collapse">
-                        <thead className="bg-gray-50">
-                            <tr className="text-left">
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Event
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Event ID
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Feedback
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Summary
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Strengths
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Improvements
-                                </th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
-                                    Sentiment
-                                </th>
+                <div className="mt-2 overflow-x-auto">
+                    <table className="w-full min-w-[860px] border-collapse">
+                        <thead>
+                            <tr className="border-b border-line">
+                                <th className={tableHead}>Event</th>
+                                <th className={tableHead}>Feedback</th>
+                                <th className={tableHead}>Summary</th>
+                                <th className={tableHead}>Strengths</th>
+                                <th className={tableHead}>Improvements</th>
+                                <th className={tableHead}>Sentiment</th>
                             </tr>
                         </thead>
                         <tbody>
                             {rows.map((row) => (
-                                <tr
-                                    key={row.eventId}
-                                    className="border-t border-gray-100 align-top"
-                                >
-                                    <td className="px-6 py-5 text-sm font-bold text-gray-950">
-                                        {row.eventName}
+                                <tr key={row.eventId} className={`${tableRow} align-top`}>
+                                    <td className={tableCell}>
+                                        <p className="font-medium text-ink">{row.eventName}</p>
+                                        <p className="mt-1 text-2xs text-ink-soft tabular-nums">{row.eventId}</p>
                                     </td>
-                                    <td className="px-6 py-5 text-xs font-bold text-gray-500">
-                                        {row.eventId}
-                                    </td>
-                                    <td className="px-6 py-5 text-sm font-bold text-gray-950">
-                                        {row.feedbackCount}
-                                    </td>
-                                    <td className="max-w-xs px-6 py-5 text-sm font-semibold text-gray-600">
-                                        {row.summary}
-                                    </td>
-                                    <td className="max-w-xs px-6 py-5 text-sm font-semibold text-gray-600">
-                                        {row.strengths}
-                                    </td>
-                                    <td className="max-w-xs px-6 py-5 text-sm font-semibold text-gray-600">
-                                        {row.improvements}
-                                    </td>
-                                    <td className="px-6 py-5">
-                                        <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                                                SENTIMENT_STYLES[row.sentiment] ??
-                                                "bg-gray-100 text-gray-600"
-                                            }`}
-                                        >
-                                            {row.sentiment}
-                                        </span>
+                                    <td className={`${tableCell} tabular-nums`}>{row.feedbackCount}</td>
+                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.summary}</td>
+                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.strengths}</td>
+                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.improvements}</td>
+                                    <td className={tableCell}>
+                                        <StatusBadge status={row.sentiment} size="sm" />
                                     </td>
                                 </tr>
                             ))}

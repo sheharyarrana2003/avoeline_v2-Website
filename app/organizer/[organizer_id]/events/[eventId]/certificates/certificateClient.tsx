@@ -12,7 +12,11 @@ import type {
 } from '@/src/services/models/certificate.model';
 import { formatDateMedium } from '@/src/lib/datetime';
 import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
+import { EmptyState } from '@/src/shared_components/ui/EmptyState';
 import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
+import { StatCard_dashboard } from '@/src/shared_components/organizer/StatCard_dashboard';
+import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from '@/src/lib/ui';
+import { Award, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
 export interface AttendeeCertProp {
     a: Attendee;
@@ -37,7 +41,6 @@ const ITEMS_PER_PAGE = 10;
 
 export default function CertificateIssuanceClient({
     attendees,
-    eventId,
     onGenerateCertificates,
 }: CertificateIssuanceClientProps) {
     // State
@@ -101,10 +104,6 @@ export default function CertificateIssuanceClient({
         (issuedPage - 1) * ITEMS_PER_PAGE,
         issuedPage * ITEMS_PER_PAGE,
     );
-
-    // Progress
-    const issuanceProgress =
-        totalAttendees > 0 ? Math.round((issuedAttendees.length / totalAttendees) * 100) : 0;
 
     // Handlers
     const toggleSelectAll = () => {
@@ -172,104 +171,90 @@ export default function CertificateIssuanceClient({
     };
 
     return (
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Certificate Issuance</h1>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href={`${pathName}/making-template`}
-                            className="bg-white border border-gray-200 text-gray-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-100 transition"
-                        >
-                            Edit Template
-                        </Link>
-                        <ConfirmButton
-                            tone="danger"
-                            title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
-                            description="Each certificate is written to the blockchain and pinned to IPFS. That is permanent and costs real resources — it cannot be undone, and re-issuing to the same attendee will not replace it."
-                            confirmLabel={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}`}
-                            disabled={isGenerating || selectedAttendees.size === 0}
-                            busy={isGenerating}
-                            onConfirm={handleGenerateClick}
-                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                        >
-                            {isGenerating ? 'Generating…' : 'Generate Certificates'}
-                        </ConfirmButton>
-                    </div>
+        // No padding and no <h1>: the event layout renders the event's name, status
+        // and tabs. This page is the Certificates section of it.
+        <div className="mx-auto max-w-7xl">
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+                <h2 className="font-display text-xl text-ink">Certificates</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link href={`${pathName}/making-template`} className={buttonClass('secondary')}>
+                        Edit template
+                    </Link>
+                    <ConfirmButton
+                        tone="danger"
+                        title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
+                        description="Each certificate is written to the blockchain and pinned to IPFS. That is permanent and costs real resources — it cannot be undone, and re-issuing to the same attendee will not replace it."
+                        confirmLabel={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}`}
+                        disabled={isGenerating || selectedAttendees.size === 0}
+                        busy={isGenerating}
+                        onConfirm={handleGenerateClick}
+                        className={buttonClass('primary')}
+                    >
+                        {isGenerating ? 'Generating…' : 'Generate certificates'}
+                    </ConfirmButton>
+                </div>
+            </div>
+
+            <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+                <StatCard_dashboard title="Total attendees" value={`${totalAttendees}`} icon={<Users className="h-4 w-4" />} />
+                <StatCard_dashboard title="Already issued" value={`${issuedAttendees.length}`} icon={<Award className="h-4 w-4" />} />
+                <StatCard_dashboard title="Pending" value={`${pendingAttendees.length}`} />
+            </section>
+
+            {generationSummary && (
+                <p className="mt-6 rounded-lg border border-line bg-paper px-4 py-3 text-sm text-ink">
+                    {generationSummary}
+                </p>
+            )}
+
+            <div className="mt-8">
+                <input
+                    type="search"
+                    value={searchQuery}
+                    aria-label="Search attendees"
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setPendingPage(1);
+                        setIssuedPage(1);
+                    }}
+                    placeholder="Search attendees by name or email"
+                    className={`${fieldClass} sm:max-w-sm`}
+                />
+            </div>
+
+            {/* Issued */}
+            <section className="mt-10">
+                <div className="mb-4 border-b border-line pb-2">
+                    <h3 className="font-display text-lg text-ink">Issued certificates</h3>
+                    <p className="text-xs text-ink-soft tabular-nums">{filteredIssuedAttendees.length} issued</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 mb-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Total Attendees</p>
-                            <p className="text-3xl font-bold text-gray-900">{totalAttendees}</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Already Issued</p>
-                            <p className="text-3xl font-bold text-gray-900">{issuedAttendees.length}</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Pending</p>
-                            <p className="text-3xl font-bold text-gray-900">{pendingAttendees.length}</p>
-                        </div>
-                    </div>
-
-                    {generationSummary && (
-                        <p className="text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-                            {generationSummary}
-                        </p>
-                    )}
-                </div>
-
-                {/* Search */}
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 mb-6">
-                    <div className="flex-1 relative">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setPendingPage(1);
-                                setIssuedPage(1);
-                            }}
-                            placeholder="Search attendees..."
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
-                        />
-                    </div>
-                </div>
-
-                {/* Issued Certificates Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <h2 className="text-sm font-bold text-gray-900">Issued Certificates</h2>
-                        <p className="text-xs text-gray-500 mt-0.5">{filteredIssuedAttendees.length} certificate(s) issued</p>
-                    </div>
-
+                {paginatedIssuedAttendees.length === 0 ? (
+                    <EmptyState
+                        size="sm"
+                        icon={<Award className="h-5 w-5" />}
+                        title={searchQuery ? 'No issued certificates match that search' : 'Nothing issued yet'}
+                        description={
+                            searchQuery
+                                ? 'Try part of a name or email address.'
+                                : 'Select attendees below and generate their certificates — they will be listed here once written to the chain.'
+                        }
+                    />
+                ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        <table className="w-full min-w-3xl">
                             <thead>
-                                <tr className="border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                    <th className="text-left px-6 py-3">Recipient</th>
-                                    <th className="text-left px-4 py-3">Type</th>
-                                    <th className="text-left px-4 py-3">Issued</th>
-                                    <th className="text-left px-4 py-3">PDF</th>
-                                    <th className="text-left px-4 py-3">Transaction Hash</th>
-                                    <th className="text-left px-4 py-3">Social Sharing</th>
-                                    <th className="text-left px-4 py-3">Status</th>
+                                <tr>
+                                    <th className={tableHead}>Recipient</th>
+                                    <th className={tableHead}>Type</th>
+                                    <th className={tableHead}>Issued</th>
+                                    <th className={tableHead}>PDF</th>
+                                    <th className={tableHead}>Transaction hash</th>
+                                    <th className={tableHead}>Sharing</th>
+                                    <th className={`${tableHead} pr-0 text-right`}>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedIssuedAttendees.length === 0 && (
-                                    <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
-                                            No certificates issued yet.
-                                        </td>
-                                    </tr>
-                                )}
                                 {paginatedIssuedAttendees.map((attendee) => {
                                     const cert = attendee.certStatus;
                                     const name = attendee.user.profile.fullName;
@@ -278,87 +263,66 @@ export default function CertificateIssuanceClient({
                                     const isBlockchain = cert?.type === 'blockchain' || cert?.type === 'both';
                                     const isDigital = cert?.type === 'digital' || cert?.type === 'both';
                                     const social = cert?.socialSharing;
+                                    const sharedOn = [
+                                        social?.sharedOnLinkedIn && 'LinkedIn',
+                                        social?.sharedOnTwitter && 'Twitter',
+                                        social?.sharedOnFacebook && 'Facebook',
+                                    ].filter(Boolean) as string[];
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className="border-b border-gray-50 hover:bg-gray-50 transition">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                  
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-gray-900">
-                                                            {cert?.content?.recipientName || name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">{email}</p>
-                                                    </div>
-                                                </div>
+                                        <tr key={attendee.a.attendeeId} className={tableRow}>
+                                            <td className={tableCell}>
+                                                <p className="font-medium text-ink">{cert?.content?.recipientName || name}</p>
+                                                <p className="text-xs text-ink-soft">{email}</p>
                                             </td>
-                                            <td className="px-4 py-4">
-                                                <span className="text-xs font-medium text-gray-700 capitalize">{cert?.type ?? '—'}</span>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <span className="text-xs text-gray-600">{formatDateMedium(cert?.issuedAt)}</span>
-                                            </td>
-                                            <td className="px-4 py-4">
+                                            <td className={`${tableCell} capitalize`}>{cert?.type ?? '—'}</td>
+                                            <td className={`${tableCell} tabular-nums`}>{formatDateMedium(cert?.issuedAt)}</td>
+                                            <td className={tableCell}>
                                                 {isDigital && cert?.digital?.pdfUrl ? (
                                                     <a
                                                         href={cert.digital.pdfUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-xs font-semibold text-gray-900 hover:underline"
+                                                        className="font-medium text-ink hover:underline"
                                                     >
                                                         View PDF
                                                     </a>
                                                 ) : (
-                                                    <span className="text-xs text-gray-300">—</span>
+                                                    <span className="text-ink-faint" aria-hidden="true">—</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-4">
+                                            <td className={`${tableCell} font-mono text-xs`}>
                                                 {isBlockchain && cert?.blockchain?.transactionHash ? (
                                                     cert.blockchain.verificationUrl ? (
                                                         <a
                                                             href={cert.blockchain.verificationUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-xs font-mono text-gray-900 hover:underline"
+                                                            className="text-ink hover:underline"
                                                             title={cert.blockchain.transactionHash}
                                                         >
                                                             {truncateHash(cert.blockchain.transactionHash)}
                                                         </a>
                                                     ) : (
-                                                        <span className="text-xs font-mono text-gray-600" title={cert.blockchain.transactionHash}>
+                                                        <span className="text-ink-soft" title={cert.blockchain.transactionHash}>
                                                             {truncateHash(cert.blockchain.transactionHash)}
                                                         </span>
                                                     )
                                                 ) : (
-                                                    <span className="text-xs text-gray-300">—</span>
+                                                    <span className="text-ink-faint" aria-hidden="true">—</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-4">
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    {social?.sharedOnLinkedIn && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
-                                                            LinkedIn
-                                                        </span>
-                                                    )}
-                                                    {social?.sharedOnTwitter && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
-                                                            Twitter
-                                                        </span>
-                                                    )}
-                                                    {social?.sharedOnFacebook && (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-900 border-gray-200">
-                                                            Facebook
-                                                        </span>
-                                                    )}
-                                                    {!social?.sharedOnLinkedIn && !social?.sharedOnTwitter && !social?.sharedOnFacebook && (
-                                                        <span className="text-xs text-gray-300">Not shared</span>
-                                                    )}
-                                                    {!!social?.shareCount && (
-                                                        <span className="text-[10px] text-gray-500">({social.shareCount})</span>
-                                                    )}
-                                                </div>
+                                            <td className={`${tableCell} text-xs text-ink-soft`}>
+                                                {sharedOn.length ? (
+                                                    <>
+                                                        {sharedOn.join(', ')}
+                                                        {social?.shareCount ? <span className="tabular-nums"> ({social.shareCount})</span> : null}
+                                                    </>
+                                                ) : (
+                                                    'Not shared'
+                                                )}
                                             </td>
-                                            <td className="px-4 py-4">
+                                            <td className={`${tableCell} pr-0 text-right`}>
                                                 <StatusBadge status={status} size="sm" />
                                             </td>
                                         </tr>
@@ -367,155 +331,150 @@ export default function CertificateIssuanceClient({
                             </tbody>
                         </table>
                     </div>
+                )}
 
-                    {filteredIssuedAttendees.length > 0 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-500">
-                                Showing {(issuedPage - 1) * ITEMS_PER_PAGE + 1}-
-                                {Math.min(issuedPage * ITEMS_PER_PAGE, filteredIssuedAttendees.length)} of{' '}
-                                {filteredIssuedAttendees.length} issued
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setIssuedPage((p) => Math.max(1, p - 1))}
-                                    disabled={issuedPage === 1}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition disabled:opacity-30"
-                                >
-                                    ‹
-                                </button>
-                                <button
-                                    onClick={() => setIssuedPage((p) => Math.min(issuedTotalPages, p + 1))}
-                                    disabled={issuedPage === issuedTotalPages}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition disabled:opacity-30"
-                                >
-                                    ›
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                {filteredIssuedAttendees.length > ITEMS_PER_PAGE && (
+                    <Pager
+                        page={issuedPage}
+                        totalPages={issuedTotalPages}
+                        total={filteredIssuedAttendees.length}
+                        noun="issued"
+                        onChange={setIssuedPage}
+                    />
+                )}
+            </section>
 
-                {/* Pending Attendees Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                        <div>
-                            <h2 className="text-sm font-bold text-gray-900">Pending Attendees</h2>
-                            <p className="text-xs text-gray-500 mt-0.5">{filteredPendingAttendees.length} awaiting certificate generation</p>
-                        </div>
-                        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs" />
-                            Select All ({selectedAttendees.size} Selected)
-                        </label>
+            {/* Pending */}
+            <section className="mt-10">
+                <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
+                    <div>
+                        <h3 className="font-display text-lg text-ink">Pending attendees</h3>
+                        <p className="text-xs text-ink-soft tabular-nums">{filteredPendingAttendees.length} awaiting generation</p>
                     </div>
-
-                    <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider items-center">
-                        <div className="col-span-4">Attendee</div>
-                        <div className="col-span-2">Attendance</div>
-                        <div className="col-span-2">Status</div>
-                        <div className="col-span-2 text-right">Action</div>
-                    </div>
-
-                    {paginatedPendingAttendees.length === 0 && (
-                        <div className="px-6 py-8 text-center text-sm text-gray-500">No pending attendees.</div>
-                    )}
-
-                    {paginatedPendingAttendees.map((attendee) => {
-                        // TODO: wire up real attendance rate once tracked
-                        const attendanceRate = 0;
-                        const isSelected = selectedAttendees.has(attendee.a.attendeeId);
-                        const name = attendee.user.profile.fullName;
-                        const email = attendee.user.email;
-                        const displayStatus = resolvePendingDisplayStatus(
-                            String(attendee.a.userId),
-                            attendee.certStatus,
-                        );
-
-                        return (
-                            <div
-                                key={attendee.a.attendeeId}
-                                className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center hover:bg-gray-50 transition ${isSelected ? 'bg-gray-50' : ''}`}
-                            >
-                                <div className="col-span-4 flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={() => toggleAttendee(attendee.a.attendeeId)}
-                                        className="rounded-xs"
-                                    />
-                                 
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">{name}</p>
-                                        <p className="text-xs text-gray-500">{email}</p>
-                                    </div>
-                                </div>
-
-                                <div className="col-span-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-bold text-gray-900">{attendanceRate}%</span>
-                                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden max-w-[60px]">
-                                            <div
-                                                className={`h-full rounded-full ${attendanceRate >= 80 ? 'bg-black' : attendanceRate >= 50 ? 'bg-gray-500' : 'bg-gray-300'}`}
-                                                style={{ width: `${attendanceRate}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                               
-
-                                <div className="col-span-2">
-                                    <div className="flex flex-col gap-1">
-                                        <StatusBadge
-                                            status={displayStatus.colorKey}
-                                            label={displayStatus.label}
-                                            size="sm"
-                                            className="w-fit"
-                                        />
-                                        {displayStatus.detail && (
-                                            <span className="text-[10px] text-gray-900 line-clamp-2" title={displayStatus.detail}>
-                                                {displayStatus.detail}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="col-span-2 text-right">
-                                    <button className="text-gray-500 hover:text-gray-600 transition">
-                                        <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-
                     {filteredPendingAttendees.length > 0 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-500">
-                                Showing {(pendingPage - 1) * ITEMS_PER_PAGE + 1}-
-                                {Math.min(pendingPage * ITEMS_PER_PAGE, filteredPendingAttendees.length)} of{' '}
-                                {filteredPendingAttendees.length} pending
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPendingPage((p) => Math.max(1, p - 1))}
-                                    disabled={pendingPage === 1}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition disabled:opacity-30"
-                                >
-                                    ‹
-                                </button>
-                                <button
-                                    onClick={() => setPendingPage((p) => Math.min(pendingTotalPages, p + 1))}
-                                    disabled={pendingPage === pendingTotalPages}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition disabled:opacity-30"
-                                >
-                                    ›
-                                </button>
-                            </div>
-                        </div>
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs accent-gray-900" />
+                            Select all (<span className="tabular-nums">{selectedAttendees.size}</span> selected)
+                        </label>
                     )}
                 </div>
+
+                {paginatedPendingAttendees.length === 0 ? (
+                    <EmptyState
+                        size="sm"
+                        icon={<Users className="h-5 w-5" />}
+                        title={searchQuery ? 'No pending attendees match that search' : 'Everyone has a certificate'}
+                        description={
+                            searchQuery
+                                ? 'Try part of a name or email address.'
+                                : 'Nobody on this event is waiting on a certificate right now.'
+                        }
+                    />
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr>
+                                    <th className={`${tableHead} w-10`}><span className="sr-only">Select</span></th>
+                                    <th className={tableHead}>Attendee</th>
+                                    {/* The "Attendance" column used to render a bar hardcoded to 0%
+                                        for every row, over a TODO. A number nobody measured is
+                                        worse than no column. */}
+                                    <th className={`${tableHead} pr-0 text-right`}>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginatedPendingAttendees.map((attendee) => {
+                                    const isSelected = selectedAttendees.has(attendee.a.attendeeId);
+                                    const name = attendee.user.profile.fullName;
+                                    const email = attendee.user.email;
+                                    const displayStatus = resolvePendingDisplayStatus(
+                                        String(attendee.a.userId),
+                                        attendee.certStatus,
+                                    );
+
+                                    return (
+                                        <tr key={attendee.a.attendeeId} className={`${tableRow} ${isSelected ? 'bg-gray-50' : ''}`}>
+                                            <td className={tableCell}>
+                                                <input
+                                                    type="checkbox"
+                                                    aria-label={`Select ${name}`}
+                                                    checked={isSelected}
+                                                    onChange={() => toggleAttendee(attendee.a.attendeeId)}
+                                                    className="rounded-xs accent-gray-900"
+                                                />
+                                            </td>
+                                            <td className={tableCell}>
+                                                <p className="font-medium text-ink">{name}</p>
+                                                <p className="text-xs text-ink-soft">{email}</p>
+                                            </td>
+                                            <td className={`${tableCell} pr-0 text-right`}>
+                                                <StatusBadge status={displayStatus.colorKey} label={displayStatus.label} size="sm" />
+                                                {displayStatus.detail && (
+                                                    <p className="mt-1 line-clamp-2 text-2xs text-ink-soft" title={displayStatus.detail}>
+                                                        {displayStatus.detail}
+                                                    </p>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {filteredPendingAttendees.length > ITEMS_PER_PAGE && (
+                    <Pager
+                        page={pendingPage}
+                        totalPages={pendingTotalPages}
+                        total={filteredPendingAttendees.length}
+                        noun="pending"
+                        onChange={setPendingPage}
+                    />
+                )}
+            </section>
+        </div>
+    );
+}
+
+function Pager({
+    page,
+    totalPages,
+    total,
+    noun,
+    onChange,
+}: {
+    page: number;
+    totalPages: number;
+    total: number;
+    noun: string;
+    onChange: (updater: (p: number) => number) => void;
+}) {
+    return (
+        <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
+            <p className="text-xs text-ink-soft tabular-nums">
+                Showing {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, total)} of {total} {noun}
+            </p>
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    aria-label="Previous page"
+                    onClick={() => onChange((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className={buttonClass('ghost', 'sm', 'px-2')}
+                >
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Next page"
+                    onClick={() => onChange((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className={buttonClass('ghost', 'sm', 'px-2')}
+                >
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </button>
             </div>
         </div>
     );

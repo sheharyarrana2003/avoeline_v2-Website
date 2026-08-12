@@ -1,63 +1,61 @@
-// app/(organizer)/dashboard/events/publish-success/page.tsx
-import SuccessIcon from "@/src/features/events/components/wizard/results/components/SuccessIcon";
-import SuccessHeader from "@/src/features/events/components/wizard/results/components/SuccessHeader";
-import EventStats from "@/src/features/events/components/wizard/results/components/EventStats";
-import ActionButtons from "@/src/features/events/components/wizard/results/components/ActionButtons";
+import Link from "next/link";
+import { Check } from "lucide-react";
 import ShareRow from "@/src/features/events/components/wizard/results/components/ShareRow";
 import { EventService } from "@/src/services/event.service";
 import { formatDate } from "@/src/lib/datetime";
+import { buttonClass } from "@/src/lib/ui";
+import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
 
-export default async function PublishSuccessModal({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
-  const resolvedParams = await params;
-  const organizer_id = resolvedParams.organizer_id;
-  const event_id = resolvedParams.eventId;
-  const event = await EventService.getEventByID(event_id);
-  let message = "";
+export default async function PublishSuccessPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
+  const { organizer_id, eventId } = await params;
+  const event = await EventService.getEventByID(eventId);
 
-  if(event && event.status === 'draft'){
-    message = ' is a draft event.'
-  }else if(event && event.status === 'published'){
-    message = 'is now live and open for registrations.'
-  }
-else{
-  message = " is being added to your events";
-}
   if (!event) {
-    return <div>Event not found</div>;
+    return <p className="text-sm text-ink-soft">Event not found.</p>;
   }
+
+  const message =
+    event.status === "draft"
+      ? "is saved as a draft."
+      : event.status === "published"
+        ? "is now live and open for registrations."
+        : "is being added to your events.";
+
+  const base = `/organizer/${organizer_id}/events/${eventId}`;
 
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8 bg-white-900/50 flex items-center justify-center">
-      {/* Modal Container */}
-      <div className="bg-white rounded-[32px] p-10 max-w-[500px] w-full shadow-2xl relative overflow-hidden">
+    // No modal chrome, no <h1> and no page padding: this renders inside the event
+    // layout, which already shows the event's name, status and tabs. The old
+    // "Event Published Successfully!" <h1> was the second one on the screen.
+    <div className="mx-auto flex max-w-lg flex-col items-center text-center">
+      <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+        <Check className="h-8 w-8" strokeWidth={3} />
+      </span>
 
-        {/* Decorative Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-gray-200 to-transparent rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        </div>
+      <h2 className="font-display text-2xl text-ink">Event published</h2>
+      <p className="mt-2 text-sm text-ink-soft">
+        {event.title} {message}
+      </p>
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center">
-          <SuccessIcon />
+      <section className="mt-8 grid w-full grid-cols-2 gap-y-8 border-y border-line py-8 text-left sm:divide-x sm:divide-line">
+        <StatCard_dashboard title="Capacity" value={`${event.capacity.totalSeats}`} />
+        <StatCard_dashboard title="Date" value={formatDate(event.schedule.startDate)} />
+      </section>
 
+      <div className="mt-8 flex w-full flex-col gap-3">
+        <Link href={base} className={buttonClass("primary", "lg", "w-full")}>
+          View event
+        </Link>
+        <Link href={`${base}/attendees`} className={buttonClass("secondary", "lg", "w-full")}>
+          Manage registrations
+        </Link>
+        <Link href={`/organizer/${organizer_id}/dashboard`} className={buttonClass("ghost", "lg", "w-full")}>
+          Go to dashboard
+        </Link>
+      </div>
 
-          <SuccessHeader
-            eventTitle={event.title}
-            message={message}
-          />
-
-          <EventStats
-            capacity={event.capacity.totalSeats}
-            date={formatDate(event.schedule.startDate)}
-          />
-
-          <ActionButtons organizer_id={organizer_id} eventId={event.id} />
-
-          <ShareRow
-            eventUrl={`https://avoeline.com/events/${event.id}`}
-            eventTitle={event.title}
-          />
-        </div>
+      <div className="mt-8">
+        <ShareRow eventUrl={`https://avoeline.com/events/${event.id}`} eventTitle={event.title} />
       </div>
     </div>
   );

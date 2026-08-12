@@ -36,7 +36,6 @@ export default async function SignIn({
             await AuthService.loginWithEmail(email, password);
             const user: CurrentUserData | null = await AuthService.getCurrentUser();
 
-            console.log("user data after signup", user);
             if (user === null) {
                 redirect("/auth/signup");
             } else if (target) {
@@ -51,7 +50,7 @@ export default async function SignIn({
                 throw error;
             }
 
-            console.error("user creation failed:", error);
+            console.error("Sign-in failed:", error);
 
             // Returning this keeps the user on the current page and sends back the error
             return {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ImageOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { PortfolioImage } from "@/src/services/models/vendor.model";
@@ -8,6 +9,8 @@ import { DateField } from "@/src/shared_components/DateField";
 import { addPortfolioImage, removePortfolioImage } from "../actions/updateVendorPortfolio.action";
 import { useToast } from "@/src/shared_components/ui/Toast";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass, fieldClass } from "@/src/lib/ui";
 
 export function PortfolioImageManager({ vendorId, images }: { vendorId: string; images: PortfolioImage[] }) {
     const router = useRouter();
@@ -46,7 +49,14 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
 
     return (
         <div className="space-y-4">
-            {images.length > 0 && (
+            {images.length === 0 ? (
+                <EmptyState
+                    size="sm"
+                    icon={<ImageOff className="h-5 w-5" />}
+                    title="No portfolio images yet"
+                    description="Upload photographs of past work below — this is the first thing organizers look at."
+                />
+            ) : (
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     {images.map((img, i) => (
                         <div key={img.url + i} className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
@@ -61,30 +71,30 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
                                 }
                                 confirmLabel="Remove image"
                                 onConfirm={() => remove(img.url)}
-                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-sm leading-none text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900/80 text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                             >
                                 <span className="sr-only">Remove image</span>
-                                <span aria-hidden="true">×</span>
+                                <X className="h-3.5 w-3.5" aria-hidden="true" />
                             </ConfirmButton>
                             {img.caption && (
-                                <div className="absolute inset-x-0 bottom-0 truncate bg-black/50 px-2 py-1 text-[10px] text-white">{img.caption}</div>
+                                <div className="absolute inset-x-0 bottom-0 truncate bg-gray-900/70 px-2 py-1 text-2xs text-white">{img.caption}</div>
                             )}
                         </div>
                     ))}
                 </div>
             )}
 
-            <div className="space-y-3 rounded-xl border border-dashed border-gray-300 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Add portfolio image</p>
+            <div className="space-y-3 rounded-xl border border-dashed border-line-loud p-4">
+                <p className="text-2xs font-bold uppercase text-ink-soft">Add portfolio image</p>
                 <MediaUpload folder="vendor-portfolio" accept="image/*" value={url || null} label="Upload image" onUploaded={(u) => setUrl(u)} />
                 {url && (
                     <>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                            <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption" className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
-                            <input value={eventType} onChange={(e) => setEventType(e.target.value)} placeholder="Event type" className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
-                            <DateField value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-200" />
+                            <input value={caption} onChange={(e) => setCaption(e.target.value)} aria-label="Caption" placeholder="Caption" className={fieldClass} />
+                            <input value={eventType} onChange={(e) => setEventType(e.target.value)} aria-label="Event type" placeholder="Event type" className={fieldClass} />
+                            <DateField value={date} onChange={(e) => setDate(e.target.value)} aria-label="Date" className={`${fieldClass} pr-10`} />
                         </div>
-                        <button type="button" onClick={save} disabled={saving} className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60">
+                        <button type="button" onClick={save} disabled={saving} className={buttonClass("primary", "md")}>
                             {saving ? "Saving…" : "Add to portfolio"}
                         </button>
                     </>

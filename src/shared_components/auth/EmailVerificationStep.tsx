@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Check, ExternalLink, Info, Loader2 } from 'lucide-react';
+import { ArrowRight, Check, Info, Loader2, Mail, Send } from 'lucide-react';
+import { buttonClass } from '@/src/lib/ui';
+import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
 
 type StatusResult = { verified: boolean; email?: string };
 type ResendResult = { success: boolean; alreadyVerified?: boolean; error?: string };
@@ -110,73 +112,68 @@ export default function EmailVerificationStep({
   const stepState = verified ? 3 : 1;
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <h2 className="text-xl md:text-2xl font-bold text-gray-700 tracking-wide mb-4 text-center">
-        Email Verification
-      </h2>
-
-      <div className="bg-gray-100 w-full max-w-2xl md:max-w-3xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm flex flex-col items-center text-center font-sans relative">
+    <div className="flex w-full flex-col items-center">
+      <div className="relative flex w-full max-w-2xl flex-col items-center rounded-2xl border border-line bg-paper p-8 text-center md:max-w-3xl md:p-12">
         {toastMsg && (
-          <div className="absolute top-4 bg-black text-white text-xs px-5 py-2.5 rounded-full shadow-lg z-20">
+          <div
+            role="status"
+            className="absolute top-4 z-20 rounded-full bg-gray-900 px-5 py-2.5 text-xs font-medium text-white"
+          >
             {toastMsg}
           </div>
         )}
 
-        {/* Top Mail Badge */}
-        <div className="mb-6 relative">
-          <div className="bg-gray-200 rounded-3xl px-9 py-5 flex items-center justify-center relative border border-gray-300/50">
-            <svg aria-hidden="true" className="w-14 h-11 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
-              <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+        <div className="relative mb-6">
+          <div className="flex items-center justify-center rounded-2xl border border-line bg-canvas px-9 py-5">
+            <Mail className="h-11 w-11 text-ink-soft" aria-hidden="true" />
             {verified && (
-              <div className="absolute -top-1.5 -right-1.5 bg-gray-900 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
-                <Check className="w-4 h-4 stroke-[3]" />
-              </div>
+              <span className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper bg-gray-900 text-white">
+                <Check className="h-4 w-4" aria-hidden="true" />
+              </span>
             )}
           </div>
         </div>
 
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 mb-2">
+        <h1 className="mb-2 font-display text-2xl text-ink md:text-3xl">
           {verified ? 'Email Verified' : 'Check Your Inbox'}
         </h1>
 
-        <p className="text-sm text-gray-500 font-medium mb-3">
+        <p className="mb-3 text-sm text-ink-soft">
           {verified ? 'Verified address' : 'We’ve sent a verification link to'}
         </p>
 
-        <div className="bg-gray-200 text-gray-800 font-semibold px-5 py-2 rounded-full text-sm inline-block mb-3 border border-gray-300">
+        <div className="mb-3 inline-block rounded-full border border-line bg-canvas px-5 py-2 text-sm font-semibold text-ink">
           {address || '—'}
         </div>
 
-        {/* Live status pill */}
         <div className="mb-6">
-          {verified ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-900 border border-gray-200">
-              <Check className="w-3.5 h-3.5 stroke-[3]" /> Verified
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-900 border border-gray-200">
-              {isChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-gray-900" />}
-              Awaiting verification
-            </span>
-          )}
+          <span className="inline-flex items-center gap-2 rounded-full border border-line-loud px-4 py-1.5 text-xs font-bold uppercase text-ink">
+            {verified ? (
+              <Check className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : isChecking ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-gray-900" />
+            )}
+            {verified ? 'Verified' : 'Awaiting verification'}
+          </span>
         </div>
 
-        <p className="text-xs md:text-sm text-gray-500 leading-relaxed text-center max-w-md mb-8">
+        <p className="mb-8 max-w-md text-sm leading-relaxed text-ink-soft">
           {verified
             ? 'Your email address is confirmed. You can continue with setup.'
             : 'Click the link in the email to verify your account. This page updates on its own once you do — you can also continue setup and verify later.'}
         </p>
 
         {/* Progress — reflects real state, not clickable */}
-        <div className="w-full max-w-lg mb-10 relative">
-          <div className="absolute top-[18px] left-[15%] right-[15%] h-[2px] bg-gray-300 -z-0" />
+        <div className="relative mb-10 w-full max-w-lg">
+          <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-[18px] h-0.5 bg-line" />
           <div
-            className="absolute top-[18px] left-[15%] h-[2px] bg-black transition-all duration-300 -z-0"
+            aria-hidden="true"
+            className="absolute left-[15%] top-[18px] h-0.5 bg-gray-900 transition-all duration-300"
             style={{ width: verified ? '70%' : '0%' }}
           />
-          <div className="flex items-center justify-between relative z-10">
+          <ol className="relative z-10 flex items-center justify-between">
             {[
               { id: 1, label: 'EMAIL SENT' },
               { id: 2, label: 'LINK CLICKED' },
@@ -184,44 +181,42 @@ export default function EmailVerificationStep({
             ].map((s) => {
               const reached = stepState >= s.id;
               return (
-                <div key={s.id} className="flex flex-col items-center">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      reached ? 'bg-black text-white shadow-sm scale-105' : 'bg-gray-100 border-2 border-gray-400 text-gray-500'
+                <li key={s.id} className="flex flex-col items-center">
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                      reached ? 'bg-gray-900 text-white' : 'border border-line-loud bg-paper text-ink-soft'
                     }`}
                   >
-                    {reached ? <Check className="w-4 h-4 stroke-[3]" /> : <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />}
-                  </div>
-                  <span className={`text-[10px] md:text-xs font-bold mt-2.5 uppercase tracking-wider ${reached ? 'text-black' : 'text-gray-500'}`}>
-                    {s.label}
+                    {reached ? <Check className="h-4 w-4" /> : <span className="h-2.5 w-2.5 rounded-full bg-line-loud" />}
                   </span>
-                </div>
+                  <span
+                    className={`mt-2.5 text-2xs font-bold uppercase ${reached ? 'text-ink' : 'text-ink-soft'}`}
+                  >
+                    {s.label}
+                    <span className="sr-only">{reached ? ' — done' : ' — pending'}</span>
+                  </span>
+                </li>
               );
             })}
-          </div>
+          </ol>
         </div>
 
-        {error && (
-          <p className="mb-4 text-xs text-gray-900 bg-gray-50 border border-gray-200 rounded-full px-4 py-2">{error}</p>
-        )}
+        <FormFeedback error={error} className="mb-4 w-full max-w-md" />
 
         {!verified && (
           <>
-            <div className="w-full max-w-md flex flex-col sm:flex-row gap-4 mb-2">
+            <div className="mb-2 flex w-full max-w-md flex-col gap-4 sm:flex-row">
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={!canResend}
-                className={`flex-1 py-3 px-6 rounded-full border border-gray-400 font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-                  canResend
-                    ? 'bg-transparent text-black hover:bg-gray-200/60 cursor-pointer'
-                    : 'bg-transparent text-gray-500 opacity-70 cursor-not-allowed'
-                }`}
+                className={buttonClass('secondary', 'lg', 'flex-1')}
               >
-                {isResending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                  <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                {isResending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Send className="h-4 w-4" aria-hidden="true" />
                 )}
                 {isResending ? 'Sending…' : 'Resend Email'}
               </button>
@@ -230,32 +225,34 @@ export default function EmailVerificationStep({
                 type="button"
                 onClick={() => check(true)}
                 disabled={isChecking}
-                className="flex-1 bg-black text-white font-medium py-3.5 px-6 rounded-full hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm cursor-pointer disabled:opacity-60"
+                className={buttonClass('primary', 'lg', 'flex-1')}
               >
-                {isChecking ? 'Checking…' : "I've verified"} <Check className="w-4 h-4" />
+                {isChecking ? 'Checking…' : "I've verified"}
+                <Check className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 mt-2 mb-6">
+            <p className="mb-6 mt-2 text-xs text-ink-soft tabular-nums">
               {timer > 0 ? `Resend available in 0:${timer < 10 ? `0${timer}` : timer}` : 'You can resend the email'}
             </p>
           </>
         )}
 
-        {verified && onNext && (
+        {onNext && (
           <button
             type="button"
             onClick={onNext}
-            className="bg-black text-white font-medium py-3.5 px-10 rounded-full hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm cursor-pointer mb-6"
+            className={buttonClass(verified ? 'primary' : 'ghost', 'lg', 'mb-6')}
           >
-            Continue <ExternalLink className="w-4 h-4" />
+            {verified ? 'Continue' : 'Continue without verifying'}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
 
         {!verified && (
-          <div className="bg-gray-200/70 border border-gray-300/60 rounded-2xl p-4 flex items-start gap-3 w-full max-w-md text-left">
-            <Info className="w-5 h-5 text-gray-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-gray-600 leading-relaxed">
+          <div className="flex w-full max-w-md items-start gap-3 rounded-2xl border border-line bg-canvas p-4 text-left">
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-ink-soft" aria-hidden="true" />
+            <p className="text-xs leading-relaxed text-ink-soft">
               Didn’t receive the email? Check your spam folder. Verification isn’t required to finish
               setup — you can carry on and verify from this page later.
             </p>
