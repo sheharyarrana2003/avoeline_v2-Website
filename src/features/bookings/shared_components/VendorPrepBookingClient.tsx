@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import Link from "next/link";
+import { useState, useTransition } from "react";
 import { formatDate, formatTime } from "@/src/lib/datetime";
-import {
-    Documents,
-} from "@/src/features/bookings/types";
+import { Documents } from "@/src/features/bookings/types";
 import { formatCurrency } from "@/src/lib/money";
+import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { DateField } from "@/src/shared_components/DateField";
+import { ListPlus, Plus, X } from "lucide-react";
+
 // --- Types ---
 
 interface QuoteItem {
@@ -14,18 +17,6 @@ interface QuoteItem {
     description: string;
     quantity: number;
     unitPrice: number;
-}
-
-interface CustomizationOption {
-    id: string;
-    label: string;
-    selected: boolean;
-}
-
-interface SupportingDoc {
-    id: string;
-    name: string;
-    type: "pdf" | "zip" | "image";
 }
 
 interface VendorService {
@@ -80,7 +71,7 @@ interface InitialData {
     existingQuote: ExistingQuote | null;
     currency: string;
     communications: unknown[];
-    documents:Documents;
+    documents: Documents;
     vendorServices: VendorService[];
     status: string;
 }
@@ -149,16 +140,12 @@ export default function PrepareQuoteClient({
         organizerName,
         bookingId,
         vendorServices,
-        status,
     } = initialData;
 
     // --- State ---
     const [servicePackage, setServicePackage] = useState<string>(
-        vendorServices.length > 0
-            ? vendorServices[0].name
-            : "Custom Quote"
+        vendorServices.length > 0 ? vendorServices[0].name : "Custom Quote"
     );
-    const [saveAsPackage, setSaveAsPackage] = useState<boolean>(false);
 
     // Initialize items from existing quote or empty
     const [items, setItems] = useState<QuoteItem[]>(
@@ -169,22 +156,13 @@ export default function PrepareQuoteClient({
     const [discountAmount, setDiscountAmount] = useState<number>(
         existingQuote?.discount || 0
     );
-    const [platformFeePercent] = useState<number>(2.5);
-
-    const [customizations, setCustomizations] = useState<CustomizationOption[]>(
-        []
-    );
-    const [customNotes, setCustomNotes] = useState<string>("");
+    const platformFeePercent = 2.5;
 
     const [terms, setTerms] = useState<string>(existingQuote?.terms || "");
 
     const [validityDate, setValidityDate] = useState<string>(
         parseValidityDate(existingQuote?.validity)
     );
-
-    const [internalNotes, setInternalNotes] = useState<string>("");
-
-    const [supportingDocs, setSupportingDocs] = useState<SupportingDoc[]>([]);
 
     // --- Computed Values ---
     const subtotal = items.reduce(
@@ -215,39 +193,10 @@ export default function PrepareQuoteClient({
     };
 
     const addLineItem = (): void => {
-        const newItem: QuoteItem = {
-            id: `item-${Date.now()}`,
-            description: "New Item",
-            quantity: 1,
-            unitPrice: 0,
-        };
-        setItems((prev) => [...prev, newItem]);
-    };
-
-    const toggleCustomization = (id: string): void => {
-        setCustomizations((prev) =>
-            prev.map((opt) =>
-                opt.id === id ? { ...opt, selected: !opt.selected } : opt
-            )
-        );
-    };
-
-    const addCustomization = (): void => {
-        if (customNotes.trim()) {
-            setCustomizations((prev) => [
-                ...prev,
-                {
-                    id: `custom-${Date.now()}`,
-                    label: customNotes.trim(),
-                    selected: true,
-                },
-            ]);
-            setCustomNotes("");
-        }
-    };
-
-    const removeDoc = (id: string): void => {
-        setSupportingDocs((prev) => prev.filter((d) => d.id !== id));
+        setItems((prev) => [
+            ...prev,
+            { id: `item-${Date.now()}`, description: "", quantity: 1, unitPrice: 0 },
+        ]);
     };
 
     const [isSubmitting, startSubmitting] = useTransition();
@@ -262,12 +211,10 @@ export default function PrepareQuoteClient({
             items: items.map(({ id: _id, ...rest }) => rest),
             taxRate,
             discountAmount,
-            customizations: customizations
-                .filter((c) => c.selected)
-                .map((c) => c.label),
+            customizations: [],
             terms,
             validityDate,
-            internalNotes,
+            internalNotes: "",
             totalAmount,
             currency,
         };
@@ -278,455 +225,261 @@ export default function PrepareQuoteClient({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Top Navigation */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-lg font-bold text-gray-900">
-                            Prepare Quote
-                        </h1>
-                        <p className="text-xs text-gray-500">
-                            {eventDetails.title} • Request from {organizerName}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl">
+                {/* One submit control, in the masthead. The second one lived in a
+                    `fixed bottom-0 left-0 right-0` bar that spanned the whole
+                    viewport and sat on top of the 16rem nav rail. */}
+                <PageHeader
+                    title="Prepare quote"
+                    description={`${eventDetails.title} • Request from ${organizerName}`}
+                    actions={
                         <button
+                            type="button"
                             onClick={handleSubmit}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || items.length === 0}
                             aria-busy={isSubmitting}
-                            className="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={buttonClass("primary", "lg")}
                         >
-                            {isSubmitting ? "Submitting…" : "Prepare Quote"}
+                            {isSubmitting ? "Submitting…" : `Send quote • ${formatCurrency(totalAmount, currency)}`}
                         </button>
-                    </div>
-                </div>
-            </div>
+                    }
+                />
 
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
                     {/* Left Column: Quote Builder */}
-                    <div className="lg:col-span-8 space-y-6">
-                        {/* Service Package */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
-                            <div className="flex items-center gap-2 mb-4">
-                                <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                    />
-                                </svg>
-                                <h3 className="text-sm font-semibold text-gray-900">
-                                    Service Package
-                                </h3>
-                            </div>
+                    <div className="space-y-10 lg:col-span-8">
 
-                            <div className="relative mb-4">
-                                <select
-                                    value={servicePackage}
-                                    onChange={(e) =>
-                                        setServicePackage(e.target.value)
-                                    }
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
-                                >
-                                    {vendorServices.length > 0 ? (
-                                        vendorServices.map((service) => (
-                                            <option
-                                                key={service.id}
-                                                value={service.name}
-                                            >
-                                                {service.name} —{" "}
-                                                {formatCurrency(
-                                                    service.basePrice,
-                                                    currency
-                                                )}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option>Custom Quote</option>
-                                    )}
-                                </select>
-                                <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
+                        <section>
+                            <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Service package</h2>
+                            <label htmlFor="servicePackage" className={labelClass}>Package</label>
+                            <select
+                                id="servicePackage"
+                                value={servicePackage}
+                                onChange={(e) => setServicePackage(e.target.value)}
+                                className={`${fieldClass} mt-2`}
+                            >
+                                {vendorServices.length > 0 ? (
+                                    vendorServices.map((service) => (
+                                        <option key={service.id} value={service.name}>
+                                            {service.name} — {formatCurrency(service.basePrice, currency)}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option>Custom Quote</option>
+                                )}
+                            </select>
+                        </section>
 
-                        {/* Itemized Pricing */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                    <svg aria-hidden="true"
-                                        className="w-4 h-4 text-gray-500"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                    <h3 className="text-sm font-semibold text-gray-900">
-                                        Itemized Pricing
-                                    </h3>
-                                </div>
-                            </div>
+                        <section>
+                            <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Itemized pricing</h2>
 
-                            {/* Table Header */}
-                            <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                                <div className="col-span-5">Description</div>
-                                <div className="col-span-2 text-center">Qty</div>
-                                <div className="col-span-2 text-center">
-                                    Unit Price
-                                </div>
-                                <div className="col-span-2 text-right">Total</div>
-                                <div className="col-span-1"></div>
-                            </div>
-
-                            {/* Table Rows */}
-                            {items.map((item) => {
-                                const total = item.quantity * item.unitPrice;
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-50 items-center"
-                                    >
-                                        <div className="col-span-5">
-                                            <input
-                                                type="text"
-                                                value={item.description}
-                                                onChange={(e) =>
-                                                    updateItem(
-                                                        item.id,
-                                                        "description",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="w-full bg-transparent text-sm text-gray-900 outline-none"
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <input
-                                                type="number"
-                                                value={item.quantity}
-                                                onChange={(e) =>
-                                                    updateItem(
-                                                        item.id,
-                                                        "quantity",
-                                                        parseInt(e.target.value) ||
-                                                            0
-                                                    )
-                                                }
-                                                className="w-full text-center bg-gray-50 rounded-lg py-1.5 text-sm outline-none"
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <input
-                                                type="number"
-                                                value={item.unitPrice}
-                                                onChange={(e) =>
-                                                    updateItem(
-                                                        item.id,
-                                                        "unitPrice",
-                                                        parseInt(e.target.value) ||
-                                                            0
-                                                    )
-                                                }
-                                                className="w-full text-center bg-gray-50 rounded-lg py-1.5 text-sm outline-none"
-                                            />
-                                        </div>
-                                        <div className="col-span-2 text-right">
-                                            <span className="text-sm font-semibold text-gray-900">
-                                                {formatCurrency(
-                                                    total,
-                                                    currency
-                                                ).replace(currency, "")}
-                                            </span>
-                                        </div>
-                                        <div className="col-span-1 text-right">
-                                            <button
-                                                onClick={() =>
-                                                    removeItem(item.id)
-                                                }
-                                                className="text-gray-300 hover:text-gray-900 transition"
-                                            >
-                                                <svg aria-hidden="true"
-                                                    className="w-4 h-4"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M6 18L18 6M6 6l12 12"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
+                            {items.length > 0 ? (
+                                <>
+                                    <div className="grid grid-cols-12 gap-2 pb-3 pr-6 text-2xs font-medium uppercase text-ink-soft">
+                                        <div className="col-span-5">Description</div>
+                                        <div className="col-span-2 text-center">Qty</div>
+                                        <div className="col-span-2 text-center">Unit price</div>
+                                        <div className="col-span-2 text-right">Total</div>
+                                        <div className="col-span-1" />
                                     </div>
-                                );
-                            })}
+
+                                    {items.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="grid grid-cols-12 items-center gap-2 border-b border-line py-2 last:border-b-0"
+                                        >
+                                            <div className="col-span-5">
+                                                <label className="sr-only" htmlFor={`desc-${item.id}`}>Description</label>
+                                                <input
+                                                    id={`desc-${item.id}`}
+                                                    type="text"
+                                                    value={item.description}
+                                                    placeholder="e.g. Buffet, 200 covers"
+                                                    onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                                                    className={fieldClass}
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="sr-only" htmlFor={`qty-${item.id}`}>Quantity</label>
+                                                <input
+                                                    id={`qty-${item.id}`}
+                                                    type="number"
+                                                    min={0}
+                                                    value={item.quantity}
+                                                    onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
+                                                    className={`${fieldClass} text-center tabular-nums`}
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="sr-only" htmlFor={`unit-${item.id}`}>Unit price</label>
+                                                <input
+                                                    id={`unit-${item.id}`}
+                                                    type="number"
+                                                    min={0}
+                                                    value={item.unitPrice}
+                                                    onChange={(e) => updateItem(item.id, "unitPrice", parseInt(e.target.value) || 0)}
+                                                    className={`${fieldClass} text-center tabular-nums`}
+                                                />
+                                            </div>
+                                            <div className="col-span-2 text-right text-sm font-medium text-ink tabular-nums">
+                                                {formatCurrency(item.quantity * item.unitPrice, currency)}
+                                            </div>
+                                            <div className="col-span-1 text-right">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeItem(item.id)}
+                                                    aria-label={`Remove ${item.description || "line item"}`}
+                                                    className={buttonClass("ghost", "sm", "px-2")}
+                                                >
+                                                    <X size={14} aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : (
+                                <EmptyState
+                                    size="sm"
+                                    icon={<ListPlus size={22} />}
+                                    title="No line items yet"
+                                    description="A quote needs at least one priced line before it can be sent."
+                                />
+                            )}
 
                             <button
+                                type="button"
                                 onClick={addLineItem}
-                                className="w-full mt-4 py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-600 transition flex items-center justify-center gap-2"
+                                className={buttonClass("secondary", "md", "mt-4 w-full")}
                             >
-                                <span>+</span> Add Line Item
+                                <Plus size={16} aria-hidden="true" />
+                                Add line item
                             </button>
-                        </div>
+                        </section>
 
-                        {/* Tax & Discount */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-900/5">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
-                                    Tax Rate (%)
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        value={taxRate}
-                                        onChange={(e) =>
-                                            setTaxRate(
-                                                parseFloat(e.target.value) || 0
-                                            )
-                                        }
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pr-8"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                                        %
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-900/5">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
-                                    Discount Amount ({currency})
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        value={discountAmount}
-                                        onChange={(e) =>
-                                            setDiscountAmount(
-                                                parseFloat(e.target.value) || 0
-                                            )
-                                        }
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pr-12"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                                        {currency}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Terms & Conditions */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
-                            <div className="flex items-center gap-2 mb-4">
-                                <svg aria-hidden="true"
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
-                                <h3 className="text-sm font-semibold text-gray-900">
-                                    Terms & Conditions
-                                </h3>
-                            </div>
-
-                            <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
-                                <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50">
-                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs font-bold">
-                                        B
-                                    </button>
-                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs italic">
-                                        I
-                                    </button>
-                                    <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">
-                                        ≡
-                                    </button>
-                                </div>
-                                <textarea
-                                    value={terms}
-                                    onChange={(e) => setTerms(e.target.value)}
-                                    rows={5}
-                                    className="w-full px-4 py-3 text-sm text-gray-700 outline-none resize-none"
+                        <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                            <div>
+                                <label htmlFor="taxRate" className={labelClass}>Tax rate (%)</label>
+                                <input
+                                    id="taxRate"
+                                    type="number"
+                                    min={0}
+                                    value={taxRate}
+                                    onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
+                                    className={`${fieldClass} mt-2 tabular-nums`}
                                 />
                             </div>
-                        </div>
+                            <div>
+                                <label htmlFor="discountAmount" className={labelClass}>Discount ({currency})</label>
+                                <input
+                                    id="discountAmount"
+                                    type="number"
+                                    min={0}
+                                    value={discountAmount}
+                                    onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)}
+                                    className={`${fieldClass} mt-2 tabular-nums`}
+                                />
+                            </div>
+                            <div>
+                                {/* Was state with no control at all, so every quote silently
+                                    expired 14 days out whether the vendor meant it to or not. */}
+                                <label htmlFor="validityDate" className={labelClass}>Valid until</label>
+                                <DateField
+                                    id="validityDate"
+                                    value={validityDate}
+                                    onChange={(e) => setValidityDate(e.target.value)}
+                                    className={`${fieldClass} mt-2 tabular-nums`}
+                                />
+                            </div>
+                        </section>
+
+                        <section>
+                            <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Terms &amp; conditions</h2>
+                            {/* The bold/italic/list buttons that sat above this had no
+                                onClick and formatted nothing — the field is plain text. */}
+                            <label htmlFor="terms" className="sr-only">Terms and conditions</label>
+                            <textarea
+                                id="terms"
+                                value={terms}
+                                onChange={(e) => setTerms(e.target.value)}
+                                rows={5}
+                                placeholder="Payment schedule, cancellation policy, what is not included…"
+                                className={`${fieldClass} resize-none`}
+                            />
+                        </section>
                     </div>
 
                     {/* Right Column: Summary & Original Request */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* Original Request */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5">
-                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
-                                Original Request
-                            </h3>
+                    <div className="space-y-10 lg:col-span-4">
+                        <section>
+                            <h2 className="mb-4 border-b border-line pb-3 text-2xs font-medium uppercase text-ink-soft">Original request</h2>
 
-                            <div className="space-y-3">
+                            <dl className="space-y-4">
                                 <div>
-                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
-                                        Event Date & Time
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <dt className="text-2xs font-medium uppercase text-ink-soft">Event date &amp; time</dt>
+                                    <dd className="mt-1 text-sm font-medium text-ink tabular-nums">
                                         {eventDetails.date ? formatDate(eventDetails.date) : "Not specified"}
                                         {eventDetails.date && eventDetails.fromEvent?.date && (
-                                            <span className="text-xs font-normal text-gray-500"> (event date)</span>
+                                            <span className="font-normal text-ink-soft"> (event date)</span>
                                         )}
                                         {eventDetails.startTime && (
                                             <>
                                                 {", "}
                                                 {formatTime(eventDetails.startTime)}
-                                                {eventDetails.endTime ? ` - ${formatTime(eventDetails.endTime)}` : ""}
+                                                {eventDetails.endTime ? ` – ${formatTime(eventDetails.endTime)}` : ""}
                                                 {(eventDetails.fromEvent?.startTime || eventDetails.fromEvent?.endTime) && (
-                                                    <span className="text-xs font-normal text-gray-500"> (event schedule)</span>
+                                                    <span className="font-normal text-ink-soft"> (event schedule)</span>
                                                 )}
                                             </>
                                         )}
-                                    </p>
+                                    </dd>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
-                                        Guests
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {(eventDetails.guestCount || requirements.guestCount)
-                                            ? `${eventDetails.guestCount || requirements.guestCount} People`
-                                            : "Not specified"}
-                                    </p>
+                                    <dt className="text-2xs font-medium uppercase text-ink-soft">Guests</dt>
+                                    <dd className="mt-1 text-sm font-medium text-ink tabular-nums">
+                                        {(eventDetails.guestCount || requirements.guestCount) || "Not specified"}
+                                    </dd>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500 uppercase tracking-widest">
-                                        Location
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <dt className="text-2xs font-medium uppercase text-ink-soft">Location</dt>
+                                    <dd className="mt-1 text-sm font-medium text-ink">
                                         {eventDetails.location || requirements.location || "Not specified"}
                                         {eventDetails.location && eventDetails.fromEvent?.location && (
-                                            <span className="text-xs font-normal text-gray-500"> (event venue)</span>
+                                            <span className="font-normal text-ink-soft"> (event venue)</span>
                                         )}
-                                    </p>
+                                    </dd>
                                 </div>
-                            </div>
-                        </div>
+                            </dl>
+                        </section>
 
-                        {/* Quote Summary */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-900/5 sticky top-24">
-                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
-                                Quote Summary
-                            </h3>
+                        <section className="lg:sticky lg:top-8">
+                            <h2 className="mb-4 border-b border-line pb-3 text-2xs font-medium uppercase text-ink-soft">Quote summary</h2>
 
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-500">
-                                        Subtotal
-                                    </span>
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        {formatCurrency(subtotal, currency)}
-                                    </span>
+                            <dl className="divide-y divide-line">
+                                <div className="flex justify-between gap-3 py-2.5">
+                                    <dt className="text-sm text-ink-soft">Subtotal</dt>
+                                    <dd className="text-sm font-medium text-ink tabular-nums">{formatCurrency(subtotal, currency)}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-500">
-                                        Tax ({taxRate}%)
-                                    </span>
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        {formatCurrency(tax, currency)}
-                                    </span>
+                                <div className="flex justify-between gap-3 py-2.5">
+                                    <dt className="text-sm text-ink-soft tabular-nums">Tax ({taxRate}%)</dt>
+                                    <dd className="text-sm font-medium text-ink tabular-nums">{formatCurrency(tax, currency)}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-500">
-                                        Discount
-                                    </span>
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        -
-                                        {formatCurrency(discountAmount, currency)}
-                                    </span>
+                                <div className="flex justify-between gap-3 py-2.5">
+                                    <dt className="text-sm text-ink-soft">Discount</dt>
+                                    <dd className="text-sm font-medium text-ink tabular-nums">−{formatCurrency(discountAmount, currency)}</dd>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-500">
-                                        Platform Fee ({platformFeePercent}%)
-                                    </span>
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        {formatCurrency(platformFee, currency)}
-                                    </span>
+                                <div className="flex justify-between gap-3 py-2.5">
+                                    <dt className="text-sm text-ink-soft tabular-nums">Platform fee ({platformFeePercent}%)</dt>
+                                    <dd className="text-sm font-medium text-ink tabular-nums">{formatCurrency(platformFee, currency)}</dd>
                                 </div>
-
-                                <div className="border-t border-gray-100 pt-3 mt-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            Total Amount
-                                        </span>
-                                        <span className="text-xl font-bold text-gray-900">
-                                            {formatCurrency(totalAmount, currency)}
-                                        </span>
-                                    </div>
+                                <div className="flex items-center justify-between gap-3 py-3">
+                                    <dt className="text-sm font-medium text-ink">Total amount</dt>
+                                    <dd className="font-display text-xl text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</dd>
                                 </div>
-                            </div>
-
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">
-                                    Payment Terms
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    Net 30 Days
-                                </p>
-                            </div>
-                        </div>
+                            </dl>
+                        </section>
                     </div>
                 </div>
-
-                {/* Bottom Bar */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-                    <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500">
-                                Total:{" "}
-                                <span className="font-bold text-gray-900">
-                                    {formatCurrency(totalAmount, currency)}
-                                </span>
-                            </span>
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                aria-busy={isSubmitting}
-                                className="bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting ? "Submitting…" : "Submit Quote"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Spacer for fixed bottom bar */}
-                <div className="h-20" />
             </div>
         </div>
     );

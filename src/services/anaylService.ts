@@ -10,6 +10,7 @@ import { QueryDocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
 import { formatDate, parseScheduleDateTime, toIsoString } from "@/src/lib/datetime";
 import { COLLECTIONS } from "@/data/collections";
 import { formatCurrencyCompact } from "@/src/lib/money";
+import { UserService } from "@/src/services/user.service";
 
 
 function toDate(val: any): Date {
@@ -155,7 +156,9 @@ function deriveUpcomingEvents(eventDocs: Docs, organizerId: string): DashboardEv
     return results.slice(0, 5);
 }
 
-function deriveRecentReg(regDocs: Docs): RecentRegistration[] {
+// Carries userId out so withAttendeeNames can resolve the names the documents lack;
+// it is stripped again there, so RecentRegistration itself is unchanged.
+function deriveRecentReg(regDocs: Docs): (RecentRegistration & { userId: string })[] {
     const allDocs = regDocs.map((doc) => ({
         doc,
         createdAt: toDate(doc.data().createdAt),
@@ -177,12 +180,34 @@ function deriveRecentReg(regDocs: Docs): RecentRegistration[] {
         const rawStatus = (data.status || "pending").toLowerCase();
         return {
             id: doc.id,
-            attendeeName: data.attendeeName || data.userName || "—",
+            userId: String(data.userId || ""),
+            attendeeName: data.attendeeName || data.userName || "",
             eventName: data.eventName || data.eventTitle || "—",
             amountPaid: data.payment?.amountPaid ?? data.finalPrice ?? 0,
             status: statusMap[rawStatus] ?? "PENDING",
         };
     });
+}
+
+/**
+ * Fill in the names the registration documents do not carry.
+ *
+ * Live registrations store neither `attendeeName` nor `userName`, so every row on the
+ * dashboard rendered as an em dash. One batched lookup resolves the ten on screen —
+ * `getUsersByIds` chunks internally, so this is not an N+1.
+ *
+ * The denormalised `attendee` field arriving with public registration will cover new
+ * rows, but it cannot retrofit documents already written, so this join is needed either
+ * way and takes precedence only when the document has nothing of its own.
+ */
+async function withAttendeeNames(rows: (RecentRegistration & { userId: string })[]): Promise<RecentRegistration[]> {
+    const missing = rows.filter((r) => !r.attendeeName && r.userId).map((r) => r.userId);
+    const users = missing.length ? await UserService.getUsersByIds(missing) : new Map();
+
+    return rows.map(({ userId, ...row }) => ({
+        ...row,
+        attendeeName: row.attendeeName || users.get(userId)?.profile?.fullName || "Unknown attendee",
+    }));
 }
 
 function deriveRegTrend(regDocs: Docs): DailyRegistrationTrend[] {
@@ -375,7 +400,7 @@ export const AnalyticsService = {
             stats: deriveDashboardStat(eventDocs, regDocs, reviewDocs),
             todayEvents: deriveTodayEvents(eventDocs, organizerId),
             upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId),
-            recentReg: deriveRecentReg(regDocs),
+            recentReg: await withAttendeeNames(deriveRecentReg(regDocs)),
             regTrend: deriveRegTrend(regDocs),
         };
     }),

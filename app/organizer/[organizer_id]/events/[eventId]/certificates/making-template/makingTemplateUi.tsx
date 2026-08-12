@@ -586,11 +586,11 @@ export default function MakingTemplateUi({
             </aside>
 
             {/* Preview */}
-            <main className="flex-1 flex flex-col items-center justify-start p-4 overflow-auto bg-stone-200">
+            <div className="flex-1 flex flex-col items-center justify-start p-4 overflow-auto bg-stone-200">
                 <div className="bg-white rounded-xl shadow-xl border border-stone-300">
                     <Certificate template={template} />
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

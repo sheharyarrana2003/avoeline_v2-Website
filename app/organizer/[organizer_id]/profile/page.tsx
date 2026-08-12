@@ -21,60 +21,35 @@ import { EventService } from "@/src/services/event.service";
 import { EventModel } from "@/src/services/models/event.model";
 import { CurrentUserData } from "@/src/services/models/user.type";
 import { formatDate } from "@/src/lib/datetime";
+import { formatCurrencyCompact } from "@/src/lib/money";
 import {
     ProfileEventsTabs,
     ProfileEventSummary,
 } from "@/src/shared_components/organizer/ProfileEventsTabs";
 import { OrganizerLogoUpload } from "@/src/shared_components/organizer/OrganizerLogoUpload";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { labelClass } from "@/src/lib/ui";
 
 const PAST_STATUSES = new Set(["completed", "cancelled"]);
 
-function StatBox({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
-    return (
-        <div className="rounded-xl bg-gray-50 p-3 text-center">
-            <div className="mb-1 flex justify-center text-gray-500">{icon}</div>
-            <div className="text-xl font-bold text-gray-900">{value}</div>
-            <div className="mt-1 text-[11px] font-medium uppercase tracking-wider text-gray-500">
-                {label}
-            </div>
-        </div>
-    );
-}
-
-function TopStat({ icon, value, label, tone }: { icon: React.ReactNode; value: string; label: string; tone: string }) {
-    return (
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-            <span className={`flex size-10 items-center justify-center rounded-xl ${tone}`}>{icon}</span>
-            <div className="mt-4 text-2xl font-bold text-gray-900">{value}</div>
-            <div className="text-sm text-gray-500">{label}</div>
-        </div>
-    );
-}
-
-function Field({ label, value, badge }: { label: string; value: string; badge?: string }) {
+/** Read-only, so a <p> and not a <label> -- there is no control to label. */
+function Field({ label, value }: { label: string; value: string }) {
     return (
         <div className="mb-4">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{label}</label>
-            <div className="relative">
-                <div className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900">
-                    {value || "—"}
-                </div>
-                {badge && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xs bg-gray-50 px-2 py-0.5 text-xs font-bold text-gray-900">
-                        {badge}
-                    </span>
-                )}
-            </div>
+            <p className={labelClass}>{label}</p>
+            <p className="mt-1.5 text-sm text-ink">{value || "—"}</p>
         </div>
     );
 }
 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
     return (
-        <div className="mb-6 flex items-center gap-2 font-semibold text-gray-900">
-            <span className="text-gray-500">{icon}</span>
-            <h2>{title}</h2>
-        </div>
+        <h2 className="mb-5 flex items-center gap-2 border-b border-line pb-3 font-display text-xl text-ink">
+            {/* gray-400 = 2.5:1, decoration only — the heading text carries the meaning. */}
+            <span className="text-gray-400" aria-hidden="true">{icon}</span>
+            {title}
+        </h2>
     );
 }
 
@@ -112,154 +87,139 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
         .charAt(0)
         .toUpperCase();
     const location = [organizer.address.city, organizer.address.country].filter(Boolean).join(", ");
-    const currency = "PKR";
 
     return (
-        <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-12">
-                {/* LEFT COLUMN */}
-                <div className="space-y-6 lg:col-span-4">
-                    <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <div className="-mx-6 -mt-6 mb-12 h-28 bg-gradient-to-r from-gray-100 to-gray-200" />
-                        <div className="absolute left-6 top-16">
-                            {organizer.organization.logo ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={organizer.organization.logo}
-                                    alt={organizer.organization.name || "Organizer logo"}
-                                    className="size-20 rounded-full border-4 border-white bg-white object-cover shadow-md"
-                                />
-                            ) : (
-                                <div className="flex size-20 items-center justify-center rounded-full border-4 border-white bg-black text-2xl font-bold text-white shadow-md">
-                                    {initial}
-                                </div>
-                            )}
-                        </div>
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl">
 
-                        <div className="mt-2">
-                            <div className="flex items-center gap-2">
-                                <h1 className="truncate text-2xl font-bold">
-                                    {organizer.organization.name || organizer.contact.primaryEmail}
-                                </h1>
+                <PageHeader
+                    title={organizer.organization.name || organizer.contact.primaryEmail}
+                    description={organizer.organization.type}
+                />
+
+                <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+                    <StatCard_dashboard title="Events Created" value={String(stats.totalEventsCreated)} icon={<CalendarDays size={14} />} />
+                    <StatCard_dashboard title="Attendees" value={String(stats.totalAttendees)} icon={<Users size={14} />} />
+                    <StatCard_dashboard title="Avg Rating" value={stats.averageRating.toFixed(1)} icon={<Star size={14} />} />
+                    <StatCard_dashboard title="Revenue" value={formatCurrencyCompact(stats.totalRevenue)} icon={<Wallet size={14} />} />
+                </section>
+
+                <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+                    {/* LEFT COLUMN */}
+                    <div className="space-y-6 lg:col-span-4">
+                        <div className="rounded-2xl border border-line bg-paper p-5">
+                            <div className="flex items-center gap-4">
+                                {organizer.organization.logo ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={organizer.organization.logo}
+                                        alt=""
+                                        className="size-16 shrink-0 rounded-full border border-line object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gray-900 text-2xl font-semibold text-ink-invert">
+                                        {initial}
+                                    </div>
+                                )}
                                 {organizer.verification.isVerified && (
-                                    <BadgeCheck size={20} className="shrink-0 text-gray-900" />
+                                    <span className="inline-flex items-center gap-1.5 text-sm text-ink">
+                                        <BadgeCheck size={16} aria-hidden="true" />
+                                        Verified
+                                    </span>
                                 )}
                             </div>
-                            <p className="mb-4 text-sm capitalize text-gray-500">{organizer.organization.type}</p>
 
                             {organizer.organization.description && (
-                                <p className="mb-4 text-sm leading-relaxed text-gray-600">
+                                <p className="mt-4 text-sm leading-relaxed text-ink-soft">
                                     {organizer.organization.description}
                                 </p>
                             )}
 
-                            <div className="mb-6 space-y-2 text-sm text-gray-500">
-                                <div className="flex items-center gap-2">
-                                    <MapPin size={16} />
+                            <div className="mt-4 space-y-2 text-sm text-ink-soft">
+                                <p className="flex items-center gap-2">
+                                    <MapPin size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
                                     <span>{location || "—"}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Mail size={16} />
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <Mail size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
                                     <span className="truncate">{organizer.contact.primaryEmail || "—"}</span>
+                                </p>
+                                <p className="flex items-center gap-2">
+                                    <Phone size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <span className="tabular-nums">{organizer.contact.primaryPhone || "—"}</span>
+                                </p>
+                            </div>
+
+                            <div className="mt-6">
+                                <p className={labelClass}>Organization Logo</p>
+                                <div className="mt-2">
+                                    <OrganizerLogoUpload organizerId={organizer_id} currentLogo={organizer.organization.logo} />
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone size={16} />
-                                    <span>{organizer.contact.primaryPhone || "—"}</span>
+                            </div>
+                        </div>
+
+                        <ProfileEventsTabs events={events} about={organizer.organization.description} basePath={basePath} />
+                    </div>
+
+                    {/* RIGHT COLUMN */}
+                    <div className="space-y-10 lg:col-span-8">
+                        <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+                            <StatCard_dashboard title="Upcoming" value={String(stats.upcomingEvents)} icon={<CalendarDays size={14} />} />
+                            <StatCard_dashboard title="Completed" value={String(stats.completedEvents)} icon={<ShieldCheck size={14} />} />
+                            <StatCard_dashboard title="Published" value={String(stats.publishedEvents)} icon={<TrendingUp size={14} />} />
+                            <StatCard_dashboard title="Avg / Event" value={stats.averageAttendeesPerEvent.toFixed(0)} icon={<Users size={14} />} />
+                        </section>
+
+                        <section>
+                            <SectionTitle icon={<BadgeCheck size={18} />} title="Account Settings" />
+                            <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+                                <Field label="Email Address" value={organizer.contact.primaryEmail} />
+                                <Field label="Phone Number" value={organizer.contact.primaryPhone} />
+                            </div>
+                        </section>
+
+                        <section>
+                            <SectionTitle icon={<Globe size={18} />} title="Organization Settings" />
+                            <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+                                <Field label="Organization Name" value={organizer.organization.name} />
+                                <Field label="Tax Identification" value={organizer.organization.taxNumber || "N/A"} />
+                            </div>
+                            <Field label="Business Registration Address" value={organizer.address.officeAddress} />
+                            <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+                                <Field label="City" value={organizer.address.city} />
+                                <Field label="Country" value={organizer.address.country} />
+                            </div>
+                        </section>
+
+                        <section>
+                            <SectionTitle icon={<ShieldCheck size={18} />} title="Verification Status" />
+                            <div className="flex items-center gap-3">
+                                <BadgeCheck
+                                    size={22}
+                                    className={organizer.verification.isVerified ? "text-ink" : "text-ink-soft"}
+                                    aria-hidden="true"
+                                />
+                                <div>
+                                    <p className="text-sm font-medium text-ink">
+                                        {organizer.verification.isVerified ? "Verified" : "Unverified"}
+                                    </p>
+                                    <p className="text-xs capitalize text-ink-soft">
+                                        Level: {organizer.verification.verificationLevel}
+                                    </p>
                                 </div>
                             </div>
+                        </section>
 
-                            <div className="mb-6">
-                                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                                    Organization Logo
-                                </p>
-                                <OrganizerLogoUpload organizerId={organizer_id} currentLogo={organizer.organization.logo} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <StatBox icon={<CalendarDays size={16} />} value={String(stats.totalEventsCreated)} label="Events Created" />
-                                <StatBox icon={<Users size={16} />} value={String(stats.totalAttendees)} label="Attendees" />
-                                <StatBox icon={<Star size={16} />} value={stats.averageRating.toFixed(1)} label="Avg Rating" />
-                                <StatBox icon={<Wallet size={16} />} value={`${currency} ${stats.totalRevenue.toLocaleString()}`} label="Revenue" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <ProfileEventsTabs events={events} about={organizer.organization.description} basePath={basePath} />
-                </div>
-
-                {/* RIGHT COLUMN */}
-                <div className="space-y-6 lg:col-span-8">
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <TopStat icon={<CalendarDays size={18} className="text-gray-900" />} value={String(stats.upcomingEvents)} label="Upcoming" tone="bg-gray-50" />
-                        <TopStat icon={<ShieldCheck size={18} className="text-gray-900" />} value={String(stats.completedEvents)} label="Completed" tone="bg-gray-50" />
-                        <TopStat icon={<TrendingUp size={18} className="text-gray-900" />} value={String(stats.publishedEvents)} label="Published" tone="bg-gray-50" />
-                        <TopStat icon={<Star size={18} className="text-gray-900" />} value={stats.averageAttendeesPerEvent.toFixed(0)} label="Avg/Event" tone="bg-gray-50" />
-                    </div>
-
-                    {/* Account Settings */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <SectionTitle icon={<BadgeCheck size={18} />} title="Account Settings" />
-                        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-                            <Field label="Email Address" value={organizer.contact.primaryEmail} />
-                            <Field label="Phone Number" value={organizer.contact.primaryPhone} badge={organizer.contact.primaryPhone ? "VERIFIED" : undefined} />
-                        </div>
-                        <div className="mt-2 flex items-center justify-between border-t border-gray-100 py-3">
-                            <div>
-                                <h3 className="text-sm font-medium">Two-Factor Authentication</h3>
-                                <p className="text-xs text-gray-500">Add an extra layer of security to your account.</p>
-                            </div>
-                            <span className="inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                                <span className="ml-1 inline-block size-4 rounded-full bg-white" />
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Organization Settings */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <SectionTitle icon={<Globe size={18} />} title="Organization Settings" />
-                        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-                            <Field label="Organization Name" value={organizer.organization.name} />
-                            <Field label="Tax Identification" value={organizer.organization.taxNumber || "N/A"} />
-                        </div>
-                        <Field label="Business Registration Address" value={organizer.address.officeAddress} />
-                        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-                            <Field label="City" value={organizer.address.city} />
-                            <Field label="Country" value={organizer.address.country} />
-                        </div>
-                    </div>
-
-                    {/* Verification Status */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <SectionTitle icon={<ShieldCheck size={18} />} title="Verification Status" />
-                        <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-4">
-                            <BadgeCheck size={22} className={organizer.verification.isVerified ? "text-gray-900" : "text-gray-500"} />
-                            <div>
-                                <p className="text-sm font-bold text-gray-900">
-                                    {organizer.verification.isVerified ? "Verified" : "Unverified"}
-                                </p>
-                                <p className="text-xs capitalize text-gray-500">
-                                    Level: {organizer.verification.verificationLevel}
-                                </p>
-                            </div>
-                        </div>
-                        <p className="mt-4 text-xs font-medium uppercase tracking-wider text-gray-500">Documents</p>
-                    </div>
-
-                    {/* Subscription Plan */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <SectionTitle icon={<CreditCard size={18} />} title="Subscription Plan" />
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-lg font-bold capitalize text-gray-900">{organizer.plan.type} Plan</p>
-                                <p className="text-xs text-gray-500">Expires {formatDate(organizer.plan.expiresAt)}</p>
-                            </div>
-                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase text-gray-700">
-                                {organizer.plan.type}
-                            </span>
-                        </div>
+                        <section>
+                            <SectionTitle icon={<CreditCard size={18} />} title="Subscription Plan" />
+                            <p className="text-lg font-semibold capitalize text-ink">{organizer.plan.type} Plan</p>
+                            <p className="mt-1 text-xs text-ink-soft tabular-nums">
+                                Expires {formatDate(organizer.plan.expiresAt)}
+                            </p>
+                        </section>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 import { MediaUpload } from "./MediaUpload";
 import { isVideoUrl } from "./media.utils";
 
@@ -62,10 +63,10 @@ export function MediaUploadField({
             <button
               type="button"
               onClick={() => setUrls((prev) => prev.filter((_, idx) => idx !== i))}
-              className="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-black/70 text-[10px] leading-none text-white opacity-0 transition group-hover:opacity-100"
+              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-gray-900/80 text-white transition hover:bg-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="Remove image"
             >
-              ×
+              <X className="h-3 w-3" aria-hidden="true" />
             </button>
           </div>
         ))}

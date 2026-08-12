@@ -5,8 +5,8 @@
  */
 export function OrganizerFooter() {
     return (
-        <footer className="mt-auto w-full border-t border-gray-200 bg-gray-50 px-6 py-5">
-            <p className="text-sm text-gray-500">
+        <footer className="mt-auto w-full border-t border-line px-6 py-5">
+            <p className="text-sm text-ink-soft">
                 © {new Date().getFullYear()} Avoeline Event Systems. All rights reserved.
             </p>
         </footer>

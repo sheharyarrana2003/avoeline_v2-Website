@@ -1,6 +1,8 @@
 'use client';
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { Plus } from "lucide-react";
+import { buttonClass } from "@/src/lib/ui";
 
 export default function AddCategoryButton() {
     const searchParams = useSearchParams();
@@ -20,17 +22,13 @@ export default function AddCategoryButton() {
     };
 
     return (
-        <button
-            type="button"
-            onClick={toggle}
-            className="text-xs font-semibold text-gray-500 hover:text-black transition-colors flex items-center gap-1 focus:outline-none"
-        >
+        <button type="button" onClick={toggle} className={buttonClass("ghost", "sm")}>
             {isAdding ? (
-                <span>Select Existing</span>
+                "Select existing"
             ) : (
                 <>
-                    <span className="text-gray-900 font-bold text-sm line-none">+</span>
-                    <span>Custom Category</span>
+                    <Plus size={14} aria-hidden="true" />
+                    New category
                 </>
             )}
         </button>

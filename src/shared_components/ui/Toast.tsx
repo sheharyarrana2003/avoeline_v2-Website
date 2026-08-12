@@ -32,20 +32,19 @@ const DURATION: Record<ToastTone, number> = {
 };
 
 /**
- * Weight replaces hue. An error is the only tone that inverts to solid ink, because
- * it is the only one that should interrupt you; success and info stay light and
- * differ by how loud their border is. The icons are the third channel, and the
- * 8s-vs-4s duration difference in DURATION above is a fourth that never depended
- * on sight at all.
+ * Hue, icon and text together -- not one standing in for the others. The icons stay
+ * because colour must never be the only channel, and the 8s-vs-4s duration split in
+ * DURATION above is a further one that never depended on sight at all. Info stays
+ * neutral: it is the tone with nothing to report.
  */
 const TONE: Record<ToastTone, { ring: string; icon: ReactNode }> = {
     success: {
-        ring: "ring-gray-900 bg-white text-gray-900",
-        icon: <Check className="h-4 w-4 text-gray-900" aria-hidden="true" />,
+        ring: "ring-success-line bg-success-soft text-success",
+        icon: <Check className="h-4 w-4 text-success" aria-hidden="true" />,
     },
     error: {
-        ring: "ring-gray-900 bg-gray-900 text-white on-ink",
-        icon: <TriangleAlert className="h-4 w-4 text-white" aria-hidden="true" />,
+        ring: "ring-danger-line bg-danger-soft text-danger",
+        icon: <TriangleAlert className="h-4 w-4 text-danger" aria-hidden="true" />,
     },
     info: {
         ring: "ring-gray-200 bg-white text-gray-900",

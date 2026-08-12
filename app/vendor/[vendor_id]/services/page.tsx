@@ -2,11 +2,16 @@ import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
+import { AuthService } from "@/src/features/auth/authService";
 import { Service, VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { formatCurrency } from "@/src/lib/money";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import { ImageOff, Package, Pencil, Plus, Trash2 } from "lucide-react";
 
 // --- Helper Functions ---
 const getCategoryLabel = (category: string) => {
@@ -30,13 +35,6 @@ const sameCategory = (a?: string, b?: string) =>
 const getCategoryCount = (services: any[], category: string) => {
     return services.filter((s: any) => sameCategory(s.category, category)).length;
 };
-
-const getServiceStatus = (service: any, index: number) => {
-    // Mock status logic - first 2 active, rest inactive
-    if (index < 2) return { status: 'active', label: 'ACTIVE', color: 'bg-gray-900 text-white' };
-    return { status: 'inactive', label: 'INACTIVE', color: 'bg-white text-gray-500' };
-};
-
 
 export default async function VendorServicesPage({
     params,
@@ -62,7 +60,7 @@ export default async function VendorServicesPage({
 
     // Build category tabs from vendor's serviceCategories
     const categoryTabs = [
-        { id: 'all', label: 'All Services', count: services.length },
+        { id: 'all', label: 'All services', count: services.length },
         ...serviceCategories.map((cat: string) => ({
             // Trimmed so the tab's href/filter value matches a trimmed service
             // category — legacy values carry a trailing newline.
@@ -72,104 +70,90 @@ export default async function VendorServicesPage({
         })),
     ];
 
-    // Filter services by category
-    let displayServices = services;
-    if (filter !== 'all') {
-        displayServices = services.filter((s: any) => sameCategory(s.category, filter));
-    }
-
-    // Add status and metadata to services
-    const enrichedServices = displayServices.map((service: any, index: number) => ({
-        ...service,
-        statusInfo: getServiceStatus(service, index),
-    }));
+    // Filter services by category. The "status" that used to be attached here was
+    // `index < 2 ? active : inactive` — a badge computed from list position, not
+    // from anything stored — and nothing rendered it anyway.
+    const displayServices = filter === 'all'
+        ? services
+        : services.filter((s: any) => sameCategory(s.category, filter));
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Services</h1>
-                        <p className="text-sm text-gray-500 mt-1">Manage your professional service catalog, pricing models, and availability status.</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href={`/vendor/${vendor_id}/services/add-service`}
-                            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
-                        >
-                            <span>+</span> Add New Service
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl">
+                <PageHeader
+                    title="Services"
+                    description="Your catalogue is what organizers search. Prices and photos are what get you shortlisted."
+                    actions={
+                        <Link href={`/vendor/${vendor_id}/services/add-service`} className={buttonClass("primary", "lg")}>
+                            <Plus size={16} />
+                            Add service
                         </Link>
-                    </div>
-                </div>
+                    }
+                />
 
-                {/* Category Tabs */}
-                <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+                <nav aria-label="Filter by category" className="mb-8 flex gap-6 overflow-x-auto border-b border-line">
                     {categoryTabs.map((tab) => (
                         <Link
                             key={tab.id}
                             href={`/vendor/${vendor_id}/services?filter=${tab.id}`}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition whitespace-nowrap ${filter === tab.id
-                                ? 'bg-black text-white'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
+                            aria-current={filter === tab.id ? "page" : undefined}
+                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
+                                filter === tab.id
+                                    ? "border-gray-900 text-ink"
+                                    : "border-transparent text-ink-soft hover:text-ink"
+                            }`}
                         >
-                            {tab.label} ({tab.count})
+                            {tab.label} <span className="tabular-nums">({tab.count})</span>
                         </Link>
                     ))}
-                </div>
+                </nav>
 
-                {/* Services Grid */}
-                {enrichedServices.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {enrichedServices.map((service: Service) => {
+                {displayServices.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {displayServices.map((service: Service) => {
                             const serviceVideo = service.videos?.[0];
                             const serviceImage = service.images?.[0];
 
                             return (
                                 <div
                                     key={service.serviceId}
-                                    className={`bg-white rounded-2xl overflow-hidden shadow-sm border transition
-                                        }`}
+                                    className="lift overflow-hidden rounded-2xl border border-line bg-paper shadow-xs"
                                 >
                                     {/* Image/Video Header */}
-                                    <div className="relative h-48 bg-gray-200 overflow-hidden">
+                                    <div className="relative h-48 overflow-hidden bg-gray-100">
                                         {serviceVideo ? (
                                             <video
                                                 src={serviceVideo}
                                                 muted
                                                 loop
                                                 playsInline
-                                                className="w-full h-full object-cover"
+                                                className="h-full w-full object-cover"
                                             />
                                         ) : serviceImage ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
                                             <img
                                                 src={serviceImage}
                                                 alt={service.name}
                                                 loading="lazy"
                                                 decoding="async"
-                                                className="w-full h-full object-cover"
+                                                className="h-full w-full object-cover"
                                             />
                                         ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                                                <span className="text-4xl">🍽️</span>
+                                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                                {/* gray-400 = 2.5:1: decoration inside an aria-hidden
+                                                    placeholder, never the only carrier of meaning. */}
+                                                <ImageOff size={28} aria-hidden="true" />
                                             </div>
                                         )}
-
-
-
-
 
                                         {/* Edit/Delete Actions */}
                                         <div className="absolute bottom-3 right-3 flex gap-2">
                                             <Link
                                                 href={`/vendor/${vendor_id}/services/${service.serviceId}/edit`}
-                                                className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-sm"
+                                                aria-label={`Edit ${service.name}`}
+                                                className={buttonClass("secondary", "sm", "px-2")}
                                             >
-                                                <svg aria-hidden="true" className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
+                                                <Pencil size={14} aria-hidden="true" />
                                             </Link>
                                             <form action={deleteServiceAction} className="inline">
                                                 <input type="hidden" name="serviceId" value={service.serviceId} />
@@ -178,12 +162,10 @@ export default async function VendorServicesPage({
                                                     title="Delete this service?"
                                                     description={`"${service.name}" will be permanently removed from your profile. Organizers browsing the marketplace will no longer see it. This cannot be undone.`}
                                                     confirmLabel="Delete service"
-                                                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:text-gray-900 text-gray-600 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                                                    className={buttonClass("destructive", "sm", "px-2")}
                                                 >
                                                     <span className="sr-only">Delete {service.name}</span>
-                                                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
+                                                    <Trash2 size={14} aria-hidden="true" />
                                                 </ConfirmSubmit>
                                             </form>
                                         </div>
@@ -191,47 +173,41 @@ export default async function VendorServicesPage({
 
                                     {/* Card Content */}
                                     <div className="p-5">
-                                        {/* Category */}
-                                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                        <p className="text-2xs font-medium uppercase text-ink-soft">
                                             {getCategoryLabel(service.category || 'general')}
                                         </p>
 
-                                        {/* Title */}
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">{service.name}</h3>
+                                        <h2 className="mt-2 font-display text-lg text-ink">{service.name}</h2>
 
-                                        {/* Description */}
-                                        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                                            {service.description}
+                                        <p className="mt-2 line-clamp-2 text-sm text-ink-soft">
+                                            {service.description || "No description yet."}
                                         </p>
 
-                                        {/* Price & Action */}
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <span className="text-lg font-bold text-gray-900">{formatCurrency(service.price)}</span>
-                                                <span className="text-xs text-gray-500 ml-1">/ {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
-                                            </div>
-                                        </div>
+                                        <p className="mt-4 text-sm text-ink-soft">
+                                            <span className="font-medium text-ink tabular-nums">{formatCurrency(service.price)}</span>
+                                            <span className="tabular-nums"> / {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                        </p>
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg aria-hidden="true" className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">No Services Found</h3>
-                        <p className="text-sm text-gray-500 mb-4">No services match the selected filter.</p>
-                        <Link
-                            href={`/vendor/${vendor_id}/services/add-service`}
-                            className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition"
-                        >
-                            + Add Service
-                        </Link>
-                    </div>
+                    <EmptyState
+                        icon={<Package size={26} />}
+                        title={filter === 'all' ? "No services yet" : "Nothing in this category"}
+                        description={
+                            filter === 'all'
+                                ? "Organizers can't request a quote for a service you haven't listed. Add your first one to start receiving requests."
+                                : "Try another category, or add a service under this one."
+                        }
+                        action={
+                            <Link href={`/vendor/${vendor_id}/services/add-service`} className={buttonClass("primary")}>
+                                <Plus size={16} />
+                                Add service
+                            </Link>
+                        }
+                    />
                 )}
             </div>
         </div>
@@ -243,6 +219,13 @@ async function deleteServiceAction(formData: FormData) {
     'use server';
     const serviceId = formData.get('serviceId') as string;
     const vendorId = formData.get('vendorId') as string;
+
+    // A Server Action is a public endpoint, so the layout guard is not enough:
+    // without this, any signed-in user could POST another vendor's id and delete
+    // their catalogue.
+    const u = await AuthService.getCurrentUser();
+    if (!u || u.userType !== 'vendor' || u.roleId !== vendorId) return;
+
     const vendor: VendorData | null = await EventVendorService.getVendorById(vendorId);
 
     if (vendor) {
@@ -257,4 +240,3 @@ async function deleteServiceAction(formData: FormData) {
         revalidatePath(`/vendor/${vendorId}/services`);
     }
 }
-

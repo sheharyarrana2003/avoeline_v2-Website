@@ -1,160 +1,175 @@
 "use client"
 
-import { Link as LinkIcon, Share2, Mail, Phone, Plus, X } from "lucide-react";
+// lucide dropped its brand glyphs, so LinkedIn and Twitter get generic marks; the
+// inputs carry the actual naming via aria-label and placeholder.
+import { Link2, AtSign, Globe, Mail, Phone, X } from "lucide-react";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
+import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+
+const BIO_LIMIT = 500;
+
+/** Icon-prefixed field: the icon sits in a joined leading cell, not inside the input. */
+function PrefixedField({
+    icon,
+    children,
+}: {
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="flex">
+            <span
+                aria-hidden="true"
+                className="flex items-center justify-center rounded-l-lg border border-r-0 border-line-loud bg-canvas px-3 text-xs font-medium text-ink-soft"
+            >
+                {icon}
+            </span>
+            {children}
+        </div>
+    );
+}
 
 export default function CreateSpeakerForm({ handle_speaker_submission }: { handle_speaker_submission: (formData: FormData) => void | Promise<void> }) {
     const router = useRouter();
     const [photoUrl, setPhotoUrl] = useState<string>("");
+    const [bio, setBio] = useState<string>("");
+
+    // Joins onto the prefix cell above, so it drops its own left radius and border.
+    const prefixedInput = `${fieldClass} rounded-l-none`;
 
     return (
-        <>
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-4xl p-8 border border-gray-100">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-extrabold text-gray-900">Add New Speaker</h2>
-                    <button className="text-gray-500 hover:text-gray-600 transition-colors">
-                        <X size={24} />
-                    </button>
+        <div className="w-full max-w-4xl rounded-2xl border border-line bg-paper p-8">
+            <div className="mb-8 flex items-center justify-between">
+                <h2 className="font-display text-xl text-ink">Add New Speaker</h2>
+                {/* Was a bare <button> with no handler sitting where a close control belongs.
+                    Wired to the same route pop as Cancel rather than deleted, because the
+                    form renders as a modal over the speakers list. */}
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    aria-label="Close"
+                    className={buttonClass("ghost", "sm")}
+                >
+                    <X size={18} aria-hidden="true" />
+                </button>
+            </div>
+
+            <form action={handle_speaker_submission}>
+                <div className="grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
+
+                    <div className="space-y-6">
+                        <div className="flex flex-col items-center justify-center rounded-2xl border border-line p-8">
+                            <MediaUpload
+                                folder="speaker-avatars"
+                                accept="image/*"
+                                value={photoUrl || null}
+                                label="Upload Photo"
+                                onUploaded={setPhotoUrl}
+                                buttonClassName="relative flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-full border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-gray-900 disabled:opacity-60"
+                            />
+                            {/* Uploaded avatar URL rides the form's server action. */}
+                            <input type="hidden" name="profileImage" value={photoUrl} />
+                        </div>
+
+                        <div>
+                            <label htmlFor="speaker-name" className={labelClass}>Full Name *</label>
+                            <input id="speaker-name" name="speakerName" type="text" placeholder="e.g. Sarah Jenkins" className={`${fieldClass} mt-1.5`} required />
+                        </div>
+                        <div>
+                            <label htmlFor="speaker-title" className={labelClass}>Title/Designation *</label>
+                            <input id="speaker-title" name="title" type="text" placeholder="e.g. Chief Innovation Officer" className={`${fieldClass} mt-1.5`} required />
+                        </div>
+                        <div>
+                            <label htmlFor="speaker-company" className={labelClass}>Company/Organization *</label>
+                            <input id="speaker-company" name="company" type="text" placeholder="e.g. Acme Tech Global" className={`${fieldClass} mt-1.5`} required />
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div>
+                            <div className="mb-1.5 flex items-end justify-between">
+                                <label htmlFor="speaker-bio" className={labelClass}>Biography</label>
+                                {/* Was a hardcoded "0 / 500" that never moved, next to a textarea
+                                    with no limit at all. Now both are real. */}
+                                <span className="text-xs font-medium text-ink-soft tabular-nums">
+                                    {bio.length} / {BIO_LIMIT}
+                                </span>
+                            </div>
+                            <textarea
+                                id="speaker-bio"
+                                name="bio"
+                                maxLength={BIO_LIMIT}
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                placeholder="Tell us about the speaker..."
+                                className={`${fieldClass} h-[132px] resize-none`}
+                            />
+                        </div>
+
+                        <div>
+                            <span className={labelClass}>Social Profiles</span>
+                            <div className="mt-1.5 space-y-3">
+                                <PrefixedField icon={<Link2 size={16} />}>
+                                    <input name="linkedin" type="url" aria-label="LinkedIn URL" placeholder="LinkedIn URL" className={prefixedInput} />
+                                </PrefixedField>
+                                <PrefixedField icon={<AtSign size={16} />}>
+                                    <input name="twitter" type="url" aria-label="Twitter URL" placeholder="Twitter URL" className={prefixedInput} />
+                                </PrefixedField>
+                                <PrefixedField icon={<Globe size={16} />}>
+                                    <input name="website" type="url" aria-label="Website URL" placeholder="Website URL" className={prefixedInput} />
+                                </PrefixedField>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span className={labelClass}>Agenda</span>
+                            <div className="mt-1.5 space-y-3">
+                                <PrefixedField icon="Purpose">
+                                    <input name="purpose" type="text" aria-label="Session purpose" placeholder="Opening ceremony…" className={prefixedInput} />
+                                </PrefixedField>
+                                {/* start_time / end_time, with underscores: the form posted
+                                    "start-time" and the service read "start_time", so every
+                                    speaker was saved with blank session times. */}
+                                <PrefixedField icon="Start Time">
+                                    <input name="start_time" type="time" aria-label="Session start time" className={`${prefixedInput} tabular-nums`} />
+                                </PrefixedField>
+                                <PrefixedField icon="End Time">
+                                    <input name="end_time" type="time" aria-label="Session end time" className={`${prefixedInput} tabular-nums`} />
+                                </PrefixedField>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <form action={handle_speaker_submission}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <hr className="my-8 border-line" />
 
-                        {/* LEFT COLUMN */}
-                        <div className="space-y-6">
-                            {/* Upload Photo Area */}
-                            <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-8 flex flex-col items-center justify-center">
-                                <MediaUpload
-                                    folder="speaker-avatars"
-                                    accept="image/*"
-                                    value={photoUrl || null}
-                                    label="Upload Photo"
-                                    onUploaded={setPhotoUrl}
-                                    buttonClassName="relative flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-full border-2 border-dashed border-gray-300 bg-gray-100/50 text-gray-500 transition hover:border-gray-400 disabled:opacity-60"
-                                />
-                                {/* Uploaded avatar URL rides the form's server action. */}
-                                <input type="hidden" name="profileImage" value={photoUrl} />
-                            </div>
-
-                            {/* Text Inputs */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2">Full Name *</label>
-                                <input name="speakerName" type="text" placeholder="e.g. Sarah Jenkins" className="w-full border border-gray-200 rounded-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" required />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2">Title/Designation *</label>
-                                <input name="title" type="text" placeholder="e.g. Chief Innovation Officer" className="w-full border border-gray-200 rounded-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" required />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2">Company/Organization *</label>
-                                <input name="company" type="text" placeholder="e.g. Acme Tech Global" className="w-full border border-gray-200 rounded-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" required />
-                            </div>
+                <div>
+                    <span className={labelClass}>Direct Contact</span>
+                    <div className="mt-4 flex flex-col gap-4 md:flex-row md:gap-8">
+                        <div className="flex items-center gap-3 text-ink-soft">
+                            <Mail size={18} aria-hidden="true" />
+                            <input type="email" name="email" aria-label="Email address" placeholder="Email Address" className={`${fieldClass} w-64`} />
                         </div>
-
-                        {/* RIGHT COLUMN */}
-                        <div className="space-y-6">
-                            {/* Bio Textarea */}
-                            <div>
-                                <div className="flex justify-between items-end mb-2">
-                                    <label className="block text-sm font-bold text-gray-900">Biography</label>
-                                    <span className="text-xs font-medium text-gray-500">0 / 500</span>
-                                </div>
-                                <textarea name="bio" placeholder="Tell us about the speaker..." className="w-full border border-gray-200 rounded-xl p-3.5 text-sm h-[132px] resize-none focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500"></textarea>
-                            </div>
-
-                            {/* Social Profiles */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-2">Social Profiles</label>
-                                <div className="space-y-3">
-                                    <div className="flex">
-                                        <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            <LinkIcon size={16} />
-                                        </span>
-                                        <input name="linkedin" type="url" placeholder="LinkedIn URL" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                    <div className="flex">
-                                        <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            <Share2 size={16} />
-                                        </span>
-                                        <input name="twitter" type="url" placeholder="Twitter URL" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                      <div className="flex">
-                                        <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            <Share2 size={16} />
-                                        </span>
-                                        <input name="website" type="url" placeholder="Website URL" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                     <label className="block text-sm font-bold text-gray-900 mb-2">Agenda</label>
-                                    <div className="flex">
-                                           <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            Purpose
-                                        </span>
-                                        <input name="purpose" type="text" placeholder="Opening Cermony...." className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                     <div className="flex">
-                                         <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            Start Time
-                                        </span>
-                                        <input name="start-time" type="time"className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                     <div className="flex">
-                                         <span className="bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl px-4 flex items-center justify-center text-gray-500">
-                                            End Time
-                                        </span>
-                                        <input name="end-time" type="time" className="w-full border border-gray-200 rounded-r-xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-black placeholder:text-gray-500" />
-                                    </div>
-                                </div>
-                            </div>
-
-                           
+                        <div className="flex items-center gap-3 text-ink-soft">
+                            <Phone size={18} aria-hidden="true" />
+                            <input type="tel" name="phone" aria-label="Phone number" placeholder="+1 (555) 000-0000" className={`${fieldClass} w-64`} />
                         </div>
                     </div>
+                </div>
 
-                    {/* Divider */}
-                    <hr className="my-8 border-gray-100" />
-
-                    {/* Direct Contact Section */}
-                    <div>
-                        <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-4">Direct Contact</label>
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 text-gray-500">
-                                    <Mail size={18} />
-                                    <input type="email" name="email" placeholder="Email Address" className="border-none focus:ring-0 p-0 text-sm placeholder-gray-400 outline-none w-64 text-gray-900 font-medium" />
-                                </div>
-                                <div className="flex items-center gap-3 text-gray-500">
-                                    <Phone size={18} />
-                                    <input type="tel" name="phone" placeholder="+1 (555) 000-0000" className="border-none focus:ring-0 p-0 text-sm placeholder-gray-400 outline-none w-64 text-gray-900 font-medium" />
-                                </div>
-                            </div>
-
-                            {/* Custom Toggle Switch */}
-                            
-                        </div>
-                    </div>
-
-                    {/* Footer Section */}
-                    <div className="mt-8 pt-6 bg-gray-50/50 -mx-8 -mb-8 p-8 rounded-b-2xl flex flex-col md:flex-row justify-between items-center gap-6 border-t border-gray-100">
-
-                        
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-3 w-full md:w-auto">
-                            <button type="button" onClick={()=>router.back()} className="flex-1 md:flex-none px-6 py-3 border border-gray-200 rounded-xl font-bold text-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                                Cancel
-                            </button>
-                            <SubmitButton pendingText="Saving…" className="flex-1 md:flex-none px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
-                                Save Speaker
-                            </SubmitButton>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </>
+                <div className="mt-8 flex justify-end gap-3 border-t border-line pt-6">
+                    <button type="button" onClick={() => router.back()} className={buttonClass("secondary")}>
+                        Cancel
+                    </button>
+                    <SubmitButton pendingText="Saving…" className={buttonClass("primary")}>
+                        Save Speaker
+                    </SubmitButton>
+                </div>
+            </form>
+        </div>
     )
 }

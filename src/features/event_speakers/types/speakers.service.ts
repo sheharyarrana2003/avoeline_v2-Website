@@ -1,6 +1,4 @@
 import { EventService } from "@/src/services/event.service";
-import { doc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
-import { db } from '@/data/db'
 import { EventModel } from "@/src/services/models/event.model";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
@@ -59,9 +57,7 @@ export const SpeakerService = {
             // Firestore rejects objects created via a custom prototype.
             await adminDb.collection(COLLECTIONS.EVENTS).doc(event_id).update({ speakers: Event.speakers });
         } else {
-            console.log("this event doesnt exist so how toadd a speaker to it??");
+            throw new Error(`Event ${event_id} not found`);
         }
-
-        console.log("Creating a new speaker... -> ");
     }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { ImageUp, TriangleAlert } from "lucide-react";
 import { uploadMedia } from "./uploadMedia.action";
 import { isVideoUrl } from "./media.utils";
 
@@ -25,7 +26,7 @@ interface MediaUploadProps {
 }
 
 const DEFAULT_BUTTON =
-  "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-500 transition hover:border-gray-400 disabled:opacity-60";
+  "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-gray-900 disabled:opacity-60";
 
 // Keep in step with uploadMedia.action MAX_BYTES and next.config proxyClientMaxBodySize.
 // Guarding here avoids a raw 500 ("Unexpected end of form") when the body would be
@@ -93,9 +94,7 @@ export function MediaUpload({
           )
         ) : (
           <>
-            <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <ImageUp className="h-6 w-6" aria-hidden="true" />
             <span className="text-xs font-medium">{isPending ? "Uploading…" : label}</span>
           </>
         )}
@@ -108,7 +107,12 @@ export function MediaUpload({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {error && <p className="mt-1 text-xs font-medium text-gray-900">⚠️ {error}</p>}
+      {error && (
+        <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs font-medium text-ink">
+          <TriangleAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          {error}
+        </p>
+      )}
     </div>
   );
 }

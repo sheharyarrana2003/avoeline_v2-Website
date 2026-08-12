@@ -1,9 +1,13 @@
 import { AnalyticsService } from "@/src/services/anaylService";
 import { analyzeOrganizerFeedback } from "@/src/features/analytics/feedbackAnalysis.service";
-import { Activity, CalendarDays, Smile, TrendingUp, Wallet } from "lucide-react";
+import { CalendarDays, LineChart, Smile, TrendingUp, Wallet } from "lucide-react";
 import { DailyAnalyticsRegistration } from "@/src/services/models/feedback.model";
 import EventFeedbackAnalysis from "./EventFeedbackAnalysis";
 import { formatCurrencyCompact } from "@/src/lib/money";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { tableCell, tableHead, tableRow } from "@/src/lib/ui";
 
 // ─── Helpers (server-side only) ───────────────────────────────────────────────
 
@@ -50,13 +54,6 @@ export default async function AnalyticsPage({
         dateRange,
     } = await AnalyticsService.getAnalyticsData(organizer_id);
 
-    const metrics = [
-        { label: "Total Events", icon: CalendarDays, ...totalEvents },
-        { label: "Profit", icon: TrendingUp, ...profit },
-        { label: "Total Revenue", icon: Wallet, ...totalRevenue },
-        { label: "Avg. Satisfaction", icon: Smile, ...avgSatisfaction },
-    ];
-
     const chartPoints = buildChartPoints(dailyRegistrations);
 
     const analyzeFeedback = async () => {
@@ -65,73 +62,41 @@ export default async function AnalyticsPage({
     };
 
     return (
-        <main className="min-h-screen bg-white px-4 py-8 text-gray-950 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl space-y-6">
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl space-y-8">
 
-                <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">
-                            Analytics Overview
-                        </h1>
-                        <p className="mt-1 text-sm font-semibold text-gray-500">
-                            Data insights and performance metrics
-                        </p>
-                    </div>
-                    <p className="text-sm font-bold text-gray-500">{dateRange}</p>
-                </header>
+                <PageHeader
+                    title="Analytics Overview"
+                    description="Data insights and performance metrics"
+                    actions={<p className="text-sm text-ink-soft tabular-nums">{dateRange}</p>}
+                />
 
-                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {metrics.map((metric) => {
-                        const Icon = metric.icon;
-                        return (
-                            <article
-                                key={metric.label}
-                                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
-                            >
-                                <div className="mb-4 flex items-center justify-between">
-                                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                                        {metric.label}
-                                    </p>
-                                    <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
-                                        <Icon size={18} />
-                                    </span>
-                                </div>
-                                <p className="text-3xl font-extrabold text-gray-950">
-                                    {metric.value}
-                                </p>
-                                {metric.helper && (
-                                    <p className="mt-3 text-xs font-bold text-gray-500">
-                                        {metric.helper}
-                                    </p>
-                                )}
-                            </article>
-                        );
-                    })}
+                {/* "Est." is in the title because the canonical tile has no sub-label slot,
+                    and an estimated profit presented as a measured one would be a lie. */}
+                <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+                    <StatCard_dashboard title="Total Events" value={totalEvents.value} icon={<CalendarDays size={14} />} />
+                    <StatCard_dashboard title="Profit (Est.)" value={profit.value} icon={<TrendingUp size={14} />} />
+                    <StatCard_dashboard title="Total Revenue" value={totalRevenue.value} icon={<Wallet size={14} />} />
+                    <StatCard_dashboard title="Avg. Satisfaction" value={avgSatisfaction.value} icon={<Smile size={14} />} />
                 </section>
 
                 {/* ── Daily Registrations Chart ─────────────────────────────── */}
-                <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h2 className="text-base font-extrabold text-gray-950">
-                                Daily Registrations
-                            </h2>
-                            <p className="mt-1 text-xs font-semibold text-gray-500">
-                                Registration volume over the last 30 days
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#171717]">
-                            <span className="size-2 rounded-full bg-[#171717]" />
-                            Registrations
-                        </div>
+                <section>
+                    <div className="flex flex-col gap-1 border-b border-line pb-3 sm:flex-row sm:items-end sm:justify-between">
+                        <h2 className="font-display text-xl text-ink">Daily Registrations</h2>
+                        <p className="text-sm text-ink-soft">Registration volume over the last 30 days</p>
                     </div>
 
                     {dailyRegistrations.length === 0 ? (
-                        <div className="flex h-[320px] items-center justify-center text-sm font-semibold text-gray-500">
-                            No registration data available yet.
-                        </div>
+                        <EmptyState
+                            size="sm"
+                            className="mt-6"
+                            icon={<LineChart size={24} />}
+                            title="No registrations yet"
+                            description="This chart fills in as attendees register for your published events."
+                        />
                     ) : (
-                        <div className="h-[320px] overflow-hidden">
+                        <div className="mt-6 h-[320px] overflow-hidden">
                             <svg
                                 viewBox="0 0 720 280"
                                 className="h-full w-full"
@@ -145,17 +110,17 @@ export default async function AnalyticsPage({
                                         x2="698"
                                         y1={y}
                                         y2={y}
-                                        stroke="#e5e5e5"
+                                        className="stroke-gray-200"
                                         strokeWidth="1"
                                     />
                                 ))}
                                 <polyline
                                     fill="none"
                                     points={chartPoints}
-                                    stroke="#171717"
+                                    className="stroke-accent"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    strokeWidth="5"
+                                    strokeWidth="4"
                                 />
                                 {dailyRegistrations.map((item, index) => {
                                     const x =
@@ -169,7 +134,8 @@ export default async function AnalyticsPage({
                                             x={x}
                                             y="268"
                                             textAnchor="middle"
-                                            className="fill-gray-400 text-[13px] font-bold"
+                                            /* gray-500 = 4.75:1: an axis label is read, so it clears the body floor. */
+                                            className="fill-gray-500 text-2xs"
                                         >
                                             {item.label}
                                         </text>
@@ -181,67 +147,48 @@ export default async function AnalyticsPage({
                 </section>
 
                 {/* ── Event Performance Table ───────────────────────────────── */}
-                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                    <div className="flex items-center justify-between border-b border-gray-100 p-6">
-                        <div className="flex items-center gap-3">
-                            <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
-                                <Activity size={18} />
-                            </span>
-                            <h2 className="text-base font-extrabold text-gray-950">
-                                Event Performance
-                            </h2>
-                        </div>
-                    </div>
+                <section>
+                    <h2 className="border-b border-line pb-3 font-display text-xl text-ink">
+                        Event Performance
+                    </h2>
 
                     {eventPerformance.length === 0 ? (
-                        <div className="flex h-32 items-center justify-center text-sm font-semibold text-gray-500">
-                            No events found for this organizer.
-                        </div>
+                        <EmptyState
+                            size="sm"
+                            className="mt-6"
+                            icon={<CalendarDays size={24} />}
+                            title="No events to measure"
+                            description="Publish an event and its registrations and revenue will be summarised here."
+                        />
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[860px] border-collapse">
-                                <thead className="bg-gray-50">
-                                    <tr className="text-left">
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                                            Event Name
-                                        </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                                            Date
-                                        </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                                            Registrations
-                                        </th>
-                                      
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
-                                            Revenue
-                                        </th>
-                                       
+                        <div className="mt-2 overflow-x-auto">
+                            <table className="w-full min-w-[640px] border-collapse">
+                                <thead>
+                                    <tr className="border-b border-line">
+                                        <th className={tableHead}>Event Name</th>
+                                        <th className={tableHead}>Date</th>
+                                        <th className={tableHead}>Registrations</th>
+                                        <th className={`${tableHead} text-right`}>Revenue</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {eventPerformance.map((event) => (
-                                        <tr
-                                            key={event.id}
-                                            className="border-t border-gray-100"
-                                        >
-                                            <td className="px-6 py-5">
-                                                <p className="text-sm font-extrabold text-gray-950">
-                                                    {event.eventName}
-                                                </p>
-                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-500">
+                                        <tr key={event.id} className={tableRow}>
+                                            <td className={tableCell}>
+                                                <p className="font-medium text-ink">{event.eventName}</p>
+                                                <p className="mt-1 text-2xs uppercase text-ink-soft">
                                                     {event.eventType}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-bold text-gray-500">
+                                            <td className={`${tableCell} whitespace-nowrap tabular-nums text-ink-soft`}>
                                                 {event.date}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                            <td className={`${tableCell} tabular-nums`}>
                                                 {event.registrations.toLocaleString("en-US")}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                            <td className={`${tableCell} text-right tabular-nums`}>
                                                 {formatCurrencyCompact(event.revenue)}
                                             </td>
-                                           
                                         </tr>
                                     ))}
                                 </tbody>
@@ -252,6 +199,6 @@ export default async function AnalyticsPage({
 
                 <EventFeedbackAnalysis analyzeFeedback={analyzeFeedback} />
             </div>
-        </main>
+        </div>
     );
 }

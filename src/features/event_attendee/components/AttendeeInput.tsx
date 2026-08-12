@@ -2,6 +2,7 @@
 import { useRef, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { fieldClass } from '@/src/lib/ui';
 
 export function AttendeeInput() {
     const router = useRouter();
@@ -32,12 +33,14 @@ export function AttendeeInput() {
 
     return (
         <div className="relative flex items-center w-full">
-            <Search className="absolute left-5 text-gray-500" size={18} />
-            <input 
-                type="text" 
-                onChange={handleOnChange}  
-                placeholder="Search attendees by name, email or ID..." 
-                className="w-full pl-12 pr-6 py-3 bg-white border border-gray-200/80 rounded-full text-sm font-medium text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 shadow-sm"
+            {/* gray-400 is 2.5:1 -- decoration; the placeholder carries the label. */}
+            <Search className="pointer-events-none absolute left-3 text-gray-400" size={16} aria-hidden="true" />
+            <input
+                type="search"
+                onChange={handleOnChange}
+                aria-label="Search attendees"
+                placeholder="Search attendees by name"
+                className={`${fieldClass} pl-9`}
             />
         </div>
     )

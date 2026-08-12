@@ -14,15 +14,11 @@ import {
     BookingData,
     BreakdownItem,
     VendorQuote,
-    Requirements,
-    Quote,
     Communication,
     Documents,
-    Payment,
 } from "@/src/features/bookings/types";
 
 import { VendorData } from "@/src/services/models/vendor.model";
-import { EventModel } from "@/src/services/models/event.model";
 
 // --- Types for Server Props ---
 interface PageParams {

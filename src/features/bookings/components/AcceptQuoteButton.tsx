@@ -41,7 +41,7 @@ export function AcceptQuoteButton({
                 onClick={() => setConfirming(true)}
                 disabled={isPending}
                 aria-busy={isPending}
-                className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                className="ml-auto flex flex-1 items-center justify-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
                 <Check className="h-4 w-4" aria-hidden="true" />
                 {isPending ? "Accepting…" : "Accept Quote"}

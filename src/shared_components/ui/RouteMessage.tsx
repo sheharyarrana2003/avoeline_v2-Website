@@ -6,7 +6,7 @@ const TONE: Record<Tone, string> = {
     // Solid ink reads "something failed"; a soft fill reads "nothing here".
     // Keeping the two apart is the whole point of having a tone at all -- it is
     // now weight rather than hue that does it.
-    danger: "bg-gray-900 text-white ring-1 ring-gray-900",
+    danger: "bg-danger-soft text-danger ring-1 ring-danger-line",
     neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
 };
 
@@ -36,7 +36,10 @@ export function RouteMessage({
     tone = "danger",
 }: RouteMessageProps) {
     return (
-        <main className="flex min-h-[60vh] flex-1 items-center justify-center bg-gray-50 px-4 py-16">
+        // A <div>, not a <main>. DashboardBoundary wraps this and the four organizer and
+        // vendor error/not-found routes re-export it, so a <main> here opened a second
+        // landmark inside the layout's — and the background fought the canvas beneath it.
+        <div className="flex min-h-[60vh] flex-1 items-center justify-center px-4 py-16">
             <div className="w-full max-w-md text-center">
                 <div
                     className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${TONE[tone]}`}
@@ -63,13 +66,13 @@ export function RouteMessage({
                     </details>
                 ) : null}
             </div>
-        </main>
+        </div>
     );
 }
 
 /** Shared button styling for the boundaries, so all four match. */
 export const routeMessageButton =
-    "inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black";
+    "inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export const routeMessageLink =
-    "inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black";
+    "inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";

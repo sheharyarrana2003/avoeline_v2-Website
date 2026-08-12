@@ -1,3 +1,4 @@
+import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 // Server Component — minimal, clean home page footer
 import Link from "next/link";
 
@@ -47,33 +48,7 @@ export function HomeFooter() {
             >
               {/* Logo mark stays black here — footer is a quiet, monochrome
                   zone; the one purple mark already lives in the header */}
-              <span
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 6,
-                  background: "var(--ink)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M3 12L8 4L13 12"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M5 9.5H11"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
+              <BrandMark className="h-6 w-6 shrink-0" />
               Avoeline
             </div>
             <p

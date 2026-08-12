@@ -1,5 +1,7 @@
 'use client';
 
+import { Code2, Wrench, GraduationCap, Users, Monitor, Handshake, BookOpen,
+         MapPin, Globe, Laptop, FileText } from "lucide-react";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -23,13 +25,13 @@ const previewTime = (t: string) => {
 
 // --- Constants ---
 const EVENT_TYPES = [
-    { id: 'hackathon', label: 'Hackathon', sub: 'Coding marathon', icon: '💻' },
-    { id: 'workshop', label: 'Workshop', sub: 'Hands-on learning', icon: '🛠️' },
-    { id: 'seminar', label: 'Seminar', sub: 'Expert talks', icon: '🎓' },
-    { id: 'conference', label: 'Conference', sub: 'Grand gathering', icon: '👥' },
-    { id: 'webinar', label: 'Webinar', sub: 'Online session', icon: '🖥️' },
-    { id: 'networking', label: 'Networking', sub: 'Professional mixer', icon: '🤝' },
-    { id: 'training', label: 'Training', sub: 'Skill building', icon: '📚' },
+    { id: 'hackathon', label: 'Hackathon', sub: 'Coding marathon', icon: <Laptop className="h-5 w-5" /> },
+    { id: 'workshop', label: 'Workshop', sub: 'Hands-on learning', icon: <Wrench className="h-5 w-5" /> },
+    { id: 'seminar', label: 'Seminar', sub: 'Expert talks', icon: <GraduationCap className="h-5 w-5" /> },
+    { id: 'conference', label: 'Conference', sub: 'Grand gathering', icon: <Users className="h-5 w-5" /> },
+    { id: 'webinar', label: 'Webinar', sub: 'Online session', icon: <Monitor className="h-5 w-5" /> },
+    { id: 'networking', label: 'Networking', sub: 'Professional mixer', icon: <Handshake className="h-5 w-5" /> },
+    { id: 'training', label: 'Training', sub: 'Skill building', icon: <BookOpen className="h-5 w-5" /> },
     { id: 'custom', label: 'Custom', sub: 'Tailored format', icon: '➕' },
 ];
 
@@ -244,7 +246,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Event Title */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                             Event Title <span className="float-right text-gray-500 font-normal">{formData.eventTitle.length}/100</span>
                         </label>
                         <input
@@ -258,14 +260,12 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Description */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
                         <div className="border border-gray-200 rounded-xl overflow-hidden">
                             <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50">
                                 <button className="p-1 hover:bg-gray-200 rounded-xs text-xs font-bold">B</button>
                                 <button className="p-1 hover:bg-gray-200 rounded-xs text-xs italic">I</button>
                                 <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">≡</button>
-                                <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">🔗</button>
-                                <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">🖼</button>
                             </div>
                             <textarea
                                 value={formData.description}
@@ -279,7 +279,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Category */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Category</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Category</label>
                         <div className="relative">
                             <select
                                 value={formData.category}
@@ -296,7 +296,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Short Description */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Short Description</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Short Description</label>
                         <input
                             type="text"
                             value={formData.shortDescription}
@@ -308,7 +308,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Tags */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tags</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tags</label>
                         <div className="flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
                             {formData.tags.map(tag => (
                                 <span key={tag} className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -353,7 +353,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Gallery */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Gallery</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Gallery</label>
                         <div className="flex flex-wrap items-center gap-3">
                             <MediaUpload
                                 folder="gallery"
@@ -382,7 +382,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 (formData.galleryImages ?? []).filter((_, idx) => idx !== i)
                                             )
                                         }
-                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-white text-[10px] leading-none opacity-0 group-hover:opacity-100 transition"
+                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-white text-2xs leading-none opacity-0 group-hover:opacity-100 transition"
                                         aria-label="Remove image"
                                     >
                                         ×
@@ -394,7 +394,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Video URL */}
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Video Promo URL</label>
+                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Video Promo URL</label>
                         <div className="flex gap-2">
                             <input
                                 type="text"
@@ -598,9 +598,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Location Type */}
                 <div className="grid grid-cols-3 gap-3">
                     {[
-                        { id: 'physical', label: 'Physical', icon: '📍' },
-                        { id: 'virtual', label: 'Virtual', icon: '💻' },
-                        { id: 'hybrid', label: 'Hybrid', icon: '🌐' },
+                        { id: 'physical', label: 'Physical', icon: <MapPin className="h-5 w-5" /> },
+                        { id: 'virtual', label: 'Virtual', icon: <Code2 className="h-5 w-5" /> },
+                        { id: 'hybrid', label: 'Hybrid', icon: <Globe className="h-5 w-5" /> },
                     ].map(loc => (
                         <button
                             key={loc.id}
@@ -804,7 +804,7 @@ export default function CreateEventPage({ handle_submission }: any) {
             {formData.ticketType !== 'free' && (
                 <div
                     className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Price Of Ticket</label>
+                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Of Ticket</label>
                     <input
                         type="text"
                         value={formData.PriceOfTicket}
@@ -831,7 +831,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <div key={tier.id} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                             <div className="grid grid-cols-12 gap-4 items-end">
                                 <div className="col-span-4">
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tier Name</label>
+                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tier Name</label>
                                     <input
                                         type="text"
                                         value={tier.name}
@@ -845,7 +845,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     />
                                 </div>
                                 <div className="col-span-3">
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Price</label>
+                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price</label>
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">PKR</span>
                                         <input
@@ -862,7 +862,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     </div>
                                 </div>
                                 <div className="col-span-3">
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Seats Available</label>
+                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Seats Available</label>
                                     <input
                                         type="number"
                                         value={tier.seatsAvailable}
@@ -889,7 +889,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                             <div className="grid grid-cols-2 gap-4 mt-3">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Available Until</label>
+                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Available Until</label>
                                     <div className="relative">
                                         <DateField
                                             value={tier.availableUntil}
@@ -907,7 +907,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Ticket description</label>
+                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ticket description</label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -1055,7 +1055,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex flex-col gap-3">
                             {/* Row 1: icon + label + required badge */}
                             <div className="flex items-center gap-2">
-                                <span className="text-xs">📝</span>
+                                <FileText className="h-3.5 w-3.5 text-ink-soft" aria-hidden="true" />
                                 <input
                                     type="text"
                                     value={field.label}
@@ -1071,7 +1071,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
                                 />
                                 {field.required && (
-                                    <span className="shrink-0 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
+                                    <span className="shrink-0 text-2xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
                                 )}
                             </div>
 
@@ -1133,7 +1133,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                                 {field.type === 'dropdown' && field?.options && <><br />{field?.options.map((option, ind) => {
                                     return <div key={ind} className="flex items-center gap-2">
-                                        <span className="text-xs">📝</span>
+                                        <FileText className="h-3.5 w-3.5 text-ink-soft" aria-hidden="true" />
                                         <input
                                             type="text"
                                             value={option}
@@ -1147,13 +1147,13 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
                                         />
                                         {field.required && (
-                                            <span className="shrink-0 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
+                                            <span className="shrink-0 text-2xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
                                         )}
                                     </div>
 
                                 })}</>}
 
-                                <span className="ml-auto text-[10px] text-gray-500">
+                                <span className="ml-auto text-2xs text-gray-500">
                                     {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                 </span>
                             </div>
@@ -1260,11 +1260,11 @@ export default function CreateEventPage({ handle_submission }: any) {
                         )}
                     </div>
                     <div className="p-6 md:p-8">
-                        <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <span className="bg-black text-white text-2xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                             {formData.eventType || 'Event'}
                         </span>
                         <h2 className="text-xl font-bold text-gray-900 mt-3 mb-4">
-                            {formData.eventTitle || 'TechVerse Hackathon 2026'}
+                            {formData.eventTitle || 'Your event title'}
                         </h2>
 
                         <div className="space-y-2 mb-6">
@@ -1464,13 +1464,13 @@ export default function CreateEventPage({ handle_submission }: any) {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div>
             {/* Top Progress Bar */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="border-b border-line bg-paper sticky top-0 z-20">
+                <div className="mx-auto max-w-7xl">
                     <div className="flex items-center justify-between h-16">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
+                            <p className="text-2xs font-bold text-gray-500 uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
                             <h1 className="text-lg font-bold text-gray-900">{STEPS[currentStep - 1].label}</h1>
                         </div>
 
@@ -1512,7 +1512,7 @@ export default function CreateEventPage({ handle_submission }: any) {
             </div>
 
             {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <ConfirmButton
@@ -1527,7 +1527,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 // never saw the change and a later render could undo it.
                                 handling_submission_client({ ...formData, isDraft: true });
                             }}
-                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             Save as Draft
                         </ConfirmButton>

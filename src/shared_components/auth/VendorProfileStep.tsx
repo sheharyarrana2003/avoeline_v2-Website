@@ -3,13 +3,18 @@
 import React, { useState } from 'react';
 import AddSocialsModal from './AddSocialsModal';
 import ProfileLoadingState from './ProfileLoadingState';
-import { Camera, CheckCircle2, Plus, X } from 'lucide-react';
+import { ImagePlus, Plus, X } from 'lucide-react';
 import { uploadMedia } from '@/src/features/media/uploadMedia.action';
+import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
+import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
 import type { VendorSetupProfileData } from '@/src/features/auth/authService';
 
+type ActionResult = { success: boolean; error?: string };
+
 interface VendorProfileStepProps {
-  onNext?: () => void;
-  onSave?: (data: VendorSetupProfileData) => Promise<boolean | void> | boolean | void;
+  /** Completes setup. Redirects on success, so it usually never resolves. */
+  onNext?: () => Promise<ActionResult | void> | void;
+  onSave?: (data: VendorSetupProfileData) => Promise<ActionResult>;
   initialEmail?: string;
 }
 
@@ -21,7 +26,6 @@ export default function VendorProfileStep({
   const [isSocialsOpen, setIsSocialsOpen] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
-  const [vendorName] = useState<string>('Vendor');
 
   const [formData, setFormData] = useState({
     username: '',
@@ -38,7 +42,6 @@ export default function VendorProfileStep({
   const [serviceInput, setServiceInput] = useState<string>('');
   const [services, setServices] = useState<string[]>([]);
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
-  const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,33 +101,35 @@ export default function VendorProfileStep({
         logoUrl = upload.url;
       }
 
-      const payload: VendorSetupProfileData = {
-        ...formData,
-        services,
-        socialLinks,
-        logoUrl,
-      };
+      const payload: VendorSetupProfileData = { ...formData, services, socialLinks, logoUrl };
 
-      const ok = onSave ? await onSave(payload) : true;
-      if (ok === false) {
+      // Errors are shown here, beside the button that was pressed. The wizard used
+      // to own this message and render it at the very top of the page, a screen and
+      // a half above the Save button, so a rejected save looked like nothing at all
+      // happening. Same reason the 800ms "Saved!" toast is gone: it re-enabled Save
+      // while a redirect was already scheduled, and a second click re-ran the write.
+      const saved: ActionResult = onSave ? await onSave(payload) : { success: true };
+      if (!saved.success) {
+        setError(saved.error || 'Failed to save vendor profile.');
         setIsLoading(false);
         return;
       }
 
-      setSavedSuccess(true);
-      setTimeout(() => {
-        setSavedSuccess(false);
-        if (onNext) onNext();
-      }, 800);
+      // Cast, not a wider prop type: onNext resolves to nothing on the success
+      // path because the server action redirects out of this tree.
+      const finished = (await onNext?.()) as ActionResult | undefined;
+      if (finished && !finished.success) {
+        setError(finished.error || 'Failed to finish setup.');
+      }
+      setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save profile.');
-    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full flex flex-col items-center relative">
+    <div className="relative flex w-full flex-col items-center">
       {isLoading && (
         <ProfileLoadingState
           title="Saving Vendor Profile"
@@ -133,244 +138,254 @@ export default function VendorProfileStep({
         />
       )}
 
-      <h2 className="text-xl md:text-2xl font-bold text-gray-700 tracking-wide mb-4 text-center">
-        Setting Up Vendor Profile
-      </h2>
+      <h1 className="mb-4 text-center font-display text-2xl text-ink">
+        Set up your vendor profile
+      </h1>
 
-      <div className="bg-gray-100 w-full max-w-3xl md:max-w-4xl rounded-[28px] p-8 md:p-12 border border-gray-300/60 shadow-sm font-sans relative">
-        {savedSuccess && (
-          <div className="absolute top-6 right-6 bg-gray-900 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-fadeIn z-20">
-            <CheckCircle2 className="w-4 h-4" /> Profile Saved Successfully!
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-center">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
-          <div className="flex flex-col items-center mb-8">
-            <label className="relative group cursor-pointer block">
-              <div className="w-28 h-28 rounded-full border-2 border-[#171717] p-1 flex items-center justify-center bg-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
+      <div className="w-full max-w-3xl rounded-2xl border border-line bg-paper p-8 md:max-w-4xl md:p-12">
+        <form onSubmit={handleSubmit} className="flex w-full flex-col items-center">
+          <div className="mb-8 flex flex-col items-center">
+            {/* sr-only rather than hidden: a display:none input is unreachable by
+                keyboard, which made the only avatar control mouse-only. */}
+            <label
+              htmlFor="vendor-logo"
+              className="group relative block cursor-pointer rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
+            >
+              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-line-loud bg-paper p-1">
                 {profileImage ? (
                   <img
                     src={profileImage}
-                    alt="Vendor Logo"
-                    className="w-full h-full object-cover rounded-full"
+                    alt="Vendor logo preview"
+                    className="h-full w-full rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full rounded-full border border-gray-200 flex flex-col items-center justify-center bg-gray-50/40 p-2 text-center">
-                    <svg aria-hidden="true" className="w-9 h-9 text-[#171717] mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-                      <path d="M12 6v12M6 12h12" stroke="currentColor" strokeWidth="1.5" />
-                      <circle cx="12" cy="12" r="4" fill="#171717" />
-                    </svg>
-                    <span className="text-[8px] font-bold text-[#171717] leading-none uppercase tracking-wider">LOGO</span>
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-full border border-dashed border-line-loud text-center">
+                    <ImagePlus className="h-7 w-7 text-ink-soft" aria-hidden="true" />
+                    <span className="text-2xs font-medium uppercase text-ink-soft">Logo</span>
                   </div>
                 )}
               </div>
-              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="w-6 h-6 text-white" />
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-gray-900/50 opacity-0 transition-opacity group-hover:opacity-100">
+                <ImagePlus className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <input
+                id="vendor-logo"
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="hidden"
+                className="sr-only"
               />
             </label>
-            <span className="text-sm font-bold text-gray-900 uppercase tracking-widest mt-3">
-              {formData.username || vendorName}
+            <span className="mt-3 text-sm font-semibold uppercase text-ink">
+              {formData.username || 'Your business'}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-8">
-            <div className="w-full text-left space-y-3.5">
-              <h3 className="text-xs md:text-sm font-bold text-gray-900 uppercase tracking-wider pb-1.5 border-b border-gray-300">
+          <div className="mb-8 grid w-full grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="w-full space-y-3.5 text-left">
+              <h2 className="border-b border-line pb-1.5 text-xs font-bold uppercase text-ink">
                 Personal Information
-              </h3>
+              </h2>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Username</label>
+                <label htmlFor="vendor-username" className={labelClass}>Username</label>
                 <input
+                  id="vendor-username"
                   type="text"
                   name="username"
                   placeholder="Username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Description</label>
-                <div className="relative w-full">
+                <label htmlFor="vendor-description" className={labelClass}>Description</label>
+                <div className="relative mt-1 w-full">
                   <input
+                    id="vendor-description"
                     type="text"
                     name="description"
                     placeholder="Description"
                     value={formData.description}
                     onChange={handleChange}
                     maxLength={100}
-                    className="w-full pl-5 pr-16 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                    className={`${fieldClass} pr-16`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-normal pointer-events-none">
+                  <span className="pointer-events-none absolute inset-y-0 right-4 my-auto h-fit text-xs text-ink-soft tabular-nums">
                     {formData.description.length}/100
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Address</label>
+                <label htmlFor="vendor-address" className={labelClass}>Address</label>
                 <input
+                  id="vendor-address"
                   type="text"
                   name="address"
                   placeholder="Address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Email</label>
+                <label htmlFor="vendor-email" className={labelClass}>Email</label>
                 <input
+                  id="vendor-email"
                   type="email"
                   name="email"
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Contact No</label>
+                <label htmlFor="vendor-contact" className={labelClass}>Contact No</label>
                 <input
+                  id="vendor-contact"
                   type="tel"
                   name="contactNo"
                   placeholder="Contact No"
                   value={formData.contactNo}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
             </div>
 
-            <div className="w-full text-left space-y-3.5">
-              <h3 className="text-xs md:text-sm font-bold text-gray-900 uppercase tracking-wider pb-1.5 border-b border-gray-300">
+            <div className="w-full space-y-3.5 text-left">
+              <h2 className="border-b border-line pb-1.5 text-xs font-bold uppercase text-ink">
                 Professional Information
-              </h3>
+              </h2>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Established</label>
+                <label htmlFor="vendor-established" className={labelClass}>Established</label>
                 <input
+                  id="vendor-established"
                   type="text"
                   name="established"
                   placeholder="Established"
                   value={formData.established}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1 tabular-nums`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Recovery Contact</label>
+                <label htmlFor="vendor-recovery" className={labelClass}>Recovery Contact</label>
                 <input
+                  id="vendor-recovery"
                   type="text"
                   name="recoveryContact"
                   placeholder="Recovery Contact"
                   value={formData.recoveryContact}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Services</label>
-                <div className="space-y-2">
+                <label htmlFor="vendor-services" className={labelClass}>Services</label>
+                <div className="mt-1 space-y-2">
                   <div className="relative w-full">
                     <input
+                      id="vendor-services"
                       type="text"
-                      placeholder="Services"
+                      placeholder="Add a service, then press Enter"
                       value={serviceInput}
                       onChange={(e) => setServiceInput(e.target.value)}
                       onKeyDown={handleServiceKeyDown}
-                      className="w-full pl-5 pr-12 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                      className={`${fieldClass} pr-12`}
                     />
                     <button
                       type="button"
                       onClick={handleAddService}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-300 hover:bg-gray-400 flex items-center justify-center text-gray-800 transition-colors"
+                      aria-label="Add service"
+                      className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-line-loud text-ink transition-colors hover:bg-gray-100"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 py-1">
-                    {services.map((service, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-black text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 shadow-xs transition-all hover:bg-gray-800"
-                      >
-                        <span>{service}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveService(idx)}
-                          className="hover:text-gray-300 transition-colors"
+                  {services.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 py-1">
+                      {services.map((service, idx) => (
+                        <span
+                          key={idx}
+                          className="flex items-center gap-2 rounded-full bg-gray-900 px-4 py-1.5 text-xs font-medium text-white"
                         >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                          {service}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveService(idx)}
+                            aria-label={`Remove ${service}`}
+                            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors hover:text-gray-300"
+                          >
+                            <X className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Website</label>
+                <label htmlFor="vendor-website" className={labelClass}>Website</label>
                 <input
+                  id="vendor-website"
                   type="url"
                   name="website"
                   placeholder="Website"
                   value={formData.website}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1 ml-3">Link 1</label>
+                <label htmlFor="vendor-link1" className={labelClass}>Link 1</label>
                 <input
+                  id="vendor-link1"
                   type="url"
                   name="link1"
                   placeholder="Link 1"
                   value={formData.link1}
                   onChange={handleChange}
-                  className="w-full px-5 py-2.5 border border-gray-400 bg-transparent rounded-full text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                  className={`${fieldClass} mt-1`}
                 />
               </div>
             </div>
           </div>
 
-          <div className="w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-            <button
-              type="button"
-              onClick={() => setIsSocialsOpen(true)}
-              className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm cursor-pointer"
-            >
-              Add Socials {socialLinks.filter((s) => s.url).length > 0 && `(${socialLinks.filter((s) => s.url).length})`}
-            </button>
+          <div className="w-full max-w-lg space-y-4">
+            <FormFeedback error={error} />
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors text-sm shadow-sm cursor-pointer disabled:opacity-60"
-            >
-              Save
-            </button>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setIsSocialsOpen(true)}
+                className={buttonClass('secondary', 'lg', 'w-full')}
+              >
+                Add Socials{' '}
+                {socialLinks.filter((s) => s.url).length > 0 &&
+                  `(${socialLinks.filter((s) => s.url).length})`}
+              </button>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={buttonClass('primary', 'lg', 'w-full')}
+              >
+                {isLoading ? 'Saving…' : 'Save and finish'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useTransition } from 'react';
-import { FcGoogle } from 'react-icons/fc';
-import { FaApple, FaLinkedin } from 'react-icons/fa';
+import Link from 'next/link';
+import { buttonClass, fieldClass } from '@/src/lib/ui';
+import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
 
 interface LoginResult {
     success: boolean;
@@ -9,7 +10,8 @@ interface LoginResult {
 }
 
 interface SignInClientProps {
-    handleEmailLogin: (email: string, password: string, next?: string) => Promise<LoginResult>;
+    /** Resolves to undefined on success — the action redirects instead of returning. */
+    handleEmailLogin: (email: string, password: string, next?: string) => Promise<LoginResult | void>;
 }
 
 export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
@@ -30,148 +32,75 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
             const next = new URLSearchParams(window.location.search).get('next') ?? '';
             const result = await handleEmailLogin(email, password, next);
 
-            if (!result.success && result.error) {
-                setError(result.error);
-            }else{
-                console.log("status changeddd")
+            // On success the action redirects and never resolves to a value.
+            if (result && !result.success) {
+                setError(result.error ?? 'Failed to login. Please try again.');
             }
-            // If success is true, the server action will redirect (handled by Next.js)
         });
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-200">
-            {/* Main Card */}
-            <div className="bg-gray-100 p-8 sm:p-12 w-full max-w-[440px] flex flex-col items-center">
+        <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-12">
+            <div className="flex w-full max-w-[440px] flex-col items-center rounded-2xl border border-line bg-paper p-8 sm:p-12">
 
-                {/* Logo Area */}
                 <div className="mb-10 flex flex-col items-center">
-                    <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-t-full rounded-bl-full rounded-br-md mb-3">
-                        {/* Simple logo placeholder to match the diamond/V shape */}
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-t-full rounded-bl-full rounded-br-md bg-gray-900 text-white">
+                        {/* Brand mark, not iconography — no lucide equivalent exists. */}
                         <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 2L2 22h20L12 2z" />
                             <circle cx="12" cy="14" r="2" fill="white" />
                         </svg>
                     </div>
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">Avoeline</h1>
+                    <h1 className="font-display text-xl text-ink">Avoeline</h1>
                 </div>
 
-                {/* Error Alert */}
-                {error && (
-                    <div className="w-full mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-3">
-                        <svg aria-hidden="true" 
-                            className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                        >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                            />
-                        </svg>
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">Login failed</p>
-                            <p className="text-sm text-gray-900 mt-0.5">{error}</p>
-                        </div>
-                        <button 
-                            onClick={() => setError(null)}
-                            className="text-gray-900 hover:text-gray-900 transition"
-                        >
-                            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                )}
+                <form onSubmit={handleSubmit} className="w-full space-y-4">
+                    <FormFeedback error={error} />
 
-                {/* Email & Password Form */}
-                <form onSubmit={handleSubmit} className="w-full space-y-4 mb-6">
-                    <div className="relative">
-                        <input
-                            type="email"
-                            aria-label="Email address"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => {
-                                setEmail(e.target.value);
-                                if (error) setError(null);
-                            }}
-                            className={`w-full px-6 py-3 border bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-1 transition-all ${
-                                error 
-                                    ? 'border-gray-200 focus:border-gray-900 focus:ring-gray-900' 
-                                    : 'border-gray-400 focus:border-black focus:ring-black'
-                            }`}
-                            required
-                        />
-                    </div>
-                    <div className="relative">
-                        <input
-                            type="password"
-                            aria-label="Password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                if (error) setError(null);
-                            }}
-                            className={`w-full px-6 py-3 border bg-transparent rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-1 transition-all ${
-                                error 
-                                    ? 'border-gray-200 focus:border-gray-900 focus:ring-gray-900' 
-                                    : 'border-gray-400 focus:border-black focus:ring-black'
-                            }`}
-                            required
-                        />
-                    </div>
+                    <input
+                        type="email"
+                        aria-label="Email address"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (error) setError(null);
+                        }}
+                        className={fieldClass}
+                        required
+                    />
+                    <input
+                        type="password"
+                        aria-label="Password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (error) setError(null);
+                        }}
+                        className={fieldClass}
+                        required
+                    />
                     <button
                         type="submit"
                         disabled={isPending}
                         aria-busy={isPending}
-                        className="w-full bg-black text-white font-medium py-3 rounded-full hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        className={buttonClass('primary', 'lg', 'w-full')}
                     >
                         {isPending ? 'Signing in…' : 'Sign in with Email'}
                     </button>
                 </form>
 
-                {/* Divider */}
-                <div className="flex items-center w-full mb-6">
-                    <div className="flex-1 border-t border-gray-300"></div>
-                    <span className="px-4 text-gray-500 text-sm">or</span>
-                    <div className="flex-1 border-t border-gray-300"></div>
-                </div>
+                {/* The Google / Apple / LinkedIn buttons that stood here had no onClick and
+                    no provider wired behind them — three controls that did nothing when
+                    pressed. Deleted rather than disabled: an offer to sign in a way the
+                    product cannot is worse than not offering it. */}
 
-                {/* Social Login Buttons */}
-                <div className="w-full space-y-3">
-                    <button
-                        type="button"
-                        className="w-full flex items-center px-6 py-3 border border-gray-400 bg-transparent rounded-full hover:bg-gray-200/50 transition-colors relative"
-                    >
-                        <FcGoogle className="text-xl absolute left-6" />
-                        <span className="flex-1 text-center text-gray-700 font-medium">Sign in with Google</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="w-full flex items-center px-6 py-3 border border-gray-400 bg-transparent rounded-full hover:bg-gray-200/50 transition-colors relative"
-                    >
-                        <FaApple className="text-xl absolute left-6 text-black" />
-                        <span className="flex-1 text-center text-gray-700 font-medium">Sign in with Apple</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="w-full flex items-center px-6 py-3 border border-gray-400 bg-transparent rounded-full hover:bg-gray-200/50 transition-colors relative"
-                    >
-                        <FaLinkedin className="text-xl absolute left-6 text-[#0A66C2]" />
-                        <span className="flex-1 text-center text-gray-700 font-medium">Sign in with LinkedIn</span>
-                    </button>
-                </div>
-
-                {/* Footer Link */}
-                <div className="mt-8 text-sm text-gray-600">
-                    Don't have an account? <a href="/auth/signup" className="text-black font-semibold hover:underline">Signup</a>
+                <div className="mt-8 text-sm text-ink-soft">
+                    Don&apos;t have an account?{' '}
+                    <Link href="/auth/signup" className="font-semibold text-ink hover:underline">
+                        Sign up
+                    </Link>
                 </div>
 
             </div>

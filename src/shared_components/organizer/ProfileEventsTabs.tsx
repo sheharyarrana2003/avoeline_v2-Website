@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { CalendarOff } from "lucide-react";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 
 export interface ProfileEventSummary {
     id: string;
@@ -31,46 +33,60 @@ export function ProfileEventsTabs({
     const list = activeTab === "Upcoming Events" ? upcoming : past;
 
     return (
-        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex border-b border-gray-100">
+        // Uncarded: this sits on the profile canvas, and a grey panel there separated
+        // from nothing. The tab rule below does the grouping the border used to.
+        <section>
+            <div className="mb-4 flex border-b border-line">
                 {TABS.map((tab) => (
                     <button
                         key={tab}
                         type="button"
                         onClick={() => setActiveTab(tab)}
-                        className={`relative px-3 pb-2 text-sm font-medium transition-colors ${activeTab === tab ? "text-black" : "text-gray-500 hover:text-gray-600"
-                            }`}
+                        aria-current={activeTab === tab ? "true" : undefined}
+                        className={`-mb-px border-b-2 px-3 pb-2 text-sm font-medium transition-colors ${
+                            activeTab === tab
+                                ? "border-gray-900 text-ink"
+                                : "border-transparent text-ink-soft hover:text-ink"
+                        }`}
                     >
                         {tab}
-                        {activeTab === tab && (
-                            <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-black" />
-                        )}
                     </button>
                 ))}
             </div>
 
             {activeTab === "About" ? (
-                <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600">
+                <p className="whitespace-pre-line text-sm leading-relaxed text-ink-soft">
                     {about?.trim() ? about : "No description provided."}
                 </p>
             ) : list.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-500">
-                    No {activeTab === "Upcoming Events" ? "upcoming" : "past"} events found.
-                </p>
+                <EmptyState
+                    size="sm"
+                    icon={<CalendarOff className="h-5 w-5" />}
+                    title={`No ${activeTab === "Upcoming Events" ? "upcoming" : "past"} events`}
+                    description={
+                        activeTab === "Upcoming Events"
+                            ? "Published events with a future start date will be listed here."
+                            : "Events that have already finished will be listed here."
+                    }
+                />
             ) : (
-                <ul className="space-y-4">
+                <ul className="space-y-2">
                     {list.map((event) => (
-                        <li key={event.id} className="group">
-                            <Link href={`${basePath}/events/${event.id}`} className="block">
+                        <li key={event.id}>
+                            {/* A real card here: the whole row is one click target. */}
+                            <Link
+                                href={`${basePath}/events/${event.id}`}
+                                className="block rounded-2xl border border-line bg-paper p-5 transition hover:border-line-loud"
+                            >
                                 <div className="flex items-center justify-between gap-3">
-                                    <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-gray-900">
+                                    <h3 className="truncate text-sm font-semibold text-ink">
                                         {event.title}
                                     </h3>
-                                    <span className="shrink-0 text-xs font-semibold text-gray-500">
+                                    <span className="shrink-0 text-xs font-medium text-ink-soft tabular-nums">
                                         {event.date || "—"}
                                     </span>
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500">
+                                <p className="mt-1 text-xs text-ink-soft">
                                     {[event.category, event.venueName].filter(Boolean).join(" • ")}
                                 </p>
                             </Link>
@@ -78,6 +94,6 @@ export function ProfileEventsTabs({
                     ))}
                 </ul>
             )}
-        </div>
+        </section>
     );
 }

@@ -1,3 +1,4 @@
+import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 import Link from "next/link";
 
 // Pure server component — no interactivity needed
@@ -37,22 +38,7 @@ export function HomeHeader() {
             flexShrink: 0,
           }}
         >
-          <span
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 9,
-              background: "#000000",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 16 16" fill="none">
-              <path d="M3 12L8 4L13 12" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M5.5 9.5H10.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </span>
+          <BrandMark className="h-8 w-8 shrink-0" />
           <span
             style={{
               fontFamily: "var(--font-heading, 'Space Grotesk', sans-serif)",

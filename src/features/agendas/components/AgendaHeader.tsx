@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { AgendaDay, Session } from "@/src/services/models/agenda.model";
+import { buttonClass } from "@/src/lib/ui";
 
 interface AgendaHeaderProps {
 	id: string;
@@ -17,10 +19,10 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 	const searchParams = useSearchParams();
 
 	return (
-		<div className="flex justify-between items-end border-b border-gray-200 w-full pt-4">
+		<div className="flex w-full items-end justify-between gap-4 border-b border-line pt-4">
 
 			{/* Left Side: Dynamic Day Tabs */}
-			<div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+			<div className="no-scrollbar flex items-center gap-8 overflow-x-auto">
 				{days.map((day, index) => {
 					const isActive = activeDate === day.date;
 					const sessionCount = sessionsByDay[day.date]?.length || 0;
@@ -34,20 +36,21 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 							key={day.id}
 							href={`?${params.toString()}`}
 							scroll={false}
-							className={`flex items-center gap-2 pb-4 border-b-2 transition-all whitespace-nowrap ${isActive
-								? 'border-black text-gray-900'
-								: 'border-transparent text-gray-500 hover:text-gray-600'
+							aria-current={isActive ? "page" : undefined}
+							className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-4 transition-colors ${isActive
+								? 'border-gray-900 text-ink'
+								: 'border-transparent text-ink-soft hover:text-ink'
 								}`}
 						>
-							<span className={`text-sm ${isActive ? 'font-bold' : 'font-semibold'}`}>
+							<span className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>
 								Day {index + 1} ({day.label})
 							</span>
 
 							{sessionCount > 0 && (
 								<span
-									className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full transition-colors ${isActive
-										? 'bg-black text-white'
-										: 'bg-gray-100 text-gray-500'
+									className={`rounded-full px-2.5 py-0.5 text-2xs font-bold tabular-nums transition-colors ${isActive
+										? 'bg-gray-900 text-white'
+										: 'bg-gray-100 text-ink-soft'
 										}`}
 								>
 									{sessionCount} sessions
@@ -59,16 +62,12 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 			</div>
 
 			{/* Right Side: Action Buttons */}
-			<div className="flex items-center gap-3 pb-3 pl-4">
-
-
+			<div className="shrink-0 pb-3">
 				<Link
 					href={`/organizer/${organizer_id}/events/${id}/agenda/create-agenda`}
-					className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition shrink-0"
+					className={buttonClass("primary", "sm")}
 				>
-					<svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
-					</svg>
+					<Plus className="h-4 w-4" aria-hidden="true" />
 					Add Agenda
 				</Link>
 			</div>

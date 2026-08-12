@@ -18,12 +18,12 @@ export function SkeletonPage({
     children: React.ReactNode;
 }) {
     return (
-        <main className="px-4 py-6 sm:px-6 lg:px-8" aria-busy="true" aria-live="polite">
+        <div className="px-4 py-6 sm:px-6 lg:px-8" aria-busy="true" aria-live="polite">
             <span className="sr-only">{label}…</span>
             <div className="mx-auto max-w-7xl space-y-6" aria-hidden="true">
                 {children}
             </div>
-        </main>
+        </div>
     );
 }
 

@@ -4,25 +4,47 @@
 import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
+import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import {
+    Building2,
+    CalendarCheck,
+    CalendarDays,
+    CalendarClock,
+    Camera,
+    ClipboardList,
+    MapPin,
+    Mic,
+    Music,
+    Package,
+    Sparkles,
+    UtensilsCrossed,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 // --- Helper Functions ---
-const getServiceIcon = (serviceType: string) => {
-    const icons: Record<string, string> = {
-        'catering': '🍴',
-        'av_equipment': '🎤',
-        'decoration': '🌸',
-        'photography': '📷',
-        'venues': '🏢',
-        'music': '🎵',
-        'event_management': '📋',
-    };
-    return icons[serviceType?.toLowerCase()] || '📦';
+// Lucide, not emoji: a black-and-white product can't carry meaning in a colour
+// glyph, and the fallback box renders differently on every platform.
+const SERVICE_ICONS: Record<string, LucideIcon> = {
+    catering: UtensilsCrossed,
+    av_equipment: Mic,
+    decoration: Sparkles,
+    photography: Camera,
+    venues: Building2,
+    music: Music,
+    event_management: ClipboardList,
 };
+
+const getServiceIcon = (serviceType: string): LucideIcon =>
+    SERVICE_ICONS[serviceType?.toLowerCase()] || Package;
 
 const getServiceName = (serviceType: string) => {
     const names: Record<string, string> = {
@@ -34,60 +56,34 @@ const getServiceName = (serviceType: string) => {
         'music': 'Music',
         'event_management': 'Event Management',
     };
-    return names[serviceType?.toLowerCase()] || serviceType;
+    return names[serviceType?.toLowerCase()] || serviceType || 'Service';
 };
 
-// Get organizer name from booking
-const getOrganizerName = (organizerId: string) => {
-    const names: Record<string, string> = {
-        'org_001': 'TechVerse',
-        'org_002': 'Tech Innovators',
-        'org_003': 'Ahmed & Sana',
-    };
-    return names[organizerId] || organizerId;
-};
-
-// Get client name for display
-const getClientName = (booking: any) => {
-    if (booking?.organizerId === 'org_003') return 'Ahmed & Sana';
-    return getOrganizerName(booking?.organizerId || '');
-};
-
-// Get preparation progress
-const getPrepProgress = (booking: any) => {
-    // Mock progress based on status
-    const status = booking?.status?.toLowerCase();
-    if (status === 'confirmed') return 25;
-    if (status === 'in_progress') return 75;
-    if (status === 'completed') return 100;
-    return 0;
-};
-
-export default async function VendorBookingsPage({ 
+export default async function VendorBookingsPage({
     params,
     searchParams
-}: { 
+}: {
     params: Promise<{ vendor_id: string }>;
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const { vendor_id } = await params;
     const awaitedSearchParams = await searchParams;
-    
+
     // Get filter from URL
     const filter = (awaitedSearchParams?.filter as string) || 'all';
-    
+
     // Fetch vendor data
     const vendor = await EventVendorService.getVendorById(vendor_id);
     if (!vendor) {
         notFound();
     }
-    
+
     // Fetch all bookings for this vendor
     const raw_bookings = await BookingServices.getAllBookingsOfVendor(vendor_id) || [];
-    
+
     // Collect unique event IDs
     const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
-    
+
     // Fetch all events dynamically
     const eventsMap: Record<string, any> = {};
     await Promise.all(eventIds.map(async (eventId) => {
@@ -98,58 +94,64 @@ export default async function VendorBookingsPage({
             // Event not found
         }
     }));
-    
-    // Get event title dynamically
-    const getEventTitle = (eventId: string) => {
-        return eventsMap[eventId]?.title || eventId;
-    };
-    
+
+    // Organizer names were a hardcoded three-entry map (org_001 -> "TechVerse"),
+    // so every real organizer rendered as a raw id and three fictional ones
+    // rendered as fact. Resolve them from the organizer collection instead.
+    const organizerIds = [...new Set(raw_bookings.map((b: any) => b?.organizerId).filter(Boolean))] as string[];
+    const organizersMap: Record<string, string> = {};
+    await Promise.all(organizerIds.map(async (id) => {
+        try {
+            const org = await OrganizerService.getOrganizerById(id);
+            // mapToOrganizer answers a missing document with a placeholder named
+            // "unknown" rather than null, so an absent organizer would otherwise
+            // render as the literal word.
+            const name = org?.organization?.name;
+            if (name && name !== "unknown") organizersMap[id] = name;
+        } catch {
+            // Organizer not found — falls back to the neutral label below.
+        }
+    }));
+
+    const getEventTitle = (eventId: string) => eventsMap[eventId]?.title || eventId;
+    const getOrganizerName = (organizerId: string) => organizersMap[organizerId] || "Organizer";
+
     // Filter bookings
     const now = new Date();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
-    
+
     const activeStatuses = ['confirmed', 'in_progress'];
-    const completedStatuses = ['completed'];
-    
-    const allBookings = raw_bookings.filter((b: any) => 
+
+    const allBookings = raw_bookings.filter((b: any) =>
         ['confirmed', 'in_progress', 'completed', 'cancelled'].includes(b?.status?.toLowerCase())
     );
-    
-    const activeBookings = allBookings.filter((b: any) => 
+
+    const activeBookings = allBookings.filter((b: any) =>
         activeStatuses.includes(b?.status?.toLowerCase())
     );
-    
+
     const upcomingThisWeek = activeBookings.filter((b: any) => {
         // serviceDate is stored DD/MM/YYYY — parse with the shared helper.
         const serviceDate = parseScheduleDateTime(b?.requirements?.serviceDate, "");
         return serviceDate && serviceDate >= startOfWeek && serviceDate <= endOfWeek;
     });
-    
+
     const completedThisMonth = allBookings.filter((b: any) => {
         if (b?.status?.toLowerCase() !== 'completed') return false;
         const completedDate = b?.completedAt ? new Date(b.completedAt) : null;
-        return completedDate && 
-               completedDate.getMonth() === now.getMonth() && 
+        return completedDate &&
+               completedDate.getMonth() === now.getMonth() &&
                completedDate.getFullYear() === now.getFullYear();
     });
-    
+
     // Apply tab filter
-    let displayBookings = allBookings;
-    if (filter === 'confirmed') {
-        displayBookings = allBookings.filter((b: any) => b?.status?.toLowerCase() === 'confirmed');
-    } else if (filter === 'in_progress') {
-        displayBookings = allBookings.filter((b: any) => b?.status?.toLowerCase() === 'in_progress');
-    } else if (filter === 'completed') {
-        displayBookings = allBookings.filter((b: any) => b?.status?.toLowerCase() === 'completed');
-    } else if (filter === 'cancelled') {
-        displayBookings = allBookings.filter((b: any) => b?.status?.toLowerCase() === 'cancelled');
-    }
-    
-    // Sort by service date (upcoming first)
-    displayBookings = displayBookings.sort((a: any, b: any) => {
+    const displayBookings = (filter === 'all'
+        ? allBookings
+        : allBookings.filter((b: any) => b?.status?.toLowerCase() === filter)
+    ).sort((a: any, b: any) => {
         const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
         const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
         return dateA - dateB;
@@ -158,201 +160,109 @@ export default async function VendorBookingsPage({
     const tabs = [
         { id: 'all', label: 'All' },
         { id: 'confirmed', label: 'Confirmed' },
-        { id: 'in_progress', label: 'In Progress' },
+        { id: 'in_progress', label: 'In progress' },
         { id: 'completed', label: 'Completed' },
         { id: 'cancelled', label: 'Cancelled' },
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            
-            
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl">
+                <PageHeader
+                    title="Bookings"
+                    description="Every service you have been confirmed for, in service-date order."
+                />
 
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-                
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
-                        <p className="text-sm text-gray-500 mt-1">Manage all your confirmed and active services</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input
-                                type="text"
-                                placeholder="Search bookings..."
-                                className="bg-white border border-gray-200 rounded-full pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200 w-48"
-                            />
-                        </div>
+                <section className="grid grid-cols-2 gap-y-8 border-b border-line py-8 sm:grid-cols-3 sm:divide-x sm:divide-line">
+                    <StatCard_dashboard title="Active" value={String(activeBookings.length)} icon={<CalendarCheck size={14} />} />
+                    <StatCard_dashboard title="This Week" value={String(upcomingThisWeek.length)} icon={<CalendarClock size={14} />} />
+                    <StatCard_dashboard title="Completed This Month" value={String(completedThisMonth.length)} icon={<CalendarDays size={14} />} />
+                </section>
 
-                    </div>
-                </div>
+                {/* Tabs, not pills: the same treatment the quotes page uses, so a
+                    filter never looks like a button that submits something. */}
+                <nav aria-label="Filter bookings" className="mb-8 flex gap-6 overflow-x-auto border-b border-line">
+                    {tabs.map((tab) => (
+                        <Link
+                            key={tab.id}
+                            href={`/vendor/${vendor_id}/bookings?filter=${tab.id}`}
+                            aria-current={filter === tab.id ? "page" : undefined}
+                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 pt-6 text-sm font-medium transition ${
+                                filter === tab.id
+                                    ? "border-gray-900 text-ink"
+                                    : "border-transparent text-ink-soft hover:text-ink"
+                            }`}
+                        >
+                            {tab.label}
+                        </Link>
+                    ))}
+                </nav>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Total Active Bookings</p>
-                        <p className="text-3xl font-bold text-gray-900">{activeBookings.length}</p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Upcoming This Week</p>
-                        <p className="text-3xl font-bold text-gray-900">{upcomingThisWeek.length}</p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Completed This Month</p>
-                        <p className="text-3xl font-bold text-gray-900">{completedThisMonth.length}</p>
-                    </div>
-                </div>
-
-                {/* Filter Tabs */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        {tabs.map((tab) => (
-                            <Link
-                                key={tab.id}
-                                href={`/vendor/${vendor_id}/bookings?filter=${tab.id}`}
-                                className={`px-5 py-2 rounded-full text-sm font-medium transition ${
-                                    filter === tab.id
-                                        ? 'bg-black text-white'
-                                        : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
-                            >
-                                {tab.label}
-                            </Link>
-                        ))}
-                    </div>
-                    
-                    {/* View Toggle */}
-                 
-                </div>
-
-                {/* Booking Cards Grid */}
                 {displayBookings.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {displayBookings.map((booking: any) => {
-                            const eventTitle = getEventTitle(booking?.eventId);
                             const status = booking?.status || 'unknown';
                             const serviceType = booking?.serviceType || '';
-                            const serviceName = getServiceName(serviceType);
-                            const serviceIcon = getServiceIcon(serviceType);
-                            const organizerName = getOrganizerName(booking?.organizerId);
-                            const clientName = getClientName(booking);
-                            const prepProgress = getPrepProgress(booking);
+                            const ServiceIcon = getServiceIcon(serviceType);
                             const totalAmount = booking?.quote?.vendorQuote?.totalAmount || booking?.payment?.totalAmount || 0;
                             const currency = booking?.payment?.currency || 'PKR';
-                            const serviceDate = booking?.requirements?.serviceDate;
-                            const location = booking?.requirements?.location;
-                            
-                            const isCompleted = status.toLowerCase() === 'completed';
-                            const isInProgress = status.toLowerCase() === 'in_progress';
-                            const isConfirmed = status.toLowerCase() === 'confirmed';
-                            
+
                             return (
-                                <div key={booking?.bookingId} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
-                                    
-                                    {/* Card Header */}
-                                    <div className="flex items-center justify-between mb-4">
-                                        <StatusBadge status={status} size="md" />
-                                        <span className="text-sm font-bold text-gray-900">{formatCurrency(totalAmount, currency)}</span>
+                                <div key={booking?.bookingId} className="lift flex flex-col rounded-2xl border border-line bg-paper p-5 shadow-xs">
+                                    <div className="mb-4 flex items-center justify-between gap-2">
+                                        <StatusBadge status={status} size="sm" />
+                                        <span className="text-sm font-medium text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</span>
                                     </div>
-                                    
-                                    {/* Event Title */}
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{eventTitle}</h3>
-                                    
-                                    {/* Organizer / Client */}
-                                    <p className="text-xs text-gray-500 mb-4">
-                                        {isCompleted ? `Client: ${clientName}` : `Organized by ${organizerName}`}
-                                    </p>
-                                    
-                                    {/* Service & Details */}
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <span>{serviceIcon}</span>
-                                            <span>{serviceName}</span>
+
+                                    <h2 className="font-display text-lg text-ink">{getEventTitle(booking?.eventId)}</h2>
+                                    <p className="mt-1 text-xs text-ink-soft">{getOrganizerName(booking?.organizerId)}</p>
+
+                                    <dl className="mt-4 space-y-2 text-sm text-ink-soft">
+                                        <div className="flex items-center gap-2">
+                                            {/* gray-400 = 2.5:1, decoration only — every row has a text value. */}
+                                            <ServiceIcon size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <dt className="sr-only">Service</dt>
+                                            <dd>{getServiceName(serviceType)}</dd>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            {formatDate(serviceDate)}
+                                        <div className="flex items-center gap-2">
+                                            <CalendarDays size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <dt className="sr-only">Service date</dt>
+                                            <dd className="tabular-nums">{formatDate(booking?.requirements?.serviceDate)}</dd>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            {location || 'Location TBD'}
+                                        <div className="flex items-center gap-2">
+                                            <MapPin size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <dt className="sr-only">Location</dt>
+                                            <dd>{booking?.requirements?.location || 'Location TBD'}</dd>
                                         </div>
-                                    </div>
-                                    
-                                    {/* Progress Bar (for in-progress) */}
-                                    {(isConfirmed || isInProgress) && (
-                                        <div className="mb-4">
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    {isInProgress ? 'Service Status' : 'Preparation Status'}
-                                                </span>
-                                                <span className="text-xs font-bold text-gray-900">{prepProgress}%</span>
-                                            </div>
-                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="h-full bg-black rounded-full"
-                                                    style={{ width: `${prepProgress}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    {/* Review Badge (for completed) */}
-                                    {isCompleted && (
-                                        <div className="mb-4">
-                                            <span className="text-[10px] font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded-full">
-                                                Review Received
-                                            </span>
-                                        </div>
-                                    )}
-                                    
-                                    {/* Action Button */}
-                                    <Link 
-                                        href={isCompleted 
-                                            ? `/vendor/${vendor_id}/bookings/${booking?.bookingId}`
-                                            : `/vendor/${vendor_id}/bookings/${booking?.bookingId}/prepare`
-                                        }
-                                        className={`w-full block text-center py-3 rounded-xl font-bold text-sm transition ${
-                                            isCompleted
-                                                ? 'border-2 border-black text-black hover:bg-black hover:text-white'
-                                                : 'bg-black text-white hover:bg-gray-800'
-                                        }`}
+                                    </dl>
+
+                                    {/* Was a "Prepare" primary CTA pointing at /bookings/[id]/prepare,
+                                        a route that has never existed — every card's main action 404'd. */}
+                                    <Link
+                                        href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}`}
+                                        className={buttonClass("secondary", "md", "mt-5 w-full")}
                                     >
-                                        {isCompleted ? 'View Details' : isInProgress ? 'Start Service' : 'Prepare'}
+                                        View booking
                                     </Link>
                                 </div>
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg aria-hidden="true" className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">No Bookings Found</h3>
-                        <p className="text-sm text-gray-500">No {filter !== 'all' ? filter : ''} bookings match your criteria.</p>
-                    </div>
-                )}
-
-                {/* Load More */}
-                {displayBookings.length > 0 && (
-                    <div className="text-center mt-8">
-                        <button className="bg-white border border-gray-200 rounded-full px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
-                            Load More Bookings
-                        </button>
-                        <p className="text-xs text-gray-500 mt-3">Showing {Math.min(displayBookings.length, 6)} of {activeBookings.length} active bookings</p>
-                    </div>
+                    <EmptyState
+                        icon={<CalendarDays size={26} />}
+                        title={filter === 'all' ? "No bookings yet" : `No ${tabs.find((t) => t.id === filter)?.label.toLowerCase()} bookings`}
+                        description={
+                            filter === 'all'
+                                ? "A quote becomes a booking once an organizer accepts it. Responding to quote requests quickly is what moves them along."
+                                : "Nothing in this state right now. Try another filter."
+                        }
+                        action={
+                            <Link href={`/vendor/${vendor_id}/quotes`} className={buttonClass("primary", "md")}>
+                                Go to quotes
+                            </Link>
+                        }
+                    />
                 )}
             </div>
         </div>

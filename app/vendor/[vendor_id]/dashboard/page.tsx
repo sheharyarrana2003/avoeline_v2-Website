@@ -7,56 +7,55 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, parseScheduleDateTime, timeAgo } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
-import { StarRating } from "@/src/shared_components/ui/StarRating";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import { CalendarDays, FileText, Inbox, MapPin, Star, Wallet } from "lucide-react";
 
-// --- Helper Functions ---
-// --- Star Rating Component ---
-// --- Mini Bar Chart Component ---
-const MiniBarChart = ({ data }: { data: number[] }) => {
+/**
+ * Seven weekly totals as bars. Decoration on top of the figure printed above it,
+ * so the bars are gray-300 (1.6:1) and the chart is hidden from assistive tech —
+ * the number, not the silhouette, is the content.
+ */
+function MiniBarChart({ data }: { data: number[] }) {
     const max = Math.max(...data, 1);
     return (
-        <div className="flex items-end gap-1.5 h-16 pt-2">
+        <div className="flex h-16 items-end gap-1.5 pt-2" aria-hidden="true">
             {data.map((val, i) => (
                 <div
                     key={i}
-                    className={`flex-1 rounded-t-sm transition-all ${val === max && val > 0 ? 'bg-black' : 'bg-gray-300'}`}
-                    style={{ height: `${(val / max) * 100}%`, minHeight: '6px' }}
+                    className={`flex-1 rounded-t-xs ${val === max && val > 0 ? "bg-accent" : "bg-gray-300"}`}
+                    style={{ height: `${(val / max) * 100}%`, minHeight: "6px" }}
                 />
             ))}
         </div>
     );
-};
+}
 
-export default async function VendorDashboardPage({ 
-    params 
-}: { 
-    params: Promise<{ vendor_id: string }> 
+export default async function VendorDashboardPage({
+    params
+}: {
+    params: Promise<{ vendor_id: string }>
 }) {
     const { vendor_id } = await params;
-    
-    // Fetch vendor data
-    const v : VendorData|null = await EventVendorService.getVendorById(vendor_id);
 
-    if(!v){
+    const v: VendorData | null = await EventVendorService.getVendorById(vendor_id);
+
+    if (!v) {
         notFound();
     }
-    
-    // Fetch all bookings for this vendor
-    let raw_bookings : BookingData[]|null = await BookingServices.getAllBookingsOfVendor(vendor_id) ;
 
-    if(!raw_bookings){
-        raw_bookings= [];
-    }
-    
-    const businessName = v?.businessName || "Vendor Dashboard";
+    const raw_bookings: BookingData[] = (await BookingServices.getAllBookingsOfVendor(vendor_id)) || [];
+
+    const businessName = v?.businessName || "there";
     const vendorRating = v?.ratings?.averageRating || 0;
-    const totalReviews = v?.ratings?.totalReviews || 0;
     const verificationBadges = v?.verification?.verificationBadges || [];
-    const isVerified = v?.verification?.verified || false;
-    
+    const isTopRated = Boolean(v?.verification?.verified) && verificationBadges.includes("top_rated");
+
     const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
-    
+
     const eventsMap: Record<string, any> = {};
     await Promise.all(eventIds.map(async (eventId) => {
         try {
@@ -68,51 +67,49 @@ export default async function VendorDashboardPage({
             // Event not found fallback
         }
     }));
-    
-    const getEventTitle = (eventId: string) => {
-        return eventsMap[eventId]?.title || eventId;
-    };
-    
+
+    const getEventTitle = (eventId: string) => eventsMap[eventId]?.title || eventId;
+
     const getEventCategory = (eventId: string) => {
         const event = eventsMap[eventId];
-        if (!event) return 'Event';
-        return event?.category || event?.eventType || 'Event';
+        if (!event) return "Event";
+        return event?.category || event?.eventType || "Event";
     };
-    
-    const activeQuotes = raw_bookings.filter((b: any) => 
+
+    const activeQuotes = raw_bookings.filter((b: any) =>
         ['quote_requested', 'quote_sent', 'negotiating'].includes(b?.status?.toLowerCase())
     );
-    
-    const confirmedBookings = raw_bookings.filter((b: any) => 
+
+    const confirmedBookings = raw_bookings.filter((b: any) =>
         ['confirmed', 'in_progress'].includes(b?.status?.toLowerCase())
     );
-    
-    const completedBookings = raw_bookings.filter((b: any) => 
+
+    const completedBookings = raw_bookings.filter((b: any) =>
         b?.status?.toLowerCase() === 'completed'
     );
-    
+
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
-    
+
     const thisMonthRevenue = completedBookings
         .filter((b: any) => {
             const completedDate = b?.completedAt ? new Date(b.completedAt) : null;
-            return completedDate && 
-                   completedDate.getMonth() === currentMonth && 
+            return completedDate &&
+                   completedDate.getMonth() === currentMonth &&
                    completedDate.getFullYear() === currentYear;
         })
         .reduce((sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0);
-    
+
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const recentQuoteRequests = raw_bookings
         .filter((b: any) => {
             const created = b?.createdAt ? new Date(b.createdAt) : null;
-            return created && created >= sevenDaysAgo && 
+            return created && created >= sevenDaysAgo &&
                    ['quote_requested', 'quote_sent'].includes(b?.status?.toLowerCase());
         })
         .sort((a: any, b: any) => new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime());
-    
+
     const upcomingBookings = confirmedBookings
         .filter((b: any) => {
             const serviceDate = parseScheduleDateTime(b?.requirements?.serviceDate, "");
@@ -124,267 +121,178 @@ export default async function VendorDashboardPage({
             return dateA - dateB;
         })
         .slice(0, 4);
-    
+
     const weeklyRevenue = computeWeeklyRevenue(completedBookings);
-    
-    const getBudgetRange = (booking: any) => {
-        const total = booking?.quote?.vendorQuote?.totalAmount || 0;
-        const currency = booking?.payment?.currency || 'PKR';
-        if (total === 0) return 'Budget TBD';
-        const min = Math.round(total * 0.8);
-        const max = Math.round(total * 1.2);
-        return `${formatCurrency(min, currency)}-${formatCurrency(max, currency).replace('PKR', '')}`;
-    };
-    
-    const getServiceIcon = (serviceType: string) => {
-        const icons: Record<string, string> = {
-            'catering': '🍽️',
-            'av_equipment': '🎤',
-            'decoration': '🌸',
-            'photography': '📷',
-            'venues': '🏢',
-            'music': '🎵',
-            'event_management': '📋',
-        };
-        return icons[serviceType?.toLowerCase()] || '📦';
-    };
 
     return (
-        <div className="min-h-screen bg-gray-200 px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-7xl mx-auto space-y-6">
-                
-                {/* Welcome Header Card - Matching Project Aesthetics */}
-                <div className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        {v?.logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={v.logo} alt={businessName} className="w-11 h-11 rounded-full object-cover border border-gray-300 bg-white shadow-xs" />
-                        ) : (
-                            <div className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg shadow-xs">
-                                {businessName.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                        <div>
-                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                                Welcome back, {businessName}!
-                            </h1>
-                            <p className="text-xs text-gray-500">Track your quotes, confirmed bookings, and monthly revenue.</p>
+        <div className="px-4 py-8 font-sans text-ink sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl">
+                <PageHeader
+                    title={`Welcome back, ${businessName}`}
+                    description="Track your quote requests, confirmed bookings and monthly revenue."
+                    actions={
+                        <>
+                            {isTopRated && (
+                                <span className="inline-flex h-11 items-center gap-1.5 rounded-full border border-success-line bg-success-soft px-4 text-2xs font-bold uppercase text-success">
+                                    <Star size={12} aria-hidden="true" />
+                                    Top rated vendor
+                                </span>
+                            )}
+                            <Link href={`/vendor/${vendor_id}/quotes`} className={buttonClass("primary", "lg")}>
+                                <FileText size={16} />
+                                Review quotes
+                            </Link>
+                        </>
+                    }
+                />
+
+                <div className="space-y-10">
+                    {/* Same shape as the organizer dashboard: one figure carries the
+                        screen and the rest support it. Revenue leads because it is what a
+                        vendor opens this page to find out. */}
+                    <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+                        <div className="ink-panel relative overflow-hidden rounded-2xl p-7 shadow-lg">
+                            <p className="text-2xs font-medium uppercase text-white/50">Revenue this month</p>
+                            <p className="figure mt-3 text-5xl text-white">
+                                {formatCurrency(thisMonthRevenue, "PKR", "Rs 0")}
+                            </p>
+                            <p className="mt-3 flex items-center gap-1.5 text-sm text-white/60">
+                                <CalendarDays size={14} aria-hidden="true" />
+                                across {confirmedBookings.length} confirmed{" "}
+                                {confirmedBookings.length === 1 ? "booking" : "bookings"}
+                            </p>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                        {isVerified && verificationBadges.includes('top_rated') && (
-                            <span className="bg-black text-white text-[10px] font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-                                <svg aria-hidden="true" className="w-3 h-3 fill-white" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                Top Rated Vendor
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Compact Stats Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
-                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Quotes</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{activeQuotes.length}</p>
-                    </div>
-
-                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
-                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirmed Bookings</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{confirmedBookings.length}</p>
-                    </div>
-
-                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
-                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">This Month Revenue</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
-                    </div>
-
-                    <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
-                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Average Rating</p>
-                        <div className="flex items-baseline gap-2">
-                            <p className="text-2xl font-extrabold text-gray-900">{vendorRating || 'N/A'}</p>
-                            <span className="text-xs text-gray-500">({totalReviews} reviews)</span>
+                        <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
+                            <StatCard_dashboard title="Active Quotes" value={String(activeQuotes.length)} icon={<FileText size={14} />} />
+                            <StatCard_dashboard title="Confirmed" value={String(confirmedBookings.length)} icon={<CalendarDays size={14} />} />
+                            <StatCard_dashboard title="Avg Rating" value={vendorRating ? vendorRating.toFixed(1) : "—"} icon={<Star size={14} />} />
                         </div>
-                        <div className="mt-1">
-                            <StarRating rating={vendorRating} />
-                        </div>
-                    </div>
-                </div>
+                    </section>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    {/* Left Column: Recent Quote Requests & Upcoming Bookings */}
-                    <div className="lg:col-span-2 space-y-6">
-                        
-                        {/* Recent Quote Requests */}
-                        <div className="bg-gray-100 rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
-                            <div className="flex items-center justify-between mb-4 border-b border-gray-300/60 pb-3">
-                                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900">Recent Quote Requests</h3>
-                                <Link href={`/vendor/${vendor_id}/quotes`} className="text-xs font-semibold text-black hover:underline">
-                                    View All
-                                </Link>
-                            </div>
+                    <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
+                        <div className="space-y-10">
+                            <section>
+                                <div className="mb-4 flex items-end justify-between border-b border-line pb-3">
+                                    <h2 className="font-display text-xl text-ink">Recent quote requests</h2>
+                                    <Link href={`/vendor/${vendor_id}/quotes`} className={buttonClass("ghost", "sm")}>
+                                        View all
+                                    </Link>
+                                </div>
 
-                            <div className="space-y-3">
                                 {recentQuoteRequests.length > 0 ? (
-                                    recentQuoteRequests.map((booking: any, index: number) => {
-                                        const eventTitle = getEventTitle(booking?.eventId);
-                                        const eventCategory = getEventCategory(booking?.eventId);
-                                        const budgetRange = getBudgetRange(booking);
-                                        
-                                        return (
-                                            <div key={booking?.bookingId || index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white border border-gray-300/50 shadow-2xs">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
-                                                        <span className="text-base">{getServiceIcon(booking?.serviceType)}</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs font-bold text-gray-900">{eventTitle}</p>
-                                                        <p className="text-[11px] text-gray-500">
-                                                            {eventCategory} • {budgetRange}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2 self-end sm:self-center">
-                                                    <span className="text-[10px] text-gray-500 font-medium mr-1">
-                                                        {timeAgo(booking?.createdAt)}
-                                                    </span>
-                                                    <Link 
-                                                        href={`/vendor/${vendor_id}/quotes/${booking?.bookingId}`}
-                                                        className="text-xs font-medium text-gray-600 hover:text-black underline"
-                                                    >
-                                                        Details
-                                                    </Link>
-                                                    <Link 
-                                                        href={`/vendor/${vendor_id}/quotes/${booking?.bookingId}/submit`}
-                                                        className="bg-black text-white text-xs font-semibold px-3.5 py-1.5 rounded-full hover:bg-gray-800 transition shadow-2xs"
-                                                    >
-                                                        Submit Quote
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <div className="text-center py-6 bg-white rounded-xl border border-gray-300/50">
-                                        <p className="text-xs text-gray-500">No recent quote requests</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Upcoming Bookings */}
-                        <div className="bg-gray-100 rounded-2xl p-5 sm:p-6 border border-gray-300/60 shadow-xs">
-                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-4 border-b border-gray-300/60 pb-3">Upcoming Bookings</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {upcomingBookings.length > 0 ? (
-                                    upcomingBookings.map((booking: any, index: number) => {
-                                        const eventTitle = getEventTitle(booking?.eventId);
-                                        const serviceDate = booking?.requirements?.serviceDate;
-                                        const location = booking?.requirements?.location;
-                                        
-                                        return (
-                                            <div key={booking?.bookingId || index} className="bg-white rounded-xl p-4 border border-gray-300/50 shadow-2xs flex flex-col justify-between">
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <StatusBadge status={booking?.status} size="sm" />
-                                                        <span className="text-[10px] text-gray-500 font-mono">
-                                                            {booking?.bookingId}
-                                                        </span>
-                                                    </div>
-                                                    
-                                                    <h4 className="font-bold text-xs text-gray-900 mb-2">{eventTitle}</h4>
-                                                    
-                                                    <div className="space-y-1 mb-4">
-                                                        <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
-                                                            <svg aria-hidden="true" className="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
-                                                            {formatDate(serviceDate)}
-                                                        </p>
-                                                        <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
-                                                            <svg aria-hidden="true" className="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            </svg>
-                                                            {location || 'Location TBD'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <Link 
-                                                    href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}/prepare`}
-                                                    className="w-full block text-center bg-gray-200 hover:bg-gray-300 text-gray-900 text-xs font-semibold py-2 rounded-full transition"
+                                    <ul className="divide-y divide-line">
+                                        {recentQuoteRequests.map((booking: any, index: number) => {
+                                            const quoted = booking?.quote?.vendorQuote?.totalAmount;
+                                            return (
+                                                <li
+                                                    key={booking?.bookingId || index}
+                                                    className="-mx-3 flex flex-col gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
                                                 >
-                                                    Prepare
-                                                </Link>
-                                            </div>
-                                        );
-                                    })
+                                                    <div>
+                                                        <p className="text-sm font-medium text-ink">{getEventTitle(booking?.eventId)}</p>
+                                                        <p className="mt-0.5 text-xs text-ink-soft tabular-nums">
+                                                            {getEventCategory(booking?.eventId)} • {quoted ? formatCurrency(quoted, booking?.payment?.currency || "PKR") : "Not quoted yet"} • {timeAgo(booking?.createdAt)}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex shrink-0 items-center gap-2">
+                                                        <Link
+                                                            href={`/vendor/${vendor_id}/quotes/${booking?.bookingId}`}
+                                                            className={buttonClass("ghost", "sm")}
+                                                        >
+                                                            Details
+                                                        </Link>
+                                                        {/* prep-quote, not the /submit route that was linked here — it has never existed. */}
+                                                        <Link
+                                                            href={`/vendor/${vendor_id}/quotes/prep-quote/${booking?.bookingId}`}
+                                                            className={buttonClass("primary", "sm")}
+                                                        >
+                                                            Prepare quote
+                                                        </Link>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                 ) : (
-                                    <div className="col-span-2 bg-white rounded-xl p-6 text-center border border-gray-300/50">
-                                        <p className="text-xs text-gray-500">No upcoming bookings</p>
-                                    </div>
+                                    <EmptyState
+                                        size="sm"
+                                        icon={<Inbox size={22} />}
+                                        title="No quote requests this week"
+                                        description="Organizers find you through your service catalogue — keeping it current is what brings requests in."
+                                        action={
+                                            <Link href={`/vendor/${vendor_id}/services`} className={buttonClass("secondary", "sm")}>
+                                                Manage services
+                                            </Link>
+                                        }
+                                    />
                                 )}
-                            </div>
-                        </div>
-                    </div>
+                            </section>
 
-                    {/* Right Column: Revenue Overview & Quick Actions */}
-                    <div className="space-y-6">
-                        <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs">
-                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Revenue Overview</h3>
-                            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Total This Month</p>
-                            <p className="text-xl font-extrabold text-gray-900 mb-4">{formatCurrency(thisMonthRevenue)}</p>
-                            
-                            <MiniBarChart data={weeklyRevenue} />
-                            
-                            <div className="flex justify-between mt-2 text-[10px] text-gray-500 font-medium">
-                                <span>{getWeekLabel(0)}</span>
-                                <span>{getWeekLabel(3)}</span>
-                                <span>{getWeekLabel(6)}</span>
-                            </div>
+                            <section>
+                                <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Upcoming bookings</h2>
+
+                                {upcomingBookings.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        {upcomingBookings.map((booking: any, index: number) => (
+                                            <Link
+                                                key={booking?.bookingId || index}
+                                                href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}`}
+                                                className="lift flex flex-col justify-between rounded-2xl border border-line bg-paper p-5 shadow-xs"
+                                            >
+                                                <div className="mb-3 flex items-center justify-between gap-2">
+                                                    <StatusBadge status={booking?.status} size="sm" />
+                                                    {/* ink-soft = 4.75:1, not ink-faint: a booking id is text a
+                                                        vendor quotes back on the phone, not decoration. */}
+                                                    <span className="text-2xs text-ink-soft tabular-nums">{booking?.bookingId}</span>
+                                                </div>
+
+                                                <h3 className="text-sm font-medium text-ink">{getEventTitle(booking?.eventId)}</h3>
+
+                                                <dl className="mt-3 space-y-1 text-xs text-ink-soft">
+                                                    <div className="flex items-center gap-1.5">
+                                                        {/* gray-400 = 2.5:1, decoration; the value beside it carries the meaning. */}
+                                                        <CalendarDays size={12} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                        <dt className="sr-only">Service date</dt>
+                                                        <dd className="tabular-nums">{formatDate(booking?.requirements?.serviceDate)}</dd>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <MapPin size={12} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                        <dt className="sr-only">Location</dt>
+                                                        <dd>{booking?.requirements?.location || "Location TBD"}</dd>
+                                                    </div>
+                                                </dl>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyState
+                                        size="sm"
+                                        icon={<CalendarDays size={22} />}
+                                        title="Nothing booked yet"
+                                        description="Confirmed bookings with a future service date show up here."
+                                    />
+                                )}
+                            </section>
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs">
-                            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Quick Actions</h3>
-                            <div className="space-y-2">
-                                <Link 
-                                    href={`/vendor/${vendor_id}/quotes`}
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-300/50 hover:bg-gray-100/70 transition shadow-2xs"
-                                >
-                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-gray-900">View All Quotes</p>
-                                        <p className="text-[10px] text-gray-500">{activeQuotes.length} active quotes</p>
-                                    </div>
-                                </Link>
+                        <aside>
+                            <section>
+                                <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Revenue</h2>
+                                <p className="text-xs font-medium uppercase text-ink-soft">Total this month</p>
+                                <p className="mt-1 font-display text-3xl text-ink tabular-nums">
+                                    {formatCurrency(thisMonthRevenue, "PKR", "Rs 0")}
+                                </p>
 
-                                <Link 
-                                    href={`/vendor/${vendor_id}/bookings`}
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-300/50 hover:bg-gray-100/70 transition shadow-2xs"
-                                >
-                                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-200">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-gray-900">Manage Bookings</p>
-                                        <p className="text-[10px] text-gray-500">{confirmedBookings.length} confirmed</p>
-                                    </div>
-                                </Link>
-                            </div>
-                        </div>
+                                <MiniBarChart data={weeklyRevenue} />
+
+                                <div className="mt-2 flex justify-between text-2xs text-ink-soft tabular-nums">
+                                    <span>{getWeekLabel(0)}</span>
+                                    <span>{getWeekLabel(6)}</span>
+                                </div>
+                            </section>
+                        </aside>
                     </div>
                 </div>
             </div>
@@ -396,18 +304,18 @@ export default async function VendorDashboardPage({
 function computeWeeklyRevenue(completedBookings: any[]): number[] {
     const now = new Date();
     const weeks: number[] = [];
-    
+
     for (let i = 6; i >= 0; i--) {
         const weekStart = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
         const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-        
+
         const weekRevenue = completedBookings
             .filter((b: any) => {
                 const completed = b?.completedAt ? new Date(b.completedAt) : null;
                 return completed && completed >= weekStart && completed < weekEnd;
             })
             .reduce((sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0);
-        
+
         weeks.push(weekRevenue);
     }
 

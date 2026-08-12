@@ -32,14 +32,14 @@ export function FormFeedback({ error, success, className = "" }: FormFeedbackPro
             aria-live={isError ? "assertive" : "polite"}
             className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ring-1 ${
                 isError
-                    ? "bg-gray-900 text-white ring-gray-900 on-ink"
-                    : "bg-white text-gray-900 ring-gray-900"
+                    ? "bg-danger-soft text-danger ring-danger-line"
+                    : "bg-success-soft text-success ring-success-line"
             } ${className}`}
         >
             {isError ? (
-                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
             ) : (
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-gray-900" aria-hidden="true" />
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
             )}
             <span className="leading-snug">{error || success}</span>
         </div>

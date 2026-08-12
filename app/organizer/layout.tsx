@@ -38,7 +38,7 @@ export default async function OrganizerLayout({
                     { label: "Dashboard", href: `${basePath}/dashboard`, icon: "dashboard" },
                     { label: "Events", href: `${basePath}/events`, icon: "events" },
                     { label: "Analytics", href: `${basePath}/analytics`, icon: "analytics" },
-                    { label: "Vendors", href: `${basePath}/vendor-marketplace`, icon: "vendors" },
+                    { label: "Marketplace", href: `${basePath}/vendor-marketplace`, icon: "vendors" },
                     { label: "Quotes", href: `${basePath}/quotes`, icon: "quotes" },
                 ]}
             />

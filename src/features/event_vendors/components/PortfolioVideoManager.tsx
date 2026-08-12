@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Video, VideoOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addPortfolioVideo, removePortfolioVideo } from "../actions/updateVendorPortfolio.action";
 import { useToast } from "@/src/shared_components/ui/Toast";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass, fieldClass } from "@/src/lib/ui";
 
 export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; videos: string[] }) {
     const router = useRouter();
@@ -39,40 +42,46 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
 
     return (
         <div className="space-y-4">
-            {videos.length > 0 && (
+            {videos.length === 0 ? (
+                <EmptyState
+                    size="sm"
+                    icon={<VideoOff className="h-5 w-5" />}
+                    title="No portfolio videos yet"
+                    description="Paste a link to a showreel or an event recording below."
+                />
+            ) : (
                 <ul className="space-y-2">
                     {videos.map((v, i) => (
-                        <li key={v + i} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
-                            <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-gray-900 hover:underline">{v}</a>
+                        <li key={v + i} className="flex items-center gap-2 rounded-lg border border-line px-3 py-2">
+                            <Video className="h-4 w-4 shrink-0 text-ink-soft" aria-hidden="true" />
+                            <a href={v} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-sm text-ink hover:underline">{v}</a>
                             <ConfirmButton
                                 title="Remove this video?"
                                 description="This video will be taken off your public portfolio. This cannot be undone."
                                 confirmLabel="Remove video"
                                 onConfirm={() => remove(v)}
-                                className="shrink-0 rounded-xs text-gray-500 transition hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-soft transition hover:bg-gray-100 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                             >
                                 <span className="sr-only">Remove video</span>
-                                <span aria-hidden="true">×</span>
+                                <X className="h-4 w-4" aria-hidden="true" />
                             </ConfirmButton>
                         </li>
                     ))}
                 </ul>
             )}
 
-            <div className="space-y-2 rounded-xl border border-dashed border-gray-300 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Add video URL</p>
+            <div className="space-y-2 rounded-xl border border-dashed border-line-loud p-4">
+                <p className="text-2xs font-bold uppercase text-ink-soft">Add video URL</p>
                 <div className="flex flex-wrap items-center gap-2">
                     <input
                         type="url"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
+                        aria-label="Video URL"
                         placeholder="https://youtube.com/… or a video link"
-                        className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200"
+                        className={`${fieldClass} min-w-0 flex-1`}
                     />
-                    <button type="button" onClick={add} disabled={!url.trim() || saving} className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60">
+                    <button type="button" onClick={add} disabled={!url.trim() || saving} className={buttonClass("primary", "md")}>
                         {saving ? "Adding…" : "Add"}
                     </button>
                 </div>

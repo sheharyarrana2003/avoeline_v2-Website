@@ -11,14 +11,14 @@
        line       hairline
        line-loud  input + interactive borders
        ink        primary text, primary fill
-       ink-soft   secondary text — 4.7:1 on white
+       ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
        ink-faint  decorative ONLY — 2.5:1, never text */
   --paper: #FFFFFF;
   --canvas: oklch(0.985 0 0);
   --line: oklch(0.922 0 0);
   --line-loud: oklch(0.870 0 0);
   --ink: oklch(0.205 0 0);
-  --ink-soft: oklch(0.556 0 0);
+  --ink-soft: oklch(0.545 0 0);
   --ink-faint: oklch(0.708 0 0);
   --ink-invert: #FFFFFF;
 
@@ -28,12 +28,60 @@
   --surface: var(--paper);
   --border: var(--line);
 
-  /* Marketing identity — deliberately NOT monochrome. app/page.tsx and
-     src/shared_components/home/* keep violet; the product is black and white.
-     Two systems on purpose, as recorded in .claude/NOTES.md. */
-  --violet: #6C5CE7;
-  --violet-soft: #EFECFD;
-  --success: #22C55E;
+  /* ── Accent ──
+     The product is monochrome except here. The accent is the brand violet the
+     marketing site already used, which means this reunites two systems that had
+     drifted apart rather than introducing a third.
+
+     It earns its place on interactive and stateful things only — active nav,
+     focus, links, selection, chart series, progress fills. Never on decoration,
+     never on surfaces, never on a button (a filled black button is stronger).
+     Kept to a few percent of pixels, which is what makes an accent read as
+     deliberate rather than as decoration.
+
+     Contrast, measured: --accent is 4.86:1 on paper and 4.65:1 on canvas, so it
+     clears AA as text on light. On ink it is only 3.69:1 — fine for an indicator
+     bar, NOT for text, which is why rail labels stay white and --accent-on-ink
+     exists for the cases that do need to read on a dark surface. */
+  --accent: #6C5CE7;
+  --accent-strong: #5646D4;   /* 6.5:1 on paper — small text, links that must shout */
+  --accent-on-ink: #C3B8F7;   /* 9.8:1 on ink — the accent that survives a dark surface */
+  --accent-soft: #EFECFD;     /* tinted surface, decorative only */
+  --accent-line: #DDD7FB;
+
+  /* ── Semantic status ──
+     Green, amber and red for the states everyone already expects them on. These
+     ADD to the channels status already had — every badge still carries its icon
+     and its text label — because the accessibility rule is that colour must not
+     be the ONLY channel, not that colour is forbidden. Icon plus label plus hue
+     beats any one of them alone, which is why removing hue entirely was the wrong
+     reading of it.
+
+     The shades are darker than the ones usually reached for, and deliberately:
+     the common #16A34A green and #D97706 amber measure 3.30 and 3.19 against
+     white, so both FAIL as body text. These are 5.02, 5.02 and 6.47 on paper, and
+     4.80, 4.81 and 4.62 on the canvas — all clear of AA.
+
+     The -on-ink values are the inverse case: 9 to 13 to 1 on a dark surface and
+     nowhere near passing on a light one, so they are only ever used on ink. */
+  --success: #15803D;
+  --success-soft: #ECFDF3;
+  --success-line: #BBF7D0;
+  --success-on-ink: #86EFAC;
+
+  --warning: #B45309;
+  --warning-soft: #FFFBEB;
+  --warning-line: #FDE68A;
+  --warning-on-ink: #FCD34D;
+
+  --danger: #B91C1C;
+  --danger-soft: #FEF2F2;
+  --danger-line: #FECACA;
+  --danger-on-ink: #FCA5A5;
+
+  /* Legacy names. `home/` consumes these by name via inline styles. */
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
 }
 
 @theme {
@@ -48,12 +96,35 @@
   --color-gray-200: oklch(0.922 0 0);
   --color-gray-300: oklch(0.870 0 0);
   --color-gray-400: oklch(0.708 0 0);
-  --color-gray-500: oklch(0.556 0 0);
+  --color-gray-500: oklch(0.545 0 0);
   --color-gray-600: oklch(0.439 0 0);
   --color-gray-700: oklch(0.371 0 0);
   --color-gray-800: oklch(0.269 0 0);
   --color-gray-900: oklch(0.205 0 0);
   --color-gray-950: oklch(0.145 0 0);
+
+  /* ── The one chromatic namespace that survives. Deliberately narrow: five
+     values, not a 10-step ramp, so there is nowhere to reach for a sixth. ── */
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-on-ink: var(--accent-on-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-line: var(--success-line);
+  --color-success-on-ink: var(--success-on-ink);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-line: var(--warning-line);
+  --color-warning-on-ink: var(--warning-on-ink);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-line: var(--danger-line);
+  --color-danger-on-ink: var(--danger-on-ink);
 
   /* ── Semantic names for new code: bg-paper, text-ink, border-line. ── */
   --color-paper: var(--paper);
@@ -104,21 +175,114 @@
   --radius-3xl: 1rem;
   --radius-4xl: 1rem;
 
-  /* ── Shadow: black and white leans on borders, not depth. 15 values → 3.
-     The three smallest all collapse to one hairline. ── */
+  /* ── Shadow: four real elevations, layered rather than blurred.
+     These were flattened to almost nothing on the theory that black and white
+     leans on borders. It does — but with no elevation at all nothing ever reads
+     as raised or interactive, which is what made the product look drawn rather
+     than built. Each step pairs a tight contact shadow with a wider ambient one,
+     which is what separates a surface from a rectangle. ── */
   --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 8px 24px -4px rgb(0 0 0 / 0.10);
-  --shadow-xl: 0 8px 24px -4px rgb(0 0 0 / 0.10);
-  --shadow-2xl: 0 24px 48px -12px rgb(0 0 0 / 0.18);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 4px -2px rgb(0 0 0 / 0.08), 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 4px 8px -4px rgb(0 0 0 / 0.10), 0 12px 28px -6px rgb(0 0 0 / 0.12);
+  --shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.12), 0 24px 48px -12px rgb(0 0 0 / 0.16);
+  --shadow-2xl: 0 16px 32px -12px rgb(0 0 0 / 0.18), 0 40px 80px -20px rgb(0 0 0 / 0.22);
 
   /* ── Type. --font-heading/-body/-mono are set by next/font on <html> in
      app/layout.tsx. Do NOT redeclare them here: `--font-heading: var(--font-heading)`
      is a self-reference that resolves to nothing. Reference them instead. ── */
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Type scale ──
+     Lives INSIDE this @theme block, directly after the --font-sans / --font-display
+     lines, before the closing brace.
+
+     There were no --text-* keys here before, so every size in the product is a raw
+     Tailwind default picked ad hoc per file: text-sm 586 uses, text-xs 431, and
+     only 6 uses above text-3xl. Redefining Tailwind's OWN --text-* names repaints
+     all ~1,195 text-* utilities with zero file edits — the identical lever the
+     --color-gray-* ramp above already used on ~2,600 colour utilities.
+
+     Two ratios on purpose: ~1.125 through the UI range so a table cell, a field
+     label and a card title can differ without wasting rows; ~1.25 above 1.5rem so
+     the display tier finally has somewhere to go. The gap that matters is 3xl
+     (32px page title) against 2xl (24px KPI) — the title must outrank a number,
+     which today it does not.
+
+     text-sm STAYS at 0.875rem. It is 586 sites and the product's complaint is
+     that everything is already small.
+
+     Line-heights are absolute rem, not unitless, so headings land on the 4px grid
+     and the uncarded layouts do not drift. Tracking rides with the size: positive
+     on small uppercase (caps crowd), negative on display (Space Grotesk is drawn
+     wide and reads loose above 1.5rem). Nobody has to remember the ramp. ── */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-2xs--letter-spacing: 0.08em;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-xs--letter-spacing: 0.06em;   /* almost always uppercase micro-labels here */
+
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-sm--letter-spacing: 0em;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-base--letter-spacing: -0.006em;
+
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-lg--letter-spacing: -0.01em;
+
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.012em;
+
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-2xl--letter-spacing: -0.016em;
+
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-3xl--letter-spacing: -0.022em;
+
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.625rem;
+  --text-4xl--letter-spacing: -0.026em;
+
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 3.25rem;
+  --text-5xl--letter-spacing: -0.03em;
+
+  --text-6xl: 4rem;
+  --text-6xl--line-height: 4rem;
+  --text-6xl--letter-spacing: -0.032em;
+
+  /* ── Weight ──
+     386 bold + 216 semibold + 106 extrabold + 6 black against SEVEN font-normal.
+     When everything is bold, bold means nothing and hierarchy has to be carried by
+     size alone — which is why the scale above matters. Aliasing collapses the
+     palette to three real weights and repaints all 708 sites without a sweep.
+
+     NOTE FOR FUTURE READERS: font-semibold renders 500 and font-bold renders 600
+     here. The class names lie. That is the deliberate price of not hand-editing
+     708 call sites. New code should use font-medium and reach for size or
+     font-display for emphasis, not weight.
+
+     --font-weight-black stays 800 so the marketing hero (app/page.tsx,
+     src/shared_components/home/*) keeps a display voice — it is a deliberately
+     separate violet system and must not be flattened by a product-side alias. ── */
+  --font-weight-light: 400;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 800;
 }
 
 html {
@@ -146,7 +310,10 @@ body {
    class is more specific than this rule, which is the right outcome since
    they already show focus their own way. */
 :focus-visible {
-  outline: 2px solid var(--ink);
+  /* Accent, not ink. A black ring on a black-and-white page is indistinguishable
+     from a border; the accent makes keyboard position unmistakable at a glance,
+     which is the whole job of a focus indicator. 3:1 against both surfaces. */
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -155,7 +322,7 @@ body {
    Anything painted with ink opts its subtree into a white ring by adding `on-ink`. */
 .on-ink:focus-visible,
 .on-ink :focus-visible {
-  outline-color: var(--ink-invert);
+  outline-color: var(--accent-on-ink);
 }
 
 /* ── Animations (must live outside @layer for SVG stroke-dasharray) ── */
@@ -254,3 +421,81 @@ body {
   }
 }
 
+/* ── Numerals ──
+   Lives OUTSIDE @theme, at the end of this file — @theme takes variable
+   declarations only, so this rule cannot be moved up into it.
+
+   tabular-nums appears in exactly 2 files today (NotificationsView,
+   NotificationBell), neither a stat surface, so every KPI grid and currency figure
+   renders in proportional figures and the digits visibly jitter between values.
+   One rule beats a ten-file sweep and it covers numeric surfaces nobody has
+   written yet. Running prose keeps proportional figures, where they read better.
+   Tailwind already ships a `tabular-nums` utility — do not invent a `.tnum`
+   duplicate of it. ── */
+@layer base {
+  table, th, td, time, output, .num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+
+/* The indeterminate bar in ProfileLoadingState. A keyframe rather than a Tailwind
+   animate-* because it travels further than it is wide, which no built-in does. */
+@keyframes loading-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  [class*="loading-sweep"] { animation: none; }
+}
+
+/* ── Surface treatments ──────────────────────────────────────────────────────
+   Everything below is additive craft rather than structure. With hue gone, the
+   instruments left are elevation, texture, scale and motion, and the product was
+   using none of them — every surface was the same flat white field, and nothing
+   responded to being pointed at. */
+
+/* A large area of pure black reads as a hole rather than a surface. A very faint
+   off-centre highlight plus a fine grid gives it a light source and a material,
+   which is the difference between an ink panel and a missing rectangle. */
+.ink-panel {
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 26px 26px, 26px 26px;
+  color: var(--ink-invert);
+}
+
+/* Interactive rows and cards. The lift is deliberately small -- 1px reads as
+   responsive, 4px reads as a toy -- and the border darkens at the same time so
+   the state survives for anyone who cannot perceive the shadow. */
+.lift {
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+.lift:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-loud);
+  box-shadow: var(--shadow-md);
+}
+.lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Figures large enough to anchor a screen. Tight tracking and lining numerals,
+   because at this size default spacing looks loose and proportional digits make
+   a column of numbers ragged. */
+.figure {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .lift:hover, .lift:active { transition: none; transform: none; }
+}

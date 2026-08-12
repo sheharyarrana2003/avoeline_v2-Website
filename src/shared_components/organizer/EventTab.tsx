@@ -58,9 +58,12 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
         .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
     return (
+        // No surface, padding or bottom rule of its own: the event header supplies all
+        // three. -mb-px drops the active underline onto that header's border so the two
+        // read as one line rather than two stacked ones.
         <nav
             aria-label="Event sections"
-            className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-white px-4 sm:px-6"
+            className="-mb-px mt-5 flex gap-1 overflow-x-auto"
         >
             {tabs.map((tab) => {
                 const isActive = tab.href === activeHref;
@@ -73,7 +76,7 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
                         aria-current={isActive ? "page" : undefined}
                         className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
                             isActive
-                                ? "border-gray-900 font-semibold text-gray-900"
+                                ? "border-accent font-semibold text-ink"
                                 : "border-transparent font-medium text-gray-500 hover:border-gray-300 hover:text-gray-900"
                         }`}
                     >
