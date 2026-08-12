@@ -15,8 +15,8 @@ export type ConfirmTone = "danger" | "default";
 const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: string }> = {
     danger: {
         icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-gray-900 text-white ring-1 ring-gray-900",
-        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-accent",
+        badge: "bg-danger-soft text-danger ring-1 ring-danger-line",
+        confirm: "bg-danger text-white hover:brightness-90 focus-visible:outline-accent",
     },
     default: {
         icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,

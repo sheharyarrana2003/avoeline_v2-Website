@@ -16,15 +16,23 @@ import { statusMeta, type StatusTone } from "@/src/lib/status";
  * Full class strings, not built from a template. Tailwind scans source text, so
  * `bg-${tone}-50` would compile to nothing at all.
  */
+/**
+ * Colour is back, on top of the icon and the label rather than instead of them.
+ * WCAG asks that colour is not the SOLE channel; it never asked for no colour, and
+ * hue plus icon plus text is stronger than any one of those alone. So a
+ * colour-blind user still reads the tick, the cross and the word, and everyone
+ * else gets the instant green/amber/red read they expect from every other product.
+ *
+ * The text shades are darker than the usual ones on purpose — the commonly used
+ * green and amber measure 3.3 and 3.2 against white and fail as body text. These
+ * clear 4.8 on the soft fills they sit on.
+ */
 const TONE: Record<StatusTone, { box: string; label: string; Icon: LucideIcon | null }> = {
-    success: { box: "bg-gray-900 text-white border-gray-900", label: "", Icon: Check },
-    danger: { box: "bg-white text-gray-900 border-gray-900", label: "line-through", Icon: X },
-    // gray-500, not gray-400: the dashed border is one of the three channels that
-    // replaces hue, so it has to clear WCAG 1.4.11's 3:1 for UI components. gray-400
-    // measures 2.58:1 on white and fails; gray-500 is 4.74:1.
-    warning: { box: "bg-white text-gray-700 border-gray-500 border-dashed", label: "", Icon: Clock },
-    info: { box: "bg-gray-100 text-gray-700 border-gray-200", label: "", Icon: Loader },
-    neutral: { box: "bg-transparent text-gray-500 border-gray-200", label: "", Icon: null },
+    success: { box: "bg-success-soft text-success border-success-line", label: "", Icon: Check },
+    danger: { box: "bg-danger-soft text-danger border-danger-line", label: "", Icon: X },
+    warning: { box: "bg-warning-soft text-warning border-warning-line", label: "", Icon: Clock },
+    info: { box: "bg-accent-soft text-accent-strong border-accent-line", label: "", Icon: Loader },
+    neutral: { box: "bg-gray-100 text-gray-600 border-gray-200", label: "", Icon: null },
 };
 
 // text-2xs/text-xs rather than the arbitrary 10px/11px these were written as before

@@ -49,10 +49,39 @@
   --accent-soft: #EFECFD;     /* tinted surface, decorative only */
   --accent-line: #DDD7FB;
 
+  /* ── Semantic status ──
+     Green, amber and red for the states everyone already expects them on. These
+     ADD to the channels status already had — every badge still carries its icon
+     and its text label — because the accessibility rule is that colour must not
+     be the ONLY channel, not that colour is forbidden. Icon plus label plus hue
+     beats any one of them alone, which is why removing hue entirely was the wrong
+     reading of it.
+
+     The shades are darker than the ones usually reached for, and deliberately:
+     the common #16A34A green and #D97706 amber measure 3.30 and 3.19 against
+     white, so both FAIL as body text. These are 5.02, 5.02 and 6.47 on paper, and
+     4.80, 4.81 and 4.62 on the canvas — all clear of AA.
+
+     The -on-ink values are the inverse case: 9 to 13 to 1 on a dark surface and
+     nowhere near passing on a light one, so they are only ever used on ink. */
+  --success: #15803D;
+  --success-soft: #ECFDF3;
+  --success-line: #BBF7D0;
+  --success-on-ink: #86EFAC;
+
+  --warning: #B45309;
+  --warning-soft: #FFFBEB;
+  --warning-line: #FDE68A;
+  --warning-on-ink: #FCD34D;
+
+  --danger: #B91C1C;
+  --danger-soft: #FEF2F2;
+  --danger-line: #FECACA;
+  --danger-on-ink: #FCA5A5;
+
   /* Legacy names. `home/` consumes these by name via inline styles. */
   --violet: var(--accent);
   --violet-soft: var(--accent-soft);
-  --success: #22C55E;
 }
 
 @theme {
@@ -81,6 +110,21 @@
   --color-accent-on-ink: var(--accent-on-ink);
   --color-accent-soft: var(--accent-soft);
   --color-accent-line: var(--accent-line);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-line: var(--success-line);
+  --color-success-on-ink: var(--success-on-ink);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-line: var(--warning-line);
+  --color-warning-on-ink: var(--warning-on-ink);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-line: var(--danger-line);
+  --color-danger-on-ink: var(--danger-on-ink);
 
   /* ── Semantic names for new code: bg-paper, text-ink, border-line. ── */
   --color-paper: var(--paper);

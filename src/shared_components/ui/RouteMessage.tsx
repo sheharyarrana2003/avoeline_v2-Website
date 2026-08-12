@@ -6,7 +6,7 @@ const TONE: Record<Tone, string> = {
     // Solid ink reads "something failed"; a soft fill reads "nothing here".
     // Keeping the two apart is the whole point of having a tone at all -- it is
     // now weight rather than hue that does it.
-    danger: "bg-gray-900 text-white ring-1 ring-gray-900",
+    danger: "bg-danger-soft text-danger ring-1 ring-danger-line",
     neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
 };
 
