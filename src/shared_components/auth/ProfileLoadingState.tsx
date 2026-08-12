@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 
 interface ProfileLoadingStateProps {
   title?: string;
@@ -10,14 +9,14 @@ interface ProfileLoadingStateProps {
 }
 
 /**
- * Was a pixel-for-pixel skeleton of the profile form — two columns of fake
- * fields that had already drifted out of sync with the real one (four rows
- * against the vendor form's five). A skeleton that lies about the shape of what
- * is coming is worse than a spinner, and it had to be re-edited every time a
- * field moved. This says the same thing in a tenth of the markup.
+ * The skeleton this replaced was a pixel-for-pixel copy of the profile form that
+ * had already drifted out of sync with it — four fake rows against the vendor
+ * form's five — so it lied about the shape of what was coming and needed
+ * re-editing every time a field moved. That part is gone.
  *
- * No px-* / bg-* on the inline variant: it renders inside route shells that
- * already supply both.
+ * The brand mark and its ring are not. A generic spinner says "something is
+ * loading"; this says the product is loading, which is the whole point of a
+ * moment the user is made to wait through.
  */
 export default function ProfileLoadingState({
   title = 'Setting Up Profile',
@@ -28,17 +27,41 @@ export default function ProfileLoadingState({
     <div
       role="status"
       aria-live="polite"
-      className="flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border border-line bg-paper px-8 py-10 text-center"
+      className="flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl border border-line bg-paper px-10 py-12 text-center shadow-lg"
     >
-      <Loader2 className="h-8 w-8 animate-spin text-ink" aria-hidden="true" />
-      <h2 className="font-display text-lg text-ink">{title}</h2>
-      <p className="max-w-xs text-xs text-ink-soft">{subtitle}</p>
+      <div className="relative flex h-16 w-16 items-center justify-center">
+        {/* Two counter-rotating rings: the outer one carries the motion, the inner
+            one is nearly still, so the mark reads as held rather than spun. */}
+        <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-gray-900 [animation-duration:1.1s]" />
+        <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-gray-300 [animation-direction:reverse] [animation-duration:1.8s]" />
+        <svg aria-hidden="true" width="26" height="26" viewBox="0 0 48 48" fill="none" className="text-ink">
+          <path
+            d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="none"
+            strokeLinejoin="round"
+          />
+          <circle cx="24" cy="18" r="3" fill="currentColor" />
+        </svg>
+      </div>
+
+      <div>
+        <h2 className="font-display text-xl text-ink">{title}</h2>
+        <p className="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-soft">{subtitle}</p>
+      </div>
+
+      {/* An indeterminate bar, because a ring alone gives no sense of ongoing work
+          once you have looked at it for a few seconds. */}
+      <span className="h-0.5 w-28 overflow-hidden rounded-full bg-line">
+        <span className="block h-full w-1/3 animate-[loading-sweep_1.4s_ease-in-out_infinite] rounded-full bg-gray-900" />
+      </span>
     </div>
   );
 
   if (isOverlay) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/90 p-4 backdrop-blur-xs">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas/80 p-4 backdrop-blur-sm">
         {content}
       </div>
     );

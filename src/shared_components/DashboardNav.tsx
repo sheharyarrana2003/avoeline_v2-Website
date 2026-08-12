@@ -96,17 +96,30 @@ export function DashboardNav({
 
     return (
         <>
-            {/* ── Rail: lg and up ─────────────────────────────────────────── */}
-            <aside className="on-ink fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-gray-950 text-white lg:flex">
+            {/* ── Rail: lg and up ───────────────────────────────────────────
+                Not flat black. A near-black gradient plus a one-pixel inner highlight
+                down the right edge makes the rail read as a lit surface rather than a
+                painted rectangle — the cheapest way to get depth out of one colour. */}
+            <aside className="on-ink fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-gradient-to-b from-gray-900 to-gray-950 text-white shadow-[inset_-1px_0_0_rgba(255,255,255,0.07)] lg:flex">
                 <Link
                     href={`${basePath}/dashboard`}
-                    className="flex h-16 shrink-0 items-center px-6 text-xl font-bold tracking-tight rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="group/brand flex h-16 shrink-0 items-center gap-2.5 px-5 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                    Avoeline
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15 transition group-hover/brand:bg-white/15">
+                        <svg aria-hidden="true" width="17" height="17" viewBox="0 0 48 48" fill="none" className="text-white">
+                            <path
+                                d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
+                                stroke="currentColor" strokeWidth="3" fill="none" strokeLinejoin="round"
+                            />
+                            <circle cx="24" cy="18" r="3" fill="currentColor" />
+                        </svg>
+                    </span>
+                    <span className="font-display text-lg tracking-tight">Avoeline</span>
                 </Link>
 
-                <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 py-4">
-                    <ul className="flex flex-col gap-1">
+                <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4">
+                    <p className="px-3 pb-2 pt-1 text-2xs font-medium uppercase text-white/35">Menu</p>
+                    <ul className="flex flex-col gap-0.5">
                         {items.map(({ label, href, icon }) => {
                             const active = href === activeHref;
                             const Icon = icon ? ICONS[icon] : undefined;
@@ -115,13 +128,29 @@ export function DashboardNav({
                                     <Link
                                         href={href}
                                         aria-current={active ? "page" : undefined}
-                                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                                        // The active row is a soft fill plus a left indicator rather
+                                        // than a solid white pill: the pill was unmissable but blunt,
+                                        // and inverted one row out of five into a different palette.
+                                        className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
                                             active
-                                                ? "bg-white font-semibold text-gray-950"
-                                                : "font-medium text-white/70 hover:bg-white/10 hover:text-white"
+                                                ? "bg-white/[0.09] font-semibold text-white"
+                                                : "font-medium text-white/65 hover:bg-white/[0.06] hover:text-white"
                                         }`}
                                     >
-                                        {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                                        <span
+                                            aria-hidden="true"
+                                            className={`absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-white transition-opacity ${
+                                                active ? "opacity-100" : "opacity-0"
+                                            }`}
+                                        />
+                                        {Icon && (
+                                            <Icon
+                                                className={`h-[18px] w-[18px] shrink-0 transition-colors ${
+                                                    active ? "text-white" : "text-white/45 group-hover:text-white/80"
+                                                }`}
+                                                aria-hidden="true"
+                                            />
+                                        )}
                                         {label}
                                     </Link>
                                 </li>
@@ -130,22 +159,26 @@ export function DashboardNav({
                     </ul>
                 </nav>
 
-                <div className="flex shrink-0 items-center gap-2 border-t border-white/10 p-3">
-                    <Link
-                        href={`${basePath}/profile`}
-                        className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                        {avatar(true)}
-                        <span className="truncate text-sm font-medium">{name}</span>
-                        <span className="sr-only">Your profile</span>
-                    </Link>
-                    <span className="shrink-0 px-2">
-                        <NotificationBell
-                            href={`${basePath}/notifications`}
-                            unreadCount={unreadCount}
-                            onInk
-                        />
-                    </span>
+                <div className="shrink-0 border-t border-white/10 p-3">
+                    <div className="flex items-center gap-1 rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
+                        <Link
+                            href={`${basePath}/profile`}
+                            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-offset-2"
+                        >
+                            {avatar(true)}
+                            <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium leading-tight">{name}</span>
+                                <span className="block text-2xs text-white/45">View profile</span>
+                            </span>
+                        </Link>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.07]">
+                            <NotificationBell
+                                href={`${basePath}/notifications`}
+                                unreadCount={unreadCount}
+                                onInk
+                            />
+                        </span>
+                    </div>
                 </div>
             </aside>
 
