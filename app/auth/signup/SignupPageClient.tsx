@@ -1,4 +1,5 @@
 'use client';
+import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 import React, { useState, useTransition } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { buttonClass, fieldClass } from '@/src/lib/ui';
@@ -49,21 +50,7 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
             <div className="flex w-full max-w-[440px] flex-col items-center rounded-2xl border border-line bg-paper p-8 sm:p-12">
 
                 <div className="mb-10 flex flex-col items-center">
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center text-ink">
-                        {/* Brand mark, not iconography — no lucide equivalent exists. */}
-                        <svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none">
-                            <path
-                                d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                fill="none"
-                                strokeLinejoin="round"
-                            />
-                            <circle cx="18" cy="18" r="2.5" fill="currentColor" />
-                            <circle cx="24" cy="18" r="2.5" fill="currentColor" />
-                            <circle cx="30" cy="18" r="2.5" fill="currentColor" />
-                        </svg>
-                    </div>
+                    <BrandMark className="mb-3 h-12 w-12" />
                     <h1 className="font-display text-xl text-ink">Avoeline</h1>
                 </div>
 

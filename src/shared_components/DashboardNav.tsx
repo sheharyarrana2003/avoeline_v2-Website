@@ -16,6 +16,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import { NotificationBell } from "@/src/shared_components/NotificationBell";
+import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 
 /**
  * Icons are keyed by name rather than passed as components, because the layouts
@@ -105,15 +106,9 @@ export function DashboardNav({
                     href={`${basePath}/dashboard`}
                     className="group/brand flex h-16 shrink-0 items-center gap-2.5 px-5 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15 transition group-hover/brand:bg-white/15">
-                        <svg aria-hidden="true" width="17" height="17" viewBox="0 0 48 48" fill="none" className="text-white">
-                            <path
-                                d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
-                                stroke="currentColor" strokeWidth="3" fill="none" strokeLinejoin="round"
-                            />
-                            <circle cx="24" cy="18" r="3" fill="currentColor" />
-                        </svg>
-                    </span>
+                    {/* Inverted: the marketing header is a black tile with a white glyph,
+                        so on the dark rail it is the other way round. */}
+                    <BrandMark inverted className="h-8 w-8 shrink-0 transition group-hover/brand:bg-white/90" />
                     <span className="font-display text-lg tracking-tight">Avoeline</span>
                 </Link>
 

@@ -34,15 +34,9 @@ export default function ProfileLoadingState({
             one is nearly still, so the mark reads as held rather than spun. */}
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-gray-900 [animation-duration:1.1s]" />
         <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-gray-300 [animation-direction:reverse] [animation-duration:1.8s]" />
-        <svg aria-hidden="true" width="26" height="26" viewBox="0 0 48 48" fill="none" className="text-ink">
-          <path
-            d="M24 4L4 28C4 28 8 32 12 32C16 32 20 28 24 28C28 28 32 32 36 32C40 32 44 28 44 28L24 4Z"
-            stroke="currentColor"
-            strokeWidth="3"
-            fill="none"
-            strokeLinejoin="round"
-          />
-          <circle cx="24" cy="18" r="3" fill="currentColor" />
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-6 w-6 text-ink">
+          <path d="M3 12L8 4L13 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5.5 9.5H10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </div>
 
