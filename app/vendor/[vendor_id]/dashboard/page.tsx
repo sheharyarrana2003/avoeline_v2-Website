@@ -26,7 +26,7 @@ function MiniBarChart({ data }: { data: number[] }) {
             {data.map((val, i) => (
                 <div
                     key={i}
-                    className={`flex-1 rounded-t-xs ${val === max && val > 0 ? "bg-gray-900" : "bg-gray-300"}`}
+                    className={`flex-1 rounded-t-xs ${val === max && val > 0 ? "bg-accent" : "bg-gray-300"}`}
                     style={{ height: `${(val / max) * 100}%`, minHeight: "6px" }}
                 />
             ))}
@@ -133,7 +133,7 @@ export default async function VendorDashboardPage({
                     actions={
                         <>
                             {isTopRated && (
-                                <span className="inline-flex h-11 items-center gap-1.5 rounded-full border border-gray-900 bg-gray-900 px-4 text-2xs font-bold uppercase text-white">
+                                <span className="inline-flex h-11 items-center gap-1.5 rounded-full border border-success-line bg-success-soft px-4 text-2xs font-bold uppercase text-success">
                                     <Star size={12} aria-hidden="true" />
                                     Top rated vendor
                                 </span>
@@ -147,12 +147,27 @@ export default async function VendorDashboardPage({
                 />
 
                 <div className="space-y-10">
-                    {/* One band, not four cards — the organizer dashboard's treatment. */}
-                    <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                        <StatCard_dashboard title="Active Quotes" value={String(activeQuotes.length)} icon={<FileText size={14} />} />
-                        <StatCard_dashboard title="Confirmed" value={String(confirmedBookings.length)} icon={<CalendarDays size={14} />} />
-                        <StatCard_dashboard title="Revenue This Month" value={formatCurrency(thisMonthRevenue, "PKR", "Rs 0")} icon={<Wallet size={14} />} />
-                        <StatCard_dashboard title="Avg Rating" value={vendorRating ? vendorRating.toFixed(1) : "—"} icon={<Star size={14} />} />
+                    {/* Same shape as the organizer dashboard: one figure carries the
+                        screen and the rest support it. Revenue leads because it is what a
+                        vendor opens this page to find out. */}
+                    <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+                        <div className="ink-panel relative overflow-hidden rounded-2xl p-7 shadow-lg">
+                            <p className="text-2xs font-medium uppercase text-white/50">Revenue this month</p>
+                            <p className="figure mt-3 text-5xl text-white">
+                                {formatCurrency(thisMonthRevenue, "PKR", "Rs 0")}
+                            </p>
+                            <p className="mt-3 flex items-center gap-1.5 text-sm text-white/60">
+                                <CalendarDays size={14} aria-hidden="true" />
+                                across {confirmedBookings.length} confirmed{" "}
+                                {confirmedBookings.length === 1 ? "booking" : "bookings"}
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
+                            <StatCard_dashboard title="Active Quotes" value={String(activeQuotes.length)} icon={<FileText size={14} />} />
+                            <StatCard_dashboard title="Confirmed" value={String(confirmedBookings.length)} icon={<CalendarDays size={14} />} />
+                            <StatCard_dashboard title="Avg Rating" value={vendorRating ? vendorRating.toFixed(1) : "—"} icon={<Star size={14} />} />
+                        </div>
                     </section>
 
                     <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
@@ -172,7 +187,7 @@ export default async function VendorDashboardPage({
                                             return (
                                                 <li
                                                     key={booking?.bookingId || index}
-                                                    className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                                                    className="-mx-3 flex flex-col gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
                                                 >
                                                     <div>
                                                         <p className="text-sm font-medium text-ink">{getEventTitle(booking?.eventId)}</p>
@@ -224,7 +239,7 @@ export default async function VendorDashboardPage({
                                             <Link
                                                 key={booking?.bookingId || index}
                                                 href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}`}
-                                                className="flex flex-col justify-between rounded-2xl border border-line bg-paper p-5 transition hover:border-line-loud"
+                                                className="lift flex flex-col justify-between rounded-2xl border border-line bg-paper p-5 shadow-xs"
                                             >
                                                 <div className="mb-3 flex items-center justify-between gap-2">
                                                     <StatusBadge status={booking?.status} size="sm" />

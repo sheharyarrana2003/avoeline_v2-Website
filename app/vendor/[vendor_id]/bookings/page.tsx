@@ -208,7 +208,7 @@ export default async function VendorBookingsPage({
                             const currency = booking?.payment?.currency || 'PKR';
 
                             return (
-                                <div key={booking?.bookingId} className="flex flex-col rounded-2xl border border-line bg-paper p-5">
+                                <div key={booking?.bookingId} className="lift flex flex-col rounded-2xl border border-line bg-paper p-5 shadow-xs">
                                     <div className="mb-4 flex items-center justify-between gap-2">
                                         <StatusBadge status={status} size="sm" />
                                         <span className="text-sm font-medium text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</span>

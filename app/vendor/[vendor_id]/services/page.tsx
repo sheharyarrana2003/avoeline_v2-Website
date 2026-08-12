@@ -117,7 +117,7 @@ export default async function VendorServicesPage({
                             return (
                                 <div
                                     key={service.serviceId}
-                                    className="overflow-hidden rounded-2xl border border-line bg-paper"
+                                    className="lift overflow-hidden rounded-2xl border border-line bg-paper shadow-xs"
                                 >
                                     {/* Image/Video Header */}
                                     <div className="relative h-48 overflow-hidden bg-gray-100">
