@@ -16,7 +16,7 @@ export default function CreateSpeakerForm({ handle_speaker_submission }: { handl
             <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-4xl p-8 border border-gray-100">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-extrabold text-gray-900">Add New Speaker</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Add New Speaker</h2>
                     <button className="text-gray-500 hover:text-gray-600 transition-colors">
                         <X size={24} />
                     </button>
@@ -120,7 +120,7 @@ export default function CreateSpeakerForm({ handle_speaker_submission }: { handl
 
                     {/* Direct Contact Section */}
                     <div>
-                        <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-4">Direct Contact</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Direct Contact</label>
                         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3 text-gray-500">

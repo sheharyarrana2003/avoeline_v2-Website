@@ -65,12 +65,12 @@ export default async function AnalyticsPage({
     };
 
     return (
-        <main className="min-h-screen bg-white px-4 py-8 text-gray-950 sm:px-6 lg:px-8">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 text-gray-950">
             <div className="mx-auto max-w-7xl space-y-6">
 
                 <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-950">
                             Analytics Overview
                         </h1>
                         <p className="mt-1 text-sm font-semibold text-gray-500">
@@ -89,14 +89,14 @@ export default async function AnalyticsPage({
                                 className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
                             >
                                 <div className="mb-4 flex items-center justify-between">
-                                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
                                         {metric.label}
                                     </p>
                                     <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
                                         <Icon size={18} />
                                     </span>
                                 </div>
-                                <p className="text-3xl font-extrabold text-gray-950">
+                                <p className="text-3xl font-bold text-gray-950">
                                     {metric.value}
                                 </p>
                                 {metric.helper && (
@@ -113,14 +113,14 @@ export default async function AnalyticsPage({
                 <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-base font-extrabold text-gray-950">
+                            <h2 className="text-base font-bold text-gray-950">
                                 Daily Registrations
                             </h2>
                             <p className="mt-1 text-xs font-semibold text-gray-500">
                                 Registration volume over the last 30 days
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#171717]">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#171717]">
                             <span className="size-2 rounded-full bg-[#171717]" />
                             Registrations
                         </div>
@@ -187,7 +187,7 @@ export default async function AnalyticsPage({
                             <span className="flex size-9 items-center justify-center rounded-xl bg-gray-50 text-gray-500">
                                 <Activity size={18} />
                             </span>
-                            <h2 className="text-base font-extrabold text-gray-950">
+                            <h2 className="text-base font-bold text-gray-950">
                                 Event Performance
                             </h2>
                         </div>
@@ -202,17 +202,17 @@ export default async function AnalyticsPage({
                             <table className="w-full min-w-[860px] border-collapse">
                                 <thead className="bg-gray-50">
                                     <tr className="text-left">
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                             Event Name
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                             Date
                                         </th>
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                             Registrations
                                         </th>
                                       
-                                        <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                             Revenue
                                         </th>
                                        
@@ -225,20 +225,20 @@ export default async function AnalyticsPage({
                                             className="border-t border-gray-100"
                                         >
                                             <td className="px-6 py-5">
-                                                <p className="text-sm font-extrabold text-gray-950">
+                                                <p className="text-sm font-bold text-gray-950">
                                                     {event.eventName}
                                                 </p>
-                                                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-500">
+                                                <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-gray-500">
                                                     {event.eventType}
                                                 </p>
                                             </td>
                                             <td className="px-6 py-5 text-sm font-bold text-gray-500">
                                                 {event.date}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                            <td className="px-6 py-5 text-sm font-bold text-gray-950">
                                                 {event.registrations.toLocaleString("en-US")}
                                             </td>
-                                            <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                            <td className="px-6 py-5 text-sm font-bold text-gray-950">
                                                 {formatCurrencyCompact(event.revenue)}
                                             </td>
                                            
@@ -252,6 +252,6 @@ export default async function AnalyticsPage({
 
                 <EventFeedbackAnalysis analyzeFeedback={analyzeFeedback} />
             </div>
-        </main>
+        </div>
     );
 }

@@ -76,14 +76,14 @@ function AttendeeListItemBase(
 
             {/* Ticket Badge */}
             <div>
-                <span className="bg-white border border-gray-200 text-gray-800 text-[9px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
+                <span className="bg-white border border-gray-200 text-gray-800 text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm">
                     {ticketType}
                 </span>
             </div>
 
             {/* Status Badge */}
             <div>
-                <span className={`text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-500 border border-gray-300'}`}>
+                <span className={`text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider ${isCheckedIn ? 'bg-black text-white shadow-md' : 'bg-transparent text-gray-500 border border-gray-300'}`}>
                     {statusLabel}
                 </span>
             </div>

@@ -115,7 +115,7 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
     const currency = "PKR";
 
     return (
-        <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 text-gray-900">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-12">
                 {/* LEFT COLUMN */}
                 <div className="space-y-6 lg:col-span-4">
@@ -260,6 +260,6 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

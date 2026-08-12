@@ -45,12 +45,12 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
     const isCompleted = raw_booking?.status === "completed";
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 font-sans text-gray-900">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header / Title */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-extrabold tracking-tight">{vendor?.businessName || "Vendor Details"}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{vendor?.businessName || "Vendor Details"}</h1>
                 </div>
 
                 {/* Main Grid Layout */}
@@ -187,7 +187,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ o
                             </h3>
 
                             <div className="mb-6 flex justify-between items-end">
-                                <h2 className="text-3xl font-extrabold">{formatCurrency(raw_booking?.payment?.totalAmount || 0, raw_booking?.payment?.currency || 'PKR')}</h2>
+                                <h2 className="text-3xl font-bold">{formatCurrency(raw_booking?.payment?.totalAmount || 0, raw_booking?.payment?.currency || 'PKR')}</h2>
                             </div>
 
                             <div className="space-y-3">

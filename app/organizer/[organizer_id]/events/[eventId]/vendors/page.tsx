@@ -31,7 +31,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
         // tone; anything else is still pending someone's attention.
         if (status === 'active' && verified) {
             return (
-                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-gray-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-gray-900 ring-1 ring-gray-200/20">
+                <span className="ml-auto inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full bg-gray-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 ring-1 ring-gray-200/20">
                     <CheckCircle2 size={12} aria-hidden="true" /> Verified
                 </span>
             );
@@ -46,12 +46,12 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-10 font-sans">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 font-sans">
             <div className="max-w-4xl mx-auto">
                 
                 <div className="flex justify-between items-start mb-16">
                     <div>
-                        <h1 className="text-[40px] font-extrabold text-gray-900 tracking-tight leading-none mb-4">
+                        <h1 className="text-[40px] font-bold text-gray-900 tracking-tight leading-none mb-4">
                             Event Vendors
                         </h1>
                         <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                 </div>
 
                 <div className="flex justify-between items-end mb-5">
-                    <h2 className="text-[22px] font-extrabold text-gray-900">
+                    <h2 className="text-[22px] font-bold text-gray-900">
                         Assigned Vendors
                     </h2>
                     
@@ -107,7 +107,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
 
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-[18px] font-extrabold text-gray-900">
+                                            <h3 className="text-[18px] font-bold text-gray-900">
                                                 {vendor.businessName}
                                             </h3>
                                         </div>
@@ -143,7 +143,7 @@ export default async function Vendors({params} : {params : Promise<{eventId:stri
                                         <p className="text-[11px] font-bold text-gray-500 mb-0.5">
                                             {startingPrice ? 'Starting Price' : 'Estimated'}
                                         </p>
-                                        <p className={`text-[22px] font-black tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-500'}`}>
+                                        <p className={`text-[22px] font-bold tracking-tight ${startingPrice ? 'text-gray-900' : 'text-gray-500'}`}>
                                             {startingPrice ? formatCurrency(startingPrice) : 'TBD'}
                                         </p>
                                     </div>

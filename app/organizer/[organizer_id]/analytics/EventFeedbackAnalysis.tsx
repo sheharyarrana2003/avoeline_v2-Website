@@ -57,7 +57,7 @@ export default function EventFeedbackAnalysis({
                         <MessageSquareText size={18} />
                     </span>
                     <div>
-                        <h2 className="text-base font-extrabold text-gray-950">
+                        <h2 className="text-base font-bold text-gray-950">
                             Event Feedback Analysis
                         </h2>
                         <p className="mt-1 text-xs font-semibold text-gray-500">
@@ -84,25 +84,25 @@ export default function EventFeedbackAnalysis({
                     <table className="w-full min-w-[960px] border-collapse">
                         <thead className="bg-gray-50">
                             <tr className="text-left">
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Event
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Event ID
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Feedback
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Summary
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Strengths
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Improvements
                                 </th>
-                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-gray-500">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-500">
                                     Sentiment
                                 </th>
                             </tr>
@@ -113,13 +113,13 @@ export default function EventFeedbackAnalysis({
                                     key={row.eventId}
                                     className="border-t border-gray-100 align-top"
                                 >
-                                    <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                    <td className="px-6 py-5 text-sm font-bold text-gray-950">
                                         {row.eventName}
                                     </td>
                                     <td className="px-6 py-5 text-xs font-bold text-gray-500">
                                         {row.eventId}
                                     </td>
-                                    <td className="px-6 py-5 text-sm font-extrabold text-gray-950">
+                                    <td className="px-6 py-5 text-sm font-bold text-gray-950">
                                         {row.feedbackCount}
                                     </td>
                                     <td className="max-w-xs px-6 py-5 text-sm font-semibold text-gray-600">
@@ -133,7 +133,7 @@ export default function EventFeedbackAnalysis({
                                     </td>
                                     <td className="px-6 py-5">
                                         <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wide ${
+                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
                                                 SENTIMENT_STYLES[row.sentiment] ??
                                                 "bg-gray-100 text-gray-600"
                                             }`}

@@ -17,14 +17,14 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   
   if (!bookings) {
     return (<>
-      <div className="min-h-screen bg-gray-50 p-8 font-sans">
+      <div className="px-4 py-8 sm:px-6 lg:px-8 font-sans">
 
         <div className="max-w-7xl mx-auto">
 
           {/* Header Section */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                 {activeTab === "active" && "Active Bookings"}
                 {activeTab === "past" && "Past Bookings"}
                 {activeTab === "cancelled" && "Cancelled Bookings"}
@@ -51,7 +51,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
             </div>
              <Link
                 href={`${basePath}/vendor-marketplace`}
-                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
+                className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-bold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
               >
 
                 Visit Vendor Marketplace
@@ -104,14 +104,14 @@ export default async function Active_Vendors({ params, searchParams }: { params:
 
   return (
 
-    <div className="min-h-screen bg-gray-50 p-8 font-sans">
+    <div className="px-4 py-8 sm:px-6 lg:px-8 font-sans">
 
       <div className="max-w-7xl mx-auto">
 
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
               {activeTab === "active" && "Active Bookings"}
               {activeTab === "past" && "Past Bookings"}
               {activeTab === "cancelled" && "Cancelled Bookings"}
@@ -143,7 +143,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
   {/* Button - Moved outside the search input container */}
   <Link
     href={`${basePath}/vendor-marketplace`}
-    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
+    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-bold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
   >
     Visit Vendor Marketplace
   </Link>

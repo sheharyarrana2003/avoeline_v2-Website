@@ -27,7 +27,7 @@ else{
   }
 
   return (
-    <div className="min-h-screen bg-white-900/50 flex items-center justify-center p-4">
+    <div className="px-4 py-8 sm:px-6 lg:px-8 bg-white-900/50 flex items-center justify-center">
       {/* Modal Container */}
       <div className="bg-white rounded-[32px] p-10 max-w-[500px] w-full shadow-2xl relative overflow-hidden">
 

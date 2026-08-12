@@ -181,11 +181,11 @@ export function SingleAttendeeView({
             {/* Header Section */}
             <div className="mb-6 pr-8">
                 <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-[32px] leading-none font-black text-gray-900 tracking-tight">
+                    <h2 className="text-[32px] leading-none font-bold text-gray-900 tracking-tight">
                         {fullName}
                     </h2>
                     {isCheckedIn && (
-                        <span className="bg-black text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full tracking-wider uppercase mt-1">
+                        <span className="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider uppercase mt-1">
                             CHECKED IN
                         </span>
                     )}
@@ -205,7 +205,7 @@ export function SingleAttendeeView({
             {/* Organizer Controls: Registration Status Dropdown */}
             <div className="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         REGISTRATION STATUS
                     </p>
                     <p className="text-xs text-gray-500">Change attendee registration state</p>
@@ -216,7 +216,7 @@ export function SingleAttendeeView({
                         value={registration.status || "pending"}
                         disabled={isUpdating}
                         onChange={(e) => handleStatusChange(e.target.value as Registration["status"])}
-                        className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                        className="appearance-none bg-gray-100 text-gray-900 font-bold text-[12px] uppercase tracking-wider px-4 py-2 pr-8 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                     >
                         {STATUS_OPTIONS.map((status) => (
                             <option key={status} value={status}>
@@ -232,24 +232,24 @@ export function SingleAttendeeView({
             <div className="bg-gray-200 rounded-3xl p-6 mb-4 shadow-sm border border-gray-300/30">
                 <div className="flex justify-between items-start">
                     <div className="max-w-[65%]">
-                        <p className="text-[9px] font-extrabold text-gray-500 uppercase tracking-widest mb-1.5">
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                             ORGANIZATION
                         </p>
-                        <p className="font-extrabold text-gray-900 text-[13px] leading-tight pr-4">
+                        <p className="font-bold text-gray-900 text-[13px] leading-tight pr-4">
                             {organization}
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[9px] font-extrabold text-gray-500 uppercase tracking-widest mb-1.5">
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                             FINAL PRICE
                         </p>
-                        <p className="font-black text-gray-900 text-[14px]">
+                        <p className="font-bold text-gray-900 text-[14px]">
                             {formatCurrency(finalPrice, currency)}
                         </p>
                     </div>
                 </div>
                 <div className="mt-5 flex gap-2 items-center flex-wrap">
-                    <span className="bg-black text-white text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
+                    <span className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
                         {ticketType}
                     </span>
                     {registration?.registrationSource && (
@@ -267,7 +267,7 @@ export function SingleAttendeeView({
                         <CheckCircle2 size={20} className="text-black" />
                     </div>
                     <div>
-                        <p className="font-extrabold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
+                        <p className="font-bold text-gray-900 text-[14px] mb-0.5">Checked In{checkInTime ? ` at ${checkInTime}` : ""}</p>
                         <p className="text-xs text-gray-500 font-medium capitalize">Method: {checkInMethod}</p>
                     </div>
                 </div>
@@ -278,7 +278,7 @@ export function SingleAttendeeView({
                 
                 {/* 1. Academic & User Profile Info */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         Academic Details
                     </h3>
                     <div className="grid grid-cols-2 gap-3 text-xs">
@@ -299,7 +299,7 @@ export function SingleAttendeeView({
 
                 {/* 2. Payment, Pricing & Discount Breakdown */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <CreditCard size={14} /> Payment & Pricing
                     </h3>
 
@@ -318,7 +318,7 @@ export function SingleAttendeeView({
                                     value={registration?.payment?.paymentStatus || "pending"}
                                     disabled={isUpdating}
                                     onChange={(e) => handlePaymentStatusChange(e.target.value as Registration["payment"]["paymentStatus"])}
-                                    className="appearance-none bg-gray-100 text-gray-900 font-extrabold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
+                                    className="appearance-none bg-gray-100 text-gray-900 font-bold text-[11px] uppercase tracking-wider pl-3 pr-7 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer disabled:opacity-50"
                                 >
                                     {PAYMENT_STATUS_OPTIONS.map((status) => (
                                         <option key={status} value={status}>
@@ -354,7 +354,7 @@ export function SingleAttendeeView({
                             <span>{formatCurrency(finalPrice, currency)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center font-black text-gray-900">
+                        <div className="flex justify-between items-center font-bold text-gray-900">
                             <span>Amount Paid</span>
                             <span>{formatCurrency(amountPaid, currency)}</span>
                         </div>
@@ -371,7 +371,7 @@ export function SingleAttendeeView({
                 {/* 3. Certificate Info */}
                 {registration?.certificate && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <Award size={14} /> Certificate Info
                         </h3>
                         <div className="grid grid-cols-2 gap-3 text-xs">
@@ -396,7 +396,7 @@ export function SingleAttendeeView({
 
                 {/* 4. Communication Log */}
                 <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                    <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                         <MessageSquare size={14} /> Communication History
                     </h3>
                     {registration?.communications && registration.communications.length > 0 ? (
@@ -421,7 +421,7 @@ export function SingleAttendeeView({
                 {/* 5. Feedback */}
                 {registration?.feedbackSubmitted && (
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/60">
-                        <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <Star size={14} /> Feedback
                         </h3>
                         <div className="flex items-center gap-2 text-xs">

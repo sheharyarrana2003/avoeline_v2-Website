@@ -150,7 +150,7 @@ export default async function VendorDashboardPage({
     };
 
     return (
-        <div className="min-h-screen bg-gray-200 px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 text-gray-900 font-sans">
             <div className="max-w-7xl mx-auto space-y-6">
                 
                 {/* Welcome Header Card - Matching Project Aesthetics */}
@@ -165,7 +165,7 @@ export default async function VendorDashboardPage({
                             </div>
                         )}
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                                 Welcome back, {businessName}!
                             </h1>
                             <p className="text-xs text-gray-500">Track your quotes, confirmed bookings, and monthly revenue.</p>
@@ -188,23 +188,23 @@ export default async function VendorDashboardPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Quotes</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{activeQuotes.length}</p>
+                        <p className="text-2xl font-bold text-gray-900">{activeQuotes.length}</p>
                     </div>
 
                     <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Confirmed Bookings</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{confirmedBookings.length}</p>
+                        <p className="text-2xl font-bold text-gray-900">{confirmedBookings.length}</p>
                     </div>
 
                     <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">This Month Revenue</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
+                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(thisMonthRevenue)}</p>
                     </div>
 
                     <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs flex flex-col justify-between">
                         <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Average Rating</p>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-2xl font-extrabold text-gray-900">{vendorRating || 'N/A'}</p>
+                            <p className="text-2xl font-bold text-gray-900">{vendorRating || 'N/A'}</p>
                             <span className="text-xs text-gray-500">({totalReviews} reviews)</span>
                         </div>
                         <div className="mt-1">
@@ -339,7 +339,7 @@ export default async function VendorDashboardPage({
                         <div className="bg-gray-100 rounded-2xl p-5 border border-gray-300/60 shadow-xs">
                             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 mb-3 border-b border-gray-300/60 pb-3">Revenue Overview</h3>
                             <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Total This Month</p>
-                            <p className="text-xl font-extrabold text-gray-900 mb-4">{formatCurrency(thisMonthRevenue)}</p>
+                            <p className="text-xl font-bold text-gray-900 mb-4">{formatCurrency(thisMonthRevenue)}</p>
                             
                             <MiniBarChart data={weeklyRevenue} />
                             

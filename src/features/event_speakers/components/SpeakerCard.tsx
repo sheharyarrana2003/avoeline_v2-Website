@@ -33,7 +33,7 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
                 )}
             </div>
 
-            <h3 className="text-xl font-extrabold text-gray-900 tracking-tight mb-1">
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-1">
                 {speaker.name}
             </h3>
 

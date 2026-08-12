@@ -48,7 +48,7 @@ export default async function Vendor_Marketplace({
     const vendors: VendorData[] | null = await EventVendorService.getAllVendors();
 
     if (!vendors) {
-       return <div className="min-h-screen bg-gray-50 p-6 md:p-8">
+       return <div className="px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
 
                 {/* Page Title */}
@@ -105,7 +105,7 @@ export default async function Vendor_Marketplace({
         : vendors;
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 md:p-8">
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
 
                 {/* Page Title */}
@@ -248,7 +248,7 @@ export default async function Vendor_Marketplace({
 
                                     {/* Price */}
                                     <div className="mb-5">
-                                        <span className="text-xl font-extrabold text-gray-900">{formatCurrency(price)}</span>
+                                        <span className="text-xl font-bold text-gray-900">{formatCurrency(price)}</span>
                                         <span className="text-xs text-gray-500 ml-1">/ {pricePackage?.minOrder ? `min ${pricePackage.minOrder}` : 'start'}</span>
                                     </div>
 

@@ -43,17 +43,17 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     ];
 
     return (
-        <main className="min-h-screen bg-white px-4 py-8 text-gray-950 sm:px-6 lg:px-8">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 text-gray-950">
             <div className="mx-auto max-w-7xl">
                 <header className="flex flex-col gap-5 border-b border-gray-200 pb-8 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">My Events</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-950">My Events</h1>
                         <p className="mt-2 text-sm font-bold text-gray-500">{organizerEvents.length} total events</p>
                     </div>
 
                     <Link
                         href={`${base_address}/events/create`}
-                        className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
+                        className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-black px-6 text-sm font-bold text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-gray-800"
                     >
                         <Plus size={18} />
                         Create New Event
@@ -68,7 +68,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                             <Link
                                 key={tab.value}
                                 href={tab.href}
-                                className={`shrink-0 border-b-2 pb-4 text-sm font-extrabold transition ${isActive
+                                className={`shrink-0 border-b-2 pb-4 text-sm font-bold transition ${isActive
                                         ? "border-black text-gray-950"
                                         : "border-transparent text-gray-500 hover:text-gray-700"
                                     }`}
@@ -81,7 +81,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
                 <section className="pt-8">
                     <div className="mb-5 flex items-center justify-between">
-                        <h2 className="text-2xl font-extrabold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900">
                             {currentTab === "all" ? "All Events" : `${toTitleCase(currentTab)} Events`}
                         </h2>
                         
@@ -95,18 +95,18 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                 className="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.035)] transition hover:border-gray-300 hover:shadow-[0_16px_36px_rgba(15,23,42,0.07)]"
                             >
                                 <article className="flex items-center gap-5">
-                                    <div className="flex size-[76px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-950 to-gray-500 text-sm font-extrabold uppercase tracking-widest text-white">
+                                    <div className="flex size-[76px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-950 to-gray-500 text-sm font-bold uppercase tracking-widest text-white">
                                         {event.category.slice(0, 2)}
                                     </div>
 
                                     <div className="min-w-0 flex-1">
                                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                                            <span className="rounded-md bg-gray-100 px-2 py-1 text-[11px] font-extrabold uppercase tracking-widest text-gray-700">
+                                            <span className="rounded-md bg-gray-100 px-2 py-1 text-[11px] font-bold uppercase tracking-widest text-gray-700">
                                                 {event.category}
                                             </span>
                                             <StatusBadge status={event.status} />
                                         </div>
-                                        <h3 className="truncate text-lg font-extrabold text-gray-950">{event.title}</h3>
+                                        <h3 className="truncate text-lg font-bold text-gray-950">{event.title}</h3>
                                         <p className="mt-1 line-clamp-1 text-sm font-semibold text-gray-500">{event.description}</p>
                                     </div>
 
@@ -126,7 +126,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     </div>
 
                                     <div className="shrink-0 w-[200px]">
-                                        <div className="mb-2 flex items-center justify-between gap-4 text-sm font-extrabold">
+                                        <div className="mb-2 flex items-center justify-between gap-4 text-sm font-bold">
                                             <span className="text-gray-950">
                                                 {event.analytics.registrations}/{event.capacity.totalSeats}
                                             </span>
@@ -157,7 +157,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                     </ul>
                 </section>
             </div>
-        </main>
+        </div>
     );
 }
 

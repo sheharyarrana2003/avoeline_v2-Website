@@ -58,9 +58,9 @@ export default async function EventLayout({
                 <EventsTab tabs={tabs} />
             </header>
 
-            <main className="min-w-0 flex-1 p-6 lg:p-8">
+            <div className="min-w-0 flex-1 p-6 lg:p-8">
                 {children}
-            </main>
+            </div>
         </div>
     );
 }

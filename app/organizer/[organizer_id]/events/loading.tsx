@@ -1,6 +1,6 @@
 export default function EventsLoading() {
     return (
-        <main className="min-h-screen bg-gray-100 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-6xl space-y-6">
                 <div className="h-16 animate-pulse rounded-lg border border-white/80 bg-white/70" />
                 <div className="space-y-4">
@@ -9,6 +9,6 @@ export default function EventsLoading() {
                     ))}
                 </div>
             </div>
-        </main>
+        </div>
     );
 }
