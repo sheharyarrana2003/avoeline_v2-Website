@@ -1,17 +1,16 @@
 /**
- * The Avoeline mark: a filled disc with a triangle cut out of it.
+ * The Avoeline mark: a disc with its lower-right corner squared off, carrying an
+ * outlined triangle with a dot at its centre.
  *
- * Taken from app/favicon.ico, which is the only real logo asset in the repo —
- * there is no SVG or PNG of it anywhere, and public/ holds nothing but the
- * framework's defaults. Three different invented emblems were in the codebase
- * before this (a mountain with one dot, the same mountain with three, and a
- * stylised A with a crossbar on the marketing header), so the product showed a
- * different logo depending on which page you were on.
+ * There is no logo file in this repository — public/ holds only the framework's
+ * defaults, and app/favicon.ico turns out to be an older, simpler version of the
+ * mark (a solid triangle, no outline, no dot) so it is not a usable source. This
+ * is traced from the supplied artwork.
  *
- * Drawn rather than imported so it stays crisp at any size and can invert. The
- * triangle is a hole punched through the disc with fill-rule evenodd, not a white
- * shape painted on top — so on a dark surface the page shows through it instead
- * of a white triangle floating on nothing.
+ * The blob is border-radius rather than an SVG arc. Three round corners and one
+ * square one is exactly what `rounded-full rounded-br-none` describes, whereas as
+ * a path it is two arcs and two lines whose sweep flags are easy to get subtly
+ * wrong — and were, twice.
  */
 export function BrandMark({
     className = "",
@@ -21,18 +20,28 @@ export function BrandMark({
     inverted?: boolean;
 }) {
     return (
-        <svg
+        <span
             aria-hidden="true"
-            viewBox="0 0 24 24"
-            className={`${inverted ? "text-white" : "text-gray-950"} ${className}`}
+            className={`inline-flex shrink-0 items-center justify-center rounded-full rounded-br-none ${
+                inverted ? "bg-white text-gray-950" : "bg-gray-950 text-white"
+            } ${className}`}
         >
-            <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0ZM12 5.9 17.9 16.2H6.1L12 5.9Z"
-                fill="currentColor"
-            />
-        </svg>
+            {/* Nudged up and left, because the squared corner puts the blob's optical
+                centre above and left of its bounding box centre. */}
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-[47%] w-[47%] -translate-x-[4%] -translate-y-[4%]"
+            >
+                <path
+                    d="M12 3.5 21.5 20H2.5L12 3.5Z"
+                    stroke="currentColor"
+                    strokeWidth="2.3"
+                    strokeLinejoin="round"
+                />
+                <circle cx="12" cy="14.3" r="2.2" fill="currentColor" />
+            </svg>
+        </span>
     );
 }
 
