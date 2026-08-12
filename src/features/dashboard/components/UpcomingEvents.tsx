@@ -1,42 +1,60 @@
 import { DashboardEvent } from "@/src/features/dashboard/types";
 import { formatDate } from "@/src/lib/datetime";
+import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { CalendarDays } from "lucide-react";
 
 export default function UpcomingEvents({ events }: { events: DashboardEvent[] }) {
   return (
-    <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-xs font-sans">
-      <h2 className="mb-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300/60 pb-3">
-        Upcoming Events
+    // Uncarded, like its two siblings: a grey card on a grey canvas separates from
+    // nothing, and three widgets on one screen have to agree.
+    <section className="font-sans">
+      <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
+        Upcoming events
       </h2>
 
-      <ul className="space-y-4">
-        {events.map((event) => {
-          const percent = Math.min(100, Math.round((event.registeredCount / event.maxCapacity) * 100));
+      {events.length === 0 ? (
+        <EmptyState
+          size="sm"
+          icon={<CalendarDays className="h-5 w-5" />}
+          title="No upcoming events"
+          description="Published events with a future start date will appear here."
+        />
+      ) : (
+        <ul className="space-y-5">
+          {events.map((event) => {
+            const percent = Math.min(100, Math.round((event.registeredCount / event.maxCapacity) * 100));
 
-          return (
-            <li key={event.id} className="bg-white rounded-xl p-3.5 border border-gray-300/50 shadow-2xs">
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <h3 className="text-xs font-bold text-gray-900 line-clamp-1">{event.title}</h3>
-                <time className="shrink-0 text-[10px] font-semibold text-gray-500">
-                  {formatDate(event.startDate)}
-                </time>
-              </div>
+            return (
+              <li key={event.id}>
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <h3 className="line-clamp-1 text-sm text-ink">{event.title}</h3>
+                  <time className="shrink-0 text-xs text-ink-soft tabular-nums">
+                    {formatDate(event.startDate)}
+                  </time>
+                </div>
 
-              <div className="h-1.5 overflow-hidden rounded-full bg-gray-200">
-                <div className="h-full rounded-full bg-black" style={{ width: `${percent}%` }} />
-              </div>
+                {/* The fill is the only thing carrying the proportion visually, so the
+                    count below it states the same fact in words. */}
+                <div className="h-1 overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-full bg-ink" style={{ width: `${percent}%` }} />
+                </div>
 
-              <div className="mt-2.5 flex items-center justify-between">
-                <p className="text-[11px] font-semibold text-gray-500">
-                  {event.registeredCount} / {event.maxCapacity} Reg.
-                </p>
-                <a href={`/organizer/events/${event.id}`} className="text-[11px] font-bold uppercase tracking-wider text-black hover:underline">
-                  Manage
-                </a>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-xs text-ink-soft tabular-nums">
+                    {event.registeredCount} / {event.maxCapacity} registered
+                  </p>
+                  <a
+                    href={`/organizer/events/${event.id}`}
+                    className="text-xs font-medium text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    Manage
+                  </a>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }

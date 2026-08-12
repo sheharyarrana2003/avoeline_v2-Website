@@ -11,14 +11,14 @@
        line       hairline
        line-loud  input + interactive borders
        ink        primary text, primary fill
-       ink-soft   secondary text — 4.7:1 on white
+       ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
        ink-faint  decorative ONLY — 2.5:1, never text */
   --paper: #FFFFFF;
   --canvas: oklch(0.985 0 0);
   --line: oklch(0.922 0 0);
   --line-loud: oklch(0.870 0 0);
   --ink: oklch(0.205 0 0);
-  --ink-soft: oklch(0.556 0 0);
+  --ink-soft: oklch(0.545 0 0);
   --ink-faint: oklch(0.708 0 0);
   --ink-invert: #FFFFFF;
 
@@ -48,7 +48,7 @@
   --color-gray-200: oklch(0.922 0 0);
   --color-gray-300: oklch(0.870 0 0);
   --color-gray-400: oklch(0.708 0 0);
-  --color-gray-500: oklch(0.556 0 0);
+  --color-gray-500: oklch(0.545 0 0);
   --color-gray-600: oklch(0.439 0 0);
   --color-gray-700: oklch(0.371 0 0);
   --color-gray-800: oklch(0.269 0 0);
@@ -119,6 +119,95 @@
      is a self-reference that resolves to nothing. Reference them instead. ── */
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Type scale ──
+     Lives INSIDE this @theme block, directly after the --font-sans / --font-display
+     lines, before the closing brace.
+
+     There were no --text-* keys here before, so every size in the product is a raw
+     Tailwind default picked ad hoc per file: text-sm 586 uses, text-xs 431, and
+     only 6 uses above text-3xl. Redefining Tailwind's OWN --text-* names repaints
+     all ~1,195 text-* utilities with zero file edits — the identical lever the
+     --color-gray-* ramp above already used on ~2,600 colour utilities.
+
+     Two ratios on purpose: ~1.125 through the UI range so a table cell, a field
+     label and a card title can differ without wasting rows; ~1.25 above 1.5rem so
+     the display tier finally has somewhere to go. The gap that matters is 3xl
+     (32px page title) against 2xl (24px KPI) — the title must outrank a number,
+     which today it does not.
+
+     text-sm STAYS at 0.875rem. It is 586 sites and the product's complaint is
+     that everything is already small.
+
+     Line-heights are absolute rem, not unitless, so headings land on the 4px grid
+     and the uncarded layouts do not drift. Tracking rides with the size: positive
+     on small uppercase (caps crowd), negative on display (Space Grotesk is drawn
+     wide and reads loose above 1.5rem). Nobody has to remember the ramp. ── */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-2xs--letter-spacing: 0.08em;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-xs--letter-spacing: 0.06em;   /* almost always uppercase micro-labels here */
+
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-sm--letter-spacing: 0em;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-base--letter-spacing: -0.006em;
+
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-lg--letter-spacing: -0.01em;
+
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.012em;
+
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-2xl--letter-spacing: -0.016em;
+
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-3xl--letter-spacing: -0.022em;
+
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.625rem;
+  --text-4xl--letter-spacing: -0.026em;
+
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 3.25rem;
+  --text-5xl--letter-spacing: -0.03em;
+
+  --text-6xl: 4rem;
+  --text-6xl--line-height: 4rem;
+  --text-6xl--letter-spacing: -0.032em;
+
+  /* ── Weight ──
+     386 bold + 216 semibold + 106 extrabold + 6 black against SEVEN font-normal.
+     When everything is bold, bold means nothing and hierarchy has to be carried by
+     size alone — which is why the scale above matters. Aliasing collapses the
+     palette to three real weights and repaints all 708 sites without a sweep.
+
+     NOTE FOR FUTURE READERS: font-semibold renders 500 and font-bold renders 600
+     here. The class names lie. That is the deliberate price of not hand-editing
+     708 call sites. New code should use font-medium and reach for size or
+     font-display for emphasis, not weight.
+
+     --font-weight-black stays 800 so the marketing hero (app/page.tsx,
+     src/shared_components/home/*) keeps a display voice — it is a deliberately
+     separate violet system and must not be flattened by a product-side alias. ── */
+  --font-weight-light: 400;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 800;
 }
 
 html {
@@ -251,6 +340,23 @@ body {
     .animate-sparkline {
       animation: none;
     }
+  }
+}
+
+/* ── Numerals ──
+   Lives OUTSIDE @theme, at the end of this file — @theme takes variable
+   declarations only, so this rule cannot be moved up into it.
+
+   tabular-nums appears in exactly 2 files today (NotificationsView,
+   NotificationBell), neither a stat surface, so every KPI grid and currency figure
+   renders in proportional figures and the digits visibly jitter between values.
+   One rule beats a ten-file sweep and it covers numeric surfaces nobody has
+   written yet. Running prose keeps proportional figures, where they read better.
+   Tailwind already ships a `tabular-nums` utility — do not invent a `.tnum`
+   duplicate of it. ── */
+@layer base {
+  table, th, td, time, output, .num {
+    font-variant-numeric: tabular-nums;
   }
 }
 

@@ -20,6 +20,13 @@ export type EmptyStateProps = {
  * treatments -- a full card with a call to action, a card with an emoji, a
  * bare grey paragraph, and in one case `return null`, which rendered a blank
  * space with no explanation at all.
+ *
+ * Bounded on purpose: the dashed rule says "this region works and is empty",
+ * where centred text floating in whitespace read as a region that failed. The
+ * border is decoration around a whole region, never a control, so line-loud
+ * (1.42:1 on canvas) is the right weight -- loud enough to see, quiet enough that a
+ * placeholder does not out-rank the section title above it. Same reason the
+ * title is font-medium rather than bold.
  */
 export function EmptyState({
     icon,
@@ -29,24 +36,23 @@ export function EmptyState({
     size = "md",
     className = "",
 }: EmptyStateProps) {
-    const pad = size === "sm" ? "py-8" : "py-14";
+    const pad = size === "sm" ? "py-8" : "py-12";
 
     return (
-        <div className={`flex flex-col items-center justify-center px-6 text-center ${pad} ${className}`}>
+        <div
+            className={`flex flex-col items-center justify-center rounded-lg border border-dashed border-line-loud px-6 text-center ${pad} ${className}`}
+        >
+            {/* Bare glyph, not a filled chip: after the hue purge the non-text channel is
+                scarce, and a 48px grey circle spends more ink than the message it labels. */}
             {icon ? (
-                <div
-                    className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500"
-                    aria-hidden="true"
-                >
+                <span className="mb-3 text-gray-400" aria-hidden="true">
                     {icon}
-                </div>
+                </span>
             ) : null}
 
-            <p className={`font-bold text-gray-900 ${size === "sm" ? "text-sm" : "text-base"}`}>{title}</p>
+            <p className="text-base font-medium text-ink">{title}</p>
 
-            {description ? (
-                <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-gray-500">{description}</p>
-            ) : null}
+            {description ? <p className="mt-1 max-w-sm text-sm text-ink-soft">{description}</p> : null}
 
             {action ? <div className="mt-5">{action}</div> : null}
         </div>

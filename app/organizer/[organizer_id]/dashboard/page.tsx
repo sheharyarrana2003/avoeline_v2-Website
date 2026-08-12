@@ -4,6 +4,7 @@ import { AnalyticsService } from "@/src/services/anaylService";
 import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
 import { Calendar, Plus, Star, Users, Wallet, Bot } from "lucide-react";
 import Link from "next/link";
+import { buttonClass } from "@/src/lib/ui";
 
 import TodaysSchedule from "@/src/features/dashboard/components/TodaysSchedule";
 import RecentRegistrations from "@/src/features/dashboard/components/RecentRegistrations";
@@ -21,31 +22,29 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
         redirect('/auth/signup');
     }
 
+    // The <main> landmark comes from app/organizer/layout.tsx. A second one here was
+    // invalid nesting, and its own background is what made the page flash a
+    // different grey between the loading and loaded frames.
     return (
-        <main className="min-h-screen bg-gray-200 px-4 py-8 text-gray-900 sm:px-6 lg:px-8 font-sans">
-            <div className="mx-auto max-w-7xl space-y-6">
-                {/* Welcome Header Card */}
-                <section className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-base shadow-xs">
-                            {u.name ? u.name.charAt(0).toUpperCase() : 'O'}
-                        </div>
-                        <div>
-                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                                Welcome back, {u.name}!
-                            </h1>
-                            <p className="text-xs text-gray-500">Manage your events, registrations, and analytics.</p>
-                        </div>
+        <div className="px-4 py-8 text-ink sm:px-6 lg:px-8 font-sans">
+            <div className="mx-auto max-w-6xl space-y-10">
+                <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h1 className="font-display text-3xl text-ink">Welcome back, {u.name}</h1>
+                        <p className="mt-1 text-sm text-ink-soft">Manage your events, registrations, and analytics.</p>
                     </div>
-
-                    <Link
-                        href={`/organizer/${organizer_id}/chatbot`}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-black px-5 text-xs font-semibold text-white shadow-xs transition hover:bg-gray-800"
-                    >
-                        <Bot size={16} />
-                        Chat With AI
-                    </Link>
-                </section>
+                    {/* wraps: two h-11 buttons need ~312px and the narrowest target is 320px */}
+                    <div className="flex flex-wrap gap-2">
+                        <Link href={`/organizer/${organizer_id}/chatbot`} className={buttonClass("secondary", "lg")}>
+                            <Bot size={16} />
+                            Chat with AI
+                        </Link>
+                        <Link href={`/organizer/${organizer_id}/events/create`} className={buttonClass("primary", "lg")}>
+                            <Plus size={16} />
+                            Create event
+                        </Link>
+                    </div>
+                </header>
 
                 {/* Streamed Stats Cards */}
                 <Suspense fallback={<StatsSkeleton />}>
@@ -61,25 +60,13 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
                     </div>
 
                     <aside className="space-y-6">
-                        {/* Quick Create Event Card */}
-                        <div className="bg-gray-100 rounded-2xl border border-gray-300/60 p-5 shadow-xs">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3">Quick Action</h3>
-                            <Link
-                                href={`/organizer/${organizer_id}/events/create`}
-                                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-black px-4 text-xs font-bold text-white transition hover:bg-gray-800 shadow-xs"
-                            >
-                                <Plus size={16} />
-                                Create New Event
-                            </Link>
-                        </div>
-
                         <Suspense fallback={<WidgetSkeleton height="h-48" />}>
                             <DashboardUpcoming organizerId={organizer_id} />
                         </Suspense>
                     </aside>
                 </section>
             </div>
-        </main>
+        </div>
     );
 }
 
@@ -87,12 +74,14 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
 async function DashboardStats({ organizerId }: { organizerId: string }) {
     const { stats } = await AnalyticsService.getDashboardData(organizerId);
+    // One band, not four cards: two rules and three dividers carry the grouping that
+    // four borders, radii and shadows used to.
     return (
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard_dashboard title="Active Events" value={String(stats.activeEvents)} icon={<Calendar size={18} />} />
-            <StatCard_dashboard title="Registrations" value={stats.registrations} icon={<Users size={18} />} />
-            <StatCard_dashboard title="Revenue" value={stats.revenue} icon={<Wallet size={18} />} />
-            <StatCard_dashboard title="Avg Rating" value={String(stats.avgRating)} icon={<Star size={18} />} />
+        <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+            <StatCard_dashboard title="Active Events" value={String(stats.activeEvents)} icon={<Calendar size={14} />} />
+            <StatCard_dashboard title="Registrations" value={stats.registrations} icon={<Users size={14} />} />
+            <StatCard_dashboard title="Revenue" value={stats.revenue} icon={<Wallet size={14} />} />
+            <StatCard_dashboard title="Avg Rating" value={String(stats.avgRating)} icon={<Star size={14} />} />
         </section>
     );
 }
@@ -115,11 +104,23 @@ async function DashboardUpcoming({ organizerId }: { organizerId: string }) {
 
 // ── Stream Skeletons ─────────────────────────────────────────────────────────
 
+// These must match DashboardStats and the uncarded widgets exactly. A skeleton that
+// resolves into a different shape reads as a bug on every navigation, and this route
+// previously had three disagreeing frames: the page, these fallbacks, and loading.tsx.
+//
+// gray-200 rather than gray-100 for the fill: the page sits on --canvas (#FAFAFA), and
+// gray-100 against it is 1.04:1 — a skeleton nobody can see. gray-200 is 1.21:1, which
+// is still decoration, so role/aria-label carry the state for anyone who cannot see it.
+
 function StatsSkeleton() {
     return (
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section
+            role="status"
+            aria-label="Loading statistics"
+            className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line"
+        >
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-2xl border border-gray-300/60 bg-gray-100" />
+                <div key={i} className="mx-0 h-14 animate-pulse rounded-xs bg-gray-200 sm:mx-6" />
             ))}
         </section>
     );
@@ -127,6 +128,10 @@ function StatsSkeleton() {
 
 function WidgetSkeleton({ height }: { height: string }) {
     return (
-        <div className={`${height} animate-pulse rounded-2xl border border-gray-300/60 bg-gray-100`} />
+        <div
+            role="status"
+            aria-label="Loading"
+            className={`${height} animate-pulse rounded-xs bg-gray-200`}
+        />
     );
 }

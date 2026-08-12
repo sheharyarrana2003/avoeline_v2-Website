@@ -27,9 +27,12 @@ const TONE: Record<StatusTone, { box: string; label: string; Icon: LucideIcon | 
     neutral: { box: "bg-transparent text-gray-500 border-gray-200", label: "", Icon: null },
 };
 
+// text-2xs/text-xs rather than the arbitrary 10px/11px these were written as before
+// the type scale existed. Both tokens already carry their own uppercase tracking, so
+// no tracking utility is needed on the badge itself.
 const SIZE = {
-    sm: "gap-1 px-2 py-0.5 text-[10px]",
-    md: "gap-1.5 px-3 py-1 text-[11px]",
+    sm: "gap-1 px-2 py-0.5 text-2xs",
+    md: "gap-1.5 px-3 py-1 text-xs",
 } as const;
 
 export type StatusBadgeProps = {
@@ -51,7 +54,7 @@ export function StatusBadge({ status, label, size = "md", className = "" }: Stat
     const Icon = tone.Icon;
     return (
         <span
-            className={`inline-flex items-center whitespace-nowrap rounded-full border font-extrabold uppercase tracking-wider ${tone.box} ${SIZE[size]} ${className}`}
+            className={`inline-flex items-center whitespace-nowrap rounded-full border font-bold uppercase ${tone.box} ${SIZE[size]} ${className}`}
         >
             {Icon && <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
             {/* The strike on `danger` is decorative -- screen readers announce the
