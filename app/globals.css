@@ -104,15 +104,19 @@
   --radius-3xl: 1rem;
   --radius-4xl: 1rem;
 
-  /* ── Shadow: black and white leans on borders, not depth. 15 values → 3.
-     The three smallest all collapse to one hairline. ── */
+  /* ── Shadow: four real elevations, layered rather than blurred.
+     These were flattened to almost nothing on the theory that black and white
+     leans on borders. It does — but with no elevation at all nothing ever reads
+     as raised or interactive, which is what made the product look drawn rather
+     than built. Each step pairs a tight contact shadow with a wider ambient one,
+     which is what separates a surface from a rectangle. ── */
   --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 8px 24px -4px rgb(0 0 0 / 0.10);
-  --shadow-xl: 0 8px 24px -4px rgb(0 0 0 / 0.10);
-  --shadow-2xl: 0 24px 48px -12px rgb(0 0 0 / 0.18);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 4px -2px rgb(0 0 0 / 0.08), 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 4px 8px -4px rgb(0 0 0 / 0.10), 0 12px 28px -6px rgb(0 0 0 / 0.12);
+  --shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.12), 0 24px 48px -12px rgb(0 0 0 / 0.16);
+  --shadow-2xl: 0 16px 32px -12px rgb(0 0 0 / 0.18), 0 40px 80px -20px rgb(0 0 0 / 0.22);
 
   /* ── Type. --font-heading/-body/-mono are set by next/font on <html> in
      app/layout.tsx. Do NOT redeclare them here: `--font-heading: var(--font-heading)`
@@ -371,4 +375,53 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-spin,
   [class*="loading-sweep"] { animation: none; }
+}
+
+/* ── Surface treatments ──────────────────────────────────────────────────────
+   Everything below is additive craft rather than structure. With hue gone, the
+   instruments left are elevation, texture, scale and motion, and the product was
+   using none of them — every surface was the same flat white field, and nothing
+   responded to being pointed at. */
+
+/* A large area of pure black reads as a hole rather than a surface. A very faint
+   off-centre highlight plus a fine grid gives it a light source and a material,
+   which is the difference between an ink panel and a missing rectangle. */
+.ink-panel {
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 26px 26px, 26px 26px;
+  color: var(--ink-invert);
+}
+
+/* Interactive rows and cards. The lift is deliberately small -- 1px reads as
+   responsive, 4px reads as a toy -- and the border darkens at the same time so
+   the state survives for anyone who cannot perceive the shadow. */
+.lift {
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+.lift:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-loud);
+  box-shadow: var(--shadow-md);
+}
+.lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Figures large enough to anchor a screen. Tight tracking and lining numerals,
+   because at this size default spacing looks loose and proportional digits make
+   a column of numbers ragged. */
+.figure {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .lift:hover, .lift:active { transition: none; transform: none; }
 }

@@ -35,7 +35,7 @@ export default function RecentRegistrations({ registerations }: { registerations
 
             <tbody>
               {registerations.map((registration) => (
-                <tr key={registration.id} className="border-b border-line transition-colors last:border-b-0 hover:bg-gray-50">
+                <tr key={registration.id} className="border-b border-line transition-colors last:border-b-0 hover:bg-gray-50/80">
                   <td className="py-3 pr-6">
                     <div className="flex items-center gap-3">
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-200 text-2xs font-medium text-gray-700">

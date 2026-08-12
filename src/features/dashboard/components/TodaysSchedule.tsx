@@ -46,7 +46,7 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                 {index < events.length - 1 && <span className="mt-1.5 h-full w-px min-h-12 bg-line-loud" />}
               </div>
 
-              <div className="border-b border-line pb-4 last:border-b-0">
+              <div className="-mx-2 rounded-lg border-b border-line px-2 pb-4 transition-colors last:border-b-0 hover:bg-gray-50">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-2xs font-medium uppercase text-gray-700 flex items-center gap-1">

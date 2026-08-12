@@ -74,14 +74,28 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
 async function DashboardStats({ organizerId }: { organizerId: string }) {
     const { stats } = await AnalyticsService.getDashboardData(organizerId);
-    // One band, not four cards: two rules and three dividers carry the grouping that
-    // four borders, radii and shadows used to.
+
+    // One figure carries the screen and the other three support it, rather than four
+    // equal tiles where nothing is the answer to "how is it going". The lead sits on
+    // ink because with hue gone, a large dark shape is the only way to say "start
+    // here" — the nav rail was the only dark region in the product and the pages
+    // behind it had no anchor at all.
     return (
-        <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-            <StatCard_dashboard title="Active Events" value={String(stats.activeEvents)} icon={<Calendar size={14} />} />
-            <StatCard_dashboard title="Registrations" value={stats.registrations} icon={<Users size={14} />} />
-            <StatCard_dashboard title="Revenue" value={stats.revenue} icon={<Wallet size={14} />} />
-            <StatCard_dashboard title="Avg Rating" value={String(stats.avgRating)} icon={<Star size={14} />} />
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+            <div className="ink-panel relative overflow-hidden rounded-2xl p-7 shadow-lg">
+                <p className="text-2xs font-medium uppercase text-white/50">Registrations</p>
+                <p className="figure mt-3 text-6xl text-white">{stats.registrations}</p>
+                <p className="mt-3 flex items-center gap-1.5 text-sm text-white/60">
+                    <Users size={14} aria-hidden="true" />
+                    across {stats.activeEvents} active {stats.activeEvents === 1 ? "event" : "events"}
+                </p>
+            </div>
+
+            <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
+                <StatCard_dashboard title="Active Events" value={String(stats.activeEvents)} icon={<Calendar size={14} />} />
+                <StatCard_dashboard title="Revenue" value={stats.revenue} icon={<Wallet size={14} />} />
+                <StatCard_dashboard title="Avg Rating" value={String(stats.avgRating)} icon={<Star size={14} />} />
+            </div>
         </section>
     );
 }
@@ -114,14 +128,16 @@ async function DashboardUpcoming({ organizerId }: { organizerId: string }) {
 
 function StatsSkeleton() {
     return (
-        <section
-            role="status"
-            aria-label="Loading statistics"
-            className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line"
-        >
-            {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="mx-0 h-14 animate-pulse rounded-xs bg-gray-200 sm:mx-6" />
-            ))}
+        <section role="status" aria-label="Loading statistics" className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+            <div className="h-44 animate-pulse rounded-2xl bg-gray-200" />
+            <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper sm:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border-line p-5 not-last:border-r sm:p-6">
+                        <div className="h-3 w-20 animate-pulse rounded-xs bg-gray-200" />
+                        <div className="mt-3 h-9 w-24 animate-pulse rounded-xs bg-gray-200" />
+                    </div>
+                ))}
+            </div>
         </section>
     );
 }

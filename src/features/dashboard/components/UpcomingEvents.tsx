@@ -20,12 +20,12 @@ export default function UpcomingEvents({ events }: { events: DashboardEvent[] })
           description="Published events with a future start date will appear here."
         />
       ) : (
-        <ul className="space-y-5">
+        <ul className="space-y-3">
           {events.map((event) => {
             const percent = Math.min(100, Math.round((event.registeredCount / event.maxCapacity) * 100));
 
             return (
-              <li key={event.id}>
+              <li key={event.id} className="lift rounded-xl border border-line bg-paper p-4">
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <h3 className="line-clamp-1 text-sm text-ink">{event.title}</h3>
                   <time className="shrink-0 text-xs text-ink-soft tabular-nums">
