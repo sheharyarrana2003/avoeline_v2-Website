@@ -1,6 +1,7 @@
 import { EventService } from "@/src/services/event.service";
 import { AnalyticsService } from "@/src/services/anaylService";
-import { EventModel, EventStatus } from "@/src/services/models/event.model";
+import { EventModel } from "@/src/services/models/event.model";
+import { eventLifecycle, type EventLifecycle } from "@/src/lib/eventState";
 import { CalendarPlus, Eye, Plus } from "lucide-react";
 import Link from "next/link";
 import { formatDate, formatTime } from "@/src/lib/datetime";
@@ -33,8 +34,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     ]);
     const tallyFor = (id: string) => tallies.get(id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
 
+    // One instant for the whole page, so every event is placed against the same
+    // clock rather than drifting across the loop.
+    const now = new Date();
+    const lifecycleOf = new Map(organizerEvents.map((e) => [e.id, eventLifecycle(e.status, e.schedule, now)]));
+
     const events = organizerEvents.filter(
-        (event) => currentTab === "all" || event.status === currentTab
+        (event) => currentTab === "all" || lifecycleOf.get(event.id) === currentTab
     );
 
     // One entry per member of EventStatus, derived from the union rather than typed
@@ -45,12 +51,12 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     //
     // The `published` branch of the old filter was also dead — it compared status to
     // "published" where the line below it already compared status to currentTab.
-    const STATUS_TABS: { label: string; value: EventStatus }[] = [
+    const STATUS_TABS: { label: string; value: EventLifecycle }[] = [
         { label: "Draft", value: "draft" },
-        { label: "Published", value: "published" },
-        { label: "Registration open", value: "registration_open" },
+        { label: "Upcoming", value: "upcoming" },
         { label: "Ongoing", value: "ongoing" },
         { label: "Completed", value: "completed" },
+        { label: "Unscheduled", value: "published" },
         { label: "Cancelled", value: "cancelled" },
     ];
 
@@ -59,7 +65,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         ...STATUS_TABS.map((t) => ({
             label: t.label,
             value: t.value,
-            count: countByStatus(organizerEvents, t.value),
+            count: organizerEvents.filter((e) => lifecycleOf.get(e.id) === t.value).length,
             href: `${base_address}/events?status=${t.value}`,
         })),
     ];
@@ -86,7 +92,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                 </Link>
             ),
         },
-        { key: "status", header: "Status", cell: (e) => <StatusBadge status={e.status} size="sm" /> },
+        {
+            key: "status",
+            header: "Status",
+            // The derived state, not the stored one: the stored value is written once at
+            // creation and never again, so a finished event would read "Published".
+            cell: (e) => <StatusBadge status={lifecycleOf.get(e.id)} size="sm" />,
+        },
         {
             key: "date",
             header: "Date",
@@ -215,10 +227,6 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
             </div>
         </div>
     );
-}
-
-function countByStatus(events: EventModel[], status: EventStatus) {
-    return events.filter((event) => event.status === status).length;
 }
 
 function toTitleCase(value: string) {

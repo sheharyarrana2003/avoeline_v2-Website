@@ -11,6 +11,7 @@ import { formatDate, parseScheduleDateTime, toIsoString } from "@/src/lib/dateti
 import { COLLECTIONS } from "@/data/collections";
 import { formatCurrencyCompact } from "@/src/lib/money";
 import { UserService } from "@/src/services/user.service";
+import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 
 
 function toDate(val: any): Date {
@@ -65,10 +66,15 @@ function computeRevenue(regDocs: Docs): number {
 //   • registrations (count)    → registrations collection
 //   • average rating           → reviews collection
 function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
+    // Counted anything `published` as active, and since nothing ever advances an
+    // event's stored status, an event that ran weeks ago stayed in this number
+    // forever. The lifecycle is derived from the schedule, so a finished event drops
+    // out on its own.
+    const now = new Date();
     let activeEvents = 0;
     eventDocs.forEach((doc) => {
-        const status = (doc.data().status || "").toLowerCase();
-        if (["active", "ongoing", "published", "registration_open"].includes(status)) {
+        const data = doc.data();
+        if (isActiveLifecycle(eventLifecycle(data.status, data.schedule, now))) {
             activeEvents++;
         }
     });
