@@ -118,7 +118,7 @@ export default async function VendorProfilePage({
                 <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line bg-paper">
                     {logo ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={logo} alt="" className="h-full w-full object-cover" />
+                        <img src={logo} alt="" className="h-full w-full object-contain p-1.5" />
                     ) : (
                         <Building2 className="h-6 w-6 text-ink-faint" aria-hidden="true" />
                     )}

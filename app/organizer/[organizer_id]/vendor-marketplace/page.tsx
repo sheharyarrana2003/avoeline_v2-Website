@@ -166,7 +166,7 @@ export default async function Vendor_Marketplace({
                                             <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                                                 {logo ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={logo} alt="" className="h-full w-full object-cover" />
+                                                    <img src={logo} alt="" className="h-full w-full object-contain p-1" />
                                                 ) : (
                                                     <Store size={16} className="text-ink-faint" aria-hidden="true" />
                                                 )}

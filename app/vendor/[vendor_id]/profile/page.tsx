@@ -184,7 +184,7 @@ export default async function VendorProfilePage({
                                 <img
                                     src={v.logo}
                                     alt=""
-                                    className="-mt-14 h-16 w-16 shrink-0 rounded-full border-4 border-paper bg-paper object-cover"
+                                    className="-mt-14 h-16 w-16 shrink-0 rounded-full border-4 border-paper bg-paper object-contain p-1.5"
                                 />
                             ) : (
                                 <div className="-mt-14 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-paper bg-ink font-display text-xl text-ink-invert">

@@ -103,7 +103,7 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                     <img
                                         src={organizer.organization.logo}
                                         alt=""
-                                        className="size-16 shrink-0 rounded-full border border-line object-cover"
+                                        className="size-16 shrink-0 rounded-full border border-line bg-paper object-contain p-1.5"
                                     />
                                 ) : (
                                     <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-ink-invert">

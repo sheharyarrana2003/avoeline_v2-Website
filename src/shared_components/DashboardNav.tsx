@@ -85,13 +85,19 @@ export function DashboardNav({
 
     const avatar = (onInk: boolean) => (
         <span
-            className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-full font-semibold ${
-                onInk ? "bg-white/15 text-white" : "bg-muted-strong text-ink"
+            className={`flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${
+                // A logo needs a light backing: most are dark marks on transparent, and
+                // on the near-black rail those vanish into it entirely.
+                logoUrl ? "bg-white" : onInk ? "bg-white/15 text-white" : "bg-muted-strong text-ink"
             }`}
         >
             {logoUrl ? (
+                // object-contain, not cover. A logo is usually wider than it is tall, so
+                // cropping it into a 32px circle keeps the middle and throws away the
+                // mark — which is why this rendered as an unreadable fragment. Contain
+                // plus a hair of padding shows the whole thing, small but recognisable.
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                <img src={logoUrl} alt="" className="h-full w-full object-contain p-0.5" />
             ) : (
                 <span aria-hidden="true">{initial}</span>
             )}
