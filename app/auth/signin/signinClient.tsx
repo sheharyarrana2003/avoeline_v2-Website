@@ -1,8 +1,9 @@
 'use client';
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { buttonClass, fieldClass } from '@/src/lib/ui';
+import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
 import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
+import { BrandMark } from '@/src/shared_components/ui/BrandMark';
 
 interface LoginResult {
     success: boolean;
@@ -44,43 +45,56 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
             <div className="flex w-full max-w-[440px] flex-col items-center rounded-2xl border border-line bg-paper p-8 sm:p-12">
 
                 <div className="mb-10 flex flex-col items-center">
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-t-full rounded-bl-full rounded-br-md bg-ink text-ink-invert">
-                        {/* Brand mark, not iconography — no lucide equivalent exists. */}
-                        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 2L2 22h20L12 2z" />
-                            <circle cx="12" cy="14" r="2" fill="white" />
-                        </svg>
-                    </div>
+                    {/* BrandMark, not a local SVG. This file drew its own triangle-and-circle
+                        glyph, which is not the Avoeline mark — the whole point of BrandMark
+                        is that the mark has one definition. */}
+                    <BrandMark className="mb-3 h-12 w-12" />
                     <h1 className="font-display text-xl text-ink">Avoeline</h1>
+                    <p className="mt-1 text-sm text-ink-soft">Sign in to your account</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="w-full space-y-4">
                     <FormFeedback error={error} />
 
-                    <input
-                        type="email"
-                        aria-label="Email address"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => {
-                            setEmail(e.target.value);
-                            if (error) setError(null);
-                        }}
-                        className={fieldClass}
-                        required
-                    />
-                    <input
-                        type="password"
-                        aria-label="Password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => {
-                            setPassword(e.target.value);
-                            if (error) setError(null);
-                        }}
-                        className={fieldClass}
-                        required
-                    />
+                    {/* Visible labels, where these were placeholder-only. A placeholder
+                        disappears the moment you type into the field, so the only thing
+                        naming the input is gone exactly when you want to check it. */}
+                    <div>
+                        <label htmlFor="signin-email" className={labelClass}>
+                            Email address
+                        </label>
+                        <input
+                            id="signin-email"
+                            type="email"
+                            autoComplete="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (error) setError(null);
+                            }}
+                            className={`${fieldClass} mt-1.5`}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="signin-password" className={labelClass}>
+                            Password
+                        </label>
+                        <input
+                            id="signin-password"
+                            type="password"
+                            autoComplete="current-password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (error) setError(null);
+                            }}
+                            className={`${fieldClass} mt-1.5`}
+                            required
+                        />
+                    </div>
                     <button
                         type="submit"
                         disabled={isPending}
