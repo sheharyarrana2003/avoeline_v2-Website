@@ -1,6 +1,7 @@
 'use client';
 import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 import React, { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
 import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
@@ -52,6 +53,7 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                 <div className="mb-10 flex flex-col items-center">
                     <BrandMark className="mb-3 h-12 w-12" />
                     <h1 className="font-display text-xl text-ink">Avoeline</h1>
+                    <p className="mt-1 text-sm text-ink-soft">Create your account</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="w-full space-y-3">
@@ -131,15 +133,23 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                         />
                     </div>
 
-                    <div className="relative">
+                    {/* Labelled like the inputs above. These two were the only fields
+                        left carrying an aria-label and a disabled first option in place
+                        of a real label, which read as inconsistent once the rest gained
+                        one — and the placeholder-option trick disappears on selection
+                        exactly the way a placeholder does. */}
+                    <div>
+                      <label htmlFor="signup-country" className={labelClass}>Country</label>
+                      <div className="relative mt-1.5">
                         <select
+                            id="signup-country"
                             name="country"
-                            aria-label="Country"
+                            autoComplete="country-name"
                             value={formData.country}
                             onChange={handleChange}
                             className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
-                            <option value="" disabled>Country</option>
+                            <option value="" disabled>Select a country</option>
                             <option value="usa">United States</option>
                             <option value="uk">United Kingdom</option>
                             <option value="canada">Canada</option>
@@ -153,17 +163,21 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
                         />
+                      </div>
                     </div>
 
-                    <div className="relative">
+                    <div>
+                      <label htmlFor="signup-city" className={labelClass}>City</label>
+                      <div className="relative mt-1.5">
                         <select
+                            id="signup-city"
                             name="city"
-                            aria-label="City"
+                            autoComplete="address-level2"
                             value={formData.city}
                             onChange={handleChange}
                             className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
-                            <option value="" disabled>City</option>
+                            <option value="" disabled>Select a city</option>
                             <option value="new-york">New York</option>
                             <option value="london">London</option>
                             <option value="toronto">Toronto</option>
@@ -177,6 +191,7 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
                         />
+                      </div>
                     </div>
 
                     {/* Segmented control, so aria-pressed carries the selection for anyone
@@ -207,6 +222,16 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                         {isPending ? 'Creating account…' : 'Sign up'}
                     </button>
                 </form>
+
+                {/* Sign-in offers a route to sign-up and sign-up offered nothing back,
+                    so anyone who already had an account and landed here had to edit the
+                    URL. The pair has to be reciprocal. */}
+                <div className="mt-8 text-sm text-ink-soft">
+                    Already have an account?{' '}
+                    <Link href="/auth/signin" className="font-semibold text-ink hover:underline">
+                        Sign in
+                    </Link>
+                </div>
 
             </div>
         </div>
