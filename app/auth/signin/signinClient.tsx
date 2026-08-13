@@ -85,7 +85,9 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
                             id="signin-password"
                             type="password"
                             autoComplete="current-password"
-                            placeholder="••••••••"
+                            // Not a row of bullets: a placeholder made of the same glyph
+                            // the field masks with makes an empty input look filled.
+                            placeholder="Your password"
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value);
