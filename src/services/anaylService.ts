@@ -259,11 +259,10 @@ function deriveTotalEvents(eventDocs: Docs): AnalyticsMetric {
     };
 }
 
-function deriveProfit(eventDocs: Docs): AnalyticsMetric {
-    let totalRevenue = 0;
-    eventDocs.forEach((doc) => {
-        totalRevenue += doc.data().analytics?.revenue ?? 0;
-    });
+// regDocs, not eventDocs. This summed event.analytics.revenue, a counter nothing
+// writes, so the headline read Rs 0 no matter how much had actually been paid.
+function deriveProfit(regDocs: Docs): AnalyticsMetric {
+    const totalRevenue = computeRevenue(regDocs);
     // Simple proxy: profit ≈ 70 % of revenue (platform fee placeholder until a costs collection exists)
     const estimatedProfit = Math.round(totalRevenue * 0.7);
     return {
@@ -272,12 +271,12 @@ function deriveProfit(eventDocs: Docs): AnalyticsMetric {
     };
 }
 
-function deriveTotalRevenue(eventDocs: Docs): AnalyticsMetric {
-    let totalRevenue = 0;
-    eventDocs.forEach((doc) => {
-        totalRevenue += doc.data().analytics?.revenue ?? 0;
-    });
-    const avg = eventDocs.length > 0 ? Math.round(totalRevenue / eventDocs.length) : 0;
+// Same fix as deriveProfit: the money lives on the registrations, not on a
+// denormalised field of the event. The per-event column and this total now come
+// from one source and therefore agree.
+function deriveTotalRevenue(regDocs: Docs, eventCount: number): AnalyticsMetric {
+    const totalRevenue = computeRevenue(regDocs);
+    const avg = eventCount > 0 ? Math.round(totalRevenue / eventCount) : 0;
     return {
         value: formatCurrencyCompact(totalRevenue),
         helper: `Avg: ${formatCurrencyCompact(avg)}/event`,
@@ -430,13 +429,21 @@ function deriveDateRange(eventDocs: Docs): string {
         return formatDate(now);
     }
 
+    // eventStart falls back to new Date(0) for a document with no schedule and no
+    // legacy timestamp — which every draft here is — so the "earliest" event was
+    // the epoch and the range rendered as "01/01/1970 – today".
     let earliest: Date | null = null;
     eventDocs.forEach((doc) => {
         const d = eventStart(doc.data());
+        const ms = d.getTime();
+        if (!Number.isFinite(ms) || ms <= 0) return;
         if (!earliest || d < earliest) earliest = d;
     });
 
-    return `${fmt(earliest!)} – ${fmt(now)}`;
+    // Every event undated: the range is just today rather than a fabricated span.
+    if (!earliest) return fmt(now);
+
+    return `${fmt(earliest)} – ${fmt(now)}`;
 }
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
@@ -493,8 +500,8 @@ export const AnalyticsService = {
 
         return {
             totalEvents: deriveTotalEvents(eventDocs),
-            profit: deriveProfit(eventDocs),
-            totalRevenue: deriveTotalRevenue(eventDocs),
+            profit: deriveProfit(regDocs),
+            totalRevenue: deriveTotalRevenue(regDocs, eventDocs.length),
             avgSatisfaction: deriveAvgSatisfaction(regDocs),
             dailyRegistrations: deriveDailyRegistrations(regDocs),
             eventPerformance: deriveEventPerformance(eventDocs, regDocs),
@@ -577,11 +584,12 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
-        return deriveProfit((await fetchEvents(organizerId)).docs);
+        return deriveProfit((await fetchRegistrations(organizerId)).docs);
     },
 
     async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
-        return deriveTotalRevenue((await fetchEvents(organizerId)).docs);
+        const [evs, regs] = await Promise.all([fetchEvents(organizerId), fetchRegistrations(organizerId)]);
+        return deriveTotalRevenue(regs.docs, evs.docs.length);
     },
 
     async getAnalyticsAvgSatisfaction(organizerId: string): Promise<AnalyticsMetric> {
