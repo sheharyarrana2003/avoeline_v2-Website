@@ -70,7 +70,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                 <Link href={`${base_address}/events/${e.id}`} className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2">
                     <CellStack
                         primary={<span className="group-hover/row:underline">{e.title}</span>}
-                        secondary={[e.category, e.format, e.eventType].filter(Boolean).join(" · ")}
+                        // category and eventType only. `format` was here too and it read
+                        // as a contradiction: a webinar whose Venue column says "Online"
+                        // was labelled "physical", because format comes from the wizard's
+                        // locationType picker, which defaults to physical and is easy to
+                        // leave untouched. The Venue column already says whether an event
+                        // is online, so format beside eventType added nothing but doubt.
+                        secondary={[e.category, e.eventType].filter(Boolean).join(" · ")}
                     />
                 </Link>
             ),

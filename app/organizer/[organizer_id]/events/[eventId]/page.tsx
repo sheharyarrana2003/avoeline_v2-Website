@@ -153,7 +153,16 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         than removing it. */}
                     <div className="flex min-w-0 flex-1 flex-col gap-6">
                         <div className="flex flex-wrap gap-1.5">
-                            {[event.category, event.format, event.eventType, event.language === "ur" ? "Urdu" : "English"]
+                            {/* No language chip: event.service.ts:111 hardcodes
+                                language: "en" on every create and nothing ever updates it,
+                                so the chip could only ever read "English" — a constant
+                                dressed as a property of this event.
+
+                                format is kept, but only when the organizer moved it off
+                                the wizard's `physical` default. A "physical" chip beside a
+                                venue is redundant, and beside a venue named "Online" it is
+                                a flat contradiction. Virtual or hybrid is real information. */}
+                            {[event.category, event.eventType, event.format !== "physical" ? event.format : null]
                                 .filter(Boolean)
                                 .map((chip) => (
                                     <span
