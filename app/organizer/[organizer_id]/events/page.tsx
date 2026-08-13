@@ -1,4 +1,5 @@
 import { EventService } from "@/src/services/event.service";
+import { AnalyticsService } from "@/src/services/anaylService";
 import { EventModel, EventStatus } from "@/src/services/models/event.model";
 import { CalendarPlus, Eye, Plus } from "lucide-react";
 import Link from "next/link";
@@ -20,7 +21,17 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
     const organizer_id :string = (await params).organizer_id;
     const base_address :string = `/organizer/${organizer_id}`
-    const organizerEvents : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
+
+    // Registrations, check-ins and revenue come from the registrations collection,
+    // not from event.analytics.*. Nothing in this codebase writes that block — grep
+    // it, there is not one update against it — so its counters are whatever seeding
+    // left behind. Reading them here made this list disagree with each event's own
+    // detail page, which has always derived these live.
+    const [organizerEvents, tallies] = await Promise.all([
+        EventService.getAllEventsByOrganizer(organizer_id) as Promise<EventModel[]>,
+        AnalyticsService.getEventTallies(organizer_id),
+    ]);
+    const tallyFor = (id: string) => tallies.get(id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
 
     const events = organizerEvents.filter((event) => {
         if (currentTab === "all") {
@@ -107,7 +118,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                 <Meter
                     compact
                     label={`Registered for ${e.title}`}
-                    value={e.analytics?.registrations ?? 0}
+                    value={tallyFor(e.id).registrations}
                     max={e.capacity?.totalSeats ?? 0}
                 />
             ),
@@ -116,19 +127,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
             key: "checkedIn",
             header: "Checked in",
             align: "right",
-            cell: (e) => e.analytics?.checkIns ?? 0,
-        },
-        {
-            key: "views",
-            header: "Views",
-            align: "right",
-            cell: (e) => e.analytics?.views ?? 0,
+            cell: (e) => tallyFor(e.id).checkedIn,
         },
         {
             key: "revenue",
             header: "Revenue",
             align: "right",
-            cell: (e) => formatCurrency(e.analytics?.revenue, e.pricing?.currency, "—"),
+            cell: (e) => formatCurrency(tallyFor(e.id).revenue, e.pricing?.currency, "—"),
         },
         {
             key: "actions",

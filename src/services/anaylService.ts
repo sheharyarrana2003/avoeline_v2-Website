@@ -110,7 +110,11 @@ const DASHBOARD_STATUS_MAP: Record<string, DashboardEvent["status"]> = {
     CANCELLED: "CANCELLED",
 };
 
-function toDashboardEvent(doc: QueryDocumentSnapshot, organizerId: string): DashboardEvent {
+function toDashboardEvent(
+    doc: QueryDocumentSnapshot,
+    organizerId: string,
+    tallies?: Map<string, EventTally>,
+): DashboardEvent {
     const data = doc.data();
     const rawStatus = (data.status || "draft").toUpperCase();
     return {
@@ -120,13 +124,17 @@ function toDashboardEvent(doc: QueryDocumentSnapshot, organizerId: string): Dash
         startDate: eventStart(data),
         endDate: eventEnd(data),
         location: data.location?.venueName || data.location?.city || "—",
-        registeredCount: data.analytics?.registrations ?? 0,
+        // Live count when the caller has the registrations to hand. The
+        // analytics.registrations fallback is only for callers that do not, and it
+        // is a stale denormalised counter nothing in this codebase maintains — the
+        // capacity meters on the dashboard were reading it.
+        registeredCount: tallies?.get(doc.id)?.registrations ?? data.analytics?.registrations ?? 0,
         maxCapacity: data.capacity?.totalSeats ?? 0,
         status: DASHBOARD_STATUS_MAP[rawStatus] ?? "DRAFT",
     };
 }
 
-function deriveTodayEvents(eventDocs: Docs, organizerId: string): DashboardEvent[] {
+function deriveTodayEvents(eventDocs: Docs, organizerId: string, tallies?: Map<string, EventTally>): DashboardEvent[] {
     const now = new Date();
     const todayStart = startOfDay(now);
     const todayEnd = endOfDay(now);
@@ -137,19 +145,19 @@ function deriveTodayEvents(eventDocs: Docs, organizerId: string): DashboardEvent
         const start = eventStart(data);
         const end = eventEnd(data);
         if (start <= todayEnd && end >= todayStart) {
-            results.push(toDashboardEvent(doc, organizerId));
+            results.push(toDashboardEvent(doc, organizerId, tallies));
         }
     });
     return results;
 }
 
-function deriveUpcomingEvents(eventDocs: Docs, organizerId: string): DashboardEvent[] {
+function deriveUpcomingEvents(eventDocs: Docs, organizerId: string, tallies?: Map<string, EventTally>): DashboardEvent[] {
     const now = new Date();
     const results: DashboardEvent[] = [];
     eventDocs.forEach((doc) => {
         const start = eventStart(doc.data());
         if (start > now) {
-            results.push(toDashboardEvent(doc, organizerId));
+            results.push(toDashboardEvent(doc, organizerId, tallies));
         }
     });
     results.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
@@ -321,13 +329,78 @@ function deriveDailyRegistrations(regDocs: Docs): DailyAnalyticsRegistration[] {
     return results.filter((_, idx) => idx % Math.max(step, 1) === 0).slice(0, 8);
 }
 
-function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
+/**
+ * Live per-event tallies from the registrations collection.
+ *
+ * NOTHING in this codebase writes `event.analytics.*`. Grep it: there is not one
+ * update, set or increment against that block anywhere. Whatever is in those
+ * fields was put there by seeding or by the external system that also writes
+ * registrations, and it has drifted ever since — which is why revenue reads as
+ * zero on events that plainly have paid registrations.
+ *
+ * The event detail page already knew this and derived its own numbers from
+ * `registerations`; this makes the same source available to every other screen so
+ * an event cannot report one figure in a list and a different one on its own page.
+ *
+ * Costs no extra read: getAnalyticsData already fetches these documents.
+ */
+export interface EventTally {
+    registrations: number;
+    checkedIn: number;
+    revenue: number;
+    /** Mean of registration.rating for this event; 0 when nobody has rated it. */
+    avgRating: number;
+}
+
+function tallyByEvent(regDocs: Docs): Map<string, EventTally> {
+    const tallies = new Map<string, EventTally>();
+    const ratings = new Map<string, { total: number; count: number }>();
+    regDocs.forEach((doc) => {
+        const data = doc.data();
+        const eventId = data.eventId;
+        if (!eventId) return;
+
+        const status = String(data.status || "").toLowerCase();
+        // A cancelled registration is not an attendee and its money is not revenue.
+        if (status === "cancelled") return;
+
+        const t = tallies.get(eventId) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
+        t.registrations += 1;
+        if (status === "checked_in" || status === "attended") t.checkedIn += 1;
+        // Same field chain computeRevenue uses, so the per-event figures sum to the
+        // headline one instead of quietly disagreeing with it.
+        t.revenue += Number(data.payment?.amountPaid ?? data.finalPrice ?? 0) || 0;
+        tallies.set(eventId, t);
+
+        // Same field and same guard deriveAvgSatisfaction uses for the headline
+        // figure, so the per-event column is the headline broken down rather than a
+        // second, differently-computed number.
+        const rating = data.rating;
+        if (typeof rating === "number" && rating > 0) {
+            const agg = ratings.get(eventId) ?? { total: 0, count: 0 };
+            agg.total += rating;
+            agg.count += 1;
+            ratings.set(eventId, agg);
+        }
+    });
+
+    ratings.forEach((agg, eventId) => {
+        const t = tallies.get(eventId);
+        if (t && agg.count > 0) t.avgRating = Number((agg.total / agg.count).toFixed(1));
+    });
+    return tallies;
+}
+
+function deriveEventPerformance(eventDocs: Docs, regDocs: Docs): AnalyticsEventPerformance[] {
+    const tallies = tallyByEvent(regDocs);
+
     // Carry a numeric sort key alongside the formatted date so sorting stays
     // chronological (parsing the DD/MM/YYYY display string would be unreliable).
     const results = eventDocs.map((doc) => {
         const data = doc.data();
         const startTime = eventStart(data);
-        const revenue = data.analytics?.revenue ?? 0;
+        const tally = tallies.get(doc.id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
+        const revenue = tally.revenue;
         const row: AnalyticsEventPerformance = {
             id: doc.id,
             eventName: data.title || "Untitled Event",
@@ -335,10 +408,12 @@ function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
                 ? data.eventType.charAt(0).toUpperCase() + data.eventType.slice(1)
                 : "Event",
             date: formatDate(startTime),
-            registrations: data.analytics?.registrations ?? 0,
+            registrations: tally.registrations,
             profit: Math.round(revenue * 0.7),
             revenue,
-            avgSatisfaction: data.analytics?.avgRating ?? 0,
+            // Was data.analytics?.avgRating, which is not even a field on the
+            // analytics block — so this column could only ever have been zero.
+            avgSatisfaction: tally.avgRating,
         };
         return { row, sortMs: startTime.getTime() };
     });
@@ -396,10 +471,12 @@ export const AnalyticsService = {
         const regDocs = regsSnap.docs;
         const reviewDocs = reviewsSnap.docs;
 
+        const tallies = tallyByEvent(regDocs);
+
         return {
             stats: deriveDashboardStat(eventDocs, regDocs, reviewDocs),
-            todayEvents: deriveTodayEvents(eventDocs, organizerId),
-            upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId),
+            todayEvents: deriveTodayEvents(eventDocs, organizerId, tallies),
+            upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId, tallies),
             recentReg: await withAttendeeNames(deriveRecentReg(regDocs)),
             regTrend: deriveRegTrend(regDocs),
         };
@@ -420,7 +497,7 @@ export const AnalyticsService = {
             totalRevenue: deriveTotalRevenue(eventDocs),
             avgSatisfaction: deriveAvgSatisfaction(regDocs),
             dailyRegistrations: deriveDailyRegistrations(regDocs),
-            eventPerformance: deriveEventPerformance(eventDocs),
+            eventPerformance: deriveEventPerformance(eventDocs, regDocs),
             dateRange: deriveDateRange(eventDocs),
         };
     },
@@ -511,12 +588,24 @@ export const AnalyticsService = {
         return deriveAvgSatisfaction((await fetchRegistrations(organizerId)).docs);
     },
 
+    /**
+     * Live registration / check-in / revenue counts per event, keyed by event id.
+     *
+     * For screens that hold event documents already and need real numbers beside
+     * them. One registrations read, cache()'d so a page rendering several regions
+     * pays for it once.
+     */
+    getEventTallies: cache(async (organizerId: string): Promise<Map<string, EventTally>> => {
+        return tallyByEvent((await fetchRegistrations(organizerId)).docs);
+    }),
+
     async getAnalyticsDailyRegistrations(organizerId: string): Promise<DailyAnalyticsRegistration[]> {
         return deriveDailyRegistrations((await fetchRegistrations(organizerId)).docs);
     },
 
     async getAnalyticsEventPerformance(organizerId: string): Promise<AnalyticsEventPerformance[]> {
-        return deriveEventPerformance((await fetchEvents(organizerId)).docs);
+        const [eventDocs, regDocs] = await Promise.all([fetchEvents(organizerId), fetchRegistrations(organizerId)]);
+        return deriveEventPerformance(eventDocs.docs, regDocs.docs);
     },
 
     async getAnalyticsDateRange(organizerId: string): Promise<string> {
