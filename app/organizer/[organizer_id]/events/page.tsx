@@ -148,7 +148,9 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+            {/* Wider than the usual 7xl: this table carries nine columns and 7xl left
+                ~50px of viewport unused on either side while the cells were squeezed. */}
+            <div className="mx-auto max-w-[100rem]">
                 <Breadcrumbs items={[{ label: "Dashboard", href: `${base_address}/dashboard` }, { label: "Events" }]} />
                 <PageHeader
                     title="My Events"

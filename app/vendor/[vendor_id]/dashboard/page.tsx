@@ -292,7 +292,7 @@ export default async function VendorDashboardPage({
                                     </Link>
                                 }
                             >
-                                <CardBody className="pt-2">
+                                <div className="pb-1">
                                     <DataTable
                                         caption="Quote requests received in the last seven days"
                                         rows={recentQuoteRequests}
@@ -312,7 +312,7 @@ export default async function VendorDashboardPage({
                                             />
                                         }
                                     />
-                                </CardBody>
+                                </div>
                             </Card>
 
                             <section>

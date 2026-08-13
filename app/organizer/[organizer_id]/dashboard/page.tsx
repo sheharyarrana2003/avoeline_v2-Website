@@ -159,9 +159,9 @@ async function DashboardMain({ organizerId }: { organizerId: string }) {
                     </Link>
                 }
             >
-                <CardBody className="pt-2">
+                <div className="pb-1">
                     <RecentRegistrations registerations={recentReg} />
-                </CardBody>
+                </div>
             </Card>
         </div>
     );

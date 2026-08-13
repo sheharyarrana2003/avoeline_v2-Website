@@ -76,11 +76,14 @@ export function DataTable<T>({
                                 // wide tracking, so a two-word one ("Checked in") wraps at
                                 // the slightest squeeze and silently makes the header row
                                 // twice as tall.
-                                // The last column drops its right gutter so a
-                                // right-aligned number sits flush with the edge.
-                                className={`${tableHead} whitespace-nowrap ${c.width ?? ""} ${
+                                //
+                                // The inset lives on the first and last cells rather than on
+                                // a padded wrapper, so the row rules still span the full
+                                // width of the card while the text stays clear of its
+                                // border. A wrapper would indent the dividers too.
+                                className={`${tableHead} whitespace-nowrap pt-4 ${c.width ?? ""} ${
                                     c.align === "right" ? "text-right" : ""
-                                } ${i === columns.length - 1 ? "pr-0" : ""}`}
+                                } ${i === 0 ? "pl-5" : ""} ${i === columns.length - 1 ? "pr-5" : ""}`}
                             >
                                 {c.header}
                             </th>
@@ -100,7 +103,7 @@ export function DataTable<T>({
                                     // nothing ever ellipsises.
                                     className={`${tableCell} ${c.width ?? ""} ${
                                         c.align === "right" ? "text-right tabular-nums" : ""
-                                    } ${i === columns.length - 1 ? "pr-0" : ""}`}
+                                    } ${i === 0 ? "pl-5" : ""} ${i === columns.length - 1 ? "pr-5" : ""}`}
                                 >
                                     {c.cell(row)}
                                 </td>
