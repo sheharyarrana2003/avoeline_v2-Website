@@ -10,16 +10,15 @@ import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 import { NotificationServices } from "@/src/services/notification.services";
-import { formatDate, formatTime } from "@/src/lib/datetime";
+import { formatDate, formatTime, toDate } from "@/src/lib/datetime";
 
-// Normalize a stored timestamp (Firebase Timestamp | ISO string | Date) to a
-// Date, so system-timestamp fields round-trip as Firestore Timestamps on the
-// whole-object update_booking write instead of degrading to strings.
+// Normalize a stored timestamp to a Date, so system-timestamp fields round-trip as
+// Firestore Timestamps on the whole-object update_booking write instead of degrading
+// to strings. Delegates to the shared coercer: the local version handled only
+// .toDate() and new Date(), so it mis-parsed the serialized {_seconds} shape and read
+// stored DD/MM/YYYY as MM/DD.
 function toDt(v: any): Date | null {
-  if (!v) return null;
-  if (typeof v.toDate === "function") return v.toDate();
-  const d = new Date(v);
-  return isNaN(d.getTime()) ? null : d;
+  return toDate(v);
 }
 
 function mapToBooking(item: any): BookingData {

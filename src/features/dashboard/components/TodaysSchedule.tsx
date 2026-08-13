@@ -2,34 +2,26 @@ import { DashboardEvent } from "../types";
 import { Clock, MapPin, CalendarClock } from "lucide-react";
 import { formatTime } from "@/src/lib/datetime";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { Meter } from "@/src/shared_components/ui/charts/Meter";
 
 export default function TodaysSchedule({ events }: { events: DashboardEvent[] }) {
   // The "Schedule options" button that used to sit here was a decoy: this is a Server
   // Component, so it could never receive a handler, and at 28px it was under the target
   // floor anyway. A control that does nothing is worse than no control.
+  // Headings come from the Card wrapper now, so this renders only its content.
   if (events.length === 0) {
     return (
-      <section className="font-sans">
-        <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
-          Today&rsquo;s schedule
-        </h2>
-        <EmptyState
-          size="sm"
-          icon={<CalendarClock className="h-5 w-5" />}
-          title="Nothing scheduled today"
-          description="Events starting today will appear here."
-        />
-      </section>
+      <EmptyState
+        size="sm"
+        icon={<CalendarClock className="h-5 w-5" />}
+        title="Nothing scheduled today"
+        description="Events starting today will appear here."
+      />
     );
   }
 
   return (
-    <section className="font-sans">
-      <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
-        Today&rsquo;s schedule
-      </h2>
-
-      <ul className="space-y-0">
+    <ul className="space-y-0">
         {events.map((event, index) => {
           const isActive = event.status === "ACTIVE";
 
@@ -58,6 +50,19 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                       <MapPin className="w-3 h-3 text-ink-soft" />
                       {event.location}
                     </p>
+
+                    {/* registeredCount and maxCapacity ride on every DashboardEvent
+                        and this widget never showed them — on the day of an event
+                        the fill rate is the one number an organizer wants. */}
+                    {event.maxCapacity > 0 ? (
+                      <Meter
+                        className="mt-3 max-w-56"
+                        label="Registered"
+                        value={event.registeredCount}
+                        max={event.maxCapacity}
+                        caption={`${event.registeredCount} of ${event.maxCapacity} seats`}
+                      />
+                    ) : null}
                   </div>
 
                   {/* Bordered, not filled. The inactive border is 1.42:1 on canvas — far under the
@@ -75,7 +80,6 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
             </li>
           );
         })}
-      </ul>
-    </section>
+    </ul>
   );
 }

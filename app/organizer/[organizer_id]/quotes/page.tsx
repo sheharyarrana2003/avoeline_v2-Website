@@ -7,7 +7,7 @@ import Link from "next/link";
 import { AcceptQuoteButton } from "@/src/features/bookings/components/AcceptQuoteButton";
 import { ok, fail, type ActionResult } from "@/src/lib/action";
 import { VendorData } from "@/src/services/models/vendor.model";
-import { formatDate, timeAgo } from "@/src/lib/datetime";
+import { formatDate, timeAgo, toIsoString } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { ArrowLeftRight, ChevronRight, FileText, Inbox, Store } from "lucide-react";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
@@ -20,7 +20,7 @@ function sanitizeForClient<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj, (key, value) => {
         // Convert Firestore Timestamps {_seconds, _nanoseconds} to ISO string
         if (value && typeof value === 'object' && '_seconds' in value) {
-            return new Date(value._seconds * 1000).toISOString();
+            return toIsoString(value);
         }
         return value;
     }));

@@ -7,7 +7,7 @@ import { EventService } from "@/src/services/event.service";
 import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime, toDate } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
@@ -141,7 +141,9 @@ export default async function VendorBookingsPage({
 
     const completedThisMonth = allBookings.filter((b: any) => {
         if (b?.status?.toLowerCase() !== 'completed') return false;
-        const completedDate = b?.completedAt ? new Date(b.completedAt) : null;
+        // toDate: getAllBookingsOfVendor skips mapToBooking, so completedAt is a raw
+        // Timestamp and new Date() on it silently yields Invalid Date.
+        const completedDate = toDate(b?.completedAt);
         return completedDate &&
                completedDate.getMonth() === now.getMonth() &&
                completedDate.getFullYear() === now.getFullYear();

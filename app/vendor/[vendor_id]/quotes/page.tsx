@@ -5,7 +5,7 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData } from "@/src/features/bookings/types";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
-import { formatDate, timeAgo } from "@/src/lib/datetime";
+import { formatDate, timeAgo, toIsoString } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -19,7 +19,7 @@ function sanitizeForClient<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj, (key, value) => {
         // Convert Firestore Timestamps {_seconds, _nanoseconds} to ISO string
         if (value && typeof value === 'object' && '_seconds' in value) {
-            return new Date(value._seconds * 1000).toISOString();
+            return toIsoString(value);
         }
         return value;
     }));

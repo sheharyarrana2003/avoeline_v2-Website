@@ -26,8 +26,17 @@ const MONTH_ABBR = [
 
 type Timestampish = { toDate?: () => Date; seconds?: number; _seconds?: number };
 
-/** Coerce any supported value into a JS Date, or null if unparseable. */
-function toDate(value: unknown): Date | null {
+/**
+ * Coerce any supported value into a JS Date, or null if unparseable.
+ *
+ * Exported because comparing and bucketing dates is as common as formatting them,
+ * and callers that needed a Date were reaching for `new Date(x)` instead. That
+ * silently produces `Invalid Date` for a Firestore Timestamp — which is what every
+ * booking carries when a service skips its read-mapper — and the resulting NaN
+ * comparison is always false, so revenue totals and "last 7 days" filters came back
+ * empty with no error anywhere. Use this for any stored value; never `new Date(x)`.
+ */
+export function toDate(value: unknown): Date | null {
   if (value == null || value === "") return null;
 
   if (value instanceof Date) {

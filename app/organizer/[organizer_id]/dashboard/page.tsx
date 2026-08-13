@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { AuthService } from "@/src/features/auth/authService";
 import { AnalyticsService } from "@/src/services/anaylService";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { Calendar, Plus, Star, Users, Wallet, Bot } from "lucide-react";
 import Link from "next/link";
 import { buttonClass } from "@/src/lib/ui";
@@ -73,16 +74,24 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 // ── Streamed data regions ──────────────────────────────────────────────────────
 
 async function DashboardStats({ organizerId }: { organizerId: string }) {
-    const { stats } = await AnalyticsService.getDashboardData(organizerId);
+    // getDashboardData is cache()-wrapped, so pulling todayEvents here as well as in
+    // DashboardMain costs nothing — the three Suspense regions share one fetch.
+    const { stats, todayEvents } = await AnalyticsService.getDashboardData(organizerId);
 
     // One figure carries the screen and the other three support it, rather than four
     // equal tiles where nothing is the answer to "how is it going". The lead sits on
     // ink because with hue gone, a large dark shape is the only way to say "start
     // here" — the nav rail was the only dark region in the product and the pages
     // behind it had no anchor at all.
+    //
+    // The sublabels name each figure's SOURCE. That matters more than it looks: these
+    // four numbers come from four different collections, and "Revenue" next to
+    // "Registrations" reads as revenue *from* those registrations, which is exactly
+    // what it is — but "Avg Rating" is the reviews collection and says nothing about
+    // either. Nothing here is a new number; it is the same value, labelled honestly.
     return (
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-            <div className="ink-panel relative overflow-hidden rounded-2xl p-7 shadow-lg">
+            <div className="ink-panel on-ink relative overflow-hidden rounded-2xl p-7 shadow-lg">
                 <p className="text-2xs font-medium uppercase text-white/50">Registrations</p>
                 <p className="figure mt-3 text-6xl text-white">{stats.registrations}</p>
                 <p className="mt-3 flex items-center gap-1.5 text-sm text-white/60">
@@ -91,10 +100,29 @@ async function DashboardStats({ organizerId }: { organizerId: string }) {
                 </p>
             </div>
 
-            <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
-                <StatCard_dashboard title="Active Events" value={String(stats.activeEvents)} icon={<Calendar size={14} />} />
-                <StatCard_dashboard title="Revenue" value={stats.revenue} icon={<Wallet size={14} />} />
-                <StatCard_dashboard title="Avg Rating" value={String(stats.avgRating)} icon={<Star size={14} />} />
+            <div className="grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
+                <MetricTile
+                    label="Active events"
+                    value={String(stats.activeEvents)}
+                    icon={<Calendar size={14} />}
+                    sublabel={
+                        todayEvents.length > 0
+                            ? `${todayEvents.length} happening today`
+                            : "Nothing on today"
+                    }
+                />
+                <MetricTile
+                    label="Revenue"
+                    value={stats.revenue}
+                    icon={<Wallet size={14} />}
+                    sublabel="Paid across all registrations"
+                />
+                <MetricTile
+                    label="Avg rating"
+                    value={String(stats.avgRating)}
+                    icon={<Star size={14} />}
+                    sublabel={stats.avgRating > 0 ? "Across your event reviews" : "No reviews yet"}
+                />
             </div>
         </section>
     );
@@ -102,18 +130,59 @@ async function DashboardStats({ organizerId }: { organizerId: string }) {
 
 async function DashboardMain({ organizerId }: { organizerId: string }) {
     const { todayEvents, recentReg, regTrend } = await AnalyticsService.getDashboardData(organizerId);
+
+    // Carded, where these three were uncarded <section>s separated by a bottom rule.
+    // Three widgets of identical weight stacked down a page is what made the dashboard
+    // read as a list of headings; containment is what gives them rank.
     return (
         <div className="space-y-6">
-            <TodaysSchedule events={todayEvents} />
-            <RecentRegistrations registerations={recentReg} />
-            <RegistrationTrendChart data={regTrend} />
+            <Card title="Today's schedule">
+                <CardBody>
+                    <TodaysSchedule events={todayEvents} />
+                </CardBody>
+            </Card>
+
+            <Card
+                title="Registration trend"
+                action={<span className="text-xs text-ink-soft">Last 7 days</span>}
+            >
+                <CardBody>
+                    <RegistrationTrendChart data={regTrend} />
+                </CardBody>
+            </Card>
+
+            <Card
+                title="Recent registrations"
+                action={
+                    <Link href={`/organizer/${organizerId}/analytics`} className={buttonClass("ghost", "sm")}>
+                        Analytics
+                    </Link>
+                }
+            >
+                <CardBody className="pt-2">
+                    <RecentRegistrations registerations={recentReg} />
+                </CardBody>
+            </Card>
         </div>
     );
 }
 
 async function DashboardUpcoming({ organizerId }: { organizerId: string }) {
     const { upcomingEvents } = await AnalyticsService.getDashboardData(organizerId);
-    return <UpcomingEvents events={upcomingEvents} />;
+    return (
+        <Card
+            title="Upcoming events"
+            action={
+                <Link href={`/organizer/${organizerId}/events`} className={buttonClass("ghost", "sm")}>
+                    View all
+                </Link>
+            }
+        >
+            <CardBody>
+                <UpcomingEvents events={upcomingEvents} />
+            </CardBody>
+        </Card>
+    );
 }
 
 // ── Stream Skeletons ─────────────────────────────────────────────────────────
