@@ -261,13 +261,51 @@ function deriveTotalEvents(eventDocs: Docs): AnalyticsMetric {
 
 // regDocs, not eventDocs. This summed event.analytics.revenue, a counter nothing
 // writes, so the headline read Rs 0 no matter how much had actually been paid.
-function deriveProfit(regDocs: Docs): AnalyticsMetric {
+/**
+ * What the organizer has actually committed to vendors.
+ *
+ * Only bookings that represent a real commitment count. A quote that has been
+ * requested, sent or is still being negotiated is not money owed, and a cancelled
+ * one is not money spent — including either would inflate costs and understate the
+ * net figure below.
+ *
+ * Note the commission does NOT enter this: `vendorReceives = baseBudget -
+ * commissionAmount`, so the platform's 15% comes out of the vendor's payout, not
+ * out of the organizer's pocket. The organizer pays `payment.totalAmount` in full.
+ */
+const COMMITTED_BOOKING_STATUSES = new Set(["quote_accepted", "confirmed", "in_progress", "completed"]);
+
+function vendorSpendByEvent(bookingDocs: Docs): Map<string, number> {
+    const spend = new Map<string, number>();
+    bookingDocs.forEach((doc) => {
+        const data = doc.data();
+        if (!COMMITTED_BOOKING_STATUSES.has(String(data.status || "").toLowerCase())) return;
+        const amount = Number(data.payment?.totalAmount ?? data.quote?.vendorQuote?.totalAmount ?? 0) || 0;
+        if (!amount) return;
+        const eventId = data.eventId || "";
+        spend.set(eventId, (spend.get(eventId) ?? 0) + amount);
+    });
+    return spend;
+}
+
+function totalVendorSpend(bookingDocs: Docs): number {
+    let total = 0;
+    vendorSpendByEvent(bookingDocs).forEach((v) => { total += v; });
+    return total;
+}
+
+function deriveNetAfterVendorSpend(regDocs: Docs, bookingDocs: Docs): AnalyticsMetric {
+    // Was `revenue * 0.7` with a helper reading "Estimated after platform fees" —
+    // a 30% deduction matching nothing (the platform takes 15%, and takes it from
+    // the vendor), while the organizer's largest real cost was ignored entirely.
     const totalRevenue = computeRevenue(regDocs);
-    // Simple proxy: profit ≈ 70 % of revenue (platform fee placeholder until a costs collection exists)
-    const estimatedProfit = Math.round(totalRevenue * 0.7);
+    const spend = totalVendorSpend(bookingDocs);
+    const net = totalRevenue - spend;
     return {
-        value: formatCurrencyCompact(estimatedProfit),
-        helper: "Estimated after platform fees",
+        value: formatCurrencyCompact(net),
+        helper: spend > 0
+            ? `${formatCurrencyCompact(spend)} committed to vendors`
+            : "No vendor spend committed yet",
     };
 }
 
@@ -390,8 +428,9 @@ function tallyByEvent(regDocs: Docs): Map<string, EventTally> {
     return tallies;
 }
 
-function deriveEventPerformance(eventDocs: Docs, regDocs: Docs): AnalyticsEventPerformance[] {
+function deriveEventPerformance(eventDocs: Docs, regDocs: Docs, bookingDocs: Docs): AnalyticsEventPerformance[] {
     const tallies = tallyByEvent(regDocs);
+    const spendByEvent = vendorSpendByEvent(bookingDocs);
 
     // Carry a numeric sort key alongside the formatted date so sorting stays
     // chronological (parsing the DD/MM/YYYY display string would be unreliable).
@@ -408,7 +447,8 @@ function deriveEventPerformance(eventDocs: Docs, regDocs: Docs): AnalyticsEventP
                 : "Event",
             date: formatDate(startTime),
             registrations: tally.registrations,
-            profit: Math.round(revenue * 0.7),
+            vendorSpend: spendByEvent.get(doc.id) ?? 0,
+            netAfterVendorSpend: revenue - (spendByEvent.get(doc.id) ?? 0),
             revenue,
             // Was data.analytics?.avgRating, which is not even a field on the
             // analytics block — so this column could only ever have been zero.
@@ -456,6 +496,10 @@ function fetchRegistrations(organizerId: string): Promise<QuerySnapshot> {
     return adminDb.collection(COLLECTIONS.REGISTRATIONS).where("organizerId", "==", organizerId).get();
 }
 
+function fetchOrganizerBookings(organizerId: string): Promise<QuerySnapshot> {
+    return adminDb.collection(COLLECTIONS.BOOKINGS).where("organizerId", "==", organizerId).get();
+}
+
 function fetchReviews(organizerId: string): Promise<QuerySnapshot> {
     return adminDb.collection(COLLECTIONS.FEEDBACK).where("organizerId", "==", organizerId).get();
 }
@@ -491,20 +535,22 @@ export const AnalyticsService = {
 
     /** Analytics page: one events read + one registerations read feed all 7 metrics. */
     async getAnalyticsData(organizerId: string) {
-        const [eventsSnap, regsSnap] = await Promise.all([
+        const [eventsSnap, regsSnap, bookingsSnap] = await Promise.all([
             fetchEvents(organizerId),
             fetchRegistrations(organizerId),
+            fetchOrganizerBookings(organizerId),
         ]);
         const eventDocs = eventsSnap.docs;
         const regDocs = regsSnap.docs;
+        const bookingDocs = bookingsSnap.docs;
 
         return {
             totalEvents: deriveTotalEvents(eventDocs),
-            profit: deriveProfit(regDocs),
+            profit: deriveNetAfterVendorSpend(regDocs, bookingDocs),
             totalRevenue: deriveTotalRevenue(regDocs, eventDocs.length),
             avgSatisfaction: deriveAvgSatisfaction(regDocs),
             dailyRegistrations: deriveDailyRegistrations(regDocs),
-            eventPerformance: deriveEventPerformance(eventDocs, regDocs),
+            eventPerformance: deriveEventPerformance(eventDocs, regDocs, bookingDocs),
             dateRange: deriveDateRange(eventDocs),
         };
     },
@@ -584,7 +630,8 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
-        return deriveProfit((await fetchRegistrations(organizerId)).docs);
+        const [regs, bookings] = await Promise.all([fetchRegistrations(organizerId), fetchOrganizerBookings(organizerId)]);
+        return deriveNetAfterVendorSpend(regs.docs, bookings.docs);
     },
 
     async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
@@ -612,8 +659,10 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsEventPerformance(organizerId: string): Promise<AnalyticsEventPerformance[]> {
-        const [eventDocs, regDocs] = await Promise.all([fetchEvents(organizerId), fetchRegistrations(organizerId)]);
-        return deriveEventPerformance(eventDocs.docs, regDocs.docs);
+        const [eventDocs, regDocs, bookingDocs] = await Promise.all([
+            fetchEvents(organizerId), fetchRegistrations(organizerId), fetchOrganizerBookings(organizerId),
+        ]);
+        return deriveEventPerformance(eventDocs.docs, regDocs.docs, bookingDocs.docs);
     },
 
     async getAnalyticsDateRange(organizerId: string): Promise<string> {

@@ -59,10 +59,28 @@ const performanceColumns: Column<AnalyticsEventPerformance>[] = [
         cell: (e) => formatCurrencyCompact(e.revenue),
     },
     {
-        key: "profit",
-        header: "Profit (est.)",
+        key: "vendorSpend",
+        header: "Vendor spend",
         align: "right",
-        cell: (e) => <span className="text-ink-soft">{formatCurrencyCompact(e.profit)}</span>,
+        cell: (e) =>
+            e.vendorSpend > 0 ? (
+                <span className="text-ink-soft">{formatCurrencyCompact(e.vendorSpend)}</span>
+            ) : (
+                <span className="text-ink-faint">—</span>
+            ),
+    },
+    {
+        key: "net",
+        header: "Net",
+        align: "right",
+        // Was "Profit (est.)" holding revenue x 0.7 — a 30% deduction matching
+        // nothing in the product. This is revenue minus what was actually committed
+        // to vendors, so it can legitimately be negative and is coloured when it is.
+        cell: (e) => (
+            <span className={e.netAfterVendorSpend < 0 ? "text-danger" : "text-ink"}>
+                {formatCurrencyCompact(e.netAfterVendorSpend)}
+            </span>
+        ),
     },
 ];
 
@@ -112,7 +130,16 @@ export default async function AnalyticsPage({
                     the caveat now sits where it belongs. */}
                 <section className="grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
                     <MetricTile label="Total events" value={totalEvents.value} sublabel={totalEvents.helper} icon={<CalendarDays size={14} />} />
-                    <MetricTile label="Profit" value={profit.value} sublabel={profit.helper} icon={<TrendingUp size={14} />} />
+                    {/* Not "Profit": the app knows ticket revenue and vendor spend and
+                        nothing else — no staff, venue or marketing costs — so naming it
+                        profit would overstate what it can actually account for. The old
+                        tile called itself Profit while holding revenue x 0.7. */}
+                    <MetricTile
+                        label="Net after vendors"
+                        value={profit.value}
+                        sublabel={profit.helper}
+                        icon={<TrendingUp size={14} />}
+                    />
                     <MetricTile label="Total revenue" value={totalRevenue.value} sublabel={totalRevenue.helper} icon={<Wallet size={14} />} />
                     <MetricTile label="Avg. satisfaction" value={avgSatisfaction.value} sublabel={avgSatisfaction.helper} icon={<Smile size={14} />} />
                 </section>

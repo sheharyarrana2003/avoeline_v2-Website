@@ -57,7 +57,14 @@ export interface AnalyticsEventPerformance {
     eventType: string;
     date: string;
     registrations: number;
-    profit: number;
+    /**
+     * Ticket revenue for this event minus what the organizer committed to vendors
+     * on it. Named for what it is: the app knows vendor spend and nothing else, so
+     * calling it `profit` invited exactly the misreading it used to produce, when
+     * it was revenue x 0.7 with no costs in it at all.
+     */
+    netAfterVendorSpend: number;
+    vendorSpend: number;
     revenue: number;
     avgSatisfaction: number;
 }
