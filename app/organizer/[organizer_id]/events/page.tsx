@@ -84,7 +84,10 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         {
             key: "venue",
             header: "Venue",
-            width: "max-w-0",
+            // w-[14%] is load-bearing: max-w-0 on its own resolves the column to zero
+            // width, which clipped the venue to a single letter and let the next
+            // header slide on top of it.
+            width: "w-[14%] max-w-0",
             cell: (e) => {
                 // Falls back to the city as the primary line rather than printing an em
                 // dash above it — "— / Lahore" reads as missing data twice over.

@@ -32,7 +32,15 @@ export interface Column<T> {
     header: string;
     /** "right" also switches the cell to tabular figures. Use it for every number. */
     align?: "left" | "right";
-    /** Tailwind width class, e.g. "w-32". Omit to let the column size itself. */
+    /**
+     * Tailwind width classes, e.g. "w-32" or "w-[30%] max-w-0". Omit to let the
+     * column size itself.
+     *
+     * To make a column TRUNCATE you need both halves: a width to size it and
+     * `max-w-0` to let it shrink under its content. `max-w-0` alone resolves the
+     * column to literally zero width — the cell collapses, its text clips to one
+     * character, and the next header renders on top of it.
+     */
     width?: string;
     cell: (row: T) => ReactNode;
 }
