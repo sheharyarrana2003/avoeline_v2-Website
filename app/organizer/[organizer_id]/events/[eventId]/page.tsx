@@ -26,6 +26,54 @@ import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 
+/**
+ * One fact on the ink hero. Sits on --panel-bg, which stays dark in both themes,
+ * so the white treatment here is correct in light and dark alike.
+ */
+function HeroFact({
+    icon,
+    label,
+    value,
+    sub,
+}: {
+    icon: ReactNode;
+    label: string;
+    value: string;
+    sub?: string;
+}) {
+    return (
+        <div className="flex min-w-0 items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden="true">
+                {icon}
+            </span>
+            <div className="min-w-0">
+                <dt className="text-2xs uppercase text-white/60">{label}</dt>
+                <dd className="truncate text-base font-medium text-white tabular-nums">{value}</dd>
+                {sub ? <dd className="truncate text-xs text-white/55 tabular-nums">{sub}</dd> : null}
+            </div>
+        </div>
+    );
+}
+
+/** "21/07/2026" for a single day, "21/07/2026 – 24/07/2026" when it spans. */
+function formatDateRange(start: unknown, end: unknown): string {
+    const from = formatDate(start);
+    const to = formatDate(end);
+    if (from === "—") return to === "—" ? "Not scheduled" : to;
+    if (to === "—" || to === from) return from;
+    return `${from} – ${to}`;
+}
+
+/** "10:00 AM – 5:00 PM PKT". Returns undefined rather than an em dash so the
+ *  sub-line disappears entirely when there is no time to show. */
+function formatTimeRange(start: unknown, end: unknown, timezone?: string): string | undefined {
+    const from = formatTime(start);
+    const to = formatTime(end);
+    if (from === "—") return undefined;
+    const range = to === "—" ? from : `${from} – ${to}`;
+    return timezone ? `${range} ${timezone}` : range;
+}
+
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
     const { eventId, organizer_id } = await params;
     const event: EventModel | null = await EventService.getEventByID(eventId);
@@ -43,6 +91,15 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
     const capacityPercent = getPercent(registrationsCount, event.capacity.totalSeats);
     const currency = event.pricing?.currency;
+
+    // Registration opens/closes are two InfoBlocks far down the page; as a single
+    // line up here they answer "can people still sign up", which is the question.
+    const regOpens = formatDate(event.registration?.registrationOpenDate);
+    const regCloses = formatDate(event.registration?.registrationCloseDate);
+    const registrationWindow =
+        regCloses !== "—" ? `Registration closes ${regCloses}`
+        : regOpens !== "—" ? `Registration opens ${regOpens}`
+        : null;
     const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
 
     return (
@@ -56,7 +113,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 --panel-bg is the surface that stays dark in both themes. */}
             <section className="overflow-hidden rounded-2xl bg-panel">
                 <div className="flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center">
-                    <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-panel sm:w-64 md:w-72 lg:w-80">
+                    <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-panel sm:w-56 md:w-64 lg:w-72">
                         {event.bannerImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -69,23 +126,72 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         )}
                     </div>
 
-                    <dl className="grid min-w-0 flex-1 grid-cols-1 gap-5 sm:grid-cols-3 md:grid-cols-1">
-                        {[
-                            { icon: <CalendarDays size={18} />, label: "Date", value: formatDate(event.schedule?.startDate) },
-                            { icon: <MapPin size={18} />, label: "Location", value: event.location?.city || "—" },
-                            { icon: <Users size={18} />, label: "Registrations", value: `${registrationsCount}` },
-                        ].map((item) => (
-                            <div key={item.label} className="flex items-center gap-3">
-                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden="true">
-                                    {item.icon}
-                                </span>
-                                <div className="min-w-0">
-                                    <dt className="text-2xs uppercase text-white/60">{item.label}</dt>
-                                    <dd className="truncate text-base font-medium text-white tabular-nums">{item.value}</dd>
-                                </div>
-                            </div>
-                        ))}
-                    </dl>
+                    {/* This block used to be three facts — date, city, registration count
+                        — stacked in one narrow column, leaving well over half the panel
+                        empty. All three were already spelled out in more detail by the
+                        Schedule, Location and Capacity sections below, and the count is
+                        repeated by the stat band directly underneath, so the hero was
+                        duplicating the page while wasting its own width.
+
+                        A hero's job on a page this long is orientation: the facts that
+                        take four InfoBlocks to reconstruct further down, said once, in a
+                        line. The window rather than four separate date and time fields;
+                        the venue and city as one address; the things you decide on. */}
+                    {/* Centred, and the banner is a little smaller than it was. Spreading
+                        the chips and facts to the panel's full height was tried and looked
+                        worse — it moved the dead space into the middle of the block rather
+                        than removing it. */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-6">
+                        <div className="flex flex-wrap gap-1.5">
+                            {[event.category, event.format, event.eventType, event.language === "ur" ? "Urdu" : "English"]
+                                .filter(Boolean)
+                                .map((chip) => (
+                                    <span
+                                        key={String(chip)}
+                                        className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-2xs font-medium uppercase text-white/80"
+                                    >
+                                        {chip}
+                                    </span>
+                                ))}
+                        </div>
+
+                        <dl className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+                            <HeroFact
+                                icon={<CalendarDays size={18} />}
+                                label="When"
+                                value={formatDateRange(event.schedule?.startDate, event.schedule?.endDate)}
+                                sub={formatTimeRange(event.schedule?.startTime, event.schedule?.endTime, event.schedule?.timezone)}
+                            />
+                            <HeroFact
+                                icon={<MapPin size={18} />}
+                                label="Where"
+                                value={event.location?.venueName || event.location?.city || "Not set"}
+                                sub={[event.location?.city, event.location?.country].filter(Boolean).join(", ") || undefined}
+                            />
+                            <HeroFact
+                                icon={<Ticket size={18} />}
+                                label="Tickets"
+                                value={event.pricing?.isFree ? "Free" : formatCurrency(event.PriceOfTicket, currency, "Not priced")}
+                                sub={
+                                    registrationWindow ??
+                                    (event.registration?.requiresApproval ? "Approval required" : undefined)
+                                }
+                            />
+                            <HeroFact
+                                icon={<Users size={18} />}
+                                label="Programme"
+                                value={
+                                    event.speakers?.length || event.agenda?.length
+                                        ? [
+                                              event.speakers?.length ? `${event.speakers.length} speaker${event.speakers.length === 1 ? "" : "s"}` : null,
+                                              event.agenda?.length ? `${event.agenda.length} session${event.agenda.length === 1 ? "" : "s"}` : null,
+                                          ].filter(Boolean).join(" · ")
+                                        : "Nothing scheduled"
+                                }
+                                sub={event.vendorRequirements?.length ? `${event.vendorRequirements.length} vendor requirement${event.vendorRequirements.length === 1 ? "" : "s"}` : undefined}
+                            />
+                        </dl>
+                    </div>
                 </div>
             </section>
 
