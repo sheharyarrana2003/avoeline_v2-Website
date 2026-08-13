@@ -259,6 +259,20 @@ export default async function PrepareQuotePage({
             0
         );
 
+        // totalAmount arrives from the client and was written through untouched. A
+        // Server Action is a public endpoint, and the client also computes it as
+        // base + charges - discount + tax, so a discount larger than the base sends
+        // a negative straight into the booking. Live data has a quote of PKR -20,
+        // which then deadlocked the organizer's counter-offer form: its two rules are
+        // "greater than zero" and "less than the current total", and no number is
+        // both. Reject it here rather than let it reach Firestore.
+        if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+            throw new Error("A quote total must be a positive amount.");
+        }
+        if (!Number.isFinite(discountAmount) || discountAmount < 0 || discountAmount > basePrice) {
+            throw new Error("A discount cannot be negative or exceed the base price.");
+        }
+
         const breakdownItems: BreakdownItem[] = items.map((item) => ({
             item: item.description,
             quantity: item.quantity,

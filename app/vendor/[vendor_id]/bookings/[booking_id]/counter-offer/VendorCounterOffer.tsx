@@ -32,7 +32,11 @@ export default function VendorCounterOfferForm ({
       setError('Please enter a valid counter-offer amount.');
       return;
     }
-    if (targetBudget >= currentTotal) {
+    // Only meaningful when there IS a sane current total. Applied against a missing
+    // or corrupt one — live data has a quote of PKR -20 — this rule combined with
+    // the positive check above admits no number at all, and the form can never be
+    // submitted. A quote with no valid total is one you can counter freely.
+    if (currentTotal > 0 && targetBudget >= currentTotal) {
       setError('Your counter-offer should generally be less than the current total price.');
       return;
     }
