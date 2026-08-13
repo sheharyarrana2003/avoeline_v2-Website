@@ -138,7 +138,8 @@
      warning 12.4:1 · danger 9.5:1 — all AA text or better.
    --ink-soft is gray-400, NOT the gray-500 it is in light mode: gray-500 measures
    3.62:1 on the dark surface and fails as body text. That is the one value that
-   does not simply mirror. */
+   does not simply mirror.
+
    The OS preference is resolved in JS, not here. The no-flash script in
    app/layout.tsx stamps data-theme="dark" | "light" onto <html> before first paint,
    reading localStorage and falling back to prefers-color-scheme. So this file needs
