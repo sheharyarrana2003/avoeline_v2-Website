@@ -110,17 +110,24 @@ export default async function VendorServicesPage({
                         value={String(services.length)}
                         sublabel={`${serviceCategories.length} categories`}
                     />
-                    <MetricTile
-                        size="md"
-                        label="Bookings"
-                        value={String(vendor?.stats?.totalBookings ?? 0)}
-                        sublabel={`${vendor?.stats?.completedBookings ?? 0} completed`}
-                    />
+                    {/* vendor.stats had a Bookings tile here. Nothing writes that object,
+                        so it read 0 for every vendor; this page does not load bookings, so
+                        rather than an extra read it shows what it does know. */}
                     <MetricTile
                         size="md"
                         label="Rating"
-                        value={vendor?.ratings?.averageRating ? vendor.ratings.averageRating.toFixed(1) : "—"}
-                        sublabel={`${vendor?.ratings?.totalReviews ?? 0} reviews`}
+                        value={(vendor?.ratings?.totalReviews ?? 0) > 0 ? vendor.ratings.averageRating.toFixed(1) : "—"}
+                        sublabel={
+                            (vendor?.ratings?.totalReviews ?? 0) > 0
+                                ? `${vendor.ratings.totalReviews} review${vendor.ratings.totalReviews === 1 ? "" : "s"}`
+                                : "No reviews yet"
+                        }
+                    />
+                    <MetricTile
+                        size="md"
+                        label="Packages"
+                        value={String(vendor?.pricingPackages?.length ?? 0)}
+                        sublabel="Priced offerings"
                     />
                     <MetricTile
                         size="md"

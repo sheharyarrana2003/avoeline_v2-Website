@@ -125,9 +125,17 @@ export default async function VendorProfilePage({
                 </span>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <StarRating rating={rating} size="sm" />
-                    <span className="text-sm font-medium text-ink tabular-nums">{rating || "N/A"}</span>
-                    <span className="text-xs text-ink-soft tabular-nums">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
+                    {/* An unreviewed vendor showed 5 stars, because that is the value the
+                        model seeds and only reviewVendor ever recomputes it. */}
+                    {totalReviews > 0 ? (
+                        <>
+                            <StarRating rating={rating} size="sm" />
+                            <span className="text-sm font-medium text-ink tabular-nums">{rating.toFixed(1)}</span>
+                            <span className="text-xs text-ink-soft tabular-nums">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
+                        </>
+                    ) : (
+                        <span className="text-sm text-ink-soft">Not rated yet</span>
+                    )}
                     {yearsInBusiness !== null && yearsInBusiness > 0 && (
                         <span className="text-xs text-ink-soft tabular-nums">
                             • {yearsInBusiness} {yearsInBusiness === 1 ? "year" : "years"} in business

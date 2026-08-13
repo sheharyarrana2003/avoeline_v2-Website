@@ -84,20 +84,21 @@ export default async function Vendors({ params }: { params: Promise<{ eventId: s
                                         </h3>
 
                                         <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-ink-soft tabular-nums">
-                                            <span className="flex items-center gap-1">
-                                                <Star size={13} className="fill-ink text-ink" aria-hidden="true" />
-                                                {vendor.ratings.averageRating.toFixed(1)}
-                                                <span>({vendor.ratings.totalReviews})</span>
-                                            </span>
+                                            {vendor.ratings.totalReviews > 0 ? (
+                                                <span className="flex items-center gap-1">
+                                                    <Star size={13} className="fill-ink text-ink" aria-hidden="true" />
+                                                    {vendor.ratings.averageRating.toFixed(1)}
+                                                    <span>({vendor.ratings.totalReviews})</span>
+                                                </span>
+                                            ) : (
+                                                <span className="text-ink-faint">No reviews yet</span>
+                                            )}
                                             <span className="flex items-center gap-1.5">
                                                 {/* ink-faint = 2.5:1, decoration only -- the number beside it is the content. */}
                                                 <Phone size={13} className="text-ink-faint" aria-hidden="true" />
                                                 {vendor.contact.primaryPhone}
                                             </span>
-                                            <span className="flex items-center gap-1.5">
-                                                <Briefcase size={13} className="text-ink-faint" aria-hidden="true" />
-                                                {vendor.stats?.completedBookings ?? 0} completed
-                                            </span>
+
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">

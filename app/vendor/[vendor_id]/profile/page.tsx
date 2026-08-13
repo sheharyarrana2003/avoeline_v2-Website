@@ -194,11 +194,19 @@ export default async function VendorProfilePage({
 
                             <div>
                                 <h2 className="font-display text-2xl text-ink">{businessName}</h2>
-                                <div className="mt-1 flex flex-wrap items-center gap-2">
-                                    <StarRating rating={rating} />
-                                    <span className="text-sm text-ink-soft tabular-nums">
-                                        {rating ? rating.toFixed(1) : "Not rated"} ({totalReviews} reviews)
-                                    </span>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                                    {/* No stars until someone has actually rated: averageRating is
+                                        seeded at 5.0 and only reviewVendor recomputes it. */}
+                                    {totalReviews > 0 ? (
+                                        <>
+                                            <StarRating rating={rating} />
+                                            <span className="text-sm text-ink-soft tabular-nums">
+                                                {rating.toFixed(1)} ({totalReviews} review{totalReviews === 1 ? "" : "s"})
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-sm text-ink-soft">Not rated yet</span>
+                                    )}
                                 </div>
                                 <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-soft">
                                     <MapPin size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
@@ -239,7 +247,7 @@ export default async function VendorProfilePage({
                         label="Bookings"
                         value={String(totalBookings)}
                         icon={<CalendarCheck size={14} />}
-                        sublabel={`${v.stats?.completedBookings ?? 0} completed`}
+                        sublabel={`${bookings.filter((b: any) => b?.status?.toLowerCase() === "completed").length} completed`}
                     />
                     <MetricTile
                         label="Years active"
@@ -251,13 +259,13 @@ export default async function VendorProfilePage({
                         label="Avg response"
                         value={String(avgResponseTime)}
                         icon={<MessageSquare size={14} />}
-                        sublabel={`${Math.round((v.stats?.cancellationRate ?? 0) * 100)}% cancellation rate`}
+                        sublabel={`${totalBookings ? Math.round((bookings.filter((b: any) => b?.status?.toLowerCase() === "cancelled").length / totalBookings) * 100) : 0}% cancellation rate`}
                     />
                     <MetricTile
                         label="Repeat clients"
                         value={`${repeatPct}%`}
                         icon={<Repeat size={14} />}
-                        sublabel={`${v.ratings?.totalReviews ?? 0} reviews`}
+                        sublabel={totalReviews > 0 ? `${totalReviews} review${totalReviews === 1 ? "" : "s"}` : "No reviews yet"}
                     />
                 </section>
 

@@ -40,9 +40,13 @@ export default async function VendorDashboardPage({
     const verificationBadges = v?.verification?.verificationBadges || [];
     const isTopRated = Boolean(v?.verification?.verified) && verificationBadges.includes("top_rated");
 
-    // Already fetched with the vendor on this page, and previously rendered only on
-    // the profile screen. Nothing here costs an extra read.
-    const stats = v?.stats;
+    // NOT v.stats. Nothing in this repo writes that object — grep it for .update or
+    // .set and there is nothing — so every field on it is the model's creation-time
+    // default: totalBookings 0, totalRevenue 0, avgResponseTime "Under 2 hours".
+    // That is why this card could read "Total bookings 0" while the tile beside it
+    // reported four active quotes off the same bookings array. The vendor profile
+    // screen already computed these live; the dashboard was reading the dead copy.
+    // Everything below comes from raw_bookings, which is already loaded.
 
     const eventIds = [...new Set(raw_bookings.map((b: any) => b?.eventId).filter(Boolean))];
 
@@ -118,6 +122,20 @@ export default async function VendorDashboardPage({
         .slice(0, 4);
 
     const weeklyRevenue = computeWeeklyRevenue(completedBookings);
+
+    // Live equivalents of the dead vendor.stats fields, from raw_bookings.
+    const cancelledBookings = raw_bookings.filter((b: any) => b?.status?.toLowerCase() === "cancelled");
+    const lifetimeRevenue = completedBookings.reduce(
+        (sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0
+    );
+    const bookingsPerOrganizer: Record<string, number> = {};
+    raw_bookings.forEach((b: any) => {
+        if (b?.organizerId) bookingsPerOrganizer[b.organizerId] = (bookingsPerOrganizer[b.organizerId] ?? 0) + 1;
+    });
+    const repeatClients = Object.values(bookingsPerOrganizer).filter((n) => n > 1).length;
+    const cancellationRate = raw_bookings.length
+        ? Math.round((cancelledBookings.length / raw_bookings.length) * 100)
+        : 0;
 
     // All of the below is already in memory — no extra reads. These are the numbers
     // the tiles previously had no slot for, which is why three tiles said only
@@ -263,18 +281,29 @@ export default async function VendorDashboardPage({
                                 icon={<CalendarDays size={14} />}
                                 sublabel={nextServiceDate ? `Next on ${nextServiceDate}` : "None scheduled"}
                                 facts={[
-                                    { label: "Completed", value: stats?.completedBookings ?? completedBookings.length },
-                                    { label: "Repeat clients", value: stats?.repeatClients ?? 0 },
+                                    { label: "Completed", value: completedBookings.length },
+                                    { label: "Repeat clients", value: repeatClients },
                                 ]}
                             />
                             <MetricTile
                                 label="Avg rating"
-                                value={vendorRating ? vendorRating.toFixed(1) : "—"}
+                                // A vendor with no reviews is not a 5.0 vendor. The model
+                                // seeds averageRating at 5.0 and only reviewVendor.action
+                                // ever recomputes it, so until someone reviews you the
+                                // dashboard was advertising a perfect score off a default.
+                                value={totalReviews > 0 ? vendorRating.toFixed(1) : "—"}
                                 icon={<Star size={14} />}
-                                sublabel={totalReviews === 1 ? "From 1 review" : `From ${totalReviews} reviews`}
+                                sublabel={
+                                    totalReviews === 0
+                                        ? "No reviews yet"
+                                        : totalReviews === 1
+                                          ? "From 1 review"
+                                          : `From ${totalReviews} reviews`
+                                }
                                 facts={[
-                                    { label: "Replies in", value: stats?.avgResponseTime ?? "—" },
-                                    { label: "Cancelled", value: `${Math.round((stats?.cancellationRate ?? 0) * 100)}%` },
+                                    // avgResponseTime is gone: it is a hardcoded string on the
+                                    // model ("Under 2 hours") that nothing computes or updates.
+                                    { label: "Cancelled", value: `${cancellationRate}%` },
                                 ]}
                             />
                         </div>
@@ -406,11 +435,11 @@ export default async function VendorDashboardPage({
                                 <CardBody>
                                     <dl className="divide-y divide-line">
                                         {[
-                                            { label: "Lifetime revenue", value: formatCurrencyCompact(stats?.totalRevenue, "PKR", "—") },
-                                            { label: "Total bookings", value: stats?.totalBookings ?? 0 },
-                                            { label: "Completed", value: stats?.completedBookings ?? 0 },
-                                            { label: "Repeat clients", value: stats?.repeatClients ?? 0 },
-                                            { label: "Typical reply", value: stats?.avgResponseTime ?? "—" },
+                                            { label: "Lifetime revenue", value: formatCurrencyCompact(lifetimeRevenue, "PKR", "—") },
+                                            { label: "Total bookings", value: raw_bookings.length },
+                                            { label: "Completed", value: completedBookings.length },
+                                            { label: "Cancelled", value: cancelledBookings.length },
+                                            { label: "Repeat clients", value: repeatClients },
                                             { label: "Services listed", value: v?.services?.length ?? 0 },
                                         ].map((row) => (
                                             <div key={row.label} className="flex items-baseline justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
@@ -437,7 +466,7 @@ export default async function VendorDashboardPage({
                                             {v?.pricingPackages?.length ?? 0} packages
                                         </span>
                                         <span className="rounded-full border border-line bg-muted px-2.5 py-1 text-2xs text-ink-soft">
-                                            {totalReviews} reviews
+                                            {totalReviews} review{totalReviews === 1 ? "" : "s"}
                                         </span>
                                     </div>
                                     <Link href={`/vendor/${vendor_id}/profile`} className={buttonClass("secondary", "sm")}>

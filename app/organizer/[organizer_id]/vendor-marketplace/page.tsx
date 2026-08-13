@@ -186,9 +186,14 @@ export default async function Vendor_Marketplace({
                                                     ) : null}
                                                 </h3>
                                                 <div className="mt-1 flex items-center gap-1.5">
-                                                    <StarRating rating={rating} />
+                                                    {totalReviews > 0 ? <StarRating rating={rating} /> : null}
                                                     <span className="text-xs text-ink-soft tabular-nums">
-                                                        {rating} ({totalReviews} review{totalReviews === 1 ? "" : "s"})
+                                                        {/* averageRating is seeded at 5.0 by the model and only
+                                                            recomputed when someone leaves a review, so an unreviewed
+                                                            vendor was advertising a perfect score. */}
+                                                        {totalReviews > 0
+                                                            ? `${rating} (${totalReviews} review${totalReviews === 1 ? "" : "s"})`
+                                                            : "No reviews yet"}
                                                     </span>
                                                 </div>
                                             </div>
@@ -215,19 +220,10 @@ export default async function Vendor_Marketplace({
                                             separates two vendors with the same star rating. */}
                                         <dl className="mb-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-3 text-2xs text-ink-soft">
                                             <div className="flex gap-1">
-                                                <dt>Bookings</dt>
-                                                <dd className="font-medium text-ink tabular-nums">{vendor?.stats?.totalBookings ?? 0}</dd>
-                                            </div>
-                                            <div className="flex gap-1">
                                                 <dt>Services</dt>
                                                 <dd className="font-medium text-ink tabular-nums">{vendor?.services?.length ?? 0}</dd>
                                             </div>
-                                            {vendor?.stats?.avgResponseTime ? (
-                                                <div className="flex gap-1">
-                                                    <dt>Replies</dt>
-                                                    <dd className="font-medium text-ink">{vendor.stats.avgResponseTime}</dd>
-                                                </div>
-                                            ) : null}
+
                                         </dl>
 
                                         <p className="mb-5">
