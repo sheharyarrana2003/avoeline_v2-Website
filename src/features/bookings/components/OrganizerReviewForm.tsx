@@ -65,7 +65,7 @@ export function OrganizerReviewForm({
                             className="p-0.5 transition-transform hover:scale-110"
                         >
                             <svg aria-hidden="true"
-                                className={`h-7 w-7 ${star <= shown ? "fill-gray-900 text-ink" : "fill-gray-200 text-gray-200"}`}
+                                className={`h-7 w-7 ${star <= shown ? "fill-ink text-ink" : "fill-line text-gray-200"}`}
                                 viewBox="0 0 20 20"
                             >
                                 <path d={STAR_PATH} />

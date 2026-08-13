@@ -329,7 +329,7 @@ export default async function VendorProfilePage({
                                     return (
                                         <div key={star} className="flex items-center gap-2">
                                             <span className="w-3 text-xs text-ink-soft tabular-nums">{star}</span>
-                                            <Star className="h-3 w-3 shrink-0 fill-gray-900 text-ink" aria-hidden="true" />
+                                            <Star className="h-3 w-3 shrink-0 fill-ink text-ink" aria-hidden="true" />
                                             <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted-strong">
                                                 <div className="h-full rounded-full bg-ink" style={{ width: `${percentage}%` }} />
                                             </div>
