@@ -15,6 +15,7 @@ import { MiniBars } from "@/src/shared_components/ui/charts/MiniBars";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
+import { isBooked, bookedAt, vendorNetValue, grossValue } from "@/src/features/bookings/bookingValue";
 import { CalendarDays, FileText, Inbox, MapPin, Star, Users } from "lucide-react";
 
 export default async function VendorDashboardPage({
@@ -81,27 +82,27 @@ export default async function VendorDashboardPage({
         ['quote_accepted', 'confirmed', 'in_progress'].includes(b?.status?.toLowerCase())
     );
 
-    const completedBookings = raw_bookings.filter((b: any) =>
-        b?.status?.toLowerCase() === 'completed'
-    );
-
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    // toDate, not new Date(). getAllBookingsOfVendor returns raw documents without
-    // running mapToBooking, so completedAt/createdAt are admin-SDK Timestamp objects.
-    // new Date(timestamp) yields Invalid Date, every comparison against it is false,
-    // and this whole block silently returned zero revenue and an empty request list
-    // with no error anywhere. Same bug was in three places on this page.
-    const thisMonthRevenue = completedBookings
-        .filter((b: any) => {
-            const completedDate = toDate(b?.completedAt);
-            return completedDate &&
-                   completedDate.getMonth() === currentMonth &&
-                   completedDate.getFullYear() === currentYear;
-        })
-        .reduce((sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0);
+    // Booked, not "revenue". This summed bookings with status "completed", which
+    // nothing in this app ever writes, so it was arithmetic over an empty set and
+    // read Rs 0 no matter how much work had been won. An accepted quote is real
+    // money — the organizer agreed the price — it is simply money owed rather than
+    // money received, and the product tracks no payments at all (paymentSchedule is
+    // written as [] and never populated), so cash collected is unknowable.
+    //
+    // Dated from statusHistory: accept_quote stamps the history but never sets
+    // confirmedAt.
+    const bookedBookings = raw_bookings.filter(isBooked);
+
+    const bookedThisMonth = bookedBookings.filter((b: any) => {
+        const at = bookedAt(b);
+        return at && at.getMonth() === currentMonth && at.getFullYear() === currentYear;
+    });
+    const thisMonthBooked = bookedThisMonth.reduce((sum: number, b: any) => sum + vendorNetValue(b), 0);
+    const thisMonthGross = bookedThisMonth.reduce((sum: number, b: any) => sum + grossValue(b), 0);
 
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const recentQuoteRequests = raw_bookings
@@ -124,13 +125,11 @@ export default async function VendorDashboardPage({
         })
         .slice(0, 4);
 
-    const weeklyRevenue = computeWeeklyRevenue(completedBookings);
+    const weeklyRevenue = computeWeeklyRevenue(bookedBookings);
 
     // Live equivalents of the dead vendor.stats fields, from raw_bookings.
     const cancelledBookings = raw_bookings.filter((b: any) => b?.status?.toLowerCase() === "cancelled");
-    const lifetimeRevenue = completedBookings.reduce(
-        (sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0
-    );
+    const lifetimeBooked = bookedBookings.reduce((sum: number, b: any) => sum + vendorNetValue(b), 0);
     const bookingsPerOrganizer: Record<string, number> = {};
     raw_bookings.forEach((b: any) => {
         if (b?.organizerId) bookingsPerOrganizer[b.organizerId] = (bookingsPerOrganizer[b.organizerId] ?? 0) + 1;
@@ -246,15 +245,23 @@ export default async function VendorDashboardPage({
                         vendor opens this page to find out. */}
                     <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
                         <div className="ink-panel on-ink relative overflow-hidden rounded-2xl p-7 shadow-lg">
-                            <p className="text-2xs font-medium uppercase text-white/50">Revenue this month</p>
+                            <p className="text-2xs font-medium uppercase text-white/50">Booked this month</p>
                             <p className="figure mt-3 text-5xl text-white">
-                                {formatCurrency(thisMonthRevenue, "PKR", "Rs 0")}
+                                {formatCurrency(thisMonthBooked, "PKR", "Rs 0")}
                             </p>
                             <p className="mt-3 flex items-center gap-1.5 text-sm text-white/60">
                                 <CalendarDays size={14} aria-hidden="true" />
-                                across {confirmedBookings.length} confirmed{" "}
-                                {confirmedBookings.length === 1 ? "booking" : "bookings"}
+                                {bookedThisMonth.length === 1
+                                    ? "1 quote accepted"
+                                    : `${bookedThisMonth.length} quotes accepted`}
                             </p>
+                            {/* Your share after commission is the number that matters to a
+                                vendor; the agreed total is the context for it. */}
+                            {thisMonthGross > thisMonthBooked ? (
+                                <p className="mt-1 text-xs text-white/45">
+                                    Your share of {formatCurrency(thisMonthGross, "PKR")} agreed
+                                </p>
+                            ) : null}
 
                             {/* The sparkline moved up here from the right rail. It was
                                 sitting under a second copy of this same figure, so the
@@ -279,12 +286,13 @@ export default async function VendorDashboardPage({
                                 facts={[{ label: "Negotiating", value: negotiatingCount }]}
                             />
                             <MetricTile
-                                label="Confirmed"
+                                label="Accepted"
                                 value={String(confirmedBookings.length)}
                                 icon={<CalendarDays size={14} />}
                                 sublabel={nextServiceDate ? `Next on ${nextServiceDate}` : "None scheduled"}
                                 facts={[
-                                    { label: "Completed", value: completedBookings.length },
+                                    // Not "Completed": nothing marks a booking complete, so
+                                    // that number is zero by construction rather than by fact.
                                     { label: "Repeat clients", value: repeatClients },
                                 ]}
                             />
@@ -438,9 +446,9 @@ export default async function VendorDashboardPage({
                                 <CardBody>
                                     <dl className="divide-y divide-line">
                                         {[
-                                            { label: "Lifetime revenue", value: formatCurrencyCompact(lifetimeRevenue, "PKR", "—") },
+                                            { label: "Booked to date", value: formatCurrencyCompact(lifetimeBooked, "PKR", "—") },
                                             { label: "Total bookings", value: raw_bookings.length },
-                                            { label: "Completed", value: completedBookings.length },
+                                            { label: "Accepted", value: bookedBookings.length },
                                             { label: "Cancelled", value: cancelledBookings.length },
                                             { label: "Repeat clients", value: repeatClients },
                                             { label: "Services listed", value: v?.services?.length ?? 0 },
@@ -485,8 +493,8 @@ export default async function VendorDashboardPage({
     );
 }
 
-// --- Helper to compute weekly revenue from completed bookings ---
-function computeWeeklyRevenue(completedBookings: any[]): number[] {
+// --- Weekly booked value, seven rolling weeks ---
+function computeWeeklyRevenue(bookedBookings: any[]): number[] {
     const now = new Date();
     const weeks: number[] = [];
 
@@ -494,13 +502,14 @@ function computeWeeklyRevenue(completedBookings: any[]): number[] {
         const weekStart = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
         const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-        const weekRevenue = completedBookings
+        const weekRevenue = bookedBookings
             .filter((b: any) => {
-                // toDate: see the note on thisMonthRevenue. These are Timestamps.
-                const completed = toDate(b?.completedAt);
-                return completed && completed >= weekStart && completed < weekEnd;
+                // bookedAt, not completedAt: nothing writes completedAt, so keying on
+                // it made every bar zero.
+                const at = bookedAt(b);
+                return at && at >= weekStart && at < weekEnd;
             })
-            .reduce((sum: number, b: any) => sum + (b?.payment?.totalAmount || 0), 0);
+            .reduce((sum: number, b: any) => sum + vendorNetValue(b), 0);
 
         weeks.push(weekRevenue);
     }
