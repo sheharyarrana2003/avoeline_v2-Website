@@ -15,10 +15,13 @@ import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
 import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 
-export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
+export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string; q?: string }> }) {
     const resolvedParams = await searchParams;
     const currentTab = resolvedParams.status || "all";
+    const query = normalizeQuery(resolvedParams.q);
 
     const organizer_id :string = (await params).organizer_id;
     const base_address :string = `/organizer/${organizer_id}`
@@ -40,7 +43,15 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     const lifecycleOf = new Map(organizerEvents.map((e) => [e.id, eventLifecycle(e.status, e.schedule, now)]));
 
     const events = organizerEvents.filter(
-        (event) => currentTab === "all" || lifecycleOf.get(event.id) === currentTab
+        (event) =>
+            (currentTab === "all" || lifecycleOf.get(event.id) === currentTab) &&
+            matchesQuery(query, [
+                event.title,
+                event.category,
+                event.eventType,
+                event.location?.venueName,
+                event.location?.city,
+            ])
     );
 
     // One entry per member of EventStatus, derived from the union rather than typed
@@ -51,6 +62,18 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     //
     // The `published` branch of the old filter was also dead — it compared status to
     // "published" where the line below it already compared status to currentTab.
+    // Tab counts are over the SEARCH results, not the whole collection — a tab
+    // reading "4" beside a single visible row is worse than no count.
+    const searchable = organizerEvents.filter((event) =>
+        matchesQuery(query, [
+            event.title,
+            event.category,
+            event.eventType,
+            event.location?.venueName,
+            event.location?.city,
+        ])
+    );
+
     const STATUS_TABS: { label: string; value: EventLifecycle }[] = [
         { label: "Draft", value: "draft" },
         { label: "Upcoming", value: "upcoming" },
@@ -61,12 +84,12 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     ];
 
     const tabs = [
-        { label: "All Events", value: "all", count: organizerEvents.length, href: `${base_address}/events` },
+        { label: "All Events", value: "all", count: searchable.length, href: `${base_address}/events${query ? `?q=${encodeURIComponent(query)}` : ""}` },
         ...STATUS_TABS.map((t) => ({
             label: t.label,
             value: t.value,
-            count: organizerEvents.filter((e) => lifecycleOf.get(e.id) === t.value).length,
-            href: `${base_address}/events?status=${t.value}`,
+            count: searchable.filter((e) => lifecycleOf.get(e.id) === t.value).length,
+            href: `${base_address}/events?status=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ""}`,
         })),
     ];
 
@@ -191,6 +214,15 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                     }
                 />
 
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`${base_address}/events`}
+                        placeholder="Search events, venue, category"
+                        defaultValue={query}
+                        keep={{ status: currentTab === "all" ? undefined : currentTab }}
+                    />
+                </div>
+
                 <FilterTabs tabs={tabs} activeValue={currentTab} label="Event status filters" />
 
                 {/* A table, where this was a stack of 132px cards showing six facts
@@ -207,7 +239,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                             <div className="p-6">
                                 <EmptyState
                                     icon={<CalendarPlus size={28} />}
-                                    title={currentTab === "all" ? "No events yet" : `No ${toTitleCase(currentTab).toLowerCase()} events`}
+                                    title={
+                                        query
+                                            ? `Nothing matches “${query}”`
+                                            : currentTab === "all"
+                                              ? "No events yet"
+                                              : `No ${toTitleCase(currentTab).toLowerCase()} events`
+                                    }
                                     description={
                                         currentTab === "all"
                                             ? "Create your first event to start taking registrations."

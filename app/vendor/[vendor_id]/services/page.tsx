@@ -13,6 +13,8 @@ import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 import { ImageOff, Package, Pencil, Plus, Trash2 } from "lucide-react";
 
 // --- Helper Functions ---
@@ -50,6 +52,7 @@ export default async function VendorServicesPage({
 
     // Get filter from URL
     const filter = (awaitedSearchParams?.filter as string) || 'all';
+    const query = normalizeQuery(awaitedSearchParams?.q);
 
     // Fetch vendor data
     const vendor = await EventVendorService.getVendorById(vendor_id);
@@ -60,24 +63,28 @@ export default async function VendorServicesPage({
     const services = vendor?.services || [];
     const serviceCategories = vendor?.serviceCategories || [];
 
-    // Build category tabs from vendor's serviceCategories
+    const matches = (s: Service) =>
+        matchesQuery(query, [s.name, s.description, s.category, s.inclusions, s.price]);
+
+    // Build category tabs from vendor's serviceCategories. Counts are over the
+    // search results, so a tab never claims more than the list can show.
     const categoryTabs = [
-        { id: 'all', label: 'All services', count: services.length },
+        { id: 'all', label: 'All services', count: services.filter(matches).length },
         ...serviceCategories.map((cat: string) => ({
             // Trimmed so the tab's href/filter value matches a trimmed service
             // category — legacy values carry a trailing newline.
             id: cat.trim().toLowerCase(),
             label: getCategoryLabel(cat),
-            count: getCategoryCount(services, cat),
+            count: services.filter((s: Service) => matches(s) && sameCategory(s.category, cat.trim().toLowerCase())).length,
         })),
     ];
 
     // Filter services by category. The "status" that used to be attached here was
     // `index < 2 ? active : inactive` — a badge computed from list position, not
     // from anything stored — and nothing rendered it anyway.
-    const displayServices = filter === 'all'
-        ? services
-        : services.filter((s: any) => sameCategory(s.category, filter));
+    const displayServices = services.filter(
+        (s: Service) => matches(s) && (filter === 'all' || sameCategory(s.category, filter))
+    );
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
@@ -123,12 +130,21 @@ export default async function VendorServicesPage({
                     />
                 </section>
 
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`/vendor/${vendor_id}/services`}
+                        placeholder="Search services and inclusions"
+                        defaultValue={query}
+                        keep={{ filter: filter === "all" ? undefined : filter }}
+                    />
+                </div>
+
                 <FilterTabs
                     tabs={categoryTabs.map((t) => ({
                         label: t.label,
                         value: t.id,
                         count: t.count,
-                        href: `/vendor/${vendor_id}/services?filter=${t.id}`,
+                        href: `/vendor/${vendor_id}/services?filter=${t.id}${query ? `&q=${encodeURIComponent(query)}` : ""}`,
                     }))}
                     activeValue={filter}
                     label="Filter by category"
@@ -249,7 +265,7 @@ export default async function VendorServicesPage({
                 ) : (
                     <EmptyState
                         icon={<Package size={26} />}
-                        title={filter === 'all' ? "No services yet" : "Nothing in this category"}
+                        title={query ? `Nothing matches \u201c${query}\u201d` : filter === 'all' ? "No services yet" : "Nothing in this category"}
                         description={
                             filter === 'all'
                                 ? "Organizers can't request a quote for a service you haven't listed. Add your first one to start receiving requests."

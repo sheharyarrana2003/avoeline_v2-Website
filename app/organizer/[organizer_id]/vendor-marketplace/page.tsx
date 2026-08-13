@@ -17,6 +17,8 @@ import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StarRating } from "@/src/shared_components/ui/StarRating";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 
 // Icons are components, not emoji, and this module renders them itself -- nothing
 // crosses the RSC boundary. Decor was labelled with a microphone before.
@@ -45,12 +47,25 @@ export default async function Vendor_Marketplace({
     const category = awaited_search_params.category;
     const base_url = `/organizer/${organizer_id}/vendor-marketplace`;
 
-    // Filter vendors by category if selected
-    const filteredVendors = category && category !== "all"
-        ? (vendors ?? []).filter((v: any) =>
-            v?.serviceCategories?.some((c: string) => c.toLowerCase() === category.toString().toLowerCase())
-        )
-        : vendors ?? [];
+    const query = normalizeQuery(awaited_search_params.q);
+
+    // Category and search compose: a term narrows within the chosen category
+    // rather than replacing it.
+    const filteredVendors = (vendors ?? []).filter((v: any) => {
+        const inCategory =
+            !category || category === "all" ||
+            v?.serviceCategories?.some((c: string) => c.toLowerCase() === category.toString().toLowerCase());
+        return (
+            inCategory &&
+            matchesQuery(query, [
+                v?.businessName,
+                v?.serviceCategories,
+                v?.contact?.address?.city,
+                v?.contact?.address?.country,
+                v?.services?.map((s: any) => s?.name),
+            ])
+        );
+    });
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
@@ -59,6 +74,14 @@ export default async function Vendor_Marketplace({
                 <PageHeader
                     title="Discover Providers"
                     description="Browse verified vendors and request a quote for your event."
+                    actions={
+                        <SearchField
+                            action={base_url}
+                            placeholder="Search vendors, services, city"
+                            defaultValue={query}
+                            keep={{ category: category?.toString() }}
+                        />
+                    }
                 />
 
                 {/* Category Filter Pills */}
@@ -69,7 +92,11 @@ export default async function Vendor_Marketplace({
                         return (
                             <Link
                                 key={id}
-                                href={id === "all" ? base_url : `${base_url}?category=${id}`}
+                                href={
+                                    id === "all"
+                                        ? `${base_url}${query ? `?q=${encodeURIComponent(query)}` : ""}`
+                                        : `${base_url}?category=${id}${query ? `&q=${encodeURIComponent(query)}` : ""}`
+                                }
                                 aria-current={isActive ? "page" : undefined}
                                 className={buttonClass(isActive ? "primary" : "secondary", "sm")}
                             >
@@ -84,7 +111,7 @@ export default async function Vendor_Marketplace({
                 {filteredVendors.length === 0 ? (
                     <EmptyState
                         icon={<Store size={28} />}
-                        title={category ? "No providers in this category" : "No providers listed yet"}
+                        title={query ? `Nothing matches \u201c${query}\u201d` : category ? "No providers in this category" : "No providers listed yet"}
                         description={
                             category
                                 ? "Clear the filter to see every provider on the marketplace."

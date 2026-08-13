@@ -17,6 +17,8 @@ import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/Da
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 import {
     Building2,
     CalendarCheck,
@@ -152,17 +154,26 @@ export default async function VendorBookingsPage({
     });
 
     // Apply tab filter
-    const displayBookings = (filter === 'all'
-        ? allBookings
-        : allBookings.filter((b: any) => b?.status?.toLowerCase() === filter)
-    ).sort((a: any, b: any) => {
+    const displayBookings = allBookings
+        .filter((b: any) => matches(b) && (filter === 'all' || b?.status?.toLowerCase() === filter))
+        .sort((a: any, b: any) => {
         const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
         const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
         return dateA - dateB;
     });
 
+    const query = normalizeQuery(awaitedSearchParams?.q);
+    const matches = (b: any) =>
+        matchesQuery(query, [
+            getEventTitle(b?.eventId),
+            getOrganizerName(b?.organizerId),
+            b?.serviceType,
+            b?.requirements?.location,
+            b?.status,
+        ]);
+
     const countOf = (id: string) =>
-        id === "all" ? allBookings.length : allBookings.filter((b: any) => b?.status?.toLowerCase() === id).length;
+        allBookings.filter((b: any) => matches(b) && (id === "all" || b?.status?.toLowerCase() === id)).length;
 
     const tabs = [
         { value: "all", label: "All" },
@@ -170,7 +181,7 @@ export default async function VendorBookingsPage({
         { value: "in_progress", label: "In progress" },
         { value: "completed", label: "Completed" },
         { value: "cancelled", label: "Cancelled" },
-    ].map((t) => ({ ...t, href: `/vendor/${vendor_id}/bookings?filter=${t.value}`, count: countOf(t.value) }));
+    ].map((t) => ({ ...t, href: `/vendor/${vendor_id}/bookings?filter=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ""}`, count: countOf(t.value) }));
 
     // Every field below was already on the booking documents this page fetched and
     // none of them reached the card: the guest count, the time window, what the
@@ -282,6 +293,15 @@ export default async function VendorBookingsPage({
                         sublabel={`${allBookings.length} bookings all time`}
                     />
                 </section>
+
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`/vendor/${vendor_id}/bookings`}
+                        placeholder="Search event, organizer, service"
+                        defaultValue={query}
+                        keep={{ filter: filter === "all" ? undefined : filter }}
+                    />
+                </div>
 
                 <FilterTabs tabs={tabs} activeValue={filter} label="Filter bookings" />
 

@@ -11,6 +11,8 @@ import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/Da
 import { formatDate } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 
 // getBookingsOfOrganizer returns a narrow server-side projection rather than the
 // whole booking, so this row type is what actually arrives — not BookingData.
@@ -20,19 +22,30 @@ type BookingRow = Awaited<ReturnType<typeof BookingServices.getBookingsOfOrganiz
   ? R
   : never;
 
-export default async function Active_Vendors({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ tab: string }> }) {
+export default async function Active_Vendors({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ tab?: string; q?: string }> }) {
   const awaited_search_params = await searchParams;
   const resolvedParams = await params;
   const organizerId = resolvedParams.organizer_id;
   const basePath = `/organizer/${organizerId}`;
 
   const activeTab = awaited_search_params?.tab?.toString() || "active"; // Default to active
+  const query = normalizeQuery(awaited_search_params?.q);
+
+  const matches = (b: BookingRow) =>
+    matchesQuery(query, [
+      b.vendor?.businessName,
+      b.vendor?.serviceCategories,
+      b.eventName,
+      b.requirements?.description,
+      b.status,
+    ]);
 
   // A null read and an empty read mean the same thing on screen, so they share
   // one path -- the duplicated "no bookings" copy of this page is gone.
   const bookings = (await BookingServices.getBookingsOfOrganizer(organizerId)) ?? [];
 
   const filteredBookings = bookings.filter((b) => {
+    if (!matches(b)) return false;
     if (activeTab === "active") {
       return b.status !== "completed" && b.status !== "cancelled";
     } else if (activeTab === "past") {
@@ -47,20 +60,20 @@ export default async function Active_Vendors({ params, searchParams }: { params:
     {
       label: "Active",
       value: "active",
-      href: `${basePath}/all-vendors?tab=active`,
-      count: bookings.filter((b) => b.status !== "completed" && b.status !== "cancelled").length,
+      href: `${basePath}/all-vendors?tab=active${query ? `&q=${encodeURIComponent(query)}` : ""}`,
+      count: bookings.filter((b) => matches(b) && b.status !== "completed" && b.status !== "cancelled").length,
     },
     {
       label: "Past",
       value: "past",
-      href: `${basePath}/all-vendors?tab=past`,
-      count: bookings.filter((b) => b.status === "completed").length,
+      href: `${basePath}/all-vendors?tab=past${query ? `&q=${encodeURIComponent(query)}` : ""}`,
+      count: bookings.filter((b) => matches(b) && b.status === "completed").length,
     },
     {
       label: "Cancelled",
       value: "cancelled",
-      href: `${basePath}/all-vendors?tab=cancelled`,
-      count: bookings.filter((b) => b.status === "cancelled").length,
+      href: `${basePath}/all-vendors?tab=cancelled${query ? `&q=${encodeURIComponent(query)}` : ""}`,
+      count: bookings.filter((b) => matches(b) && b.status === "cancelled").length,
     },
   ];
 
@@ -148,6 +161,15 @@ export default async function Active_Vendors({ params, searchParams }: { params:
           }
         />
 
+        <div className="mb-4 flex justify-end">
+          <SearchField
+            action={`${basePath}/all-vendors`}
+            placeholder="Search vendor, event, service"
+            defaultValue={query}
+            keep={{ tab: activeTab }}
+          />
+        </div>
+
         <FilterTabs tabs={tabs} activeValue={activeTab} label="Booking filters" />
 
         {/* Was a three-column card grid where each card carried six short facts and
@@ -162,7 +184,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
               <div className="p-6">
                 <EmptyState
                   icon={<Store size={28} />}
-                  title={`No ${activeTab} bookings`}
+                  title={query ? `Nothing matches \u201c${query}\u201d` : `No ${activeTab} bookings`}
                   description={
                     activeTab === "active"
                       ? "Book a provider from the marketplace and the engagement will be tracked here."
