@@ -16,12 +16,12 @@ const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: strin
     danger: {
         icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
         badge: "bg-danger-soft text-danger ring-1 ring-danger-line",
-        confirm: "bg-danger text-white hover:brightness-90 focus-visible:outline-accent",
+        confirm: "bg-danger text-ink-invert hover:brightness-90 focus-visible:outline-accent",
     },
     default: {
         icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
-        confirm: "bg-gray-900 text-white hover:bg-gray-700 focus-visible:outline-accent",
+        badge: "bg-muted text-ink-soft ring-1 ring-line",
+        confirm: "bg-ink text-ink-invert hover:bg-ink-soft focus-visible:outline-accent",
     },
 };
 
@@ -82,7 +82,7 @@ export function ConfirmDialog({
             onClick={(e) => {
                 if (e.target === ref.current && !busy) onCancel();
             }}
-            className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-white p-0 text-gray-900 shadow-2xl backdrop:bg-black/50"
+            className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-paper p-0 text-ink shadow-2xl backdrop:bg-black/50"
         >
             <div className="p-6">
                 <div className="flex gap-4">
@@ -91,7 +91,7 @@ export function ConfirmDialog({
                     </span>
                     <div className="min-w-0 flex-1">
                         <h2 className="text-base font-bold tracking-tight">{title}</h2>
-                        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{description}</p>
+                        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{description}</p>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@ export function ConfirmDialog({
                         type="button"
                         onClick={onCancel}
                         disabled={busy}
-                        className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        className="rounded-full border border-line-loud px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
                         {cancelLabel}
                     </button>

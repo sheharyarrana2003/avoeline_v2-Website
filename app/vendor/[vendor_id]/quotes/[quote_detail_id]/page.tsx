@@ -10,6 +10,8 @@ import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
 import { Clock, FileText, PenLine, SearchX } from "lucide-react";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
 
 // --- Helper Functions ---
 const getDaysRemaining = (validityDate: string="") => {
@@ -26,11 +28,6 @@ const getDaysRemaining = (validityDate: string="") => {
     if (diffDays === 1) return { label: 'Deadline: tomorrow', urgent: true };
     return { label: `${diffDays} days remaining`, urgent: false };
 };
-
-/** Section heading. Uncarded: a rule and a label group as well as a box did. */
-function SectionHeading({ children }: { children: React.ReactNode }) {
-    return <h3 className="mb-3 border-b border-line pb-2 text-2xs font-medium uppercase text-ink-soft">{children}</h3>;
-}
 
 export default async function QuoteDetailPage({
     params
@@ -115,6 +112,13 @@ export default async function QuoteDetailPage({
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
+                <Breadcrumbs
+                    items={[
+                        { label: "Quotes", href: `/vendor/${vendor_id}/quotes` },
+                        { label: b?.serviceType || "Quote request" },
+                    ]}
+                />
+
                 <PageHeader
                     title={eventTitle}
                     description={`Request ${b?.bookingId} • Event date ${formatDate(eventDate || "")}`}
@@ -138,25 +142,27 @@ export default async function QuoteDetailPage({
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
 
                     {/* Left: Full Requirements */}
-                    <div className="space-y-8">
-                        <section>
-                            <SectionHeading>Full requirements</SectionHeading>
+                    <div className="space-y-6">
+                        <Card title="Full requirements">
+                              <CardBody>
                             <p className="whitespace-pre-line text-sm leading-relaxed text-ink-soft">
                                 {requirements?.description || "No description provided."}
                             </p>
-                        </section>
+                        </CardBody>
+                        </Card>
 
                         {requirements?.specialInstructions && (
-                            <section>
-                                <SectionHeading>Special instructions</SectionHeading>
+                            <Card title="Special instructions">
+                                  <CardBody>
                                 <p className="text-sm leading-relaxed text-ink-soft">
                                     {requirements.specialInstructions}
                                 </p>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
-                        <section>
-                            <SectionHeading>Service details</SectionHeading>
+                        <Card title="Service details">
+                              <CardBody>
                             <dl className="divide-y divide-line">
                                 <div className="flex justify-between gap-3 py-2.5">
                                     <dt className="text-sm text-ink-soft">Service type</dt>
@@ -181,17 +187,18 @@ export default async function QuoteDetailPage({
                                     <dd className="text-sm font-medium text-ink tabular-nums">{requirements?.guestCount || 0}</dd>
                                 </div>
                             </dl>
-                        </section>
+                        </CardBody>
+                        </Card>
 
                         {negotiation.length > 0 && (
-                            <section>
-                                <SectionHeading>Negotiation history</SectionHeading>
+                            <Card title="Negotiation history">
+                                  <CardBody>
                                 <ul className="space-y-4">
                                     {negotiation.map((n: any, i: number) => (
                                         <li key={i} className="flex gap-3">
                                             {/* Decoration: the label below names the speaker. */}
                                             <span
-                                                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${n?.from === 'organizer' ? 'bg-gray-300' : 'bg-gray-900'}`}
+                                                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${n?.from === 'organizer' ? 'bg-muted-strong' : 'bg-ink'}`}
                                                 aria-hidden="true"
                                             />
                                             <div>
@@ -202,16 +209,17 @@ export default async function QuoteDetailPage({
                                         </li>
                                     ))}
                                 </ul>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
                         {communications.length > 0 && (
-                            <section>
-                                <SectionHeading>Communications</SectionHeading>
+                            <Card title="Communications">
+                                  <CardBody>
                                 <ul className="space-y-4">
                                     {communications.map((comm: any, i: number) => (
                                         <li key={i} className="flex gap-3">
-                                            <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-gray-300" aria-hidden="true" />
+                                            <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-muted-strong" aria-hidden="true" />
                                             <div>
                                                 <p className="text-xs font-medium capitalize text-ink">{comm?.from} → {comm?.to}</p>
                                                 <p className="mt-1 text-sm text-ink-soft">{comm?.message}</p>
@@ -220,15 +228,16 @@ export default async function QuoteDetailPage({
                                         </li>
                                     ))}
                                 </ul>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
                     </div>
 
                     {/* Right: Contact, quote, payment, delivery */}
-                    <div className="space-y-8">
+                    <div className="space-y-6">
 
-                        <section>
-                            <SectionHeading>Contact</SectionHeading>
+                        <Card title="Contact">
+                              <CardBody>
                             <p className="text-sm font-medium text-ink">{organizerName}</p>
                             {organizerEmail || organizerPhone ? (
                                 <p className="mt-1 text-sm text-ink-soft">
@@ -244,11 +253,12 @@ export default async function QuoteDetailPage({
                                     Email organizer
                                 </a>
                             )}
-                        </section>
+                        </CardBody>
+                        </Card>
 
                         {quotedTotal > 0 && (
-                            <section>
-                                <SectionHeading>Current quote</SectionHeading>
+                            <Card title="Current quote">
+                                  <CardBody>
                                 <dl className="divide-y divide-line">
                                     <div className="flex justify-between gap-3 py-2.5">
                                         <dt className="text-sm text-ink-soft">Base price</dt>
@@ -278,12 +288,13 @@ export default async function QuoteDetailPage({
                                 {vendorQuote?.terms && (
                                     <p className="mt-3 text-xs text-ink-soft">{vendorQuote.terms}</p>
                                 )}
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
                         {payment?.paymentSchedule && payment.paymentSchedule.length > 0 && (
-                            <section>
-                                <SectionHeading>Payment schedule</SectionHeading>
+                            <Card title="Payment schedule">
+                                  <CardBody>
                                 <ul className="divide-y divide-line">
                                     {payment.paymentSchedule.map((inst: any, i: number) => (
                                         <li key={i} className="flex items-center justify-between gap-2 py-3">
@@ -295,12 +306,13 @@ export default async function QuoteDetailPage({
                                         </li>
                                     ))}
                                 </ul>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
                         {delivery?.scheduledDate && (
-                            <section>
-                                <SectionHeading>Delivery</SectionHeading>
+                            <Card title="Delivery">
+                                  <CardBody>
                                 <dl className="divide-y divide-line">
                                     <div className="flex justify-between gap-3 py-2.5">
                                         <dt className="text-sm text-ink-soft">Scheduled</dt>
@@ -318,12 +330,13 @@ export default async function QuoteDetailPage({
                                 {delivery?.deliveryNotes && (
                                     <p className="mt-3 text-xs text-ink-soft">{delivery.deliveryNotes}</p>
                                 )}
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
                         {qualityCheck?.organizerCheck?.checked && (
-                            <section>
-                                <SectionHeading>Quality review</SectionHeading>
+                            <Card title="Quality review">
+                                  <CardBody>
                                 <div className="flex items-center gap-2">
                                     <StarRating rating={qualityCheck.organizerCheck?.rating || 0} />
                                     <span className="text-sm font-medium text-ink tabular-nums">{qualityCheck.organizerCheck?.rating}/5</span>
@@ -331,15 +344,16 @@ export default async function QuoteDetailPage({
                                 {qualityCheck.organizerCheck?.comments && (
                                     <p className="mt-2 text-sm text-ink-soft">{qualityCheck.organizerCheck.comments}</p>
                                 )}
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
 
                         {/* Was a two-item hardcoded array — "Floor_Plan.pdf, 2.4 MB" and
                             "Menu_Requirements.docx, 1.1 MB" — shown as this request's
                             attachments on every booking. Only real documents now. */}
                         {documentLinks.length > 0 && (
-                            <section>
-                                <SectionHeading>Documents</SectionHeading>
+                            <Card title="Documents">
+                                  <CardBody>
                                 <ul className="divide-y divide-line">
                                     {documentLinks.map((doc) => (
                                         <li key={doc.label}>
@@ -349,19 +363,20 @@ export default async function QuoteDetailPage({
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-2 py-3 text-sm text-ink hover:underline"
                                             >
-                                                <FileText size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                <FileText size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 {doc.label}
                                             </a>
                                         </li>
                                     ))}
                                 </ul>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
                     </div>
                 </div>
 
                 <div className="mt-10 flex items-center gap-2 border-t border-line pt-6">
-                    <Clock size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                    <Clock size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                     {deadline ? (
                         <span className={`text-sm ${deadline.urgent ? 'font-medium text-ink' : 'text-ink-soft'}`}>
                             {deadline.label}
@@ -372,17 +387,20 @@ export default async function QuoteDetailPage({
                 </div>
 
                 {b?.statusHistory && b.statusHistory.length > 0 && (
-                    <section className="mt-10">
-                        <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">Status history</h2>
-                        <ul className="divide-y divide-line">
-                            {b.statusHistory.map((s: any, index: number) => (
-                                <li key={index} className="flex items-center justify-between gap-3 py-3">
-                                    <span className="text-sm font-medium capitalize text-ink">{s?.status?.replace(/_/g, ' ')}</span>
-                                    <span className="text-xs text-ink-soft tabular-nums">{formatDateTime(s?.timestamp)}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
+                    <div className="mt-6">
+                        <Card title="Status history">
+                            <CardBody>
+                                <ul className="divide-y divide-line">
+                                    {b.statusHistory.map((s: any, index: number) => (
+                                        <li key={index} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                                            <span className="text-sm font-medium capitalize text-ink">{s?.status?.replace(/_/g, ' ')}</span>
+                                            <span className="text-xs text-ink-soft tabular-nums">{formatDateTime(s?.timestamp)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardBody>
+                        </Card>
+                    </div>
                 )}
             </div>
         </div>

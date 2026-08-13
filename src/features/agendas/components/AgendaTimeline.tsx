@@ -72,7 +72,7 @@ function SessionCard({ session, isLast }: { session: Session; isLast: boolean })
 						<div className="flex items-center gap-2">
 							<span
 								aria-hidden="true"
-								className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-2xs font-bold text-ink-soft"
+								className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-2xs font-bold text-ink-soft"
 							>
 								{getInitials(session.speaker.name)}
 							</span>

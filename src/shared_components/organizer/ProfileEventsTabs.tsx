@@ -45,7 +45,7 @@ export function ProfileEventsTabs({
                         aria-current={activeTab === tab ? "true" : undefined}
                         className={`-mb-px border-b-2 px-3 pb-2 text-sm font-medium transition-colors ${
                             activeTab === tab
-                                ? "border-gray-900 text-ink"
+                                ? "border-ink text-ink"
                                 : "border-transparent text-ink-soft hover:text-ink"
                         }`}
                     >

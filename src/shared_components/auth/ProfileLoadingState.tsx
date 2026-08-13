@@ -46,7 +46,7 @@ export default function ProfileLoadingState({
       {/* An indeterminate bar, because a ring alone gives no sense of ongoing work
           once you have looked at it for a few seconds. */}
       <span className="h-0.5 w-28 overflow-hidden rounded-full bg-line">
-        <span className="block h-full w-1/3 animate-[loading-sweep_1.4s_ease-in-out_infinite] rounded-full bg-gray-900" />
+        <span className="block h-full w-1/3 animate-[loading-sweep_1.4s_ease-in-out_infinite] rounded-full bg-ink" />
       </span>
     </div>
   );

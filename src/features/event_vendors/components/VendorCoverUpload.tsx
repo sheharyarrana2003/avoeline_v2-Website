@@ -17,7 +17,7 @@ export function VendorCoverUpload({ vendorId, currentCover }: { vendorId: string
       accept="image/*"
       value={cover || null}
       label="Upload cover"
-      buttonClassName="relative flex h-24 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border-2 border-dashed border-line-loud bg-canvas text-xs text-ink-soft transition hover:border-gray-900 disabled:opacity-60"
+      buttonClassName="relative flex h-24 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border-2 border-dashed border-line-loud bg-canvas text-xs text-ink-soft transition hover:border-ink disabled:opacity-60"
       onUploaded={async (url) => {
         setCover(url);
         const res = await updateVendorCover(vendorId, url);

@@ -2,34 +2,26 @@ import { DashboardEvent } from "../types";
 import { Clock, MapPin, CalendarClock } from "lucide-react";
 import { formatTime } from "@/src/lib/datetime";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { Meter } from "@/src/shared_components/ui/charts/Meter";
 
 export default function TodaysSchedule({ events }: { events: DashboardEvent[] }) {
   // The "Schedule options" button that used to sit here was a decoy: this is a Server
   // Component, so it could never receive a handler, and at 28px it was under the target
   // floor anyway. A control that does nothing is worse than no control.
+  // Headings come from the Card wrapper now, so this renders only its content.
   if (events.length === 0) {
     return (
-      <section className="font-sans">
-        <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
-          Today&rsquo;s schedule
-        </h2>
-        <EmptyState
-          size="sm"
-          icon={<CalendarClock className="h-5 w-5" />}
-          title="Nothing scheduled today"
-          description="Events starting today will appear here."
-        />
-      </section>
+      <EmptyState
+        size="sm"
+        icon={<CalendarClock className="h-5 w-5" />}
+        title="Nothing scheduled today"
+        description="Events starting today will appear here."
+      />
     );
   }
 
   return (
-    <section className="font-sans">
-      <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
-        Today&rsquo;s schedule
-      </h2>
-
-      <ul className="space-y-0">
+    <ul className="space-y-0">
         {events.map((event, index) => {
           const isActive = event.status === "ACTIVE";
 
@@ -40,24 +32,37 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                     saying which row is live. */}
                 <span
                   className={`mt-1.5 w-3.5 h-3.5 rounded-full border-2 ${
-                    isActive ? "border-gray-900 bg-gray-900" : "border-ink-soft bg-paper"
+                    isActive ? "border-ink bg-ink" : "border-ink-soft bg-paper"
                   }`}
                 />
                 {index < events.length - 1 && <span className="mt-1.5 h-full w-px min-h-12 bg-line-loud" />}
               </div>
 
-              <div className="-mx-2 rounded-lg border-b border-line px-2 pb-4 transition-colors last:border-b-0 hover:bg-gray-50">
+              <div className="-mx-2 rounded-lg border-b border-line px-2 pb-4 transition-colors last:border-b-0 hover:bg-muted">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-2xs font-medium uppercase text-gray-700 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-gray-500" />
+                    <p className="text-2xs font-medium uppercase text-ink flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-ink-soft" />
                       {formatTime(event.startDate)} - {formatTime(event.endDate)}
                     </p>
                     <h3 className="mt-1 text-base text-ink">{event.title}</h3>
-                    <p className="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-gray-500" />
+                    <p className="mt-0.5 text-xs text-ink-soft flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-ink-soft" />
                       {event.location}
                     </p>
+
+                    {/* registeredCount and maxCapacity ride on every DashboardEvent
+                        and this widget never showed them — on the day of an event
+                        the fill rate is the one number an organizer wants. */}
+                    {event.maxCapacity > 0 ? (
+                      <Meter
+                        className="mt-3 max-w-56"
+                        label="Registered"
+                        value={event.registeredCount}
+                        max={event.maxCapacity}
+                        caption={`${event.registeredCount} of ${event.maxCapacity} seats`}
+                      />
+                    ) : null}
                   </div>
 
                   {/* Bordered, not filled. The inactive border is 1.42:1 on canvas — far under the
@@ -65,7 +70,7 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                       state is carried by the word inside it and by the filled/hollow dot. */}
                   <span
                     className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-2xs font-medium uppercase ${
-                      isActive ? "border border-gray-900 text-gray-900" : "border border-line-loud text-ink-soft"
+                      isActive ? "border border-ink text-ink" : "border border-line-loud text-ink-soft"
                     }`}
                   >
                     {isActive ? "Live View" : "Upcoming"}
@@ -75,7 +80,6 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
             </li>
           );
         })}
-      </ul>
-    </section>
+    </ul>
   );
 }

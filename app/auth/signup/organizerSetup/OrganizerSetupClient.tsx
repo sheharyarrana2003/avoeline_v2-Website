@@ -51,17 +51,17 @@ export default function OrganizerSetupClient({
                   aria-current={isActive ? 'step' : undefined}
                   className={`flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                     isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'text-ink-soft hover:bg-gray-100 hover:text-ink'
+                      ? 'bg-ink text-ink-invert'
+                      : 'text-ink-soft hover:bg-muted hover:text-ink'
                   }`}
                 >
                   <span
                     className={`flex h-5 w-5 items-center justify-center rounded-full text-2xs font-bold tabular-nums ${
                       isActive
-                        ? 'bg-white text-ink'
+                        ? 'bg-paper text-ink'
                         : isCompleted
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-gray-200 text-ink-soft'
+                          ? 'bg-ink text-ink-invert'
+                          : 'bg-muted-strong text-ink-soft'
                     }`}
                   >
                     {isCompleted ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : step.id}

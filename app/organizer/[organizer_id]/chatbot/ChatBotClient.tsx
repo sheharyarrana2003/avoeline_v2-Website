@@ -23,7 +23,7 @@ const SUGGESTIONS = [
 // globals.css, so every prose-* class compiled to nothing. These do the same job
 // and actually render.
 const MARKDOWN =
-    "text-sm leading-relaxed text-ink [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:my-0.5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-gray-100 [&_pre]:p-3 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5";
+    "text-sm leading-relaxed text-ink [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:my-0.5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5";
 
 export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -75,7 +75,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                                             className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-canvas p-4 text-left text-sm text-ink transition hover:border-line-loud"
                                         >
                                             {text}
-                                            <Icon size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <Icon size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                         </button>
                                     ))}
                                 </div>
@@ -88,7 +88,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                                 className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 {m.role === 'user' ? (
-                                    <div className={`max-w-[80%] rounded-2xl rounded-tr-sm bg-gray-100 px-4 py-2.5 ${MARKDOWN}`}>
+                                    <div className={`max-w-[80%] rounded-2xl rounded-tr-sm bg-muted px-4 py-2.5 ${MARKDOWN}`}>
                                         <ReactMarkdown>{String(m.content)}</ReactMarkdown>
                                     </div>
                                 ) : (
@@ -117,7 +117,7 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                     {/* Input Area */}
                     <div className="border-t border-line px-5 pb-5 pt-4 md:px-8">
                         <form onSubmit={handleSubmit} className="flex w-full items-center gap-2">
-                            <div className="flex flex-1 items-center gap-2 rounded-full border border-line-loud bg-paper px-4 py-1.5 focus-within:border-gray-900">
+                            <div className="flex flex-1 items-center gap-2 rounded-full border border-line-loud bg-paper px-4 py-1.5 focus-within:border-ink">
                                 <input
                                     value={input}
                                     onChange={(e) => SetInput(e.target.value)}

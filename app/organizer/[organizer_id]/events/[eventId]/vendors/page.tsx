@@ -3,7 +3,7 @@ import { formatCurrency } from "@/src/lib/money";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
 import Link from 'next/link';
-import { Utensils, Volume2, Aperture, Star, Phone, LayoutDashboard } from 'lucide-react';
+import { Utensils, Volume2, Aperture, Star, Phone, LayoutDashboard, BadgeCheck, Briefcase } from 'lucide-react';
 import { EventVendorService } from '@/src/features/event_vendors/event_venders.services';
 import { VendorData } from '@/src/services/models/vendor.model';
 import { PricingPackage } from '@/src/services/models/vendor.model';
@@ -69,24 +69,36 @@ export default async function Vendors({ params }: { params: Promise<{ eventId: s
                                 className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-5 sm:flex-row sm:items-start sm:justify-between"
                             >
                                 <div className="flex min-w-0 items-start gap-4">
-                                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-ink">
+                                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-muted text-ink">
                                         {renderIcon(vendor.serviceCategories)}
                                     </span>
 
                                     <div className="min-w-0">
-                                        <h3 className="truncate text-base font-medium text-ink">{vendor.businessName}</h3>
+                                        <h3 className="flex items-center gap-1.5 truncate text-base font-medium text-ink">
+                                            <span className="truncate">{vendor.businessName}</span>
+                                            {/* Loaded on every vendor here and rendered on none —
+                                                the same gap the marketplace grid had. */}
+                                            {vendor.verification?.verified ? (
+                                                <BadgeCheck size={14} className="shrink-0 text-success" aria-label="Verified vendor" />
+                                            ) : null}
+                                        </h3>
 
                                         <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-ink-soft tabular-nums">
-                                            <span className="flex items-center gap-1">
-                                                <Star size={13} className="fill-gray-900 text-gray-900" aria-hidden="true" />
-                                                {vendor.ratings.averageRating.toFixed(1)}
-                                                <span>({vendor.ratings.totalReviews})</span>
-                                            </span>
+                                            {vendor.ratings.totalReviews > 0 ? (
+                                                <span className="flex items-center gap-1">
+                                                    <Star size={13} className="fill-ink text-ink" aria-hidden="true" />
+                                                    {vendor.ratings.averageRating.toFixed(1)}
+                                                    <span>({vendor.ratings.totalReviews})</span>
+                                                </span>
+                                            ) : (
+                                                <span className="text-ink-faint">No reviews yet</span>
+                                            )}
                                             <span className="flex items-center gap-1.5">
-                                                {/* gray-400 = 2.5:1, decoration only -- the number beside it is the content. */}
-                                                <Phone size={13} className="text-gray-400" aria-hidden="true" />
+                                                {/* ink-faint = 2.5:1, decoration only -- the number beside it is the content. */}
+                                                <Phone size={13} className="text-ink-faint" aria-hidden="true" />
                                                 {vendor.contact.primaryPhone}
                                             </span>
+
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { AcceptQuoteButton } from "@/src/features/bookings/components/AcceptQuoteButton";
 import { ok, fail, type ActionResult } from "@/src/lib/action";
 import { VendorData } from "@/src/services/models/vendor.model";
-import { formatDate, timeAgo } from "@/src/lib/datetime";
+import { formatDate, timeAgo, toIsoString } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { ArrowLeftRight, ChevronRight, FileText, Inbox, Store } from "lucide-react";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
@@ -20,7 +20,7 @@ function sanitizeForClient<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj, (key, value) => {
         // Convert Firestore Timestamps {_seconds, _nanoseconds} to ISO string
         if (value && typeof value === 'object' && '_seconds' in value) {
-            return new Date(value._seconds * 1000).toISOString();
+            return toIsoString(value);
         }
         return value;
     }));
@@ -140,7 +140,7 @@ export default async function QuoteManagementPage({
 
                 <div className="mb-8 flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-line bg-gray-50">
+                        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-line bg-muted">
                             <Store size={20} className="text-ink-soft" aria-hidden="true" />
                         </span>
                         <div>
@@ -212,7 +212,7 @@ export default async function QuoteManagementPage({
                                             {/* Decoration only — the name beside it says who spoke. */}
                                             <span
                                                 aria-hidden="true"
-                                                className={`mt-2 size-2 shrink-0 rounded-full ${isOrganizer ? "bg-gray-900" : "bg-gray-300"}`}
+                                                className={`mt-2 size-2 shrink-0 rounded-full ${isOrganizer ? "bg-ink" : "bg-muted-strong"}`}
                                             />
                                             <div>
                                                 <p className="text-xs font-medium text-ink">
@@ -269,7 +269,7 @@ export default async function QuoteManagementPage({
                                 key={tab.value}
                                 href={`?tab=${tab.value}`}
                                 className={`shrink-0 border-b-2 pb-3 text-sm font-medium transition ${isActive
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                                     }`}
                             >
@@ -321,23 +321,38 @@ export default async function QuoteManagementPage({
                                             href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
                                             className="flex items-center justify-between rounded-2xl border border-line bg-paper p-4 transition hover:border-line-loud"
                                         >
-                                            <span className="flex items-center gap-3">
-                                                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-gray-50">
+                                            <span className="flex min-w-0 items-center gap-3">
+                                                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-muted">
                                                     <Store size={16} className="text-ink-soft" aria-hidden="true" />
                                                 </span>
-                                                <span>
-                                                    <span className="block text-sm font-medium text-ink">
-                                                        Vendor {booking?.vendorId}
+                                                <span className="min-w-0">
+                                                    <span className="block truncate text-sm font-medium text-ink">
+                                                        {booking?.serviceType || `Vendor ${booking?.vendorId}`}
                                                     </span>
-                                                    <span className="mt-0.5 block text-xs text-ink-soft tabular-nums">
+                                                    {/* Service date, guest count and the age of the request were
+                                                        loaded on every one of these rows and none was shown — the
+                                                        row said only a vendor id and a number. */}
+                                                    <span className="mt-0.5 block truncate text-xs text-ink-soft tabular-nums">
                                                         {formatCurrency(bq?.totalAmount, booking?.payment?.currency || "PKR")}
+                                                        {booking?.requirements?.serviceDate
+                                                            ? ` · ${formatDate(booking.requirements.serviceDate)}`
+                                                            : ""}
+                                                        {booking?.requirements?.guestCount
+                                                            ? ` · ${booking.requirements.guestCount} guests`
+                                                            : ""}
+                                                    </span>
+                                                    <span className="mt-0.5 block text-2xs text-ink-faint">
+                                                        Requested {timeAgo(booking?.createdAt)}
+                                                        {booking?.quote?.negotiation?.length
+                                                            ? ` · ${booking.quote.negotiation.length} messages`
+                                                            : ""}
                                                     </span>
                                                 </span>
                                             </span>
                                             <span className="flex items-center gap-3">
                                                 {/* Real status, where the row used to claim "Pending response" for every quote. */}
                                                 <StatusBadge status={booking?.status} size="sm" />
-                                                <ChevronRight size={16} className="text-gray-400" aria-hidden="true" />
+                                                <ChevronRight size={16} className="text-ink-faint" aria-hidden="true" />
                                             </span>
                                         </Link>
                                     );

@@ -4,7 +4,7 @@ import ShareRow from "@/src/features/events/components/wizard/results/components
 import { EventService } from "@/src/services/event.service";
 import { formatDate } from "@/src/lib/datetime";
 import { buttonClass } from "@/src/lib/ui";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 
 export default async function PublishSuccessPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
   const { organizer_id, eventId } = await params;
@@ -28,7 +28,7 @@ export default async function PublishSuccessPage({ params }: { params: Promise<{
     // layout, which already shows the event's name, status and tabs. The old
     // "Event Published Successfully!" <h1> was the second one on the screen.
     <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-      <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+      <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-ink text-ink-invert" aria-hidden="true">
         <Check className="h-8 w-8" strokeWidth={3} />
       </span>
 
@@ -38,8 +38,8 @@ export default async function PublishSuccessPage({ params }: { params: Promise<{
       </p>
 
       <section className="mt-8 grid w-full grid-cols-2 gap-y-8 border-y border-line py-8 text-left sm:divide-x sm:divide-line">
-        <StatCard_dashboard title="Capacity" value={`${event.capacity.totalSeats}`} />
-        <StatCard_dashboard title="Date" value={formatDate(event.schedule.startDate)} />
+        <MetricTile label="Capacity" value={`${event.capacity.totalSeats}`} />
+        <MetricTile label="Date" value={formatDate(event.schedule.startDate)} />
       </section>
 
       <div className="mt-8 flex w-full flex-col gap-3">

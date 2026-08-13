@@ -13,10 +13,13 @@ import {
     FileText,
     Package,
     CalendarCheck,
+    LogOut,
     type LucideIcon,
 } from "lucide-react";
 import { NotificationBell } from "@/src/shared_components/NotificationBell";
 import { BrandMark } from "@/src/shared_components/ui/BrandMark";
+import { ThemeToggle } from "@/src/shared_components/ui/ThemeToggle";
+import { signOutAction } from "@/src/features/auth/actions/signOut.action";
 
 /**
  * Icons are keyed by name rather than passed as components, because the layouts
@@ -82,13 +85,19 @@ export function DashboardNav({
 
     const avatar = (onInk: boolean) => (
         <span
-            className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-full font-semibold ${
-                onInk ? "bg-white/15 text-white" : "bg-gray-200 text-gray-700"
+            className={`flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${
+                // A logo needs a light backing: most are dark marks on transparent, and
+                // on the near-black rail those vanish into it entirely.
+                logoUrl ? "bg-white" : onInk ? "bg-white/15 text-white" : "bg-muted-strong text-ink"
             }`}
         >
             {logoUrl ? (
+                // object-contain, not cover. A logo is usually wider than it is tall, so
+                // cropping it into a 32px circle keeps the middle and throws away the
+                // mark — which is why this rendered as an unreadable fragment. Contain
+                // plus a hair of padding shows the whole thing, small but recognisable.
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                <img src={logoUrl} alt="" className="h-full w-full object-contain p-0.5" />
             ) : (
                 <span aria-hidden="true">{initial}</span>
             )}
@@ -154,31 +163,55 @@ export function DashboardNav({
                     </ul>
                 </nav>
 
+                {/* Two rows, not one. The identity and three controls were competing for
+                    a 256px rail, which squeezed the name to nothing — and the name is
+                    often empty anyway, so the block read as a bare "View profile" with a
+                    blank line above it. The name gets the full width now, and the actions
+                    get a row where a fourth (sign out) fits without crowding. */}
                 <div className="shrink-0 border-t border-white/10 p-3">
-                    <div className="flex items-center gap-1 rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
+                    <div className="rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
                         <Link
                             href={`${basePath}/profile`}
-                            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="flex min-w-0 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-offset-2"
                         >
                             {avatar(true)}
                             <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-medium leading-tight">{name}</span>
-                                <span className="block text-2xs text-white/45">View profile</span>
+                                {name ? (
+                                    <span className="block truncate text-sm font-medium leading-tight">{name}</span>
+                                ) : null}
+                                <span className={`block truncate ${name ? "text-2xs text-white/45" : "text-sm font-medium"}`}>
+                                    View profile
+                                </span>
                             </span>
                         </Link>
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.07]">
-                            <NotificationBell
-                                href={`${basePath}/notifications`}
-                                unreadCount={unreadCount}
-                                onInk
-                            />
-                        </span>
+
+                        <div className="mt-1 flex items-center gap-1 border-t border-white/10 pt-1">
+                            <ThemeToggle onInk />
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.07]">
+                                <NotificationBell
+                                    href={`${basePath}/notifications`}
+                                    unreadCount={unreadCount}
+                                    onInk
+                                />
+                            </span>
+                            {/* A plain form, so signing out survives with JavaScript off and
+                                needs no client component. */}
+                            <form action={signOutAction} className="ml-auto">
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-2xs font-medium text-white/60 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+                                >
+                                    <LogOut className="h-[15px] w-[15px]" aria-hidden="true" />
+                                    Sign out
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </aside>
 
             {/* ── Topbar: below lg ────────────────────────────────────────── */}
-            <header className="border-b border-gray-200 bg-white lg:hidden">
+            <header className="border-b border-line bg-paper lg:hidden">
                 <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
                     <div className="flex items-center gap-3">
                         <button
@@ -187,20 +220,21 @@ export function DashboardNav({
                             aria-expanded={menuOpen}
                             aria-controls="dashboard-nav"
                             aria-label={menuOpen ? "Close menu" : "Open menu"}
-                            className="rounded-lg p-1.5 text-gray-600 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            className="rounded-lg p-1.5 text-ink-soft transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             {menuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
                         </button>
 
                         <Link
                             href={`${basePath}/dashboard`}
-                            className="text-xl font-bold text-gray-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            className="text-xl font-bold text-ink rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             Avoeline
                         </Link>
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-4">
+                        <ThemeToggle />
                         <NotificationBell href={`${basePath}/notifications`} unreadCount={unreadCount} />
 
                         {/* One link, one accessible name. Previously the avatar was an
@@ -211,9 +245,21 @@ export function DashboardNav({
                             className="flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             {avatar(false)}
-                            <span className="hidden font-medium text-gray-900 sm:inline">{name}</span>
+                            {name ? <span className="hidden font-medium text-ink sm:inline">{name}</span> : null}
                             <span className="sr-only">Your profile</span>
                         </Link>
+
+                        {/* The rail is hidden below lg, so without this there is no way to
+                            sign out on a phone at all. */}
+                        <form action={signOutAction}>
+                            <button
+                                type="submit"
+                                aria-label="Sign out"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-soft transition hover:bg-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            >
+                                <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -222,7 +268,7 @@ export function DashboardNav({
                     id="dashboard-nav"
                     aria-label="Main"
                     hidden={!menuOpen}
-                    className="border-t border-gray-200 px-4 pb-3"
+                    className="border-t border-line px-4 pb-3"
                 >
                     <ul className="flex flex-col">
                         {items.map(({ label, href, icon }) => {
@@ -238,7 +284,7 @@ export function DashboardNav({
                                         // pathname from an effect.
                                         onClick={() => setMenuOpen(false)}
                                         className={`flex items-center gap-3 rounded-lg px-2 py-3 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-                                            active ? "font-bold text-black" : "font-medium text-gray-500 hover:text-black"
+                                            active ? "font-bold text-black" : "font-medium text-ink-soft hover:text-black"
                                         }`}
                                     >
                                         {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}

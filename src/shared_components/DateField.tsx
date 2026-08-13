@@ -173,7 +173,7 @@ export function DateField({
                 onClick={openPicker}
                 disabled={disabled}
                 aria-label="Open calendar"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-gray-700 disabled:opacity-50"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition hover:text-ink disabled:opacity-50"
             >
                 <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path

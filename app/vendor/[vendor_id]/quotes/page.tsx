@@ -5,7 +5,7 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { BookingData } from "@/src/features/bookings/types";
 import { EventService } from "@/src/services/event.service";
 import Link from "next/link";
-import { formatDate, timeAgo } from "@/src/lib/datetime";
+import { formatDate, timeAgo, toIsoString } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -19,7 +19,7 @@ function sanitizeForClient<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj, (key, value) => {
         // Convert Firestore Timestamps {_seconds, _nanoseconds} to ISO string
         if (value && typeof value === 'object' && '_seconds' in value) {
-            return new Date(value._seconds * 1000).toISOString();
+            return toIsoString(value);
         }
         return value;
     }));
@@ -133,7 +133,7 @@ export default async function VendorQuoteManagementPage({
                             aria-current={activeTab === tab.id ? "page" : undefined}
                             className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
                                 activeTab === tab.id
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                         >
@@ -211,7 +211,7 @@ export default async function VendorQuoteManagementPage({
                                                         {/* Position, not colour, says who spoke: the label below
                                                             names them, so the dot is pure decoration. */}
                                                         <span
-                                                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`}
+                                                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isOrganizer ? 'bg-muted-strong' : 'bg-ink'}`}
                                                             aria-hidden="true"
                                                         />
                                                         <div>
@@ -285,15 +285,29 @@ export default async function VendorQuoteManagementPage({
                                             <li key={booking?.bookingId || i}>
                                                 <Link
                                                     href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
-                                                    className="flex items-center justify-between gap-3 py-4 transition hover:bg-gray-50"
+                                                    className="flex items-center justify-between gap-3 py-4 transition hover:bg-muted"
                                                 >
-                                                    <div>
-                                                        <p className="text-sm font-medium text-ink">Organizer {booking?.organizerId}</p>
-                                                        <p className="mt-0.5 text-xs text-ink-soft tabular-nums">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-medium text-ink">
+                                                            {booking?.serviceType || `Organizer ${booking?.organizerId}`}
+                                                        </p>
+                                                        <p className="mt-0.5 truncate text-xs text-ink-soft tabular-nums">
                                                             {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
                                                         </p>
+                                                        {/* Age of the request is the most useful thing in a quotes
+                                                            queue and it was loaded on every row and thrown away.
+                                                            Service date, location and guest count likewise. */}
+                                                        <p className="mt-0.5 truncate text-2xs text-ink-faint tabular-nums">
+                                                            {timeAgo(booking?.createdAt)}
+                                                            {booking?.requirements?.serviceDate
+                                                                ? ` · ${formatDate(booking.requirements.serviceDate)}`
+                                                                : ""}
+                                                            {booking?.requirements?.guestCount
+                                                                ? ` · ${booking.requirements.guestCount} guests`
+                                                                : ""}
+                                                        </p>
                                                     </div>
-                                                    <ChevronRight size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                    <ChevronRight size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 </Link>
                                             </li>
                                         );

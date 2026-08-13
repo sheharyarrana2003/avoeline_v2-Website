@@ -47,8 +47,8 @@ export function OrganizerReviewForm({
 
     return (
         <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-                How did <span className="font-semibold text-gray-900">{vendorName}</span> do? Your rating is
+            <p className="text-sm text-ink-soft">
+                How did <span className="font-semibold text-ink">{vendorName}</span> do? Your rating is
                 shown on their public profile.
             </p>
 
@@ -65,7 +65,7 @@ export function OrganizerReviewForm({
                             className="p-0.5 transition-transform hover:scale-110"
                         >
                             <svg aria-hidden="true"
-                                className={`h-7 w-7 ${star <= shown ? "fill-gray-900 text-gray-900" : "fill-gray-200 text-gray-200"}`}
+                                className={`h-7 w-7 ${star <= shown ? "fill-ink text-ink" : "fill-line text-gray-200"}`}
                                 viewBox="0 0 20 20"
                             >
                                 <path d={STAR_PATH} />
@@ -73,14 +73,14 @@ export function OrganizerReviewForm({
                         </button>
                     ))}
                 </div>
-                <span className="text-sm font-semibold text-gray-700">{rating ? `${rating}.0` : ""}</span>
+                <span className="text-sm font-semibold text-ink">{rating ? `${rating}.0` : ""}</span>
             </div>
 
             <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Headline (optional)"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                className="w-full rounded-xl border border-line bg-muted px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
             />
 
             <textarea
@@ -88,16 +88,16 @@ export function OrganizerReviewForm({
                 onChange={(e) => setComment(e.target.value)}
                 rows={4}
                 placeholder="What went well? Anything they could improve?"
-                className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                className="w-full resize-none rounded-xl border border-line bg-muted px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
             />
 
-            {error && <p className="text-sm font-medium text-gray-900">{error}</p>}
+            {error && <p className="text-sm font-medium text-ink">{error}</p>}
 
             <button
                 type="button"
                 onClick={submit}
                 disabled={saving}
-                className="rounded-full bg-black px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-60"
+                className="rounded-full bg-ink px-8 py-2.5 text-sm font-semibold text-ink-invert transition hover:bg-ink-soft disabled:opacity-60"
             >
                 {saving ? "Submitting…" : "Submit review"}
             </button>

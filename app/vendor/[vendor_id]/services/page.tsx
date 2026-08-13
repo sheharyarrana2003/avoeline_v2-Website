@@ -10,7 +10,11 @@ import { revalidatePath } from "next/cache";
 import { formatCurrency } from "@/src/lib/money";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 import { ImageOff, Package, Pencil, Plus, Trash2 } from "lucide-react";
 
 // --- Helper Functions ---
@@ -48,6 +52,7 @@ export default async function VendorServicesPage({
 
     // Get filter from URL
     const filter = (awaitedSearchParams?.filter as string) || 'all';
+    const query = normalizeQuery(awaitedSearchParams?.q);
 
     // Fetch vendor data
     const vendor = await EventVendorService.getVendorById(vendor_id);
@@ -58,24 +63,28 @@ export default async function VendorServicesPage({
     const services = vendor?.services || [];
     const serviceCategories = vendor?.serviceCategories || [];
 
-    // Build category tabs from vendor's serviceCategories
+    const matches = (s: Service) =>
+        matchesQuery(query, [s.name, s.description, s.category, s.inclusions, s.price]);
+
+    // Build category tabs from vendor's serviceCategories. Counts are over the
+    // search results, so a tab never claims more than the list can show.
     const categoryTabs = [
-        { id: 'all', label: 'All services', count: services.length },
+        { id: 'all', label: 'All services', count: services.filter(matches).length },
         ...serviceCategories.map((cat: string) => ({
             // Trimmed so the tab's href/filter value matches a trimmed service
             // category — legacy values carry a trailing newline.
             id: cat.trim().toLowerCase(),
             label: getCategoryLabel(cat),
-            count: getCategoryCount(services, cat),
+            count: services.filter((s: Service) => matches(s) && sameCategory(s.category, cat.trim().toLowerCase())).length,
         })),
     ];
 
     // Filter services by category. The "status" that used to be attached here was
     // `index < 2 ? active : inactive` — a badge computed from list position, not
     // from anything stored — and nothing rendered it anyway.
-    const displayServices = filter === 'all'
-        ? services
-        : services.filter((s: any) => sameCategory(s.category, filter));
+    const displayServices = services.filter(
+        (s: Service) => matches(s) && (filter === 'all' || sameCategory(s.category, filter))
+    );
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
@@ -91,22 +100,62 @@ export default async function VendorServicesPage({
                     }
                 />
 
-                <nav aria-label="Filter by category" className="mb-8 flex gap-6 overflow-x-auto border-b border-line">
-                    {categoryTabs.map((tab) => (
-                        <Link
-                            key={tab.id}
-                            href={`/vendor/${vendor_id}/services?filter=${tab.id}`}
-                            aria-current={filter === tab.id ? "page" : undefined}
-                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
-                                filter === tab.id
-                                    ? "border-gray-900 text-ink"
-                                    : "border-transparent text-ink-soft hover:text-ink"
-                            }`}
-                        >
-                            {tab.label} <span className="tabular-nums">({tab.count})</span>
-                        </Link>
-                    ))}
-                </nav>
+                {/* The whole vendor document is already in hand on this page and only
+                    `services` was read off it. A catalogue screen with no sense of how
+                    the catalogue is performing is the definition of bland. */}
+                <section className="mb-8 grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                    <MetricTile
+                        size="md"
+                        label="Services"
+                        value={String(services.length)}
+                        sublabel={`${serviceCategories.length} categories`}
+                    />
+                    {/* vendor.stats had a Bookings tile here. Nothing writes that object,
+                        so it read 0 for every vendor; this page does not load bookings, so
+                        rather than an extra read it shows what it does know. */}
+                    <MetricTile
+                        size="md"
+                        label="Rating"
+                        value={(vendor?.ratings?.totalReviews ?? 0) > 0 ? vendor.ratings.averageRating.toFixed(1) : "—"}
+                        sublabel={
+                            (vendor?.ratings?.totalReviews ?? 0) > 0
+                                ? `${vendor.ratings.totalReviews} review${vendor.ratings.totalReviews === 1 ? "" : "s"}`
+                                : "No reviews yet"
+                        }
+                    />
+                    <MetricTile
+                        size="md"
+                        label="Packages"
+                        value={String(vendor?.pricingPackages?.length ?? 0)}
+                        sublabel="Priced offerings"
+                    />
+                    <MetricTile
+                        size="md"
+                        label="With media"
+                        value={String(services.filter((s: Service) => s.images?.length || s.videos?.length).length)}
+                        sublabel="Listings with a photo or video"
+                    />
+                </section>
+
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`/vendor/${vendor_id}/services`}
+                        placeholder="Search services and inclusions"
+                        defaultValue={query}
+                        keep={{ filter: filter === "all" ? undefined : filter }}
+                    />
+                </div>
+
+                <FilterTabs
+                    tabs={categoryTabs.map((t) => ({
+                        label: t.label,
+                        value: t.id,
+                        count: t.count,
+                        href: `/vendor/${vendor_id}/services?filter=${t.id}${query ? `&q=${encodeURIComponent(query)}` : ""}`,
+                    }))}
+                    activeValue={filter}
+                    label="Filter by category"
+                />
 
                 {displayServices.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -120,7 +169,7 @@ export default async function VendorServicesPage({
                                     className="lift overflow-hidden rounded-2xl border border-line bg-paper shadow-xs"
                                 >
                                     {/* Image/Video Header */}
-                                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                                    <div className="relative h-48 overflow-hidden bg-muted">
                                         {serviceVideo ? (
                                             <video
                                                 src={serviceVideo}
@@ -139,7 +188,7 @@ export default async function VendorServicesPage({
                                                 className="h-full w-full object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                            <div className="flex h-full w-full items-center justify-center text-ink-faint">
                                                 {/* gray-400 = 2.5:1: decoration inside an aria-hidden
                                                     placeholder, never the only carrier of meaning. */}
                                                 <ImageOff size={28} aria-hidden="true" />
@@ -183,9 +232,37 @@ export default async function VendorServicesPage({
                                             {service.description || "No description yet."}
                                         </p>
 
-                                        <p className="mt-4 text-sm text-ink-soft">
-                                            <span className="font-medium text-ink tabular-nums">{formatCurrency(service.price)}</span>
-                                            <span className="tabular-nums"> / {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                        {/* inclusions is stored on every service and was
+                                            rendered on no screen in the product — it is
+                                            the part an organizer actually compares. */}
+                                        {service.inclusions?.length ? (
+                                            <ul className="mt-3 flex flex-wrap gap-1.5">
+                                                {service.inclusions.slice(0, 3).map((inc: string) => (
+                                                    <li
+                                                        key={inc}
+                                                        className="rounded-full border border-line bg-muted px-2 py-0.5 text-2xs text-ink-soft"
+                                                    >
+                                                        {inc}
+                                                    </li>
+                                                ))}
+                                                {service.inclusions.length > 3 ? (
+                                                    <li className="px-1 py-0.5 text-2xs text-ink-faint">
+                                                        +{service.inclusions.length - 3} more
+                                                    </li>
+                                                ) : null}
+                                            </ul>
+                                        ) : null}
+
+                                        <p className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 text-sm text-ink-soft">
+                                            <span>
+                                                <span className="font-medium text-ink tabular-nums">{formatCurrency(service.price)}</span>
+                                                <span className="tabular-nums"> / {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                            </span>
+                                            {(service.images?.length ?? 0) + (service.videos?.length ?? 0) > 0 ? (
+                                                <span className="shrink-0 text-2xs text-ink-faint tabular-nums">
+                                                    {(service.images?.length ?? 0) + (service.videos?.length ?? 0)} media
+                                                </span>
+                                            ) : null}
                                         </p>
                                     </div>
                                 </div>
@@ -195,7 +272,7 @@ export default async function VendorServicesPage({
                 ) : (
                     <EmptyState
                         icon={<Package size={26} />}
-                        title={filter === 'all' ? "No services yet" : "Nothing in this category"}
+                        title={query ? `Nothing matches \u201c${query}\u201d` : filter === 'all' ? "No services yet" : "Nothing in this category"}
                         description={
                             filter === 'all'
                                 ? "Organizers can't request a quote for a service you haven't listed. Add your first one to start receiving requests."

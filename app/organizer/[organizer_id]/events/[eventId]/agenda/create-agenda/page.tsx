@@ -11,7 +11,7 @@ export default async function CreateAgendaPage({
     const all_speakers : Speaker[] = await SpeakerService.getAllSpeakers(eventId);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-md p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto">
             <div className="relative w-full max-w-4xl shadow-2xl rounded-2xl drop-shadow-2xl">
                 <CreateAgendaForm eventId={eventId} activeSpeakers={all_speakers} organizerId={organizer_id} />
             </div>

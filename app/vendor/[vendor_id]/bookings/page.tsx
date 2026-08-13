@@ -7,13 +7,18 @@ import { EventService } from "@/src/services/event.service";
 import { OrganizerService } from "@/src/services/organizer.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatDate, parseScheduleDateTime } from "@/src/lib/datetime";
+import { formatDate, parseScheduleDateTime, toDate } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Card } from "@/src/shared_components/ui/Card";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
+import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 import {
     Building2,
     CalendarCheck,
@@ -21,7 +26,6 @@ import {
     CalendarClock,
     Camera,
     ClipboardList,
-    MapPin,
     Mic,
     Music,
     Package,
@@ -123,10 +127,15 @@ export default async function VendorBookingsPage({
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    const activeStatuses = ['confirmed', 'in_progress'];
+    // quote_accepted belongs here. The app can only ever write three booking
+    // statuses — quote_requested, quote_sent and quote_accepted — and this list
+    // contained none of them, so the vendor's bookings screen could not show a
+    // single row however much work they had won. An organizer accepting a quote is
+    // the moment a booking exists; nothing downstream sets 'confirmed'.
+    const activeStatuses = ['quote_accepted', 'confirmed', 'in_progress'];
 
     const allBookings = raw_bookings.filter((b: any) =>
-        ['confirmed', 'in_progress', 'completed', 'cancelled'].includes(b?.status?.toLowerCase())
+        ['quote_accepted', 'confirmed', 'in_progress', 'completed', 'cancelled'].includes(b?.status?.toLowerCase())
     );
 
     const activeBookings = allBookings.filter((b: any) =>
@@ -141,28 +150,130 @@ export default async function VendorBookingsPage({
 
     const completedThisMonth = allBookings.filter((b: any) => {
         if (b?.status?.toLowerCase() !== 'completed') return false;
-        const completedDate = b?.completedAt ? new Date(b.completedAt) : null;
+        // toDate: getAllBookingsOfVendor skips mapToBooking, so completedAt is a raw
+        // Timestamp and new Date() on it silently yields Invalid Date.
+        const completedDate = toDate(b?.completedAt);
         return completedDate &&
                completedDate.getMonth() === now.getMonth() &&
                completedDate.getFullYear() === now.getFullYear();
     });
 
+    // Declared before every use. `displayBookings` below called this while it was
+    // still in the temporal dead zone, which threw at render and dropped the whole
+    // route to the error boundary. tsc did not catch it: the call sits inside a
+    // callback, so it is a deferred reference as far as the checker is concerned,
+    // and only running the page surfaces it.
+    const query = normalizeQuery(awaitedSearchParams?.q);
+    const matches = (b: any) =>
+        matchesQuery(query, [
+            getEventTitle(b?.eventId),
+            getOrganizerName(b?.organizerId),
+            b?.serviceType,
+            b?.requirements?.location,
+            b?.status,
+        ]);
+
     // Apply tab filter
-    const displayBookings = (filter === 'all'
-        ? allBookings
-        : allBookings.filter((b: any) => b?.status?.toLowerCase() === filter)
-    ).sort((a: any, b: any) => {
+    const displayBookings = allBookings
+        .filter((b: any) => matches(b) && (filter === 'all' || b?.status?.toLowerCase() === filter))
+        .sort((a: any, b: any) => {
         const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
         const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
         return dateA - dateB;
     });
 
+    const countOf = (id: string) =>
+        allBookings.filter((b: any) => matches(b) && (id === "all" || b?.status?.toLowerCase() === id)).length;
+
     const tabs = [
-        { id: 'all', label: 'All' },
-        { id: 'confirmed', label: 'Confirmed' },
-        { id: 'in_progress', label: 'In progress' },
-        { id: 'completed', label: 'Completed' },
-        { id: 'cancelled', label: 'Cancelled' },
+        { value: "all", label: "All" },
+        { value: "quote_accepted", label: "Accepted" },
+        { value: "confirmed", label: "Confirmed" },
+        { value: "in_progress", label: "In progress" },
+        { value: "completed", label: "Completed" },
+        { value: "cancelled", label: "Cancelled" },
+    ].map((t) => ({ ...t, href: `/vendor/${vendor_id}/bookings?filter=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ""}`, count: countOf(t.value) }));
+
+    // Every field below was already on the booking documents this page fetched and
+    // none of them reached the card: the guest count, the time window, what the
+    // vendor actually receives after commission, and whether the contract is signed.
+    const columns: Column<any>[] = [
+        {
+            key: "event",
+            header: "Event",
+            width: "w-[22%] max-w-0",
+            cell: (b) => (
+                <Link
+                    href={`/vendor/${vendor_id}/bookings/${b?.bookingId}`}
+                    className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                    <CellStack
+                        primary={<span className="group-hover/row:underline">{getEventTitle(b?.eventId)}</span>}
+                        secondary={getOrganizerName(b?.organizerId)}
+                    />
+                </Link>
+            ),
+        },
+        {
+            key: "service",
+            header: "Service",
+            cell: (b) => {
+                const ServiceIcon = getServiceIcon(b?.serviceType || "");
+                return (
+                    <span className="flex items-center gap-2">
+                        <ServiceIcon size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
+                        {getServiceName(b?.serviceType || "")}
+                    </span>
+                );
+            },
+        },
+        {
+            key: "when",
+            header: "When",
+            cell: (b) => (
+                <CellStack
+                    primary={<span className="font-normal tabular-nums">{formatDate(b?.requirements?.serviceDate)}</span>}
+                    secondary={
+                        b?.requirements?.startTime
+                            ? `${b.requirements.startTime}${b?.requirements?.endTime ? `–${b.requirements.endTime}` : ""}`
+                            : undefined
+                    }
+                />
+            ),
+        },
+        {
+            key: "where",
+            header: "Where",
+            width: "w-[16%] max-w-0",
+            cell: (b) => (
+                <CellStack
+                    primary={<span className="font-normal">{b?.requirements?.location || "Location TBD"}</span>}
+                    secondary={b?.requirements?.guestCount ? `${b.requirements.guestCount} guests` : undefined}
+                />
+            ),
+        },
+        { key: "status", header: "Status", cell: (b) => <StatusBadge status={b?.status || "unknown"} size="sm" /> },
+        {
+            key: "amount",
+            header: "Total",
+            align: "right",
+            cell: (b) =>
+                formatCurrency(
+                    b?.quote?.vendorQuote?.totalAmount || b?.payment?.totalAmount || 0,
+                    b?.payment?.currency || "PKR"
+                ),
+        },
+        {
+            key: "receives",
+            header: "You receive",
+            align: "right",
+            cell: (b) =>
+                b?.payment?.commission?.vendorReceives ? (
+                    formatCurrency(b.payment.commission.vendorReceives, b?.payment?.currency || "PKR")
+                ) : (
+                    <span className="text-ink-faint">—</span>
+                ),
+        },
     ];
 
     return (
@@ -173,97 +284,68 @@ export default async function VendorBookingsPage({
                     description="Every service you have been confirmed for, in service-date order."
                 />
 
-                <section className="grid grid-cols-2 gap-y-8 border-b border-line py-8 sm:grid-cols-3 sm:divide-x sm:divide-line">
-                    <StatCard_dashboard title="Active" value={String(activeBookings.length)} icon={<CalendarCheck size={14} />} />
-                    <StatCard_dashboard title="This Week" value={String(upcomingThisWeek.length)} icon={<CalendarClock size={14} />} />
-                    <StatCard_dashboard title="Completed This Month" value={String(completedThisMonth.length)} icon={<CalendarDays size={14} />} />
+                <section className="mb-8 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-3">
+                    <MetricTile
+                        label="Active"
+                        value={String(activeBookings.length)}
+                        icon={<CalendarCheck size={14} />}
+                        sublabel="Confirmed or in progress"
+                    />
+                    <MetricTile
+                        label="This week"
+                        value={String(upcomingThisWeek.length)}
+                        icon={<CalendarClock size={14} />}
+                        sublabel="Service dates in the next 7 days"
+                    />
+                    <MetricTile
+                        label="Completed this month"
+                        value={String(completedThisMonth.length)}
+                        icon={<CalendarDays size={14} />}
+                        sublabel={`${allBookings.length} bookings all time`}
+                    />
                 </section>
 
-                {/* Tabs, not pills: the same treatment the quotes page uses, so a
-                    filter never looks like a button that submits something. */}
-                <nav aria-label="Filter bookings" className="mb-8 flex gap-6 overflow-x-auto border-b border-line">
-                    {tabs.map((tab) => (
-                        <Link
-                            key={tab.id}
-                            href={`/vendor/${vendor_id}/bookings?filter=${tab.id}`}
-                            aria-current={filter === tab.id ? "page" : undefined}
-                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 pt-6 text-sm font-medium transition ${
-                                filter === tab.id
-                                    ? "border-gray-900 text-ink"
-                                    : "border-transparent text-ink-soft hover:text-ink"
-                            }`}
-                        >
-                            {tab.label}
-                        </Link>
-                    ))}
-                </nav>
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`/vendor/${vendor_id}/bookings`}
+                        placeholder="Search event, organizer, service"
+                        defaultValue={query}
+                        keep={{ filter: filter === "all" ? undefined : filter }}
+                    />
+                </div>
 
-                {displayBookings.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {displayBookings.map((booking: any) => {
-                            const status = booking?.status || 'unknown';
-                            const serviceType = booking?.serviceType || '';
-                            const ServiceIcon = getServiceIcon(serviceType);
-                            const totalAmount = booking?.quote?.vendorQuote?.totalAmount || booking?.payment?.totalAmount || 0;
-                            const currency = booking?.payment?.currency || 'PKR';
+                <FilterTabs tabs={tabs} activeValue={filter} label="Filter bookings" />
 
-                            return (
-                                <div key={booking?.bookingId} className="lift flex flex-col rounded-2xl border border-line bg-paper p-5 shadow-xs">
-                                    <div className="mb-4 flex items-center justify-between gap-2">
-                                        <StatusBadge status={status} size="sm" />
-                                        <span className="text-sm font-medium text-ink tabular-nums">{formatCurrency(totalAmount, currency)}</span>
-                                    </div>
-
-                                    <h2 className="font-display text-lg text-ink">{getEventTitle(booking?.eventId)}</h2>
-                                    <p className="mt-1 text-xs text-ink-soft">{getOrganizerName(booking?.organizerId)}</p>
-
-                                    <dl className="mt-4 space-y-2 text-sm text-ink-soft">
-                                        <div className="flex items-center gap-2">
-                                            {/* gray-400 = 2.5:1, decoration only — every row has a text value. */}
-                                            <ServiceIcon size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
-                                            <dt className="sr-only">Service</dt>
-                                            <dd>{getServiceName(serviceType)}</dd>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <CalendarDays size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
-                                            <dt className="sr-only">Service date</dt>
-                                            <dd className="tabular-nums">{formatDate(booking?.requirements?.serviceDate)}</dd>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <MapPin size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
-                                            <dt className="sr-only">Location</dt>
-                                            <dd>{booking?.requirements?.location || 'Location TBD'}</dd>
-                                        </div>
-                                    </dl>
-
-                                    {/* Was a "Prepare" primary CTA pointing at /bookings/[id]/prepare,
-                                        a route that has never existed — every card's main action 404'd. */}
-                                    <Link
-                                        href={`/vendor/${vendor_id}/bookings/${booking?.bookingId}`}
-                                        className={buttonClass("secondary", "md", "mt-5 w-full")}
-                                    >
-                                        View booking
-                                    </Link>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <EmptyState
-                        icon={<CalendarDays size={26} />}
-                        title={filter === 'all' ? "No bookings yet" : `No ${tabs.find((t) => t.id === filter)?.label.toLowerCase()} bookings`}
-                        description={
-                            filter === 'all'
-                                ? "A quote becomes a booking once an organizer accepts it. Responding to quote requests quickly is what moves them along."
-                                : "Nothing in this state right now. Try another filter."
-                        }
-                        action={
-                            <Link href={`/vendor/${vendor_id}/quotes`} className={buttonClass("primary", "md")}>
-                                Go to quotes
-                            </Link>
+                <Card>
+                    <DataTable
+                        caption={`${filter === "all" ? "All" : filter} bookings, in service-date order`}
+                        rows={displayBookings}
+                        columns={columns}
+                        getKey={(b: any, i) => b?.bookingId || String(i)}
+                        empty={
+                            <div className="p-6">
+                                <EmptyState
+                                    icon={<CalendarDays size={26} />}
+                                    title={
+                                        filter === "all"
+                                            ? "No bookings yet"
+                                            : `No ${tabs.find((t) => t.value === filter)?.label.toLowerCase()} bookings`
+                                    }
+                                    description={
+                                        filter === "all"
+                                            ? "A quote becomes a booking once an organizer accepts it. Responding to quote requests quickly is what moves them along."
+                                            : "Nothing in this state right now. Try another filter."
+                                    }
+                                    action={
+                                        <Link href={`/vendor/${vendor_id}/quotes`} className={buttonClass("primary", "md")}>
+                                            Go to quotes
+                                        </Link>
+                                    }
+                                />
+                            </div>
                         }
                     />
-                )}
+                </Card>
             </div>
         </div>
     );

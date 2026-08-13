@@ -1,50 +1,208 @@
 import { EventService } from "@/src/services/event.service";
-import { EventModel, EventStatus } from "@/src/services/models/event.model";
-import { Calendar, CalendarPlus, Eye, MapPin, Plus } from "lucide-react";
+import { AnalyticsService } from "@/src/services/anaylService";
+import { EventModel } from "@/src/services/models/event.model";
+import { eventLifecycle, type EventLifecycle } from "@/src/lib/eventState";
+import { CalendarPlus, Eye, Plus } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from "@/src/lib/datetime";
+import { formatDate, formatTime } from "@/src/lib/datetime";
+import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { Card } from "@/src/shared_components/ui/Card";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
+import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
+import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { buttonClass } from "@/src/lib/ui";
+import { SearchField } from "@/src/shared_components/ui/SearchField";
+import { matchesQuery, normalizeQuery } from "@/src/lib/search";
 
-export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string }> }) {
+export default async function MyEventsPage({ params, searchParams }: { params: Promise<{ organizer_id: string }>, searchParams: Promise<{ status?: string; q?: string }> }) {
     const resolvedParams = await searchParams;
     const currentTab = resolvedParams.status || "all";
+    const query = normalizeQuery(resolvedParams.q);
 
     const organizer_id :string = (await params).organizer_id;
     const base_address :string = `/organizer/${organizer_id}`
-    const organizerEvents : EventModel[]= await EventService.getAllEventsByOrganizer(organizer_id);
 
-    const events = organizerEvents.filter((event) => {
-        if (currentTab === "all") {
-            return true;
-        }
+    // Registrations, check-ins and revenue come from the registrations collection,
+    // not from event.analytics.*. Nothing in this codebase writes that block — grep
+    // it, there is not one update against it — so its counters are whatever seeding
+    // left behind. Reading them here made this list disagree with each event's own
+    // detail page, which has always derived these live.
+    const [organizerEvents, tallies] = await Promise.all([
+        EventService.getAllEventsByOrganizer(organizer_id) as Promise<EventModel[]>,
+        AnalyticsService.getEventTallies(organizer_id),
+    ]);
+    const tallyFor = (id: string) => tallies.get(id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
 
-        if (currentTab === "published") {
-            return event.status === "published" ;
-        }
+    // One instant for the whole page, so every event is placed against the same
+    // clock rather than drifting across the loop.
+    const now = new Date();
+    const lifecycleOf = new Map(organizerEvents.map((e) => [e.id, eventLifecycle(e.status, e.schedule, now)]));
 
-        return event.status === currentTab;
-    });
+    const events = organizerEvents.filter(
+        (event) =>
+            (currentTab === "all" || lifecycleOf.get(event.id) === currentTab) &&
+            matchesQuery(query, [
+                event.title,
+                event.category,
+                event.eventType,
+                event.location?.venueName,
+                event.location?.city,
+            ])
+    );
+
+    // One entry per member of EventStatus, derived from the union rather than typed
+    // out. `registration_open` had no tab at all: it is a legal status, so such an
+    // event was counted in All Events and reachable from no tab, and the per-status
+    // counts did not add up to the total. Deriving the list means a status added to
+    // the union cannot silently lose its tab again.
+    //
+    // The `published` branch of the old filter was also dead — it compared status to
+    // "published" where the line below it already compared status to currentTab.
+    // Tab counts are over the SEARCH results, not the whole collection — a tab
+    // reading "4" beside a single visible row is worse than no count.
+    const searchable = organizerEvents.filter((event) =>
+        matchesQuery(query, [
+            event.title,
+            event.category,
+            event.eventType,
+            event.location?.venueName,
+            event.location?.city,
+        ])
+    );
+
+    const STATUS_TABS: { label: string; value: EventLifecycle }[] = [
+        { label: "Draft", value: "draft" },
+        { label: "Upcoming", value: "upcoming" },
+        { label: "Ongoing", value: "ongoing" },
+        { label: "Completed", value: "completed" },
+        { label: "Unscheduled", value: "published" },
+        { label: "Cancelled", value: "cancelled" },
+    ];
 
     const tabs = [
-        { label: "All Events", value: "all", count: organizerEvents.length, href: `${base_address}/events` },
-        { label: "Draft", value: "draft", count: countByStatus(organizerEvents, "draft"), href: `${base_address}/events?status=draft` },
+        { label: "All Events", value: "all", count: searchable.length, href: `${base_address}/events${query ? `?q=${encodeURIComponent(query)}` : ""}` },
+        ...STATUS_TABS.map((t) => ({
+            label: t.label,
+            value: t.value,
+            count: searchable.filter((e) => lifecycleOf.get(e.id) === t.value).length,
+            href: `${base_address}/events?status=${t.value}${query ? `&q=${encodeURIComponent(query)}` : ""}`,
+        })),
+    ];
+
+    const columns: Column<EventModel>[] = [
         {
-            label: "Published",
-            value: "published",
-            count: countByStatus(organizerEvents, "published"),
-            href: `${base_address}/events?status=published`
+            key: "event",
+            header: "Event",
+            // Capped, not min-width. Without a ceiling the longest title stretches this
+            // column past 600px and pushes revenue and the actions off the table.
+            width: "w-[34%] max-w-0",
+            cell: (e) => (
+                <Link href={`${base_address}/events/${e.id}`} className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <CellStack
+                        primary={<span className="group-hover/row:underline">{e.title}</span>}
+                        // category and eventType only. `format` was here too and it read
+                        // as a contradiction: a webinar whose Venue column says "Online"
+                        // was labelled "physical", because format comes from the wizard's
+                        // locationType picker, which defaults to physical and is easy to
+                        // leave untouched. The Venue column already says whether an event
+                        // is online, so format beside eventType added nothing but doubt.
+                        secondary={[e.category, e.eventType].filter(Boolean).join(" · ")}
+                    />
+                </Link>
+            ),
         },
-        { label: "Ongoing", value: "ongoing", count: countByStatus(organizerEvents, "ongoing"), href: `${base_address}/events?status=ongoing` },
-        { label: "Completed", value: "completed", count: countByStatus(organizerEvents, "completed"), href: `${base_address}/events?status=completed` },
-        { label: "Cancelled", value: "cancelled", count: countByStatus(organizerEvents, "cancelled"), href: `${base_address}/events?status=cancelled` },
+        {
+            key: "status",
+            header: "Status",
+            // The derived state, not the stored one: the stored value is written once at
+            // creation and never again, so a finished event would read "Published".
+            cell: (e) => <StatusBadge status={lifecycleOf.get(e.id)} size="sm" />,
+        },
+        {
+            key: "date",
+            header: "Date",
+            cell: (e) => {
+                const date = formatDate(e.schedule?.startDate);
+                // A bare "10:00 AM" under an em dash is noise: a draft with no start date
+                // still carries a default start time, and a time with no day means nothing.
+                const showTime = date !== "—" && e.schedule?.startTime;
+                return (
+                    <CellStack
+                        primary={<span className="whitespace-nowrap font-normal tabular-nums">{date}</span>}
+                        secondary={showTime ? formatTime(e.schedule.startTime) : undefined}
+                    />
+                );
+            },
+        },
+        {
+            key: "venue",
+            header: "Venue",
+            // w-[14%] is load-bearing: max-w-0 on its own resolves the column to zero
+            // width, which clipped the venue to a single letter and let the next
+            // header slide on top of it.
+            width: "w-[14%] max-w-0",
+            cell: (e) => {
+                // Falls back to the city as the primary line rather than printing an em
+                // dash above it — "— / Lahore" reads as missing data twice over.
+                const venue = e.location?.venueName;
+                return (
+                    <CellStack
+                        primary={<span className="font-normal">{venue || e.location?.city || "—"}</span>}
+                        secondary={venue ? e.location?.city : undefined}
+                    />
+                );
+            },
+        },
+        {
+            key: "registered",
+            header: "Registered",
+            cell: (e) => (
+                <Meter
+                    compact
+                    label={`Registered for ${e.title}`}
+                    value={tallyFor(e.id).registrations}
+                    max={e.capacity?.totalSeats ?? 0}
+                />
+            ),
+        },
+        {
+            key: "checkedIn",
+            header: "Checked in",
+            align: "right",
+            cell: (e) => tallyFor(e.id).checkedIn,
+        },
+        {
+            key: "revenue",
+            header: "Revenue",
+            align: "right",
+            cell: (e) => formatCurrency(tallyFor(e.id).revenue, e.pricing?.currency, "—"),
+        },
+        {
+            key: "actions",
+            header: "",
+            align: "right",
+            cell: (e) => (
+                <Link
+                    href={`${base_address}/events/${e.id}`}
+                    className={buttonClass("ghost", "sm")}
+                    aria-label={`View ${e.title}`}
+                >
+                    <Eye size={16} aria-hidden="true" />
+                </Link>
+            ),
+        },
     ];
 
     return (
         <div className="px-4 py-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+            {/* Wider than the usual 7xl: this table carries nine columns and 7xl left
+                ~50px of viewport unused on either side while the cells were squeezed. */}
+            <div className="mx-auto max-w-[100rem]">
+                <Breadcrumbs items={[{ label: "Dashboard", href: `${base_address}/dashboard` }, { label: "Events" }]} />
                 <PageHeader
                     title="My Events"
                     description={`${organizerEvents.length} total events`}
@@ -56,124 +214,57 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                     }
                 />
 
-                <nav className="flex gap-7 overflow-x-auto border-b border-line" aria-label="Event status filters">
-                    {tabs.map((tab) => {
-                        const isActive = currentTab === tab.value;
+                <div className="mb-4 flex justify-end">
+                    <SearchField
+                        action={`${base_address}/events`}
+                        placeholder="Search events, venue, category"
+                        defaultValue={query}
+                        keep={{ status: currentTab === "all" ? undefined : currentTab }}
+                    />
+                </div>
 
-                        return (
-                            <Link
-                                key={tab.value}
-                                href={tab.href}
-                                className={`shrink-0 border-b-2 pb-3 text-sm font-medium transition ${isActive
-                                        ? "border-gray-900 text-ink"
-                                        : "border-transparent text-ink-soft hover:text-ink"
-                                    }`}
-                            >
-                                {tab.label} <span className="tabular-nums">({tab.count})</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <FilterTabs tabs={tabs} activeValue={currentTab} label="Event status filters" />
 
-                <section className="pt-8">
-                    <h2 className="mb-5 font-display text-xl text-ink">
-                        {currentTab === "all" ? "All Events" : `${toTitleCase(currentTab)} Events`}
-                    </h2>
-
-                    {events.length === 0 ? (
-                        <EmptyState
-                            icon={<CalendarPlus size={28} />}
-                            title={currentTab === "all" ? "No events yet" : `No ${toTitleCase(currentTab).toLowerCase()} events`}
-                            description={
-                                currentTab === "all"
-                                    ? "Create your first event to start taking registrations."
-                                    : "Nothing sits in this status right now. Try another filter, or create an event."
-                            }
-                            action={
-                                <Link href={`${base_address}/events/create`} className={buttonClass()}>
-                                    <Plus size={16} aria-hidden="true" />
-                                    Create New Event
-                                </Link>
-                            }
-                        />
-                    ) : (
-                        <ul className="space-y-4">
-                            {events.map((event) => (
-                                <li
-                                    key={event.id}
-                                    className="rounded-2xl border border-line bg-paper p-5 transition hover:border-line-loud"
-                                >
-                                    <article className="flex items-center gap-5">
-                                        <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-sm font-semibold uppercase text-ink-invert">
-                                            {event.category.slice(0, 2)}
-                                        </div>
-
-                                        <div className="min-w-0 flex-1">
-                                            <div className="mb-2 flex flex-wrap items-center gap-2">
-                                                <span className="rounded-md bg-gray-100 px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
-                                                    {event.category}
-                                                </span>
-                                                <StatusBadge status={event.status} size="sm" />
-                                            </div>
-                                            <h3 className="truncate text-base font-semibold text-ink">{event.title}</h3>
-                                            <p className="mt-1 line-clamp-1 text-sm text-ink-soft">{event.description}</p>
-                                        </div>
-
-                                        <div className="shrink-0 space-y-2 text-sm text-ink-soft">
-                                            <p className="flex items-center gap-2 tabular-nums">
-                                                {/* gray-400 = 2.5:1, decoration only — the date beside it carries the meaning. */}
-                                                <Calendar size={16} className="text-gray-400" aria-hidden="true" />
-                                                {formatDate(event.schedule.startDate)}
-                                            </p>
-                                            <p className="flex items-center gap-2">
-                                                <MapPin size={16} className="text-gray-400" aria-hidden="true" />
-                                                {event.location.venueName}
-                                            </p>
-                                        </div>
-
-                                        <div className="w-[200px] shrink-0">
-                                            <div className="mb-2 flex items-center justify-between gap-4 text-sm">
-                                                <span className="font-medium text-ink tabular-nums">
-                                                    {event.analytics.registrations}/{event.capacity.totalSeats}
-                                                </span>
-                                                <span className="text-ink-soft">registered</span>
-                                            </div>
-                                            <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-                                                <div
-                                                    className="h-full rounded-full bg-gray-900"
-                                                    style={{ width: `${getProgress(event)}%` }}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <Link
-                                            href={`${base_address}/events/${event.id}`}
-                                            className={buttonClass("ghost", "sm", "shrink-0")}
-                                            aria-label={`View ${event.title}`}
-                                        >
-                                            <Eye size={18} aria-hidden="true" />
+                {/* A table, where this was a stack of 132px cards showing six facts
+                    each. EventModel carries a whole analytics block — views, check-ins,
+                    revenue, completion rate — and the cards rendered exactly one of
+                    them. Nothing below is a new read; it is the same document. */}
+                <Card>
+                    <DataTable
+                        caption={currentTab === "all" ? "All events" : `${toTitleCase(currentTab)} events`}
+                        rows={events}
+                        columns={columns}
+                        getKey={(e) => e.id}
+                        empty={
+                            <div className="p-6">
+                                <EmptyState
+                                    icon={<CalendarPlus size={28} />}
+                                    title={
+                                        query
+                                            ? `Nothing matches “${query}”`
+                                            : currentTab === "all"
+                                              ? "No events yet"
+                                              : `No ${toTitleCase(currentTab).toLowerCase()} events`
+                                    }
+                                    description={
+                                        currentTab === "all"
+                                            ? "Create your first event to start taking registrations."
+                                            : "Nothing sits in this status right now. Try another filter, or create an event."
+                                    }
+                                    action={
+                                        <Link href={`${base_address}/events/create`} className={buttonClass()}>
+                                            <Plus size={16} aria-hidden="true" />
+                                            Create New Event
                                         </Link>
-                                    </article>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </section>
+                                    }
+                                />
+                            </div>
+                        }
+                    />
+                </Card>
             </div>
         </div>
     );
-}
-
-function countByStatus(events: EventModel[], status: EventStatus) {
-    return events.filter((event) => event.status === status).length;
-}
-
-function getProgress(event: EventModel) {
-    if (event.capacity.totalSeats <= 0) {
-        return 0;
-    }
-
-    return Math.min(100, Math.round((event.analytics.registrations / event.capacity.totalSeats) * 100));
 }
 
 function toTitleCase(value: string) {

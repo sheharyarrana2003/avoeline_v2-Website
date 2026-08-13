@@ -12,9 +12,11 @@ import { StarRating } from "@/src/shared_components/ui/StarRating";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { buttonClass } from "@/src/lib/ui";
-import { Check, CalendarDays, ClipboardList, FileText, Files, Star, Wallet } from "lucide-react";
-import type { ReactNode } from "react";
+import { Check, CalendarDays, FileText, Files, Users, Wallet } from "lucide-react";
 
 export default async function BookingDetailsPage({ params }: { params: Promise<{ organizer_id: string, booking_id: string }> }) {
     const { organizer_id, booking_id } = await params;
@@ -39,16 +41,67 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <Breadcrumbs
+                items={[
+                    { label: "Dashboard", href: `/organizer/${organizer_id}/dashboard` },
+                    { label: "Vendor bookings", href: `/organizer/${organizer_id}/all-vendors` },
+                    { label: vendor?.businessName || "Booking" },
+                ]}
+            />
+
             <PageHeader
                 title={vendor?.businessName || "Vendor booking"}
                 description={event?.title}
                 actions={<StatusBadge status={raw_booking?.status} />}
             />
 
+            {/* The four facts you open this page for. Agreed budget was buried in the
+                right rail below the fold, and guest count and service date were
+                Fields in the middle of a six-item grid — all three are decisions,
+                not details. */}
+            <section className="mb-10 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                <MetricTile
+                    label="Agreed budget"
+                    value={formatCurrency(raw_booking?.payment?.totalAmount || 0, currency)}
+                    icon={<Wallet size={14} />}
+                    sublabel={
+                        raw_booking?.payment?.commission?.platformCommission
+                            ? `Includes ${formatCurrency(raw_booking.payment.commission.platformCommission, currency)} commission`
+                            : undefined
+                    }
+                />
+                <MetricTile
+                    label="Vendor receives"
+                    value={formatCurrency(raw_booking?.payment?.commission?.vendorReceives || 0, currency)}
+                    icon={<Wallet size={14} />}
+                    sublabel={
+                        raw_booking?.payment?.commission?.platformCommissionPercentage
+                            ? `After ${raw_booking.payment.commission.platformCommissionPercentage}% platform fee`
+                            : undefined
+                    }
+                />
+                <MetricTile
+                    label="Service date"
+                    value={formatDate(raw_booking?.requirements?.serviceDate)}
+                    icon={<CalendarDays size={14} />}
+                    sublabel={
+                        raw_booking?.requirements?.startTime
+                            ? `${formatTime(raw_booking.requirements.startTime)} – ${formatTime(raw_booking?.requirements?.endTime)}`
+                            : undefined
+                    }
+                />
+                <MetricTile
+                    label="Guests"
+                    value={`${raw_booking?.requirements?.guestCount ?? 0}`}
+                    icon={<Users size={14} />}
+                    sublabel={raw_booking?.requirements?.location || "Location not specified"}
+                />
+            </section>
+
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-                <div className="space-y-10 lg:col-span-7 xl:col-span-8">
-                    <section>
-                        <Heading icon={<CalendarDays size={16} />}>Booking journey</Heading>
+                <div className="space-y-6 lg:col-span-7 xl:col-span-8">
+                    <Card title="Booking journey">
+                      <CardBody>
 
                         {raw_booking?.statusHistory?.length ? (
                             <ol className="mb-6 space-y-6 border-l border-line pl-6">
@@ -57,7 +110,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                         {/* Every entry in the history has already happened, so every
                                             dot is filled. The old code computed `isCompleted = true`
                                             and then branched on it. */}
-                                        <span className="absolute -left-[31px] flex size-4 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+                                        <span className="absolute -left-[31px] flex size-4 items-center justify-center rounded-full bg-ink text-ink-invert" aria-hidden="true">
                                             <Check className="h-2.5 w-2.5" strokeWidth={4} />
                                         </span>
                                         <div className="flex items-start justify-between gap-4">
@@ -81,24 +134,22 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 Completed: <span className="font-medium text-ink">{formatDate(raw_booking.completedAt)}</span>
                             </p>
                         )}
-                    </section>
+                      </CardBody>
+                    </Card>
 
-                    <section>
-                        <Heading icon={<ClipboardList size={16} />}>Service overview</Heading>
+                    <Card title="Service overview">
+                      <CardBody>
                         {/* "Special requirements" used to be two hardcoded chips reading
                             VEGETARIAN and GLUTEN-FREE for every booking in the product, and
-                            the event name fell back to an invented title. Both are gone. */}
+                            the event name fell back to an invented title. Both are gone.
+                            Location, guests and service time moved up to the metric band. */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <Field label="Service type" value={raw_booking?.serviceType || 'N/A'} />
                             <Field label="Event" value={event?.title || 'Unknown event'} />
-                            <Field label="Location" value={raw_booking?.requirements?.location || 'Not specified'} />
-                            <Field label="Guest count" value={`${raw_booking?.requirements?.guestCount ?? 0}`} />
-                            <Field
-                                label="Service time"
-                                value={`${formatTime(raw_booking?.requirements?.startTime)} – ${formatTime(raw_booking?.requirements?.endTime)}`}
-                            />
                             {raw_booking?.requirements?.specialInstructions && (
-                                <Field label="Special instructions" value={raw_booking.requirements.specialInstructions} />
+                                <div className="md:col-span-2">
+                                    <Field label="Special instructions" value={raw_booking.requirements.specialInstructions} />
+                                </div>
                             )}
                             {/* The requirements text the organizer typed on the quote form
                                 was stored and then never shown anywhere. */}
@@ -108,10 +159,39 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 </div>
                             )}
                         </div>
-                    </section>
+                      </CardBody>
+                    </Card>
 
-                    <section>
-                        <Heading icon={<Star size={16} />}>Your review</Heading>
+                    {/* The whole delivery block was stored on every booking and rendered on
+                        no screen — on the day itself it is the only part anyone reads. */}
+                    {(raw_booking?.delivery?.scheduledTime ||
+                        raw_booking?.delivery?.setupCompleted ||
+                        raw_booking?.delivery?.deliveryNotes) && (
+                        <Card title="Delivery">
+                          <CardBody>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                                <Field
+                                    label="Scheduled"
+                                    value={
+                                        raw_booking?.delivery?.scheduledTime
+                                            ? formatTime(raw_booking.delivery.scheduledTime)
+                                            : "Not scheduled"
+                                    }
+                                />
+                                <Field label="Setup" value={raw_booking?.delivery?.setupCompleted ? "Complete" : "Pending"} />
+                                <Field label="Teardown" value={raw_booking?.delivery?.teardownCompleted ? "Complete" : "Pending"} />
+                                {raw_booking?.delivery?.deliveryNotes && (
+                                    <div className="md:col-span-3">
+                                        <Field label="Notes" value={raw_booking.delivery.deliveryNotes} />
+                                    </div>
+                                )}
+                            </div>
+                          </CardBody>
+                        </Card>
+                    )}
+
+                    <Card title="Your review">
+                      <CardBody>
 
                         {existingReview ? (
                             <div className="rounded-2xl border border-line bg-paper p-5">
@@ -142,38 +222,45 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 You can review this vendor once the booking is completed.
                             </p>
                         )}
-                    </section>
+                      </CardBody>
+                    </Card>
                 </div>
 
-                <div className="space-y-10 lg:col-span-5 xl:col-span-4">
-                    <section>
-                        <Heading icon={<Wallet size={16} />}>Financials</Heading>
-
-                        <p className="text-2xs font-medium uppercase text-ink-soft">Agreed budget</p>
-                        <p className="font-display text-3xl text-ink tabular-nums">
-                            {formatCurrency(raw_booking?.payment?.totalAmount || 0, currency)}
-                        </p>
-
-                        <ul className="mt-6 space-y-2">
+                <div className="space-y-6 lg:col-span-5 xl:col-span-4">
+                    <Card title="Payment schedule">
+                      <CardBody>
+                        {/* Each installment carries an amount and a due date. The list
+                            showed neither — just "first installment" and a pill, which
+                            tells an organizer nothing about what is owed or when. */}
+                        <ul className="space-y-3">
                             {raw_booking?.payment?.paymentSchedule?.length ? (
                                 raw_booking.payment.paymentSchedule.map((installment: any, i: number) => (
-                                    <li key={i} className="flex items-center justify-between gap-3 border-b border-line pb-2 last:border-b-0">
-                                        <span className="text-sm capitalize text-ink">{installment?.installment || 'Unknown'} installment</span>
-                                        <StatusBadge status={installment?.status === 'paid' ? 'paid' : 'pending'} size="sm" />
+                                    <li key={i} className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-b-0 last:pb-0">
+                                        <span className="min-w-0">
+                                            <span className="block text-sm capitalize text-ink">
+                                                {installment?.installment || 'Unknown'} installment
+                                            </span>
+                                            <span className="block text-xs text-ink-soft tabular-nums">
+                                                {installment?.dueDate ? `Due ${formatDate(installment.dueDate)}` : "No due date"}
+                                            </span>
+                                        </span>
+                                        <span className="shrink-0 text-right">
+                                            <span className="block text-sm font-medium text-ink tabular-nums">
+                                                {formatCurrency(installment?.amount, currency, "—")}
+                                            </span>
+                                            <StatusBadge status={installment?.status === 'paid' ? 'paid' : 'pending'} size="sm" />
+                                        </span>
                                     </li>
                                 ))
                             ) : (
                                 <li className="text-sm text-ink-soft">No payment schedule agreed yet.</li>
                             )}
                         </ul>
+                      </CardBody>
+                    </Card>
 
-                        <p className="mt-4 text-2xs uppercase text-ink-soft tabular-nums">
-                            Platform commission: {formatCurrency(raw_booking?.payment?.commission?.platformCommission || 0, currency)} included
-                        </p>
-                    </section>
-
-                    <section>
-                        <Heading icon={<FileText size={16} />}>Contract</Heading>
+                    <Card title="Contract">
+                      <CardBody>
 
                         <div className="mb-4 grid grid-cols-2 gap-4">
                             <Field label="Organizer" value={raw_booking?.contract?.signedByOrganizer || 'Not signed'} />
@@ -198,10 +285,11 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                             <li>{raw_booking?.contract?.terms?.cancellationPolicy || 'No cancellation policy specified.'}</li>
                             <li>{raw_booking?.contract?.terms?.liability || 'No liability terms specified.'}</li>
                         </ul>
-                    </section>
+                      </CardBody>
+                    </Card>
 
-                    <section>
-                        <Heading icon={<Files size={16} />}>Documents</Heading>
+                    <Card title="Documents">
+                      <CardBody>
 
                         {/* Both rows used to render unconditionally, each an icon beside an
                             empty <div> linking to "#" — a document that did not exist looked
@@ -214,9 +302,9 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                         <Link
                                             href={doc.url}
                                             target="_blank"
-                                            className="flex items-center gap-3 rounded-lg border border-line p-3 text-sm text-ink transition hover:bg-gray-50"
+                                            className="flex items-center gap-3 rounded-lg border border-line p-3 text-sm text-ink transition hover:bg-muted"
                                         >
-                                            <FileText className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                                            <FileText className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                                             {doc.label}
                                         </Link>
                                     </li>
@@ -230,21 +318,11 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 description="The quote and invoice PDFs appear here once the vendor issues them."
                             />
                         )}
-                    </section>
+                      </CardBody>
+                    </Card>
                 </div>
             </div>
         </div>
-    );
-}
-
-/** Section heading. A rule instead of a white card on an almost-white canvas. */
-function Heading({ icon, children }: { icon: ReactNode; children: ReactNode }) {
-    return (
-        <h2 className="mb-5 flex items-center gap-2 border-b border-line pb-2 font-display text-lg text-ink">
-            {/* gray-400 is 2.5:1 — decoration only, the heading text carries the meaning. */}
-            <span className="text-gray-400" aria-hidden="true">{icon}</span>
-            {children}
-        </h2>
     );
 }
 

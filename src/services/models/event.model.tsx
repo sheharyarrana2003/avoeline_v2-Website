@@ -320,7 +320,13 @@ export class EventModel {
       }
     };
 
-    this.status = raw.status || "draft";
+    // Normalised, not raw. `statusMeta` lowercases and underscores before it looks a
+    // status up, so a document holding "Published" or "Registration Open" renders a
+    // perfectly correct badge — while every `status === "published"` comparison in
+    // the app misses it. That mismatch put such events in the All tab and no other,
+    // and left the per-status counts not adding up to the total. Normalising here
+    // fixes it once for every consumer instead of at each comparison.
+    this.status = (String(raw.status || "draft").toLowerCase().replace(/\s+/g, "_")) as EventStatus;
     this.visibility = raw.visibility || "public";
     this.accessCode = raw.accessCode || null;
     this.analytics = {

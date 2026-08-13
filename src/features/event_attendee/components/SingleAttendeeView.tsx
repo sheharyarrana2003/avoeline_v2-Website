@@ -181,11 +181,11 @@ export function SingleAttendeeView({
                 </div>
                 <p className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
                     {/* gray-400 is 2.5:1 -- decoration only; the address beside it is the content. */}
-                    <Mail size={14} className="text-gray-400" aria-hidden="true" />
+                    <Mail size={14} className="text-ink-faint" aria-hidden="true" />
                     {email}
                 </p>
                 <p className="mt-1 flex items-center gap-2 text-sm text-ink-soft tabular-nums">
-                    <Phone size={14} className="text-gray-400" aria-hidden="true" />
+                    <Phone size={14} className="text-ink-faint" aria-hidden="true" />
                     {phone}
                 </p>
             </header>

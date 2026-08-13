@@ -34,7 +34,7 @@ export function AttendeeInput() {
     return (
         <div className="relative flex items-center w-full">
             {/* gray-400 is 2.5:1 -- decoration; the placeholder carries the label. */}
-            <Search className="pointer-events-none absolute left-3 text-gray-400" size={16} aria-hidden="true" />
+            <Search className="pointer-events-none absolute left-3 text-ink-faint" size={16} aria-hidden="true" />
             <input
                 type="search"
                 onChange={handleOnChange}

@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { EventsTab } from "@/src/shared_components/organizer/EventTab";
 import { EventService } from "@/src/services/event.service";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { eventLifecycle } from "@/src/lib/eventState";
 
 export default async function EventLayout({
     children,
@@ -55,7 +56,10 @@ export default async function EventLayout({
 
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                     <h1 className="font-display text-3xl text-ink">{event?.title ?? "Event"}</h1>
-                    {event?.status ? <StatusBadge status={event.status} size="sm" /> : null}
+                    {/* Derived, not stored. event.status is written once at creation and
+                        never updated, so a finished event would sit here reading
+                        "Published" indefinitely. */}
+                    {event ? <StatusBadge status={eventLifecycle(event.status, event.schedule)} size="sm" /> : null}
                 </div>
 
                 <EventsTab tabs={tabs} />

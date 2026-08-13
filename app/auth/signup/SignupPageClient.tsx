@@ -1,8 +1,9 @@
 'use client';
 import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 import React, { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { buttonClass, fieldClass } from '@/src/lib/ui';
+import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
 import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
 
 type SignupResult = { success: boolean; error?: string } | void;
@@ -52,70 +53,103 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                 <div className="mb-10 flex flex-col items-center">
                     <BrandMark className="mb-3 h-12 w-12" />
                     <h1 className="font-display text-xl text-ink">Avoeline</h1>
+                    <p className="mt-1 text-sm text-ink-soft">Create your account</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="w-full space-y-3">
                     <FormFeedback error={error} />
 
-                    <input
-                        type="text"
-                        name="name"
-                        aria-label="Full name"
-                        placeholder="Name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className={fieldClass}
-                        required
-                    />
-                    <input
-                        type="email"
-                        name="email"
-                        aria-label="Email address"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={fieldClass}
-                        required
-                    />
-                    <input
-                        type="tel"
-                        name="contactNo"
-                        aria-label="Contact number"
-                        placeholder="Contact No"
-                        value={formData.contactNo}
-                        onChange={handleChange}
-                        className={fieldClass}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="gender"
-                        aria-label="Gender"
-                        placeholder="Gender"
-                        value={formData.gender}
-                        onChange={handleChange}
-                        className={fieldClass}
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        aria-label="Password"
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        className={fieldClass}
-                    />
+                    {/* Visible labels, where these were placeholder-only with an
+                        aria-label. A placeholder vanishes the moment you type, so a
+                        sighted user filling a five-field form loses every field name
+                        exactly when they want to re-check one. autoComplete was
+                        missing too, so browsers could not fill any of it. */}
+                    <div>
+                        <label htmlFor="signup-name" className={labelClass}>Full name</label>
+                        <input
+                            id="signup-name"
+                            type="text"
+                            name="name"
+                            autoComplete="name"
+                            placeholder="Ayesha Khan"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className={`${fieldClass} mt-1.5`}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="signup-email" className={labelClass}>Email address</label>
+                        <input
+                            id="signup-email"
+                            type="email"
+                            name="email"
+                            autoComplete="email"
+                            placeholder="you@example.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={`${fieldClass} mt-1.5`}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="signup-contact" className={labelClass}>Contact number</label>
+                        <input
+                            id="signup-contact"
+                            type="tel"
+                            name="contactNo"
+                            autoComplete="tel"
+                            placeholder="+92 300 0000000"
+                            value={formData.contactNo}
+                            onChange={handleChange}
+                            className={`${fieldClass} mt-1.5`}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="signup-gender" className={labelClass}>Gender (optional)</label>
+                        <input
+                            id="signup-gender"
+                            type="text"
+                            name="gender"
+                            placeholder="Prefer not to say"
+                            value={formData.gender}
+                            onChange={handleChange}
+                            className={`${fieldClass} mt-1.5`}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="signup-password" className={labelClass}>Password</label>
+                        <input
+                            id="signup-password"
+                            type="password"
+                            name="password"
+                            autoComplete="new-password"
+                            placeholder="At least 6 characters"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className={`${fieldClass} mt-1.5`}
+                        />
+                    </div>
 
-                    <div className="relative">
+                    {/* Labelled like the inputs above. These two were the only fields
+                        left carrying an aria-label and a disabled first option in place
+                        of a real label, which read as inconsistent once the rest gained
+                        one — and the placeholder-option trick disappears on selection
+                        exactly the way a placeholder does. */}
+                    <div>
+                      <label htmlFor="signup-country" className={labelClass}>Country</label>
+                      <div className="relative mt-1.5">
                         <select
+                            id="signup-country"
                             name="country"
-                            aria-label="Country"
+                            autoComplete="country-name"
                             value={formData.country}
                             onChange={handleChange}
                             className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
-                            <option value="" disabled>Country</option>
+                            <option value="" disabled>Select a country</option>
                             <option value="usa">United States</option>
                             <option value="uk">United Kingdom</option>
                             <option value="canada">Canada</option>
@@ -129,17 +163,21 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
                         />
+                      </div>
                     </div>
 
-                    <div className="relative">
+                    <div>
+                      <label htmlFor="signup-city" className={labelClass}>City</label>
+                      <div className="relative mt-1.5">
                         <select
+                            id="signup-city"
                             name="city"
-                            aria-label="City"
+                            autoComplete="address-level2"
                             value={formData.city}
                             onChange={handleChange}
                             className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
-                            <option value="" disabled>City</option>
+                            <option value="" disabled>Select a city</option>
                             <option value="new-york">New York</option>
                             <option value="london">London</option>
                             <option value="toronto">Toronto</option>
@@ -153,6 +191,7 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
                         />
+                      </div>
                     </div>
 
                     {/* Segmented control, so aria-pressed carries the selection for anyone
@@ -165,8 +204,8 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                                 aria-pressed={formData.userType === role}
                                 onClick={() => handleRoleSelect(role)}
                                 className={`flex-1 py-2.5 text-sm font-medium transition-colors ${formData.userType === role
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-transparent text-ink-soft hover:bg-gray-100'
+                                    ? 'bg-ink text-ink-invert'
+                                    : 'bg-transparent text-ink-soft hover:bg-muted'
                                     }`}
                             >
                                 {role}
@@ -183,6 +222,16 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                         {isPending ? 'Creating account…' : 'Sign up'}
                     </button>
                 </form>
+
+                {/* Sign-in offers a route to sign-up and sign-up offered nothing back,
+                    so anyone who already had an account and landed here had to edit the
+                    URL. The pair has to be reciprocal. */}
+                <div className="mt-8 text-sm text-ink-soft">
+                    Already have an account?{' '}
+                    <Link href="/auth/signin" className="font-semibold text-ink hover:underline">
+                        Sign in
+                    </Link>
+                </div>
 
             </div>
         </div>

@@ -36,7 +36,7 @@ function AgendaContent({ id, organizer_id, days, sessionsByDay }: AgendaClientCo
 
 export default function AgendaClientContent(props: AgendaClientContentProps) {
     return (
-        <Suspense fallback={<div className="p-8 text-gray-500">Loading agenda...</div>}>
+        <Suspense fallback={<div className="p-8 text-ink-soft">Loading agenda...</div>}>
             <AgendaContent {...props} />
         </Suspense>
     );

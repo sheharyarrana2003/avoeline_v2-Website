@@ -22,6 +22,20 @@
   --ink-faint: oklch(0.708 0 0);
   --ink-invert: #FFFFFF;
 
+  /* Recessive fills: chips, meter tracks, table zebra, avatar placeholders. These
+     existed only as bg-gray-100 / bg-gray-200, which are ramp steps and therefore
+     do NOT flip with the theme — a gray is a gray. Naming them semantically is what
+     lets dark mode re-point them. */
+  --muted: oklch(0.970 0 0);
+  --muted-strong: oklch(0.922 0 0);
+
+  /* .ink-panel's own surface, split out from --ink because the two diverge in dark
+     mode: --ink becomes near-white (it is text), while the panel must STAY dark —
+     it is the loudest surface on the page, and a white slab on a dark page is a
+     flashbang, not a hierarchy. Dark mode lifts it above --paper instead. */
+  --panel-bg: var(--ink);
+  --panel-fg: #FFFFFF;
+
   /* Legacy names. `home/` consumes these by name via inline styles, so they stay
      defined rather than being renamed across the marketing components. */
   --bg: var(--canvas);
@@ -79,9 +93,105 @@
   --danger-line: #FECACA;
   --danger-on-ink: #FCA5A5;
 
+  /* ── Chart series ──
+     The ONLY place hue is allowed to carry meaning rather than state. Chrome stays
+     monochrome; marks get colour, because a grayscale ramp genuinely cannot separate
+     three categories and "black and white dominant" is about the product's surfaces,
+     not about crippling its charts.
+
+     Slot 1 is the brand violet, so the most important series is always on-brand.
+     Green, amber and red are deliberately ABSENT: they are reserved for status, and a
+     series that borrows a status hue starts lying about itself.
+
+     Validated, not eyeballed — the dataviz validator, both modes, `--pairs all`:
+     lightness band, chroma floor, CVD separation (worst adjacent ΔE 10.3 light /
+     10.7 dark against a target of 8), normal-vision floor (18.3 / 17.6 against a
+     floor of 15) and >=3:1 on the surface all PASS.
+
+     HARD CAP: three. A fourth hue cannot clear the gates against these three, and a
+     generated hue is indistinguishable under CVD. A fourth series folds into "Other"
+     or the chart becomes small multiples. */
+  --series-1: #6C5CE7;   /* brand violet — 4.86:1 on paper */
+  --series-2: #0891B2;   /* cyan        — 3.68:1 on paper */
+  --series-3: #DB2777;   /* pink        — 4.60:1 on paper */
+
   /* Legacy names. `home/` consumes these by name via inline styles. */
   --violet: var(--accent);
   --violet-soft: var(--accent-soft);
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────────────
+   This is the payoff for :root existing at all. Every @theme colour aliases a
+   variable declared above, so re-pointing them here repaints the whole product —
+   the ~2,600 gray-* utilities keep their literal ramp values (a gray stays a gray,
+   deliberately: bg-gray-800 means "a dark chip" in both modes and must not invert),
+   while everything expressed semantically flips.
+
+   The gray ramp is NOT inverted. That was the tempting one-block trick and it is
+   wrong here: gray-900 is used both as "the ink fill that must flip" and as "a dark
+   chip that must not", so inverting the ramp would flip the second kind too. The
+   honest fix is that semantic intent wears a semantic token, which is what the
+   sweep in this commit finishes.
+
+   Contrast, measured against --paper #171717 / --canvas #0a0a0a:
+     ink 17.2:1 · ink-soft 6.9:1 · accent 6.3:1 · success 12.8:1
+     warning 12.4:1 · danger 9.5:1 — all AA text or better.
+   --ink-soft is gray-400, NOT the gray-500 it is in light mode: gray-500 measures
+   3.62:1 on the dark surface and fails as body text. That is the one value that
+   does not simply mirror.
+
+   The OS preference is resolved in JS, not here. The no-flash script in
+   app/layout.tsx stamps data-theme="dark" | "light" onto <html> before first paint,
+   reading localStorage and falling back to prefers-color-scheme. So this file needs
+   ONE attribute-scoped block rather than the same 35 tokens duplicated into a media
+   query — and the toggle wins over the OS setting for free, in both directions. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: oklch(0.205 0 0);
+  --canvas: oklch(0.145 0 0);
+  --line: oklch(0.269 0 0);
+  --line-loud: oklch(0.371 0 0);
+  --ink: oklch(0.985 0 0);
+  --ink-soft: oklch(0.708 0 0);
+  --ink-faint: oklch(0.545 0 0);
+  --ink-invert: oklch(0.205 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-strong: oklch(0.371 0 0);
+
+  /* Lifted above --paper rather than inverted to white. */
+  --panel-bg: oklch(0.269 0 0);
+  --panel-fg: oklch(0.985 0 0);
+
+  /* The -on-ink values were already chosen against #171717, which is exactly what
+     --paper becomes here — so dark mode's semantic layer largely already existed.
+     -strong swaps direction: in light it is DARKER than --accent (text that must
+     shout on white); in dark it must be lighter. */
+  --accent: #9B8AF5;
+  --accent-strong: #C3B8F7;
+  --accent-soft: #211D3A;
+  --accent-line: #383151;
+
+  --success: #86EFAC;
+  --success-soft: #0B2818;
+  --success-line: #1C4A31;
+
+  --warning: #FCD34D;
+  --warning-soft: #2A1F05;
+  --warning-line: #4A3A0C;
+
+  --danger: #FCA5A5;
+  --danger-soft: #2C1414;
+  --danger-line: #4E2323;
+
+  /* Same three hues, snapped to the dark lightness band (L 0.48–0.67) rather than a
+     separate palette — re-stepping, not re-choosing. */
+  --series-1: #7A6DF9;
+  --series-2: #1394B6;
+  --series-3: #E5347F;
 }
 
 @theme {
@@ -135,6 +245,15 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-ink-invert: var(--ink-invert);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-panel: var(--panel-bg);
+  --color-panel-fg: var(--panel-fg);
+
+  /* Charts only. Never reach for these as chrome — that is what the accent is for. */
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
 
   /* ── Delete every chromatic namespace.
      `initial` rather than an alias onto gray, deliberately: a leftover `bg-red-500`
@@ -283,6 +402,43 @@
   --font-weight-bold: 600;
   --font-weight-extrabold: 600;
   --font-weight-black: 800;
+}
+
+/* ── Light-only subtree ──
+   The marketing site (app/page.tsx, src/shared_components/home/*) is a deliberately
+   separate system: violet skin, inline styles, ~29 hardcoded hex values. It reads
+   --ink, --ink-soft, --surface and --border BY NAME, but its surfaces are literal
+   hex — so under a dark theme its body text would flip to near-white while the
+   panels behind it stayed hardcoded white, and the page would be unreadable.
+
+   Pinning the tokens back for that subtree is the smallest correct fix: better than
+   excluding the marketing routes from the toggle (the toggle does not appear there
+   anyway) and far better than converting 29 hex values that were never in scope. */
+.light-only {
+  --paper: #FFFFFF;
+  --canvas: oklch(0.985 0 0);
+  --line: oklch(0.922 0 0);
+  --line-loud: oklch(0.870 0 0);
+  --ink: oklch(0.205 0 0);
+  --ink-soft: oklch(0.545 0 0);
+  --ink-faint: oklch(0.708 0 0);
+  --ink-invert: #FFFFFF;
+  --muted: oklch(0.970 0 0);
+  --muted-strong: oklch(0.922 0 0);
+  --panel-bg: oklch(0.205 0 0);
+  --panel-fg: #FFFFFF;
+  --bg: var(--canvas);
+  --surface: var(--paper);
+  --border: var(--line);
+  --accent: #6C5CE7;
+  --accent-strong: #5646D4;
+  --accent-soft: #EFECFD;
+  --accent-line: #DDD7FB;
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
+  color-scheme: light;
+  background-color: var(--bg);
+  color: var(--ink);
 }
 
 html {
@@ -461,13 +617,13 @@ body {
    off-centre highlight plus a fine grid gives it a light source and a material,
    which is the difference between an ink panel and a missing rectangle. */
 .ink-panel {
-  background-color: var(--ink);
+  background-color: var(--panel-bg);
   background-image:
     radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
     linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 100% 100%, 26px 26px, 26px 26px;
-  color: var(--ink-invert);
+  color: var(--panel-fg);
 }
 
 /* Interactive rows and cards. The lift is deliberately small -- 1px reads as

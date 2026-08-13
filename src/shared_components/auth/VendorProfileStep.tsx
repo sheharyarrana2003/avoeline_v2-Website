@@ -165,7 +165,7 @@ export default function VendorProfileStep({
                   </div>
                 )}
               </div>
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-gray-900/50 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                 <ImagePlus className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <input
@@ -307,7 +307,7 @@ export default function VendorProfileStep({
                       type="button"
                       onClick={handleAddService}
                       aria-label="Add service"
-                      className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-line-loud text-ink transition-colors hover:bg-gray-100"
+                      className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-line-loud text-ink transition-colors hover:bg-muted"
                     >
                       <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
@@ -318,7 +318,7 @@ export default function VendorProfileStep({
                       {services.map((service, idx) => (
                         <span
                           key={idx}
-                          className="flex items-center gap-2 rounded-full bg-gray-900 px-4 py-1.5 text-xs font-medium text-white"
+                          className="flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-xs font-medium text-ink-invert"
                         >
                           {service}
                           <button

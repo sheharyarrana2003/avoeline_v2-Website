@@ -10,12 +10,10 @@ import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { buttonClass } from "@/src/lib/ui";
-import { Check, FileText, History } from "lucide-react";
-
-/** Section heading. Uncarded: a rule and a label group as well as a box did. */
-function SectionHeading({ children }: { children: React.ReactNode }) {
-    return <h2 className="mb-4 border-b border-line pb-3 font-display text-xl text-ink">{children}</h2>;
-}
+import { CalendarDays, Check, FileText, History, Users, Wallet } from "lucide-react";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
 
 export default async function VendorBookingDetailPage({ params }: { params: Promise<{ vendor_id: string, booking_id: string }> }) {
     const { vendor_id, booking_id } = await params;
@@ -47,6 +45,15 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
     return (
         <div className="px-4 py-8 font-sans text-ink sm:px-6 lg:px-8">
             <div className="mx-auto max-w-6xl">
+                <Breadcrumbs
+                        items={[
+                            { label: "Bookings", href: `/vendor/${vendor_id}/bookings` },
+                            { label: event?.title || "Booking" },
+                        ]}
+
+                />
+
+
                 <PageHeader
                     title={event?.title || "Booking"}
                     description={`${organizerName} • Booking ${raw_booking.bookingId}`}
@@ -60,20 +67,58 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                     }
                 />
 
+                {/* The four facts a vendor opens this page for. Payout was buried in
+                    the right rail and the guest count / time window were dl rows in the
+                    middle of a six-item grid — a vendor is planning staffing off those. */}
+                <section className="mb-10 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                    <MetricTile
+                        label="You receive"
+                        value={formatCurrency(payment?.commission?.vendorReceives || 0, payment?.currency || 'PKR')}
+                        icon={<Wallet size={14} />}
+                        sublabel={`of ${formatCurrency(payment?.totalAmount || 0, payment?.currency || 'PKR')} agreed`}
+                    />
+                    <MetricTile
+                        label="Service date"
+                        value={formatDate(raw_booking?.requirements?.serviceDate)}
+                        icon={<CalendarDays size={14} />}
+                        sublabel={
+                            raw_booking?.requirements?.startTime
+                                ? `${formatTime(raw_booking.requirements.startTime)} \u2013 ${formatTime(raw_booking?.requirements?.endTime)}`
+                                : undefined
+                        }
+                    />
+                    <MetricTile
+                        label="Guests"
+                        value={`${raw_booking?.requirements?.guestCount ?? 0}`}
+                        icon={<Users size={14} />}
+                        sublabel={raw_booking?.requirements?.location || "Location not specified"}
+                    />
+                    <MetricTile
+                        label="Contract"
+                        value={raw_booking?.contract?.signed ? "Signed" : "Pending"}
+                        icon={<FileText size={14} />}
+                        sublabel={
+                            raw_booking?.contract?.signedAt
+                                ? formatDate(raw_booking.contract.signedAt)
+                                : "Not signed yet"
+                        }
+                    />
+                </section>
+
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
 
                     {/* ================= LEFT COLUMN ================= */}
-                    <div className="space-y-10 lg:col-span-7 xl:col-span-8">
+                    <div className="space-y-6 lg:col-span-7 xl:col-span-8">
 
-                        <section>
-                            <SectionHeading>Booking journey</SectionHeading>
+                        <Card title="Booking journey">
+                          <CardBody>
 
                             {raw_booking?.statusHistory?.length ? (
                                 <ol className="relative space-y-6 border-l border-line pl-6">
                                     {raw_booking.statusHistory.map((s: any, index: number) => (
                                         <li key={index} className="relative">
                                             <span
-                                                className="absolute -left-[31px] flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 text-white"
+                                                className="absolute -left-[31px] flex h-4 w-4 items-center justify-center rounded-full bg-ink text-ink-invert"
                                                 aria-hidden="true"
                                             >
                                                 <Check size={10} strokeWidth={3} />
@@ -101,10 +146,11 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                     Completed {formatDate(raw_booking.completedAt)}
                                 </p>
                             ) : null}
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionHeading>Service overview</SectionHeading>
+                        <Card title="Service overview">
+                          <CardBody>
                             <dl className="grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2">
                                 <div>
                                     <dt className="text-2xs font-medium uppercase text-ink-soft">Service type</dt>
@@ -133,14 +179,15 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                     </dd>
                                 </div>
                             </dl>
-                        </section>
+                        </CardBody>
+                        </Card>
 
                         {/* Only rendered when there is delivery data. It used to print
                             "ARRIVED —" on every booking, including ones nobody had
                             delivered yet. */}
                         {(raw_booking?.delivery?.scheduledTime || raw_booking?.delivery?.actualDeliveryTime) && (
-                            <section>
-                                <SectionHeading>Delivery</SectionHeading>
+                            <Card title="Delivery">
+                          <CardBody>
                                 <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     {raw_booking.delivery?.scheduledTime && (
                                         <div>
@@ -159,15 +206,16 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                         </div>
                                     )}
                                 </dl>
-                            </section>
+                            </CardBody>
+                        </Card>
                         )}
                     </div>
 
                     {/* ================= RIGHT COLUMN ================= */}
-                    <div className="space-y-10 lg:col-span-5 xl:col-span-4">
+                    <div className="space-y-6 lg:col-span-5 xl:col-span-4">
 
-                        <section>
-                            <SectionHeading>Financials</SectionHeading>
+                        <Card title="Financials">
+                          <CardBody>
                             <p className="text-2xs font-medium uppercase text-ink-soft">Agreed budget</p>
                             <p className="mt-1 font-display text-3xl text-ink tabular-nums">
                                 {formatCurrency(payment?.totalAmount || 0, payment?.currency || 'PKR')}
@@ -196,10 +244,11 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                     Includes {formatCurrency(payment.commission.platformCommission, payment?.currency || 'PKR')} platform commission.
                                 </p>
                             ) : null}
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionHeading>Contract</SectionHeading>
+                        <Card title="Contract">
+                          <CardBody>
                             <dl className="grid grid-cols-2 gap-4">
                                 <div>
                                     <dt className="text-2xs font-medium uppercase text-ink-soft">Organizer</dt>
@@ -235,10 +284,11 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                 <li>{raw_booking?.contract?.terms?.cancellationPolicy || 'No cancellation policy specified.'}</li>
                                 <li>{raw_booking?.contract?.terms?.liability || 'No liability terms specified.'}</li>
                             </ul>
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionHeading>Documents</SectionHeading>
+                        <Card title="Documents">
+                          <CardBody>
                             {/* Was a MediaUploadField with no surrounding form and no action:
                                 the file uploaded, the URL landed in a hidden input, and
                                 nothing ever read it. Show what exists instead of offering
@@ -253,7 +303,7 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-2 py-3 text-sm text-ink hover:underline"
                                             >
-                                                <FileText size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                <FileText size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 {doc.label}
                                             </a>
                                         </li>
@@ -267,7 +317,8 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                     description="Quotes, invoices and receipts generated for this booking are filed here."
                                 />
                             )}
-                        </section>
+                        </CardBody>
+                        </Card>
                     </div>
                 </div>
             </div>

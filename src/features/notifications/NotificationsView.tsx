@@ -160,7 +160,7 @@ export async function NotificationsView({ userId, tab }: { userId: string; tab?:
                                     {isUnread && (
                                         <span
                                             aria-hidden="true"
-                                            className="absolute right-4 top-4 h-2 w-2 rounded-full bg-gray-900"
+                                            className="absolute right-4 top-4 h-2 w-2 rounded-full bg-ink"
                                         />
                                     )}
 

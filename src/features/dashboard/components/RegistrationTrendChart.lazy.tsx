@@ -15,7 +15,7 @@ const RegistrationTrendChart = dynamic(() => import("./RegistrationTrendChart"),
       <h2 className="mb-5 border-b border-line pb-3 font-display text-xl text-ink">
         Registration trend
       </h2>
-      <div className="h-[400px] w-full animate-pulse rounded-lg bg-gray-100" aria-label="Loading chart" />
+      <div className="h-[400px] w-full animate-pulse rounded-lg bg-muted" aria-label="Loading chart" />
     </section>
   ),
 });

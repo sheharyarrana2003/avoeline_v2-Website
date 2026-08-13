@@ -117,7 +117,7 @@ export default function EmailVerificationStep({
         {toastMsg && (
           <div
             role="status"
-            className="absolute top-4 z-20 rounded-full bg-gray-900 px-5 py-2.5 text-xs font-medium text-white"
+            className="absolute top-4 z-20 rounded-full bg-ink px-5 py-2.5 text-xs font-medium text-ink-invert"
           >
             {toastMsg}
           </div>
@@ -127,7 +127,7 @@ export default function EmailVerificationStep({
           <div className="flex items-center justify-center rounded-2xl border border-line bg-canvas px-9 py-5">
             <Mail className="h-11 w-11 text-ink-soft" aria-hidden="true" />
             {verified && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper bg-gray-900 text-white">
+              <span className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper bg-ink text-ink-invert">
                 <Check className="h-4 w-4" aria-hidden="true" />
               </span>
             )}
@@ -153,7 +153,7 @@ export default function EmailVerificationStep({
             ) : isChecking ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
             ) : (
-              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-gray-900" />
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-ink" />
             )}
             {verified ? 'Verified' : 'Awaiting verification'}
           </span>
@@ -170,7 +170,7 @@ export default function EmailVerificationStep({
           <div aria-hidden="true" className="absolute left-[15%] right-[15%] top-[18px] h-0.5 bg-line" />
           <div
             aria-hidden="true"
-            className="absolute left-[15%] top-[18px] h-0.5 bg-gray-900 transition-all duration-300"
+            className="absolute left-[15%] top-[18px] h-0.5 bg-ink transition-all duration-300"
             style={{ width: verified ? '70%' : '0%' }}
           />
           <ol className="relative z-10 flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function EmailVerificationStep({
                   <span
                     aria-hidden="true"
                     className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
-                      reached ? 'bg-gray-900 text-white' : 'border border-line-loud bg-paper text-ink-soft'
+                      reached ? 'bg-ink text-ink-invert' : 'border border-line-loud bg-paper text-ink-soft'
                     }`}
                   >
                     {reached ? <Check className="h-4 w-4" /> : <span className="h-2.5 w-2.5 rounded-full bg-line-loud" />}

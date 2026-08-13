@@ -11,6 +11,7 @@ import { formatDate, parseScheduleDateTime, toIsoString } from "@/src/lib/dateti
 import { COLLECTIONS } from "@/data/collections";
 import { formatCurrencyCompact } from "@/src/lib/money";
 import { UserService } from "@/src/services/user.service";
+import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 
 
 function toDate(val: any): Date {
@@ -65,10 +66,15 @@ function computeRevenue(regDocs: Docs): number {
 //   • registrations (count)    → registrations collection
 //   • average rating           → reviews collection
 function deriveDashboardStat(eventDocs: Docs, regDocs: Docs, reviewDocs: Docs) {
+    // Counted anything `published` as active, and since nothing ever advances an
+    // event's stored status, an event that ran weeks ago stayed in this number
+    // forever. The lifecycle is derived from the schedule, so a finished event drops
+    // out on its own.
+    const now = new Date();
     let activeEvents = 0;
     eventDocs.forEach((doc) => {
-        const status = (doc.data().status || "").toLowerCase();
-        if (["active", "ongoing", "published", "registration_open"].includes(status)) {
+        const data = doc.data();
+        if (isActiveLifecycle(eventLifecycle(data.status, data.schedule, now))) {
             activeEvents++;
         }
     });
@@ -110,7 +116,11 @@ const DASHBOARD_STATUS_MAP: Record<string, DashboardEvent["status"]> = {
     CANCELLED: "CANCELLED",
 };
 
-function toDashboardEvent(doc: QueryDocumentSnapshot, organizerId: string): DashboardEvent {
+function toDashboardEvent(
+    doc: QueryDocumentSnapshot,
+    organizerId: string,
+    tallies?: Map<string, EventTally>,
+): DashboardEvent {
     const data = doc.data();
     const rawStatus = (data.status || "draft").toUpperCase();
     return {
@@ -120,13 +130,17 @@ function toDashboardEvent(doc: QueryDocumentSnapshot, organizerId: string): Dash
         startDate: eventStart(data),
         endDate: eventEnd(data),
         location: data.location?.venueName || data.location?.city || "—",
-        registeredCount: data.analytics?.registrations ?? 0,
+        // Live count when the caller has the registrations to hand. The
+        // analytics.registrations fallback is only for callers that do not, and it
+        // is a stale denormalised counter nothing in this codebase maintains — the
+        // capacity meters on the dashboard were reading it.
+        registeredCount: tallies?.get(doc.id)?.registrations ?? data.analytics?.registrations ?? 0,
         maxCapacity: data.capacity?.totalSeats ?? 0,
         status: DASHBOARD_STATUS_MAP[rawStatus] ?? "DRAFT",
     };
 }
 
-function deriveTodayEvents(eventDocs: Docs, organizerId: string): DashboardEvent[] {
+function deriveTodayEvents(eventDocs: Docs, organizerId: string, tallies?: Map<string, EventTally>): DashboardEvent[] {
     const now = new Date();
     const todayStart = startOfDay(now);
     const todayEnd = endOfDay(now);
@@ -137,19 +151,19 @@ function deriveTodayEvents(eventDocs: Docs, organizerId: string): DashboardEvent
         const start = eventStart(data);
         const end = eventEnd(data);
         if (start <= todayEnd && end >= todayStart) {
-            results.push(toDashboardEvent(doc, organizerId));
+            results.push(toDashboardEvent(doc, organizerId, tallies));
         }
     });
     return results;
 }
 
-function deriveUpcomingEvents(eventDocs: Docs, organizerId: string): DashboardEvent[] {
+function deriveUpcomingEvents(eventDocs: Docs, organizerId: string, tallies?: Map<string, EventTally>): DashboardEvent[] {
     const now = new Date();
     const results: DashboardEvent[] = [];
     eventDocs.forEach((doc) => {
         const start = eventStart(doc.data());
         if (start > now) {
-            results.push(toDashboardEvent(doc, organizerId));
+            results.push(toDashboardEvent(doc, organizerId, tallies));
         }
     });
     results.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
@@ -251,25 +265,62 @@ function deriveTotalEvents(eventDocs: Docs): AnalyticsMetric {
     };
 }
 
-function deriveProfit(eventDocs: Docs): AnalyticsMetric {
-    let totalRevenue = 0;
-    eventDocs.forEach((doc) => {
-        totalRevenue += doc.data().analytics?.revenue ?? 0;
+// regDocs, not eventDocs. This summed event.analytics.revenue, a counter nothing
+// writes, so the headline read Rs 0 no matter how much had actually been paid.
+/**
+ * What the organizer has actually committed to vendors.
+ *
+ * Only bookings that represent a real commitment count. A quote that has been
+ * requested, sent or is still being negotiated is not money owed, and a cancelled
+ * one is not money spent — including either would inflate costs and understate the
+ * net figure below.
+ *
+ * Note the commission does NOT enter this: `vendorReceives = baseBudget -
+ * commissionAmount`, so the platform's 15% comes out of the vendor's payout, not
+ * out of the organizer's pocket. The organizer pays `payment.totalAmount` in full.
+ */
+const COMMITTED_BOOKING_STATUSES = new Set(["quote_accepted", "confirmed", "in_progress", "completed"]);
+
+function vendorSpendByEvent(bookingDocs: Docs): Map<string, number> {
+    const spend = new Map<string, number>();
+    bookingDocs.forEach((doc) => {
+        const data = doc.data();
+        if (!COMMITTED_BOOKING_STATUSES.has(String(data.status || "").toLowerCase())) return;
+        const amount = Number(data.payment?.totalAmount ?? data.quote?.vendorQuote?.totalAmount ?? 0) || 0;
+        if (!amount) return;
+        const eventId = data.eventId || "";
+        spend.set(eventId, (spend.get(eventId) ?? 0) + amount);
     });
-    // Simple proxy: profit ≈ 70 % of revenue (platform fee placeholder until a costs collection exists)
-    const estimatedProfit = Math.round(totalRevenue * 0.7);
+    return spend;
+}
+
+function totalVendorSpend(bookingDocs: Docs): number {
+    let total = 0;
+    vendorSpendByEvent(bookingDocs).forEach((v) => { total += v; });
+    return total;
+}
+
+function deriveNetAfterVendorSpend(regDocs: Docs, bookingDocs: Docs): AnalyticsMetric {
+    // Was `revenue * 0.7` with a helper reading "Estimated after platform fees" —
+    // a 30% deduction matching nothing (the platform takes 15%, and takes it from
+    // the vendor), while the organizer's largest real cost was ignored entirely.
+    const totalRevenue = computeRevenue(regDocs);
+    const spend = totalVendorSpend(bookingDocs);
+    const net = totalRevenue - spend;
     return {
-        value: formatCurrencyCompact(estimatedProfit),
-        helper: "Estimated after platform fees",
+        value: formatCurrencyCompact(net),
+        helper: spend > 0
+            ? `${formatCurrencyCompact(spend)} committed to vendors`
+            : "No vendor spend committed yet",
     };
 }
 
-function deriveTotalRevenue(eventDocs: Docs): AnalyticsMetric {
-    let totalRevenue = 0;
-    eventDocs.forEach((doc) => {
-        totalRevenue += doc.data().analytics?.revenue ?? 0;
-    });
-    const avg = eventDocs.length > 0 ? Math.round(totalRevenue / eventDocs.length) : 0;
+// Same fix as deriveProfit: the money lives on the registrations, not on a
+// denormalised field of the event. The per-event column and this total now come
+// from one source and therefore agree.
+function deriveTotalRevenue(regDocs: Docs, eventCount: number): AnalyticsMetric {
+    const totalRevenue = computeRevenue(regDocs);
+    const avg = eventCount > 0 ? Math.round(totalRevenue / eventCount) : 0;
     return {
         value: formatCurrencyCompact(totalRevenue),
         helper: `Avg: ${formatCurrencyCompact(avg)}/event`,
@@ -321,13 +372,79 @@ function deriveDailyRegistrations(regDocs: Docs): DailyAnalyticsRegistration[] {
     return results.filter((_, idx) => idx % Math.max(step, 1) === 0).slice(0, 8);
 }
 
-function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
+/**
+ * Live per-event tallies from the registrations collection.
+ *
+ * NOTHING in this codebase writes `event.analytics.*`. Grep it: there is not one
+ * update, set or increment against that block anywhere. Whatever is in those
+ * fields was put there by seeding or by the external system that also writes
+ * registrations, and it has drifted ever since — which is why revenue reads as
+ * zero on events that plainly have paid registrations.
+ *
+ * The event detail page already knew this and derived its own numbers from
+ * `registerations`; this makes the same source available to every other screen so
+ * an event cannot report one figure in a list and a different one on its own page.
+ *
+ * Costs no extra read: getAnalyticsData already fetches these documents.
+ */
+export interface EventTally {
+    registrations: number;
+    checkedIn: number;
+    revenue: number;
+    /** Mean of registration.rating for this event; 0 when nobody has rated it. */
+    avgRating: number;
+}
+
+function tallyByEvent(regDocs: Docs): Map<string, EventTally> {
+    const tallies = new Map<string, EventTally>();
+    const ratings = new Map<string, { total: number; count: number }>();
+    regDocs.forEach((doc) => {
+        const data = doc.data();
+        const eventId = data.eventId;
+        if (!eventId) return;
+
+        const status = String(data.status || "").toLowerCase();
+        // A cancelled registration is not an attendee and its money is not revenue.
+        if (status === "cancelled") return;
+
+        const t = tallies.get(eventId) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
+        t.registrations += 1;
+        if (status === "checked_in" || status === "attended") t.checkedIn += 1;
+        // Same field chain computeRevenue uses, so the per-event figures sum to the
+        // headline one instead of quietly disagreeing with it.
+        t.revenue += Number(data.payment?.amountPaid ?? data.finalPrice ?? 0) || 0;
+        tallies.set(eventId, t);
+
+        // Same field and same guard deriveAvgSatisfaction uses for the headline
+        // figure, so the per-event column is the headline broken down rather than a
+        // second, differently-computed number.
+        const rating = data.rating;
+        if (typeof rating === "number" && rating > 0) {
+            const agg = ratings.get(eventId) ?? { total: 0, count: 0 };
+            agg.total += rating;
+            agg.count += 1;
+            ratings.set(eventId, agg);
+        }
+    });
+
+    ratings.forEach((agg, eventId) => {
+        const t = tallies.get(eventId);
+        if (t && agg.count > 0) t.avgRating = Number((agg.total / agg.count).toFixed(1));
+    });
+    return tallies;
+}
+
+function deriveEventPerformance(eventDocs: Docs, regDocs: Docs, bookingDocs: Docs): AnalyticsEventPerformance[] {
+    const tallies = tallyByEvent(regDocs);
+    const spendByEvent = vendorSpendByEvent(bookingDocs);
+
     // Carry a numeric sort key alongside the formatted date so sorting stays
     // chronological (parsing the DD/MM/YYYY display string would be unreliable).
     const results = eventDocs.map((doc) => {
         const data = doc.data();
         const startTime = eventStart(data);
-        const revenue = data.analytics?.revenue ?? 0;
+        const tally = tallies.get(doc.id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
+        const revenue = tally.revenue;
         const row: AnalyticsEventPerformance = {
             id: doc.id,
             eventName: data.title || "Untitled Event",
@@ -335,10 +452,13 @@ function deriveEventPerformance(eventDocs: Docs): AnalyticsEventPerformance[] {
                 ? data.eventType.charAt(0).toUpperCase() + data.eventType.slice(1)
                 : "Event",
             date: formatDate(startTime),
-            registrations: data.analytics?.registrations ?? 0,
-            profit: Math.round(revenue * 0.7),
+            registrations: tally.registrations,
+            vendorSpend: spendByEvent.get(doc.id) ?? 0,
+            netAfterVendorSpend: revenue - (spendByEvent.get(doc.id) ?? 0),
             revenue,
-            avgSatisfaction: data.analytics?.avgRating ?? 0,
+            // Was data.analytics?.avgRating, which is not even a field on the
+            // analytics block — so this column could only ever have been zero.
+            avgSatisfaction: tally.avgRating,
         };
         return { row, sortMs: startTime.getTime() };
     });
@@ -355,13 +475,21 @@ function deriveDateRange(eventDocs: Docs): string {
         return formatDate(now);
     }
 
+    // eventStart falls back to new Date(0) for a document with no schedule and no
+    // legacy timestamp — which every draft here is — so the "earliest" event was
+    // the epoch and the range rendered as "01/01/1970 – today".
     let earliest: Date | null = null;
     eventDocs.forEach((doc) => {
         const d = eventStart(doc.data());
+        const ms = d.getTime();
+        if (!Number.isFinite(ms) || ms <= 0) return;
         if (!earliest || d < earliest) earliest = d;
     });
 
-    return `${fmt(earliest!)} – ${fmt(now)}`;
+    // Every event undated: the range is just today rather than a fabricated span.
+    if (!earliest) return fmt(now);
+
+    return `${fmt(earliest)} – ${fmt(now)}`;
 }
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
@@ -372,6 +500,10 @@ function fetchEvents(organizerId: string): Promise<QuerySnapshot> {
 
 function fetchRegistrations(organizerId: string): Promise<QuerySnapshot> {
     return adminDb.collection(COLLECTIONS.REGISTRATIONS).where("organizerId", "==", organizerId).get();
+}
+
+function fetchOrganizerBookings(organizerId: string): Promise<QuerySnapshot> {
+    return adminDb.collection(COLLECTIONS.BOOKINGS).where("organizerId", "==", organizerId).get();
 }
 
 function fetchReviews(organizerId: string): Promise<QuerySnapshot> {
@@ -396,10 +528,12 @@ export const AnalyticsService = {
         const regDocs = regsSnap.docs;
         const reviewDocs = reviewsSnap.docs;
 
+        const tallies = tallyByEvent(regDocs);
+
         return {
             stats: deriveDashboardStat(eventDocs, regDocs, reviewDocs),
-            todayEvents: deriveTodayEvents(eventDocs, organizerId),
-            upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId),
+            todayEvents: deriveTodayEvents(eventDocs, organizerId, tallies),
+            upcomingEvents: deriveUpcomingEvents(eventDocs, organizerId, tallies),
             recentReg: await withAttendeeNames(deriveRecentReg(regDocs)),
             regTrend: deriveRegTrend(regDocs),
         };
@@ -407,20 +541,22 @@ export const AnalyticsService = {
 
     /** Analytics page: one events read + one registerations read feed all 7 metrics. */
     async getAnalyticsData(organizerId: string) {
-        const [eventsSnap, regsSnap] = await Promise.all([
+        const [eventsSnap, regsSnap, bookingsSnap] = await Promise.all([
             fetchEvents(organizerId),
             fetchRegistrations(organizerId),
+            fetchOrganizerBookings(organizerId),
         ]);
         const eventDocs = eventsSnap.docs;
         const regDocs = regsSnap.docs;
+        const bookingDocs = bookingsSnap.docs;
 
         return {
             totalEvents: deriveTotalEvents(eventDocs),
-            profit: deriveProfit(eventDocs),
-            totalRevenue: deriveTotalRevenue(eventDocs),
+            profit: deriveNetAfterVendorSpend(regDocs, bookingDocs),
+            totalRevenue: deriveTotalRevenue(regDocs, eventDocs.length),
             avgSatisfaction: deriveAvgSatisfaction(regDocs),
             dailyRegistrations: deriveDailyRegistrations(regDocs),
-            eventPerformance: deriveEventPerformance(eventDocs),
+            eventPerformance: deriveEventPerformance(eventDocs, regDocs, bookingDocs),
             dateRange: deriveDateRange(eventDocs),
         };
     },
@@ -500,23 +636,39 @@ export const AnalyticsService = {
     },
 
     async getAnalyticsProfit(organizerId: string): Promise<AnalyticsMetric> {
-        return deriveProfit((await fetchEvents(organizerId)).docs);
+        const [regs, bookings] = await Promise.all([fetchRegistrations(organizerId), fetchOrganizerBookings(organizerId)]);
+        return deriveNetAfterVendorSpend(regs.docs, bookings.docs);
     },
 
     async getAnalyticsTotalRevenue(organizerId: string): Promise<AnalyticsMetric> {
-        return deriveTotalRevenue((await fetchEvents(organizerId)).docs);
+        const [evs, regs] = await Promise.all([fetchEvents(organizerId), fetchRegistrations(organizerId)]);
+        return deriveTotalRevenue(regs.docs, evs.docs.length);
     },
 
     async getAnalyticsAvgSatisfaction(organizerId: string): Promise<AnalyticsMetric> {
         return deriveAvgSatisfaction((await fetchRegistrations(organizerId)).docs);
     },
 
+    /**
+     * Live registration / check-in / revenue counts per event, keyed by event id.
+     *
+     * For screens that hold event documents already and need real numbers beside
+     * them. One registrations read, cache()'d so a page rendering several regions
+     * pays for it once.
+     */
+    getEventTallies: cache(async (organizerId: string): Promise<Map<string, EventTally>> => {
+        return tallyByEvent((await fetchRegistrations(organizerId)).docs);
+    }),
+
     async getAnalyticsDailyRegistrations(organizerId: string): Promise<DailyAnalyticsRegistration[]> {
         return deriveDailyRegistrations((await fetchRegistrations(organizerId)).docs);
     },
 
     async getAnalyticsEventPerformance(organizerId: string): Promise<AnalyticsEventPerformance[]> {
-        return deriveEventPerformance((await fetchEvents(organizerId)).docs);
+        const [eventDocs, regDocs, bookingDocs] = await Promise.all([
+            fetchEvents(organizerId), fetchRegistrations(organizerId), fetchOrganizerBookings(organizerId),
+        ]);
+        return deriveEventPerformance(eventDocs.docs, regDocs.docs, bookingDocs.docs);
     },
 
     async getAnalyticsDateRange(organizerId: string): Promise<string> {

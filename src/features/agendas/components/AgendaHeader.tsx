@@ -38,7 +38,7 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 							scroll={false}
 							aria-current={isActive ? "page" : undefined}
 							className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-4 transition-colors ${isActive
-								? 'border-gray-900 text-ink'
+								? 'border-ink text-ink'
 								: 'border-transparent text-ink-soft hover:text-ink'
 								}`}
 						>
@@ -49,8 +49,8 @@ export default function AgendaHeader({ id, organizer_id, days, sessionsByDay, ac
 							{sessionCount > 0 && (
 								<span
 									className={`rounded-full px-2.5 py-0.5 text-2xs font-bold tabular-nums transition-colors ${isActive
-										? 'bg-gray-900 text-white'
-										: 'bg-gray-100 text-ink-soft'
+										? 'bg-ink text-ink-invert'
+										: 'bg-muted text-ink-soft'
 										}`}
 								>
 									{sessionCount} sessions

@@ -187,7 +187,7 @@ export default async function AddNewServicePage({
                                 folder="service-images"
                                 multiple
                                 accept="image/*,video/*"
-                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line-loud text-2xs text-ink-soft transition hover:border-gray-900 disabled:opacity-60"
+                                buttonClassName="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line-loud text-2xs text-ink-soft transition hover:border-ink disabled:opacity-60"
                             />
                         </div>
                     </div>

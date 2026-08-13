@@ -47,8 +47,8 @@ const TONE: Record<ToastTone, { ring: string; icon: ReactNode }> = {
         icon: <TriangleAlert className="h-4 w-4 text-danger" aria-hidden="true" />,
     },
     info: {
-        ring: "ring-gray-200 bg-white text-gray-900",
-        icon: <Info className="h-4 w-4 text-gray-500" aria-hidden="true" />,
+        ring: "ring-line bg-paper text-ink",
+        icon: <Info className="h-4 w-4 text-ink-soft" aria-hidden="true" />,
     },
 };
 

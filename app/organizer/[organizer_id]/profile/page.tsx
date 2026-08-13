@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import {
     BadgeCheck,
     CalendarDays,
-    CreditCard,
-    Globe,
     Mail,
     MapPin,
     Phone,
@@ -28,7 +26,8 @@ import {
 } from "@/src/shared_components/organizer/ProfileEventsTabs";
 import { OrganizerLogoUpload } from "@/src/shared_components/organizer/OrganizerLogoUpload";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { labelClass } from "@/src/lib/ui";
 
 const PAST_STATUSES = new Set(["completed", "cancelled"]);
@@ -40,16 +39,6 @@ function Field({ label, value }: { label: string; value: string }) {
             <p className={labelClass}>{label}</p>
             <p className="mt-1.5 text-sm text-ink">{value || "—"}</p>
         </div>
-    );
-}
-
-function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
-    return (
-        <h2 className="mb-5 flex items-center gap-2 border-b border-line pb-3 font-display text-xl text-ink">
-            {/* gray-400 = 2.5:1, decoration only — the heading text carries the meaning. */}
-            <span className="text-gray-400" aria-hidden="true">{icon}</span>
-            {title}
-        </h2>
     );
 }
 
@@ -97,11 +86,11 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                     description={organizer.organization.type}
                 />
 
-                <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                    <StatCard_dashboard title="Events Created" value={String(stats.totalEventsCreated)} icon={<CalendarDays size={14} />} />
-                    <StatCard_dashboard title="Attendees" value={String(stats.totalAttendees)} icon={<Users size={14} />} />
-                    <StatCard_dashboard title="Avg Rating" value={stats.averageRating.toFixed(1)} icon={<Star size={14} />} />
-                    <StatCard_dashboard title="Revenue" value={formatCurrencyCompact(stats.totalRevenue)} icon={<Wallet size={14} />} />
+                <section className="mb-8 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                    <MetricTile label="Events Created" value={String(stats.totalEventsCreated)} icon={<CalendarDays size={14} />} />
+                    <MetricTile label="Attendees" value={String(stats.totalAttendees)} icon={<Users size={14} />} />
+                    <MetricTile label="Avg Rating" value={stats.averageRating.toFixed(1)} icon={<Star size={14} />} />
+                    <MetricTile label="Revenue" value={formatCurrencyCompact(stats.totalRevenue)} icon={<Wallet size={14} />} />
                 </section>
 
                 <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -114,10 +103,10 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                     <img
                                         src={organizer.organization.logo}
                                         alt=""
-                                        className="size-16 shrink-0 rounded-full border border-line object-cover"
+                                        className="size-16 shrink-0 rounded-full border border-line bg-paper object-contain p-1.5"
                                     />
                                 ) : (
-                                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gray-900 text-2xl font-semibold text-ink-invert">
+                                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-ink-invert">
                                         {initial}
                                     </div>
                                 )}
@@ -137,15 +126,15 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
 
                             <div className="mt-4 space-y-2 text-sm text-ink-soft">
                                 <p className="flex items-center gap-2">
-                                    <MapPin size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <MapPin size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span>{location || "—"}</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <Mail size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <Mail size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span className="truncate">{organizer.contact.primaryEmail || "—"}</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <Phone size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <Phone size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span className="tabular-nums">{organizer.contact.primaryPhone || "—"}</span>
                                 </p>
                             </div>
@@ -163,23 +152,24 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
 
                     {/* RIGHT COLUMN */}
                     <div className="space-y-10 lg:col-span-8">
-                        <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                            <StatCard_dashboard title="Upcoming" value={String(stats.upcomingEvents)} icon={<CalendarDays size={14} />} />
-                            <StatCard_dashboard title="Completed" value={String(stats.completedEvents)} icon={<ShieldCheck size={14} />} />
-                            <StatCard_dashboard title="Published" value={String(stats.publishedEvents)} icon={<TrendingUp size={14} />} />
-                            <StatCard_dashboard title="Avg / Event" value={stats.averageAttendeesPerEvent.toFixed(0)} icon={<Users size={14} />} />
+                        <section className="mb-6 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                            <MetricTile label="Upcoming" value={String(stats.upcomingEvents)} icon={<CalendarDays size={14} />} />
+                            <MetricTile label="Completed" value={String(stats.completedEvents)} icon={<ShieldCheck size={14} />} />
+                            <MetricTile label="Published" value={String(stats.publishedEvents)} icon={<TrendingUp size={14} />} />
+                            <MetricTile label="Avg / Event" value={stats.averageAttendeesPerEvent.toFixed(0)} icon={<Users size={14} />} />
                         </section>
 
-                        <section>
-                            <SectionTitle icon={<BadgeCheck size={18} />} title="Account Settings" />
+                        <Card title="Account Settings">
+                              <CardBody>
                             <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
                                 <Field label="Email Address" value={organizer.contact.primaryEmail} />
                                 <Field label="Phone Number" value={organizer.contact.primaryPhone} />
                             </div>
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionTitle icon={<Globe size={18} />} title="Organization Settings" />
+                        <Card title="Organization Settings">
+                              <CardBody>
                             <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
                                 <Field label="Organization Name" value={organizer.organization.name} />
                                 <Field label="Tax Identification" value={organizer.organization.taxNumber || "N/A"} />
@@ -189,10 +179,11 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                 <Field label="City" value={organizer.address.city} />
                                 <Field label="Country" value={organizer.address.country} />
                             </div>
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionTitle icon={<ShieldCheck size={18} />} title="Verification Status" />
+                        <Card title="Verification Status">
+                              <CardBody>
                             <div className="flex items-center gap-3">
                                 <BadgeCheck
                                     size={22}
@@ -208,15 +199,17 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                     </p>
                                 </div>
                             </div>
-                        </section>
+                        </CardBody>
+                        </Card>
 
-                        <section>
-                            <SectionTitle icon={<CreditCard size={18} />} title="Subscription Plan" />
+                        <Card title="Subscription Plan">
+                          <CardBody>
                             <p className="text-lg font-semibold capitalize text-ink">{organizer.plan.type} Plan</p>
                             <p className="mt-1 text-xs text-ink-soft tabular-nums">
                                 Expires {formatDate(organizer.plan.expiresAt)}
                             </p>
-                        </section>
+                          </CardBody>
+                        </Card>
                     </div>
                 </div>
             </div>

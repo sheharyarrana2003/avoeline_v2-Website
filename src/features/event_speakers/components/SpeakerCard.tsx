@@ -10,7 +10,7 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
     return (
         // A genuine container: a grid tile that has to hold together as one unit.
         <div className="flex flex-col items-center rounded-2xl border border-line bg-paper p-6 text-center">
-            <div className="relative mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+            <div className="relative mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-muted">
                 {speaker.profileImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

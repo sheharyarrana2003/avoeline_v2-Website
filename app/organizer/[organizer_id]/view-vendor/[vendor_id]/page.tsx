@@ -118,16 +118,24 @@ export default async function VendorProfilePage({
                 <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line bg-paper">
                     {logo ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={logo} alt="" className="h-full w-full object-cover" />
+                        <img src={logo} alt="" className="h-full w-full object-contain p-1.5" />
                     ) : (
-                        <Building2 className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                        <Building2 className="h-6 w-6 text-ink-faint" aria-hidden="true" />
                     )}
                 </span>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <StarRating rating={rating} size="sm" />
-                    <span className="text-sm font-medium text-ink tabular-nums">{rating || "N/A"}</span>
-                    <span className="text-xs text-ink-soft tabular-nums">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
+                    {/* An unreviewed vendor showed 5 stars, because that is the value the
+                        model seeds and only reviewVendor ever recomputes it. */}
+                    {totalReviews > 0 ? (
+                        <>
+                            <StarRating rating={rating} size="sm" />
+                            <span className="text-sm font-medium text-ink tabular-nums">{rating.toFixed(1)}</span>
+                            <span className="text-xs text-ink-soft tabular-nums">({totalReviews} review{totalReviews === 1 ? '' : 's'})</span>
+                        </>
+                    ) : (
+                        <span className="text-sm text-ink-soft">Not rated yet</span>
+                    )}
                     {yearsInBusiness !== null && yearsInBusiness > 0 && (
                         <span className="text-xs text-ink-soft tabular-nums">
                             • {yearsInBusiness} {yearsInBusiness === 1 ? "year" : "years"} in business
@@ -166,7 +174,7 @@ export default async function VendorProfilePage({
                         href={`${profileUrl}?tab=${tab.id}`}
                         aria-current={activeTab === tab.id ? "page" : undefined}
                         className={`-mb-px border-b-2 pb-3 text-sm transition ${activeTab === tab.id
-                            ? "border-gray-900 font-medium text-ink"
+                            ? "border-ink font-medium text-ink"
                             : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                     >
@@ -187,7 +195,7 @@ export default async function VendorProfilePage({
 
                                 return (
                                     <li key={pkg?.serviceId || index} className="flex flex-col gap-6 rounded-2xl border border-line bg-paper p-5 md:flex-row">
-                                        <div className="h-40 w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100 md:w-48">
+                                        <div className="h-40 w-full shrink-0 overflow-hidden rounded-2xl bg-muted md:w-48">
                                             {packageVideo ? (
                                                 <video src={packageVideo} muted loop playsInline className="h-full w-full object-cover" />
                                             ) : packageImage ? (
@@ -196,7 +204,7 @@ export default async function VendorProfilePage({
                                             ) : (
                                                 <span className="flex h-full w-full items-center justify-center">
                                                     {/* gray-400 = 2.5:1, decoration only — this is a placeholder, not information. */}
-                                                    <Package className="h-8 w-8 text-gray-400" aria-hidden="true" />
+                                                    <Package className="h-8 w-8 text-ink-faint" aria-hidden="true" />
                                                 </span>
                                             )}
                                         </div>
@@ -258,13 +266,13 @@ export default async function VendorProfilePage({
                             <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 {portfolioImages.map((img: any, i: number) => (
                                     <li key={i} className="overflow-hidden rounded-2xl border border-line bg-paper">
-                                        <div className="relative h-56 bg-gray-100">
+                                        <div className="relative h-56 bg-muted">
                                             {img?.url ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img src={img.url} alt={img?.caption || ""} className="h-full w-full object-cover" />
                                             ) : (
                                                 <span className="flex h-full w-full items-center justify-center">
-                                                    <ImageIcon className="h-8 w-8 text-gray-400" aria-hidden="true" />
+                                                    <ImageIcon className="h-8 w-8 text-ink-faint" aria-hidden="true" />
                                                 </span>
                                             )}
                                         </div>
@@ -291,7 +299,7 @@ export default async function VendorProfilePage({
                                 <h3 className="mb-4 border-b border-line pb-2 font-display text-lg text-ink">Videos</h3>
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     {portfolioVideos.map((video: string, i: number) => (
-                                        <video key={i} src={video} controls className="aspect-video w-full rounded-2xl bg-gray-900 object-cover" />
+                                        <video key={i} src={video} controls className="aspect-video w-full rounded-2xl bg-panel object-cover" />
                                     ))}
                                 </div>
                             </section>
@@ -329,9 +337,9 @@ export default async function VendorProfilePage({
                                     return (
                                         <div key={star} className="flex items-center gap-2">
                                             <span className="w-3 text-xs text-ink-soft tabular-nums">{star}</span>
-                                            <Star className="h-3 w-3 shrink-0 fill-gray-900 text-gray-900" aria-hidden="true" />
-                                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
-                                                <div className="h-full rounded-full bg-gray-900" style={{ width: `${percentage}%` }} />
+                                            <Star className="h-3 w-3 shrink-0 fill-ink text-ink" aria-hidden="true" />
+                                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted-strong">
+                                                <div className="h-full rounded-full bg-ink" style={{ width: `${percentage}%` }} />
                                             </div>
                                             <span className="w-6 text-right text-xs text-ink-soft tabular-nums">{count}</span>
                                         </div>
@@ -348,7 +356,7 @@ export default async function VendorProfilePage({
                                         <div className="mb-3 flex items-center gap-2">
                                             <StarRating rating={r.rating} size="sm" />
                                             <span className="text-xs text-ink-soft tabular-nums">{r.rating}.0</span>
-                                            <span className="ml-auto rounded-full bg-gray-900 px-2 py-1 text-2xs font-bold uppercase text-white">
+                                            <span className="ml-auto rounded-full bg-ink px-2 py-1 text-2xs font-bold uppercase text-ink-invert">
                                                 Verified booking
                                             </span>
                                         </div>
@@ -356,7 +364,7 @@ export default async function VendorProfilePage({
                                         <p className="mt-1 text-sm leading-relaxed text-ink-soft">{r.comment}</p>
                                         <div className="mt-4 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <span className="flex size-8 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-ink-soft">
+                                                <span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-ink-soft">
                                                     {(r.reviewerName || "O")[0]}
                                                 </span>
                                                 <span className="text-sm text-ink">{r.reviewerName || 'Event organizer'}</span>
@@ -385,7 +393,7 @@ export default async function VendorProfilePage({
                                             <p className="text-sm italic leading-relaxed text-ink-soft">&quot;{t?.testimonial || 'No testimonial text.'}&quot;</p>
                                             <div className="mt-4 flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="flex size-8 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-ink-soft">
+                                                    <span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-ink-soft">
                                                         {(t?.clientName || "A")[0]}
                                                     </span>
                                                     <span className="text-sm text-ink">{t?.clientName || 'Anonymous'}</span>
@@ -415,19 +423,19 @@ export default async function VendorProfilePage({
                     {primaryPhone && (
                         <li className="flex items-center gap-3 text-sm text-ink tabular-nums">
                             {/* gray-400 = 2.5:1 — decoration; each row's text is the content. */}
-                            <Phone className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                            <Phone className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                             <a href={`tel:${primaryPhone}`} className="hover:underline">{primaryPhone}</a>
                         </li>
                     )}
                     {businessEmail && (
                         <li className="flex items-center gap-3 text-sm text-ink">
-                            <Mail className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                            <Mail className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                             <a href={`mailto:${businessEmail}`} className="hover:underline">{businessEmail}</a>
                         </li>
                     )}
                     {website && (
                         <li className="flex items-center gap-3 text-sm text-ink">
-                            <Globe className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                            <Globe className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                             <a href={website} target="_blank" rel="noopener noreferrer" className="hover:underline">
                                 {website.replace('https://', '')}
                             </a>
@@ -435,7 +443,7 @@ export default async function VendorProfilePage({
                     )}
                     {street && (
                         <li className="flex items-center gap-3 text-sm text-ink">
-                            <MapPin className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                            <MapPin className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                             {street}, {city}
                         </li>
                     )}
