@@ -25,6 +25,7 @@ import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { ImageLightbox } from "@/src/shared_components/ui/ImageLightbox";
 
 /**
  * One fact on the ink hero. Sits on --panel-bg, which stays dark in both themes,
@@ -113,18 +114,27 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                 --panel-bg is the surface that stays dark in both themes. */}
             <section className="overflow-hidden rounded-2xl bg-panel">
                 <div className="flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center">
-                    <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-panel sm:w-56 md:w-64 lg:w-72">
-                        {event.bannerImage ? (
-                            // eslint-disable-next-line @next/next/no-img-element
+                    {/* Banners carry the schedule and venue as artwork, and at 288px the
+                        overlaid text is unreadable — so the thumbnail expands. Only when
+                        there is a banner: the gradient placeholder has nothing to enlarge. */}
+                    {event.bannerImage ? (
+                        <ImageLightbox
+                            src={event.bannerImage}
+                            alt={`${event.title} banner`}
+                            className="aspect-square w-full shrink-0 bg-panel sm:w-56 md:w-64 lg:w-72"
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={event.bannerImage}
-                                alt={event.title}
-                                className="absolute inset-0 h-full w-full object-cover"
+                                alt=""
+                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover/zoom:scale-[1.02]"
                             />
-                        ) : (
+                        </ImageLightbox>
+                    ) : (
+                        <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-panel sm:w-56 md:w-64 lg:w-72">
                             <div className="absolute inset-0 bg-[linear-gradient(115deg,#171717,#404040_52%,#171717)]" />
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* This block used to be three facts — date, city, registration count
                         — stacked in one narrow column, leaving well over half the panel
@@ -442,8 +452,14 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                         {isVideoUrl(url) ? (
                                             <video src={url} controls className="h-full w-full object-cover" />
                                         ) : (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={url} alt={`Gallery ${i + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                                            // Same need as the banner: a gallery cropped square
+                                            // to a quarter-width tile is a thumbnail, not a view
+                                            // of the picture. Videos already have their own
+                                            // fullscreen control, so they are left alone.
+                                            <ImageLightbox src={url} alt={`Gallery image ${i + 1}`} className="h-full w-full">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={url} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+                                            </ImageLightbox>
                                         )}
                                     </div>
                                 ))}
