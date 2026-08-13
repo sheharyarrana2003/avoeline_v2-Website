@@ -158,15 +158,11 @@ export default async function VendorBookingsPage({
                completedDate.getFullYear() === now.getFullYear();
     });
 
-    // Apply tab filter
-    const displayBookings = allBookings
-        .filter((b: any) => matches(b) && (filter === 'all' || b?.status?.toLowerCase() === filter))
-        .sort((a: any, b: any) => {
-        const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
-        const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
-        return dateA - dateB;
-    });
-
+    // Declared before every use. `displayBookings` below called this while it was
+    // still in the temporal dead zone, which threw at render and dropped the whole
+    // route to the error boundary. tsc did not catch it: the call sits inside a
+    // callback, so it is a deferred reference as far as the checker is concerned,
+    // and only running the page surfaces it.
     const query = normalizeQuery(awaitedSearchParams?.q);
     const matches = (b: any) =>
         matchesQuery(query, [
@@ -176,6 +172,15 @@ export default async function VendorBookingsPage({
             b?.requirements?.location,
             b?.status,
         ]);
+
+    // Apply tab filter
+    const displayBookings = allBookings
+        .filter((b: any) => matches(b) && (filter === 'all' || b?.status?.toLowerCase() === filter))
+        .sort((a: any, b: any) => {
+        const dateA = parseScheduleDateTime(a?.requirements?.serviceDate, "")?.getTime() ?? 0;
+        const dateB = parseScheduleDateTime(b?.requirements?.serviceDate, "")?.getTime() ?? 0;
+        return dateA - dateB;
+    });
 
     const countOf = (id: string) =>
         allBookings.filter((b: any) => matches(b) && (id === "all" || b?.status?.toLowerCase() === id)).length;
