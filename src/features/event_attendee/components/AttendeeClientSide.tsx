@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo } from "react";
 import { AttendeeListItem } from "./AttendeeListItem";
 import { SingleAttendeeView } from "./SingleAttendeeView";
 import { AttendeeInput } from "./AttendeeInput";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { Users, UserCheck, Clock, Ban } from "lucide-react";
 import { Registration } from "@/src/services/models/reg.type";
@@ -78,10 +78,33 @@ export function AttendeeClientSide({ attendees = [], handle_reg_status }: { atte
                 <h2 className="mb-8 font-display text-xl text-ink">Attendees</h2>
 
                 <section className="mb-8 grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                    <StatCard_dashboard title="Registered" value={`${stats.total}`} icon={<Users className="h-4 w-4" />} />
-                    <StatCard_dashboard title={`Checked in (${stats.checkedInPercent}%)`} value={`${stats.checkedIn}`} icon={<UserCheck className="h-4 w-4" />} />
-                    <StatCard_dashboard title="Pending" value={`${stats.pending}`} icon={<Clock className="h-4 w-4" />} />
-                    <StatCard_dashboard title="Cancelled" value={`${stats.cancelled}`} icon={<Ban className="h-4 w-4" />} />
+                    {/* The check-in percentage used to be crammed into the tile's own
+                        title, for the same reason "(Est.)" was crammed into the
+                        analytics one: there was nowhere else for a qualifier to go. */}
+                    <MetricTile
+                        label="Registered"
+                        value={`${stats.total}`}
+                        icon={<Users className="h-4 w-4" />}
+                        sublabel="Excluding cancellations"
+                    />
+                    <MetricTile
+                        label="Checked in"
+                        value={`${stats.checkedIn}`}
+                        icon={<UserCheck className="h-4 w-4" />}
+                        sublabel={`${stats.checkedInPercent}% of registered`}
+                    />
+                    <MetricTile
+                        label="Pending"
+                        value={`${stats.pending}`}
+                        icon={<Clock className="h-4 w-4" />}
+                        sublabel="Registered, not yet arrived"
+                    />
+                    <MetricTile
+                        label="Cancelled"
+                        value={`${stats.cancelled}`}
+                        icon={<Ban className="h-4 w-4" />}
+                        sublabel="Withdrawn registrations"
+                    />
                 </section>
 
                 <div className="mb-6">

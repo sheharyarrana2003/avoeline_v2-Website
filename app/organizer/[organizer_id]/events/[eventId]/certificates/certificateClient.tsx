@@ -14,7 +14,7 @@ import { formatDateMedium } from '@/src/lib/datetime';
 import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
 import { EmptyState } from '@/src/shared_components/ui/EmptyState';
 import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
-import { StatCard_dashboard } from '@/src/shared_components/organizer/StatCard_dashboard';
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from '@/src/lib/ui';
 import { Award, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
@@ -196,9 +196,22 @@ export default function CertificateIssuanceClient({
             </div>
 
             <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                <StatCard_dashboard title="Total attendees" value={`${totalAttendees}`} icon={<Users className="h-4 w-4" />} />
-                <StatCard_dashboard title="Already issued" value={`${issuedAttendees.length}`} icon={<Award className="h-4 w-4" />} />
-                <StatCard_dashboard title="Pending" value={`${pendingAttendees.length}`} />
+                <MetricTile label="Total attendees" value={`${totalAttendees}`} icon={<Users className="h-4 w-4" />} />
+                <MetricTile
+                    label="Already issued"
+                    value={`${issuedAttendees.length}`}
+                    icon={<Award className="h-4 w-4" />}
+                    sublabel={
+                        totalAttendees > 0
+                            ? `${Math.round((issuedAttendees.length / totalAttendees) * 100)}% of attendees`
+                            : "No attendees yet"
+                    }
+                />
+                <MetricTile
+                    label="Pending"
+                    value={`${pendingAttendees.length}`}
+                    sublabel="Awaiting issuance"
+                />
             </section>
 
             {generationSummary && (

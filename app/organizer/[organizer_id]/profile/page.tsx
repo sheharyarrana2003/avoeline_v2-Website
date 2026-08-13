@@ -28,7 +28,7 @@ import {
 } from "@/src/shared_components/organizer/ProfileEventsTabs";
 import { OrganizerLogoUpload } from "@/src/shared_components/organizer/OrganizerLogoUpload";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { labelClass } from "@/src/lib/ui";
 
 const PAST_STATUSES = new Set(["completed", "cancelled"]);
@@ -98,10 +98,10 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                 />
 
                 <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                    <StatCard_dashboard title="Events Created" value={String(stats.totalEventsCreated)} icon={<CalendarDays size={14} />} />
-                    <StatCard_dashboard title="Attendees" value={String(stats.totalAttendees)} icon={<Users size={14} />} />
-                    <StatCard_dashboard title="Avg Rating" value={stats.averageRating.toFixed(1)} icon={<Star size={14} />} />
-                    <StatCard_dashboard title="Revenue" value={formatCurrencyCompact(stats.totalRevenue)} icon={<Wallet size={14} />} />
+                    <MetricTile label="Events Created" value={String(stats.totalEventsCreated)} icon={<CalendarDays size={14} />} />
+                    <MetricTile label="Attendees" value={String(stats.totalAttendees)} icon={<Users size={14} />} />
+                    <MetricTile label="Avg Rating" value={stats.averageRating.toFixed(1)} icon={<Star size={14} />} />
+                    <MetricTile label="Revenue" value={formatCurrencyCompact(stats.totalRevenue)} icon={<Wallet size={14} />} />
                 </section>
 
                 <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -164,10 +164,10 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                     {/* RIGHT COLUMN */}
                     <div className="space-y-10 lg:col-span-8">
                         <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                            <StatCard_dashboard title="Upcoming" value={String(stats.upcomingEvents)} icon={<CalendarDays size={14} />} />
-                            <StatCard_dashboard title="Completed" value={String(stats.completedEvents)} icon={<ShieldCheck size={14} />} />
-                            <StatCard_dashboard title="Published" value={String(stats.publishedEvents)} icon={<TrendingUp size={14} />} />
-                            <StatCard_dashboard title="Avg / Event" value={stats.averageAttendeesPerEvent.toFixed(0)} icon={<Users size={14} />} />
+                            <MetricTile label="Upcoming" value={String(stats.upcomingEvents)} icon={<CalendarDays size={14} />} />
+                            <MetricTile label="Completed" value={String(stats.completedEvents)} icon={<ShieldCheck size={14} />} />
+                            <MetricTile label="Published" value={String(stats.publishedEvents)} icon={<TrendingUp size={14} />} />
+                            <MetricTile label="Avg / Event" value={stats.averageAttendeesPerEvent.toFixed(0)} icon={<Users size={14} />} />
                         </section>
 
                         <section>
