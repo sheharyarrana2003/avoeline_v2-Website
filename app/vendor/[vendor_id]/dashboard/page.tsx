@@ -32,7 +32,9 @@ export default async function VendorDashboardPage({
 
     const raw_bookings: BookingData[] = (await BookingServices.getAllBookingsOfVendor(vendor_id)) || [];
 
-    const businessName = v?.businessName || "there";
+    // Same shape as the organizer greeting: drop the comma rather than greet someone
+    // as "there" when the business name has not been set yet.
+    const businessName = v?.businessName?.trim() || "";
     const vendorRating = v?.ratings?.averageRating || 0;
     const totalReviews = v?.ratings?.totalReviews ?? 0;
     const verificationBadges = v?.verification?.verificationBadges || [];
@@ -199,7 +201,7 @@ export default async function VendorDashboardPage({
         <div className="px-4 py-8 font-sans text-ink sm:px-6 lg:px-8">
             <div className="mx-auto max-w-6xl">
                 <PageHeader
-                    title={`Welcome back, ${businessName}`}
+                    title={businessName ? `Welcome back, ${businessName}` : "Welcome back"}
                     description="Track your quote requests, confirmed bookings and monthly revenue."
                     actions={
                         <>

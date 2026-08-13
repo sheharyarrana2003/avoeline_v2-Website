@@ -23,6 +23,17 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
         redirect('/auth/signup');
     }
 
+    // `name` comes straight off the session token and is routinely empty — accounts
+    // created before the setup step, or any flow that never set a display name. The
+    // heading interpolated it unguarded, so those users were greeted with
+    // "Welcome back," and a dangling comma.
+    //
+    // Falls back to the local part of the email, matching the chain authService
+    // already uses when it derives an organization name (`current.name ||
+    // current.email`). With neither, the comma is dropped rather than trailing a
+    // filler word: "Welcome back" is a complete greeting on its own.
+    const displayName = u.name?.trim() || u.email?.split("@")[0]?.trim() || "";
+
     // The <main> landmark comes from app/organizer/layout.tsx. A second one here was
     // invalid nesting, and its own background is what made the page flash a
     // different grey between the loading and loaded frames.
@@ -31,7 +42,9 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
             <div className="mx-auto max-w-6xl space-y-10">
                 <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 className="font-display text-3xl text-ink">Welcome back, {u.name}</h1>
+                        <h1 className="font-display text-3xl text-ink">
+                            {displayName ? `Welcome back, ${displayName}` : "Welcome back"}
+                        </h1>
                         <p className="mt-1 text-sm text-ink-soft">Manage your events, registrations, and analytics.</p>
                     </div>
                     {/* wraps: two h-11 buttons need ~312px and the narrowest target is 320px */}
