@@ -287,10 +287,24 @@ export default async function VendorQuoteManagementPage({
                                                     href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
                                                     className="flex items-center justify-between gap-3 py-4 transition hover:bg-muted"
                                                 >
-                                                    <div>
-                                                        <p className="text-sm font-medium text-ink">Organizer {booking?.organizerId}</p>
-                                                        <p className="mt-0.5 text-xs text-ink-soft tabular-nums">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-medium text-ink">
+                                                            {booking?.serviceType || `Organizer ${booking?.organizerId}`}
+                                                        </p>
+                                                        <p className="mt-0.5 truncate text-xs text-ink-soft tabular-nums">
                                                             {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
+                                                        </p>
+                                                        {/* Age of the request is the most useful thing in a quotes
+                                                            queue and it was loaded on every row and thrown away.
+                                                            Service date, location and guest count likewise. */}
+                                                        <p className="mt-0.5 truncate text-2xs text-ink-faint tabular-nums">
+                                                            {timeAgo(booking?.createdAt)}
+                                                            {booking?.requirements?.serviceDate
+                                                                ? ` · ${formatDate(booking.requirements.serviceDate)}`
+                                                                : ""}
+                                                            {booking?.requirements?.guestCount
+                                                                ? ` · ${booking.requirements.guestCount} guests`
+                                                                : ""}
                                                         </p>
                                                     </div>
                                                     <ChevronRight size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />

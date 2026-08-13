@@ -10,6 +10,8 @@ import { revalidatePath } from "next/cache";
 import { formatCurrency } from "@/src/lib/money";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { buttonClass } from "@/src/lib/ui";
 import { ImageOff, Package, Pencil, Plus, Trash2 } from "lucide-react";
 
@@ -91,22 +93,46 @@ export default async function VendorServicesPage({
                     }
                 />
 
-                <nav aria-label="Filter by category" className="mb-8 flex gap-6 overflow-x-auto border-b border-line">
-                    {categoryTabs.map((tab) => (
-                        <Link
-                            key={tab.id}
-                            href={`/vendor/${vendor_id}/services?filter=${tab.id}`}
-                            aria-current={filter === tab.id ? "page" : undefined}
-                            className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
-                                filter === tab.id
-                                    ? "border-ink text-ink"
-                                    : "border-transparent text-ink-soft hover:text-ink"
-                            }`}
-                        >
-                            {tab.label} <span className="tabular-nums">({tab.count})</span>
-                        </Link>
-                    ))}
-                </nav>
+                {/* The whole vendor document is already in hand on this page and only
+                    `services` was read off it. A catalogue screen with no sense of how
+                    the catalogue is performing is the definition of bland. */}
+                <section className="mb-8 grid grid-cols-2 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                    <MetricTile
+                        size="md"
+                        label="Services"
+                        value={String(services.length)}
+                        sublabel={`${serviceCategories.length} categories`}
+                    />
+                    <MetricTile
+                        size="md"
+                        label="Bookings"
+                        value={String(vendor?.stats?.totalBookings ?? 0)}
+                        sublabel={`${vendor?.stats?.completedBookings ?? 0} completed`}
+                    />
+                    <MetricTile
+                        size="md"
+                        label="Rating"
+                        value={vendor?.ratings?.averageRating ? vendor.ratings.averageRating.toFixed(1) : "—"}
+                        sublabel={`${vendor?.ratings?.totalReviews ?? 0} reviews`}
+                    />
+                    <MetricTile
+                        size="md"
+                        label="With media"
+                        value={String(services.filter((s: Service) => s.images?.length || s.videos?.length).length)}
+                        sublabel="Listings with a photo or video"
+                    />
+                </section>
+
+                <FilterTabs
+                    tabs={categoryTabs.map((t) => ({
+                        label: t.label,
+                        value: t.id,
+                        count: t.count,
+                        href: `/vendor/${vendor_id}/services?filter=${t.id}`,
+                    }))}
+                    activeValue={filter}
+                    label="Filter by category"
+                />
 
                 {displayServices.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -183,9 +209,37 @@ export default async function VendorServicesPage({
                                             {service.description || "No description yet."}
                                         </p>
 
-                                        <p className="mt-4 text-sm text-ink-soft">
-                                            <span className="font-medium text-ink tabular-nums">{formatCurrency(service.price)}</span>
-                                            <span className="tabular-nums"> / {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                        {/* inclusions is stored on every service and was
+                                            rendered on no screen in the product — it is
+                                            the part an organizer actually compares. */}
+                                        {service.inclusions?.length ? (
+                                            <ul className="mt-3 flex flex-wrap gap-1.5">
+                                                {service.inclusions.slice(0, 3).map((inc: string) => (
+                                                    <li
+                                                        key={inc}
+                                                        className="rounded-full border border-line bg-muted px-2 py-0.5 text-2xs text-ink-soft"
+                                                    >
+                                                        {inc}
+                                                    </li>
+                                                ))}
+                                                {service.inclusions.length > 3 ? (
+                                                    <li className="px-1 py-0.5 text-2xs text-ink-faint">
+                                                        +{service.inclusions.length - 3} more
+                                                    </li>
+                                                ) : null}
+                                            </ul>
+                                        ) : null}
+
+                                        <p className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3 text-sm text-ink-soft">
+                                            <span>
+                                                <span className="font-medium text-ink tabular-nums">{formatCurrency(service.price)}</span>
+                                                <span className="tabular-nums"> / {service.minOrder ? `min ${service.minOrder}` : 'unit'}</span>
+                                            </span>
+                                            {(service.images?.length ?? 0) + (service.videos?.length ?? 0) > 0 ? (
+                                                <span className="shrink-0 text-2xs text-ink-faint tabular-nums">
+                                                    {(service.images?.length ?? 0) + (service.videos?.length ?? 0)} media
+                                                </span>
+                                            ) : null}
                                         </p>
                                     </div>
                                 </div>

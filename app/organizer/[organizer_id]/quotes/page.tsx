@@ -321,16 +321,31 @@ export default async function QuoteManagementPage({
                                             href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
                                             className="flex items-center justify-between rounded-2xl border border-line bg-paper p-4 transition hover:border-line-loud"
                                         >
-                                            <span className="flex items-center gap-3">
+                                            <span className="flex min-w-0 items-center gap-3">
                                                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-muted">
                                                     <Store size={16} className="text-ink-soft" aria-hidden="true" />
                                                 </span>
-                                                <span>
-                                                    <span className="block text-sm font-medium text-ink">
-                                                        Vendor {booking?.vendorId}
+                                                <span className="min-w-0">
+                                                    <span className="block truncate text-sm font-medium text-ink">
+                                                        {booking?.serviceType || `Vendor ${booking?.vendorId}`}
                                                     </span>
-                                                    <span className="mt-0.5 block text-xs text-ink-soft tabular-nums">
+                                                    {/* Service date, guest count and the age of the request were
+                                                        loaded on every one of these rows and none was shown — the
+                                                        row said only a vendor id and a number. */}
+                                                    <span className="mt-0.5 block truncate text-xs text-ink-soft tabular-nums">
                                                         {formatCurrency(bq?.totalAmount, booking?.payment?.currency || "PKR")}
+                                                        {booking?.requirements?.serviceDate
+                                                            ? ` · ${formatDate(booking.requirements.serviceDate)}`
+                                                            : ""}
+                                                        {booking?.requirements?.guestCount
+                                                            ? ` · ${booking.requirements.guestCount} guests`
+                                                            : ""}
+                                                    </span>
+                                                    <span className="mt-0.5 block text-2xs text-ink-faint">
+                                                        Requested {timeAgo(booking?.createdAt)}
+                                                        {booking?.quote?.negotiation?.length
+                                                            ? ` · ${booking.quote.negotiation.length} messages`
+                                                            : ""}
                                                     </span>
                                                 </span>
                                             </span>

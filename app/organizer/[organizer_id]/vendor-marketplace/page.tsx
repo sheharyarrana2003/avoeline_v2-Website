@@ -3,6 +3,7 @@ import { VendorData } from "@/src/services/models/vendor.model";
 import Link from "next/link";
 import { formatCurrency } from "@/src/lib/money";
 import {
+    BadgeCheck,
     Building2,
     Camera,
     LayoutGrid,
@@ -144,7 +145,19 @@ export default async function Vendor_Marketplace({
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <h3 className="truncate text-base font-semibold text-ink">{vendor?.businessName}</h3>
+                                                <h3 className="flex items-center gap-1.5 truncate text-base font-semibold text-ink">
+                                                    <span className="truncate">{vendor?.businessName}</span>
+                                                    {/* verification.verified was loaded for every vendor in
+                                                        this grid and the marketplace showed no badge at all —
+                                                        the one signal an organizer picks a vendor on. */}
+                                                    {vendor?.verification?.verified ? (
+                                                        <BadgeCheck
+                                                            size={15}
+                                                            className="shrink-0 text-success"
+                                                            aria-label="Verified vendor"
+                                                        />
+                                                    ) : null}
+                                                </h3>
                                                 <div className="mt-1 flex items-center gap-1.5">
                                                     <StarRating rating={rating} />
                                                     <span className="text-xs text-ink-soft tabular-nums">
@@ -154,7 +167,7 @@ export default async function Vendor_Marketplace({
                                             </div>
                                         </div>
 
-                                        <div className="mb-3 flex gap-2">
+                                        <div className="mb-3 flex flex-wrap gap-2">
                                             <span className="rounded-md bg-muted px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
                                                 {primaryCategory}
                                             </span>
@@ -165,10 +178,30 @@ export default async function Vendor_Marketplace({
                                             )}
                                         </div>
 
-                                        <p className="mb-4 flex items-center gap-1.5 text-xs text-ink-soft">
+                                        <p className="mb-3 flex items-center gap-1.5 text-xs text-ink-soft">
                                             <MapPin size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                             {city}{country ? `, ${country}` : ""}
                                         </p>
+
+                                        {/* stats and services were fetched with every vendor and
+                                            rendered nowhere on this grid. Track record is what
+                                            separates two vendors with the same star rating. */}
+                                        <dl className="mb-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-3 text-2xs text-ink-soft">
+                                            <div className="flex gap-1">
+                                                <dt>Bookings</dt>
+                                                <dd className="font-medium text-ink tabular-nums">{vendor?.stats?.totalBookings ?? 0}</dd>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <dt>Services</dt>
+                                                <dd className="font-medium text-ink tabular-nums">{vendor?.services?.length ?? 0}</dd>
+                                            </div>
+                                            {vendor?.stats?.avgResponseTime ? (
+                                                <div className="flex gap-1">
+                                                    <dt>Replies</dt>
+                                                    <dd className="font-medium text-ink">{vendor.stats.avgResponseTime}</dd>
+                                                </div>
+                                            ) : null}
+                                        </dl>
 
                                         <p className="mb-5">
                                             <span className="text-xl font-semibold text-ink tabular-nums">{formatCurrency(price)}</span>
