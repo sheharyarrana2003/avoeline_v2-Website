@@ -18,7 +18,7 @@ import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { formatCurrency } from "@/src/lib/money";
 import { StarRating } from "@/src/shared_components/ui/StarRating";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
@@ -231,11 +231,34 @@ export default async function VendorProfilePage({
                     </div>
                 </section>
 
-                <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                    <StatCard_dashboard title="Bookings" value={String(totalBookings)} icon={<CalendarCheck size={14} />} />
-                    <StatCard_dashboard title="Years Active" value={String(yearsInBusiness)} icon={<Clock size={14} />} />
-                    <StatCard_dashboard title="Avg Response" value={String(avgResponseTime)} icon={<MessageSquare size={14} />} />
-                    <StatCard_dashboard title="Repeat Clients" value={`${repeatPct}%`} icon={<Repeat size={14} />} />
+                {/* The rest of vendor.stats was sitting one property away the whole
+                    time — completed count, cancellation rate, lifetime revenue — and
+                    "Bookings 41" on its own says nothing about whether they went well. */}
+                <section className="grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                    <MetricTile
+                        label="Bookings"
+                        value={String(totalBookings)}
+                        icon={<CalendarCheck size={14} />}
+                        sublabel={`${v.stats?.completedBookings ?? 0} completed`}
+                    />
+                    <MetricTile
+                        label="Years active"
+                        value={String(yearsInBusiness)}
+                        icon={<Clock size={14} />}
+                        sublabel={`${v.services?.length ?? 0} services listed`}
+                    />
+                    <MetricTile
+                        label="Avg response"
+                        value={String(avgResponseTime)}
+                        icon={<MessageSquare size={14} />}
+                        sublabel={`${Math.round((v.stats?.cancellationRate ?? 0) * 100)}% cancellation rate`}
+                    />
+                    <MetricTile
+                        label="Repeat clients"
+                        value={`${repeatPct}%`}
+                        icon={<Repeat size={14} />}
+                        sublabel={`${v.ratings?.totalReviews ?? 0} reviews`}
+                    />
                 </section>
 
                 {!isPreview && (

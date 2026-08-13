@@ -22,7 +22,8 @@ import { RegService } from "@/src/services/registeration.service";
 import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
-import { StatCard_dashboard } from "@/src/shared_components/organizer/StatCard_dashboard";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 
 export default async function EventDetailsPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
@@ -91,26 +92,44 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
             {/* The fourth tile used to be "Avg. Rating 4.8 / Based on 142 reviews" over a
                 five-bar chart hardcoded to [45,62,74,100,68]. Neither number came from
                 anywhere; an invented figure on an organizer's own event is worse than none. */}
-            <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                <StatCard_dashboard
-                    title="Registrations"
-                    value={`${registrationsCount} / ${event.capacity.totalSeats}`}
+            {/* Was four bare figures on a divided band. "Registrations 340 / 500" and
+                "Capacity filled 68%" were two tiles saying the same thing in different
+                units, so the meter absorbs both and the freed tile carries the seats
+                still available — the number an organizer is actually deciding on. */}
+            <section className="grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
+                <MetricTile
+                    label="Registrations"
+                    value={`${registrationsCount}`}
                     icon={<Users className="h-4 w-4" />}
-                />
-                <StatCard_dashboard
-                    title="Capacity filled"
-                    value={`${capacityPercent}%`}
+                    sublabel={`${capacityPercent}% of ${event.capacity.totalSeats} seats`}
+                >
+                    <Meter
+                        label="Capacity filled"
+                        value={registrationsCount}
+                        max={event.capacity.totalSeats}
+                    />
+                </MetricTile>
+                <MetricTile
+                    label="Seats left"
+                    value={`${Math.max(0, event.capacity.totalSeats - registrationsCount)}`}
                     icon={<Gauge className="h-4 w-4" />}
+                    sublabel={event.capacity.totalSeats > 0 ? "Against configured capacity" : "No capacity set"}
                 />
-                <StatCard_dashboard
-                    title="Checked in"
+                <MetricTile
+                    label="Checked in"
                     value={`${checkedIn}`}
                     icon={<UserCheck className="h-4 w-4" />}
+                    sublabel={
+                        registrationsCount > 0
+                            ? `${Math.round((checkedIn / registrationsCount) * 100)}% of registrations`
+                            : "Nobody registered yet"
+                    }
                 />
-                <StatCard_dashboard
-                    title="Revenue"
+                <MetricTile
+                    label="Revenue"
                     value={formatCurrency(revenue, currency, "—")}
                     icon={<Wallet className="h-4 w-4" />}
+                    sublabel="Amounts actually paid"
                 />
             </section>
 
