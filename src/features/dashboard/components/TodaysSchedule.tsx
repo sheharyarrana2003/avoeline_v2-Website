@@ -40,22 +40,22 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                     saying which row is live. */}
                 <span
                   className={`mt-1.5 w-3.5 h-3.5 rounded-full border-2 ${
-                    isActive ? "border-gray-900 bg-gray-900" : "border-ink-soft bg-paper"
+                    isActive ? "border-ink bg-ink" : "border-ink-soft bg-paper"
                   }`}
                 />
                 {index < events.length - 1 && <span className="mt-1.5 h-full w-px min-h-12 bg-line-loud" />}
               </div>
 
-              <div className="-mx-2 rounded-lg border-b border-line px-2 pb-4 transition-colors last:border-b-0 hover:bg-gray-50">
+              <div className="-mx-2 rounded-lg border-b border-line px-2 pb-4 transition-colors last:border-b-0 hover:bg-muted">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-2xs font-medium uppercase text-gray-700 flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-gray-500" />
+                    <p className="text-2xs font-medium uppercase text-ink flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-ink-soft" />
                       {formatTime(event.startDate)} - {formatTime(event.endDate)}
                     </p>
                     <h3 className="mt-1 text-base text-ink">{event.title}</h3>
-                    <p className="mt-0.5 text-xs text-gray-500 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-gray-500" />
+                    <p className="mt-0.5 text-xs text-ink-soft flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-ink-soft" />
                       {event.location}
                     </p>
                   </div>
@@ -65,7 +65,7 @@ export default function TodaysSchedule({ events }: { events: DashboardEvent[] })
                       state is carried by the word inside it and by the filled/hollow dot. */}
                   <span
                     className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-2xs font-medium uppercase ${
-                      isActive ? "border border-gray-900 text-gray-900" : "border border-line-loud text-ink-soft"
+                      isActive ? "border border-ink text-ink" : "border border-line-loud text-ink-soft"
                     }`}
                   >
                     {isActive ? "Live View" : "Upcoming"}

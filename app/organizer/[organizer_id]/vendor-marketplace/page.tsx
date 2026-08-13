@@ -117,7 +117,7 @@ export default async function Vendor_Marketplace({
                                     key={vendor?.vendorId || index}
                                     className="overflow-hidden rounded-2xl border border-line bg-paper transition hover:border-line-loud"
                                 >
-                                    <div className="h-40 bg-gray-100">
+                                    <div className="h-40 bg-muted">
                                         {coverImage ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
@@ -128,19 +128,19 @@ export default async function Vendor_Marketplace({
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center">
                                                 {/* gray-400 = 2.5:1 — a placeholder glyph, aria-hidden, meaning is in the name below. */}
-                                                <Building2 size={32} className="text-gray-400" aria-hidden="true" />
+                                                <Building2 size={32} className="text-ink-faint" aria-hidden="true" />
                                             </div>
                                         )}
                                     </div>
 
                                     <div className="p-5">
                                         <div className="mb-3 flex items-start gap-3">
-                                            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+                                            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                                                 {logo ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={logo} alt="" className="h-full w-full object-cover" />
                                                 ) : (
-                                                    <Store size={16} className="text-gray-400" aria-hidden="true" />
+                                                    <Store size={16} className="text-ink-faint" aria-hidden="true" />
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
@@ -155,18 +155,18 @@ export default async function Vendor_Marketplace({
                                         </div>
 
                                         <div className="mb-3 flex gap-2">
-                                            <span className="rounded-md bg-gray-100 px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
+                                            <span className="rounded-md bg-muted px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
                                                 {primaryCategory}
                                             </span>
                                             {secondaryCategory && (
-                                                <span className="rounded-md bg-gray-100 px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
+                                                <span className="rounded-md bg-muted px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
                                                     {secondaryCategory}
                                                 </span>
                                             )}
                                         </div>
 
                                         <p className="mb-4 flex items-center gap-1.5 text-xs text-ink-soft">
-                                            <MapPin size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <MapPin size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                             {city}{country ? `, ${country}` : ""}
                                         </p>
 

@@ -159,7 +159,7 @@ export default async function VendorProfilePage({
 
                 {/* Hero */}
                 <section className="overflow-hidden rounded-2xl border border-line bg-paper">
-                    <div className="relative h-48 bg-gray-100">
+                    <div className="relative h-48 bg-muted">
                         {coverImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -170,7 +170,7 @@ export default async function VendorProfilePage({
                                 className="h-full w-full object-cover grayscale"
                             />
                         ) : (
-                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                            <div className="flex h-full w-full items-center justify-center text-ink-faint">
                                 {/* gray-400 = 2.5:1: decoration inside an aria-hidden placeholder. */}
                                 <ImageOff size={28} aria-hidden="true" />
                             </div>
@@ -187,7 +187,7 @@ export default async function VendorProfilePage({
                                     className="-mt-14 h-16 w-16 shrink-0 rounded-full border-4 border-paper bg-paper object-cover"
                                 />
                             ) : (
-                                <div className="-mt-14 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-paper bg-gray-900 font-display text-xl text-white">
+                                <div className="-mt-14 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-paper bg-ink font-display text-xl text-ink-invert">
                                     {businessName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                                 </div>
                             )}
@@ -201,7 +201,7 @@ export default async function VendorProfilePage({
                                     </span>
                                 </div>
                                 <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-soft">
-                                    <MapPin size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <MapPin size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     {[address?.city, address?.country].filter(Boolean).join(', ') || 'Location not set'}
                                 </p>
                                 {serviceCategories.length > 0 && (
@@ -267,7 +267,7 @@ export default async function VendorProfilePage({
                             aria-current={activeTab === tab.id ? "page" : undefined}
                             className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
                                 activeTab === tab.id
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                         >
@@ -343,7 +343,7 @@ export default async function VendorProfilePage({
                                 {portfolioImages.length > 0 ? (
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                                         {portfolioImages.map((img: any, i: number) => (
-                                            <div key={i} className="aspect-square overflow-hidden rounded-xl bg-gray-100">
+                                            <div key={i} className="aspect-square overflow-hidden rounded-xl bg-muted">
                                                 {img?.url ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={img.url} alt={img.caption || ""} loading="lazy" decoding="async" className="h-full w-full object-cover" />
@@ -365,7 +365,7 @@ export default async function VendorProfilePage({
                                         <p className={labelClass}>Videos</p>
                                         <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                             {portfolioVideos.map((url: string, i: number) => (
-                                                <video key={i} src={url} controls className="aspect-video w-full rounded-xl bg-gray-900 object-cover" />
+                                                <video key={i} src={url} controls className="aspect-video w-full rounded-xl bg-panel object-cover" />
                                             ))}
                                         </div>
                                     </div>
@@ -395,7 +395,7 @@ export default async function VendorProfilePage({
                                         <li key={r.id} className="py-4">
                                             <div className="flex items-center justify-between gap-3">
                                                 <StarRating rating={r.rating} />
-                                                <span className="rounded-full border border-gray-900 bg-gray-900 px-2 py-0.5 text-2xs font-bold uppercase text-white">
+                                                <span className="rounded-full border border-ink bg-ink px-2 py-0.5 text-2xs font-bold uppercase text-ink-invert">
                                                     Verified booking
                                                 </span>
                                             </div>

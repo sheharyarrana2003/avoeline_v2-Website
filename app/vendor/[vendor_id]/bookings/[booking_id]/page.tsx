@@ -73,7 +73,7 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                     {raw_booking.statusHistory.map((s: any, index: number) => (
                                         <li key={index} className="relative">
                                             <span
-                                                className="absolute -left-[31px] flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 text-white"
+                                                className="absolute -left-[31px] flex h-4 w-4 items-center justify-center rounded-full bg-ink text-ink-invert"
                                                 aria-hidden="true"
                                             >
                                                 <Check size={10} strokeWidth={3} />
@@ -253,7 +253,7 @@ export default async function VendorBookingDetailPage({ params }: { params: Prom
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-2 py-3 text-sm text-ink hover:underline"
                                             >
-                                                <FileText size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                <FileText size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 {doc.label}
                                             </a>
                                         </li>

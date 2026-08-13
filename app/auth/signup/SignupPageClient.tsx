@@ -165,8 +165,8 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                                 aria-pressed={formData.userType === role}
                                 onClick={() => handleRoleSelect(role)}
                                 className={`flex-1 py-2.5 text-sm font-medium transition-colors ${formData.userType === role
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-transparent text-ink-soft hover:bg-gray-100'
+                                    ? 'bg-ink text-ink-invert'
+                                    : 'bg-transparent text-ink-soft hover:bg-muted'
                                     }`}
                             >
                                 {role}

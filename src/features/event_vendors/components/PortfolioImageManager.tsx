@@ -59,7 +59,7 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
             ) : (
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     {images.map((img, i) => (
-                        <div key={img.url + i} className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+                        <div key={img.url + i} className="group relative aspect-square overflow-hidden rounded-xl bg-muted">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={img.url} alt={img.caption || "portfolio image"} className="h-full w-full object-cover" />
                             <ConfirmButton
@@ -71,13 +71,13 @@ export function PortfolioImageManager({ vendorId, images }: { vendorId: string; 
                                 }
                                 confirmLabel="Remove image"
                                 onConfirm={() => remove(img.url)}
-                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900/80 text-white opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/80 text-ink-invert opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                             >
                                 <span className="sr-only">Remove image</span>
                                 <X className="h-3.5 w-3.5" aria-hidden="true" />
                             </ConfirmButton>
                             {img.caption && (
-                                <div className="absolute inset-x-0 bottom-0 truncate bg-gray-900/70 px-2 py-1 text-2xs text-white">{img.caption}</div>
+                                <div className="absolute inset-x-0 bottom-0 truncate bg-black/70 px-2 py-1 text-2xs text-ink-invert">{img.caption}</div>
                             )}
                         </div>
                     ))}

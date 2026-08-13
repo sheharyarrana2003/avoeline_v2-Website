@@ -189,7 +189,7 @@ export default async function VendorBookingsPage({
                             aria-current={filter === tab.id ? "page" : undefined}
                             className={`-mb-px whitespace-nowrap border-b-2 pb-3 pt-6 text-sm font-medium transition ${
                                 filter === tab.id
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                         >
@@ -220,17 +220,17 @@ export default async function VendorBookingsPage({
                                     <dl className="mt-4 space-y-2 text-sm text-ink-soft">
                                         <div className="flex items-center gap-2">
                                             {/* gray-400 = 2.5:1, decoration only — every row has a text value. */}
-                                            <ServiceIcon size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <ServiceIcon size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                             <dt className="sr-only">Service</dt>
                                             <dd>{getServiceName(serviceType)}</dd>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <CalendarDays size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <CalendarDays size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                             <dt className="sr-only">Service date</dt>
                                             <dd className="tabular-nums">{formatDate(booking?.requirements?.serviceDate)}</dd>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <MapPin size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                            <MapPin size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                             <dt className="sr-only">Location</dt>
                                             <dd>{booking?.requirements?.location || 'Location TBD'}</dd>
                                         </div>

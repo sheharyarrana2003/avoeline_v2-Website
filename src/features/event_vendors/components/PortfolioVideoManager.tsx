@@ -60,7 +60,7 @@ export function PortfolioVideoManager({ vendorId, videos }: { vendorId: string; 
                                 description="This video will be taken off your public portfolio. This cannot be undone."
                                 confirmLabel="Remove video"
                                 onConfirm={() => remove(v)}
-                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-soft transition hover:bg-gray-100 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-soft transition hover:bg-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                             >
                                 <span className="sr-only">Remove video</span>
                                 <X className="h-4 w-4" aria-hidden="true" />

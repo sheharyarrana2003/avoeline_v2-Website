@@ -12,7 +12,7 @@
     
 //     return (
 //         <><h6>tabs</h6>
-//             <div className="flex space-x-6 border-b border-gray-200 mb-6 pb-2">
+//             <div className="flex space-x-6 border-b border-line mb-6 pb-2">
 
 //                 {arr.map((tab) => {
 
@@ -27,7 +27,7 @@
 //                             href={targetUrl}
 //                             className={`capitalize ${currentTab === tab
 //                                     ? "font-bold text-black border-b-2 border-black"
-//                                     : "text-gray-500 hover:text-gray-800"
+//                                     : "text-ink-soft hover:text-ink"
 //                                 }`}
 //                         >
 //                             {tab}

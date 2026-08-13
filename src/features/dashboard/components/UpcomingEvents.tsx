@@ -35,7 +35,7 @@ export default function UpcomingEvents({ events }: { events: DashboardEvent[] })
 
                 {/* The fill is the only thing carrying the proportion visually, so the
                     count below it states the same fact in words. */}
-                <div className="h-1 overflow-hidden rounded-full bg-gray-200">
+                <div className="h-1 overflow-hidden rounded-full bg-muted-strong">
                   <div className="h-full bg-accent" style={{ width: `${percent}%` }} />
                 </div>
 

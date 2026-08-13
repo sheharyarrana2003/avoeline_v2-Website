@@ -63,7 +63,7 @@ export function MediaUploadField({
             <button
               type="button"
               onClick={() => setUrls((prev) => prev.filter((_, idx) => idx !== i))}
-              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-gray-900/80 text-white transition hover:bg-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-black/80 text-ink-invert transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="Remove image"
             >
               <X className="h-3 w-3" aria-hidden="true" />

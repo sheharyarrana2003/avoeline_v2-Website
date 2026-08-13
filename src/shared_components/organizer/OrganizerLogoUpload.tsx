@@ -23,7 +23,7 @@ export function OrganizerLogoUpload({
       accept="image/*"
       value={logo || null}
       label="Upload logo"
-      buttonClassName="relative flex h-20 w-20 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border-2 border-dashed border-line-loud bg-canvas text-2xs text-ink-soft transition hover:border-gray-900 disabled:opacity-60"
+      buttonClassName="relative flex h-20 w-20 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border-2 border-dashed border-line-loud bg-canvas text-2xs text-ink-soft transition hover:border-ink disabled:opacity-60"
       onUploaded={async (url) => {
         setLogo(url);
         const res = await updateOrganizerLogo(organizerId, url);

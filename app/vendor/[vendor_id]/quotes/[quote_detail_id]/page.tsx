@@ -191,7 +191,7 @@ export default async function QuoteDetailPage({
                                         <li key={i} className="flex gap-3">
                                             {/* Decoration: the label below names the speaker. */}
                                             <span
-                                                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${n?.from === 'organizer' ? 'bg-gray-300' : 'bg-gray-900'}`}
+                                                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${n?.from === 'organizer' ? 'bg-muted-strong' : 'bg-ink'}`}
                                                 aria-hidden="true"
                                             />
                                             <div>
@@ -211,7 +211,7 @@ export default async function QuoteDetailPage({
                                 <ul className="space-y-4">
                                     {communications.map((comm: any, i: number) => (
                                         <li key={i} className="flex gap-3">
-                                            <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-gray-300" aria-hidden="true" />
+                                            <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-muted-strong" aria-hidden="true" />
                                             <div>
                                                 <p className="text-xs font-medium capitalize text-ink">{comm?.from} → {comm?.to}</p>
                                                 <p className="mt-1 text-sm text-ink-soft">{comm?.message}</p>
@@ -349,7 +349,7 @@ export default async function QuoteDetailPage({
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-2 py-3 text-sm text-ink hover:underline"
                                             >
-                                                <FileText size={14} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                <FileText size={14} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 {doc.label}
                                             </a>
                                         </li>
@@ -361,7 +361,7 @@ export default async function QuoteDetailPage({
                 </div>
 
                 <div className="mt-10 flex items-center gap-2 border-t border-line pt-6">
-                    <Clock size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                    <Clock size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                     {deadline ? (
                         <span className={`text-sm ${deadline.urgent ? 'font-medium text-ink' : 'text-ink-soft'}`}>
                             {deadline.label}

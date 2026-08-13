@@ -25,14 +25,14 @@ export function NotificationBell({
             href={href}
             aria-label={hasUnread ? `Notifications, ${unreadCount} unread` : "Notifications"}
             className={`relative transition-colors ${
-                onInk ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-black"
+                onInk ? "text-white/70 hover:text-white" : "text-ink-soft hover:text-black"
             }`}
         >
             <Bell className="w-5 h-5" aria-hidden="true" />
             {hasUnread && (
                 <span
                     className={`absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full text-[10px] font-semibold leading-4 text-center tabular-nums ${
-                        onInk ? "bg-white text-gray-950" : "bg-gray-900 text-white"
+                        onInk ? "bg-white text-gray-950" : "bg-ink text-ink-invert"
                     }`}
                 >
                     {unreadCount > 99 ? "99+" : unreadCount}

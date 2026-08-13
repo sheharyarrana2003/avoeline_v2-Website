@@ -216,21 +216,21 @@ export default function CreateEventPage({ handle_submission }: any) {
         <div className="space-y-8">
             {/* Event Type Selection */}
             <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Event Type</h3>
-                <p className="text-sm text-gray-500 mb-4">Select the format that best fits your event structure.</p>
+                <h3 className="text-lg font-bold text-ink mb-1">Event Type</h3>
+                <p className="text-sm text-ink-soft mb-4">Select the format that best fits your event structure.</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {EVENT_TYPES.map((type) => (
                         <button
                             key={type.id}
                             onClick={() => updateForm('eventType', type.id)}
                             className={`p-4 rounded-2xl border-2 text-left transition-all ${formData.eventType === type.id
-                                ? 'border-black bg-gray-50'
-                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                ? 'border-black bg-muted'
+                                : 'border-line hover:border-line-loud bg-paper'
                                 }`}
                         >
                             <div className="text-2xl mb-2">{type.icon}</div>
-                            <div className="font-semibold text-sm text-gray-900">{type.label}</div>
-                            <div className="text-xs text-gray-500">{type.sub}</div>
+                            <div className="font-semibold text-sm text-ink">{type.label}</div>
+                            <div className="text-xs text-ink-soft">{type.sub}</div>
                         </button>
                     ))}
                 </div>
@@ -240,55 +240,55 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Left: General Info */}
                 <div className="space-y-6">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">General Info</h3>
-                        <p className="text-sm text-gray-500 mb-4">The essential details displayed on the event page.</p>
+                        <h3 className="text-lg font-bold text-ink mb-1">General Info</h3>
+                        <p className="text-sm text-ink-soft mb-4">The essential details displayed on the event page.</p>
                     </div>
 
                     {/* Event Title */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                            Event Title <span className="float-right text-gray-500 font-normal">{formData.eventTitle.length}/100</span>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">
+                            Event Title <span className="float-right text-ink-soft font-normal">{formData.eventTitle.length}/100</span>
                         </label>
                         <input
                             type="text"
                             value={formData.eventTitle}
                             onChange={(e) => updateForm('eventTitle', e.target.value)}
                             placeholder="Global AI Innovation Summit 2024"
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
-                        <div className="border border-gray-200 rounded-xl overflow-hidden">
-                            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50">
-                                <button className="p-1 hover:bg-gray-200 rounded-xs text-xs font-bold">B</button>
-                                <button className="p-1 hover:bg-gray-200 rounded-xs text-xs italic">I</button>
-                                <button className="p-1 hover:bg-gray-200 rounded-xs text-xs">≡</button>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Description</label>
+                        <div className="border border-line rounded-xl overflow-hidden">
+                            <div className="flex items-center gap-2 px-3 py-2 border-b border-line bg-muted">
+                                <button className="p-1 hover:bg-muted-strong rounded-xs text-xs font-bold">B</button>
+                                <button className="p-1 hover:bg-muted-strong rounded-xs text-xs italic">I</button>
+                                <button className="p-1 hover:bg-muted-strong rounded-xs text-xs">≡</button>
                             </div>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => updateForm('description', e.target.value)}
                                 placeholder="Tell your attendees what to expect..."
                                 rows={4}
-                                className="w-full px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none resize-none"
+                                className="w-full px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none resize-none"
                             />
                         </div>
                     </div>
 
                     {/* Category */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Category</label>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Category</label>
                         <div className="relative">
                             <select
                                 value={formData.category}
                                 onChange={(e) => updateForm('category', e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line"
                             >
                                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
@@ -296,24 +296,24 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Short Description */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Short Description</label>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Short Description</label>
                         <input
                             type="text"
                             value={formData.shortDescription}
                             onChange={(e) => updateForm('shortDescription', e.target.value)}
                             placeholder="A catchphrase for social sharing"
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
                     {/* Tags */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tags</label>
-                        <div className="flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Tags</label>
+                        <div className="flex flex-wrap items-center gap-2 bg-paper border border-line rounded-xl px-3 py-2">
                             {formData.tags.map(tag => (
-                                <span key={tag} className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
+                                <span key={tag} className="bg-muted text-ink text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
                                     {tag}
-                                    <button onClick={() => removeTag(tag)} className="text-gray-500 hover:text-gray-600">×</button>
+                                    <button onClick={() => removeTag(tag)} className="text-ink-soft hover:text-ink-soft">×</button>
                                 </span>
                             ))}
                             <input
@@ -331,8 +331,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Right: Media & Registration */}
                 <div className="space-y-6">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">Media Assets</h3>
-                        <p className="text-sm text-gray-500 mb-4">High-quality visuals increase engagement.</p>
+                        <h3 className="text-lg font-bold text-ink mb-1">Media Assets</h3>
+                        <p className="text-sm text-ink-soft mb-4">High-quality visuals increase engagement.</p>
                     </div>
 
                     {/* Banner Upload */}
@@ -346,14 +346,14 @@ export default function CreateEventPage({ handle_submission }: any) {
                             // Square dropzone/preview so the upload box matches the 1:1
                             // banner the event page renders — the default is a short, wide
                             // strip that implied a much wider banner than we display.
-                            buttonClassName="relative mx-auto flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-500 transition hover:border-gray-400 disabled:opacity-60"
+                            buttonClassName="relative mx-auto flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
                         />
-                        <p className="text-xs text-gray-500 mt-1">1080 × 1080px square recommended (JPG, PNG)</p>
+                        <p className="text-xs text-ink-soft mt-1">1080 × 1080px square recommended (JPG, PNG)</p>
                     </div>
 
                     {/* Gallery */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Gallery</label>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Gallery</label>
                         <div className="flex flex-wrap items-center gap-3">
                             <MediaUpload
                                 folder="gallery"
@@ -361,7 +361,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 multiple
                                 label="+"
                                 className="shrink-0"
-                                buttonClassName="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-lg text-gray-500 transition hover:border-gray-400 disabled:opacity-60"
+                                buttonClassName="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-line-loud bg-muted text-lg text-ink-soft transition hover:border-line-loud disabled:opacity-60"
                                 onUploaded={(url) =>
                                     updateForm('galleryImages', [...(formData.galleryImages ?? []), url])
                                 }
@@ -382,7 +382,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 (formData.galleryImages ?? []).filter((_, idx) => idx !== i)
                                             )
                                         }
-                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-white text-2xs leading-none opacity-0 group-hover:opacity-100 transition"
+                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-ink-invert text-2xs leading-none opacity-0 group-hover:opacity-100 transition"
                                         aria-label="Remove image"
                                     >
                                         ×
@@ -394,16 +394,16 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     {/* Video URL */}
                     <div>
-                        <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Video Promo URL</label>
+                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Video Promo URL</label>
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={formData.videoUrl}
                                 onChange={(e) => updateForm('videoUrl', e.target.value)}
                                 placeholder="https://youtube.com/..."
-                                className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                                className="flex-1 bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line"
                             />
-                            <button className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition">
+                            <button className="bg-ink text-ink-invert px-4 py-2 rounded-xl text-sm font-medium hover:bg-ink-soft transition">
                                 Preview
                             </button>
                         </div>
@@ -421,36 +421,36 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Left: Event Schedule */}
             <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-2">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <h3 className="text-lg font-bold text-gray-900">Event Schedule</h3>
+                    <h3 className="text-lg font-bold text-ink">Event Schedule</h3>
                 </div>
 
                 {/* Date Selection */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">Start Date</label>
+                        <label className="block text-xs text-ink-soft mb-2">Start Date</label>
                         <div className="relative">
                             <DateField
                                 value={formData.startDate}
                                 onChange={(e) => updateForm('startDate', e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-line pl-10"
                             />
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">End Date</label>
+                        <label className="block text-xs text-ink-soft mb-2">End Date</label>
                         <div className="relative">
                             <DateField
                                 value={formData.endDate}
                                 onChange={(e) => updateForm('endDate', e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-line pl-10"
                             />
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
@@ -458,11 +458,11 @@ export default function CreateEventPage({ handle_submission }: any) {
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <label className="flex items-center gap-2 text-sm text-ink-soft">
                         <input type="checkbox" checked={formData.startDate === formData.endDate} onChange={() => { }} className="rounded-xs" />
                         Same as start date
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <label className="flex items-center gap-2 text-sm text-ink-soft">
                         <input type="checkbox" checked={formData.isAllDay} onChange={(e) => updateForm('isAllDay', e.target.checked)} className="rounded-xs" />
                         All-day event
                     </label>
@@ -471,12 +471,12 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Time Selection */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">Start Time</label>
+                        <label className="block text-xs text-ink-soft mb-2">Start Time</label>
                         <div className="relative">
                             <select
                                 value={formData.startTime}
                                 onChange={(e) => updateForm('startTime', e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line"
                             >
                                 <option value="10:00 AM">10:00 AM</option>
                                 <option value="11:00 AM">11:00 AM</option>
@@ -484,25 +484,25 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 <option value="01:00 PM">01:00 PM</option>
                                 <option value="02:00 PM">02:00 PM</option>
                             </select>
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">End Time</label>
+                        <label className="block text-xs text-ink-soft mb-2">End Time</label>
                         <div className="relative">
                             <select
                                 value={formData.endTime}
                                 onChange={(e) => updateForm('endTime', e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line"
                             >
                                 <option value="05:00 PM">05:00 PM</option>
                                 <option value="06:00 PM">06:00 PM</option>
                                 <option value="07:00 PM">07:00 PM</option>
                                 <option value="08:00 PM">08:00 PM</option>
                             </select>
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
@@ -510,30 +510,30 @@ export default function CreateEventPage({ handle_submission }: any) {
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500 flex items-center gap-1">
+                    <span className="text-ink-soft flex items-center gap-1">
                         <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Total duration: 7 hours
                     </span>
                     <div className="flex gap-2">
-                        <button className="text-xs bg-gray-100 px-2 py-1 rounded-xs text-gray-600">12h</button>
-                        <button className="text-xs bg-gray-100 px-2 py-1 rounded-xs text-gray-600">24h</button>
+                        <button className="text-xs bg-muted px-2 py-1 rounded-xs text-ink-soft">12h</button>
+                        <button className="text-xs bg-muted px-2 py-1 rounded-xs text-ink-soft">24h</button>
                     </div>
                 </div>
 
                 {/* Timezone */}
                 <div>
-                    <label className="block text-xs text-gray-500 mb-2">Timezone</label>
+                    <label className="block text-xs text-ink-soft mb-2">Timezone</label>
                     <div className="relative">
                         <select
                             value={formData.timezone}
                             onChange={(e) => updateForm('timezone', e.target.value)}
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line pl-10"
                         >
                             {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
                         </select>
-                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -542,16 +542,16 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Recurring Event */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <span className="text-sm font-medium text-gray-700">Recurring Event</span>
+                        <span className="text-sm font-medium text-ink">Recurring Event</span>
                     </div>
                     <button
                         onClick={() => updateForm('isRecurring', !formData.isRecurring)}
-                        className={`relative w-11 h-6 rounded-full transition-colors ${formData.isRecurring ? 'bg-black' : 'bg-gray-300'}`}
+                        className={`relative w-11 h-6 rounded-full transition-colors ${formData.isRecurring ? 'bg-ink' : 'bg-muted-strong'}`}
                     >
-                        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.isRecurring ? 'right-1' : 'left-1'}`} />
+                        <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.isRecurring ? 'right-1' : 'left-1'}`} />
                     </button>
                 </div>
 
@@ -562,8 +562,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 key={type}
                                 onClick={() => updateForm('recurrenceType', type.toLowerCase())}
                                 className={`px-4 py-2 rounded-full text-xs font-medium transition ${formData.recurrenceType === type.toLowerCase()
-                                    ? 'bg-black text-white'
-                                    : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-ink text-ink-invert'
+                                    : 'bg-muted text-ink-soft'
                                     }`}
                             >
                                 {type}
@@ -573,13 +573,13 @@ export default function CreateEventPage({ handle_submission }: any) {
                 )}
 
                 {formData.isRecurring && (
-                    <div className="bg-gray-50 rounded-xl p-4 flex items-start gap-3">
-                        <svg aria-hidden="true" className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="bg-muted rounded-xl p-4 flex items-start gap-3">
+                        <svg aria-hidden="true" className="w-5 h-5 text-ink-soft flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-medium text-gray-700">Quick Summary</p>
-                            <p className="text-xs text-gray-500 mt-1">Occurs every day starting {previewDate(formData.startDate)}, until {previewDate(formData.endDate)}. Starts at {previewTime(formData.startTime)} and ends at {previewTime(formData.endTime)} PKT.</p>
+                            <p className="text-sm font-medium text-ink">Quick Summary</p>
+                            <p className="text-xs text-ink-soft mt-1">Occurs every day starting {previewDate(formData.startDate)}, until {previewDate(formData.endDate)}. Starts at {previewTime(formData.startTime)} and ends at {previewTime(formData.endTime)} PKT.</p>
                         </div>
                     </div>
                 )}
@@ -588,11 +588,11 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Right: Event Location */}
             <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-2">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <h3 className="text-lg font-bold text-gray-900">Event Location</h3>
+                    <h3 className="text-lg font-bold text-ink">Event Location</h3>
                 </div>
 
                 {/* Location Type */}
@@ -606,12 +606,12 @@ export default function CreateEventPage({ handle_submission }: any) {
                             key={loc.id}
                             onClick={() => updateForm('locationType', loc.id)}
                             className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.locationType === loc.id
-                                ? 'border-black bg-gray-50'
-                                : 'border-gray-200 bg-white hover:border-gray-300'
+                                ? 'border-black bg-muted'
+                                : 'border-line bg-paper hover:border-line-loud'
                                 }`}
                         >
                             <div className="text-2xl mb-1">{loc.icon}</div>
-                            <div className="text-xs font-medium text-gray-700">{loc.label}</div>
+                            <div className="text-xs font-medium text-ink">{loc.label}</div>
                         </button>
                     ))}
                 </div>
@@ -619,27 +619,27 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Venue Details */}
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">Venue Name</label>
+                        <label className="block text-xs text-ink-soft mb-2">Venue Name</label>
                         <input
                             type="text"
                             value={formData.venueName}
                             onChange={(e) => updateForm('venueName', e.target.value)}
                             placeholder="e.g. Grand Convention Center"
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs text-gray-500 mb-2">Address</label>
+                        <label className="block text-xs text-ink-soft mb-2">Address</label>
                         <div className="relative">
                             <input
                                 type="text"
                                 value={formData.address}
                                 onChange={(e) => updateForm('address', e.target.value)}
                                 placeholder="Start typing address..."
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line pl-10"
                             />
-                            <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -647,45 +647,45 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs text-gray-500 mb-2">City</label>
+                            <label className="block text-xs text-ink-soft mb-2">City</label>
                             <div className="relative">
                                 <select
                                     value={formData.city}
                                     onChange={(e) => updateForm('city', e.target.value)}
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 appearance-none outline-none focus:ring-2 focus:ring-gray-200"
+                                    className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line"
                                 >
                                     <option>Lahore</option>
                                     <option>Karachi</option>
                                     <option>Islamabad</option>
                                     <option>Rawalpindi</option>
                                 </select>
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-2">Postal Code</label>
+                            <label className="block text-xs text-ink-soft mb-2">Postal Code</label>
                             <input
                                 type="text"
                                 value={formData.postalCode}
                                 onChange={(e) => updateForm('postalCode', e.target.value)}
                                 placeholder="54000"
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Map Placeholder */}
-                <div className="relative h-48 bg-gray-200 rounded-2xl overflow-hidden">
+                <div className="relative h-48 bg-muted-strong rounded-2xl overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                        <svg aria-hidden="true" className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" className="w-8 h-8 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7" />
                         </svg>
                     </div>
-                    <div className="absolute bottom-3 left-3 bg-white rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm flex items-center gap-1">
-                        <svg aria-hidden="true" className="w-3 h-3 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute bottom-3 left-3 bg-paper rounded-full px-3 py-1.5 text-xs font-medium text-ink shadow-sm flex items-center gap-1">
+                        <svg aria-hidden="true" className="w-3 h-3 text-ink" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                         {formData.coordinates.lat}°N, {formData.coordinates.lng}°E
@@ -695,48 +695,48 @@ export default function CreateEventPage({ handle_submission }: any) {
                 {/* Capacity */}
                 <div>
                     <div className="flex items-center gap-2 mb-4">
-                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <h3 className="text-sm font-bold text-gray-900">Capacity & Availability</h3>
+                        <h3 className="text-sm font-bold text-ink">Capacity & Availability</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs text-gray-500 mb-2">Total Seats</label>
+                            <label className="block text-xs text-ink-soft mb-2">Total Seats</label>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => updateForm('totalSeats', Math.max(0, formData.totalSeats - 1))}
-                                    className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                                    className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-ink-soft hover:bg-muted-strong"
                                 >-</button>
                                 <input
                                     type="number"
                                     value={formData.totalSeats}
                                     onChange={(e) => updateForm('totalSeats', parseInt(e.target.value) || 0)}
-                                    className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                    className="flex-1 bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-center text-ink outline-none"
                                 />
                                 <button
                                     onClick={() => updateForm('totalSeats', formData.totalSeats + 1)}
-                                    className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                                    className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-ink-soft hover:bg-muted-strong"
                                 >+</button>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-2">Reserved Seats</label>
+                            <label className="block text-xs text-ink-soft mb-2">Reserved Seats</label>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => updateForm('reservedSeats', Math.max(0, formData.reservedSeats - 1))}
-                                    className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                                    className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-ink-soft hover:bg-muted-strong"
                                 >-</button>
                                 <input
                                     type="number"
                                     value={formData.reservedSeats}
                                     onChange={(e) => updateForm('reservedSeats', parseInt(e.target.value) || 0)}
-                                    className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                    className="flex-1 bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-center text-ink outline-none"
                                 />
                                 <button
                                     onClick={() => updateForm('reservedSeats', formData.reservedSeats + 1)}
-                                    className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                                    className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-ink-soft hover:bg-muted-strong"
                                 >+</button>
                             </div>
                         </div>
@@ -744,25 +744,25 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <div className="flex items-center justify-between mt-4">
                         <div>
-                            <p className="text-sm font-medium text-gray-700">Enable Waiting List</p>
-                            <p className="text-xs text-gray-500">Allows guests to join queue if seats are full</p>
+                            <p className="text-sm font-medium text-ink">Enable Waiting List</p>
+                            <p className="text-xs text-ink-soft">Allows guests to join queue if seats are full</p>
                             {
                                 formData.enableWaitingList && <div className='mt-10'>
-                                    <label className="text-sm font-medium text-gray-700">Waiting List Capacity</label>
+                                    <label className="text-sm font-medium text-ink">Waiting List Capacity</label>
                                     <input
                                         type="number"
                                         value={formData.waitingListCapacity}
                                         onChange={(e) => updateForm('waitingListCapacity', parseInt(e.target.value) || 0)}
-                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-center text-gray-900 outline-none"
+                                        className="flex-1 bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-center text-ink outline-none"
                                     />
                                 </div>
                             }
                         </div>
                         <button
                             onClick={() => updateForm('enableWaitingList', !formData.enableWaitingList)}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.enableWaitingList ? 'bg-black' : 'bg-gray-300'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.enableWaitingList ? 'bg-ink' : 'bg-muted-strong'}`}
                         >
-                            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.enableWaitingList ? 'right-1' : 'left-1'}`} />
+                            <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.enableWaitingList ? 'right-1' : 'left-1'}`} />
                         </button>
                     </div>
                 </div>
@@ -774,15 +774,15 @@ export default function CreateEventPage({ handle_submission }: any) {
     const renderStep3 = () => (
         <div className="space-y-8">
             {/* Ticket Type Selection */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <p className="text-sm font-medium text-gray-700 text-center mb-4">Select Ticket Type</p>
+            <div className="bg-paper rounded-2xl p-6 border border-line shadow-sm">
+                <p className="text-sm font-medium text-ink text-center mb-4">Select Ticket Type</p>
                 <div className="flex justify-center">
-                    <div className="bg-gray-100 rounded-xl p-1 flex">
+                    <div className="bg-muted rounded-xl p-1 flex">
                         <button
                             onClick={() => updateForm('ticketType', 'free')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'free'
-                                ? 'bg-white text-gray-900 shadow-sm'
-                                : 'text-gray-500'
+                                ? 'bg-paper text-ink shadow-sm'
+                                : 'text-ink-soft'
                                 }`}
                         >
                             Free
@@ -790,8 +790,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                         <button
                             onClick={() => updateForm('ticketType', 'paid')}
                             className={`px-6 py-2 rounded-lg text-sm font-medium transition ${formData.ticketType === 'paid'
-                                ? 'bg-black text-white shadow-sm'
-                                : 'text-gray-500'
+                                ? 'bg-ink text-ink-invert shadow-sm'
+                                : 'text-ink-soft'
                                 }`}
                         >
                             Paid
@@ -803,8 +803,8 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* {Ticket final price} — only relevant for paid events */}
             {formData.ticketType !== 'free' && (
                 <div
-                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Of Ticket</label>
+                    className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
+                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Price Of Ticket</label>
                     <input
                         type="text"
                         value={formData.PriceOfTicket}
@@ -812,7 +812,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                             formData.PriceOfTicket = parseInt(e.target.value) || 0;
                             updateForm('PriceOfTicket', formData.PriceOfTicket);
                         }}
-                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                        className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                     />
                 </div>
             )}
@@ -820,18 +820,18 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Ticket Tiers */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                     </svg>
-                    <h3 className="font-bold text-gray-900">Ticket Tiers</h3>
+                    <h3 className="font-bold text-ink">Ticket Tiers</h3>
                 </div>
 
                 <div className="space-y-4">
                     {formData.ticketTiers.map((tier) => (
-                        <div key={tier.id} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <div key={tier.id} className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
                             <div className="grid grid-cols-12 gap-4 items-end">
                                 <div className="col-span-4">
-                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tier Name</label>
+                                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Tier Name</label>
                                     <input
                                         type="text"
                                         value={tier.name}
@@ -841,13 +841,13 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             );
                                             updateForm('ticketTiers', updated);
                                         }}
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                        className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                                     />
                                 </div>
                                 <div className="col-span-3">
-                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price</label>
+                                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Price</label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">PKR</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-ink-soft">PKR</span>
                                         <input
                                             type="number"
                                             value={tier.price}
@@ -857,12 +857,12 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                            className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line pl-10"
                                         />
                                     </div>
                                 </div>
                                 <div className="col-span-3">
-                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Seats Available</label>
+                                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Seats Available</label>
                                     <input
                                         type="number"
                                         value={tier.seatsAvailable}
@@ -872,13 +872,13 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             );
                                             updateForm('ticketTiers', updated);
                                         }}
-                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                        className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                                     />
                                 </div>
                                 <div className="col-span-2 flex justify-end">
                                     <button
                                         onClick={() => removeTicketTier(tier.id)}
-                                        className="text-gray-500 hover:text-gray-900 transition"
+                                        className="text-ink-soft hover:text-ink transition"
                                     >
                                         <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -889,7 +889,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                             <div className="grid grid-cols-2 gap-4 mt-3">
                                 <div>
-                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Available Until</label>
+                                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Available Until</label>
                                     <div className="relative">
                                         <DateField
                                             value={tier.availableUntil}
@@ -899,15 +899,15 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 );
                                                 updateForm('ticketTiers', updated);
                                             }}
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                            className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line pl-10"
                                         />
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-2xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ticket description</label>
+                                    <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Ticket description</label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -919,9 +919,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 updateForm('ticketTiers', updated);
                                             }}
                                             placeholder="VIP Lounge Access, Fast Track Entry..."
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200 pl-10"
+                                            className="w-full bg-paper border border-line rounded-xl px-3 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line pl-10"
                                         />
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
@@ -940,7 +940,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                             }
 
                         }
-                        className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-2"
+                        className="w-full py-3 border-2 border-dashed border-line rounded-xl text-sm font-medium text-ink-soft hover:border-line-loud transition flex items-center justify-center gap-2"
                     >
                         <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -953,70 +953,70 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Discounts */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V4a4 4 0 00-4 4H4m16 0h-4a4 4 0 00-4 4v1m0-5V4a4 4 0 014-4h4" />
                     </svg>
-                    <h3 className="font-bold text-gray-900">Discounts</h3>
+                    <h3 className="font-bold text-ink">Discounts</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Student Discount */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <svg aria-hidden="true" className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-5 h-5 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                             </svg>
                             <div>
-                                <p className="text-sm font-medium text-gray-700">Student Discount</p>
+                                <p className="text-sm font-medium text-ink">Student Discount</p>
                                 {formData.studentDiscount && (
                                     <div className="flex items-center gap-1 mt-1">
                                         <input
                                             type="number"
                                             value={formData.studentDiscountPercent}
                                             onChange={(e) => updateForm('studentDiscountPercent', parseInt(e.target.value) || 0)}
-                                            className="w-12 bg-gray-50 border border-gray-200 rounded-xs px-2 py-1 text-xs text-center"
+                                            className="w-12 bg-muted border border-line rounded-xs px-2 py-1 text-xs text-center"
                                         />
-                                        <span className="text-xs text-gray-500">% off</span>
+                                        <span className="text-xs text-ink-soft">% off</span>
                                     </div>
                                 )}
                             </div>
                         </div>
                         <button
                             onClick={() => updateForm('studentDiscount', !formData.studentDiscount)}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.studentDiscount ? 'bg-black' : 'bg-gray-300'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.studentDiscount ? 'bg-ink' : 'bg-muted-strong'}`}
                         >
-                            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.studentDiscount ? 'right-1' : 'left-1'}`} />
+                            <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.studentDiscount ? 'right-1' : 'left-1'}`} />
                         </button>
                     </div>
 
                     {/* Group Discount */}
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <svg aria-hidden="true" className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" className="w-5 h-5 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             <div>
-                                <p className="text-sm font-medium text-gray-700">Group Discount</p>
-                                <p className="text-xs text-gray-500">Limit number of tickets per registrant</p>
+                                <p className="text-sm font-medium text-ink">Group Discount</p>
+                                <p className="text-xs text-ink-soft">Limit number of tickets per registrant</p>
                                 {formData.groupDiscount && <>
 
                                     <div className="flex items-center gap-1 mt-1">
-                                        <p className="text-sm font-small text-gray-700 mb-2">Min Size For Group Discounts</p>
+                                        <p className="text-sm font-small text-ink mb-2">Min Size For Group Discounts</p>
                                         <input
                                             type="number"
                                             value={formData.minSizeForGroupDiscounts}
                                             onChange={(e) => updateForm('minSizeForGroupDiscounts', parseInt(e.target.value) || 5)}
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                                            className="w-full bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                                         />
-                                        <p className="text-sm font-medium text-gray-700 mb-2"> Group Discount Percentage</p>
+                                        <p className="text-sm font-medium text-ink mb-2"> Group Discount Percentage</p>
                                         <input
                                             type="number"
                                             value={formData.groupDiscountPercent}
                                             onChange={(e) => updateForm('groupDiscountPercent', parseInt(e.target.value) || 0)}
-                                            className="w-12 bg-gray-50 border border-gray-200 rounded-xs px-2 py-1 text-xs text-center"
+                                            className="w-12 bg-muted border border-line rounded-xs px-2 py-1 text-xs text-center"
                                         />
-                                        <span className="text-xs text-gray-500">% off</span>
+                                        <span className="text-xs text-ink-soft">% off</span>
                                     </div>
 
                                 </>}
@@ -1024,9 +1024,9 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </div>
                         <button
                             onClick={() => updateForm('groupDiscount', !formData.groupDiscount)}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.groupDiscount ? 'bg-black' : 'bg-gray-300'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.groupDiscount ? 'bg-ink' : 'bg-muted-strong'}`}
                         >
-                            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.groupDiscount ? 'right-1' : 'left-1'}`} />
+                            <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.groupDiscount ? 'right-1' : 'left-1'}`} />
                         </button>
                     </div>
                 </div>
@@ -1037,22 +1037,22 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Registration Form Builder */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <div>
-                        <h4 className="font-bold text-gray-900">Registration Form</h4>
-                        <p className="text-xs text-gray-500">Design your attendee intake form.</p>
+                        <h4 className="font-bold text-ink">Registration Form</h4>
+                        <p className="text-xs text-ink-soft">Design your attendee intake form.</p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
 
-                    <p className="text-xs text-gray-500 mb-4">Custom Fields</p>
+                    <p className="text-xs text-ink-soft mb-4">Custom Fields</p>
 
                     {/* Custom Fields */}
                     {formData.customFields.map((field, i) => (
-                        <div key={field.id} className="bg-gray-50 rounded-xl p-3 mb-2 flex flex-col gap-3">
+                        <div key={field.id} className="bg-muted rounded-xl p-3 mb-2 flex flex-col gap-3">
                             {/* Row 1: icon + label + required badge */}
                             <div className="flex items-center gap-2">
                                 <FileText className="h-3.5 w-3.5 text-ink-soft" aria-hidden="true" />
@@ -1068,10 +1068,10 @@ export default function CreateEventPage({ handle_submission }: any) {
                                         })
                                         updateForm('customFields', formData.customFields);
                                     }}
-                                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
+                                    className="flex-1 min-w-0 bg-transparent text-sm font-medium text-ink outline-none"
                                 />
                                 {field.required && (
-                                    <span className="shrink-0 text-2xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
+                                    <span className="shrink-0 text-2xs bg-muted-strong text-ink-soft px-1.5 py-0.5 rounded-xs">REQUIRED</span>
                                 )}
                             </div>
 
@@ -1088,7 +1088,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                         });
                                         updateForm('customFields', formData.customFields);
                                     }}
-                                    className="h-8 bg-white border border-gray-200 text-xs rounded-lg px-2 text-gray-700 outline-none"
+                                    className="h-8 bg-paper border border-line text-xs rounded-lg px-2 text-ink outline-none"
                                 >
                                     <option value="text">Text</option>
                                     <option value="number">Number</option>
@@ -1099,7 +1099,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                                 <button
                                     type="button"
-                                    className={`h-8 px-4 rounded-lg text-xs font-medium transition ${field.required ? "bg-black text-white hover:bg-gray-800" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100"}`}
+                                    className={`h-8 px-4 rounded-lg text-xs font-medium transition ${field.required ? "bg-ink text-ink-invert hover:bg-ink-soft" : "bg-paper border border-line text-ink hover:bg-muted"}`}
                                     onClick={() => {
                                         formData.customFields.map(x => {
                                             if (x.id === field.id) {
@@ -1114,7 +1114,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 </button>
                                 <button
                                     type="button"
-                                    className="h-8 px-4 rounded-lg text-xs font-medium border border-gray-200 text-gray-900 hover:bg-gray-100 transition"
+                                    className="h-8 px-4 rounded-lg text-xs font-medium border border-line text-ink hover:bg-muted transition"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         const updatedFields = formData.customFields.filter(x => x.id !== field.id);
@@ -1126,7 +1126,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                                 {field.type === 'dropdown' && <><br /> <button
                                     onClick={() => addCustomFieldOption(field)}
-                                    className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
+                                    className="w-full py-2.5 border-2 border-dashed border-line rounded-xl text-sm font-medium text-ink-soft hover:border-line-loud transition flex items-center justify-center gap-1"
                                 >
                                     <span>+</span> Add Custom options
                                 </button></>}
@@ -1144,16 +1144,16 @@ export default function CreateEventPage({ handle_submission }: any) {
                                                 }
                                                 updateForm('customFields', formData.customFields);
                                             }}
-                                            className="flex-1 min-w-0 bg-transparent text-sm font-medium text-gray-900 outline-none"
+                                            className="flex-1 min-w-0 bg-transparent text-sm font-medium text-ink outline-none"
                                         />
                                         {field.required && (
-                                            <span className="shrink-0 text-2xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-xs">REQUIRED</span>
+                                            <span className="shrink-0 text-2xs bg-muted-strong text-ink-soft px-1.5 py-0.5 rounded-xs">REQUIRED</span>
                                         )}
                                     </div>
 
                                 })}</>}
 
-                                <span className="ml-auto text-2xs text-gray-500">
+                                <span className="ml-auto text-2xs text-ink-soft">
                                     {field.type === 'dropdown' ? `Dropdown List • ${field.options?.length} Options` : field.type}
                                 </span>
                             </div>
@@ -1162,7 +1162,7 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                     <button
                         onClick={addCustomField}
-                        className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-gray-300 transition flex items-center justify-center gap-1"
+                        className="w-full py-2.5 border-2 border-dashed border-line rounded-xl text-sm font-medium text-ink-soft hover:border-line-loud transition flex items-center justify-center gap-1"
                     >
                         <span>+</span> Add Custom Field
                     </button>
@@ -1175,53 +1175,53 @@ export default function CreateEventPage({ handle_submission }: any) {
             {/* Registration Settings */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <h3 className="font-bold text-gray-900">Registration Settings</h3>
+                    <h3 className="font-bold text-ink">Registration Settings</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-700">Requires Approval</p>
-                            <p className="text-xs text-gray-500">Review registrations before confirming seats</p>
+                            <p className="text-sm font-medium text-ink">Requires Approval</p>
+                            <p className="text-xs text-ink-soft">Review registrations before confirming seats</p>
                         </div>
                         <button
                             onClick={() => updateForm('requiresApproval', !formData.requiresApproval)}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.requiresApproval ? 'bg-black' : 'bg-gray-300'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${formData.requiresApproval ? 'bg-ink' : 'bg-muted-strong'}`}
                         >
-                            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.requiresApproval ? 'right-1' : 'left-1'}`} />
+                            <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.requiresApproval ? 'right-1' : 'left-1'}`} />
                         </button>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Maximum tickets per person</p>
-                        <p className="text-xs text-gray-500 mb-3">Limit number of tickets per registrant</p>
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
+                        <p className="text-sm font-medium text-ink mb-2">Maximum tickets per person</p>
+                        <p className="text-xs text-ink-soft mb-3">Limit number of tickets per registrant</p>
                         <input
                             type="number"
                             value={formData.maxTicketsPerPerson}
                             onChange={(e) => updateForm('maxTicketsPerPerson', parseInt(e.target.value) || 1)}
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Starting Date Of Registeration</p>
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm flex items-center justify-between">
+                        <p className="text-sm font-medium text-ink mb-2">Starting Date Of Registeration</p>
                         <DateField
                             value={formData.registrationOpenDate}
                             onChange={(e) => updateForm('registrationOpenDate', e.target.value)}
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
-                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Closing Date Of Registeration</p>
+                    <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
+                        <p className="text-sm font-medium text-ink mb-2">Closing Date Of Registeration</p>
                         <DateField
                             value={formData.registrationCloseDate}
                             onChange={(e) => updateForm('registrationCloseDate', e.target.value)}
-                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-200"
+                            className="w-full bg-paper border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-line"
                         />
                     </div>
 
@@ -1235,7 +1235,7 @@ export default function CreateEventPage({ handle_submission }: any) {
     const renderStep4 = () => (
         <div className="space-y-8">
             {/* Event Preview Card */}
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div className="bg-paper rounded-2xl overflow-hidden border border-line shadow-sm">
                 <div>{serverError}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     {/* Square, matching the 1:1 banner the event page renders. Capped on
@@ -1251,38 +1251,38 @@ export default function CreateEventPage({ handle_submission }: any) {
                         ) : (
                             <div className="text-center">
                                 <div className="w-20 h-20 bg-gray-700 rounded-2xl mx-auto mb-3 flex items-center justify-center">
-                                    <svg aria-hidden="true" className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg aria-hidden="true" className="w-10 h-10 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
                                 </div>
-                                <p className="text-xs text-gray-500">No banner uploaded</p>
+                                <p className="text-xs text-ink-soft">No banner uploaded</p>
                             </div>
                         )}
                     </div>
                     <div className="p-6 md:p-8">
-                        <span className="bg-black text-white text-2xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <span className="bg-ink text-ink-invert text-2xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                             {formData.eventType || 'Event'}
                         </span>
-                        <h2 className="text-xl font-bold text-gray-900 mt-3 mb-4">
+                        <h2 className="text-xl font-bold text-ink mt-3 mb-4">
                             {formData.eventTitle || 'Your event title'}
                         </h2>
 
                         <div className="space-y-2 mb-6">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex items-center gap-2 text-sm text-ink-soft">
+                                <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 {formData.startDate ? previewDate(formData.startDate) : 'Dates not set'}
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex items-center gap-2 text-sm text-ink-soft">
+                                <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 {formData.city || 'San Francisco, CA'} • {formData.venueName || 'Pier 27'}
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex items-center gap-2 text-sm text-ink-soft">
+                                <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                 </svg>
                                 {formData.ticketTiers[0]?.price
@@ -1300,92 +1300,92 @@ export default function CreateEventPage({ handle_submission }: any) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Review Details */}
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Review Details</h3>
+                    <h3 className="text-lg font-bold text-ink mb-4">Review Details</h3>
 
                     <div className="space-y-4">
                         {/* Basic Information */}
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-900">Basic Information</p>
-                                        <p className="text-xs text-gray-500 mt-1">Event Category: {formData.category}</p>
-                                        <p className="text-xs text-gray-500">Timezone: {formData.timezone.split('(')[0]}</p>
+                                        <p className="text-sm font-bold text-ink">Basic Information</p>
+                                        <p className="text-xs text-ink-soft mt-1">Event Category: {formData.category}</p>
+                                        <p className="text-xs text-ink-soft">Timezone: {formData.timezone.split('(')[0]}</p>
                                     </div>
                                 </div>
-                                <button onClick={() => goToStep(1)} className="text-xs text-gray-500 hover:text-gray-600 underline">Edit</button>
+                                <button onClick={() => goToStep(1)} className="text-xs text-ink-soft hover:text-ink-soft underline">Edit</button>
                             </div>
                         </div>
 
                         {/* Schedule & Agenda */}
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-900">Schedule & Agenda</p>
-                                        <p className="text-xs text-gray-500 mt-1">
+                                        <p className="text-sm font-bold text-ink">Schedule & Agenda</p>
+                                        <p className="text-xs text-ink-soft mt-1">
                                             {formData.startDate ? `${previewDate(formData.startDate)} - ${previewDate(formData.endDate || formData.startDate)}` : 'Dates not set'}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-ink-soft">
                                             {previewTime(formData.startTime)} - {previewTime(formData.endTime)}
                                         </p>
                                     </div>
                                 </div>
-                                <button onClick={() => goToStep(2)} className="text-xs text-gray-500 hover:text-gray-600 underline">Edit</button>
+                                <button onClick={() => goToStep(2)} className="text-xs text-ink-soft hover:text-ink-soft underline">Edit</button>
                             </div>
                         </div>
 
                         {/* Location & Venue */}
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-900">Location & Venue</p>
-                                        <p className="text-xs text-gray-500 mt-1">{formData.venueName || 'Venue not set'}</p>
-                                        <p className="text-xs text-gray-500">{formData.address || ''} {formData.city || ''}</p>
+                                        <p className="text-sm font-bold text-ink">Location & Venue</p>
+                                        <p className="text-xs text-ink-soft mt-1">{formData.venueName || 'Venue not set'}</p>
+                                        <p className="text-xs text-ink-soft">{formData.address || ''} {formData.city || ''}</p>
                                     </div>
                                 </div>
-                                <button onClick={() => goToStep(2)} className="text-xs text-gray-500 hover:text-gray-600 underline">Edit</button>
+                                <button onClick={() => goToStep(2)} className="text-xs text-ink-soft hover:text-ink-soft underline">Edit</button>
                             </div>
                             {/* Mini Map */}
-                            <div className="mt-3 h-24 bg-gray-200 rounded-xl overflow-hidden">
+                            <div className="mt-3 h-24 bg-muted-strong rounded-xl overflow-hidden">
                                 <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400" />
                             </div>
                         </div>
 
                         {/* Registration & Tickets */}
-                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <div className="bg-paper rounded-2xl p-5 border border-line shadow-sm">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-ink-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-900">Registration & Tickets</p>
-                                        <p className="text-xs text-gray-500 mt-1">
+                                        <p className="text-sm font-bold text-ink">Registration & Tickets</p>
+                                        <p className="text-xs text-ink-soft mt-1">
                                             Max capacity: {formData.totalSeats} attendees • {formData.ticketTiers.length} ticket types active
                                         </p>
                                     </div>
                                 </div>
-                                <button onClick={() => goToStep(3)} className="text-xs text-gray-500 hover:text-gray-600 underline">Edit</button>
+                                <button onClick={() => goToStep(3)} className="text-xs text-ink-soft hover:text-ink-soft underline">Edit</button>
                             </div>
                         </div>
                     </div>
@@ -1393,12 +1393,12 @@ export default function CreateEventPage({ handle_submission }: any) {
 
                 {/* Publishing */}
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Publishing</h3>
+                    <h3 className="text-lg font-bold text-ink mb-4">Publishing</h3>
 
-                    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-6">
+                    <div className="bg-paper rounded-2xl p-6 border border-line shadow-sm space-y-6">
                         {/* Event Visibility */}
                         <div>
-                            <p className="text-sm font-bold text-gray-900 mb-3">Event Visibility</p>
+                            <p className="text-sm font-bold text-ink mb-3">Event Visibility</p>
                             <div className="space-y-3">
                                 {[
                                     { id: 'public', label: 'Public', desc: 'Listed on our discovery platform' },
@@ -1414,8 +1414,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                                             className="mt-1"
                                         />
                                         <div>
-                                            <p className="text-sm font-medium text-gray-700">{opt.label}</p>
-                                            <p className="text-xs text-gray-500">{opt.desc}</p>
+                                            <p className="text-sm font-medium text-ink">{opt.label}</p>
+                                            <p className="text-xs text-ink-soft">{opt.desc}</p>
                                         </div>
                                     </label>
                                 ))}
@@ -1423,21 +1423,21 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </div>
 
                         {/* Publish Immediately */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between pt-4 border-t border-line">
                             <div>
-                                <p className="text-sm font-medium text-gray-700">Publish Immediately</p>
-                                <p className="text-xs text-gray-500">Go live as soon as you click publish</p>
+                                <p className="text-sm font-medium text-ink">Publish Immediately</p>
+                                <p className="text-xs text-ink-soft">Go live as soon as you click publish</p>
                             </div>
                             <button
                                 onClick={() => updateForm('publishImmediately', !formData.publishImmediately)}
-                                className={`relative w-11 h-6 rounded-full transition-colors ${formData.publishImmediately ? 'bg-black' : 'bg-gray-300'}`}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${formData.publishImmediately ? 'bg-ink' : 'bg-muted-strong'}`}
                             >
-                                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${formData.publishImmediately ? 'right-1' : 'left-1'}`} />
+                                <span className={`absolute top-1 w-4 h-4 bg-paper rounded-full shadow transition-transform ${formData.publishImmediately ? 'right-1' : 'left-1'}`} />
                             </button>
                         </div>
 
                         {/* Agreements */}
-                        <div className="space-y-3 pt-4 border-t border-gray-100">
+                        <div className="space-y-3 pt-4 border-t border-line">
                             <label className="flex items-start gap-3 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -1445,7 +1445,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     onChange={(e) => updateForm('confirmRights', e.target.checked)}
                                     className="mt-0.5 rounded-xs"
                                 />
-                                <p className="text-xs text-gray-500">I confirm that I have the rights to use all uploaded images and content for this event.</p>
+                                <p className="text-xs text-ink-soft">I confirm that I have the rights to use all uploaded images and content for this event.</p>
                             </label>
                             <label className="flex items-start gap-3 cursor-pointer">
                                 <input
@@ -1454,7 +1454,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                                     onChange={(e) => updateForm('agreeToTerms', e.target.checked)}
                                     className="mt-0.5 rounded-xs"
                                 />
-                                <p className="text-xs text-gray-500">I agree to the Terms of Service and Event Organizer Agreement.</p>
+                                <p className="text-xs text-ink-soft">I agree to the Terms of Service and Event Organizer Agreement.</p>
                             </label>
                         </div>
                     </div>
@@ -1470,8 +1470,8 @@ export default function CreateEventPage({ handle_submission }: any) {
                 <div className="mx-auto max-w-7xl">
                     <div className="flex items-center justify-between h-16">
                         <div>
-                            <p className="text-2xs font-bold text-gray-500 uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
-                            <h1 className="text-lg font-bold text-gray-900">{STEPS[currentStep - 1].label}</h1>
+                            <p className="text-2xs font-bold text-ink-soft uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
+                            <h1 className="text-lg font-bold text-ink">{STEPS[currentStep - 1].label}</h1>
                         </div>
 
                         {/* Progress Steps */}
@@ -1479,15 +1479,15 @@ export default function CreateEventPage({ handle_submission }: any) {
                             {STEPS.map((step, i) => (
                                 <div key={step.id} className="flex items-center">
                                     {i > 0 && (
-                                        <div className={`w-6 h-0.5 mx-1 ${i < currentStep ? 'bg-black' : 'bg-gray-300'}`} />
+                                        <div className={`w-6 h-0.5 mx-1 ${i < currentStep ? 'bg-ink' : 'bg-muted-strong'}`} />
                                     )}
                                     <button
                                         onClick={() => goToStep(step.id)}
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${step.id < currentStep
-                                            ? 'bg-black text-white'
+                                            ? 'bg-ink text-ink-invert'
                                             : step.id === currentStep
-                                                ? 'bg-black text-white'
-                                                : 'bg-gray-200 text-gray-500'
+                                                ? 'bg-ink text-ink-invert'
+                                                : 'bg-muted-strong text-ink-soft'
                                             }`}
                                     >
                                         {step.id < currentStep ? '✓' : step.id}
@@ -1497,7 +1497,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                         </div>
 
                         <div className="text-right">
-                            <p className="text-sm font-bold text-gray-900">{completionPercent}% Complete</p>
+                            <p className="text-sm font-bold text-ink">{completionPercent}% Complete</p>
                         </div>
                     </div>
                 </div>
@@ -1512,7 +1512,7 @@ export default function CreateEventPage({ handle_submission }: any) {
             </div>
 
             {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-gray-200">
+            <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-paper border-t border-line">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <ConfirmButton
@@ -1527,14 +1527,14 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 // never saw the change and a later render could undo it.
                                 handling_submission_client({ ...formData, isDraft: true });
                             }}
-                            className="text-sm text-gray-500 transition hover:text-gray-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            className="text-sm text-ink-soft transition hover:text-ink disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             Save as Draft
                         </ConfirmButton>
                         {currentStep > 1 && (
                             <button
                                 onClick={prevStep}
-                                className="text-sm text-gray-500 hover:text-gray-700 transition"
+                                className="text-sm text-ink-soft hover:text-ink transition"
                             >
                                 Back
                             </button>
@@ -1544,7 +1544,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                     {currentStep < 4 ? (
                         <button
                             onClick={nextStep}
-                            className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2"
+                            className="bg-ink text-ink-invert px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-ink-soft transition flex items-center gap-2"
                         >
                             Next: {STEPS[currentStep].label}
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1556,7 +1556,7 @@ export default function CreateEventPage({ handle_submission }: any) {
                             onClick={() => handling_submission_client(formData)}
                             disabled={!formData.agreeToTerms || !formData.confirmRights || isPublishing}
                             aria-busy={isPublishing}
-                            className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-ink text-ink-invert px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-ink-soft transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isPublishing ? 'Publishing…' : 'Publish Event'}
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

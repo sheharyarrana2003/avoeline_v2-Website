@@ -47,7 +47,7 @@ function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string })
     return (
         <h2 className="mb-5 flex items-center gap-2 border-b border-line pb-3 font-display text-xl text-ink">
             {/* gray-400 = 2.5:1, decoration only — the heading text carries the meaning. */}
-            <span className="text-gray-400" aria-hidden="true">{icon}</span>
+            <span className="text-ink-faint" aria-hidden="true">{icon}</span>
             {title}
         </h2>
     );
@@ -117,7 +117,7 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
                                         className="size-16 shrink-0 rounded-full border border-line object-cover"
                                     />
                                 ) : (
-                                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gray-900 text-2xl font-semibold text-ink-invert">
+                                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-ink-invert">
                                         {initial}
                                     </div>
                                 )}
@@ -137,15 +137,15 @@ export default async function OrganizerProfile({ params }: { params: Promise<{ o
 
                             <div className="mt-4 space-y-2 text-sm text-ink-soft">
                                 <p className="flex items-center gap-2">
-                                    <MapPin size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <MapPin size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span>{location || "—"}</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <Mail size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <Mail size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span className="truncate">{organizer.contact.primaryEmail || "—"}</span>
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <Phone size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                    <Phone size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                     <span className="tabular-nums">{organizer.contact.primaryPhone || "—"}</span>
                                 </p>
                             </div>

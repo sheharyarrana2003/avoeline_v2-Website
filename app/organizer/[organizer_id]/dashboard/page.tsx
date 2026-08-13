@@ -129,12 +129,12 @@ async function DashboardUpcoming({ organizerId }: { organizerId: string }) {
 function StatsSkeleton() {
     return (
         <section role="status" aria-label="Loading statistics" className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-            <div className="h-44 animate-pulse rounded-2xl bg-gray-200" />
+            <div className="h-44 animate-pulse rounded-2xl bg-muted-strong" />
             <div className="grid grid-cols-2 rounded-2xl border border-line bg-paper sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="border-line p-5 not-last:border-r sm:p-6">
-                        <div className="h-3 w-20 animate-pulse rounded-xs bg-gray-200" />
-                        <div className="mt-3 h-9 w-24 animate-pulse rounded-xs bg-gray-200" />
+                        <div className="h-3 w-20 animate-pulse rounded-xs bg-muted-strong" />
+                        <div className="mt-3 h-9 w-24 animate-pulse rounded-xs bg-muted-strong" />
                     </div>
                 ))}
             </div>
@@ -147,7 +147,7 @@ function WidgetSkeleton({ height }: { height: string }) {
         <div
             role="status"
             aria-label="Loading"
-            className={`${height} animate-pulse rounded-xs bg-gray-200`}
+            className={`${height} animate-pulse rounded-xs bg-muted-strong`}
         />
     );
 }

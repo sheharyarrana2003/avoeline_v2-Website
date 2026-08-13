@@ -65,7 +65,7 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                 key={tab.value}
                                 href={tab.href}
                                 className={`shrink-0 border-b-2 pb-3 text-sm font-medium transition ${isActive
-                                        ? "border-gray-900 text-ink"
+                                        ? "border-ink text-ink"
                                         : "border-transparent text-ink-soft hover:text-ink"
                                     }`}
                             >
@@ -104,13 +104,13 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                     className="rounded-2xl border border-line bg-paper p-5 transition hover:border-line-loud"
                                 >
                                     <article className="flex items-center gap-5">
-                                        <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-sm font-semibold uppercase text-ink-invert">
+                                        <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-ink text-sm font-semibold uppercase text-ink-invert">
                                             {event.category.slice(0, 2)}
                                         </div>
 
                                         <div className="min-w-0 flex-1">
                                             <div className="mb-2 flex flex-wrap items-center gap-2">
-                                                <span className="rounded-md bg-gray-100 px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
+                                                <span className="rounded-md bg-muted px-2 py-1 text-2xs font-medium uppercase text-ink-soft">
                                                     {event.category}
                                                 </span>
                                                 <StatusBadge status={event.status} size="sm" />
@@ -122,11 +122,11 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                         <div className="shrink-0 space-y-2 text-sm text-ink-soft">
                                             <p className="flex items-center gap-2 tabular-nums">
                                                 {/* gray-400 = 2.5:1, decoration only — the date beside it carries the meaning. */}
-                                                <Calendar size={16} className="text-gray-400" aria-hidden="true" />
+                                                <Calendar size={16} className="text-ink-faint" aria-hidden="true" />
                                                 {formatDate(event.schedule.startDate)}
                                             </p>
                                             <p className="flex items-center gap-2">
-                                                <MapPin size={16} className="text-gray-400" aria-hidden="true" />
+                                                <MapPin size={16} className="text-ink-faint" aria-hidden="true" />
                                                 {event.location.venueName}
                                             </p>
                                         </div>
@@ -138,9 +138,9 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
                                                 </span>
                                                 <span className="text-ink-soft">registered</span>
                                             </div>
-                                            <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                                            <div className="h-2 overflow-hidden rounded-full bg-muted-strong">
                                                 <div
-                                                    className="h-full rounded-full bg-gray-900"
+                                                    className="h-full rounded-full bg-ink"
                                                     style={{ width: `${getProgress(event)}%` }}
                                                 />
                                             </div>

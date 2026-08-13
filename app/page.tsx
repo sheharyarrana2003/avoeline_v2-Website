@@ -73,7 +73,9 @@ const steps = [
 
 export default function HomePage() {
   return (
-    <>
+    // light-only: this page is the separate marketing system and its surfaces are
+    // hardcoded hex, so it must not follow the product's dark theme. See globals.css.
+    <div className="light-only flex flex-1 flex-col">
       <HomeHeader />
 
       <main style={{ flex: 1 }}>
@@ -401,6 +403,6 @@ export default function HomePage() {
       </main>
 
       <HomeFooter />
-    </>
+    </div>
   );
 }

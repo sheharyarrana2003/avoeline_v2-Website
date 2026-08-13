@@ -26,7 +26,7 @@ function MiniBarChart({ data }: { data: number[] }) {
             {data.map((val, i) => (
                 <div
                     key={i}
-                    className={`flex-1 rounded-t-xs ${val === max && val > 0 ? "bg-accent" : "bg-gray-300"}`}
+                    className={`flex-1 rounded-t-xs ${val === max && val > 0 ? "bg-accent" : "bg-muted-strong"}`}
                     style={{ height: `${(val / max) * 100}%`, minHeight: "6px" }}
                 />
             ))}
@@ -187,7 +187,7 @@ export default async function VendorDashboardPage({
                                             return (
                                                 <li
                                                     key={booking?.bookingId || index}
-                                                    className="-mx-3 flex flex-col gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
+                                                    className="-mx-3 flex flex-col gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-muted sm:flex-row sm:items-center sm:justify-between"
                                                 >
                                                     <div>
                                                         <p className="text-sm font-medium text-ink">{getEventTitle(booking?.eventId)}</p>
@@ -253,12 +253,12 @@ export default async function VendorDashboardPage({
                                                 <dl className="mt-3 space-y-1 text-xs text-ink-soft">
                                                     <div className="flex items-center gap-1.5">
                                                         {/* gray-400 = 2.5:1, decoration; the value beside it carries the meaning. */}
-                                                        <CalendarDays size={12} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                        <CalendarDays size={12} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                         <dt className="sr-only">Service date</dt>
                                                         <dd className="tabular-nums">{formatDate(booking?.requirements?.serviceDate)}</dd>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <MapPin size={12} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                        <MapPin size={12} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                         <dt className="sr-only">Location</dt>
                                                         <dd>{booking?.requirements?.location || "Location TBD"}</dd>
                                                     </div>

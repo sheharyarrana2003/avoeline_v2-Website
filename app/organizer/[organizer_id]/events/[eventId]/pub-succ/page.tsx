@@ -28,7 +28,7 @@ export default async function PublishSuccessPage({ params }: { params: Promise<{
     // layout, which already shows the event's name, status and tabs. The old
     // "Event Published Successfully!" <h1> was the second one on the screen.
     <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-      <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+      <span className="mb-6 flex size-16 items-center justify-center rounded-full bg-ink text-ink-invert" aria-hidden="true">
         <Check className="h-8 w-8" strokeWidth={3} />
       </span>
 

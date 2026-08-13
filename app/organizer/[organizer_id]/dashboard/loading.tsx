@@ -12,25 +12,25 @@ export default function DashboardLoading() {
                 {/* Masthead: title over subtitle, actions right from sm up. */}
                 <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <div className="h-8 w-64 animate-pulse rounded-xs bg-gray-200" />
-                        <div className="mt-2 h-4 w-72 animate-pulse rounded-xs bg-gray-200" />
+                        <div className="h-8 w-64 animate-pulse rounded-xs bg-muted-strong" />
+                        <div className="mt-2 h-4 w-72 animate-pulse rounded-xs bg-muted-strong" />
                     </div>
                     <div className="flex gap-2">
-                        <div className="h-11 w-32 animate-pulse rounded-lg bg-gray-200" />
-                        <div className="h-11 w-32 animate-pulse rounded-lg bg-gray-200" />
+                        <div className="h-11 w-32 animate-pulse rounded-lg bg-muted-strong" />
+                        <div className="h-11 w-32 animate-pulse rounded-lg bg-muted-strong" />
                     </div>
                 </div>
 
                 {/* Hairline stat band, not four cards. */}
                 <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="mx-0 h-14 animate-pulse rounded-xs bg-gray-200 sm:mx-6" />
+                        <div key={i} className="mx-0 h-14 animate-pulse rounded-xs bg-muted-strong sm:mx-6" />
                     ))}
                 </section>
 
                 <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
-                    <div className="h-64 animate-pulse rounded-xs bg-gray-200" />
-                    <div className="h-48 animate-pulse rounded-xs bg-gray-200" />
+                    <div className="h-64 animate-pulse rounded-xs bg-muted-strong" />
+                    <div className="h-48 animate-pulse rounded-xs bg-muted-strong" />
                 </section>
             </div>
         </div>

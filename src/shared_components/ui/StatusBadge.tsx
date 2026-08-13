@@ -32,7 +32,7 @@ const TONE: Record<StatusTone, { box: string; label: string; Icon: LucideIcon | 
     danger: { box: "bg-danger-soft text-danger border-danger-line", label: "", Icon: X },
     warning: { box: "bg-warning-soft text-warning border-warning-line", label: "", Icon: Clock },
     info: { box: "bg-accent-soft text-accent-strong border-accent-line", label: "", Icon: Loader },
-    neutral: { box: "bg-gray-100 text-gray-600 border-gray-200", label: "", Icon: null },
+    neutral: { box: "bg-muted text-ink-soft border-line", label: "", Icon: null },
 };
 
 // text-2xs/text-xs rather than the arbitrary 10px/11px these were written as before

@@ -133,7 +133,7 @@ export default async function VendorQuoteManagementPage({
                             aria-current={activeTab === tab.id ? "page" : undefined}
                             className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
                                 activeTab === tab.id
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                         >
@@ -211,7 +211,7 @@ export default async function VendorQuoteManagementPage({
                                                         {/* Position, not colour, says who spoke: the label below
                                                             names them, so the dot is pure decoration. */}
                                                         <span
-                                                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isOrganizer ? 'bg-gray-300' : 'bg-gray-900'}`}
+                                                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isOrganizer ? 'bg-muted-strong' : 'bg-ink'}`}
                                                             aria-hidden="true"
                                                         />
                                                         <div>
@@ -285,7 +285,7 @@ export default async function VendorQuoteManagementPage({
                                             <li key={booking?.bookingId || i}>
                                                 <Link
                                                     href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
-                                                    className="flex items-center justify-between gap-3 py-4 transition hover:bg-gray-50"
+                                                    className="flex items-center justify-between gap-3 py-4 transition hover:bg-muted"
                                                 >
                                                     <div>
                                                         <p className="text-sm font-medium text-ink">Organizer {booking?.organizerId}</p>
@@ -293,7 +293,7 @@ export default async function VendorQuoteManagementPage({
                                                             {formatCurrency(bq?.totalAmount || 0, booking?.payment?.currency || "PKR")} • {statusMeta(booking?.status).label}
                                                         </p>
                                                     </div>
-                                                    <ChevronRight size={16} className="shrink-0 text-gray-400" aria-hidden="true" />
+                                                    <ChevronRight size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
                                                 </Link>
                                             </li>
                                         );

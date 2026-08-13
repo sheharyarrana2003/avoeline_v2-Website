@@ -394,7 +394,7 @@ export default function CertificateIssuanceClient({
                                     );
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className={`${tableRow} ${isSelected ? 'bg-gray-50' : ''}`}>
+                                        <tr key={attendee.a.attendeeId} className={`${tableRow} ${isSelected ? 'bg-muted' : ''}`}>
                                             <td className={tableCell}>
                                                 <input
                                                     type="checkbox"

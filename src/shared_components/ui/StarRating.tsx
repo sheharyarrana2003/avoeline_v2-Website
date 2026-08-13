@@ -23,8 +23,8 @@ export function StarRating({ rating, size = "sm", light = false }: StarRatingPro
     const full = Math.floor(value);
     const hasHalf = value % 1 >= 0.5;
 
-    const active = light ? "text-white fill-white" : "text-gray-900 fill-gray-900";
-    const inactive = light ? "text-white/25 fill-white/25" : "text-gray-300 fill-gray-300";
+    const active = light ? "text-white fill-white" : "text-ink fill-ink";
+    const inactive = light ? "text-white/25 fill-white/25" : "text-line-loud fill-line-loud";
 
     return (
         <div

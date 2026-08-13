@@ -69,7 +69,7 @@ export default async function Vendors({ params }: { params: Promise<{ eventId: s
                                 className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-5 sm:flex-row sm:items-start sm:justify-between"
                             >
                                 <div className="flex min-w-0 items-start gap-4">
-                                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-ink">
+                                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-muted text-ink">
                                         {renderIcon(vendor.serviceCategories)}
                                     </span>
 
@@ -78,13 +78,13 @@ export default async function Vendors({ params }: { params: Promise<{ eventId: s
 
                                         <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-ink-soft tabular-nums">
                                             <span className="flex items-center gap-1">
-                                                <Star size={13} className="fill-gray-900 text-gray-900" aria-hidden="true" />
+                                                <Star size={13} className="fill-gray-900 text-ink" aria-hidden="true" />
                                                 {vendor.ratings.averageRating.toFixed(1)}
                                                 <span>({vendor.ratings.totalReviews})</span>
                                             </span>
                                             <span className="flex items-center gap-1.5">
                                                 {/* gray-400 = 2.5:1, decoration only -- the number beside it is the content. */}
-                                                <Phone size={13} className="text-gray-400" aria-hidden="true" />
+                                                <Phone size={13} className="text-ink-faint" aria-hidden="true" />
                                                 {vendor.contact.primaryPhone}
                                             </span>
                                         </div>

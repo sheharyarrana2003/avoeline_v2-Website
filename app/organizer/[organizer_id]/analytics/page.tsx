@@ -135,7 +135,7 @@ export default async function AnalyticsPage({
                                             y="268"
                                             textAnchor="middle"
                                             /* gray-500 = 4.75:1: an axis label is read, so it clears the body floor. */
-                                            className="fill-gray-500 text-2xs"
+                                            className="fill-ink-soft text-2xs"
                                         >
                                             {item.label}
                                         </text>

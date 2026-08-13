@@ -23,7 +23,7 @@ export function BrandMark({
         <span
             aria-hidden="true"
             className={`inline-flex shrink-0 items-center justify-center rounded-full rounded-br-none ${
-                inverted ? "bg-white text-gray-950" : "bg-gray-950 text-white"
+                inverted ? "bg-white text-gray-950" : "bg-ink text-ink-invert"
             } ${className}`}
         >
             {/* Nudged up and left, because the squared corner puts the blob's optical

@@ -44,7 +44,7 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
             <div className="flex w-full max-w-[440px] flex-col items-center rounded-2xl border border-line bg-paper p-8 sm:p-12">
 
                 <div className="mb-10 flex flex-col items-center">
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-t-full rounded-bl-full rounded-br-md bg-gray-900 text-white">
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-t-full rounded-bl-full rounded-br-md bg-ink text-ink-invert">
                         {/* Brand mark, not iconography — no lucide equivalent exists. */}
                         <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 2L2 22h20L12 2z" />

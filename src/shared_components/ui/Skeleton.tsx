@@ -7,7 +7,7 @@
  * "loading" once from the region, not read out a dozen empty grey boxes.
  */
 export function Skeleton({ className = "" }: { className?: string }) {
-    return <div className={`animate-pulse rounded-lg bg-gray-200/70 ${className}`} />;
+    return <div className={`animate-pulse rounded-lg bg-muted-strong/70 ${className}`} />;
 }
 
 export function SkeletonPage({

@@ -69,7 +69,7 @@ export default function CreateSpeakerForm({ handle_speaker_submission }: { handl
                                 value={photoUrl || null}
                                 label="Upload Photo"
                                 onUploaded={setPhotoUrl}
-                                buttonClassName="relative flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-full border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-gray-900 disabled:opacity-60"
+                                buttonClassName="relative flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-full border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-ink disabled:opacity-60"
                             />
                             {/* Uploaded avatar URL rides the form's server action. */}
                             <input type="hidden" name="profileImage" value={photoUrl} />

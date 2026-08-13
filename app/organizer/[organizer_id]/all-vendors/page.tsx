@@ -57,7 +57,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
                 key={tab.value}
                 href={`${basePath}/all-vendors?tab=${tab.value}`}
                 className={`shrink-0 border-b-2 pb-3 text-sm font-medium transition ${isActive
-                  ? "border-gray-900 text-ink"
+                  ? "border-ink text-ink"
                   : "border-transparent text-ink-soft hover:text-ink"
                   }`}
               >

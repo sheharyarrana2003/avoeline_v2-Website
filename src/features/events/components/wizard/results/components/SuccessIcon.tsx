@@ -1,7 +1,7 @@
 export default function SuccessIcon() {
   return (
     <div className="flex justify-center mb-6">
-      <div className="bg-black rounded-full w-20 h-20 flex items-center justify-center">
+      <div className="bg-ink rounded-full w-20 h-20 flex items-center justify-center">
         <svg aria-hidden="true" 
           className="w-10 h-10 text-white" 
           fill="none" 

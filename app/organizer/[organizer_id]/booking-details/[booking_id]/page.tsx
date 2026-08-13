@@ -57,7 +57,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                         {/* Every entry in the history has already happened, so every
                                             dot is filled. The old code computed `isCompleted = true`
                                             and then branched on it. */}
-                                        <span className="absolute -left-[31px] flex size-4 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+                                        <span className="absolute -left-[31px] flex size-4 items-center justify-center rounded-full bg-ink text-ink-invert" aria-hidden="true">
                                             <Check className="h-2.5 w-2.5" strokeWidth={4} />
                                         </span>
                                         <div className="flex items-start justify-between gap-4">
@@ -214,9 +214,9 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                         <Link
                                             href={doc.url}
                                             target="_blank"
-                                            className="flex items-center gap-3 rounded-lg border border-line p-3 text-sm text-ink transition hover:bg-gray-50"
+                                            className="flex items-center gap-3 rounded-lg border border-line p-3 text-sm text-ink transition hover:bg-muted"
                                         >
-                                            <FileText className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                                            <FileText className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden="true" />
                                             {doc.label}
                                         </Link>
                                     </li>
@@ -242,7 +242,7 @@ function Heading({ icon, children }: { icon: ReactNode; children: ReactNode }) {
     return (
         <h2 className="mb-5 flex items-center gap-2 border-b border-line pb-2 font-display text-lg text-ink">
             {/* gray-400 is 2.5:1 — decoration only, the heading text carries the meaning. */}
-            <span className="text-gray-400" aria-hidden="true">{icon}</span>
+            <span className="text-ink-faint" aria-hidden="true">{icon}</span>
             {children}
         </h2>
     );

@@ -45,7 +45,7 @@ export function EmptyState({
             {/* Bare glyph, not a filled chip: after the hue purge the non-text channel is
                 scarce, and a 48px grey circle spends more ink than the message it labels. */}
             {icon ? (
-                <span className="mb-3 text-gray-400" aria-hidden="true">
+                <span className="mb-3 text-ink-faint" aria-hidden="true">
                     {icon}
                 </span>
             ) : null}

@@ -99,7 +99,7 @@ export default async function VendorServicesPage({
                             aria-current={filter === tab.id ? "page" : undefined}
                             className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition ${
                                 filter === tab.id
-                                    ? "border-gray-900 text-ink"
+                                    ? "border-ink text-ink"
                                     : "border-transparent text-ink-soft hover:text-ink"
                             }`}
                         >
@@ -120,7 +120,7 @@ export default async function VendorServicesPage({
                                     className="lift overflow-hidden rounded-2xl border border-line bg-paper shadow-xs"
                                 >
                                     {/* Image/Video Header */}
-                                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                                    <div className="relative h-48 overflow-hidden bg-muted">
                                         {serviceVideo ? (
                                             <video
                                                 src={serviceVideo}
@@ -139,7 +139,7 @@ export default async function VendorServicesPage({
                                                 className="h-full w-full object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                            <div className="flex h-full w-full items-center justify-center text-ink-faint">
                                                 {/* gray-400 = 2.5:1: decoration inside an aria-hidden
                                                     placeholder, never the only carrier of meaning. */}
                                                 <ImageOff size={28} aria-hidden="true" />

@@ -50,9 +50,12 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
         <div className="mx-auto max-w-7xl space-y-10">
             {/* Banners are square (1080x1080), so it's shown at 1:1 beside the event
                 facts rather than cropped into a wide strip. */}
-            <section className="overflow-hidden rounded-2xl bg-gray-950">
+            {/* bg-panel, not bg-ink: --ink is *text*, so in dark mode it resolves to
+                near-white and this hero would become a white slab carrying white text.
+                --panel-bg is the surface that stays dark in both themes. */}
+            <section className="overflow-hidden rounded-2xl bg-panel">
                 <div className="flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center">
-                    <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-gray-900 sm:w-64 md:w-72 lg:w-80">
+                    <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl bg-panel sm:w-64 md:w-72 lg:w-80">
                         {event.bannerImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -76,7 +79,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                     {item.icon}
                                 </span>
                                 <div className="min-w-0">
-                                    <dt className="text-2xs uppercase text-gray-400">{item.label}</dt>
+                                    <dt className="text-2xs uppercase text-white/60">{item.label}</dt>
                                     <dd className="truncate text-base font-medium text-white tabular-nums">{item.value}</dd>
                                 </div>
                             </div>
@@ -244,7 +247,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             <ul className="space-y-4">
                                 {recentRegistrations.map((reg, index) => (
                                     <li key={reg.id} className="flex items-center gap-4">
-                                        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs text-ink-soft tabular-nums">
+                                        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs text-ink-soft tabular-nums">
                                             {index + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
@@ -280,7 +283,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={speaker.profileImage} alt="" loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
                                         ) : (
-                                            <span className="flex size-8 items-center justify-center rounded-full bg-gray-100 text-xs text-ink-soft">
+                                            <span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs text-ink-soft">
                                                 {speaker.name.charAt(0)}
                                             </span>
                                         )}
@@ -310,7 +313,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             <SectionHeading icon={<ImageIcon size={16} />}>Gallery</SectionHeading>
                             <div className="grid grid-cols-2 gap-3">
                                 {event.galleryImages.map((url: string, i: number) => (
-                                    <div key={i} className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
+                                    <div key={i} className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
                                         {isVideoUrl(url) ? (
                                             <video src={url} controls className="h-full w-full object-cover" />
                                         ) : (
@@ -327,7 +330,7 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                         <section>
                             <SectionHeading icon={<ImageIcon size={16} />}>Promo video</SectionHeading>
                             {isVideoUrl(event.promoVideoUrl) ? (
-                                <video src={event.promoVideoUrl} controls className="w-full rounded-2xl bg-black" />
+                                <video src={event.promoVideoUrl} controls className="w-full rounded-2xl bg-panel" />
                             ) : (
                                 <a
                                     href={event.promoVideoUrl}
@@ -360,7 +363,7 @@ function SectionHeading({ icon, children, action }: { icon: ReactNode; children:
     return (
         <div className="mb-5 flex items-center gap-2 border-b border-line pb-2">
             {/* gray-400 is 2.5:1 — decoration only, the heading text carries the meaning. */}
-            <span className="text-gray-400" aria-hidden="true">{icon}</span>
+            <span className="text-ink-faint" aria-hidden="true">{icon}</span>
             <h2 className="font-display text-lg text-ink">{children}</h2>
             {action ? <div className="ml-auto">{action}</div> : null}
         </div>

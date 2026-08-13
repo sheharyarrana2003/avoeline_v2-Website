@@ -7,7 +7,7 @@ const TONE: Record<Tone, string> = {
     // Keeping the two apart is the whole point of having a tone at all -- it is
     // now weight rather than hue that does it.
     danger: "bg-danger-soft text-danger ring-1 ring-danger-line",
-    neutral: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
+    neutral: "bg-muted text-ink-soft ring-1 ring-line",
 };
 
 export type RouteMessageProps = {
@@ -48,8 +48,8 @@ export function RouteMessage({
                     {icon}
                 </div>
 
-                <h1 className="mt-6 text-xl font-bold tracking-tight text-gray-900">{title}</h1>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">{description}</p>
+                <h1 className="mt-6 text-xl font-bold tracking-tight text-ink">{title}</h1>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{description}</p>
 
                 {actions ? (
                     <div className="mt-7 flex flex-wrap items-center justify-center gap-3">{actions}</div>
@@ -57,10 +57,10 @@ export function RouteMessage({
 
                 {details ? (
                     <details className="mt-8 text-left">
-                        <summary className="cursor-pointer text-xs font-medium text-gray-500 hover:text-gray-600">
+                        <summary className="cursor-pointer text-xs font-medium text-ink-soft hover:text-ink-soft">
                             Technical details
                         </summary>
-                        <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-100 p-3 text-[11px] leading-relaxed text-gray-600">
+                        <pre className="mt-2 overflow-x-auto rounded-lg bg-muted p-3 text-[11px] leading-relaxed text-ink-soft">
                             {details}
                         </pre>
                     </details>
@@ -72,7 +72,7 @@ export function RouteMessage({
 
 /** Shared button styling for the boundaries, so all four match. */
 export const routeMessageButton =
-    "inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+    "inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-ink-invert transition hover:bg-ink-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export const routeMessageLink =
-    "inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+    "inline-flex items-center gap-2 rounded-full border border-line-loud px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";

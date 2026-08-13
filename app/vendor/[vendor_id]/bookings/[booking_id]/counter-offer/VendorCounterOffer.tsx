@@ -106,7 +106,7 @@ export default function VendorCounterOfferForm ({
       {error && (
         <p
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-gray-900 px-3 py-2.5 text-sm font-medium text-ink"
+          className="flex items-start gap-2 rounded-lg border border-ink px-3 py-2.5 text-sm font-medium text-ink"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
           {error}
