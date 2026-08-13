@@ -33,30 +33,35 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
     ]);
     const tallyFor = (id: string) => tallies.get(id) ?? { registrations: 0, checkedIn: 0, revenue: 0, avgRating: 0 };
 
-    const events = organizerEvents.filter((event) => {
-        if (currentTab === "all") {
-            return true;
-        }
+    const events = organizerEvents.filter(
+        (event) => currentTab === "all" || event.status === currentTab
+    );
 
-        if (currentTab === "published") {
-            return event.status === "published" ;
-        }
-
-        return event.status === currentTab;
-    });
+    // One entry per member of EventStatus, derived from the union rather than typed
+    // out. `registration_open` had no tab at all: it is a legal status, so such an
+    // event was counted in All Events and reachable from no tab, and the per-status
+    // counts did not add up to the total. Deriving the list means a status added to
+    // the union cannot silently lose its tab again.
+    //
+    // The `published` branch of the old filter was also dead — it compared status to
+    // "published" where the line below it already compared status to currentTab.
+    const STATUS_TABS: { label: string; value: EventStatus }[] = [
+        { label: "Draft", value: "draft" },
+        { label: "Published", value: "published" },
+        { label: "Registration open", value: "registration_open" },
+        { label: "Ongoing", value: "ongoing" },
+        { label: "Completed", value: "completed" },
+        { label: "Cancelled", value: "cancelled" },
+    ];
 
     const tabs = [
         { label: "All Events", value: "all", count: organizerEvents.length, href: `${base_address}/events` },
-        { label: "Draft", value: "draft", count: countByStatus(organizerEvents, "draft"), href: `${base_address}/events?status=draft` },
-        {
-            label: "Published",
-            value: "published",
-            count: countByStatus(organizerEvents, "published"),
-            href: `${base_address}/events?status=published`
-        },
-        { label: "Ongoing", value: "ongoing", count: countByStatus(organizerEvents, "ongoing"), href: `${base_address}/events?status=ongoing` },
-        { label: "Completed", value: "completed", count: countByStatus(organizerEvents, "completed"), href: `${base_address}/events?status=completed` },
-        { label: "Cancelled", value: "cancelled", count: countByStatus(organizerEvents, "cancelled"), href: `${base_address}/events?status=cancelled` },
+        ...STATUS_TABS.map((t) => ({
+            label: t.label,
+            value: t.value,
+            count: countByStatus(organizerEvents, t.value),
+            href: `${base_address}/events?status=${t.value}`,
+        })),
     ];
 
     const columns: Column<EventModel>[] = [
