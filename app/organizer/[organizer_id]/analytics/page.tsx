@@ -25,6 +25,7 @@ const performanceColumns: Column<AnalyticsEventPerformance>[] = [
     {
         key: "event",
         header: "Event",
+        width: "w-[34%] max-w-0",
         cell: (e) => <CellStack primary={e.eventName} secondary={e.eventType} />,
     },
     {

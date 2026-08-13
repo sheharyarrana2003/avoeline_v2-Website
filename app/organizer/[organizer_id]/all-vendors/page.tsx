@@ -68,10 +68,11 @@ export default async function Active_Vendors({ params, searchParams }: { params:
     {
       key: "vendor",
       header: "Vendor",
+      width: "w-[20%] max-w-0",
       cell: (b) => (
         <Link
           href={`${basePath}/view-vendor/${b.vendor?.vendorId}`}
-          className="group/row block min-w-40 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           <CellStack
             primary={<span className="group-hover/row:underline">{b.vendor?.businessName || "Vendor"}</span>}
@@ -85,6 +86,7 @@ export default async function Active_Vendors({ params, searchParams }: { params:
     {
       key: "event",
       header: "Event",
+      width: "w-[18%] max-w-0",
       cell: (b) => (
         <CellStack
           primary={<span className="font-normal">{b.eventName || "—"}</span>}

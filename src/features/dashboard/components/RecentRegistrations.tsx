@@ -14,6 +14,9 @@ const columns: Column<RecentRegistration>[] = [
   {
     key: "attendee",
     header: "Attendee",
+    // This table sits in the dashboard's narrower main column, so both text
+    // columns need a ceiling or a long name shoves Status and Amount out.
+    width: "w-[32%] max-w-0",
     cell: (r) => (
       <div className="flex items-center gap-3">
         <span
@@ -26,7 +29,12 @@ const columns: Column<RecentRegistration>[] = [
       </div>
     ),
   },
-  { key: "event", header: "Event", cell: (r) => <span className="text-ink-soft">{r.eventName}</span> },
+  {
+    key: "event",
+    header: "Event",
+    width: "w-[38%] max-w-0",
+    cell: (r) => <span className="block truncate text-ink-soft">{r.eventName}</span>,
+  },
   { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} size="sm" /> },
   {
     key: "amount",

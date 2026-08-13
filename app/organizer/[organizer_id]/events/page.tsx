@@ -52,8 +52,11 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         {
             key: "event",
             header: "Event",
+            // Capped, not min-width. Without a ceiling the longest title stretches this
+            // column past 600px and pushes revenue and the actions off the table.
+            width: "w-[34%] max-w-0",
             cell: (e) => (
-                <Link href={`${base_address}/events/${e.id}`} className="group/row block min-w-48 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2">
+                <Link href={`${base_address}/events/${e.id}`} className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2">
                     <CellStack
                         primary={<span className="group-hover/row:underline">{e.title}</span>}
                         secondary={[e.category, e.format, e.eventType].filter(Boolean).join(" · ")}
@@ -65,23 +68,34 @@ export default async function MyEventsPage({ params, searchParams }: { params: P
         {
             key: "date",
             header: "Date",
-            cell: (e) => (
-                <CellStack
-                    primary={<span className="tabular-nums font-normal">{formatDate(e.schedule?.startDate)}</span>}
-                    // startTime was stored and never shown on this list.
-                    secondary={e.schedule?.startTime ? formatTime(e.schedule.startTime) : undefined}
-                />
-            ),
+            cell: (e) => {
+                const date = formatDate(e.schedule?.startDate);
+                // A bare "10:00 AM" under an em dash is noise: a draft with no start date
+                // still carries a default start time, and a time with no day means nothing.
+                const showTime = date !== "—" && e.schedule?.startTime;
+                return (
+                    <CellStack
+                        primary={<span className="whitespace-nowrap font-normal tabular-nums">{date}</span>}
+                        secondary={showTime ? formatTime(e.schedule.startTime) : undefined}
+                    />
+                );
+            },
         },
         {
             key: "venue",
             header: "Venue",
-            cell: (e) => (
-                <CellStack
-                    primary={<span className="font-normal">{e.location?.venueName || "—"}</span>}
-                    secondary={e.location?.city}
-                />
-            ),
+            width: "max-w-0",
+            cell: (e) => {
+                // Falls back to the city as the primary line rather than printing an em
+                // dash above it — "— / Lahore" reads as missing data twice over.
+                const venue = e.location?.venueName;
+                return (
+                    <CellStack
+                        primary={<span className="font-normal">{venue || e.location?.city || "—"}</span>}
+                        secondary={venue ? e.location?.city : undefined}
+                    />
+                );
+            },
         },
         {
             key: "registered",

@@ -137,6 +137,7 @@ export default async function VendorDashboardPage({
         {
             key: "event",
             header: "Event",
+            width: "w-[30%] max-w-0",
             cell: (b) => (
                 <CellStack
                     primary={getEventTitle(b?.eventId)}

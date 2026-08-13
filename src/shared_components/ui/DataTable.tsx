@@ -64,9 +64,13 @@ export function DataTable<T>({
                             <th
                                 key={c.key}
                                 scope="col"
+                                // whitespace-nowrap: these headings are 2xs uppercase with
+                                // wide tracking, so a two-word one ("Checked in") wraps at
+                                // the slightest squeeze and silently makes the header row
+                                // twice as tall.
                                 // The last column drops its right gutter so a
                                 // right-aligned number sits flush with the edge.
-                                className={`${tableHead} ${c.width ?? ""} ${
+                                className={`${tableHead} whitespace-nowrap ${c.width ?? ""} ${
                                     c.align === "right" ? "text-right" : ""
                                 } ${i === columns.length - 1 ? "pr-0" : ""}`}
                             >
@@ -81,7 +85,12 @@ export function DataTable<T>({
                             {columns.map((c, i) => (
                                 <td
                                     key={c.key}
-                                    className={`${tableCell} ${
+                                    // `width` lands on the cell as well as the header. A
+                                    // percentage width on the th alone is advisory; the
+                                    // `max-w-0` half of the truncation trick has to be on
+                                    // the td, or the cell still sizes to its content and
+                                    // nothing ever ellipsises.
+                                    className={`${tableCell} ${c.width ?? ""} ${
                                         c.align === "right" ? "text-right tabular-nums" : ""
                                     } ${i === columns.length - 1 ? "pr-0" : ""}`}
                                 >
@@ -101,9 +110,21 @@ export function DataTable<T>({
  * on top, its qualifier underneath, instead of spending a whole column on each.
  * This is the pattern the reference dashboard uses for name+email and role+department.
  */
-export function CellStack({ primary, secondary }: { primary: ReactNode; secondary?: ReactNode }) {
+export function CellStack({
+    primary,
+    secondary,
+    className = "",
+}: {
+    primary: ReactNode;
+    secondary?: ReactNode;
+    className?: string;
+}) {
     return (
-        <div className="min-w-0">
+        // `truncate` below is inert without a bounded width, and a table cell sizes to
+        // its content by default — so one long title stretches its column until the
+        // right-hand columns are pushed off the table entirely. Callers cap the width
+        // through `className`; this is why Column has a `width` too.
+        <div className={`min-w-0 ${className}`}>
             <div className="truncate font-medium text-ink">{primary}</div>
             {secondary ? <div className="truncate text-xs text-ink-soft">{secondary}</div> : null}
         </div>

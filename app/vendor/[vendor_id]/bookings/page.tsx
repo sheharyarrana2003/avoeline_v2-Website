@@ -179,10 +179,11 @@ export default async function VendorBookingsPage({
         {
             key: "event",
             header: "Event",
+            width: "w-[22%] max-w-0",
             cell: (b) => (
                 <Link
                     href={`/vendor/${vendor_id}/bookings/${b?.bookingId}`}
-                    className="group/row block min-w-44 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="group/row block rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     <CellStack
                         primary={<span className="group-hover/row:underline">{getEventTitle(b?.eventId)}</span>}
@@ -221,6 +222,7 @@ export default async function VendorBookingsPage({
         {
             key: "where",
             header: "Where",
+            width: "w-[16%] max-w-0",
             cell: (b) => (
                 <CellStack
                     primary={<span className="font-normal">{b?.requirements?.location || "Location TBD"}</span>}
