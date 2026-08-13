@@ -31,7 +31,10 @@ export default async function VendorLayout({
         <>
             <DashboardNav
                 basePath={basePath}
-                name={u?.name ?? ""}
+                // Same fallback chain as the dashboard greeting: `name` off the session
+                // token is routinely empty, which left the rail showing a blank line above
+                // "View profile".
+                name={u?.name?.trim() || u?.email?.split("@")[0] || ""}
                 logoUrl={vendor?.logo || undefined}
                 unreadCount={unreadCount}
                 items={[

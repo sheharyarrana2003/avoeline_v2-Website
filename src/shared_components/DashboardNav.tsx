@@ -13,11 +13,13 @@ import {
     FileText,
     Package,
     CalendarCheck,
+    LogOut,
     type LucideIcon,
 } from "lucide-react";
 import { NotificationBell } from "@/src/shared_components/NotificationBell";
 import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 import { ThemeToggle } from "@/src/shared_components/ui/ThemeToggle";
+import { signOutAction } from "@/src/features/auth/actions/signOut.action";
 
 /**
  * Icons are keyed by name rather than passed as components, because the layouts
@@ -155,26 +157,49 @@ export function DashboardNav({
                     </ul>
                 </nav>
 
+                {/* Two rows, not one. The identity and three controls were competing for
+                    a 256px rail, which squeezed the name to nothing — and the name is
+                    often empty anyway, so the block read as a bare "View profile" with a
+                    blank line above it. The name gets the full width now, and the actions
+                    get a row where a fourth (sign out) fits without crowding. */}
                 <div className="shrink-0 border-t border-white/10 p-3">
-                    <div className="flex items-center gap-1 rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
+                    <div className="rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
                         <Link
                             href={`${basePath}/profile`}
-                            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="flex min-w-0 items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-offset-2"
                         >
                             {avatar(true)}
                             <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-medium leading-tight">{name}</span>
-                                <span className="block text-2xs text-white/45">View profile</span>
+                                {name ? (
+                                    <span className="block truncate text-sm font-medium leading-tight">{name}</span>
+                                ) : null}
+                                <span className={`block truncate ${name ? "text-2xs text-white/45" : "text-sm font-medium"}`}>
+                                    View profile
+                                </span>
                             </span>
                         </Link>
-                        <ThemeToggle onInk />
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.07]">
-                            <NotificationBell
-                                href={`${basePath}/notifications`}
-                                unreadCount={unreadCount}
-                                onInk
-                            />
-                        </span>
+
+                        <div className="mt-1 flex items-center gap-1 border-t border-white/10 pt-1">
+                            <ThemeToggle onInk />
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.07]">
+                                <NotificationBell
+                                    href={`${basePath}/notifications`}
+                                    unreadCount={unreadCount}
+                                    onInk
+                                />
+                            </span>
+                            {/* A plain form, so signing out survives with JavaScript off and
+                                needs no client component. */}
+                            <form action={signOutAction} className="ml-auto">
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-2xs font-medium text-white/60 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+                                >
+                                    <LogOut className="h-[15px] w-[15px]" aria-hidden="true" />
+                                    Sign out
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -214,9 +239,21 @@ export function DashboardNav({
                             className="flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
                             {avatar(false)}
-                            <span className="hidden font-medium text-ink sm:inline">{name}</span>
+                            {name ? <span className="hidden font-medium text-ink sm:inline">{name}</span> : null}
                             <span className="sr-only">Your profile</span>
                         </Link>
+
+                        {/* The rail is hidden below lg, so without this there is no way to
+                            sign out on a phone at all. */}
+                        <form action={signOutAction}>
+                            <button
+                                type="submit"
+                                aria-label="Sign out"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-soft transition hover:bg-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            >
+                                <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
+                            </button>
+                        </form>
                     </div>
                 </div>
 
