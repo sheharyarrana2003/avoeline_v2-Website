@@ -62,9 +62,18 @@ export function mapToService(raw: any): Service {
 }
 
 export function mapToRatings(raw: any): Ratings {
+    const totalReviews = Number(raw?.totalReviews) || 0;
     return {
-        averageRating: Number(raw?.averageRating) || 0,
-        totalReviews: Number(raw?.totalReviews) || 0,
+        // A rating with no reviews behind it is not a rating. The vendor model seeds
+        // averageRating at 5.0 and only reviewVendor recomputes it, so every vendor
+        // who has never been reviewed carries a stored 5.0 — and every screen that
+        // read this field advertised a perfect score for them.
+        //
+        // Fixing it here rather than in the model default is deliberate: this also
+        // corrects the documents already carrying 5.0, which a changed default would
+        // not, and it means no screen has to remember the rule.
+        averageRating: totalReviews > 0 ? Number(raw?.averageRating) || 0 : 0,
+        totalReviews,
         breakdown: raw?.breakdown || {}
     };
 }

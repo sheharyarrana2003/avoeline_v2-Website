@@ -74,8 +74,11 @@ export default async function VendorDashboardPage({
         ['quote_requested', 'quote_sent', 'negotiating'].includes(b?.status?.toLowerCase())
     );
 
+    // quote_accepted counts as won. It is the furthest state the app can actually
+    // reach — nothing anywhere writes 'confirmed' — so excluding it meant a vendor
+    // whose quotes had all been accepted still saw "Confirmed 0".
     const confirmedBookings = raw_bookings.filter((b: any) =>
-        ['confirmed', 'in_progress'].includes(b?.status?.toLowerCase())
+        ['quote_accepted', 'confirmed', 'in_progress'].includes(b?.status?.toLowerCase())
     );
 
     const completedBookings = raw_bookings.filter((b: any) =>

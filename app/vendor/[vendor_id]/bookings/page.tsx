@@ -127,10 +127,15 @@ export default async function VendorBookingsPage({
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    const activeStatuses = ['confirmed', 'in_progress'];
+    // quote_accepted belongs here. The app can only ever write three booking
+    // statuses — quote_requested, quote_sent and quote_accepted — and this list
+    // contained none of them, so the vendor's bookings screen could not show a
+    // single row however much work they had won. An organizer accepting a quote is
+    // the moment a booking exists; nothing downstream sets 'confirmed'.
+    const activeStatuses = ['quote_accepted', 'confirmed', 'in_progress'];
 
     const allBookings = raw_bookings.filter((b: any) =>
-        ['confirmed', 'in_progress', 'completed', 'cancelled'].includes(b?.status?.toLowerCase())
+        ['quote_accepted', 'confirmed', 'in_progress', 'completed', 'cancelled'].includes(b?.status?.toLowerCase())
     );
 
     const activeBookings = allBookings.filter((b: any) =>
@@ -177,6 +182,7 @@ export default async function VendorBookingsPage({
 
     const tabs = [
         { value: "all", label: "All" },
+        { value: "quote_accepted", label: "Accepted" },
         { value: "confirmed", label: "Confirmed" },
         { value: "in_progress", label: "In progress" },
         { value: "completed", label: "Completed" },
