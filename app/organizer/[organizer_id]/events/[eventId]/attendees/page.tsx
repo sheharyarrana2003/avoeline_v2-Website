@@ -1,4 +1,4 @@
-import { AttendeeService, emptyAttendeeForUser } from "@/src/features/event_attendee/attendee.service"
+import { AttendeeService, emptyAttendeeForUser, userFromRegistration } from "@/src/features/event_attendee/attendee.service"
 import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event_attendee/components/AttendeeClientSide";
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
@@ -22,7 +22,10 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
 
         attendeesWithUsers = regs.map(register => ({
             a: attendeesByUser.get(String(register.userId)) ?? emptyAttendeeForUser(String(register.userId)),
-            user: usersById.get(String(register.userId))!,
+            // No `!` here: a public registration has no account to find, and a
+            // deleted user resolves to nothing either. Both used to hand the list
+            // `undefined` and crash it on the first property access.
+            user: usersById.get(String(register.userId)) ?? userFromRegistration(register),
             register,
         }));
     }

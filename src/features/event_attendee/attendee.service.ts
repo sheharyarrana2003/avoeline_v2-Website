@@ -1,4 +1,5 @@
 import { Attendee } from "./type";
+import { User } from "@/src/services/models/user.type";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { QuerySnapshot } from "firebase-admin/firestore";
@@ -154,4 +155,45 @@ export const AttendeeService = {
 // with a stable, unique key.
 export function emptyAttendeeForUser(userId: string): Attendee {
     return mapToAttendee({ userId, attendeeId: `reg-${userId}` });
+}
+
+/**
+ * The display identity for a registration whose `users` document cannot be found.
+ *
+ * Two ways to land here. A public registration has no account at all, so `userId`
+ * is "" and there is nothing to look up -- the name and email live on the
+ * registration. And a registration whose user was deleted resolves to nothing
+ * either. Both used to produce `undefined`, which `AttendeeListItem` then walked
+ * into via `attendee_user.profile.fullName.charAt(0)`, taking down the whole
+ * Attendees tab rather than dropping one row.
+ *
+ * Same idea as `emptyAttendeeForUser` above: synthesise a well-formed object so
+ * the list stays renderable, and let the missing data show as missing.
+ */
+export function userFromRegistration(reg: {
+    userId?: string;
+    attendee?: { name?: string; email?: string; phone?: string } | null;
+}): User {
+    const contact = reg.attendee;
+    return {
+        userId: String(reg.userId || ""),
+        email: contact?.email || "",
+        userType: "attendee",
+        accountStatus: "active",
+        profile: {
+            // Never "": AttendeeListItem takes .charAt(0) for the avatar, and an
+            // empty initial renders as a blank circle with no hint of who it is.
+            fullName: contact?.name || "Guest registration",
+            phoneNumber: contact?.phone || "",
+            profileImageUrl: "",
+            gender: "other",
+        },
+        location: { city: "", country: "" },
+        preferences: { emailNotifications: true, pushNotifications: false, language: "en", theme: "light" },
+        security: { lastLogin: "", loginCount: 0, failedLoginAttempts: 0, mfaEnabled: false, mfaMethod: null },
+        verification: { isEmailVerified: false, isPhoneVerified: false, emailVerifiedAt: null, phoneVerifiedAt: null },
+        createdAt: "",
+        updatedAt: "",
+        lastActive: "",
+    };
 }
