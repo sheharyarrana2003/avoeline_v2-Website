@@ -19,24 +19,34 @@ function occupiesASeat(reg: Registration): boolean {
 }
 
 /**
- * Whether an event charges for entry.
+ * The tier an attendee is buying and its price, resolved together.
  *
- * Two fields carry price and they disagree in live data: `pricing.isFree` is set
- * by the wizard, `PriceOfTicket` is a separate top-level number, and tiers can
- * carry their own prices. Treating any positive price as paid is the safe read --
- * charging nobody is a worse failure than showing an upload box on a free event.
+ * Live data states the price twice and the two disagree on four of the five
+ * published events: `PriceOfTicket` is a loose top-level number while each entry
+ * in `pricing.tiers` carries its own. Taking the amount from one and the label
+ * from the other stamped registrations "Early Bird Pass" at a price that was not
+ * the Early Bird price -- 1500 against a tier that reads 1000. Both values leave
+ * this function from the same object so they cannot drift apart again.
+ *
+ * A priced tier wins, because it is the only place a name and an amount are
+ * stated together. `PriceOfTicket` is the fallback and gets a generic label
+ * rather than borrowing a tier's name it does not match.
  */
-export function isPaidEvent(event: EventModel): boolean {
-    if (event.pricing?.isFree) return false;
-    const tierPrice = event.pricing?.tiers?.reduce((max, t) => Math.max(max, Number(t.price) || 0), 0) ?? 0;
-    return (Number(event.PriceOfTicket) || 0) > 0 || tierPrice > 0;
+export function ticketFor(event: EventModel): { tierName: string; price: number } {
+    if (event.pricing?.isFree) return { tierName: "General", price: 0 };
+
+    // The first tier with a real price, not the highest: a zero-priced lead tier
+    // should not be read as "this event is free", and picking the max would pair
+    // one tier's name with another tier's amount.
+    const tier = event.pricing?.tiers?.find((t) => (Number(t.price) || 0) > 0);
+    if (tier) return { tierName: tier.name || "General", price: Number(tier.price) || 0 };
+
+    return { tierName: "General", price: Number(event.PriceOfTicket) || 0 };
 }
 
-/** The price we record against a registration. */
-export function ticketPrice(event: EventModel): number {
-    if (!isPaidEvent(event)) return 0;
-    const tierPrice = event.pricing?.tiers?.reduce((max, t) => Math.max(max, Number(t.price) || 0), 0) ?? 0;
-    return Number(event.PriceOfTicket) || tierPrice || 0;
+/** Whether an event charges for entry. */
+export function isPaidEvent(event: EventModel): boolean {
+    return ticketFor(event).price > 0;
 }
 
 /**
@@ -132,8 +142,8 @@ export async function createPublicRegistration(
 
     const ref = adminDb.collection(COLLECTIONS.REGISTRATIONS).doc();
     const now = new Date().toISOString();
-    const paid = isPaidEvent(event);
-    const price = ticketPrice(event);
+    const ticket = ticketFor(event);
+    const paid = ticket.price > 0;
 
     // Paid registrations are not confirmed until an organizer verifies the
     // screenshot; free ones have nothing to verify.
@@ -153,7 +163,7 @@ export async function createPublicRegistration(
             paymentId: "",
             // What they owe, not what we have confirmed receiving -- paymentStatus
             // carries that, and an organizer flips it after seeing the screenshot.
-            amountPaid: paid ? price : 0,
+            amountPaid: ticket.price,
             currency: event.pricing?.currency || "PKR",
             paymentMethod: paid ? "bank_transfer" : "free_ticket",
             paymentStatus: paid ? "pending" : "completed",
@@ -161,8 +171,8 @@ export async function createPublicRegistration(
             invoiceUrl: null,
             proofPath: extras?.proofPath ?? null,
         },
-        pricingTier: event.pricing?.tiers?.[0]?.name || "General",
-        finalPrice: price,
+        pricingTier: ticket.tierName,
+        finalPrice: ticket.price,
         discountApplied: null,
         checkIn: { checkedIn: false, checkInTime: null, checkInMethod: null, checkedInBy: null, deviceId: null },
         qrCode: {
