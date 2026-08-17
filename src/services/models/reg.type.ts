@@ -13,6 +13,15 @@ export interface PaymentInfo {
   paymentStatus: "pending" | "completed" | "failed" | "refunded";
   transactionId: string | null;
   invoiceUrl: string | null;
+  /**
+   * Storage key of the payment screenshot the attendee uploaded, e.g.
+   * "payment-proofs/<uuid>-receipt.png". A key rather than a URL on purpose: the
+   * bucket is private, so the link has to be signed, and a signed URL expires --
+   * storing one would leave the organizer looking at a dead image an hour later.
+   * Sign it at render time instead. Distinct from `invoiceUrl`, which is an
+   * invoice we issued rather than a receipt they sent us.
+   */
+  proofPath: string | null;
 }
 
 export interface DiscountInfo {
@@ -59,10 +68,26 @@ export interface RegistrationMetadata {
   deviceType: "mobile" | "desktop" | "tablet" | string;
 }
 
+/**
+ * Who registered, when they hold no account.
+ *
+ * Registrations used to be reachable only from inside the app, so `userId` always
+ * pointed at a real user and the name and email were read from there. The public
+ * registration form has no account behind it, so the contact details have to live
+ * on the registration itself. `userId` stays "" for these.
+ */
+export interface RegistrantContact {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 export interface Registration {
   registrationId: string;
   eventId: string; // Foreign Key to Event
-  userId: string; // Foreign Key to User
+  userId: string; // Foreign Key to User -- "" for public, account-less registrations
+  /** Set when `userId` is empty; null for registrations made by a signed-in user. */
+  attendee: RegistrantContact | null;
   organizerId: string; // Foreign Key to Organizer (User)
   registrationDate: string;
   registrationSource: "mobile_app" | "web" | "admin_panel";

@@ -5,7 +5,7 @@ import { COLLECTIONS } from "@/data/collections";
 import { toIsoString } from "@/src/lib/datetime";
 
 
-function mapToRegistration(raw: any, fallbackId?: string): Registration {
+export function mapToRegistration(raw: any, fallbackId?: string): Registration {
   if (!raw) {
     throw new Error("Cannot map an empty or undefined raw object to Registration");
   }
@@ -16,6 +16,16 @@ function mapToRegistration(raw: any, fallbackId?: string): Registration {
     registrationId: String(raw.registrationId || fallbackId || ""),
     eventId: String(raw.eventId || ""),
     userId: String(raw.userId || ""),
+    // Only public, account-less registrations carry this. Seeded docs predate the
+    // field entirely, so absence has to stay null rather than an empty contact --
+    // callers use it to decide whether to look the person up in `users` at all.
+    attendee: raw.attendee
+      ? {
+        name: String(raw.attendee.name || ""),
+        email: String(raw.attendee.email || ""),
+        phone: String(raw.attendee.phone || ""),
+      }
+      : null,
     organizerId: String(raw.organizerId || ""),
     registrationDate: String(raw.registrationDate || new Date().toISOString()),
     registrationSource: raw.registrationSource || "web",
@@ -36,6 +46,7 @@ function mapToRegistration(raw: any, fallbackId?: string): Registration {
       paymentStatus: raw.payment?.paymentStatus || "pending",
       transactionId: raw.payment?.transactionId ?? null,
       invoiceUrl: raw.payment?.invoiceUrl ?? null,
+      proofPath: raw.payment?.proofPath ?? null,
     },
 
     pricingTier: String(raw.pricingTier || ""),
