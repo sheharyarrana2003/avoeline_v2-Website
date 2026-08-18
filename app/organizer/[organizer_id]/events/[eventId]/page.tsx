@@ -22,6 +22,9 @@ import { RegService } from "@/src/services/registeration.service";
 import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import ShareRow from "@/src/features/events/components/wizard/results/components/ShareRow";
+import { absoluteUrl, registrationPath } from "@/src/lib/appUrl";
+import { getPublicEvent } from "@/src/features/registration/registration.service";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { Meter } from "@/src/shared_components/ui/charts/Meter";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
@@ -102,6 +105,11 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
         : regOpens !== "—" ? `Registration opens ${regOpens}`
         : null;
     const recentRegistrations: RecentRegistration[] = await EventService.getRecentRegEvents(eventId);
+
+    // Same gate the public page uses, so this link only appears when it actually
+    // leads somewhere. getEventByID is cache()d, so asking again costs no read.
+    const shareable = await getPublicEvent(eventId);
+    const registrationUrl = shareable ? await absoluteUrl(registrationPath(event.id)) : null;
 
     return (
         // No <main>, no page padding and no title here: the event layout renders all
@@ -213,6 +221,24 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                     </div>
                 </div>
             </section>
+
+            {/* The attendees tab tells organizers to "share the event's registration
+                link", and until now there was nowhere to get one: the publish success
+                screen showed it once, on publish day, and never again. */}
+            {registrationUrl && (
+                <section className="rounded-2xl border border-line bg-paper p-6">
+                    <h2 className="font-display text-lg text-ink">Registration link</h2>
+                    <p className="mt-1 text-sm text-ink-soft">
+                        Anyone with this link can register. No account needed.
+                    </p>
+                    <p className="mt-4 truncate rounded-lg border border-line bg-muted px-3 py-2 font-mono text-xs text-ink">
+                        {registrationUrl}
+                    </p>
+                    <div className="mt-4">
+                        <ShareRow eventUrl={registrationUrl} eventTitle={event.title} />
+                    </div>
+                </section>
+            )}
 
             {/* The fourth tile used to be "Avg. Rating 4.8 / Based on 142 reviews" over a
                 five-bar chart hardcoded to [45,62,74,100,68]. Neither number came from
