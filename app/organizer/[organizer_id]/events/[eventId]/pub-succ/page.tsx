@@ -4,6 +4,7 @@ import ShareRow from "@/src/features/events/components/wizard/results/components
 import { EventService } from "@/src/services/event.service";
 import { formatDate } from "@/src/lib/datetime";
 import { buttonClass } from "@/src/lib/ui";
+import { absoluteUrl, registrationPath } from "@/src/lib/appUrl";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 
 export default async function PublishSuccessPage({ params }: { params: Promise<{ eventId: string; organizer_id: string }> }) {
@@ -55,7 +56,10 @@ export default async function PublishSuccessPage({ params }: { params: Promise<{
       </div>
 
       <div className="mt-8">
-        <ShareRow eventUrl={`https://avoeline.com/events/${event.id}`} eventTitle={event.title} />
+        {/* Built from the incoming request rather than a constant. This used to be
+            hardcoded to avoeline.com, a host this app does not run on, so the link
+            organizers were told to share resolved to nothing at all. */}
+        <ShareRow eventUrl={await absoluteUrl(registrationPath(event.id))} eventTitle={event.title} />
       </div>
     </div>
   );
