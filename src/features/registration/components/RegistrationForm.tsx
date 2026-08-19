@@ -84,6 +84,27 @@ export function RegistrationForm({ eventId, isPaid, priceLabel }: RegistrationFo
                 />
             </div>
 
+            {isPaid ? (
+                <div className="flex flex-col gap-1.5 border-t border-line pt-5">
+                    <label htmlFor="reg-proof" className={labelClass}>
+                        Payment screenshot <span className="normal-case text-ink-faint">(optional)</span>
+                    </label>
+                    <input
+                        id="reg-proof"
+                        name="paymentProof"
+                        type="file"
+                        // Images only, and the camera offered first: on a phone this is
+                        // almost always a screenshot or a photo of a receipt.
+                        accept="image/*"
+                        className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink focus:border-ink focus:outline-2 focus:outline-offset-2 focus:outline-ink"
+                    />
+                    <p className="text-xs text-ink-soft">
+                        Upload proof of your transfer and the organiser will verify it. You can also
+                        register now and send it later.
+                    </p>
+                </div>
+            ) : null}
+
             <SubmitButton pendingText="Registering…" className={buttonClass("primary", "lg", "w-full")}>
                 {isPaid ? `Register — ${priceLabel}` : "Register for free"}
             </SubmitButton>
