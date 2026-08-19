@@ -3,6 +3,7 @@ import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 import { Registration } from "@/src/services/models/reg.type";
+import { getSignedUrl, CERTIFICATES_BUCKET } from "@/data/supabase";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
@@ -20,6 +21,25 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
             AttendeeService.getAttendeeProfilesByUserIds(userIds),
         ]);
 
+        // Signed here, once per render, because the proofs bucket is private. Failures
+        // resolve to null so one unreachable screenshot cannot take down the list.
+        const proofUrls = new Map<string, string>(
+            (
+                await Promise.all(
+                    regs
+                        .filter(r => r.payment?.proofPath)
+                        .map(async r => {
+                            try {
+                                return [r.registrationId, await getSignedUrl(CERTIFICATES_BUCKET, r.payment.proofPath!)] as const;
+                            } catch (err) {
+                                console.error("[attendees] could not sign payment proof", { id: r.registrationId, err });
+                                return null;
+                            }
+                        }),
+                )
+            ).filter((entry): entry is readonly [string, string] => entry !== null),
+        );
+
         attendeesWithUsers = regs.map(register => ({
             a: attendeesByUser.get(String(register.userId)) ?? emptyAttendeeForUser(String(register.userId)),
             // No `!` here: a public registration has no account to find, and a
@@ -27,6 +47,7 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
             // `undefined` and crash it on the first property access.
             user: usersById.get(String(register.userId)) ?? userFromRegistration(register),
             register,
+            proofUrl: proofUrls.get(register.registrationId) ?? null,
         }));
     }
 

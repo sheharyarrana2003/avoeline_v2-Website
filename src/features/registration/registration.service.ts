@@ -1,16 +1,18 @@
 import { cache } from "react";
 import { adminDb } from "@/data/admin_db";
+import { FieldValue } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 import { EventService } from "@/src/services/event.service";
 import { RegService, mapToRegistration } from "@/src/services/registeration.service";
 import { EventModel } from "@/src/services/models/event.model";
-import { Registration } from "@/src/services/models/reg.type";
+import { Registration, CommunicationLog } from "@/src/services/models/reg.type";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import { PublicRegistrationInput, RegistrationRefusal } from "./types";
+import { buildQrPayload, generateAndHostQr } from "./qr";
 
 /** What `createPublicRegistration` hands back. */
 export type CreateRegistrationResult =
-    | { ok: true; registrationId: string }
+    | { ok: true; registrationId: string; registration: Registration; event: EventModel }
     | { ok: false; refusal: RegistrationRefusal };
 
 /** A registration counts against capacity unless it was withdrawn. */
@@ -115,8 +117,6 @@ export async function createPublicRegistration(
     extras?: {
         /** Storage key of the uploaded payment screenshot, if any. */
         proofPath?: string | null;
-        /** Filled in by the QR step; absent on a free registration created before it runs. */
-        qrCode?: { data: string; imageUrl: string };
         metadata?: { ipAddress: string; userAgent: string; deviceType: string };
     },
 ): Promise<CreateRegistrationResult> {
@@ -142,6 +142,14 @@ export async function createPublicRegistration(
 
     const ref = adminDb.collection(COLLECTIONS.REGISTRATIONS).doc();
     const now = new Date().toISOString();
+
+    // Generated before the write so the document carries its QR from the outset
+    // rather than needing a second write to attach one. Returns null on failure,
+    // which leaves qrCode empty: a registration without a QR is recoverable, a
+    // lost registration is not.
+    const qr = await generateAndHostQr(
+        buildQrPayload({ name: input.name.trim(), eventId: event.id, registrationId: ref.id, timestamp: now }),
+    );
     const ticket = ticketFor(event);
     const paid = ticket.price > 0;
 
@@ -176,8 +184,8 @@ export async function createPublicRegistration(
         discountApplied: null,
         checkIn: { checkedIn: false, checkInTime: null, checkInMethod: null, checkedInBy: null, deviceId: null },
         qrCode: {
-            data: extras?.qrCode?.data || "",
-            imageUrl: extras?.qrCode?.imageUrl || "",
+            data: qr?.data || "",
+            imageUrl: qr?.imageUrl || "",
             scanCount: 0,
             lastScanned: null,
         },
@@ -213,5 +221,29 @@ export async function createPublicRegistration(
         throw new Error(`Failed to create registration for event ${eventId}`, { cause: err });
     }
 
-    return { ok: true, registrationId: ref.id };
+    return { ok: true, registrationId: ref.id, registration, event };
+}
+
+/**
+ * Record that a confirmation email actually went out.
+ *
+ * A separate write rather than part of the create, because the email can only be
+ * sent once the registration exists and its ticket URL is known. `communications[]`
+ * is already rendered by the organizer's attendee drawer as "Communication
+ * history", and has been permanently empty until now.
+ *
+ * `arrayUnion` rather than assignment so a later entry cannot clobber an earlier
+ * one. Swallows its own failures: the email has already been delivered by this
+ * point, and failing to write the audit line is not worth surfacing to someone who
+ * has just registered successfully.
+ */
+export async function recordCommunication(registrationId: string, log: CommunicationLog): Promise<void> {
+    try {
+        await adminDb
+            .collection(COLLECTIONS.REGISTRATIONS)
+            .doc(registrationId)
+            .update({ communications: FieldValue.arrayUnion(log), updatedAt: new Date().toISOString() });
+    } catch (err) {
+        console.error("[recordCommunication] could not append the log", { registrationId, err });
+    }
 }

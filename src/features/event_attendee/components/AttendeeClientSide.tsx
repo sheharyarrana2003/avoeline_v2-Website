@@ -15,6 +15,13 @@ export interface AttendeeClientSideProp {
     a: Attendee,
     user: User,
     register: Registration
+    /**
+     * A freshly signed URL for `register.payment.proofPath`, or null when there is
+     * no proof. Minted on the server per render because the proofs bucket is
+     * private and signed links expire -- the document stores a storage key, never
+     * a URL.
+     */
+    proofUrl?: string | null
 }
 
 export function AttendeeClientSide({ attendees = [], handle_reg_status }: { attendees: AttendeeClientSideProp[] | [], handle_reg_status: (reg: Registration) => Promise<void> }) {

@@ -12,6 +12,7 @@ import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { useToast } from "@/src/shared_components/ui/Toast";
 import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
+import { ImageLightbox } from "@/src/shared_components/ui/ImageLightbox";
 import { fieldClass, labelClass } from "@/src/lib/ui";
 
 interface SingleAttendeeViewProps {
@@ -54,6 +55,7 @@ export function SingleAttendeeView({
     const a = combined_data?.a || {} as any;
     const u = combined_data?.user || {} as any;
     const r = combined_data?.register || {} as any;
+    const proofUrl = combined_data?.proofUrl ?? null;
 
     // State for local registration updates
     const [registration, setRegistration] = useState<Registration>(r);
@@ -269,6 +271,33 @@ export function SingleAttendeeView({
                         </div>
                     </div>
                 </div>
+
+                {/* Sits directly under the payment-status control because it is the
+                    evidence for it: the organizer looks at the screenshot, then moves
+                    the status. Shown only when a proof exists -- an empty frame reads
+                    as a broken image rather than "nothing was sent". */}
+                {proofUrl ? (
+                    <div className="mt-4">
+                        <p className={labelClass}>Payment proof</p>
+                        <ImageLightbox
+                            src={proofUrl}
+                            alt="Payment screenshot supplied by the attendee"
+                            className="mt-1.5 aspect-video w-full bg-muted"
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={proofUrl}
+                                alt=""
+                                className="absolute inset-0 h-full w-full object-contain"
+                            />
+                        </ImageLightbox>
+                        <p className="mt-1.5 text-xs text-ink-soft">Click to enlarge before verifying.</p>
+                    </div>
+                ) : registration?.status === "awaiting_payment" ? (
+                    <p className="mt-4 text-xs text-ink-soft">
+                        No payment proof was uploaded with this registration.
+                    </p>
+                ) : null}
 
                 <dl className="mt-4 space-y-2 border-t border-line pt-4 text-sm tabular-nums">
                     {discount && (
