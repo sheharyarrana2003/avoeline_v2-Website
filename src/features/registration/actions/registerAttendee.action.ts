@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { ActionResult, fail } from "@/src/lib/action";
-import { createPublicRegistration, getPublicEvent } from "../registration.service";
+import { createPublicRegistration, getPublicEvent, recordCommunication } from "../registration.service";
+import { sendRegistrationEmail } from "../registrationEmail";
+import { absoluteUrl } from "@/src/lib/appUrl";
 import { RegistrationRefusal } from "../types";
 
 /**
@@ -81,11 +83,25 @@ export async function registerAttendeeAction(
 
         if (!result.ok) return fail(REFUSAL_MESSAGE[result.refusal]);
 
+        const ticketPath = `/events/${eventId}/ticket/${result.registrationId}`;
+
+        // Awaited rather than fired and forgotten: this runtime does not guarantee
+        // work outliving the response, so a floating promise here would be killed
+        // mid-flight and the email would vanish. `sendRegistrationEmail` never
+        // throws and returns null when it did not send, so the cost of waiting is
+        // bounded and a failure cannot take the registration down with it.
+        const sent = await sendRegistrationEmail(
+            result.registration,
+            result.event,
+            await absoluteUrl(ticketPath),
+        );
+        if (sent) await recordCommunication(result.registrationId, sent);
+
         // So the organizer's attendee list shows the new registration rather than a
         // cached page without it.
         revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
 
-        redirect(`/events/${eventId}/ticket/${result.registrationId}`);
+        redirect(ticketPath);
     } catch (err) {
         // redirect() reports itself by throwing. Swallowing it here would leave the
         // attendee staring at a form that appears to have done nothing.
