@@ -34,7 +34,7 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
     statusHistory: Array.isArray(raw.statusHistory)
       ? raw.statusHistory.map((h: any) => ({
         status: h.status || "pending",
-        timestamp: String(h.timestamp || new Date().toISOString()),
+        timestamp: toIsoString(h.timestamp) || new Date().toISOString(),
       }))
       : [],
 
@@ -73,14 +73,17 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
       data: String(raw.qrCode?.data || ""),
       imageUrl: String(raw.qrCode?.imageUrl || ""),
       scanCount: Number(raw.qrCode?.scanCount ?? 0),
-      lastScanned: raw.qrCode?.lastScanned ?? null,
+      // Live docs hold a real Timestamp here. Passed through raw it crashes the
+      // organizer's attendees tab outright -- a Timestamp is a class instance, and
+      // anything crossing into a Client Component has to be plain JSON.
+      lastScanned: toIsoString(raw.qrCode?.lastScanned),
     },
 
     certificate: {
       type: raw?.type || "digital",
       issued: Boolean(raw.certificate?.issued ?? false),
       certificateId: raw.certificate?.certificateId ?? null,
-      issueDate: raw.certificate?.issueDate ?? null,
+      issueDate: toIsoString(raw.certificate?.issueDate),
       downloadUrl: raw.certificate?.downloadUrl ?? null,
       sharedOnLinkedIn: Boolean(raw.certificate?.sharedOnLinkedIn ?? false),
     },
@@ -108,7 +111,7 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
     // already store that, which is what crashed the analytics trend.
     createdAt: toIsoString(raw.createdAt) || new Date().toISOString(),
     updatedAt: toIsoString(raw.updatedAt) || new Date().toISOString(),
-    cancelledAt: raw.cancelledAt ?? null,
+    cancelledAt: toIsoString(raw.cancelledAt),
   };
 }
 export const RegService = {

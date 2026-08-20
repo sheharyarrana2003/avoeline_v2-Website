@@ -122,12 +122,39 @@ export function SingleAttendeeView({
         ],
     });
 
+    /**
+     * Verifying a payment also confirms the registration.
+     *
+     * These were independent, so marking a payment "completed" left the
+     * registration sitting at awaiting_payment forever -- the organizer had
+     * verified the transfer while the attendee's own ticket still told them their
+     * place was only held pending payment. The two fields describe one fact.
+     *
+     * Only promotes FROM awaiting_payment: someone already checked_in or attended
+     * must not be demoted to merely confirmed by a late payment reconciliation.
+     * The reverse direction (a payment later failing or being refunded) is
+     * deliberately left alone -- a refund can follow a cancellation as easily as
+     * cause one, and guessing which would be inventing policy.
+     */
     const withPaymentStatus = (
         newPaymentStatus: Registration["payment"]["paymentStatus"],
-    ): Registration => ({
-        ...registration,
-        payment: { ...registration.payment, paymentStatus: newPaymentStatus },
-    });
+    ): Registration => {
+        const confirms = newPaymentStatus === "completed" && registration.status === "awaiting_payment";
+
+        return {
+            ...registration,
+            payment: { ...registration.payment, paymentStatus: newPaymentStatus },
+            ...(confirms
+                ? {
+                    status: "confirmed" as const,
+                    statusHistory: [
+                        ...(registration.statusHistory || []),
+                        { status: "confirmed" as const, timestamp: new Date().toISOString() },
+                    ],
+                }
+                : {}),
+        };
+    };
 
     const handleStatusChange = (newStatus: Registration["status"]) => {
         // Only the consequential ones ask. Confirming every change would train
@@ -139,6 +166,12 @@ export function SingleAttendeeView({
         void commit(withStatus(newStatus), "Registration status");
     };
 
+    /** Says what actually happened, since verifying a payment can also confirm. */
+    const paymentLabel = (newPaymentStatus: Registration["payment"]["paymentStatus"]): string =>
+        newPaymentStatus === "completed" && registration.status === "awaiting_payment"
+            ? "Payment and registration"
+            : "Payment status";
+
     const handlePaymentStatusChange = (
         newPaymentStatus: Registration["payment"]["paymentStatus"],
     ) => {
@@ -146,7 +179,7 @@ export function SingleAttendeeView({
             setPending({ kind: "payment", value: newPaymentStatus });
             return;
         }
-        void commit(withPaymentStatus(newPaymentStatus), "Payment status");
+        void commit(withPaymentStatus(newPaymentStatus), paymentLabel(newPaymentStatus));
     };
 
     const confirmPending = () => {
@@ -158,7 +191,7 @@ export function SingleAttendeeView({
         } else {
             void commit(
                 withPaymentStatus(value as Registration["payment"]["paymentStatus"]),
-                "Payment status",
+                paymentLabel(value as Registration["payment"]["paymentStatus"]),
             );
         }
     };
