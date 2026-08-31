@@ -1210,7 +1210,6 @@ export default function CreateEventPage({
         <div className="space-y-8">
             {/* Event Preview Card */}
             <div className="bg-paper rounded-2xl overflow-hidden border border-line shadow-sm">
-                {serverError ? <FormFeedback error={serverError} className="m-4" /> : null}
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     {/* Square, matching the 1:1 banner the event page renders. Capped on
                         narrow screens so a full-width column doesn't make it huge. */}
@@ -1479,6 +1478,14 @@ export default function CreateEventPage({
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+                {/* Outside the step renderers on purpose. "Save as Draft" submits
+                    from ANY step, and this banner used to live inside step 4 --
+                    so a draft rejected by the server (a deactivated category, a
+                    blank required field) set serverError and displayed nothing at
+                    all. A refused publish that looks like a no-op is the worst
+                    outcome available, so the banner follows you. */}
+                {serverError ? <FormFeedback error={serverError} className="mb-6" /> : null}
+
                 {currentStep === 1 && renderStep1()}
                 {currentStep === 2 && renderStep2()}
                 {currentStep === 3 && renderStep3()}
