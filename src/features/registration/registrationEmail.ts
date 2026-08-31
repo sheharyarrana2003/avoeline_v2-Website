@@ -3,17 +3,8 @@ import { EventModel } from "@/src/services/models/event.model";
 import { OrganizerService } from "@/src/services/organizer.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import { escapeHtml, sendEmail } from "@/src/lib/email";
 
-const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
-
-/** Escape anything user-supplied before it goes into the HTML body. */
-function esc(value: string): string {
-    return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
 
 /**
  * The confirmation email an attendee receives, as subject plus both bodies.
@@ -73,12 +64,12 @@ export function buildRegistrationEmail(
 <html><body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#171717">
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e5e5e5;border-radius:16px">
   <tr><td style="padding:32px 32px 8px">
-    <h1 style="margin:0 0 8px;font-size:22px;font-weight:600">${esc(awaiting ? "Registration received" : "You're registered")}</h1>
-    <p style="margin:0;font-size:14px;line-height:1.6;color:#525252">Hi ${esc(name)}, ${esc(opening)}</p>
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:600">${escapeHtml(awaiting ? "Registration received" : "You're registered")}</h1>
+    <p style="margin:0;font-size:14px;line-height:1.6;color:#525252">Hi ${escapeHtml(name)}, ${escapeHtml(opening)}</p>
   </td></tr>
   ${registration.qrCode?.imageUrl
         ? `<tr><td align="center" style="padding:24px 32px">
-    <img src="${esc(registration.qrCode.imageUrl)}" width="220" height="220" alt="Entry QR code"
+    <img src="${escapeHtml(registration.qrCode.imageUrl)}" width="220" height="220" alt="Entry QR code"
          style="display:block;border:1px solid #e5e5e5;border-radius:12px;background:#ffffff;padding:8px" />
   </td></tr>`
         : ""}
@@ -87,12 +78,12 @@ export function buildRegistrationEmail(
       ${facts
           .map(
               ([k, v]) =>
-                  `<tr><td style="padding:8px 0;color:#737373;border-bottom:1px solid #f0f0f0">${esc(k)}</td>
-                   <td style="padding:8px 0;text-align:right;border-bottom:1px solid #f0f0f0">${esc(v)}</td></tr>`,
+                  `<tr><td style="padding:8px 0;color:#737373;border-bottom:1px solid #f0f0f0">${escapeHtml(k)}</td>
+                   <td style="padding:8px 0;text-align:right;border-bottom:1px solid #f0f0f0">${escapeHtml(v)}</td></tr>`,
           )
           .join("")}
     </table>
-    <p style="margin:24px 0 0"><a href="${esc(ticketUrl)}"
+    <p style="margin:24px 0 0"><a href="${escapeHtml(ticketUrl)}"
       style="display:inline-block;padding:12px 20px;background:#171717;color:#ffffff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600">View your ticket</a></p>
     <p style="margin:16px 0 0;font-size:12px;color:#737373">Keep that link — it is how you get back to your ticket and QR code.</p>
   </td></tr>
@@ -123,62 +114,37 @@ export async function sendRegistrationEmail(
     event: EventModel,
     ticketUrl: string,
 ): Promise<CommunicationLog | null> {
-    const apiKey = process.env.BREVO_API_KEY;
-    const from = process.env.MAIL_FROM;
     const to = registration.attendee?.email;
-
-    const { subject, html, text } = buildRegistrationEmail(registration, event, ticketUrl);
-
     if (!to) {
         console.warn("[sendRegistrationEmail] registration has no attendee email; nothing to send");
         return null;
     }
-    if (!apiKey || !from) {
-        console.info(
-            `[sendRegistrationEmail] no BREVO_API_KEY/MAIL_FROM set — not sending. Would have sent to ${to}: ${subject}`,
-        );
-        return null;
-    }
 
-    // Shown as the organizer, sent as us: mail claiming an organizer's own domain but
-    // leaving Brevo's servers fails SPF/DKIM alignment. The display name carries who
-    // it is from and replyTo puts their real address behind the reply button.
+    const { subject, html, text } = buildRegistrationEmail(registration, event, ticketUrl);
+
+    // Shown as the organizer, sent as us — sendEmail handles the SPF/DKIM
+    // reasoning; this only supplies who to name and where replies should go.
     const organizer = await OrganizerService.getOrganizerById(event.organizerId).catch(() => null);
     const organizerName = organizer?.organization?.name?.trim();
     const organizerEmail = organizer?.contact?.primaryEmail?.trim();
 
-    try {
-        const response = await fetch(BREVO_ENDPOINT, {
-            method: "POST",
-            headers: { "api-key": apiKey, "Content-Type": "application/json", accept: "application/json" },
-            body: JSON.stringify({
-                sender: { email: from, name: organizerName ? `${organizerName} (via Avoeline)` : "Avoeline" },
-                to: [{ email: to, name: registration.attendee?.name || undefined }],
-                ...(organizerEmail ? { replyTo: { email: organizerEmail, name: organizerName || undefined } } : {}),
-                subject,
-                htmlContent: html,
-                textContent: text,
-            }),
-        });
+    const ok = await sendEmail(
+        { email: to, name: registration.attendee?.name || undefined },
+        {
+            subject,
+            html,
+            text,
+            senderName: organizerName,
+            ...(organizerEmail ? { replyTo: { email: organizerEmail, name: organizerName } } : {}),
+        },
+    );
 
-        if (!response.ok) {
-            // Body carries Brevo's reason -- unverified sender and daily quota are the
-            // two that will actually happen, and both are silent otherwise.
-            console.error(
-                `[sendRegistrationEmail] Brevo rejected the send (${response.status})`,
-                await response.text().catch(() => ""),
-            );
-            return null;
-        }
+    if (!ok) return null;
 
-        return {
-            type: "registration_confirmation",
-            sentAt: new Date().toISOString(),
-            channel: "email",
-            status: "sent",
-        };
-    } catch (err) {
-        console.error("[sendRegistrationEmail] send failed", err);
-        return null;
-    }
+    return {
+        type: "registration_confirmation",
+        sentAt: new Date().toISOString(),
+        channel: "email",
+        status: "sent",
+    };
 }
