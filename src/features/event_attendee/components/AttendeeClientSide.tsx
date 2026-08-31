@@ -7,6 +7,8 @@ import { SingleAttendeeView } from "./SingleAttendeeView";
 import { AttendeeInput } from "./AttendeeInput";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { ExportButton } from "@/src/features/exports/components/ExportButton";
+import type { ExportResult } from "@/src/features/exports/actions/exportAttendees.action";
 import { Users, UserCheck, Clock, Ban } from "lucide-react";
 import { Registration } from "@/src/services/models/reg.type";
 import { useSearchParams } from "next/navigation";
@@ -24,7 +26,7 @@ export interface AttendeeClientSideProp {
     proofUrl?: string | null
 }
 
-export function AttendeeClientSide({ attendees = [], handle_reg_status }: { attendees: AttendeeClientSideProp[] | [], handle_reg_status: (reg: Registration) => Promise<void> }) {
+export function AttendeeClientSide({ attendees = [], handle_reg_status, onExport }: { attendees: AttendeeClientSideProp[] | [], handle_reg_status: (reg: Registration) => Promise<void>, onExport?: () => Promise<ExportResult> }) {
     // The open row is held by id, not by object, so the drawer keeps showing the
     // current registration after a server revalidation replaces the props.
     const [open_registration_id, set_open_registration_id] = useState<string | null>(null);
@@ -82,7 +84,10 @@ export function AttendeeClientSide({ attendees = [], handle_reg_status }: { atte
             <div className="min-w-0 flex-1">
                 {/* Section heading, not a page title: the event layout already renders
                     the event's name, status and tabs above this. */}
-                <h2 className="mb-8 font-display text-xl text-ink">Attendees</h2>
+                <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+                    <h2 className="font-display text-xl text-ink">Attendees</h2>
+                    {onExport ? <ExportButton run={onExport} label="Export attendees" /> : null}
+                </div>
 
                 <section className="mb-8 grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
                     {/* The check-in percentage used to be crammed into the tile's own

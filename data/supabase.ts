@@ -21,9 +21,23 @@ export const supabaseAdmin = createClient(url, serviceKey ?? anonKey, {
 export const MEDIA_BUCKET = "media";
 export const CERTIFICATES_BUCKET = "certificates";
 
-/** Create a short-lived signed URL for a file in a private bucket (e.g. certificates). */
-export async function getSignedUrl(bucket: string, path: string, expiresIn = 3600): Promise<string> {
-  const { data, error } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, expiresIn);
+/**
+ * Create a short-lived signed URL for a file in a private bucket (e.g. certificates).
+ *
+ * `downloadAs` makes the link save the file under that name instead of the
+ * storage key. Without it a generated export downloads as
+ * "<uuid>-attendees-....csv", since the key carries a uuid to avoid collisions.
+ * Omit it for anything meant to be viewed inline, like a payment proof.
+ */
+export async function getSignedUrl(
+  bucket: string,
+  path: string,
+  expiresIn = 3600,
+  downloadAs?: string,
+): Promise<string> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(bucket)
+    .createSignedUrl(path, expiresIn, downloadAs ? { download: downloadAs } : undefined);
   if (error) throw error;
   return data.signedUrl;
 }
