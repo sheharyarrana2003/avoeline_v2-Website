@@ -4,7 +4,10 @@ import { adminAuth } from './data/admin_db';
 
 
 // This middle ware is for role validation
-const all_possible_roles = ['organizer', 'vendor'];
+// Every role whose routes live under /<role>/<id>/... Attendee joined the
+// list once app/attendee existed; before that an attendee signing in was sent
+// to a 404, and /attendee was not guarded at all.
+const all_possible_roles = ['organizer', 'vendor', 'attendee'];
 
 /** Send an unauthenticated visitor to sign in, remembering where they were headed. */
 function redirectToSignIn(request: NextRequest) {
@@ -44,6 +47,18 @@ export async function proxy(request: NextRequest) {
         return redirectToSignIn(request);
     }
 
+    // An admin on /organizer or /vendor is signed in on the wrong side, so send
+    // them to their own area. Without this they fell through to redirectToSignIn
+    // below and were bounced to a sign-in page they had already passed.
+    if (userType === 'admin') {
+        for (const role of all_possible_roles) {
+            if (request.nextUrl.pathname.startsWith(`/${role}`)) {
+                return NextResponse.redirect(new URL('/admin', request.url));
+            }
+        }
+        return NextResponse.next();
+    }
+
     for (const role of all_possible_roles) {
         if (request.nextUrl.pathname.startsWith(`/${role}`) && userType !== role) {
             // Signed in, but on the wrong side of the app — send them to their own
@@ -64,6 +79,15 @@ export const config = {
     // ':path*' acts as a named wildcard placeholder that Next.js safely compiles
     matcher: [
         '/organizer/:path*',
-        '/vendor/:path*'
+        '/vendor/:path*',
+        '/attendee/:path*',
+        // Listed so a signed-out visitor is redirected rather than reaching the
+        // page. 'admin' is deliberately NOT in all_possible_roles above: that
+        // array doubles as the cross-redirect target, so an admin bounced off
+        // /organizer would be sent to /admin/<roleId>/dashboard, which does not
+        // exist. The role check for /admin lives in app/admin/layout.tsx, and
+        // every admin action re-checks it -- a Server Action is a public
+        // endpoint this middleware never sees.
+        '/admin/:path*'
     ]
 };

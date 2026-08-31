@@ -3,7 +3,7 @@ import { Registration } from "@/src/services/models/reg.type";
 
 import { Mail, Phone, CheckCircle2, X, CreditCard, Tag, Award, MessageSquare, Star, ChevronDown } from "lucide-react";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import type { ReactNode } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
 import { formatDateTime } from "@/src/lib/datetime";
@@ -13,6 +13,10 @@ import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { useToast } from "@/src/shared_components/ui/Toast";
 import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
 import { ImageLightbox } from "@/src/shared_components/ui/ImageLightbox";
+import { buttonClass } from "@/src/lib/ui";
+import { setCheckIn } from "@/src/features/event_attendee/actions/checkIn.action";
+import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import type { ActionResult } from "@/src/lib/action";
 import { fieldClass, labelClass } from "@/src/lib/ui";
 
 interface SingleAttendeeViewProps {
@@ -76,6 +80,8 @@ export function SingleAttendeeView({
     const finalPrice = registration?.finalPrice ?? amountPaid;
     const ticketType = registration?.pricingTier || "General";
     const discount = registration?.discountApplied;
+
+    const [checkInState, checkInAction] = useActionState<ActionResult | null, FormData>(setCheckIn, null);
 
     const isCheckedIn = Boolean(registration?.checkIn?.checkedIn) || registration?.status === "checked_in";
 
@@ -257,15 +263,32 @@ export function SingleAttendeeView({
                 </div>
             </section>
 
-            {isCheckedIn && (
-                <section className="flex items-center gap-3 rounded-2xl border border-line bg-paper p-4">
-                    <CheckCircle2 size={20} className="shrink-0 text-ink" aria-hidden="true" />
-                    <div>
-                        <p className="text-sm font-medium text-ink">Checked in{checkInTime ? ` at ${checkInTime}` : ""}</p>
-                        <p className="text-xs capitalize text-ink-soft">Method: {checkInMethod}</p>
-                    </div>
-                </section>
-            )}
+            <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-paper p-4">
+                <CheckCircle2
+                    size={20}
+                    className={`shrink-0 ${isCheckedIn ? "text-ink" : "text-ink-faint"}`}
+                    aria-hidden="true"
+                />
+                <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink">
+                        {isCheckedIn ? `Checked in${checkInTime ? ` at ${checkInTime}` : ""}` : "Not checked in"}
+                    </p>
+                    <p className="text-xs capitalize text-ink-soft">
+                        {isCheckedIn ? `Method: ${checkInMethod}` : "Mark them in when they arrive"}
+                    </p>
+                </div>
+                {/* A plain form, so this works with JS off and needs no state here.
+                    The action takes an id and a boolean -- the timestamp and the
+                    operator are the server's to decide. */}
+                <form action={checkInAction} className="ml-auto">
+                    <input type="hidden" name="registrationId" value={registration?.registrationId ?? ""} />
+                    <input type="hidden" name="checkedIn" value={isCheckedIn ? "false" : "true"} />
+                    <button type="submit" className={buttonClass(isCheckedIn ? "secondary" : "primary", "sm")}>
+                        {isCheckedIn ? "Undo check-in" : "Check in"}
+                    </button>
+                </form>
+                {checkInState?.error ? <FormFeedback error={checkInState.error} className="w-full" /> : null}
+            </section>
 
             <section>
                 <Heading>Academic details</Heading>

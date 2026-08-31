@@ -5,7 +5,8 @@ export type NotificationType =
   | "certificate_ready"
   | "new_message"
   | "vendor_quote"
-  | "booking_confirmation";
+  | "booking_confirmation"
+  | "category_request";
 
 export type NotificationPriority = "high" | "medium" | "low";
 

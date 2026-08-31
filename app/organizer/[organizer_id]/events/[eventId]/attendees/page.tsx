@@ -4,6 +4,7 @@ import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 import { Registration } from "@/src/services/models/reg.type";
 import { getSignedUrl, CERTIFICATES_BUCKET } from "@/data/supabase";
+import { exportAttendeesAction } from "@/src/features/exports/actions/exportAttendees.action";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
@@ -58,5 +59,12 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
 
     // No padding and no event title here: the event layout renders both, and this
     // page's job is the Attendees section of it.
-    return <AttendeeClientSide attendees={attendeesWithUsers} handle_reg_status={handle_reg_status} />;
+    // Bound here so the client never sees an event id it could swap; the action
+    // re-checks ownership regardless.
+    const handle_export = async () => {
+        'use server'
+        return exportAttendeesAction(event_id);
+    };
+
+    return <AttendeeClientSide attendees={attendeesWithUsers} handle_reg_status={handle_reg_status} onExport={handle_export} />;
 }

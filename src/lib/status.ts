@@ -65,6 +65,13 @@ const STATUS: Record<string, StatusMeta> = {
     revoked: { label: "Revoked", tone: "danger" },
     success: { label: "Success", tone: "success" },
     missing: { label: "Missing", tone: "neutral" },
+
+    // ── Event categories and formats ──────────────────────────────
+    // A deactivated category is not a failure, so "inactive" is grey rather
+    // than red: existing events still use it, it is only hidden from new ones.
+    active: { label: "Active", tone: "success" },
+    inactive: { label: "Inactive", tone: "neutral" },
+    approved: { label: "Approved", tone: "success" },
 };
 
 /** "quote_requested" -> "Quote requested", for statuses not in the map. */

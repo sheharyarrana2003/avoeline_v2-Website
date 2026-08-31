@@ -115,17 +115,27 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
   };
 }
 export const RegService = {
-  async getRegOfUser(user_id: string) {
-    // Only the first match is used, so cap the read at one document.
-    const q = adminDb.collection(COLLECTIONS.REGISTRATIONS).where("userId", "==", user_id).limit(1);
-    const querySnapshot: QuerySnapshot = await q.get();
+  /**
+   * Every registration one person holds, newest first.
+   *
+   * Replaces getRegOfUser, which capped the read at one document and returned
+   * `mapToRegistration({})` when there were none -- a truthy object with empty
+   * fields, which reads as "a registration exists" at every call site. It had
+   * none, so nothing had to be migrated.
+   *
+   * Sorted in memory: a where + orderBy pair needs a composite index, and the
+   * ones declared for registrations are on a misspelled collection group.
+   */
+  async getRegsOfUser(user_id: string): Promise<Registration[]> {
+    if (!user_id) return [];
+    const querySnapshot: QuerySnapshot = await adminDb
+      .collection(COLLECTIONS.REGISTRATIONS)
+      .where("userId", "==", user_id)
+      .get();
 
-    if (querySnapshot.empty) {
-      return mapToRegistration({});
-    }
-
-    return mapToRegistration(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
-
+    return querySnapshot.docs
+      .map((d) => mapToRegistration(d.data(), d.id))
+      .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
   },
 
   // Fetch every registration for an event in one query. Used to resolve each

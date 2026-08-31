@@ -123,6 +123,13 @@ type GateProps = Omit<ConfirmDialogProps, "open" | "onConfirm" | "onCancel"> & {
     children: ReactNode;
     className?: string;
     disabled?: boolean;
+    /**
+     * Forwarded to the button, for a form with more than one submit button --
+     * `name="decision" value="reject"` beside a plain Approve button. Passed to
+     * requestSubmit() as the submitter, so the pair reaches the action.
+     */
+    name?: string;
+    value?: string;
 };
 
 /**
@@ -135,7 +142,7 @@ type GateProps = Omit<ConfirmDialogProps, "open" | "onConfirm" | "onCancel"> & {
  * platform via requestSubmit(), so the action, the hidden inputs and the
  * page all stay exactly as they were.
  */
-export function ConfirmSubmit({ children, className = "", disabled, ...dialog }: GateProps) {
+export function ConfirmSubmit({ children, className = "", disabled, name, value, ...dialog }: GateProps) {
     const [open, setOpen] = useState(false);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -144,6 +151,8 @@ export function ConfirmSubmit({ children, className = "", disabled, ...dialog }:
             <button
                 ref={buttonRef}
                 type="submit"
+                name={name}
+                value={value}
                 disabled={disabled}
                 className={className}
                 onClick={(e) => {
@@ -161,7 +170,11 @@ export function ConfirmSubmit({ children, className = "", disabled, ...dialog }:
                     setOpen(false);
                     // requestSubmit, not submit(): it runs validation and fires
                     // the submit event, which is what React's form action needs.
-                    buttonRef.current?.form?.requestSubmit();
+                    // The button is passed as the submitter, or its name/value
+                    // is dropped -- which silently turns a two-button form
+                    // (Approve / Reject) into whichever branch is the default.
+                    const button = buttonRef.current;
+                    button?.form?.requestSubmit(button);
                 }}
             />
         </>

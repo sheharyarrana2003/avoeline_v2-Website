@@ -1,4 +1,5 @@
 import { adminDb } from "@/data/admin_db";
+import { toIsoString } from "@/src/lib/datetime";
 import { CertificateDocument } from "./models/certificate.model";
 import type {
   CertificateGenerationAttendeeResult,
@@ -37,92 +38,6 @@ export async function uploadToIPFS(metadata: CertificateTemplate): Promise<strin
   }
 }
 
-function createCertificateDocument(input: any) {
-  const now = new Date().toISOString();
-  const padId = String(input.index).padStart(3, '0');
-  const certificateId = `CERT${padId}`;
-  const uniqueId = `CERT-${new Date().getFullYear()}-${padId}`;
-
-  // 5 Year expiry logic
-  const expiryDate = new Date();
-  expiryDate.setFullYear(expiryDate.getFullYear() + 5);
-
-  const doc: CertificateDocument = {
-    certificateId,
-    registrationId: input.registrationId,
-    userId: input.userId,
-    eventId: input.eventId,
-    organizerId: input.organizerId,
-    type: input.type,
-    title: "Certificate of Completion",
-    description: `Successfully completed ${input.eventTitle}`,
-    content: {
-      recipientName: input.recipientName,
-      eventTitle: input.eventTitle,
-      completionDate: now.split('T')[0],
-      grade: "A+",
-      duration: input.duration,
-      issuerName: input.issuerName,
-      issuerSignature: `https://storage.eventflow.com/signatures/${input.organizerId}.png`,
-      uniqueId: uniqueId
-    },
-    validation: {
-      verificationCode: `EVT-${certificateId}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      verificationUrl: `https://eventflow.com/verify/${certificateId}`,
-      isVerified: false,
-      verificationCount: 0
-    },
-    socialSharing: {
-      sharedOnLinkedIn: false,
-      sharedOnTwitter: false,
-      sharedOnFacebook: false,
-      shareCount: 0
-    },
-    status: 'generating',
-    createdAt: now,
-    updatedAt: now,
-    expiresAt: expiryDate.toISOString().split('T')[0]
-  };
-
-  // Conditionals based on dynamic Type mapping
-  if (input.type === 'digital' || input.type === 'both') {
-    doc.digital = {
-      pdfUrl: `https://storage.eventflow.com/certificates/${certificateId}.pdf`,
-      templateId: "TEMPLATE_DEFAULT_01",
-      design: {
-        backgroundColor: "#FFFFFF",
-        borderColor: "#1E3A8A",
-        logoUrl: "https://storage.eventflow.com/logos/default_logo.png",
-        watermark: "EVENTFLOW VERIFIED"
-      },
-      downloadCount: 0,
-      lastDownloaded: ""
-    };
-  }
-
-  if (input.type === 'blockchain' || input.type === 'both') {
-    doc.blockchain = {
-      minted: false, // Initially false until cron/worker picks it up to mint
-      network: "Polygon",
-      tokenId: "",
-      tokenStandard: "ERC-721",
-      contractAddress: "0x742d35Cc6634C0532925a3b844Bc9e...", // System deployment contract
-      transactionHash: "",
-      blockNumber: 0,
-      gasUsed: "",
-      metadata: {
-        ipfsHash: "",
-        ipfsUrl: "",
-        metadataJson: ""
-      },
-      verificationUrl: "",
-      qrCodeUrl: ""
-    };
-  }
-
-  return doc;
-}
-
 function buildCertificateMetadata(cert: CertificateDocument, template: any) {
   return {
     name: cert.title,
@@ -139,13 +54,122 @@ function buildCertificateMetadata(cert: CertificateDocument, template: any) {
   };
 }
 
+
+/**
+ * Read-mapper for a stored certificate.
+ *
+ * `createCertificateDocument` below was being used for this job, which was the
+ * bug: it is a *builder* full of placeholders, so every certificate read back
+ * out of Firestore had its real fields overwritten — `certificateId` became
+ * `CERT` + `padStart(undefined)`, `grade` became "A+", and `digital.pdfUrl`
+ * became a fabricated storage.eventflow.com URL. The issued-certificates table
+ * rendered that as a live "View PDF" link to a domain nobody owns.
+ *
+ * This returns what is actually stored, and nothing else.
+ */
+function mapToCertificate(raw: any, fallbackId?: string): CertificateDocument {
+  return {
+    certificateId: String(raw?.certificateId || fallbackId || ""),
+    registrationId: String(raw?.registrationId || ""),
+    userId: String(raw?.userId || ""),
+    eventId: String(raw?.eventId || ""),
+    organizerId: String(raw?.organizerId || ""),
+    type: raw?.type === "digital" || raw?.type === "blockchain" ? raw.type : "both",
+    title: String(raw?.title || ""),
+    description: String(raw?.description || ""),
+    content: {
+      recipientName: String(raw?.content?.recipientName || ""),
+      eventTitle: String(raw?.content?.eventTitle || ""),
+      completionDate: toIsoString(raw?.content?.completionDate) || String(raw?.content?.completionDate || ""),
+      grade: raw?.content?.grade ? String(raw.content.grade) : undefined,
+      duration: String(raw?.content?.duration || ""),
+      issuerName: String(raw?.content?.issuerName || ""),
+      issuerSignature: String(raw?.content?.issuerSignature || ""),
+      uniqueId: String(raw?.content?.uniqueId || ""),
+    },
+    digital: raw?.digital
+      ? {
+          pdfUrl: String(raw.digital.pdfUrl || ""),
+          templateId: String(raw.digital.templateId || ""),
+          design: {
+            backgroundColor: String(raw.digital.design?.backgroundColor || ""),
+            borderColor: String(raw.digital.design?.borderColor || ""),
+            logoUrl: String(raw.digital.design?.logoUrl || ""),
+            watermark: raw.digital.design?.watermark ? String(raw.digital.design.watermark) : undefined,
+          },
+          downloadCount: Number(raw.digital.downloadCount ?? 0),
+          lastDownloaded: toIsoString(raw.digital.lastDownloaded) || "",
+        }
+      : null,
+    blockchain: raw?.blockchain
+      ? {
+          minted: !!raw.blockchain.minted,
+          network: String(raw.blockchain.network || ""),
+          tokenId: String(raw.blockchain.tokenId || ""),
+          tokenStandard: raw.blockchain.tokenStandard === "ERC-1155" ? "ERC-1155" : "ERC-721",
+          contractAddress: String(raw.blockchain.contractAddress || ""),
+          transactionHash: String(raw.blockchain.transactionHash || ""),
+          blockNumber: Number(raw.blockchain.blockNumber ?? 0),
+          gasUsed: String(raw.blockchain.gasUsed || ""),
+          metadata: {
+            ipfsHash: String(raw.blockchain.metadata?.ipfsHash || ""),
+            ipfsUrl: String(raw.blockchain.metadata?.ipfsUrl || ""),
+            metadataJson: String(raw.blockchain.metadata?.metadataJson || ""),
+          },
+          verificationUrl: String(raw.blockchain.verificationUrl || ""),
+          qrCodeUrl: String(raw.blockchain.qrCodeUrl || ""),
+        }
+      : null,
+    validation: {
+      verificationCode: String(raw?.validation?.verificationCode || ""),
+      verificationUrl: String(raw?.validation?.verificationUrl || ""),
+      isVerified: !!raw?.validation?.isVerified,
+      verifiedBy: raw?.validation?.verifiedBy ?? null,
+      verifiedAt: toIsoString(raw?.validation?.verifiedAt),
+      verificationCount: Number(raw?.validation?.verificationCount ?? 0),
+    },
+    socialSharing: {
+      sharedOnLinkedIn: !!raw?.socialSharing?.sharedOnLinkedIn,
+      linkedInPostId: raw?.socialSharing?.linkedInPostId ?? null,
+      sharedOnTwitter: !!raw?.socialSharing?.sharedOnTwitter,
+      sharedOnFacebook: !!raw?.socialSharing?.sharedOnFacebook,
+      shareCount: Number(raw?.socialSharing?.shareCount ?? 0),
+    },
+    status: ["generating", "ready", "issued", "revoked"].includes(raw?.status) ? raw.status : "generating",
+    revokeReason: raw?.revokeReason ?? null,
+    revokedAt: toIsoString(raw?.revokedAt),
+    createdAt: toIsoString(raw?.createdAt) || "",
+    issuedAt: toIsoString(raw?.issuedAt),
+    expiresAt: toIsoString(raw?.expiresAt),
+    updatedAt: toIsoString(raw?.updatedAt) || "",
+  };
+}
+
 export const CertificateService = {
+  /**
+   * Every certificate one person has earned, newest first — the query behind an
+   * attendee's own certificate list. `cert_for_attendee` below returns only the
+   * first and has no callers; this replaces it for anything user-facing.
+   *
+   * Sorted in memory rather than with orderBy, because a where + orderBy pair
+   * needs a composite index and none is declared for `certificates`.
+   */
+  async certsForUser(user_id: string): Promise<CertificateDocument[]> {
+    if (!user_id) return [];
+    const snap = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", user_id).get();
+    return snap.docs
+      .map((d: FirebaseFirestore.QueryDocumentSnapshot) => mapToCertificate(d.data(), d.id))
+      .sort((a: CertificateDocument, b: CertificateDocument) =>
+        String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")),
+      );
+  },
+
   async cert_for_attendee(id: String) {
     const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", id).limit(1).get();
     if (querySnapshot.empty) {
       return null;
     }
-    return createCertificateDocument(querySnapshot.docs[0].data());
+    return mapToCertificate(querySnapshot.docs[0].data(), querySnapshot.docs[0].id);
   },
 
   // Batch: fetch every certificate for an event once and index by userId,
@@ -156,7 +180,7 @@ export const CertificateService = {
     querySnapshot.forEach((d: FirebaseFirestore.QueryDocumentSnapshot) => {
       const data = d.data();
       if (data.userId) {
-        map.set(String(data.userId), createCertificateDocument(data));
+        map.set(String(data.userId), mapToCertificate(data, d.id));
       }
     });
     return map;
@@ -181,10 +205,23 @@ export const CertificateService = {
         return { success: true, count: 0, failedCount: 0, message: 'No attendees to process.', results: [] };
       }
 
-      const selectedSet =
-        selectedUserIds && selectedUserIds.length > 0
-          ? new Set(selectedUserIds.map(String))
-          : null;
+      // An empty selection means NOBODY, and the distinction is expensive: the
+      // default template has blockchain.enabled = true, so falling through to
+      // "every registration" mints a real on-chain certificate per attendee and
+      // spends real funds, irreversibly. `undefined` still means the whole event
+      // for callers that genuinely want that; `[]` is a no-op.
+      if (Array.isArray(selectedUserIds) && selectedUserIds.length === 0) {
+        console.warn(`[CERT_GEN] refusing an empty selection for event ${event_id}`);
+        return {
+          success: false,
+          count: 0,
+          failedCount: 0,
+          message: 'Select at least one attendee before generating certificates.',
+          results: [],
+        };
+      }
+
+      const selectedSet = selectedUserIds ? new Set(selectedUserIds.map(String)) : null;
 
       const docsToProcess = selectedSet
         ? registrationsSnapshot.docs.filter((doc) => selectedSet.has(String(doc.data().userId || '')))
@@ -286,7 +323,10 @@ export const CertificateService = {
             },
             validation: {
               verificationCode: `VCODE-${autoGeneratedCertId}`,
-              verificationUrl: `https://eventflow.com/verify/${autoGeneratedCertId}`,
+              // Was a hardcoded https://eventflow.com/... — a domain this project
+              // does not own, so every issued certificate carried a dead link.
+              // Stored as a path; the verification page makes it absolute.
+              verificationUrl: `/verify/${autoGeneratedCertId}`,
               isVerified: false,
               verificationCount: 0
             },

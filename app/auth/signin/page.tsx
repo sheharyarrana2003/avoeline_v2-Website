@@ -41,8 +41,10 @@ export default async function SignIn({
             } else if (target) {
                 redirect(target);
             } else {
-                const user_role = user.userType;
-                redirect(`/${user_role.toLowerCase()}/${user.userId}/dashboard`);
+                const user_role = user.userType.toLowerCase();
+                // Admin is platform-wide, so its routes carry no id segment --
+                // /admin/<uid>/dashboard does not exist and never will.
+                redirect(user_role === "admin" ? "/admin" : `/${user_role}/${user.userId}/dashboard`);
             }
 
         } catch (error) {
