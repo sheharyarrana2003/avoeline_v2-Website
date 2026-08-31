@@ -7,7 +7,32 @@ export type UploadResult =
   | { success: false; error: string };
 
 const MAX_BYTES = 50 * 1024 * 1024; // keep in step with next.config serverActions.bodySizeLimit
+
+/**
+ * Images and video cover banners, galleries and avatars. Documents were added
+ * for the things events actually carry alongside a picture: rules and
+ * problem-statement files, pitch decks, sponsor agreements.
+ *
+ * An allowlist, not a blocklist, and deliberately narrow -- no archives and
+ * nothing executable. The check is on the browser-declared MIME type, which a
+ * determined caller controls, so it is a usability guard rather than a security
+ * boundary: everything lands in object storage and is served back as an
+ * attachment, never executed.
+ */
 const ALLOWED_PREFIXES = ["image/", "video/"];
+const ALLOWED_TYPES = new Set([
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+    "application/vnd.ms-powerpoint", // .ppt
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+    "application/msword", // .doc
+    "text/plain",
+    "text/csv",
+]);
+
+function isAllowedType(mime: string): boolean {
+    return ALLOWED_PREFIXES.some((p) => mime.startsWith(p)) || ALLOWED_TYPES.has(mime);
+}
 
 function safeName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9.-]+/g, "-").replace(/^-+|-+$/g, "").slice(-80) || "file";
@@ -30,8 +55,8 @@ export async function uploadMedia(formData: FormData): Promise<UploadResult> {
     }
     const f = file as File;
 
-    if (!ALLOWED_PREFIXES.some((p) => f.type.startsWith(p))) {
-      return { success: false, error: "Only image and video files are allowed." };
+    if (!isAllowedType(f.type)) {
+      return { success: false, error: "That file type is not allowed. Use an image, a video, a PDF, or an Office document." };
     }
     if (f.size > MAX_BYTES) {
       return { success: false, error: "File is too large (max 50MB)." };

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolderTree, ListChecks, Plus, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarDays, FolderTree, ListChecks, Plus, ShieldCheck, Sparkles, Store, Users } from "lucide-react";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
@@ -12,6 +12,8 @@ import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import { AuthService } from "@/src/features/auth/authService";
 import { promoteToAdminAction } from "@/src/features/auth/actions/promoteToAdmin.action";
 import { listTaxonomy } from "@/src/features/taxonomy/taxonomy.service";
+import { getPlatformTotals } from "@/src/features/admin/platform.service";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import {
     formatFieldLines,
     kindLabel,
@@ -40,6 +42,7 @@ export default async function AdminCategoriesPage({
     // their account really is userType "admin", or they matched the
     // PLATFORM_ADMIN_EMAILS bootstrap allowlist. Only the latter is offered the
     // promotion, and the offer disappears once the role is real.
+    const totals = await getPlatformTotals();
     const viewer = await AuthService.getCurrentUser();
     const viaEnvBootstrap = String(viewer?.userType ?? "").toLowerCase() !== "admin";
 
@@ -100,6 +103,33 @@ export default async function AdminCategoriesPage({
                     </CardBody>
                 </Card>
             ) : null}
+
+            <section className="mb-8 grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+                <MetricTile
+                    label="Organizers"
+                    value={`${totals.organizers}`}
+                    icon={<Users className="h-4 w-4" />}
+                    sublabel="Accounts on the platform"
+                />
+                <MetricTile
+                    label="Events"
+                    value={`${totals.events}`}
+                    icon={<CalendarDays className="h-4 w-4" />}
+                    sublabel={`${totals.liveEvents} live · ${totals.pastEvents} past`}
+                />
+                <MetricTile
+                    label="Registrations"
+                    value={`${totals.registrations}`}
+                    icon={<ListChecks className="h-4 w-4" />}
+                    sublabel={`${totals.certificates} certificates issued`}
+                />
+                <MetricTile
+                    label="Vendors"
+                    value={`${totals.vendors}`}
+                    icon={<Store className="h-4 w-4" />}
+                    sublabel="Listed on the marketplace"
+                />
+            </section>
 
             <FilterTabs tabs={tabs} activeValue={tab} label="Category management sections" />
 
