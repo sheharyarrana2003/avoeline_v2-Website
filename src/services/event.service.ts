@@ -6,6 +6,8 @@ import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
 import { formatDate, formatTime } from "@/src/lib/datetime";
 import { CertificateTemplateService } from "./certificate.template.services";
+import { listTaxonomy } from "@/src/features/taxonomy/taxonomy.service";
+import { missingRequired, resolveChecklist, selectable } from "@/src/features/taxonomy/types";
 
 
 function mapFormDataToEventModel(formData: EventFormData): EventModel {
@@ -107,6 +109,12 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     shortDescription: formData.shortDescription,
     category: formData.category,
     eventType: formData.eventType,
+    superCategoryId: formData.superCategoryId,
+    eventFormatId: formData.eventFormatId,
+    categoryFields: formData.categoryFields || {},
+    // Filled in by create_event from the taxonomy templates; the form never
+    // sends one, so there is nothing to map here.
+    checklist: [],
     format: formData.locationType,
     language: "en",
     schedule: schedule,
@@ -266,7 +274,44 @@ export const EventService = {
     console.log(formdata);
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id; // Remove the "o_" prefix from organizer_id
- 
+
+    // The wizard is a Client Component that hands over a plain EventFormData
+    // object, so `category`, `eventType` and `categoryFields` are caller-
+    // controlled strings. Only the two ids are worth anything, and even those
+    // get re-checked against the live taxonomy here: without this a deactivated
+    // category is still usable and a required field is decorative.
+    const taxonomy = await listTaxonomy();
+    const superCategory = selectable(taxonomy, "super").find((t) => t.id === formdata.superCategoryId);
+    const eventFormat = selectable(taxonomy, "format").find((t) => t.id === formdata.eventFormatId);
+
+    if (!superCategory || !eventFormat) {
+      throw new Error("Choose a category and an event format before publishing.");
+    }
+
+    const missing = missingRequired(superCategory.fields, event_to_be_added.categoryFields);
+    if (missing.length) {
+      throw new Error(`Please fill in: ${missing.join(", ")}.`);
+    }
+
+    // Names come from the taxonomy, never from the form. Every list, chip and
+    // search in the app reads these strings, so they are what must be right --
+    // and copying them here is what lets an old event keep displaying a
+    // category that has since been deactivated or renamed.
+    event_to_be_added.category = superCategory.name;
+    event_to_be_added.eventType = eventFormat.name;
+
+    // Drop answers to fields the chosen category does not define, so switching
+    // category mid-wizard cannot smuggle a stale value through.
+    const allowed = new Set(superCategory.fields.map((f) => f.fieldId));
+    event_to_be_added.categoryFields = Object.fromEntries(
+      Object.entries(event_to_be_added.categoryFields).filter(([k]) => allowed.has(k)),
+    );
+
+    event_to_be_added.checklist = resolveChecklist(superCategory, eventFormat).map((label) => ({
+      label,
+      done: false,
+    }));
+
     const docRef = adminDb.collection(COLLECTIONS.EVENTS).doc();
     const id_generated = docRef.id;
     event_to_be_added.id = id_generated;

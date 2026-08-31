@@ -12,12 +12,15 @@ import {
     UserCheck,
     Wallet,
     Gauge,
+    ListChecks,
+    Check,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecentRegistration } from '@/src/features/dashboard/types';
 import { isVideoUrl } from "@/src/features/media/media.utils";
+import { toggleChecklistItem } from "@/src/features/events/actions/toggleChecklistItem.action";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDate, formatTime, formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
@@ -389,6 +392,63 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
                             />
                         )}
                     </section>
+
+                    {event.categoryFields && Object.keys(event.categoryFields).length ? (
+                        <section>
+                            <SectionHeading icon={<FileText size={16} />}>{event.category} details</SectionHeading>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                {Object.entries(event.categoryFields).map(([key, value]) => (
+                                    <InfoBlock
+                                        key={key}
+                                        label={humanizeFieldId(key)}
+                                        value={typeof value === "boolean" ? (value ? "Yes" : "No") : String(value || "")}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    ) : null}
+
+                    {event.checklist?.length ? (
+                        <section>
+                            <SectionHeading icon={<ListChecks size={16} />}>
+                                Checklist
+                            </SectionHeading>
+                            <p className="mb-4 -mt-2 text-xs text-ink-soft tabular-nums">
+                                {event.checklist.filter((c) => c.done).length} of {event.checklist.length} done
+                                {" · "}suggested for {event.eventType || "this format"}
+                            </p>
+                            <ul className="space-y-1">
+                                {event.checklist.map((item, index) => (
+                                    <li key={`${index}-${item.label}`}>
+                                        {/* A form per row rather than a client component:
+                                            the page stays a Server Component and this
+                                            works with JS off. */}
+                                        <form action={toggleChecklistItem}>
+                                            <input type="hidden" name="eventId" value={eventId} />
+                                            <input type="hidden" name="index" value={index} />
+                                            <button
+                                                type="submit"
+                                                aria-pressed={item.done}
+                                                className="flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+                                            >
+                                                <span
+                                                    aria-hidden="true"
+                                                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border ${
+                                                        item.done ? "border-ink bg-ink text-ink-invert" : "border-line-loud"
+                                                    }`}
+                                                >
+                                                    {item.done ? <Check className="h-3 w-3" /> : null}
+                                                </span>
+                                                <span className={`text-sm ${item.done ? "text-ink-soft line-through" : "text-ink"}`}>
+                                                    {item.label}
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    ) : null}
                 </div>
 
                 <div className="space-y-10">
@@ -544,6 +604,16 @@ function SectionHeading({ icon, children, action }: { icon: ReactNode; children:
             {action ? <div className="ml-auto">{action}</div> : null}
         </div>
     );
+}
+
+/**
+ * "cuisine-type" -> "Cuisine type". The stored key is a slug of the admin's
+ * label, and the label itself is not copied onto the event -- so this rebuilds
+ * something readable rather than adding a second copy that can drift.
+ */
+function humanizeFieldId(fieldId: string): string {
+    const words = fieldId.replace(/[-_]+/g, " ").trim();
+    return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 function InfoBlock({ label, value }: { label: string | null; value: string | null }) {

@@ -64,6 +64,14 @@ export const config = {
     // ':path*' acts as a named wildcard placeholder that Next.js safely compiles
     matcher: [
         '/organizer/:path*',
-        '/vendor/:path*'
+        '/vendor/:path*',
+        // Listed so a signed-out visitor is redirected rather than reaching the
+        // page. 'admin' is deliberately NOT in all_possible_roles above: that
+        // array doubles as the cross-redirect target, so an admin bounced off
+        // /organizer would be sent to /admin/<roleId>/dashboard, which does not
+        // exist. The role check for /admin lives in app/admin/layout.tsx, and
+        // every admin action re-checks it -- a Server Action is a public
+        // endpoint this middleware never sees.
+        '/admin/:path*'
     ]
 };

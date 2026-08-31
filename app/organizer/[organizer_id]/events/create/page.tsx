@@ -1,6 +1,8 @@
 import EventWizardLayout from '@/src/features/events/components/wizard/EventWizardLayout'
 import { EventService } from '@/src/services/event.service'
 import { EventFormData } from '@/src/services/models/event.model'
+import { listTaxonomy } from '@/src/features/taxonomy/taxonomy.service';
+import { selectable } from '@/src/features/taxonomy/types';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { redirect } from 'next/navigation';
 
@@ -9,6 +11,12 @@ import { redirect } from 'next/navigation';
 export default async function EventWiz({ params }: { params: Promise<{ organizer_id: string }> }) {
     const resolvedParams = await params;
     const organizer_id = resolvedParams.organizer_id;
+
+    // Only the live vocabulary crosses to the client. A deactivated or still
+    // pending entry must not be pickable, and create_event re-checks the same
+    // predicate on the way back in.
+    const taxonomy = await listTaxonomy();
+    const entries = [...selectable(taxonomy, 'super'), ...selectable(taxonomy, 'format')];
 
 
     const handle_submission = async (formData: EventFormData) => {
@@ -36,7 +44,7 @@ export default async function EventWiz({ params }: { params: Promise<{ organizer
     }
     return (
         <>
-            <EventWizardLayout handle_submission={handle_submission} ></EventWizardLayout>
+            <EventWizardLayout handle_submission={handle_submission} entries={entries} ></EventWizardLayout>
         </>
     )
 }

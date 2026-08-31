@@ -195,7 +195,39 @@ export const AuthService = {
 
     }),
 
+    /**
+     * The signed-in user if they are a platform admin, otherwise null.
+     *
+     * Two ways in, and the second one is load-bearing. `userType` reaches the
+     * session only through `setClaimsForUser`, which copies it off the users
+     * doc **at login**, and signup never writes "admin" -- so gating on the
+     * claim alone means a manual Firestore edit plus a re-login before anyone
+     * can reach /admin at all. PLATFORM_ADMIN_EMAILS is the bootstrap: it takes
+     * effect on the next request and needs no write.
+     *
+     * ponytail: this is an allowlist, not a permissions layer -- every admin
+     * has every power, and the env var lives outside the user record. The spec
+     * wants a separate admin login with its own permissions (module 9); when
+     * that lands, drop the env branch and keep the claim check.
+     */
+    requireAdmin: async (): Promise<CurrentUserData | null> => {
+        const user = await AuthService.getCurrentUser();
+        if (!user?.userId) return null;
 
+        if (String(user.userType).trim().toLowerCase() === "admin") {
+            return user as CurrentUserData;
+        }
+
+        const email = String(user.email ?? "").trim().toLowerCase();
+        if (!email) return null;
+
+        const allowed = String(process.env.PLATFORM_ADMIN_EMAILS ?? "")
+            .split(",")
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean);
+
+        return allowed.includes(email) ? (user as CurrentUserData) : null;
+    },
 
     async loginWithEmail(email: string, password: string) {
         console.log("Checkpoint 1:  function started.");

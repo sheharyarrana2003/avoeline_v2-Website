@@ -1,7 +1,14 @@
 import { parseScheduleDateTime } from "@/src/lib/datetime";
 
-export type EventCategory = 'technology' | 'business' | 'healthcare' | 'education';
-export type EventType = 'workshop' | 'conference' | 'seminar' | 'webinar' | 'hackathon';
+// `category` and `eventType` are plain strings because the vocabulary lives in
+// Firestore now (super_categories / event_formats) and an admin can add to it
+// without a deploy. They used to be unions of four and five slugs, which the
+// wizard had never once satisfied -- it wrote "Technology & Innovation" and
+// "networking" -- so the types were describing a shape no document had.
+//
+// EventFormat below is a DIFFERENT concept: the `format` field, physical vs
+// virtual vs hybrid. The spec's "EventFormat" (Seminar, Hackathon) is the
+// `eventType` field. Do not conflate them.
 export type EventFormat = 'physical' | 'virtual' | 'hybrid';
 export type MeetingPlatform = 'Google Meet' | 'Zoom' | 'Microsoft Teams';
 export type CertificateType = 'digital' | 'blockchain' | 'both';
@@ -41,7 +48,7 @@ export interface EventLocation {
 export interface CustomFieldOption {
   fieldId: string;
   label: string;
-  type: 'dropdown' | 'text' | 'checkbox'; // expanded for flexibility
+  type: 'dropdown' | 'text' | 'checkbox' | 'number';
   options: string[];
   required: boolean;
 }
@@ -160,9 +167,18 @@ export class EventModel {
   title: string;
   description: string;
   shortDescription: string;
-  category: EventCategory;
-  eventType: EventType;
+  category: string;
+  eventType: string;
   format: EventFormat;
+  /** Document ids in super_categories / event_formats. The names above are
+   *  denormalized copies, so a deactivated category still renders on old
+   *  events without a lookup. */
+  superCategoryId: string;
+  eventFormatId: string;
+  /** Answers to the super-category's extra fields, keyed by CustomFieldOption.fieldId. */
+  categoryFields: Record<string, string | number | boolean>;
+  /** The starter checklist resolved from the category + format templates. */
+  checklist: { label: string; done: boolean }[];
   language: 'en' | 'ur'; 
   schedule: EventSchedule;
   location: EventLocation & { 
@@ -210,9 +226,20 @@ export class EventModel {
     this.title = raw.title || "Untitled Event";
     this.description = raw.description || "";
     this.shortDescription = raw.shortDescription || "";
-    this.category = raw.category || "technology";
-    this.eventType = raw.eventType || "workshop";
+    this.category = raw.category || "";
+    this.eventType = raw.eventType || "";
     this.format = raw.format || "physical";
+    // create_event does set({...instance}), so a field missing an assignment
+    // here is silently dropped on write -- no type error, no runtime error,
+    // just absent data. Add to the declaration AND to this constructor.
+    this.superCategoryId = raw.superCategoryId || "";
+    this.eventFormatId = raw.eventFormatId || "";
+    this.categoryFields = raw.categoryFields && typeof raw.categoryFields === "object" ? raw.categoryFields : {};
+    this.checklist = Array.isArray(raw.checklist)
+      ? (raw.checklist as { label?: unknown; done?: unknown }[])
+          .filter((c) => c?.label)
+          .map((c) => ({ label: String(c.label), done: !!c.done }))
+      : [];
     this.language = raw.language || "en"; 
     this.PriceOfTicket = raw?.PriceOfTicket || 0;
 
@@ -378,7 +405,7 @@ export class EventModel {
 export interface CreateEventDTO {
   title: string;
   description: string;
-  category: EventCategory;
+  category: string;
   date: string;
   time: string;
   location: string;
@@ -426,16 +453,25 @@ export interface CustomField {
 
 export interface EventFormData {
   // Step 1: Basic Info
+  /** Display name of the chosen event format. Re-resolved from eventFormatId
+   *  on the server -- what the client sends here is never trusted. */
   eventType: string;
   eventTitle: string;
   description: string;
+  /** Display name of the chosen super category. Same caveat as eventType. */
   category: string;
+  superCategoryId: string;
+  eventFormatId: string;
+  /** Answers to the super category's extra fields, keyed by fieldId. Replaces
+   *  the hardcoded `dietaryOptions`, which was declared, initialised, and then
+   *  never bound to an input or written to Firestore. It is a Food & Beverage
+   *  custom field now, like the spec asks. */
+  categoryFields: Record<string, string | number | boolean>;
   shortDescription: string;
   tags: string[];
   bannerImage: string | null;
   galleryImages: string[];
   videoUrl: string;
-  dietaryOptions: string[];
 
   // Step 2: Schedule & Location
   startDate: string;

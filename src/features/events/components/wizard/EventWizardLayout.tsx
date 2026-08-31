@@ -1,8 +1,10 @@
 'use client';
 
-import { Code2, Wrench, GraduationCap, Users, Monitor, Handshake, BookOpen,
-         MapPin, Globe, Laptop, FileText } from "lucide-react";
+import { Code2, MapPin, Globe, FileText } from "lucide-react";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
+import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import { CategoryStep } from "@/src/features/taxonomy/components/CategoryStep";
+import type { TaxonomyEntry } from "@/src/features/taxonomy/types";
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { EventFormData } from '@/src/services/models/event.model';
@@ -24,27 +26,12 @@ const previewTime = (t: string) => {
 };
 
 // --- Constants ---
-const EVENT_TYPES = [
-    { id: 'hackathon', label: 'Hackathon', sub: 'Coding marathon', icon: <Laptop className="h-5 w-5" /> },
-    { id: 'workshop', label: 'Workshop', sub: 'Hands-on learning', icon: <Wrench className="h-5 w-5" /> },
-    { id: 'seminar', label: 'Seminar', sub: 'Expert talks', icon: <GraduationCap className="h-5 w-5" /> },
-    { id: 'conference', label: 'Conference', sub: 'Grand gathering', icon: <Users className="h-5 w-5" /> },
-    { id: 'webinar', label: 'Webinar', sub: 'Online session', icon: <Monitor className="h-5 w-5" /> },
-    { id: 'networking', label: 'Networking', sub: 'Professional mixer', icon: <Handshake className="h-5 w-5" /> },
-    { id: 'training', label: 'Training', sub: 'Skill building', icon: <BookOpen className="h-5 w-5" /> },
-    { id: 'custom', label: 'Custom', sub: 'Tailored format', icon: '➕' },
-];
-
-const CATEGORIES = [
-    'Technology & Innovation',
-    'Business & Entrepreneurship',
-    'Arts & Culture',
-    'Health & Wellness',
-    'Education',
-    'Sports & Fitness',
-    'Food & Beverage',
-    'Music & Entertainment',
-];
+// The category and event-format lists used to live here, as two hardcoded
+// arrays: 8 display strings and 8 icon tiles. They are Firestore-backed now
+// (see CategoryStep), so an Avoeline admin can add "Exhibition" without a
+// deploy. The tiles went with them rather than becoming database-driven --
+// a hand-picked icon per format cannot come from a table, so every new entry
+// would have landed in the grid wearing the same generic glyph.
 
 const TIMEZONES = [
     'Pakistan Standard Time (PKT, UTC+5)',
@@ -65,13 +52,15 @@ const INITIAL_FORM: EventFormData = {
     eventType: '',
     eventTitle: '',
     description: '',
-    category: 'Technology & Innovation',
+    category: '',
+    superCategoryId: '',
+    eventFormatId: '',
+    categoryFields: {},
     shortDescription: '',
     tags: [],
     bannerImage: null,
     galleryImages: [],
     videoUrl: '',
-    dietaryOptions: [],
 
     startDate: '',
     endDate: '',
@@ -121,7 +110,16 @@ const INITIAL_FORM: EventFormData = {
 
 };
 
-export default function CreateEventPage({ handle_submission }: any) {
+export default function CreateEventPage({
+    handle_submission,
+    entries = [],
+}: {
+    // Stays `any`: this is the frozen legacy closure pattern, and typing it
+    // would mean touching the page that owns it. `entries` is typed because it
+    // is new.
+    handle_submission: any;
+    entries?: TaxonomyEntry[];
+}) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(INITIAL_FORM);
     const [tagInput, setTagInput] = useState('');
@@ -148,6 +146,11 @@ export default function CreateEventPage({ handle_submission }: any) {
     }
     const updateForm = (field: keyof EventFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    /** Several fields at once -- choosing a category moves three of them. */
+    const patchForm = (patch: Partial<EventFormData>) => {
+        setFormData(prev => ({ ...prev, ...patch }));
     };
 
     const addTag = () => {
@@ -211,30 +214,18 @@ export default function CreateEventPage({ handle_submission }: any) {
 
     const completionPercent = Math.round((currentStep / 4) * 100);
 
+    const step1Incomplete = currentStep === 1 && (!formData.superCategoryId || !formData.eventFormatId);
+
     // --- Step 1: Basic Information ---
     const renderStep1 = () => (
         <div className="space-y-8">
-            {/* Event Type Selection */}
-            <div>
-                <h3 className="text-lg font-bold text-ink mb-1">Event Type</h3>
-                <p className="text-sm text-ink-soft mb-4">Select the format that best fits your event structure.</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {EVENT_TYPES.map((type) => (
-                        <button
-                            key={type.id}
-                            onClick={() => updateForm('eventType', type.id)}
-                            className={`p-4 rounded-2xl border-2 text-left transition-all ${formData.eventType === type.id
-                                ? 'border-black bg-muted'
-                                : 'border-line hover:border-line-loud bg-paper'
-                                }`}
-                        >
-                            <div className="text-2xl mb-2">{type.icon}</div>
-                            <div className="font-semibold text-sm text-ink">{type.label}</div>
-                            <div className="text-xs text-ink-soft">{type.sub}</div>
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <CategoryStep
+                entries={entries}
+                superCategoryId={formData.superCategoryId}
+                eventFormatId={formData.eventFormatId}
+                categoryFields={formData.categoryFields}
+                onChange={patchForm}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left: General Info */}
@@ -274,23 +265,6 @@ export default function CreateEventPage({ handle_submission }: any) {
                                 rows={4}
                                 className="w-full px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none resize-none"
                             />
-                        </div>
-                    </div>
-
-                    {/* Category */}
-                    <div>
-                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Category</label>
-                        <div className="relative">
-                            <select
-                                value={formData.category}
-                                onChange={(e) => updateForm('category', e.target.value)}
-                                className="w-full bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink appearance-none outline-none focus:ring-2 focus:ring-line"
-                            >
-                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <svg aria-hidden="true" className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
                         </div>
                     </div>
 
@@ -1236,7 +1210,7 @@ export default function CreateEventPage({ handle_submission }: any) {
         <div className="space-y-8">
             {/* Event Preview Card */}
             <div className="bg-paper rounded-2xl overflow-hidden border border-line shadow-sm">
-                <div>{serverError}</div>
+                {serverError ? <FormFeedback error={serverError} className="m-4" /> : null}
                 <div className="grid grid-cols-1 md:grid-cols-2">
                     {/* Square, matching the 1:1 banner the event page renders. Capped on
                         narrow screens so a full-width column doesn't make it huge. */}
@@ -1544,7 +1518,12 @@ export default function CreateEventPage({ handle_submission }: any) {
                     {currentStep < 4 ? (
                         <button
                             onClick={nextStep}
-                            className="bg-ink text-ink-invert px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-ink-soft transition flex items-center gap-2"
+                            // create_event rejects a missing category outright, so
+                            // stopping here saves the organizer filling in three more
+                            // steps before finding out. Nothing validated step 1 before.
+                            disabled={step1Incomplete}
+                            title={step1Incomplete ? "Choose a category and an event format first" : undefined}
+                            className="bg-ink text-ink-invert px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-ink-soft transition flex items-center gap-2 disabled:pointer-events-none disabled:opacity-50"
                         >
                             Next: {STEPS[currentStep].label}
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
