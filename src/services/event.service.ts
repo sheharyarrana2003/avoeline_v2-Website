@@ -327,5 +327,50 @@ export const EventService = {
                 await CertificateTemplateService.insert_generic_Template(id_generated);
             console.log("Firestore write to certificate template done.");
     return id_generated;
-  }
+  },
+
+  /**
+   * Change fields on an existing event.
+   *
+   * Until now nothing could edit an event at all: `create_event` was the only
+   * full write, and the two partial writes that exist (agenda, speakers) each
+   * reach into `adminDb` from their own service. Every remaining module needs
+   * this -- changing access settings, adding tracks, attaching sponsors,
+   * unpublishing from the admin panel -- so it belongs here once rather than as
+   * a fifth hand-rolled `.update()`.
+   *
+   * Deliberately a patch, not a whole-document set: `create_event` writes a
+   * spread EventModel instance, so a bare `set()` here would silently drop every
+   * field the caller did not restate. `{ merge: true }` cannot do that.
+   *
+   * Ownership is NOT checked here -- services throw, actions authorize (see
+   * CLAUDE.md). Every caller must confirm the organizer owns the event first;
+   * `assertOwnedEvent` below is the shared way to do that.
+   */
+  async update_event(event_id: string, patch: Record<string, unknown>): Promise<void> {
+    if (!event_id) throw new Error("update_event called without an event id");
+
+    // A patch that only carries the audit field is a caller bug, not a no-op to
+    // absorb quietly -- it means the fields they meant to send never arrived.
+    const keys = Object.keys(patch);
+    if (!keys.length) throw new Error("update_event called with an empty patch");
+
+    // Guard the identity fields. Rewriting these repoints an event at a
+    // different owner, which no edit surface should ever be able to do.
+    for (const forbidden of ["id", "eventId", "organizerId", "createdAt"]) {
+      if (forbidden in patch) {
+        throw new Error(`update_event refuses to change ${forbidden}`);
+      }
+    }
+
+    try {
+      await adminDb.collection(COLLECTIONS.EVENTS).doc(event_id).set(
+        { ...patch, updatedAt: new Date() },
+        { merge: true },
+      );
+    } catch (err) {
+      console.error("[update_event] Firestore write failed", { event_id, keys, err });
+      throw new Error(`Failed to update event ${event_id}`, { cause: err });
+    }
+  },
 }
