@@ -146,6 +146,24 @@ function mapToCertificate(raw: any, fallbackId?: string): CertificateDocument {
 }
 
 export const CertificateService = {
+  /**
+   * Every certificate one person has earned, newest first — the query behind an
+   * attendee's own certificate list. `cert_for_attendee` below returns only the
+   * first and has no callers; this replaces it for anything user-facing.
+   *
+   * Sorted in memory rather than with orderBy, because a where + orderBy pair
+   * needs a composite index and none is declared for `certificates`.
+   */
+  async certsForUser(user_id: string): Promise<CertificateDocument[]> {
+    if (!user_id) return [];
+    const snap = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", user_id).get();
+    return snap.docs
+      .map((d: FirebaseFirestore.QueryDocumentSnapshot) => mapToCertificate(d.data(), d.id))
+      .sort((a: CertificateDocument, b: CertificateDocument) =>
+        String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")),
+      );
+  },
+
   async cert_for_attendee(id: String) {
     const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", id).limit(1).get();
     if (querySnapshot.empty) {

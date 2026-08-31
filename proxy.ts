@@ -4,7 +4,10 @@ import { adminAuth } from './data/admin_db';
 
 
 // This middle ware is for role validation
-const all_possible_roles = ['organizer', 'vendor'];
+// Every role whose routes live under /<role>/<id>/... Attendee joined the
+// list once app/attendee existed; before that an attendee signing in was sent
+// to a 404, and /attendee was not guarded at all.
+const all_possible_roles = ['organizer', 'vendor', 'attendee'];
 
 /** Send an unauthenticated visitor to sign in, remembering where they were headed. */
 function redirectToSignIn(request: NextRequest) {
@@ -77,6 +80,7 @@ export const config = {
     matcher: [
         '/organizer/:path*',
         '/vendor/:path*',
+        '/attendee/:path*',
         // Listed so a signed-out visitor is redirected rather than reaching the
         // page. 'admin' is deliberately NOT in all_possible_roles above: that
         // array doubles as the cross-redirect target, so an admin bounced off
