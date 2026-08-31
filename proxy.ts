@@ -44,6 +44,18 @@ export async function proxy(request: NextRequest) {
         return redirectToSignIn(request);
     }
 
+    // An admin on /organizer or /vendor is signed in on the wrong side, so send
+    // them to their own area. Without this they fell through to redirectToSignIn
+    // below and were bounced to a sign-in page they had already passed.
+    if (userType === 'admin') {
+        for (const role of all_possible_roles) {
+            if (request.nextUrl.pathname.startsWith(`/${role}`)) {
+                return NextResponse.redirect(new URL('/admin', request.url));
+            }
+        }
+        return NextResponse.next();
+    }
+
     for (const role of all_possible_roles) {
         if (request.nextUrl.pathname.startsWith(`/${role}`) && userType !== role) {
             // Signed in, but on the wrong side of the app — send them to their own

@@ -169,6 +169,9 @@ const making_a_session = async (user: FirebaseUser) => {
 };
 
 
+/** The only roles a visitor may create for themselves. "admin" is never here. */
+const SELF_SIGNUP_ROLES = ["attendee", "organizer", "vendor"];
+
 export const AuthService = {
     getCurrentUser: cache(async () => {
         const cookieStore = await cookies();
@@ -270,6 +273,19 @@ export const AuthService = {
         const password = formData.password;
         console.log("Checkpoint 1: signUpWithEmail function started.");
 
+        // Checked before anything is created. Signup is reached through a Server
+        // Action, i.e. a public HTTP endpoint, and userType arrives from the form,
+        // so without this allowlist a caller can POST userType: "admin" and mint
+        // themselves a platform admin -- the role that manages the event taxonomy
+        // for everyone. An admin account is created deliberately, never by signing
+        // up. Validating up here rather than after createUserWithEmailAndPassword
+        // also means a refused signup leaves no orphaned Firebase Auth user and
+        // sends no verification email for an account that will not exist.
+        const userTypeLower = String(formData.userType).trim().toLowerCase();
+        if (!SELF_SIGNUP_ROLES.includes(userTypeLower)) {
+            throw new Error("Choose a valid account type.");
+        }
+
         let user_credintials;
         try {
             user_credintials = await createUserWithEmailAndPassword(auth, email, password);
@@ -290,7 +306,6 @@ export const AuthService = {
             console.error("[signUpWithEmail] verification email failed", error);
         }
 
-        const userTypeLower = String(formData.userType).trim().toLowerCase();
         const now = new Date().toISOString();
 
         // Persist a proper User-shaped document (never store the password).
