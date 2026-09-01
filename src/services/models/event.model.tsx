@@ -13,7 +13,28 @@ export type EventFormat = 'physical' | 'virtual' | 'hybrid';
 export type MeetingPlatform = 'Google Meet' | 'Zoom' | 'Microsoft Teams';
 export type CertificateType = 'digital' | 'blockchain' | 'both';
 export type EventStatus = 'draft' | 'published' | 'registration_open' | 'ongoing' | 'completed' | 'cancelled';
-export type EventVisibility = 'public' | 'private' | 'invite_only';
+/**
+ * The five access models. `hybrid` and `tiered` are new; the first three were
+ * already stored, so existing documents keep working.
+ *
+ * Lives here rather than in src/features/access because it is the type of a
+ * field on this document -- the feature imports it, not the other way round.
+ */
+export type EventVisibility = 'public' | 'private' | 'invite_only' | 'hybrid' | 'tiered';
+
+/** Per-event access configuration, stored under `access`. */
+export interface EventAccess {
+  /** Tiers an attendee can hold on this event. */
+  attendeeTiers: string[];
+  /** Tiers gated behind the access code or guest list. Only used by `hybrid`. */
+  gatedTiers: string[];
+  /** Whether an attendee may choose their own tier when registering. */
+  allowTierSelfSelect: boolean;
+  /** Registrations wait as `pending` until the organizer approves or rejects. */
+  requiresApproval: boolean;
+  /** Once capacity is reached, later registrants join the waitlist. */
+  waitlistEnabled: boolean;
+}
 
 export interface Coordinates {
   latitude: number;
@@ -212,6 +233,7 @@ export class EventModel {
   status: EventStatus;
   visibility: EventVisibility;
   accessCode: string | null;
+  access: EventAccess;
   analytics: EventAnalytics;
   createdAt: Date|string;
   updatedAt: Date|string;
@@ -356,6 +378,17 @@ export class EventModel {
     this.status = (String(raw.status || "draft").toLowerCase().replace(/\s+/g, "_")) as EventStatus;
     this.visibility = raw.visibility || "public";
     this.accessCode = raw.accessCode || null;
+    this.access = {
+      attendeeTiers: Array.isArray(raw.access?.attendeeTiers) && raw.access.attendeeTiers.length
+        ? raw.access.attendeeTiers.map(String)
+        : ["General", "Premium", "VIP", "Speaker", "Sponsor"],
+      gatedTiers: Array.isArray(raw.access?.gatedTiers) ? raw.access.gatedTiers.map(String) : [],
+      allowTierSelfSelect: !!raw.access?.allowTierSelfSelect,
+      // Falls back to the older top-level flag, which is where every event
+      // created before this block stored the same setting.
+      requiresApproval: raw.access?.requiresApproval ?? !!raw.registration?.requiresApproval,
+      waitlistEnabled: raw.access?.waitlistEnabled ?? !!raw.capacity?.waitingListEnabled,
+    };
     this.analytics = {
       views: raw.analytics?.views ?? 0,
       registrations: raw.analytics?.registrations ?? 0,
