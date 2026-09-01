@@ -30,6 +30,10 @@ export async function createAgendaAction(
             .map((s) => s.trim())
             .filter(Boolean);
 
+        // One checkbox per tier, all sharing the name, so getAll collects them --
+        // the same shape speakerNames uses. None ticked means "everyone".
+        const tiers = formData.getAll("tiers").map(String).map((t) => t.trim()).filter(Boolean);
+
         await AgendaService.addAgendaItem(eventId, {
             title,
             type,
@@ -40,6 +44,7 @@ export async function createAgendaAction(
             speakerNames,
             description,
             status,
+            tiers,
         });
 
         revalidatePath(`/organizer/${organizerId}/events/${eventId}/agenda`);

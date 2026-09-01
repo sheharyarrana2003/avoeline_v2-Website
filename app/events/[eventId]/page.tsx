@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
-import { getPublicEvent, isPaidEvent, ticketFor } from "@/src/features/registration/registration.service";
+import { getEventForVisitor, isPaidEvent, ticketFor } from "@/src/features/registration/registration.service";
+import { AccessGate } from "@/src/features/access/components/AccessGate";
+import { TrackInviteOpen } from "@/src/features/access/components/TrackInviteOpen";
 import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
@@ -19,14 +21,39 @@ export const metadata = {
  * also the page the publish success screen has been handing organizers a link to
  * all along, which until now resolved to a 404.
  */
-export default async function PublicEventPage({ params }: { params: Promise<{ eventId: string }> }) {
+export default async function PublicEventPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ eventId: string }>;
+    searchParams: Promise<{ invite?: string; code?: string }>;
+}) {
     const { eventId } = await params;
-    const event = await getPublicEvent(eventId);
+    const { invite, code } = await searchParams;
 
-    // Draft, private, cancelled and finished events are all indistinguishable from
-    // a wrong link on purpose: a stranger holding a URL should not learn that a
-    // private event exists.
-    if (!event) notFound();
+    // The visitor's credentials come off the URL: `?invite=` is the per-person
+    // link, `?code=` is what the code form re-submits.
+    const { event, access } = await getEventForVisitor(eventId, { token: invite, code });
+
+    // A draft, cancelled or finished event is indistinguishable from a wrong link
+    // on purpose: a stranger holding a URL should not learn that it exists.
+    if (!event || (!access.allowed && access.reason !== "needs_code" && access.reason !== "bad_code")) {
+        notFound();
+    }
+
+    // Refused only for want of a code: show the code form and nothing else about
+    // the event, so the gate does not leak the thing it is protecting.
+    if (!access.allowed) {
+        return (
+            <main className="mx-auto w-full max-w-md px-4 py-16 sm:px-6">
+                <AccessGate eventId={eventId} inviteToken={invite ?? null} wrongCode={access.reason === "bad_code"} />
+            </main>
+        );
+    }
+
+    // Only once they are through: an opened invite means the person saw the
+    // event, not that a token was present on a refused request.
+    const trackInvite = invite && access.entry?.kind === "invite" ? invite : null;
 
     const paid = isPaidEvent(event);
     const { price } = ticketFor(event);
@@ -46,6 +73,11 @@ export default async function PublicEventPage({ params }: { params: Promise<{ ev
 
     return (
         <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+            {/* Renders nothing. Placed here rather than beside the form so an
+                opened invite is recorded even when the event turns out to be
+                full -- they still looked. */}
+            {trackInvite ? <TrackInviteOpen token={trackInvite} /> : null}
+
             <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
                 <section className="min-w-0">
                     {event.bannerImage ? (
@@ -98,14 +130,25 @@ export default async function PublicEventPage({ params }: { params: Promise<{ ev
                         <p className="mt-1 font-display text-2xl text-ink">{paid ? priceLabel : "Free"}</p>
 
                         <div className="mt-6">
-                            {isFull ? (
+                            {isFull && !event.access?.waitlistEnabled ? (
                                 <EmptyState
                                     icon={<Users className="h-5 w-5" />}
                                     title="Fully booked"
                                     description="Every seat for this event has been taken. Check back in case someone cancels."
                                 />
                             ) : (
-                                <RegistrationForm eventId={event.id} isPaid={paid} priceLabel={priceLabel} />
+                                <RegistrationForm
+                                    eventId={event.id}
+                                    isPaid={paid}
+                                    priceLabel={priceLabel}
+                                    inviteToken={invite ?? null}
+                                    accessCode={code ?? null}
+                                    tierChoices={
+                                        event.access?.allowTierSelfSelect
+                                            ? (event.access.attendeeTiers ?? []).filter((t) => !access.lockedTiers.includes(t))
+                                            : []
+                                    }
+                                />
                             )}
                         </div>
                     </div>

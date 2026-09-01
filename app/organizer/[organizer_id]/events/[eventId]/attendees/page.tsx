@@ -1,10 +1,12 @@
 import { AttendeeService, emptyAttendeeForUser, userFromRegistration } from "@/src/features/event_attendee/attendee.service"
 import { AttendeeClientSide, AttendeeClientSideProp } from "@/src/features/event_attendee/components/AttendeeClientSide";
 import { RegService } from "@/src/services/registeration.service";
+import { EventService } from "@/src/services/event.service";
 import { UserService } from "@/src/services/user.service";
 import { Registration } from "@/src/services/models/reg.type";
 import { getSignedUrl, CERTIFICATES_BUCKET } from "@/data/supabase";
 import { exportAttendeesAction } from "@/src/features/exports/actions/exportAttendees.action";
+import { promoteFromWaitlist } from "@/src/features/access/actions/registrationDecision.action";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
@@ -13,6 +15,9 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     // Drive the list off registrations, not attendee profiles: every registrant
     // must show up, whether or not they have an `attendees` profile doc.
     const regs = await RegService.getRegsOfEvent(event_id);
+    // Needed only for its access settings, which decide where a paid registration
+    // lands once payment clears.
+    const eventForAccess = await EventService.getEventByID(event_id);
 
     let attendeesWithUsers: AttendeeClientSideProp[] = [];
     if (regs.length) {
@@ -55,6 +60,14 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     const handle_reg_status = async (registeration: Registration) => {
         'use server'
         await RegService.updateReg(registeration)
+
+        // Cancelling or rejecting releases a seat, and there are no background
+        // jobs here, so promotion has to be a consequence of the write that made
+        // room. Never throws -- a failed promotion must not look like a failed
+        // status change.
+        if (registeration.status === "cancelled" || registeration.status === "rejected") {
+            await promoteFromWaitlist(event_id);
+        }
     }
 
     // No padding and no event title here: the event layout renders both, and this
@@ -66,5 +79,12 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
         return exportAttendeesAction(event_id);
     };
 
-    return <AttendeeClientSide attendees={attendeesWithUsers} handle_reg_status={handle_reg_status} onExport={handle_export} />;
+    return (
+        <AttendeeClientSide
+            attendees={attendeesWithUsers}
+            handle_reg_status={handle_reg_status}
+            onExport={handle_export}
+            requiresApproval={!!eventForAccess?.access?.requiresApproval}
+        />
+    );
 }

@@ -11,6 +11,8 @@ export interface PublicRegistrationInput {
     phone: string;
     /** Only collected for paid events. Uploaded in the same form submission. */
     paymentProof?: File | null;
+    /** Only offered when the event sets `access.allowTierSelfSelect`. */
+    tier?: string;
 }
 
 /**
@@ -35,4 +37,13 @@ export type RegistrationRefusal =
     | "event_not_found"
     | "event_closed"
     | "event_full"
-    | "already_registered";
+    | "already_registered"
+    // Access refusals (spec 2.1). Each maps from one AccessDenial so the form
+    // can say what is actually missing rather than "not found".
+    | "needs_code"
+    | "bad_code"
+    | "needs_invite"
+    | "invite_expired"
+    | "invite_used"
+    | "not_whitelisted"
+    | "tier_locked";

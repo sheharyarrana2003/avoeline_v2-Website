@@ -13,9 +13,15 @@ interface CreateAgendaFormProps {
     eventId: string;
     organizerId: string;
     activeSpeakers?: Speaker[];
+    /**
+     * Attendee tiers this event offers. Empty for events that are not tiered, in
+     * which case the restriction control is not rendered at all -- a gate you
+     * cannot open is worse than no gate.
+     */
+    attendeeTiers?: string[];
 }
 
-export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers }: CreateAgendaFormProps) {
+export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers, attendeeTiers = [] }: CreateAgendaFormProps) {
     const router = useRouter();
 
     const boundAction = createAgendaAction.bind(null, eventId, organizerId);
@@ -225,6 +231,25 @@ export default function CreateAgendaForm({ eventId, organizerId, activeSpeakers 
                             </p>
                         )}
                     </div>
+
+                    {attendeeTiers.length ? (
+                        <div>
+                            <span className={labelClass}>Who can see this session</span>
+                            <p className="mt-1 text-xs text-ink-soft">
+                                Tick none to show it to everyone. Ticking tiers restricts it to those attendees.
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+                                {attendeeTiers.map((tier) => (
+                                    <label key={tier} className="flex items-center gap-2 text-sm text-ink">
+                                        {/* Same name for every box, so the action reads them
+                                            with getAll -- the pattern speakerNames already uses. */}
+                                        <input type="checkbox" name="tiers" value={tier} className="h-4 w-4 accent-current" />
+                                        {tier}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    ) : null}
 
                     <div>
                         <label htmlFor="agenda-description" className={labelClass}>

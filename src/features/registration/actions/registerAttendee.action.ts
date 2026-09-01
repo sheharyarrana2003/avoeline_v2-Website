@@ -23,6 +23,15 @@ const REFUSAL_MESSAGE: Record<RegistrationRefusal, string> = {
     event_closed: "Registration for this event has closed.",
     event_full: "This event is fully booked.",
     already_registered: "That email address is already registered for this event.",
+    needs_code: "This is a private event. Enter the access code to register.",
+    bad_code: "That access code is not right.",
+    needs_invite: "This event is invite only. Please use the link you were sent.",
+    invite_expired: "That invitation has expired.",
+    invite_used: "That invitation has already been used.",
+    // Deliberately does not confirm whether the address is on the list -- that
+    // would let anyone test an event's guest list one address at a time.
+    not_whitelisted: "That email address cannot register for this event.",
+    tier_locked: "That ticket tier needs the access code for this event.",
 };
 
 /**
@@ -84,6 +93,15 @@ export async function registerAttendeeAction(
             return fail("That email address does not look right.");
         }
 
+        // Access credentials travel with the form as hidden inputs, so the gate
+        // can be re-decided here. They are re-checked rather than trusted: the
+        // page that rendered this form proves nothing about who is submitting it.
+        const attempt = {
+            token: String(formData.get("inviteToken") ?? "").trim() || null,
+            code: String(formData.get("accessCode") ?? "").trim() || null,
+        };
+        const tier = String(formData.get("tier") ?? "").trim();
+
         // Re-check the event here rather than trusting the page that rendered the
         // form: it may have been open when the page loaded and closed since.
         const event = await getPublicEvent(eventId);
@@ -123,7 +141,7 @@ export async function registerAttendeeAction(
         const headerList = await headers();
         const result = await createPublicRegistration(
             eventId,
-            { name, email, phone },
+            { name, email, phone, tier },
             {
                 proofPath,
                 metadata: {
@@ -134,6 +152,7 @@ export async function registerAttendeeAction(
                         : "desktop",
                 },
             },
+            attempt,
         );
 
         if (!result.ok) return fail(REFUSAL_MESSAGE[result.refusal]);

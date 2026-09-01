@@ -26,7 +26,7 @@ export interface AttendeeClientSideProp {
     proofUrl?: string | null
 }
 
-export function AttendeeClientSide({ attendees = [], handle_reg_status, onExport }: { attendees: AttendeeClientSideProp[] | [], handle_reg_status: (reg: Registration) => Promise<void>, onExport?: () => Promise<ExportResult> }) {
+export function AttendeeClientSide({ attendees = [], handle_reg_status, onExport, requiresApproval = false }: { attendees: AttendeeClientSideProp[] | [], handle_reg_status: (reg: Registration) => Promise<void>, onExport?: () => Promise<ExportResult>, requiresApproval?: boolean }) {
     // The open row is held by id, not by object, so the drawer keeps showing the
     // current registration after a server revalidation replaces the props.
     const [open_registration_id, set_open_registration_id] = useState<string | null>(null);
@@ -162,6 +162,7 @@ export function AttendeeClientSide({ attendees = [], handle_reg_status, onExport
             {open_attendee && (
                 <aside className="w-full shrink-0 overflow-hidden rounded-2xl border border-line bg-paper lg:sticky lg:top-8 lg:h-fit lg:w-[400px]">
                     <SingleAttendeeView
+                        requiresApproval={requiresApproval}
                         combined_data={open_attendee}
                         onClose={() => set_open_registration_id(null)}
                         update_registration={handle_reg_status}

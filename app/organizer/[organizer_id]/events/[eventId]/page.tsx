@@ -111,6 +111,10 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ e
 
     // Same gate the public page uses, so this link only appears when it actually
     // leads somewhere. getEventByID is cache()d, so asking again costs no read.
+    // A registration link is worth showing whenever the event is open, whatever
+    // its access type -- a private event's link is exactly the thing an organizer
+    // needs to hand out, since the direct link is one of the ways in. Only a
+    // draft, cancelled or finished event has no link worth copying.
     const shareable = await getPublicEvent(eventId);
     const registrationUrl = shareable ? await absoluteUrl(registrationPath(event.id)) : null;
 

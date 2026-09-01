@@ -11,10 +11,11 @@ import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { useToast } from "@/src/shared_components/ui/Toast";
-import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
+import { ConfirmDialog, ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { ImageLightbox } from "@/src/shared_components/ui/ImageLightbox";
 import { buttonClass } from "@/src/lib/ui";
 import { setCheckIn } from "@/src/features/event_attendee/actions/checkIn.action";
+import { decideRegistration } from "@/src/features/access/actions/registrationDecision.action";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { ActionResult } from "@/src/lib/action";
 import { fieldClass, labelClass } from "@/src/lib/ui";
@@ -23,6 +24,8 @@ interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
     onClose: () => void;
     update_registration?: (updatedRegistration: Registration) => Promise<void> | void;
+    /** From the event's access settings; decides where a paid registration lands. */
+    requiresApproval?: boolean;
 }
 
 const STATUS_OPTIONS: Registration["status"][] = [
@@ -53,7 +56,8 @@ const SERIOUS_PAYMENT = new Set<string>(["refunded", "failed"]);
 export function SingleAttendeeView({
     combined_data,
     onClose,
-    update_registration
+    update_registration,
+    requiresApproval = false,
 }: SingleAttendeeViewProps) {
     // 1. Safely extract core data
     const a = combined_data?.a || {} as any;
@@ -82,6 +86,10 @@ export function SingleAttendeeView({
     const discount = registration?.discountApplied;
 
     const [checkInState, checkInAction] = useActionState<ActionResult | null, FormData>(setCheckIn, null);
+    const [decisionState, decisionAction] = useActionState<ActionResult | null, FormData>(
+        async (_prev: ActionResult | null, fd: FormData) => decideRegistration(fd),
+        null,
+    );
 
     const isCheckedIn = Boolean(registration?.checkIn?.checkedIn) || registration?.status === "checked_in";
 
@@ -147,15 +155,21 @@ export function SingleAttendeeView({
     ): Registration => {
         const confirms = newPaymentStatus === "completed" && registration.status === "awaiting_payment";
 
+        // On an event that vets registrations, money clearing does not confirm
+        // anyone -- it moves them into the approval queue. Without this the
+        // requiresApproval toggle had no effect at all on a paid event: payment
+        // verification promoted straight past it to confirmed.
+        const nextStatus = requiresApproval ? ("pending" as const) : ("confirmed" as const);
+
         return {
             ...registration,
             payment: { ...registration.payment, paymentStatus: newPaymentStatus },
             ...(confirms
                 ? {
-                    status: "confirmed" as const,
+                    status: nextStatus,
                     statusHistory: [
                         ...(registration.statusHistory || []),
-                        { status: "confirmed" as const, timestamp: new Date().toISOString() },
+                        { status: nextStatus, timestamp: new Date().toISOString() },
                     ],
                 }
                 : {}),
@@ -262,6 +276,46 @@ export function SingleAttendeeView({
                     )}
                 </div>
             </section>
+
+            {registration?.status === "pending" ? (
+                <section className="rounded-2xl border border-line bg-paper p-4">
+                    <p className="text-sm font-medium text-ink">Waiting on your approval</p>
+                    <p className="mt-1 text-xs text-ink-soft">
+                        This event holds new registrations until you decide. They are emailed either way.
+                    </p>
+                    {decisionState?.error ? <FormFeedback error={decisionState.error} className="mt-3" /> : null}
+                    {/* One form, two submit buttons -- the submitter's name/value is
+                        what tells the action which way to go. */}
+                    <form action={decisionAction} className="mt-3 flex flex-wrap gap-2">
+                        <input type="hidden" name="eventId" value={registration.eventId} />
+                        <input type="hidden" name="registrationId" value={registration.registrationId} />
+                        <button type="submit" name="decision" value="approve" className={buttonClass("primary", "sm")}>
+                            Approve
+                        </button>
+                        <ConfirmSubmit
+                            name="decision"
+                            value="reject"
+                            title={`Reject ${registration.attendee?.name || "this registration"}?`}
+                            description="They are emailed to say the organizer did not approve it, and their seat is released to anyone on the waitlist."
+                            confirmLabel="Reject registration"
+                            className={buttonClass("destructive", "sm")}
+                        >
+                            Reject
+                        </ConfirmSubmit>
+                    </form>
+                </section>
+            ) : null}
+
+            {registration?.status === "waitlisted" ? (
+                <section className="rounded-2xl border border-line bg-paper p-4">
+                    <p className="text-sm font-medium text-ink">
+                        On the waitlist{registration.waitlistPosition ? ` — position ${registration.waitlistPosition}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-soft">
+                        Promoted automatically, in order, when a place frees up.
+                    </p>
+                </section>
+            ) : null}
 
             <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-paper p-4">
                 <CheckCircle2

@@ -43,7 +43,24 @@ function agendaItemToSession(item: AgendaItem, eventId: string): Session {
         speaker:     item.speakerNames?.length
             ? { id: item.speakerNames[0], name: item.speakerNames[0], avatarUrl: "" }
             : undefined,
+        tiers:       Array.isArray(item.tiers) ? item.tiers : [],
     };
+}
+
+/**
+ * The sessions one attendee may see (spec 2.1, tiered access).
+ *
+ * A session with no tiers is for everyone, which is what every session written
+ * before tiers existed reads as -- so this hides nothing retroactively. An
+ * attendee with no tier sees only the open sessions, which is the safe direction:
+ * a missing tier must not act as a master key.
+ */
+export function sessionsForTier(sessions: Session[], tier: string): Session[] {
+    const mine = String(tier ?? "").trim();
+    return sessions.filter((s) => {
+        const gated = (s.tiers ?? []).filter(Boolean);
+        return gated.length === 0 || (!!mine && gated.includes(mine));
+    });
 }
 
 // ─── AgendaService ───────────────────────────────────────────────────────────
@@ -122,6 +139,8 @@ export const AgendaService = {
             speakerNames: string[];
             description: string;
             status: AgendaItem["status"];
+            /** Attendee tiers this session is for. Empty means everyone. */
+            tiers?: string[];
         }
     ): Promise<void> {
         // 1. Read the current event document
@@ -162,6 +181,7 @@ export const AgendaService = {
             capacity:              data.capacity?.totalSeats ?? 0,
             speakerNames:          formData.speakerNames ?? [],
             description:           formData.description ?? "",
+            tiers:                 formData.tiers ?? [],
             activities:            [],
             notes:                 "",
             recordingUrl:          "",
