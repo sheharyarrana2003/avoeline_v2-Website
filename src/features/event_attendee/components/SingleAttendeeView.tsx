@@ -24,6 +24,8 @@ interface SingleAttendeeViewProps {
     combined_data: AttendeeClientSideProp;
     onClose: () => void;
     update_registration?: (updatedRegistration: Registration) => Promise<void> | void;
+    /** From the event's access settings; decides where a paid registration lands. */
+    requiresApproval?: boolean;
 }
 
 const STATUS_OPTIONS: Registration["status"][] = [
@@ -54,7 +56,8 @@ const SERIOUS_PAYMENT = new Set<string>(["refunded", "failed"]);
 export function SingleAttendeeView({
     combined_data,
     onClose,
-    update_registration
+    update_registration,
+    requiresApproval = false,
 }: SingleAttendeeViewProps) {
     // 1. Safely extract core data
     const a = combined_data?.a || {} as any;
@@ -152,15 +155,21 @@ export function SingleAttendeeView({
     ): Registration => {
         const confirms = newPaymentStatus === "completed" && registration.status === "awaiting_payment";
 
+        // On an event that vets registrations, money clearing does not confirm
+        // anyone -- it moves them into the approval queue. Without this the
+        // requiresApproval toggle had no effect at all on a paid event: payment
+        // verification promoted straight past it to confirmed.
+        const nextStatus = requiresApproval ? ("pending" as const) : ("confirmed" as const);
+
         return {
             ...registration,
             payment: { ...registration.payment, paymentStatus: newPaymentStatus },
             ...(confirms
                 ? {
-                    status: "confirmed" as const,
+                    status: nextStatus,
                     statusHistory: [
                         ...(registration.statusHistory || []),
-                        { status: "confirmed" as const, timestamp: new Date().toISOString() },
+                        { status: nextStatus, timestamp: new Date().toISOString() },
                     ],
                 }
                 : {}),
