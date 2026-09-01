@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
-import { Mail, Ticket, UserCheck } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { buttonClass } from "@/src/lib/ui";
-import { formatDate, formatDateTime } from "@/src/lib/datetime";
+import { formatDate } from "@/src/lib/datetime";
 import { absoluteUrl } from "@/src/lib/appUrl";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { getEventGuestList, accessTypeOf } from "@/src/features/access/access.service";
