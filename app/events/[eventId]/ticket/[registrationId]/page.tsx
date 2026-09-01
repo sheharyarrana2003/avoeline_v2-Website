@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { Check, Clock } from "lucide-react";
 import { getPublicEvent, getRegistrationById } from "@/src/features/registration/registration.service";
+import { AgendaService, sessionsForTier } from "@/src/features/agendas/agenda.service";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
-import { formatDateMedium, formatTime } from "@/src/lib/datetime";
+import { formatDate, formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 
 export const metadata = {
@@ -38,6 +39,11 @@ export default async function TicketPage({
 
     const awaitingPayment = registration.status === "awaiting_payment";
     const attendeeName = registration.attendee?.name || "Attendee";
+
+    // Spec 2.1: a tiered event's attendees see a different agenda depending on
+    // their tier. Filtered on the server, so a restricted session is never sent
+    // to a browser that is not entitled to it.
+    const sessions = sessionsForTier(await AgendaService.getSessionsByEventId(eventId), registration.tier);
 
     return (
         <main className="mx-auto w-full max-w-xl px-4 py-10 sm:px-6 sm:py-14">
@@ -98,6 +104,31 @@ export default async function TicketPage({
                     <Row label="Registration ID" value={<span className="font-mono text-xs">{registration.registrationId}</span>} />
                 </dl>
             </div>
+
+            {sessions.length ? (
+                <section className="mt-8 rounded-2xl border border-line bg-paper p-6">
+                    <h2 className="font-display text-base text-ink">
+                        Your schedule
+                        {registration.tier ? (
+                            <span className="ml-2 text-2xs font-medium uppercase text-ink-soft">{registration.tier}</span>
+                        ) : null}
+                    </h2>
+                    <ul className="mt-4 space-y-3">
+                        {sessions.map((session) => (
+                            <li key={session.id} className="flex gap-4 border-b border-line pb-3 last:border-b-0 last:pb-0">
+                                <div className="w-28 shrink-0 text-xs text-ink-soft tabular-nums">
+                                    <span className="block text-ink">{formatTime(session.startTime)}</span>
+                                    <span>{formatDate(session.date)}</span>
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-medium text-ink">{session.title}</p>
+                                    <p className="text-xs text-ink-soft">{session.location}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ) : null}
 
             <p className="mt-6 text-center text-xs text-ink-soft">
                 Keep this link — it is the only way back to your ticket.

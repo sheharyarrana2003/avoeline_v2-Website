@@ -159,6 +159,8 @@ export interface AgendaItem {
   maxAttendees: number;
   currentAttendees: number;
   customFields: Record<string, any>;
+  /** Attendee tiers this session is for. Empty or absent means everyone. */
+  tiers?: string[];
 }
 
 export interface VendorRequirement {
@@ -341,6 +343,7 @@ export class EventModel {
       ...item,
       activities: Array.isArray(item.activities) ? item.activities : [],
       customFields: item.customFields || {},
+      tiers: Array.isArray(item.tiers) ? item.tiers.map(String) : [],
     })) : [];
 
     const parseDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : new Date();
