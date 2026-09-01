@@ -30,6 +30,12 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
     registrationDate: String(raw.registrationDate || new Date().toISOString()),
     registrationSource: raw.registrationSource || "web",
     status: raw.status || "pending",
+    // Defaults chosen so a document written before these fields existed reads as
+    // "not waitlisted, no tier assigned, not from an invite" rather than as
+    // position 1 in a queue it was never in.
+    tier: String(raw.tier || ""),
+    waitlistPosition: Number(raw.waitlistPosition ?? 0),
+    inviteId: raw.inviteId ? String(raw.inviteId) : null,
 
     statusHistory: Array.isArray(raw.statusHistory)
       ? raw.statusHistory.map((h: any) => ({

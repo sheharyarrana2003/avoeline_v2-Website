@@ -9,6 +9,40 @@ import { Registration, CommunicationLog } from "@/src/services/models/reg.type";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import { PublicRegistrationInput, RegistrationRefusal } from "./types";
 import { buildQrPayload, generateAndHostQr } from "./qr";
+import { resolveEventAccess, type AccessAttempt } from "@/src/features/access/access.service";
+import type { AccessDenial } from "@/src/features/access/types";
+import type { RegistrationStatus } from "@/src/services/models/reg.type";
+
+/**
+ * One refusal code per access denial, so the form explains what is missing
+ * instead of collapsing everything into "event not found".
+ */
+const ACCESS_REFUSAL: Record<AccessDenial, RegistrationRefusal> = {
+    not_found: "event_not_found",
+    closed: "event_closed",
+    needs_code: "needs_code",
+    bad_code: "bad_code",
+    needs_invite: "needs_invite",
+    invite_expired: "invite_expired",
+    invite_used: "invite_used",
+    not_whitelisted: "not_whitelisted",
+};
+
+/**
+ * Which tier this registration gets.
+ *
+ * An invite or guest-list row wins: the organizer set it deliberately per
+ * person. Otherwise the attendee's own choice counts only when the event allows
+ * self-selection AND the tier is one the event actually offers -- the value
+ * arrives from a form, so an unlisted tier is either a stale page or someone
+ * editing the request. Failing that, the first configured tier.
+ */
+function resolveTier(event: EventModel, entitled: string, requested?: string): string {
+    const offered = event.access?.attendeeTiers ?? [];
+    if (entitled) return entitled;
+    if (event.access?.allowTierSelfSelect && requested && offered.includes(requested)) return requested;
+    return offered[0] ?? "";
+}
 
 /** What `createPublicRegistration` hands back. */
 export type CreateRegistrationResult =
@@ -72,15 +106,33 @@ export const getPublicEvent = cache(async (eventId: string): Promise<EventModel 
     const event = await EventService.getEventByID(eventId);
     if (!event) return null;
 
-    // Private and invite-only events are not registrable from a shared link.
-    // `accessCode` exists on the model for invite-only flows; nothing implements
-    // it yet, so those events stay unreachable rather than silently public.
-    if (String(event.visibility || "").toLowerCase() !== "public") return null;
-
     if (!isActiveLifecycle(eventLifecycle(event.status, event.schedule))) return null;
 
     return event;
 });
+
+/**
+ * The event a visitor is allowed to see, with the access decision attached.
+ *
+ * Replaces the old rule inside `getPublicEvent`, which denied anything that was
+ * not `public` and so 404'd a private event on its own direct link. Access is
+ * now `resolveEventAccess`'s job; this only fetches and hands the visitor's
+ * credentials over.
+ *
+ * The event is returned even when access is refused, because the page needs to
+ * render a code-entry form for it -- the caller must check `access.allowed`
+ * before showing anything else about the event.
+ */
+export const getEventForVisitor = cache(
+    async (
+        eventId: string,
+        attempt: AccessAttempt = {},
+    ): Promise<{ event: EventModel | null; access: Awaited<ReturnType<typeof resolveEventAccess>> }> => {
+        const event = eventId ? await EventService.getEventByID(eventId) : null;
+        const access = await resolveEventAccess(event, attempt);
+        return { event, access };
+    },
+);
 
 /** One registration by id, for the ticket page. */
 export const getRegistrationById = cache(async (registrationId: string): Promise<Registration | null> => {
@@ -119,26 +171,43 @@ export async function createPublicRegistration(
         proofPath?: string | null;
         metadata?: { ipAddress: string; userAgent: string; deviceType: string };
     },
+    /** Access credentials the visitor presented: an invite token, a code. */
+    attempt: AccessAttempt = {},
 ): Promise<CreateRegistrationResult> {
-    const event = await getPublicEvent(eventId);
-    if (!event) return { ok: false, refusal: "event_not_found" };
+    const email = input.email.trim().toLowerCase();
 
-    // One read serves both guards below.
+    // The register-time gate. Unlike the page view this knows the email, so the
+    // guest list is enforced here -- and the whole decision is re-made server
+    // side rather than trusting anything the form implies about access.
+    const event = await EventService.getEventByID(eventId);
+    const access = await resolveEventAccess(event, { ...attempt, email });
+    if (!event) return { ok: false, refusal: "event_not_found" };
+    if (!access.allowed) return { ok: false, refusal: ACCESS_REFUSAL[access.reason] };
+
+    // One read serves the guards below.
     const existing = await RegService.getRegsOfEvent(eventId);
 
-    const email = input.email.trim().toLowerCase();
     const alreadyHere = existing.some(
         (r) => occupiesASeat(r) && (r.attendee?.email || "").trim().toLowerCase() === email,
     );
     if (alreadyHere) return { ok: false, refusal: "already_registered" };
 
+    const tier = resolveTier(event, access.tier, input.tier);
+    if (access.lockedTiers.includes(tier)) return { ok: false, refusal: "tier_locked" };
+
     // Counted live rather than read from `capacity.availableSeats`, which is
     // written once at event creation and never moves -- it is already stale in
     // main. totalSeats of 0 means uncapped.
     const totalSeats = Number(event.capacity?.totalSeats) || 0;
-    if (totalSeats > 0 && existing.filter(occupiesASeat).length >= totalSeats) {
+    const seatsTaken = existing.filter(occupiesASeat).length;
+    const full = totalSeats > 0 && seatsTaken >= totalSeats;
+
+    // A full event now offers the waitlist instead of a dead end, when the
+    // organizer turned it on. Without it the behaviour is the old refusal.
+    if (full && !event.access?.waitlistEnabled) {
         return { ok: false, refusal: "event_full" };
     }
+    const waitlistPosition = full ? existing.filter((r) => r.status === "waitlisted").length + 1 : 0;
 
     const ref = adminDb.collection(COLLECTIONS.REGISTRATIONS).doc();
     const now = new Date().toISOString();
@@ -153,9 +222,20 @@ export async function createPublicRegistration(
     const ticket = ticketFor(event);
     const paid = ticket.price > 0;
 
-    // Paid registrations are not confirmed until an organizer verifies the
-    // screenshot; free ones have nothing to verify.
-    const status = paid ? "awaiting_payment" : "confirmed";
+    /*
+     * Status precedence, most binding first:
+     *   waitlisted      -- there is no seat, so nothing else applies yet
+     *   awaiting_payment-- money is owed; approval comes after it clears
+     *   pending         -- the organizer vets registrations (spec 2.2)
+     *   confirmed       -- nothing stands in the way
+     */
+    const status: RegistrationStatus = full
+        ? "waitlisted"
+        : paid
+          ? "awaiting_payment"
+          : event.access?.requiresApproval
+            ? "pending"
+            : "confirmed";
 
     const registration: Registration = {
         registrationId: ref.id,
@@ -167,6 +247,9 @@ export async function createPublicRegistration(
         registrationSource: "web",
         status,
         statusHistory: [{ status, timestamp: now }],
+        tier,
+        waitlistPosition,
+        inviteId: access.entry?.id ?? null,
         payment: {
             paymentId: "",
             // What they owe, not what we have confirmed receiving -- paymentStatus
@@ -219,6 +302,23 @@ export async function createPublicRegistration(
     } catch (err) {
         console.error("[createPublicRegistration] Firestore write failed", { eventId, err });
         throw new Error(`Failed to create registration for event ${eventId}`, { cause: err });
+    }
+
+    // Spec 2.2: an invite tracks whether the person it was sent to registered.
+    // After the registration, and never throwing -- the registration exists and
+    // must not be lost because a tracking write failed.
+    if (access.entry) {
+        try {
+            await adminDb.collection(COLLECTIONS.EVENT_INVITES).doc(access.entry.id).set(
+                { registeredAt: new Date(), registrationId: ref.id, updatedAt: new Date() },
+                { merge: true },
+            );
+        } catch (err) {
+            console.error("[createPublicRegistration] could not mark the invite as used", {
+                inviteId: access.entry.id,
+                err,
+            });
+        }
     }
 
     return { ok: true, registrationId: ref.id, registration, event };

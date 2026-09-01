@@ -12,6 +12,17 @@ export interface RegistrationFormProps {
     /** Drives the copy on the button and the note beneath it. */
     isPaid: boolean;
     priceLabel: string;
+    /** Carried through from `?invite=` so the action can re-check the invite. */
+    inviteToken?: string | null;
+    /** Carried through from `?code=` for the same reason. */
+    accessCode?: string | null;
+    /**
+     * Tiers the attendee may pick from. Empty unless the event allows
+     * self-selection, and already filtered to exclude gated tiers they have not
+     * unlocked -- the server re-checks both, this only avoids offering a choice
+     * that would be refused.
+     */
+    tierChoices?: string[];
 }
 
 /**
@@ -25,12 +36,25 @@ export interface RegistrationFormProps {
  * On success the action redirects to the ticket, so there is no success branch to
  * render: this component only ever shows the form or an error.
  */
-export function RegistrationForm({ eventId, isPaid, priceLabel }: RegistrationFormProps) {
+export function RegistrationForm({
+    eventId,
+    isPaid,
+    priceLabel,
+    inviteToken = null,
+    accessCode = null,
+    tierChoices = [],
+}: RegistrationFormProps) {
     const boundAction = registerAttendeeAction.bind(null, eventId);
     const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
 
     return (
         <form action={formAction} className="flex flex-col gap-5">
+            {/* The credentials the page was reached with. Hidden inputs rather than
+                bound arguments so they survive a re-render, and re-verified server
+                side -- they prove nothing on their own. */}
+            {inviteToken ? <input type="hidden" name="inviteToken" value={inviteToken} /> : null}
+            {accessCode ? <input type="hidden" name="accessCode" value={accessCode} /> : null}
+
             {state?.error && <FormFeedback error={state.error} />}
 
             <div className="flex flex-col gap-1.5">
@@ -83,6 +107,17 @@ export function RegistrationForm({ eventId, isPaid, priceLabel }: RegistrationFo
                     className={fieldClass}
                 />
             </div>
+
+            {tierChoices.length > 1 ? (
+                <div className="flex flex-col gap-1.5">
+                    <label htmlFor="reg-tier" className={labelClass}>Ticket type</label>
+                    <select id="reg-tier" name="tier" defaultValue={tierChoices[0]} className={fieldClass}>
+                        {tierChoices.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                        ))}
+                    </select>
+                </div>
+            ) : null}
 
             {isPaid ? (
                 <div className="flex flex-col gap-1.5 border-t border-line pt-5">

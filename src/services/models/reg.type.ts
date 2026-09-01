@@ -1,7 +1,26 @@
 import { CertificateType } from "./event.model";
 
+/**
+ * Every state a registration can hold.
+ *
+ * `waitlisted` and `rejected` are new: capacity used to refuse outright with no
+ * list to join, and an organizer approving registrations had no way to record a
+ * refusal. Declared once and reused -- this union was written out twice, on
+ * StatusHistoryEntry and on Registration, and the two were already a copy apart.
+ */
+export type RegistrationStatus =
+  | "pending"
+  | "confirmed"
+  | "checked_in"
+  | "attended"
+  | "cancelled"
+  | "no_show"
+  | "awaiting_payment"
+  | "waitlisted"
+  | "rejected";
+
 export interface StatusHistoryEntry {
-  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show" | "awaiting_payment";
+  status: RegistrationStatus;
   timestamp: string;
 }
 
@@ -91,10 +110,20 @@ export interface Registration {
   organizerId: string; // Foreign Key to Organizer (User)
   registrationDate: string;
   registrationSource: "mobile_app" | "web" | "admin_panel";
-  status: "pending" | "confirmed" | "checked_in" | "attended" | "cancelled" | "no_show" | "awaiting_payment";
+  status: RegistrationStatus;
   statusHistory: StatusHistoryEntry[];
   payment: PaymentInfo;
   pricingTier: string;
+  /**
+   * Attendee tier -- General/Premium/VIP/Speaker/Sponsor by default, set per
+   * event. Distinct from `pricingTier`, which is the name of the ticket price
+   * band they bought; this is what they are entitled to see.
+   */
+  tier: string;
+  /** 1-based place in the queue while `status === "waitlisted"`, else 0. */
+  waitlistPosition: number;
+  /** The guest-list or invite row that authorized this registration, if any. */
+  inviteId: string | null;
   finalPrice: number;
   discountApplied: DiscountInfo | null;
   checkIn: CheckInInfo;
