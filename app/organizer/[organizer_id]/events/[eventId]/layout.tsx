@@ -22,6 +22,7 @@ export default async function EventLayout({
     const tabs = [
         { label: "Overview", value: "overview", href: `/organizer/${organizer_id}/events/${eventId}` },
         { label: "Attendees", value: "attendees", href: `/organizer/${organizer_id}/events/${eventId}/attendees` },
+        { label: "Access", value: "access", href: `/organizer/${organizer_id}/events/${eventId}/access` },
         { label: "Agenda", value: "agenda", href: `/organizer/${organizer_id}/events/${eventId}/agenda` },
         { label: "Speakers", value: "speakers", href: `/organizer/${organizer_id}/events/${eventId}/speakers` },
         { label: "Vendors", value: "vendors", href: `/organizer/${organizer_id}/events/${eventId}/vendors` },
