@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { getEventForVisitor, isPaidEvent, ticketFor } from "@/src/features/registration/registration.service";
 import { AccessGate } from "@/src/features/access/components/AccessGate";
+import { TrackInviteOpen } from "@/src/features/access/components/TrackInviteOpen";
 import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
@@ -50,6 +51,10 @@ export default async function PublicEventPage({
         );
     }
 
+    // Only once they are through: an opened invite means the person saw the
+    // event, not that a token was present on a refused request.
+    const trackInvite = invite && access.entry?.kind === "invite" ? invite : null;
+
     const paid = isPaidEvent(event);
     const { price } = ticketFor(event);
     const priceLabel = formatCurrency(price, event.pricing?.currency || "PKR", "Free");
@@ -68,6 +73,11 @@ export default async function PublicEventPage({
 
     return (
         <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+            {/* Renders nothing. Placed here rather than beside the form so an
+                opened invite is recorded even when the event turns out to be
+                full -- they still looked. */}
+            {trackInvite ? <TrackInviteOpen token={trackInvite} /> : null}
+
             <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
                 <section className="min-w-0">
                     {event.bannerImage ? (

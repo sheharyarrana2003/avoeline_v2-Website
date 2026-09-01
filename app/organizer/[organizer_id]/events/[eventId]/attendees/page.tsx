@@ -5,6 +5,7 @@ import { UserService } from "@/src/services/user.service";
 import { Registration } from "@/src/services/models/reg.type";
 import { getSignedUrl, CERTIFICATES_BUCKET } from "@/data/supabase";
 import { exportAttendeesAction } from "@/src/features/exports/actions/exportAttendees.action";
+import { promoteFromWaitlist } from "@/src/features/access/actions/registrationDecision.action";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
     const resolvedParams = await params;
@@ -55,6 +56,14 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     const handle_reg_status = async (registeration: Registration) => {
         'use server'
         await RegService.updateReg(registeration)
+
+        // Cancelling or rejecting releases a seat, and there are no background
+        // jobs here, so promotion has to be a consequence of the write that made
+        // room. Never throws -- a failed promotion must not look like a failed
+        // status change.
+        if (registeration.status === "cancelled" || registeration.status === "rejected") {
+            await promoteFromWaitlist(event_id);
+        }
     }
 
     // No padding and no event title here: the event layout renders both, and this
