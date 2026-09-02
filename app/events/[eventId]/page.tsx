@@ -3,6 +3,8 @@ import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { getEventForVisitor, isPaidEvent, ticketFor } from "@/src/features/registration/registration.service";
 import { AccessGate } from "@/src/features/access/components/AccessGate";
 import { TrackInviteOpen } from "@/src/features/access/components/TrackInviteOpen";
+import { SponsorStrip } from "@/src/features/organizations/components/SponsorStrip";
+import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import { RegService } from "@/src/services/registeration.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
@@ -62,6 +64,7 @@ export default async function PublicEventPage({
     // Same live count the capacity guard uses, so what the page promises and what
     // the action enforces cannot disagree.
     const regs = await RegService.getRegsOfEvent(eventId);
+    const organizations = await getEventOrganizations(eventId);
     const taken = regs.filter((r) => r.status !== "cancelled").length;
     const totalSeats = Number(event.capacity?.totalSeats) || 0;
     const seatsLeft = totalSeats > 0 ? Math.max(0, totalSeats - taken) : null;
@@ -154,6 +157,8 @@ export default async function PublicEventPage({
                     </div>
                 </aside>
             </div>
+
+            <SponsorStrip organizations={organizations} sponsorTiers={event.sponsorTiers} />
         </main>
     );
 }

@@ -6,6 +6,7 @@ export const COLLECTIONS = {
   SUPER_CATEGORIES: "super_categories",
   EVENT_FORMATS: "event_formats",
   EVENT_INVITES: "event_invites",
+  EVENT_ORGANIZATIONS: "event_organizations",
   REGISTRATIONS: "registrations",
   VENDORS: "vendor",
   BOOKINGS: "bookings",

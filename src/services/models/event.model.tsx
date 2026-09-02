@@ -236,6 +236,12 @@ export class EventModel {
   visibility: EventVisibility;
   accessCode: string | null;
   access: EventAccess;
+  /**
+   * Sponsorship tier names, most significant first. Order is meaning: the public
+   * sponsor strip sizes logos by position, so reordering is how an organizer
+   * changes who shows largest. Editable per event, per the spec.
+   */
+  sponsorTiers: string[];
   analytics: EventAnalytics;
   createdAt: Date|string;
   updatedAt: Date|string;
@@ -381,6 +387,9 @@ export class EventModel {
     this.status = (String(raw.status || "draft").toLowerCase().replace(/\s+/g, "_")) as EventStatus;
     this.visibility = raw.visibility || "public";
     this.accessCode = raw.accessCode || null;
+    this.sponsorTiers = Array.isArray(raw.sponsorTiers) && raw.sponsorTiers.length
+      ? raw.sponsorTiers.map(String)
+      : ["Title", "Platinum", "Gold", "Silver", "In-Kind"];
     this.access = {
       attendeeTiers: Array.isArray(raw.access?.attendeeTiers) && raw.access.attendeeTiers.length
         ? raw.access.attendeeTiers.map(String)
