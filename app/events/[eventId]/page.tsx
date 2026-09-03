@@ -146,6 +146,8 @@ export default async function PublicEventPage({
                                     priceLabel={priceLabel}
                                     inviteToken={invite ?? null}
                                     accessCode={code ?? null}
+                                    joinsWaitlist={isFull}
+                                    needsApproval={!!event.access?.requiresApproval}
                                     tierChoices={
                                         event.access?.allowTierSelfSelect
                                             ? (event.access.attendeeTiers ?? []).filter((t) => !access.lockedTiers.includes(t))
