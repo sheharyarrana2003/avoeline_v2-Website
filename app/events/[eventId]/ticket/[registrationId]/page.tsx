@@ -37,8 +37,46 @@ export default async function TicketPage({
     // pairing in the link has to be genuine.
     if (!registration || !event || registration.eventId !== event.id) notFound();
 
-    const awaitingPayment = registration.status === "awaiting_payment";
     const attendeeName = registration.attendee?.name || "Attendee";
+
+    /*
+     * What the ticket actually says, per status.
+     *
+     * This used to branch on awaiting_payment alone, so every other status fell
+     * through to "You're registered / Your place is confirmed / Show this at the
+     * entrance" -- including `waitlisted`. Someone with no seat was being told to
+     * turn up at the door, with a QR code above the message. `entrance` gates
+     * that instruction: only a status that actually admits you gets it.
+     */
+    const admits = ["confirmed", "checked_in", "attended"].includes(registration.status);
+    const headline: Record<string, { title: string; note: string }> = {
+        awaiting_payment: {
+            title: "Registration received",
+            note: `Your place at ${event.title} is held until the organiser confirms your payment.`,
+        },
+        waitlisted: {
+            title: "You're on the waitlist",
+            note: registration.waitlistPosition
+                ? `${event.title} is full. You are number ${registration.waitlistPosition} in the queue and will be emailed if a place frees up.`
+                : `${event.title} is full. You will be emailed if a place frees up.`,
+        },
+        pending: {
+            title: "Awaiting approval",
+            note: `The organiser reviews registrations for ${event.title}. You will be emailed once they decide.`,
+        },
+        rejected: {
+            title: "Not approved",
+            note: `The organiser did not approve your registration for ${event.title}.`,
+        },
+        cancelled: {
+            title: "Registration cancelled",
+            note: `Your registration for ${event.title} has been cancelled.`,
+        },
+    };
+    const copy = headline[registration.status] ?? {
+        title: "You're registered",
+        note: `Your place at ${event.title} is confirmed.`,
+    };
 
     // Spec 2.1: a tiered event's attendees see a different agenda depending on
     // their tier. Filtered on the server, so a restricted session is never sent
@@ -50,21 +88,15 @@ export default async function TicketPage({
             <div className="flex flex-col items-center text-center">
                 <span
                     className={`mb-6 flex size-14 items-center justify-center rounded-full ${
-                        awaitingPayment ? "bg-muted text-ink" : "bg-ink text-ink-invert"
+                        admits ? "bg-ink text-ink-invert" : "bg-muted text-ink"
                     }`}
                     aria-hidden="true"
                 >
-                    {awaitingPayment ? <Clock className="h-7 w-7" /> : <Check className="h-7 w-7" strokeWidth={3} />}
+                    {admits ? <Check className="h-7 w-7" strokeWidth={3} /> : <Clock className="h-7 w-7" />}
                 </span>
 
-                <h1 className="font-display text-2xl text-ink">
-                    {awaitingPayment ? "Registration received" : "You're registered"}
-                </h1>
-                <p className="mt-2 text-sm text-ink-soft">
-                    {awaitingPayment
-                        ? `Your place at ${event.title} is held until the organiser confirms your payment.`
-                        : `Your place at ${event.title} is confirmed.`}
-                </p>
+                <h1 className="font-display text-2xl text-ink">{copy.title}</h1>
+                <p className="mt-2 text-sm text-ink-soft">{copy.note}</p>
             </div>
 
             <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-paper">
@@ -76,7 +108,11 @@ export default async function TicketPage({
                             alt={`Entry QR code for ${attendeeName}`}
                             className="size-56 rounded-xl bg-white p-3"
                         />
-                        <p className="mt-4 text-xs text-ink-soft">Show this at the entrance.</p>
+                        <p className="mt-4 text-xs text-ink-soft">
+                            {admits
+                                ? "Show this at the entrance."
+                                : "This code only works once your place is confirmed."}
+                        </p>
                     </div>
                 ) : null}
 

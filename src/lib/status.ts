@@ -51,6 +51,10 @@ const STATUS: Record<string, StatusMeta> = {
     attended: { label: "Attended", tone: "success" },
     no_show: { label: "No show", tone: "danger" },
     awaiting_payment: { label: "Awaiting payment", tone: "warning" },
+    // Waiting on somebody else, like the other warning states. Without this it
+    // fell through to humanize() and rendered neutral grey, which reads as
+    // "nothing is happening" rather than "you are in a queue".
+    waitlisted: { label: "Waitlisted", tone: "warning" },
 
     // ── Payments ─────────────────────────────────────────────────────────
     paid: { label: "Paid", tone: "success" },
