@@ -8,6 +8,7 @@ import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { buttonClass } from "@/src/lib/ui";
 import { formatCurrency } from "@/src/lib/money";
 import { formatDate } from "@/src/lib/datetime";
+import { absoluteUrl } from "@/src/lib/appUrl";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import { OrganizationForm } from "@/src/features/organizations/components/OrganizationForm";
@@ -29,6 +30,9 @@ export default async function EventSponsorsPage({
     if (!event) notFound();
 
     const orgs = publicOrder(await getEventOrganizations(eventId), event.sponsorTiers);
+    // Shown alongside the emailed copy, the same way guest-list invite links are:
+    // mail gets lost, and the organizer is the one who knows who should have it.
+    const origin = await absoluteUrl("/collaborate");
     const editing = edit ? orgs.find((o) => o.id === edit) : undefined;
     const base = `/organizer/${organizer_id}/events/${eventId}/sponsors`;
 
@@ -199,6 +203,13 @@ export default async function EventSponsorsPage({
                                                             ? `Invited ${formatDate(org.invitedAt)} to ${org.invitedEmail} — not accepted yet.`
                                                             : "Not invited yet."}
                                                     </p>
+                                                    {org.inviteToken ? (
+                                                        <p className="mb-3 break-all">
+                                                            <code className="rounded bg-muted px-1.5 py-0.5 text-2xs text-ink-soft">
+                                                                {`${origin}/${org.inviteToken}`}
+                                                            </code>
+                                                        </p>
+                                                    ) : null}
                                                     <InviteCollaborator
                                                         eventId={eventId}
                                                         id={org.id}

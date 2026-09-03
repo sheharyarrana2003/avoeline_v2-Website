@@ -16,6 +16,10 @@ export interface RegistrationFormProps {
     inviteToken?: string | null;
     /** Carried through from `?code=` for the same reason. */
     accessCode?: string | null;
+    /** True when the event is full and the waitlist is what registering joins. */
+    joinsWaitlist?: boolean;
+    /** True when the organizer vets registrations before confirming them. */
+    needsApproval?: boolean;
     /**
      * Tiers the attendee may pick from. Empty unless the event allows
      * self-selection, and already filtered to exclude gated tiers they have not
@@ -43,6 +47,8 @@ export function RegistrationForm({
     inviteToken = null,
     accessCode = null,
     tierChoices = [],
+    joinsWaitlist = false,
+    needsApproval = false,
 }: RegistrationFormProps) {
     const boundAction = registerAttendeeAction.bind(null, eventId);
     const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
@@ -141,13 +147,21 @@ export function RegistrationForm({
             ) : null}
 
             <SubmitButton pendingText="Registering…" className={buttonClass("primary", "lg", "w-full")}>
-                {isPaid ? `Register — ${priceLabel}` : "Register for free"}
+                {joinsWaitlist ? "Join the waitlist" : isPaid ? `Register — ${priceLabel}` : "Register for free"}
             </SubmitButton>
 
+            {/* Ordered by what actually decides the outcome. The waitlist wins
+                because a full event grants no place at all, so promising one --
+                which this said unconditionally for any free event -- is wrong
+                before payment or approval even come into it. */}
             <p className="text-xs text-ink-soft">
-                {isPaid
-                    ? "Your place is held once the organiser confirms your payment."
-                    : "Your place is confirmed as soon as you register."}
+                {joinsWaitlist
+                    ? "This event is full. You will join the waitlist and be emailed if a place frees up."
+                    : isPaid
+                      ? "Your place is held once the organiser confirms your payment."
+                      : needsApproval
+                        ? "The organiser reviews registrations for this event, and will email you once they decide."
+                        : "Your place is confirmed as soon as you register."}
             </p>
         </form>
     );
