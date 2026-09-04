@@ -6,6 +6,7 @@ import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { ActionResult } from "@/src/lib/action";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import type { CustomFieldOption } from "@/src/services/models/event.model";
 
 export interface RegistrationFormProps {
     eventId: string;
@@ -27,6 +28,66 @@ export interface RegistrationFormProps {
      * that would be refused.
      */
     tierChoices?: string[];
+    /**
+     * The event's own registration questions. Written by the wizard's step 3 for
+     * a long time and rendered nowhere, so every event that defined them
+     * collected nothing.
+     */
+    customFields?: CustomFieldOption[];
+}
+
+/**
+ * One organizer-defined question.
+ *
+ * Uncontrolled and name-based, unlike `CategoryStep`'s controlled equivalent:
+ * this form is a plain `<form action={}>` and the answers are read off the
+ * FormData by `readAnswers`, which keys on `custom_<fieldId>`. Nothing here
+ * holds state, so there is nothing to reset -- which is the whole reason the
+ * two are not one component.
+ */
+function CustomQuestion({ field }: { field: CustomFieldOption }) {
+    const id = `custom-${field.fieldId}`;
+    const name = `custom_${field.fieldId}`;
+
+    if (field.type === "checkbox") {
+        return (
+            <label htmlFor={id} className="flex items-start gap-2.5 text-sm text-ink">
+                {/* No `required` on a checkbox even when the question is: the browser
+                    would demand a tick, and the honest answer is often no. The server
+                    treats an unticked required box as answered. */}
+                <input id={id} name={name} type="checkbox" value="yes" className="mt-0.5 h-4 w-4 shrink-0 accent-current" />
+                <span>{field.label}</span>
+            </label>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-1.5">
+            <label htmlFor={id} className={labelClass}>
+                {field.label}
+                {field.required ? " *" : ""}
+            </label>
+            {field.type === "dropdown" ? (
+                <select id={id} name={name} required={field.required} defaultValue="" className={fieldClass}>
+                    <option value="">Select…</option>
+                    {field.options.map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                    ))}
+                </select>
+            ) : (
+                <input
+                    id={id}
+                    name={name}
+                    type={field.type === "number" ? "number" : "text"}
+                    inputMode={field.type === "number" ? "numeric" : undefined}
+                    min={field.type === "number" ? 0 : undefined}
+                    maxLength={field.type === "number" ? undefined : 500}
+                    required={field.required}
+                    className={`${fieldClass}${field.type === "number" ? " tabular-nums" : ""}`}
+                />
+            )}
+        </div>
+    );
 }
 
 /**
@@ -49,6 +110,7 @@ export function RegistrationForm({
     tierChoices = [],
     joinsWaitlist = false,
     needsApproval = false,
+    customFields = [],
 }: RegistrationFormProps) {
     const boundAction = registerAttendeeAction.bind(null, eventId);
     const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
@@ -122,6 +184,15 @@ export function RegistrationForm({
                             <option key={t} value={t}>{t}</option>
                         ))}
                     </select>
+                </div>
+            ) : null}
+
+            {customFields.length ? (
+                <div className="flex flex-col gap-5 border-t border-line pt-5">
+                    <p className={labelClass}>A few questions from the organiser</p>
+                    {customFields.map((field) => (
+                        <CustomQuestion key={field.fieldId} field={field} />
+                    ))}
                 </div>
             ) : null}
 

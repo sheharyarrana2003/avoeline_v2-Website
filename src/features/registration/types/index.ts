@@ -13,6 +13,8 @@ export interface PublicRegistrationInput {
     paymentProof?: File | null;
     /** Only offered when the event sets `access.allowTierSelfSelect`. */
     tier?: string;
+    /** Answers to the event's own registration questions, by fieldId. */
+    customResponses?: Record<string, string | number | boolean>;
 }
 
 /**

@@ -36,6 +36,12 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
     tier: String(raw.tier || ""),
     waitlistPosition: Number(raw.waitlistPosition ?? 0),
     inviteId: raw.inviteId ? String(raw.inviteId) : null,
+    // A plain object, so the shape crossing to a Client Component stays JSON.
+    // Anything that is not one reads as "asked nothing", not as a broken row.
+    customResponses:
+      raw.customResponses && typeof raw.customResponses === "object" && !Array.isArray(raw.customResponses)
+        ? { ...raw.customResponses }
+        : {},
 
     statusHistory: Array.isArray(raw.statusHistory)
       ? raw.statusHistory.map((h: any) => ({
