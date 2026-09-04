@@ -1,10 +1,17 @@
 export type CertificateType = 'digital' | 'blockchain' | 'both';
 export type CertificateStatus = 'generating' | 'ready' | 'issued' | 'revoked';
 
+/** The roles a certificate can be awarded for (spec 6.1). */
+export const CERTIFICATE_ROLES = ["Attendee", "Winner", "Speaker", "Volunteer", "Organizer"] as const;
+export type CertificateRole = (typeof CERTIFICATE_ROLES)[number];
+
 export interface CertificateContent {
   recipientName: string;
   eventTitle: string;
   completionDate: string; // ISO date string
+  /** Attendee / Winner / Speaker / Volunteer / Organizer. Free-form on read so
+   *  a stored value outside the list survives rather than being dropped. */
+  role: string;
   grade?: string;
   duration: string;
   issuerName: string;
@@ -13,6 +20,13 @@ export interface CertificateContent {
 }
 
 export interface DigitalCertificate {
+  /**
+   * Storage key of the rendered PDF in the private certificates bucket. A key
+   * rather than a URL, because a signed URL expires within the hour and would
+   * be dead by the time an emailed link was opened; downloads sign it on demand.
+   */
+  pdfPath: string;
+  /** Legacy. Was written as "" on every certificate and never populated. */
   pdfUrl: string;
   templateId: string;
   design: {

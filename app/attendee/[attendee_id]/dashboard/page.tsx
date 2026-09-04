@@ -14,6 +14,7 @@ import { CertificateService } from "@/src/services/certificate.service";
 import { EventService } from "@/src/services/event.service";
 import type { Registration } from "@/src/services/models/reg.type";
 import type { CertificateDocument } from "@/src/services/models/certificate.model";
+import { DownloadCertificate } from "@/src/features/certificates/components/DownloadCertificate";
 
 type TicketRow = { reg: Registration; eventTitle: string };
 
@@ -78,7 +79,19 @@ export default async function AttendeeDashboard({
             cell: (c) => <CellStack primary={c.content.eventTitle || c.title || "Certificate"} secondary={c.certificateId} />,
         },
         { key: "status", header: "Status", cell: (c) => <StatusBadge status={c.status} size="sm" /> },
+        { key: "role", header: "Role", cell: (c) => c.content.role || "Attendee" },
         { key: "issued", header: "Issued", align: "right", cell: (c) => formatDate(c.issuedAt || c.createdAt) },
+        {
+            key: "download",
+            header: "",
+            align: "right",
+            cell: (c) =>
+                c.digital?.pdfPath ? (
+                    <DownloadCertificate certificateId={c.certificateId} />
+                ) : (
+                    <span className="text-2xs uppercase text-ink-faint">No PDF</span>
+                ),
+        },
     ];
 
     return (
@@ -123,10 +136,6 @@ export default async function AttendeeDashboard({
                             </div>
                         }
                     />
-                    {/* ponytail: no download column. Certificates have no PDF to
-                        download — nothing in the app renders one, and digital.pdfUrl
-                        is written empty. Module 6 adds the renderer, and the column
-                        goes here when there is a file to point it at. */}
                 </Card>
             </div>
         </>

@@ -14,13 +14,26 @@ import { formatDateMedium } from '@/src/lib/datetime';
 import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
 import { EmptyState } from '@/src/shared_components/ui/EmptyState';
 import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
+import { DownloadCertificate } from '@/src/features/certificates/components/DownloadCertificate';
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from '@/src/lib/ui';
 import { Award, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
+/**
+ * One row, keyed on the REGISTRATION rather than an attendee profile.
+ *
+ * The page used to drive this list off `attendees` profile documents, which only
+ * exist for people with an account -- so anybody who signed up through the
+ * public form (userId "") was absent, and certificates could not be issued to
+ * them at all. Every registrant has a registration id; not every registrant has
+ * a profile.
+ */
 export interface AttendeeCertProp {
-    a: Attendee;
-    user: User;
+    registrationId: string;
+    name: string;
+    email: string;
+    /** Drives the "select everyone who checked in" control (spec 6.1). */
+    checkedIn: boolean;
     certStatus: CertificateDocument | null;
 }
 
@@ -76,8 +89,8 @@ export default function CertificateIssuanceClient({
         const q = searchQuery.toLowerCase();
         return pendingAttendees.filter(
             (a) =>
-                a.user.profile.fullName.toLowerCase().includes(q) ||
-                a.user.email?.toLowerCase().includes(q),
+                a.name.toLowerCase().includes(q) ||
+                a.email?.toLowerCase().includes(q),
         );
     }, [pendingAttendees, searchQuery]);
 
@@ -86,8 +99,8 @@ export default function CertificateIssuanceClient({
         const q = searchQuery.toLowerCase();
         return issuedAttendees.filter(
             (a) =>
-                a.user.profile.fullName.toLowerCase().includes(q) ||
-                a.user.email?.toLowerCase().includes(q),
+                a.name.toLowerCase().includes(q) ||
+                a.email?.toLowerCase().includes(q),
         );
     }, [issuedAttendees, searchQuery]);
 
@@ -110,7 +123,7 @@ export default function CertificateIssuanceClient({
         if (selectAll) {
             setSelectedAttendees(new Set());
         } else {
-            setSelectedAttendees(new Set(filteredPendingAttendees.map((a) => a.a.attendeeId)));
+            setSelectedAttendees(new Set(filteredPendingAttendees.map((a) => a.registrationId)));
         }
         setSelectAll(!selectAll);
     };
@@ -262,6 +275,7 @@ export default function CertificateIssuanceClient({
                                     <th className={tableHead}>Type</th>
                                     <th className={tableHead}>Issued</th>
                                     <th className={tableHead}>PDF</th>
+                                    <th className={tableHead}>Verify</th>
                                     <th className={tableHead}>Transaction hash</th>
                                     <th className={tableHead}>Sharing</th>
                                     <th className={`${tableHead} pr-0 text-right`}>Status</th>
@@ -270,8 +284,8 @@ export default function CertificateIssuanceClient({
                             <tbody>
                                 {paginatedIssuedAttendees.map((attendee) => {
                                     const cert = attendee.certStatus;
-                                    const name = attendee.user.profile.fullName;
-                                    const email = attendee.user.email;
+                                    const name = attendee.name;
+                                    const email = attendee.email;
                                     const status = cert?.status ?? 'issued';
                                     const isBlockchain = cert?.type === 'blockchain' || cert?.type === 'both';
                                     const isDigital = cert?.type === 'digital' || cert?.type === 'both';
@@ -283,22 +297,36 @@ export default function CertificateIssuanceClient({
                                     ].filter(Boolean) as string[];
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className={tableRow}>
+                                        <tr key={attendee.registrationId} className={tableRow}>
                                             <td className={tableCell}>
                                                 <p className="font-medium text-ink">{cert?.content?.recipientName || name}</p>
                                                 <p className="text-xs text-ink-soft">{email}</p>
                                             </td>
                                             <td className={`${tableCell} capitalize`}>{cert?.type ?? '—'}</td>
-                                            <td className={`${tableCell} tabular-nums`}>{formatDateMedium(cert?.issuedAt)}</td>
+                                            {/* issuedAt is only set on the blockchain path, so a digital certificate
+    showed an em dash for a date it definitely has. */}
+                                            <td className={`${tableCell} tabular-nums`}>{formatDateMedium(cert?.issuedAt || cert?.createdAt)}</td>
                                             <td className={tableCell}>
-                                                {isDigital && cert?.digital?.pdfUrl ? (
+                                                {/* A signed download, not an href. `digital.pdfUrl` used
+                                                    to be rendered here and was a fabricated
+                                                    storage.eventflow.com address on every certificate --
+                                                    a live link to a domain nobody owns. The real file is
+                                                    in a private bucket and its URL is signed per click. */}
+                                                {cert?.digital?.pdfPath ? (
+                                                    <DownloadCertificate certificateId={cert.certificateId} label="PDF" />
+                                                ) : (
+                                                    <span className="text-ink-faint" aria-hidden="true">—</span>
+                                                )}
+                                            </td>
+                                            <td className={tableCell}>
+                                                {cert?.certificateId ? (
                                                     <a
-                                                        href={cert.digital.pdfUrl}
+                                                        href={`/verify/${cert.certificateId}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="font-medium text-ink hover:underline"
                                                     >
-                                                        View PDF
+                                                        Check
                                                     </a>
                                                 ) : (
                                                     <span className="text-ink-faint" aria-hidden="true">—</span>
@@ -398,22 +426,22 @@ export default function CertificateIssuanceClient({
                             </thead>
                             <tbody>
                                 {paginatedPendingAttendees.map((attendee) => {
-                                    const isSelected = selectedAttendees.has(attendee.a.attendeeId);
-                                    const name = attendee.user.profile.fullName;
-                                    const email = attendee.user.email;
+                                    const isSelected = selectedAttendees.has(attendee.registrationId);
+                                    const name = attendee.name;
+                                    const email = attendee.email;
                                     const displayStatus = resolvePendingDisplayStatus(
-                                        String(attendee.a.userId),
+                                        attendee.registrationId,
                                         attendee.certStatus,
                                     );
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className={`${tableRow} ${isSelected ? 'bg-muted' : ''}`}>
+                                        <tr key={attendee.registrationId} className={`${tableRow} ${isSelected ? 'bg-muted' : ''}`}>
                                             <td className={tableCell}>
                                                 <input
                                                     type="checkbox"
                                                     aria-label={`Select ${name}`}
                                                     checked={isSelected}
-                                                    onChange={() => toggleAttendee(attendee.a.attendeeId)}
+                                                    onChange={() => toggleAttendee(attendee.registrationId)}
                                                     className="rounded-xs accent-gray-900"
                                                 />
                                             </td>
