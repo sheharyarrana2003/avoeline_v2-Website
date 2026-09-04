@@ -3,8 +3,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Attendee } from '@/src/features/event_attendee/type';
-import { User } from '@/src/services/models/user.type';
 import { CertificateDocument, CertificateStatus } from '@/src/services/models/certificate.model';
 import type {
     CertificateGenerationAttendeeResult,
@@ -14,20 +12,43 @@ import { formatDateMedium } from '@/src/lib/datetime';
 import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
 import { EmptyState } from '@/src/shared_components/ui/EmptyState';
 import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
+import { DownloadCertificate } from '@/src/features/certificates/components/DownloadCertificate';
+import { CERTIFICATE_ROLES } from '@/src/services/models/certificate.model';
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from '@/src/lib/ui';
 import { Award, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
+/**
+ * One row, keyed on the REGISTRATION rather than an attendee profile.
+ *
+ * The page used to drive this list off `attendees` profile documents, which only
+ * exist for people with an account -- so anybody who signed up through the
+ * public form (userId "") was absent, and certificates could not be issued to
+ * them at all. Every registrant has a registration id; not every registrant has
+ * a profile.
+ */
 export interface AttendeeCertProp {
-    a: Attendee;
-    user: User;
+    registrationId: string;
+    name: string;
+    email: string;
+    /** Drives the "select everyone who checked in" control (spec 6.1). */
+    checkedIn: boolean;
     certStatus: CertificateDocument | null;
 }
 
 interface CertificateIssuanceClientProps {
     attendees: AttendeeCertProp[];
     eventId: string;
-    onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<CertificateGenerationResult>;
+    onGenerateCertificates: (
+        selectedAttendeeIds: string[],
+        roles: Record<string, string>,
+    ) => Promise<CertificateGenerationResult>;
+    /**
+     * Spec 6.1's bulk distribution. `resend` includes people who have already
+     * been emailed; the default excludes them, so pressing the button twice
+     * does not mail everyone again.
+     */
+    onEmailCertificates: (resend: boolean) => Promise<{ success: boolean; error?: string; sent?: number; skipped?: number }>;
 }
 
 
@@ -42,10 +63,13 @@ const ITEMS_PER_PAGE = 10;
 export default function CertificateIssuanceClient({
     attendees,
     onGenerateCertificates,
+    onEmailCertificates,
 }: CertificateIssuanceClientProps) {
     // State
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [selectedAttendees, setSelectedAttendees] = useState<Set<string>>(new Set());
+    /** Role per registration id. Absent means Attendee. */
+    const [roles, setRoles] = useState<Record<string, string>>({});
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const [pendingPage, setPendingPage] = useState<number>(1);
     const [issuedPage, setIssuedPage] = useState<number>(1);
@@ -54,6 +78,8 @@ export default function CertificateIssuanceClient({
         Record<string, CertificateGenerationAttendeeResult>
     >({});
     const [generationSummary, setGenerationSummary] = useState<string | null>(null);
+    const [isEmailing, startEmailing] = useTransition();
+    const [emailSummary, setEmailSummary] = useState<string | null>(null);
 
     const pathName = usePathname();
 
@@ -70,14 +96,32 @@ export default function CertificateIssuanceClient({
 
     const totalAttendees = attendees.length;
 
+    /**
+     * Who a plain "send" would reach: issued, not revoked, not already emailed.
+     * Counted here so the button can say the number rather than making the
+     * organizer press it to find out.
+     */
+    const unsentCount = useMemo(
+        () =>
+            attendees.filter(
+                (a) => a.certStatus && a.certStatus.status !== 'revoked' && !a.certStatus.emailedAt && a.email,
+            ).length,
+        [attendees],
+    );
+    const sentCount = useMemo(() => attendees.filter((a) => a.certStatus?.emailedAt).length, [attendees]);
+    const sendableCount = useMemo(
+        () => attendees.filter((a) => a.certStatus && a.certStatus.status !== 'revoked' && a.email).length,
+        [attendees],
+    );
+
     // Search only applies to the pending (to-be-issued) list — selection only makes sense there
     const filteredPendingAttendees = useMemo(() => {
         if (!searchQuery) return pendingAttendees;
         const q = searchQuery.toLowerCase();
         return pendingAttendees.filter(
             (a) =>
-                a.user.profile.fullName.toLowerCase().includes(q) ||
-                a.user.email?.toLowerCase().includes(q),
+                a.name.toLowerCase().includes(q) ||
+                a.email?.toLowerCase().includes(q),
         );
     }, [pendingAttendees, searchQuery]);
 
@@ -86,8 +130,8 @@ export default function CertificateIssuanceClient({
         const q = searchQuery.toLowerCase();
         return issuedAttendees.filter(
             (a) =>
-                a.user.profile.fullName.toLowerCase().includes(q) ||
-                a.user.email?.toLowerCase().includes(q),
+                a.name.toLowerCase().includes(q) ||
+                a.email?.toLowerCase().includes(q),
         );
     }, [issuedAttendees, searchQuery]);
 
@@ -105,12 +149,27 @@ export default function CertificateIssuanceClient({
         issuedPage * ITEMS_PER_PAGE,
     );
 
+    const checkedInPending = useMemo(
+        () => filteredPendingAttendees.filter((a) => a.checkedIn),
+        [filteredPendingAttendees],
+    );
+
+    /**
+     * Spec 6.1 asks for one button that issues to every checked-in attendee.
+     * Kept separate from "select all" rather than replacing it: an organizer
+     * issuing to speakers or winners who never scanned in still needs the
+     * unfiltered list.
+     */
+    const selectCheckedIn = () => {
+        setSelectedAttendees(new Set(checkedInPending.map((a) => a.registrationId)));
+    };
+
     // Handlers
     const toggleSelectAll = () => {
         if (selectAll) {
             setSelectedAttendees(new Set());
         } else {
-            setSelectedAttendees(new Set(filteredPendingAttendees.map((a) => a.a.attendeeId)));
+            setSelectedAttendees(new Set(filteredPendingAttendees.map((a) => a.registrationId)));
         }
         setSelectAll(!selectAll);
     };
@@ -151,7 +210,7 @@ export default function CertificateIssuanceClient({
         startGenerating(async () => {
             setGenerationSummary(null);
             try {
-                const result = await onGenerateCertificates(Array.from(selectedAttendees));
+                const result = await onGenerateCertificates(Array.from(selectedAttendees), roles);
                 setGenerationResultsByUserId((prev) => {
                     const nextByUser = { ...prev };
                     for (const item of result.results) {
@@ -170,6 +229,28 @@ export default function CertificateIssuanceClient({
         });
     };
 
+    const sendCertificates = (resend: boolean) => {
+        startEmailing(async () => {
+            setEmailSummary(null);
+            try {
+                const result = await onEmailCertificates(resend);
+                if (!result.success) {
+                    setEmailSummary(result.error ?? 'Could not send the certificates.');
+                    return;
+                }
+                const parts = [`Emailed ${result.sent} certificate${result.sent === 1 ? '' : 's'}.`];
+                // Named rather than swallowed: a registrant with no address on
+                // file is a real gap the organizer can fix, and silently sending
+                // to fewer people than expected looks like a bug.
+                if (result.skipped) parts.push(`${result.skipped} had no email address on the registration.`);
+                if (result.error) parts.push(result.error);
+                setEmailSummary(parts.join(' '));
+            } catch {
+                setEmailSummary('Could not reach the server. Please try again.');
+            }
+        });
+    };
+
     return (
         // No padding and no <h1>: the event layout renders the event's name, status
         // and tabs. This page is the Certificates section of it.
@@ -180,6 +261,38 @@ export default function CertificateIssuanceClient({
                     <Link href={`${pathName}/making-template`} className={buttonClass('secondary')}>
                         Edit template
                     </Link>
+                    {/* Sending mail to attendees is outward-facing and cannot be
+                        taken back, so both of these confirm first. Two buttons
+                        rather than one: the common case is "send the new ones",
+                        and a resend is a deliberate act that mails people who
+                        already have their certificate. */}
+                    {unsentCount > 0 ? (
+                        <ConfirmButton
+                            title={`Email ${unsentCount} certificate${unsentCount === 1 ? '' : 's'}?`}
+                            description="Each recipient gets their own link to their certificate. Nobody who has already been emailed is included."
+                            confirmLabel={`Send ${unsentCount} email${unsentCount === 1 ? '' : 's'}`}
+                            disabled={isEmailing}
+                            busy={isEmailing}
+                            onConfirm={() => sendCertificates(false)}
+                            className={buttonClass('secondary')}
+                        >
+                            {isEmailing ? 'Sending…' : `Email ${unsentCount} certificate${unsentCount === 1 ? '' : 's'}`}
+                        </ConfirmButton>
+                    ) : null}
+                    {sentCount > 0 ? (
+                        <ConfirmButton
+                            tone="danger"
+                            title={`Resend to all ${sendableCount} recipients?`}
+                            description="Everyone with a certificate is emailed again, including the people who already received theirs."
+                            confirmLabel={`Resend ${sendableCount} email${sendableCount === 1 ? '' : 's'}`}
+                            disabled={isEmailing}
+                            busy={isEmailing}
+                            onConfirm={() => sendCertificates(true)}
+                            className={buttonClass('ghost')}
+                        >
+                            Resend to all
+                        </ConfirmButton>
+                    ) : null}
                     <ConfirmButton
                         tone="danger"
                         title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
@@ -217,6 +330,12 @@ export default function CertificateIssuanceClient({
             {generationSummary && (
                 <p className="mt-6 rounded-lg border border-line bg-paper px-4 py-3 text-sm text-ink">
                     {generationSummary}
+                </p>
+            )}
+
+            {emailSummary && (
+                <p className="mt-4 rounded-lg border border-line bg-paper px-4 py-3 text-sm text-ink">
+                    {emailSummary}
                 </p>
             )}
 
@@ -262,6 +381,8 @@ export default function CertificateIssuanceClient({
                                     <th className={tableHead}>Type</th>
                                     <th className={tableHead}>Issued</th>
                                     <th className={tableHead}>PDF</th>
+                                    <th className={tableHead}>Verify</th>
+                                    <th className={tableHead}>Emailed</th>
                                     <th className={tableHead}>Transaction hash</th>
                                     <th className={tableHead}>Sharing</th>
                                     <th className={`${tableHead} pr-0 text-right`}>Status</th>
@@ -270,11 +391,10 @@ export default function CertificateIssuanceClient({
                             <tbody>
                                 {paginatedIssuedAttendees.map((attendee) => {
                                     const cert = attendee.certStatus;
-                                    const name = attendee.user.profile.fullName;
-                                    const email = attendee.user.email;
+                                    const name = attendee.name;
+                                    const email = attendee.email;
                                     const status = cert?.status ?? 'issued';
                                     const isBlockchain = cert?.type === 'blockchain' || cert?.type === 'both';
-                                    const isDigital = cert?.type === 'digital' || cert?.type === 'both';
                                     const social = cert?.socialSharing;
                                     const sharedOn = [
                                         social?.sharedOnLinkedIn && 'LinkedIn',
@@ -283,25 +403,50 @@ export default function CertificateIssuanceClient({
                                     ].filter(Boolean) as string[];
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className={tableRow}>
+                                        <tr key={attendee.registrationId} className={tableRow}>
                                             <td className={tableCell}>
                                                 <p className="font-medium text-ink">{cert?.content?.recipientName || name}</p>
                                                 <p className="text-xs text-ink-soft">{email}</p>
                                             </td>
                                             <td className={`${tableCell} capitalize`}>{cert?.type ?? '—'}</td>
-                                            <td className={`${tableCell} tabular-nums`}>{formatDateMedium(cert?.issuedAt)}</td>
+                                            {/* issuedAt is only set on the blockchain path, so a digital certificate
+    showed an em dash for a date it definitely has. */}
+                                            <td className={`${tableCell} tabular-nums`}>{formatDateMedium(cert?.issuedAt || cert?.createdAt)}</td>
                                             <td className={tableCell}>
-                                                {isDigital && cert?.digital?.pdfUrl ? (
+                                                {/* A signed download, not an href. `digital.pdfUrl` used
+                                                    to be rendered here and was a fabricated
+                                                    storage.eventflow.com address on every certificate --
+                                                    a live link to a domain nobody owns. The real file is
+                                                    in a private bucket and its URL is signed per click. */}
+                                                {cert?.digital?.pdfPath ? (
+                                                    <DownloadCertificate certificateId={cert.certificateId} label="PDF" />
+                                                ) : (
+                                                    <span className="text-ink-faint" aria-hidden="true">—</span>
+                                                )}
+                                            </td>
+                                            <td className={tableCell}>
+                                                {cert?.certificateId ? (
                                                     <a
-                                                        href={cert.digital.pdfUrl}
+                                                        href={`/verify/${cert.certificateId}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="font-medium text-ink hover:underline"
                                                     >
-                                                        View PDF
+                                                        Check
                                                     </a>
                                                 ) : (
                                                     <span className="text-ink-faint" aria-hidden="true">—</span>
+                                                )}
+                                            </td>
+                                            <td className={`${tableCell} tabular-nums`}>
+                                                {cert?.emailedAt ? (
+                                                    formatDateMedium(cert.emailedAt)
+                                                ) : email ? (
+                                                    <span className="text-ink-soft">Not sent</span>
+                                                ) : (
+                                                    // Not "not sent" -- there is nowhere to send it, and
+                                                    // that is a different thing for the organizer to fix.
+                                                    <span className="text-ink-soft">No address</span>
                                                 )}
                                             </td>
                                             <td className={`${tableCell} font-mono text-xs`}>
@@ -365,10 +510,17 @@ export default function CertificateIssuanceClient({
                         <p className="text-xs text-ink-soft tabular-nums">{filteredPendingAttendees.length} awaiting generation</p>
                     </div>
                     {filteredPendingAttendees.length > 0 && (
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
-                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs accent-gray-900" />
-                            Select all (<span className="tabular-nums">{selectedAttendees.size}</span> selected)
-                        </label>
+                        <div className="flex flex-wrap items-center gap-4">
+                            {checkedInPending.length > 0 && (
+                                <button type="button" onClick={selectCheckedIn} className="text-sm font-medium text-ink underline hover:no-underline">
+                                    Select everyone who checked in (<span className="tabular-nums">{checkedInPending.length}</span>)
+                                </button>
+                            )}
+                            <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+                                <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs accent-gray-900" />
+                                Select all (<span className="tabular-nums">{selectedAttendees.size}</span> selected)
+                            </label>
+                        </div>
                     )}
                 </div>
 
@@ -390,6 +542,7 @@ export default function CertificateIssuanceClient({
                                 <tr>
                                     <th className={`${tableHead} w-10`}><span className="sr-only">Select</span></th>
                                     <th className={tableHead}>Attendee</th>
+                                    <th className={tableHead}>Role</th>
                                     {/* The "Attendance" column used to render a bar hardcoded to 0%
                                         for every row, over a TODO. A number nobody measured is
                                         worse than no column. */}
@@ -398,28 +551,48 @@ export default function CertificateIssuanceClient({
                             </thead>
                             <tbody>
                                 {paginatedPendingAttendees.map((attendee) => {
-                                    const isSelected = selectedAttendees.has(attendee.a.attendeeId);
-                                    const name = attendee.user.profile.fullName;
-                                    const email = attendee.user.email;
+                                    const isSelected = selectedAttendees.has(attendee.registrationId);
+                                    const name = attendee.name;
+                                    const email = attendee.email;
                                     const displayStatus = resolvePendingDisplayStatus(
-                                        String(attendee.a.userId),
+                                        attendee.registrationId,
                                         attendee.certStatus,
                                     );
 
                                     return (
-                                        <tr key={attendee.a.attendeeId} className={`${tableRow} ${isSelected ? 'bg-muted' : ''}`}>
+                                        <tr key={attendee.registrationId} className={`${tableRow} ${isSelected ? 'bg-muted' : ''}`}>
                                             <td className={tableCell}>
                                                 <input
                                                     type="checkbox"
                                                     aria-label={`Select ${name}`}
                                                     checked={isSelected}
-                                                    onChange={() => toggleAttendee(attendee.a.attendeeId)}
+                                                    onChange={() => toggleAttendee(attendee.registrationId)}
                                                     className="rounded-xs accent-gray-900"
                                                 />
                                             </td>
                                             <td className={tableCell}>
                                                 <p className="font-medium text-ink">{name}</p>
                                                 <p className="text-xs text-ink-soft">{email}</p>
+                                                {attendee.checkedIn && (
+                                                    <p className="mt-0.5 text-2xs uppercase text-ink-soft">Checked in</p>
+                                                )}
+                                            </td>
+                                            <td className={tableCell}>
+                                                {/* Spec 6.1: the role the certificate is awarded for.
+                                                    Per attendee, because one event issues to attendees,
+                                                    winners and speakers at the same time. */}
+                                                <select
+                                                    aria-label={`Role for ${name}`}
+                                                    value={roles[attendee.registrationId] ?? "Attendee"}
+                                                    onChange={(e) =>
+                                                        setRoles((prev) => ({ ...prev, [attendee.registrationId]: e.target.value }))
+                                                    }
+                                                    className="rounded-lg border border-line-loud bg-paper px-2 py-1 text-xs text-ink"
+                                                >
+                                                    {CERTIFICATE_ROLES.map((r) => (
+                                                        <option key={r} value={r}>{r}</option>
+                                                    ))}
+                                                </select>
                                             </td>
                                             <td className={`${tableCell} pr-0 text-right`}>
                                                 <StatusBadge status={displayStatus.colorKey} label={displayStatus.label} size="sm" />

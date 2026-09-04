@@ -124,6 +124,15 @@ export interface Registration {
   waitlistPosition: number;
   /** The guest-list or invite row that authorized this registration, if any. */
   inviteId: string | null;
+  /**
+   * Answers to the event's own registration questions
+   * (`event.registration.customForm`), keyed by `CustomFieldOption.fieldId`.
+   *
+   * Kept as a free-form map rather than typed per event, because the questions
+   * are defined per event at creation time. Empty for an event that asks none,
+   * and for every registration made before the form was rendered at all.
+   */
+  customResponses: Record<string, string | number | boolean>;
   finalPrice: number;
   discountApplied: DiscountInfo | null;
   checkIn: CheckInInfo;

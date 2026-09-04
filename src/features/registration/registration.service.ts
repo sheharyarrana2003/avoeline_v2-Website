@@ -12,6 +12,7 @@ import { buildQrPayload, generateAndHostQr } from "./qr";
 import { resolveEventAccess, type AccessAttempt } from "@/src/features/access/access.service";
 import type { AccessDenial } from "@/src/features/access/types";
 import type { RegistrationStatus } from "@/src/services/models/reg.type";
+import { sanitizeAnswers } from "@/src/lib/customFields";
 
 /**
  * One refusal code per access denial, so the form explains what is missing
@@ -250,6 +251,10 @@ export async function createPublicRegistration(
         tier,
         waitlistPosition,
         inviteId: access.entry?.id ?? null,
+        // Cleaned against the event's own question list rather than stored as
+        // submitted: this is a public endpoint, so an unknown key here would be
+        // arbitrary attacker-chosen data landing in the organizer's export.
+        customResponses: sanitizeAnswers(event.registration?.customForm ?? [], input.customResponses),
         payment: {
             paymentId: "",
             // What they owe, not what we have confirmed receiving -- paymentStatus

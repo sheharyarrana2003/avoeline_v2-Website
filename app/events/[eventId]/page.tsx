@@ -148,6 +148,7 @@ export default async function PublicEventPage({
                                     accessCode={code ?? null}
                                     joinsWaitlist={isFull}
                                     needsApproval={!!event.access?.requiresApproval}
+                                    customFields={event.registration?.customForm ?? []}
                                     tierChoices={
                                         event.access?.allowTierSelfSelect
                                             ? (event.access.attendeeTiers ?? []).filter((t) => !access.lockedTiers.includes(t))

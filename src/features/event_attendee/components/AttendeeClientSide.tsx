@@ -8,7 +8,7 @@ import { AttendeeInput } from "./AttendeeInput";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { ExportButton } from "@/src/features/exports/components/ExportButton";
-import type { ExportResult } from "@/src/features/exports/actions/exportAttendees.action";
+import type { ExportResult } from "@/src/features/exports/types";
 import { Users, UserCheck, Clock, Ban } from "lucide-react";
 import { Registration } from "@/src/services/models/reg.type";
 import { useSearchParams } from "next/navigation";

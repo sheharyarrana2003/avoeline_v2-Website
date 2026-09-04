@@ -11,6 +11,8 @@ import { createPublicRegistration, getPublicEvent, isPaidEvent, recordCommunicat
 import { sendRegistrationEmail } from "../registrationEmail";
 import { absoluteUrl } from "@/src/lib/appUrl";
 import { RegistrationRefusal } from "../types";
+import { readAnswers } from "@/src/lib/customFields";
+import { missingRequired } from "@/src/features/taxonomy/types";
 
 /**
  * What each refusal reads like to the person who just pressed the button.
@@ -107,6 +109,17 @@ export async function registerAttendeeAction(
         const event = await getPublicEvent(eventId);
         if (!event) return fail(REFUSAL_MESSAGE.event_not_found);
 
+        // The event's own registration questions. Read against the stored
+        // question list and validated here rather than trusting the form: the
+        // `required` flag lives on the event, and a hand-made POST carries
+        // whichever inputs it likes.
+        const questions = event.registration?.customForm ?? [];
+        const customResponses = readAnswers(formData, questions);
+        const unanswered = missingRequired(questions, customResponses);
+        if (unanswered.length) {
+            return fail(`Please answer: ${unanswered.join(", ")}.`);
+        }
+
         // Optional even on a paid event: the requirement is that an attendee *can*
         // send proof, and refusing to register someone who has not paid yet would
         // lock out the exact person the awaiting_payment status exists for.
@@ -141,7 +154,7 @@ export async function registerAttendeeAction(
         const headerList = await headers();
         const result = await createPublicRegistration(
             eventId,
-            { name, email, phone, tier },
+            { name, email, phone, tier, customResponses },
             {
                 proofPath,
                 metadata: {

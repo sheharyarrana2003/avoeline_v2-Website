@@ -29,6 +29,7 @@ export default async function EventLayout({
         { label: "Sponsors", value: "sponsors", href: `/organizer/${organizer_id}/events/${eventId}/sponsors` },
         // { label: "Analytics", value: "analytics", href: `/organizer/${organizer_id}/events/${eventId}/analytics` },
         { label: "Certificates", value: "certificates", href: `/organizer/${organizer_id}/events/${eventId}/certificates` },
+        { label: "Exports", value: "exports", href: `/organizer/${organizer_id}/events/${eventId}/exports` },
     ];
 
     // The event's identity lives here rather than in each of the six sections: they all

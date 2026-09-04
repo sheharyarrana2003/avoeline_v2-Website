@@ -1,9 +1,10 @@
-import { AttendeeService } from "@/src/features/event_attendee/attendee.service";
+import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 import { CertificateService } from "@/src/services/certificate.service";
 import { EventService } from "@/src/services/event.service";
 import { AuthService } from "@/src/features/auth/authService";
 import type { CertificateGenerationResult } from "@/src/services/models/certificate.model";
+import { emailCertificatesAction } from "@/src/features/certificates/actions/emailCertificates.action";
 import CertificateIssuanceClient from "./certificateClient";
 import { AttendeeCertProp } from "./certificateClient";
 
@@ -16,25 +17,39 @@ export default async function CertificateIssuancePage({
     const { organizer_id, eventId } = resolvedParams;
 
 
-    const attendee = await AttendeeService.getAttendeeOfEvent(eventId);
-    const attendeeList = attendee ?? [];
+    // Driven off registrations, not `attendees` profile documents: a profile only
+    // exists for someone with an account, so public sign-ups (userId "") were
+    // absent from this page entirely and could never be issued a certificate.
+    const regs = await RegService.getRegsOfEvent(eventId);
 
     let attendeesWithData: AttendeeCertProp[] = [];
-    if (attendeeList.length) {
-        // Two batched reads for the whole list instead of 2 reads per attendee.
-        const [usersById, certByUser] = await Promise.all([
-            UserService.getUsersByIds(attendeeList.map(a => a.userId)),
-            CertificateService.getCertsOfEventByUser(eventId),
+    if (regs.length) {
+        const [usersById, certByRegistration] = await Promise.all([
+            UserService.getUsersByIds(regs.map((r) => r.userId).filter(Boolean)),
+            CertificateService.getCertsOfEventByRegistration(eventId),
         ]);
 
-        attendeesWithData = attendeeList.map(a => ({
-            a,
-            user: usersById.get(String(a.userId))!,
-            certStatus: certByUser.get(String(a.userId)) ?? null,
-        }));
+        attendeesWithData = regs
+            // A cancelled or rejected registration is not owed a certificate.
+            .filter((r) => r.status !== "cancelled" && r.status !== "rejected")
+            .map((r) => {
+                const user = usersById.get(String(r.userId));
+                return {
+                    registrationId: r.registrationId,
+                    // The account's name when there is one, the registration's
+                    // own contact details when there is not.
+                    name: user?.profile?.fullName || r.attendee?.name || "Attendee",
+                    email: user?.email || r.attendee?.email || "",
+                    checkedIn: !!r.checkIn?.checkedIn || r.status === "checked_in" || r.status === "attended",
+                    certStatus: certByRegistration.get(r.registrationId) ?? null,
+                };
+            });
     }
 
-    async function handleGenerateCertificates(selectedAttendeeIds: string[]): Promise<CertificateGenerationResult> {
+    async function handleGenerateCertificates(
+        selectedAttendeeIds: string[],
+        roles: Record<string, string> = {},
+    ): Promise<CertificateGenerationResult> {
         "use server";
 
         // A Server Action is a public endpoint, and this one spends money: the
@@ -60,19 +75,26 @@ export default async function CertificateIssuancePage({
             return refuse("You cannot issue certificates for an event you do not own.");
         }
 
-        const selectedUserIds = attendeesWithData
-            .filter((item) => selectedAttendeeIds.includes(item.a.attendeeId))
-            .map((item) => String(item.a.userId));
+        const selected = attendeesWithData
+            .filter((item) => selectedAttendeeIds.includes(item.registrationId))
+            .map((item) => item.registrationId);
 
-        return CertificateService.generateCertificatesForEvent(eventId, organizer_id, selectedUserIds);
+        return CertificateService.generateCertificatesForEvent(eventId, organizer_id, selected, roles);
     }
 
    
+    // Bound so the client never names the event; the action re-checks ownership.
+    async function handleEmailCertificates(resend: boolean) {
+        "use server";
+        return emailCertificatesAction(eventId, resend);
+    }
+
     return (
         <CertificateIssuanceClient
             attendees={attendeesWithData}
             eventId={eventId}
             onGenerateCertificates={handleGenerateCertificates}
+            onEmailCertificates={handleEmailCertificates}
         />
     );
 }

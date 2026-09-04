@@ -1,5 +1,8 @@
 import { adminDb } from "@/data/admin_db";
-import { toIsoString } from "@/src/lib/datetime";
+import { formatDate, toIsoString } from "@/src/lib/datetime";
+import { absoluteUrl } from "@/src/lib/appUrl";
+import { supabaseAdmin, CERTIFICATES_BUCKET } from "@/data/supabase";
+import { renderCertificatePdf } from "@/src/features/certificates/renderCertificatePdf";
 import { CertificateDocument } from "./models/certificate.model";
 import type {
   CertificateGenerationAttendeeResult,
@@ -8,7 +11,7 @@ import type {
 import { EventService } from "./event.service";
 import { RegistrationCertificate } from "./models/reg.type";
 import { COLLECTIONS } from "@/data/collections";
-import { BlockchainService } from "./blockchain.service";
+import { BlockchainService, isBlockchainConfigured } from "./blockchain.service";
 import { CertificateTemplate, CertificateTemplateService, initialTemplate } from "./certificate.template.services";
 
 import { PinataSDK } from "pinata";
@@ -85,10 +88,14 @@ function mapToCertificate(raw: any, fallbackId?: string): CertificateDocument {
       duration: String(raw?.content?.duration || ""),
       issuerName: String(raw?.content?.issuerName || ""),
       issuerSignature: String(raw?.content?.issuerSignature || ""),
+      // Certificates issued before roles existed read as "Attendee", which is
+      // what they were.
+      role: String(raw?.content?.role || "Attendee"),
       uniqueId: String(raw?.content?.uniqueId || ""),
     },
     digital: raw?.digital
       ? {
+          pdfPath: String(raw.digital.pdfPath || ""),
           pdfUrl: String(raw.digital.pdfUrl || ""),
           templateId: String(raw.digital.templateId || ""),
           design: {
@@ -139,6 +146,7 @@ function mapToCertificate(raw: any, fallbackId?: string): CertificateDocument {
     revokeReason: raw?.revokeReason ?? null,
     revokedAt: toIsoString(raw?.revokedAt),
     createdAt: toIsoString(raw?.createdAt) || "",
+    emailedAt: toIsoString(raw?.emailedAt),
     issuedAt: toIsoString(raw?.issuedAt),
     expiresAt: toIsoString(raw?.expiresAt),
     updatedAt: toIsoString(raw?.updatedAt) || "",
@@ -164,6 +172,25 @@ export const CertificateService = {
       );
   },
 
+  /**
+   * One certificate by its id, for the public verification page.
+   *
+   * A plain document read: the id IS the Firestore doc id, so there is no query
+   * and no index involved. Returns null for anything unknown rather than
+   * throwing, because a stranger mistyping an id is the normal case here.
+   */
+  async getCertificateById(certificateId: string): Promise<CertificateDocument | null> {
+    const id = String(certificateId ?? "").trim();
+    if (!id) return null;
+    try {
+      const snap = await adminDb.collection(COLLECTIONS.CERTIFICATES).doc(id).get();
+      return snap.exists ? mapToCertificate(snap.data(), snap.id) : null;
+    } catch (err) {
+      console.error("[getCertificateById] Firestore read failed", { id, err });
+      return null;
+    }
+  },
+
   async cert_for_attendee(id: String) {
     const querySnapshot = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("userId", "==", id).limit(1).get();
     if (querySnapshot.empty) {
@@ -186,10 +213,34 @@ export const CertificateService = {
     return map;
   },
 
+  /**
+   * Certificates for one event, indexed by REGISTRATION id.
+   *
+   * getCertsOfEventByUser keys on userId, which is "" for every public sign-up,
+   * so those all collapsed onto one map entry and the page could not tell whose
+   * certificate was whose. The registration id is unique per registrant.
+   */
+  async getCertsOfEventByRegistration(event_id: string): Promise<Map<string, CertificateDocument>> {
+    const snap = await adminDb.collection(COLLECTIONS.CERTIFICATES).where("eventId", "==", event_id).get();
+    const map = new Map<string, CertificateDocument>();
+    snap.forEach((d: FirebaseFirestore.QueryDocumentSnapshot) => {
+      const data = d.data();
+      if (data.registrationId) map.set(String(data.registrationId), mapToCertificate(data, d.id));
+    });
+    return map;
+  },
+
   async generateCertificatesForEvent(
     event_id: string,
     organizer_id: string,
-    selectedUserIds?: string[],
+    /**
+     * REGISTRATION ids to issue for. Keyed on the registration rather than the
+     * user, because a public sign-up has no userId -- selecting by user made
+     * every account-less registrant unaddressable.
+     */
+    selectedRegistrationIds?: string[],
+    /** Role per registration id, e.g. { regId: "Winner" }. Defaults to Attendee. */
+    rolesByRegistrationId?: Record<string, string>,
   ): Promise<CertificateGenerationResult> {
     const results: CertificateGenerationAttendeeResult[] = [];
 
@@ -210,7 +261,7 @@ export const CertificateService = {
       // "every registration" mints a real on-chain certificate per attendee and
       // spends real funds, irreversibly. `undefined` still means the whole event
       // for callers that genuinely want that; `[]` is a no-op.
-      if (Array.isArray(selectedUserIds) && selectedUserIds.length === 0) {
+      if (Array.isArray(selectedRegistrationIds) && selectedRegistrationIds.length === 0) {
         console.warn(`[CERT_GEN] refusing an empty selection for event ${event_id}`);
         return {
           success: false,
@@ -221,10 +272,10 @@ export const CertificateService = {
         };
       }
 
-      const selectedSet = selectedUserIds ? new Set(selectedUserIds.map(String)) : null;
+      const selectedSet = selectedRegistrationIds ? new Set(selectedRegistrationIds.map(String)) : null;
 
       const docsToProcess = selectedSet
-        ? registrationsSnapshot.docs.filter((doc) => selectedSet.has(String(doc.data().userId || '')))
+        ? registrationsSnapshot.docs.filter((doc) => selectedSet.has(String(doc.id)))
         : registrationsSnapshot.docs;
 
       if (docsToProcess.length === 0) {
@@ -263,16 +314,80 @@ export const CertificateService = {
           const newCertDocRef = adminDb.collection(COLLECTIONS.CERTIFICATES).doc();
           const autoGeneratedCertId = newCertDocRef.id;
 
-          const attendee_user = await UserService.getUserById(registrationData.userId);
-          const attendee = await AttendeeService.getAttendeebyuserid(registrationData.userId);
+          /*
+           * A public sign-up has no account, so there is no user document and no
+           * attendee profile to read -- the registration's own contact details
+           * are all that exist. Looking these up unconditionally threw on the
+           * empty userId and took the whole batch down.
+           */
+          const attendee_user = userId ? await UserService.getUserById(userId).catch(() => null) : null;
+          const attendee = userId ? await AttendeeService.getAttendeebyuserid(userId).catch(() => null) : null;
 
-          template.name_content = attendee_user.profile.fullName;
-          template.date_content = new Date().toISOString();
-          console.log(`[CERT_GEN] Configured Template -> Name: "${template.name_content}", Date: "${template.date_content}"`);
+          const recipient =
+            attendee_user?.profile?.fullName ||
+            String(registrationData.attendee?.name || "") ||
+            recipientName;
+          const recipientEmail =
+            attendee_user?.email || String(registrationData.attendee?.email || "");
 
-          console.log("[CERT_GEN] About to upload template to IPFS/Pinata...");
-          const metadata_ipfs = await uploadToIPFS(template);
-          console.log("[CERT_GEN] IPFS Upload complete! Metadata IPFS URI:", metadata_ipfs);
+          const issuedOn = new Date();
+          template.name_content = recipient;
+          template.date_content = formatDate(issuedOn);
+
+          // The role the certificate is awarded for. Set per attendee by the
+          // organizer before generating; "Attendee" when they did not choose.
+          const role = String(rolesByRegistrationId?.[String(registrationId)] || "Attendee");
+
+          /*
+           * Gated on blockchain.enabled, like the mint below.
+           *
+           * This pin ran unconditionally, so every generation pushed one
+           * document per attendee to Pinata even on events with the chain
+           * turned off -- a paid external write, and an irreversible one, for
+           * data nothing then read. The mint two hundred lines down was already
+           * gated; this never was.
+           */
+          /*
+           * Both the pin and the mint additionally require the chain to be
+           * configured at all. The default template ships with
+           * blockchain.enabled = true, so without this check every deployment
+           * lacking Pinata and Polygon credentials failed to issue ANY
+           * certificate -- the IPFS upload threw inside the per-attendee try and
+           * each one was recorded as a failure. A digital certificate does not
+           * need a blockchain; it should not be held hostage to one.
+           */
+          const onChain = template.blockchain.enabled && isBlockchainConfigured();
+
+          let metadata_ipfs = "";
+          if (onChain) {
+            metadata_ipfs = await uploadToIPFS(template);
+            console.log("[CERT_GEN] IPFS upload complete:", metadata_ipfs);
+          }
+
+          // The PDF is what the attendee actually receives, so it is rendered
+          // and stored now rather than on demand: generation is the one moment
+          // the template, the name and the date are all in hand together.
+          let pdfPath = "";
+          try {
+            const bytes = await renderCertificatePdf(template, {
+              recipientName: recipient,
+              eventTitle: event?.title || "",
+              dateText: formatDate(issuedOn),
+              role,
+              certificateId: autoGeneratedCertId,
+              verifyUrl: await absoluteUrl(`/verify/${autoGeneratedCertId}`).catch(() => ""),
+            });
+            const key = `certificates/${event_id}/${autoGeneratedCertId}.pdf`;
+            const { error: uploadError } = await supabaseAdmin.storage
+              .from(CERTIFICATES_BUCKET)
+              .upload(key, bytes, { contentType: "application/pdf", upsert: true });
+            if (uploadError) throw uploadError;
+            pdfPath = key;
+          } catch (err) {
+            // A certificate without its PDF is recoverable -- it can be
+            // re-rendered from the stored template. Losing the record is not.
+            console.error("[CERT_GEN] could not render or store the PDF", { autoGeneratedCertId, err });
+          }
 
           const certPayload: CertificateDocument = {
             certificateId: autoGeneratedCertId,
@@ -280,20 +395,24 @@ export const CertificateService = {
             userId,
             eventId: event_id,
             organizerId: organizer_id,
-            type: template.blockchain.enabled ? "both" : "digital",
+            type: onChain ? "both" : "digital",
             title: template.heading_content,
             description: template.achievement_content,
             status: 'ready',
             content: {
-              recipientName,
+              recipientName: recipient,
               eventTitle: event?.title || "",
               completionDate: new Date().toISOString(),
               duration: 'N/A',
               issuerName: template.issuer_name_content,
               issuerSignature: '',
+              role,
               uniqueId: `UID-${autoGeneratedCertId}`
             },
             digital: {
+              // Storage key, not a URL: a signed URL expires within the hour and
+              // would be a dead link by the time the attendee opened the email.
+              pdfPath,
               pdfUrl: '',
               templateId: template.templateId || 'DEFAULT',
               design: {
@@ -346,23 +465,20 @@ export const CertificateService = {
 
           let mintErrorMessage: string | undefined;
 
-          if (template.blockchain.enabled) {
-            console.log("[CERT_GEN] Blockchain check passed. Proceeding with minting check...");
+          if (onChain) {
 
             try {
-              console.log(`[CERT_GEN] Checking if already minted on-chain for event_id: ${event_id}, email: ${attendee_user.email}...`);
-              const alreadyMinted = await BlockchainService.checkHasCertificate(event_id, attendee_user.email);
+              const alreadyMinted = await BlockchainService.checkHasCertificate(event_id, recipientEmail);
               console.log(`[CERT_GEN] alreadyMinted status: ${alreadyMinted}`);
 
               if (alreadyMinted) {
-                console.warn(`[CERT_GEN] Certificate already minted on-chain for ${attendee_user.email}. Skipping mint.`);
+                console.warn(`[CERT_GEN] already minted on-chain for ${recipientEmail}; skipping.`);
               } else {
-                console.log(`[CERT_GEN] Minting single certificate on-chain for ${attendee_user.email}...`);
                 const mintResult = await BlockchainService.mintSingleCertificate(
                   "", // Falls back to owner wallet if not provided or invalid
                   event?.title || "unknown event",
-                  attendee_user.profile.fullName,
-                  attendee_user.email,
+                  recipient,
+                  recipientEmail,
                   event_id,
                   metadata_ipfs
                 );
@@ -405,20 +521,25 @@ export const CertificateService = {
             certificateConfig: updatedCertConfig
           });
 
-          const attendee_cert: AttendeeCertificate[] = [
-            ...attendee.certificates,
-            {
-              certificateId: certPayload.certificateId,
-              eventId:event_id,
-              issuedAt: new Date().toISOString(),
-              type: certPayload.type,
-              verificationUrl: ""
-            }
-          ]
+          // Only when there is a profile to append to. A public sign-up has no
+          // attendees document, and the certificate itself already records who
+          // it belongs to -- this array is a convenience index, not the source.
+          if (attendee?.attendeeId) {
+            const attendee_cert: AttendeeCertificate[] = [
+              ...(attendee.certificates ?? []),
+              {
+                certificateId: certPayload.certificateId,
+                eventId: event_id,
+                issuedAt: new Date().toISOString(),
+                type: certPayload.type,
+                verificationUrl: `/verify/${certPayload.certificateId}`,
+              },
+            ];
 
-          bulkWriter.update(adminDb.collection(COLLECTIONS.ATTENDEES).doc(attendee.attendeeId), {
-            certificates: attendee_cert
-          });
+            bulkWriter.update(adminDb.collection(COLLECTIONS.ATTENDEES).doc(attendee.attendeeId), {
+              certificates: attendee_cert,
+            });
+          }
 
           certificate_count++;
           console.log(`[CERT_GEN] Successfully staged attendee #${certificate_count}`);
