@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Award, Ticket } from "lucide-react";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
-import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import { Card } from "@/src/shared_components/ui/Card";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";

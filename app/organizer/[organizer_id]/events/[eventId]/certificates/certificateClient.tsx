@@ -3,8 +3,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Attendee } from '@/src/features/event_attendee/type';
-import { User } from '@/src/services/models/user.type';
 import { CertificateDocument, CertificateStatus } from '@/src/services/models/certificate.model';
 import type {
     CertificateGenerationAttendeeResult,
@@ -15,6 +13,7 @@ import { StatusBadge } from '@/src/shared_components/ui/StatusBadge';
 import { EmptyState } from '@/src/shared_components/ui/EmptyState';
 import { ConfirmButton } from '@/src/shared_components/ui/ConfirmDialog';
 import { DownloadCertificate } from '@/src/features/certificates/components/DownloadCertificate';
+import { CERTIFICATE_ROLES } from '@/src/services/models/certificate.model';
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from '@/src/lib/ui';
 import { Award, ChevronLeft, ChevronRight, Users } from 'lucide-react';
@@ -40,7 +39,10 @@ export interface AttendeeCertProp {
 interface CertificateIssuanceClientProps {
     attendees: AttendeeCertProp[];
     eventId: string;
-    onGenerateCertificates: (selectedAttendeeIds: string[]) => Promise<CertificateGenerationResult>;
+    onGenerateCertificates: (
+        selectedAttendeeIds: string[],
+        roles: Record<string, string>,
+    ) => Promise<CertificateGenerationResult>;
 }
 
 
@@ -59,6 +61,8 @@ export default function CertificateIssuanceClient({
     // State
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [selectedAttendees, setSelectedAttendees] = useState<Set<string>>(new Set());
+    /** Role per registration id. Absent means Attendee. */
+    const [roles, setRoles] = useState<Record<string, string>>({});
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const [pendingPage, setPendingPage] = useState<number>(1);
     const [issuedPage, setIssuedPage] = useState<number>(1);
@@ -118,6 +122,21 @@ export default function CertificateIssuanceClient({
         issuedPage * ITEMS_PER_PAGE,
     );
 
+    const checkedInPending = useMemo(
+        () => filteredPendingAttendees.filter((a) => a.checkedIn),
+        [filteredPendingAttendees],
+    );
+
+    /**
+     * Spec 6.1 asks for one button that issues to every checked-in attendee.
+     * Kept separate from "select all" rather than replacing it: an organizer
+     * issuing to speakers or winners who never scanned in still needs the
+     * unfiltered list.
+     */
+    const selectCheckedIn = () => {
+        setSelectedAttendees(new Set(checkedInPending.map((a) => a.registrationId)));
+    };
+
     // Handlers
     const toggleSelectAll = () => {
         if (selectAll) {
@@ -164,7 +183,7 @@ export default function CertificateIssuanceClient({
         startGenerating(async () => {
             setGenerationSummary(null);
             try {
-                const result = await onGenerateCertificates(Array.from(selectedAttendees));
+                const result = await onGenerateCertificates(Array.from(selectedAttendees), roles);
                 setGenerationResultsByUserId((prev) => {
                     const nextByUser = { ...prev };
                     for (const item of result.results) {
@@ -288,7 +307,6 @@ export default function CertificateIssuanceClient({
                                     const email = attendee.email;
                                     const status = cert?.status ?? 'issued';
                                     const isBlockchain = cert?.type === 'blockchain' || cert?.type === 'both';
-                                    const isDigital = cert?.type === 'digital' || cert?.type === 'both';
                                     const social = cert?.socialSharing;
                                     const sharedOn = [
                                         social?.sharedOnLinkedIn && 'LinkedIn',
@@ -393,10 +411,17 @@ export default function CertificateIssuanceClient({
                         <p className="text-xs text-ink-soft tabular-nums">{filteredPendingAttendees.length} awaiting generation</p>
                     </div>
                     {filteredPendingAttendees.length > 0 && (
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
-                            <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs accent-gray-900" />
-                            Select all (<span className="tabular-nums">{selectedAttendees.size}</span> selected)
-                        </label>
+                        <div className="flex flex-wrap items-center gap-4">
+                            {checkedInPending.length > 0 && (
+                                <button type="button" onClick={selectCheckedIn} className="text-sm font-medium text-ink underline hover:no-underline">
+                                    Select everyone who checked in (<span className="tabular-nums">{checkedInPending.length}</span>)
+                                </button>
+                            )}
+                            <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+                                <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="rounded-xs accent-gray-900" />
+                                Select all (<span className="tabular-nums">{selectedAttendees.size}</span> selected)
+                            </label>
+                        </div>
                     )}
                 </div>
 
@@ -418,6 +443,7 @@ export default function CertificateIssuanceClient({
                                 <tr>
                                     <th className={`${tableHead} w-10`}><span className="sr-only">Select</span></th>
                                     <th className={tableHead}>Attendee</th>
+                                    <th className={tableHead}>Role</th>
                                     {/* The "Attendance" column used to render a bar hardcoded to 0%
                                         for every row, over a TODO. A number nobody measured is
                                         worse than no column. */}
@@ -448,6 +474,26 @@ export default function CertificateIssuanceClient({
                                             <td className={tableCell}>
                                                 <p className="font-medium text-ink">{name}</p>
                                                 <p className="text-xs text-ink-soft">{email}</p>
+                                                {attendee.checkedIn && (
+                                                    <p className="mt-0.5 text-2xs uppercase text-ink-soft">Checked in</p>
+                                                )}
+                                            </td>
+                                            <td className={tableCell}>
+                                                {/* Spec 6.1: the role the certificate is awarded for.
+                                                    Per attendee, because one event issues to attendees,
+                                                    winners and speakers at the same time. */}
+                                                <select
+                                                    aria-label={`Role for ${name}`}
+                                                    value={roles[attendee.registrationId] ?? "Attendee"}
+                                                    onChange={(e) =>
+                                                        setRoles((prev) => ({ ...prev, [attendee.registrationId]: e.target.value }))
+                                                    }
+                                                    className="rounded-lg border border-line-loud bg-paper px-2 py-1 text-xs text-ink"
+                                                >
+                                                    {CERTIFICATE_ROLES.map((r) => (
+                                                        <option key={r} value={r}>{r}</option>
+                                                    ))}
+                                                </select>
                                             </td>
                                             <td className={`${tableCell} pr-0 text-right`}>
                                                 <StatusBadge status={displayStatus.colorKey} label={displayStatus.label} size="sm" />
