@@ -5,7 +5,8 @@ import { EventService } from "@/src/services/event.service";
 import { UserService } from "@/src/services/user.service";
 import { Registration } from "@/src/services/models/reg.type";
 import { getSignedUrl, CERTIFICATES_BUCKET } from "@/data/supabase";
-import { exportAttendeesAction } from "@/src/features/exports/actions/exportAttendees.action";
+import type { ExportResult } from "@/src/features/exports/types";
+import { exportEventSheetAction } from "@/src/features/exports/actions/exportEventSheet.action";
 import { promoteFromWaitlist } from "@/src/features/access/actions/registrationDecision.action";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
@@ -76,7 +77,7 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     // re-checks ownership regardless.
     const handle_export = async () => {
         'use server'
-        return exportAttendeesAction(event_id);
+        return exportEventSheetAction({ eventId: event_id, kind: "attendees", format: "xlsx" });
     };
 
     return (

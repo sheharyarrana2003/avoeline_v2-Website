@@ -4,7 +4,7 @@ import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
 import { AuthService } from "@/src/features/auth/authService";
-import type { ExportResult } from "@/src/features/exports/actions/exportAttendees.action";
+import type { ExportResult } from "@/src/features/exports/types";
 
 /**
  * Hand back a short-lived link to a certificate's PDF.

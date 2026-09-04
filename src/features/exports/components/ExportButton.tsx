@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Download } from "lucide-react";
 import { buttonClass } from "@/src/lib/ui";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
-import type { ExportResult } from "@/src/features/exports/actions/exportAttendees.action";
+import type { ExportResult } from "@/src/features/exports/types";
 
 /**
  * Ask the server to build a file, then open the signed URL it hands back.
