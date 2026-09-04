@@ -7,6 +7,8 @@ import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { buttonClass } from "@/src/lib/ui";
 import { formatDateMedium } from "@/src/lib/datetime";
 import { CertificateService } from "@/src/services/certificate.service";
+import { DownloadCertificate } from "@/src/features/certificates/components/DownloadCertificate";
+import { downloadCertificatePublicly } from "@/src/features/certificates/actions/downloadCertificate.action";
 
 export const metadata = {
     title: "Verify a certificate — Avoeline",
@@ -84,6 +86,21 @@ export default async function VerifyCertificatePage({
                                 value={<span className="break-all font-mono text-xs">{certificate.certificateId}</span>}
                             />
                         </dl>
+                    ) : null}
+
+                    {/* The link in the certificate email points here, so this is
+                        where an account-less recipient collects their PDF. Signed
+                        per click; the action refuses a revoked certificate. */}
+                    {genuine && certificate.digital?.pdfPath ? (
+                        <div className="mt-6">
+                            <DownloadCertificate
+                                certificateId={certificate.certificateId}
+                                run={downloadCertificatePublicly}
+                                label="Download the PDF"
+                                align="start"
+                                className={buttonClass("primary", "md")}
+                            />
+                        </div>
                     ) : null}
 
                     <p className="mt-6 text-xs text-ink-soft">

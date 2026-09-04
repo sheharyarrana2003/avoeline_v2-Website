@@ -43,6 +43,12 @@ interface CertificateIssuanceClientProps {
         selectedAttendeeIds: string[],
         roles: Record<string, string>,
     ) => Promise<CertificateGenerationResult>;
+    /**
+     * Spec 6.1's bulk distribution. `resend` includes people who have already
+     * been emailed; the default excludes them, so pressing the button twice
+     * does not mail everyone again.
+     */
+    onEmailCertificates: (resend: boolean) => Promise<{ success: boolean; error?: string; sent?: number; skipped?: number }>;
 }
 
 
@@ -57,6 +63,7 @@ const ITEMS_PER_PAGE = 10;
 export default function CertificateIssuanceClient({
     attendees,
     onGenerateCertificates,
+    onEmailCertificates,
 }: CertificateIssuanceClientProps) {
     // State
     const [searchQuery, setSearchQuery] = useState<string>('');
@@ -71,6 +78,8 @@ export default function CertificateIssuanceClient({
         Record<string, CertificateGenerationAttendeeResult>
     >({});
     const [generationSummary, setGenerationSummary] = useState<string | null>(null);
+    const [isEmailing, startEmailing] = useTransition();
+    const [emailSummary, setEmailSummary] = useState<string | null>(null);
 
     const pathName = usePathname();
 
@@ -86,6 +95,24 @@ export default function CertificateIssuanceClient({
     );
 
     const totalAttendees = attendees.length;
+
+    /**
+     * Who a plain "send" would reach: issued, not revoked, not already emailed.
+     * Counted here so the button can say the number rather than making the
+     * organizer press it to find out.
+     */
+    const unsentCount = useMemo(
+        () =>
+            attendees.filter(
+                (a) => a.certStatus && a.certStatus.status !== 'revoked' && !a.certStatus.emailedAt && a.email,
+            ).length,
+        [attendees],
+    );
+    const sentCount = useMemo(() => attendees.filter((a) => a.certStatus?.emailedAt).length, [attendees]);
+    const sendableCount = useMemo(
+        () => attendees.filter((a) => a.certStatus && a.certStatus.status !== 'revoked' && a.email).length,
+        [attendees],
+    );
 
     // Search only applies to the pending (to-be-issued) list — selection only makes sense there
     const filteredPendingAttendees = useMemo(() => {
@@ -202,6 +229,28 @@ export default function CertificateIssuanceClient({
         });
     };
 
+    const sendCertificates = (resend: boolean) => {
+        startEmailing(async () => {
+            setEmailSummary(null);
+            try {
+                const result = await onEmailCertificates(resend);
+                if (!result.success) {
+                    setEmailSummary(result.error ?? 'Could not send the certificates.');
+                    return;
+                }
+                const parts = [`Emailed ${result.sent} certificate${result.sent === 1 ? '' : 's'}.`];
+                // Named rather than swallowed: a registrant with no address on
+                // file is a real gap the organizer can fix, and silently sending
+                // to fewer people than expected looks like a bug.
+                if (result.skipped) parts.push(`${result.skipped} had no email address on the registration.`);
+                if (result.error) parts.push(result.error);
+                setEmailSummary(parts.join(' '));
+            } catch {
+                setEmailSummary('Could not reach the server. Please try again.');
+            }
+        });
+    };
+
     return (
         // No padding and no <h1>: the event layout renders the event's name, status
         // and tabs. This page is the Certificates section of it.
@@ -212,6 +261,38 @@ export default function CertificateIssuanceClient({
                     <Link href={`${pathName}/making-template`} className={buttonClass('secondary')}>
                         Edit template
                     </Link>
+                    {/* Sending mail to attendees is outward-facing and cannot be
+                        taken back, so both of these confirm first. Two buttons
+                        rather than one: the common case is "send the new ones",
+                        and a resend is a deliberate act that mails people who
+                        already have their certificate. */}
+                    {unsentCount > 0 ? (
+                        <ConfirmButton
+                            title={`Email ${unsentCount} certificate${unsentCount === 1 ? '' : 's'}?`}
+                            description="Each recipient gets their own link to their certificate. Nobody who has already been emailed is included."
+                            confirmLabel={`Send ${unsentCount} email${unsentCount === 1 ? '' : 's'}`}
+                            disabled={isEmailing}
+                            busy={isEmailing}
+                            onConfirm={() => sendCertificates(false)}
+                            className={buttonClass('secondary')}
+                        >
+                            {isEmailing ? 'Sending…' : `Email ${unsentCount} certificate${unsentCount === 1 ? '' : 's'}`}
+                        </ConfirmButton>
+                    ) : null}
+                    {sentCount > 0 ? (
+                        <ConfirmButton
+                            tone="danger"
+                            title={`Resend to all ${sendableCount} recipients?`}
+                            description="Everyone with a certificate is emailed again, including the people who already received theirs."
+                            confirmLabel={`Resend ${sendableCount} email${sendableCount === 1 ? '' : 's'}`}
+                            disabled={isEmailing}
+                            busy={isEmailing}
+                            onConfirm={() => sendCertificates(true)}
+                            className={buttonClass('ghost')}
+                        >
+                            Resend to all
+                        </ConfirmButton>
+                    ) : null}
                     <ConfirmButton
                         tone="danger"
                         title={`Issue ${selectedAttendees.size} certificate${selectedAttendees.size === 1 ? '' : 's'}?`}
@@ -249,6 +330,12 @@ export default function CertificateIssuanceClient({
             {generationSummary && (
                 <p className="mt-6 rounded-lg border border-line bg-paper px-4 py-3 text-sm text-ink">
                     {generationSummary}
+                </p>
+            )}
+
+            {emailSummary && (
+                <p className="mt-4 rounded-lg border border-line bg-paper px-4 py-3 text-sm text-ink">
+                    {emailSummary}
                 </p>
             )}
 
@@ -295,6 +382,7 @@ export default function CertificateIssuanceClient({
                                     <th className={tableHead}>Issued</th>
                                     <th className={tableHead}>PDF</th>
                                     <th className={tableHead}>Verify</th>
+                                    <th className={tableHead}>Emailed</th>
                                     <th className={tableHead}>Transaction hash</th>
                                     <th className={tableHead}>Sharing</th>
                                     <th className={`${tableHead} pr-0 text-right`}>Status</th>
@@ -348,6 +436,17 @@ export default function CertificateIssuanceClient({
                                                     </a>
                                                 ) : (
                                                     <span className="text-ink-faint" aria-hidden="true">—</span>
+                                                )}
+                                            </td>
+                                            <td className={`${tableCell} tabular-nums`}>
+                                                {cert?.emailedAt ? (
+                                                    formatDateMedium(cert.emailedAt)
+                                                ) : email ? (
+                                                    <span className="text-ink-soft">Not sent</span>
+                                                ) : (
+                                                    // Not "not sent" -- there is nowhere to send it, and
+                                                    // that is a different thing for the organizer to fix.
+                                                    <span className="text-ink-soft">No address</span>
                                                 )}
                                             </td>
                                             <td className={`${tableCell} font-mono text-xs`}>

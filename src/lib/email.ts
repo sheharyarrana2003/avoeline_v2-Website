@@ -29,6 +29,19 @@ export type EmailMessage = {
 
 export type SendOutcome = { sent: number; failed: number; skipped: boolean };
 
+/**
+ * Per-recipient overrides for a bulk send.
+ *
+ * Certificate distribution is the reason this exists: everyone gets the same
+ * letter but their own verification link, so one shared `htmlContent` cannot
+ * work. Brevo's messageVersions take a `subject` and `htmlContent` of their
+ * own, so a personalised batch is still one request per 1000 people rather
+ * than one request per person.
+ */
+export type BulkOptions = {
+    personalize?: (recipient: Recipient) => { subject?: string; html?: string; text?: string };
+};
+
 /** Escape anything user-supplied before it goes into an HTML body. */
 export function escapeHtml(value: string): string {
     return String(value)
@@ -101,8 +114,9 @@ export async function sendEmail(to: Recipient, message: EmailMessage): Promise<b
 }
 
 /**
- * The same message to many recipients — certificate distribution, an event
- * broadcast, a batch of invitations.
+ * One message to many recipients — certificate distribution, an event
+ * broadcast, a batch of invitations. Pass `personalize` when each person needs
+ * their own body.
  *
  * Uses Brevo's `messageVersions` rather than putting everyone in one `to` array.
  * That is not an optimisation, it is the point: a shared `to` header discloses
@@ -114,7 +128,11 @@ export async function sendEmail(to: Recipient, message: EmailMessage): Promise<b
  * one bad row cannot fail the batch, and a chunk that Brevo rejects is counted
  * as failed while the remaining chunks still go.
  */
-export async function sendBulkEmail(recipients: Recipient[], message: EmailMessage): Promise<SendOutcome> {
+export async function sendBulkEmail(
+    recipients: Recipient[],
+    message: EmailMessage,
+    options: BulkOptions = {},
+): Promise<SendOutcome> {
     const apiKey = process.env.BREVO_API_KEY;
     const from = process.env.MAIL_FROM;
 
@@ -146,7 +164,17 @@ export async function sendBulkEmail(recipients: Recipient[], message: EmailMessa
                 subject: message.subject,
                 htmlContent: message.html,
                 ...(message.text ? { textContent: message.text } : {}),
-                messageVersions: chunk.map((r) => ({ to: [{ email: r.email, name: r.name || undefined }] })),
+                messageVersions: chunk.map((r) => {
+                    // The top-level subject and body above are the fallback; a
+                    // version only overrides what `personalize` actually returns.
+                    const own = options.personalize?.(r);
+                    return {
+                        to: [{ email: r.email, name: r.name || undefined }],
+                        ...(own?.subject ? { subject: own.subject } : {}),
+                        ...(own?.html ? { htmlContent: own.html } : {}),
+                        ...(own?.text ? { textContent: own.text } : {}),
+                    };
+                }),
             },
             apiKey,
             "sendBulkEmail",

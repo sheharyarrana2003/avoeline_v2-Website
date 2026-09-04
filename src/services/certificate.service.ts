@@ -146,6 +146,7 @@ function mapToCertificate(raw: any, fallbackId?: string): CertificateDocument {
     revokeReason: raw?.revokeReason ?? null,
     revokedAt: toIsoString(raw?.revokedAt),
     createdAt: toIsoString(raw?.createdAt) || "",
+    emailedAt: toIsoString(raw?.emailedAt),
     issuedAt: toIsoString(raw?.issuedAt),
     expiresAt: toIsoString(raw?.expiresAt),
     updatedAt: toIsoString(raw?.updatedAt) || "",

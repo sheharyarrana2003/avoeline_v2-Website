@@ -92,6 +92,12 @@ export interface CertificateDocument {
   revokeReason?: string | null;
   revokedAt?: Date | string | null;
   createdAt: Date | string;
+  /**
+   * When the recipient was last emailed a link to this certificate. Null until
+   * one genuinely went out, so "not sent" and "sent and failed" are not the
+   * same state on the organizer's screen.
+   */
+  emailedAt?: Date | string | null;
   issuedAt?: Date | string | null;
   expiresAt?: Date | string | null;
   updatedAt: Date | string;

@@ -4,6 +4,7 @@ import { CertificateService } from "@/src/services/certificate.service";
 import { EventService } from "@/src/services/event.service";
 import { AuthService } from "@/src/features/auth/authService";
 import type { CertificateGenerationResult } from "@/src/services/models/certificate.model";
+import { emailCertificatesAction } from "@/src/features/certificates/actions/emailCertificates.action";
 import CertificateIssuanceClient from "./certificateClient";
 import { AttendeeCertProp } from "./certificateClient";
 
@@ -82,11 +83,18 @@ export default async function CertificateIssuancePage({
     }
 
    
+    // Bound so the client never names the event; the action re-checks ownership.
+    async function handleEmailCertificates(resend: boolean) {
+        "use server";
+        return emailCertificatesAction(eventId, resend);
+    }
+
     return (
         <CertificateIssuanceClient
             attendees={attendeesWithData}
             eventId={eventId}
             onGenerateCertificates={handleGenerateCertificates}
+            onEmailCertificates={handleEmailCertificates}
         />
     );
 }
