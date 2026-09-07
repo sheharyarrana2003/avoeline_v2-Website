@@ -76,6 +76,21 @@ const STATUS: Record<string, StatusMeta> = {
     active: { label: "Active", tone: "success" },
     inactive: { label: "Inactive", tone: "neutral" },
     approved: { label: "Approved", tone: "success" },
+
+    // -- Hackathon tracks and teams ---------------------------------------
+    // "Not submitted" is a warning rather than neutral: a team with an
+    // unsubmitted project as the deadline approaches is something the organizer
+    // should be able to spot at a glance, not a resting state.
+    submitted: { label: "Submitted", tone: "success" },
+    not_submitted: { label: "Not submitted", tone: "warning" },
+    // A locked roster is the intended end state once the lock date passes, so
+    // it reads as information rather than as a problem.
+    locked: { label: "Roster locked", tone: "neutral" },
+    open: { label: "Roster open", tone: "info" },
+    looking: { label: "Looking for members", tone: "info" },
+    fee_pending: { label: "Fee pending", tone: "warning" },
+    fee_paid: { label: "Fee paid", tone: "success" },
+    not_required: { label: "No fee", tone: "neutral" },
 };
 
 /** "quote_requested" -> "Quote requested", for statuses not in the map. */

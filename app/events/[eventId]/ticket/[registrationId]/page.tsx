@@ -1,10 +1,14 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Clock } from "lucide-react";
+import { Check, Clock, Flag } from "lucide-react";
 import { getPublicEvent, getRegistrationById } from "@/src/features/registration/registration.service";
 import { AgendaService, sessionsForTier } from "@/src/features/agendas/agenda.service";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { formatDate, formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import { buttonClass } from "@/src/lib/ui";
+import { isHackathon, listTracks, teamsForRegistration } from "@/src/features/hackathon/hackathon.service";
+import { rosterProgress } from "@/src/features/hackathon/types";
 
 export const metadata = {
     title: "Your ticket — Avoeline",
@@ -38,6 +42,13 @@ export default async function TicketPage({
     if (!registration || !event || registration.eventId !== event.id) notFound();
 
     const attendeeName = registration.attendee?.name || "Attendee";
+
+    // Spec 3.2 reaches the participant through this link, because a public
+    // registration has no account to sign into. Only read for a hackathon.
+    const hackathon = isHackathon(event);
+    const [tracks, myTeams] = hackathon
+        ? await Promise.all([listTracks(event.id), teamsForRegistration(registrationId)])
+        : [[], []];
 
     /*
      * What the ticket actually says, per status.
@@ -163,6 +174,47 @@ export default async function TicketPage({
                             </li>
                         ))}
                     </ul>
+                </section>
+            ) : null}
+
+            {hackathon && tracks.length ? (
+                <section className="mt-8 rounded-2xl border border-line bg-paper p-6">
+                    <h2 className="flex items-center gap-2 font-display text-base text-ink">
+                        <Flag className="h-4 w-4" aria-hidden="true" />
+                        Your teams
+                    </h2>
+                    {myTeams.length ? (
+                        <ul className="mt-4 space-y-2">
+                            {myTeams.map((team) => {
+                                const track = tracks.find((t) => t.id === team.trackId);
+                                return (
+                                    <li key={team.id} className="flex flex-wrap items-baseline justify-between gap-2">
+                                        <span className="text-sm text-ink">
+                                            {team.name}
+                                            {track ? <span className="text-ink-soft"> · {track.name}</span> : null}
+                                        </span>
+                                        <span className="text-xs text-ink-soft">
+                                            {rosterProgress(team).label} · code{" "}
+                                            <span className="font-mono text-ink">{team.joinCode}</span>
+                                        </span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="mt-2 text-sm text-ink-soft">
+                            This hackathon has {tracks.length} track{tracks.length === 1 ? "" : "s"}. Start a team
+                            or join one with a code, then submit your project.
+                        </p>
+                    )}
+                    <p className="mt-4">
+                        <Link
+                            href={`/events/${event.id}/ticket/${registrationId}/team`}
+                            className={buttonClass("primary", "sm")}
+                        >
+                            {myTeams.length ? "Manage your teams" : "Find a team"}
+                        </Link>
+                    </p>
                 </section>
             ) : null}
 
