@@ -208,6 +208,25 @@ export function toIsoString(value: unknown): string | null {
   return d ? d.toISOString() : null;
 }
 
+/**
+ * ISO `yyyy-mm-dd` for a form field, from anything `toDate` understands.
+ *
+ * The inverse of `formatDate`, and NOT `toIsoString(x).slice(0, 10)` -- that
+ * goes through `toISOString()`, which is UTC, so a stored `10/12/2026` parsed
+ * as local midnight comes back as `2026-12-09` anywhere east of Greenwich. This
+ * server runs in PKT, so the naive version is wrong by a day every time.
+ *
+ * Use this to populate `<DateField value=...>` when editing a stored
+ * DD/MM/YYYY date.
+ */
+export function toIsoDate(value: unknown): string {
+  const d = toDate(value);
+  if (!d) return "";
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
 /** "12 Aug 2026" style medium date, used where a compact label reads better. */
 export function formatDateMedium(value: unknown): string {
   const d = toDate(value);
