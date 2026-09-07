@@ -4,6 +4,7 @@ import { EventsTab } from "@/src/shared_components/organizer/EventTab";
 import { EventService } from "@/src/services/event.service";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { eventLifecycle } from "@/src/lib/eventState";
+import { isHackathon } from "@/src/features/hackathon/hackathon.service";
 
 export default async function EventLayout({
     children,
@@ -30,6 +31,12 @@ export default async function EventLayout({
         // { label: "Analytics", value: "analytics", href: `/organizer/${organizer_id}/events/${eventId}/analytics` },
         { label: "Certificates", value: "certificates", href: `/organizer/${organizer_id}/events/${eventId}/certificates` },
         { label: "Exports", value: "exports", href: `/organizer/${organizer_id}/events/${eventId}/exports` },
+        // Only on a hackathon-format event: tracks, teams and submissions mean
+        // nothing on a webinar. The route itself re-checks the same condition --
+        // hiding a tab is presentation, and the URL can be typed.
+        ...(isHackathon(event)
+            ? [{ label: "Hackathon", value: "hackathon", href: `/organizer/${organizer_id}/events/${eventId}/hackathon` }]
+            : []),
     ];
 
     // The event's identity lives here rather than in each of the six sections: they all

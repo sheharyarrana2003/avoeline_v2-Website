@@ -17,5 +17,7 @@ export const COLLECTIONS = {
   MESSAGES: "messages",
   SETTINGS: "settings",
   ANALYTICS: "analytics",
-  FEEDBACK: "reviews"
+  FEEDBACK: "reviews",
+  HACKATHON_TRACKS: "hackathon_tracks",
+  HACKATHON_TEAMS: "hackathon_teams"
 } as const; 

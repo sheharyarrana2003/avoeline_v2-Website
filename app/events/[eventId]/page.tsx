@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { getEventForVisitor, isPaidEvent, ticketFor } from "@/src/features/registration/registration.service";
@@ -10,6 +11,8 @@ import { RegService } from "@/src/services/registeration.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { buttonClass } from "@/src/lib/ui";
+import { isHackathon, listTracks } from "@/src/features/hackathon/hackathon.service";
 
 export const metadata = {
     title: "Register — Avoeline",
@@ -65,6 +68,9 @@ export default async function PublicEventPage({
     // the action enforces cannot disagree.
     const regs = await RegService.getRegsOfEvent(eventId);
     const organizations = await getEventOrganizations(eventId);
+    // Only a hackathon has tracks, and only read for one -- every other event
+    // would pay a query to learn it has none.
+    const trackCount = isHackathon(event) ? (await listTracks(eventId)).length : 0;
     const taken = regs.filter((r) => r.status !== "cancelled").length;
     const totalSeats = Number(event.capacity?.totalSeats) || 0;
     const seatsLeft = totalSeats > 0 ? Math.max(0, totalSeats - taken) : null;
@@ -160,6 +166,26 @@ export default async function PublicEventPage({
                     </div>
                 </aside>
             </div>
+
+            {/* Only on a hackathon, and only once the organizer has opened a
+                track -- an empty tracks page is worse than no link. */}
+            {isHackathon(event) && trackCount > 0 ? (
+                <section className="mt-12 border-t border-line pt-8">
+                    <h2 className="font-display text-lg text-ink">Tracks</h2>
+                    <p className="mt-1 text-sm text-ink-soft">
+                        This hackathon runs {trackCount} track{trackCount === 1 ? "" : "s"}, each with its own
+                        team size, deadline and prizes.
+                    </p>
+                    <p className="mt-4">
+                        <Link
+                            href={`/events/${event.id}/tracks${code ? `?code=${encodeURIComponent(code)}` : ""}`}
+                            className={buttonClass("secondary", "sm")}
+                        >
+                            See the tracks
+                        </Link>
+                    </p>
+                </section>
+            ) : null}
 
             <SponsorStrip organizations={organizations} sponsorTiers={event.sponsorTiers} />
         </main>
