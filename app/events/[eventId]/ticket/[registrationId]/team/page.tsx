@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download, Flag, Users } from "lucide-react";
+import { ChevronLeft, Download, Flag, Megaphone, Trophy, Users } from "lucide-react";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -10,7 +10,21 @@ import { formatCurrency } from "@/src/lib/money";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
 import { assertParticipant } from "@/src/features/events/ownership";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
-import { isHackathon, listTeams, listTracks, teamsForRegistration } from "@/src/features/hackathon/hackathon.service";
+import {
+    getHackathonSettings,
+    isHackathon,
+    judgesForTrack,
+    listAnnouncements,
+    listMentors,
+    listTeams,
+    listTracks,
+    teamsForRegistration,
+} from "@/src/features/hackathon/hackathon.service";
+import { announcementsFor, openSlots, type HackathonMentor } from "@/src/features/hackathon/live";
+import { rankTeams, rubricMax } from "@/src/features/hackathon/judging";
+import { MentorBooking } from "@/src/features/hackathon/components/MentorForms";
+import { bookMentorSlot, cancelMentorSlot } from "@/src/features/hackathon/actions/live.action";
+import { formatDateMedium } from "@/src/lib/datetime";
 import {
     complementaryTo,
     deadlinePassed,
@@ -55,11 +69,21 @@ export default async function ParticipantTeamPage({
     const who = await assertParticipant(eventId, registrationId);
     if (!who || !isHackathon(who.event)) notFound();
 
-    const [tracks, myTeams, orgs] = await Promise.all([
+    const [tracks, myTeams, orgs, mentors, allAnnouncements, settings] = await Promise.all([
         listTracks(eventId),
         teamsForRegistration(registrationId),
         getEventOrganizations(eventId),
+        listMentors(eventId),
+        listAnnouncements(eventId),
+        getHackathonSettings(eventId),
     ]);
+
+    // Only the posts that apply to this participant: hackathon-wide ones, plus
+    // anything on a track they are actually competing in.
+    const announcements = announcementsFor(
+        allAnnouncements,
+        myTeams.map((t) => t.trackId),
+    );
 
     const ticketHref = `/events/${eventId}/ticket/${registrationId}`;
 
@@ -75,6 +99,27 @@ export default async function ParticipantTeamPage({
                 Tracks you can enter as {who.registration.attendee?.name || "a participant"}. Team up, then submit
                 your project before the track&apos;s deadline.
             </p>
+
+            {announcements.length ? (
+                <section className="mt-8 rounded-2xl border border-line bg-paper p-6">
+                    <h2 className="flex items-center gap-2 font-display text-base text-ink">
+                        <Megaphone className="h-4 w-4" aria-hidden="true" />
+                        From the organiser
+                    </h2>
+                    <ul className="mt-4 space-y-4">
+                        {announcements.slice(0, 6).map((a) => (
+                            <li key={a.id} className="border-b border-line pb-4 last:border-b-0 last:pb-0">
+                                <p className="text-sm font-medium text-ink">{a.title}</p>
+                                <p className="mt-1 whitespace-pre-line text-sm text-ink-soft">{a.body}</p>
+                                <p className="mt-1 text-2xs uppercase text-ink-faint">
+                                    {formatDateMedium(a.createdAt)}
+                                    {a.trackId ? ` · ${tracks.find((t) => t.id === a.trackId)?.name ?? "your track"}` : ""}
+                                </p>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ) : null}
 
             {tracks.length === 0 ? (
                 <div className="mt-8">
@@ -97,6 +142,9 @@ export default async function ParticipantTeamPage({
                                     mine={mine}
                                     teams={teams}
                                     orgs={orgs}
+                                    mentors={mentors}
+                                    judgeCount={(await judgesForTrack(eventId, track.id)).length}
+                                    onlineMode={settings.onlineMode}
                                     eventId={eventId}
                                     registrationId={registrationId}
                                 />
@@ -118,6 +166,9 @@ async function TrackSection({
     mine,
     teams,
     orgs,
+    mentors,
+    judgeCount,
+    onlineMode,
     eventId,
     registrationId,
 }: {
@@ -125,6 +176,9 @@ async function TrackSection({
     mine: HackathonTeam | null;
     teams: HackathonTeam[];
     orgs: Awaited<ReturnType<typeof getEventOrganizations>>;
+    mentors: HackathonMentor[];
+    judgeCount: number;
+    onlineMode: boolean;
     eventId: string;
     registrationId: string;
 }) {
@@ -222,6 +276,65 @@ async function TrackSection({
                             join={joinTeam.bind(null, eventId, registrationId)}
                         />
                     )}
+
+                    {mine && track.rubric.length ? (
+                        <div className="border-t border-line pt-6">
+                            <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">
+                                <Trophy className="h-4 w-4" aria-hidden="true" />
+                                Where you stand
+                            </h3>
+                            {(() => {
+                                const ranked = rankTeams(teams, track.rubric, track.currentRound, judgeCount);
+                                const me = ranked.find((r) => r.team.id === mine.id);
+                                if (!me) {
+                                    return (
+                                        <p className="mt-1 text-sm text-ink-soft">
+                                            Your team is not in round {track.currentRound}.
+                                        </p>
+                                    );
+                                }
+                                if (!me.judgeCount) {
+                                    return (
+                                        <p className="mt-1 text-sm text-ink-soft">
+                                            No judge has scored you yet in round {track.currentRound}.
+                                        </p>
+                                    );
+                                }
+                                return (
+                                    <p className="mt-1 text-sm text-ink-soft tabular-nums">
+                                        {me.average.toFixed(1)} out of {rubricMax(track.rubric)} from{" "}
+                                        {me.judgeCount} judge{me.judgeCount === 1 ? "" : "s"} · placed {me.rank} of{" "}
+                                        {ranked.filter((r) => r.judgeCount).length} scored
+                                        {onlineMode ? " · " : ""}
+                                        {onlineMode ? (
+                                            <Link
+                                                href={`/events/${eventId}/tracks/${track.id}/leaderboard`}
+                                                className="font-medium text-ink hover:underline"
+                                            >
+                                                full leaderboard
+                                            </Link>
+                                        ) : null}
+                                    </p>
+                                );
+                            })()}
+                        </div>
+                    ) : null}
+
+                    {mine && mentors.length ? (
+                        <div className="border-t border-line pt-6">
+                            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+                                <Users className="h-4 w-4" aria-hidden="true" />
+                                Book a mentor
+                            </h3>
+                            <MentorBooking
+                                mentors={mentors.map((mentor) => ({ mentor, open: openSlots(mentor) }))}
+                                teamId={mine.id}
+                                teamName={mine.name}
+                                book={bookMentorSlot.bind(null, eventId, registrationId)}
+                                cancel={cancelMentorSlot.bind(null, eventId, registrationId)}
+                            />
+                        </div>
+                    ) : null}
 
                     {looking.length ? (
                         <div className="border-t border-line pt-6">

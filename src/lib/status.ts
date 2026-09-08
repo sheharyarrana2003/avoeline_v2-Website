@@ -91,6 +91,14 @@ const STATUS: Record<string, StatusMeta> = {
     fee_pending: { label: "Fee pending", tone: "warning" },
     fee_paid: { label: "Fee paid", tone: "success" },
     not_required: { label: "No fee", tone: "neutral" },
+    // Judging. "Advanced" and "eliminated" are both settled outcomes, so only
+    // the one that ends a team's run reads as negative.
+    scored: { label: "Scored", tone: "success" },
+    awaiting_scores: { label: "Awaiting scores", tone: "warning" },
+    advanced: { label: "Advanced", tone: "success" },
+    eliminated: { label: "Eliminated", tone: "danger" },
+    judging: { label: "Judging", tone: "info" },
+    booked: { label: "Booked", tone: "info" },
 };
 
 /** "quote_requested" -> "Quote requested", for statuses not in the map. */

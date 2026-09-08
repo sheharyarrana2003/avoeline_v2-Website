@@ -10,7 +10,7 @@ import { formatCurrency } from "@/src/lib/money";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
 import { getEventForVisitor } from "@/src/features/registration/registration.service";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
-import { isHackathon, listTeamsOfEvent, listTracks } from "@/src/features/hackathon/hackathon.service";
+import { getHackathonSettings, isHackathon, listTeamsOfEvent, listTracks } from "@/src/features/hackathon/hackathon.service";
 import { trackSponsor } from "@/src/features/hackathon/types";
 
 export const metadata = { title: "Tracks — Avoeline" };
@@ -68,11 +68,13 @@ export default async function PublicTracksPage({
         );
     }
 
-    const [tracks, teams, orgs] = await Promise.all([
+    const [tracks, teams, orgs, settings] = await Promise.all([
         listTracks(eventId),
         listTeamsOfEvent(eventId),
         getEventOrganizations(eventId),
+        getHackathonSettings(eventId),
     ]);
+    const qs = code ? `?code=${encodeURIComponent(code)}` : "";
 
     const teamsByTrack = new Map<string, number>();
     for (const team of teams) teamsByTrack.set(team.trackId, (teamsByTrack.get(team.trackId) ?? 0) + 1);
@@ -90,9 +92,12 @@ export default async function PublicTracksPage({
                     ? "Pick a track, then form a team once you have registered."
                     : "Tracks for this hackathon."}
             </p>
-            <p className="mt-4">
+            <p className="mt-4 flex flex-wrap gap-2">
                 <Link href={eventHref} className={buttonClass("secondary", "sm")}>
                     Register for this event
+                </Link>
+                <Link href={`/events/${eventId}/mentors${qs}`} className={buttonClass("ghost", "sm")}>
+                    Mentor at this hackathon
                 </Link>
             </p>
 
@@ -140,6 +145,17 @@ export default async function PublicTracksPage({
 
                                         {track.prizePool ? (
                                             <p className="mt-4 text-sm text-ink">{track.prizePool}</p>
+                                        ) : null}
+
+                                        {settings.onlineMode ? (
+                                            <p className="mt-4">
+                                                <Link
+                                                    href={`/events/${eventId}/tracks/${track.id}/leaderboard${qs}`}
+                                                    className={buttonClass("secondary", "sm")}
+                                                >
+                                                    Watch the live leaderboard
+                                                </Link>
+                                            </p>
                                         ) : null}
 
                                         {(sponsor || rulesUrl) && (
