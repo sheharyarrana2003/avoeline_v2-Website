@@ -3,6 +3,15 @@ import type { QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
 import { toIsoString } from "@/src/lib/datetime";
+import type { HackathonJudge } from "./judging";
+import {
+    EMPTY_SETTINGS,
+    type HackathonAnnouncement,
+    type HackathonMentor,
+    type HackathonSettings,
+    type MentorSlot,
+} from "./live";
+import type { JudgeScore, TeamScores } from "./types";
 import {
     normalizeJoinCode,
     type FeeStatus,
@@ -90,6 +99,39 @@ function mapToSubmission(raw: any): TeamSubmission {
     };
 }
 
+/**
+ * Judges' cards, with every timestamp turned into a string.
+ *
+ * The reason this is not a raw spread: `scoredAt` is written as a real
+ * Timestamp, the team is handed to Client Components, and an admin-SDK
+ * Timestamp there is a runtime error rather than a warning. A spread looked
+ * harmless right up to the first score being submitted.
+ */
+function mapToScores(raw: any): TeamScores {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const out: TeamScores = {};
+    for (const [judgeId, byRound] of Object.entries(raw)) {
+        if (!byRound || typeof byRound !== "object") continue;
+        const rounds: Record<string, JudgeScore> = {};
+        for (const [round, card] of Object.entries(byRound as Record<string, any>)) {
+            if (!card || typeof card !== "object") continue;
+            rounds[round] = {
+                byCategory:
+                    card.byCategory && typeof card.byCategory === "object" && !Array.isArray(card.byCategory)
+                        ? Object.fromEntries(
+                              Object.entries(card.byCategory).map(([k, v]) => [k, Number(v) || 0]),
+                          )
+                        : {},
+                total: Number(card.total ?? 0) || 0,
+                comment: String(card.comment || ""),
+                scoredAt: toIsoString(card.scoredAt) || "",
+            };
+        }
+        if (Object.keys(rounds).length) out[judgeId] = rounds;
+    }
+    return out;
+}
+
 export function mapToTeam(raw: any, fallbackId?: string): HackathonTeam {
     const members = mapToMembers(raw?.members);
     return {
@@ -115,7 +157,7 @@ export function mapToTeam(raw: any, fallbackId?: string): HackathonTeam {
             raw?.eliminatedAtRound === null || raw?.eliminatedAtRound === undefined
                 ? null
                 : Number(raw.eliminatedAtRound) || null,
-        scores: raw?.scores && typeof raw.scores === "object" && !Array.isArray(raw.scores) ? { ...raw.scores } : {},
+        scores: mapToScores(raw?.scores),
         createdAt: toIsoString(raw?.createdAt) || "",
         updatedAt: toIsoString(raw?.updatedAt) || "",
     };
@@ -218,3 +260,132 @@ export function isHackathon(event: { eventFormatId?: string; eventType?: string 
         String(event.eventType || "").toLowerCase() === "hackathon"
     );
 }
+
+/* ------------------------------------------------------- judges (spec 3.3) */
+
+export function mapToJudge(raw: any, fallbackId?: string): HackathonJudge {
+    return {
+        id: String(raw?.id || fallbackId || ""),
+        eventId: String(raw?.eventId || ""),
+        organizerId: String(raw?.organizerId || ""),
+        name: String(raw?.name || ""),
+        email: String(raw?.email || ""),
+        trackIds: Array.isArray(raw?.trackIds) ? raw.trackIds.map(String) : [],
+        // Null once revoked, which is what closes the link.
+        inviteToken: raw?.inviteToken ? String(raw.inviteToken) : null,
+        invitedAt: toIsoString(raw?.invitedAt) || "",
+        lastScoredAt: toIsoString(raw?.lastScoredAt),
+        createdAt: toIsoString(raw?.createdAt) || "",
+        updatedAt: toIsoString(raw?.updatedAt) || "",
+    };
+}
+
+export const listJudges = cache(async (eventId: string): Promise<HackathonJudge[]> => {
+    if (!eventId) return [];
+    const snap = await adminDb.collection(COLLECTIONS.HACKATHON_JUDGES).where("eventId", "==", eventId).get();
+    return snap.docs
+        .map((d: QueryDocumentSnapshot) => mapToJudge(d.data(), d.id))
+        .sort((a: HackathonJudge, b: HackathonJudge) => a.name.localeCompare(b.name));
+});
+
+/** Judges assigned to one track. Filtered in memory: `trackIds` is an array. */
+export async function judgesForTrack(eventId: string, trackId: string): Promise<HackathonJudge[]> {
+    const judges = await listJudges(eventId);
+    return judges.filter((j) => j.trackIds.includes(trackId));
+}
+
+/**
+ * Resolve a judge's link. The token is the whole credential, so this is looked
+ * up by token alone -- one field, no index needed.
+ */
+export const findJudgeByToken = cache(async (token: string): Promise<HackathonJudge | null> => {
+    const value = String(token ?? "").trim();
+    if (!value) return null;
+    const snap = await adminDb
+        .collection(COLLECTIONS.HACKATHON_JUDGES)
+        .where("inviteToken", "==", value)
+        .limit(1)
+        .get();
+    return snap.empty ? null : mapToJudge(snap.docs[0].data(), snap.docs[0].id);
+});
+
+/* ------------------------------------------------------ mentors (spec 3.4) */
+
+function mapToSlots(raw: any): MentorSlot[] {
+    if (!Array.isArray(raw)) return [];
+    return raw
+        .filter((s: any) => s && s.date)
+        .map((s: any) => ({
+            id: String(s.id || ""),
+            date: String(s.date || ""),
+            startTime: String(s.startTime || ""),
+            endTime: String(s.endTime || ""),
+            bookedByTeamId: String(s.bookedByTeamId || ""),
+            bookedTeamName: String(s.bookedTeamName || ""),
+            bookedAt: toIsoString(s.bookedAt),
+        }));
+}
+
+export function mapToMentor(raw: any, fallbackId?: string): HackathonMentor {
+    return {
+        id: String(raw?.id || fallbackId || ""),
+        eventId: String(raw?.eventId || ""),
+        name: String(raw?.name || ""),
+        email: String(raw?.email || ""),
+        expertise: Array.isArray(raw?.expertise) ? raw.expertise.map(String) : [],
+        bio: String(raw?.bio || ""),
+        slots: mapToSlots(raw?.slots),
+        createdAt: toIsoString(raw?.createdAt) || "",
+        updatedAt: toIsoString(raw?.updatedAt) || "",
+    };
+}
+
+export const listMentors = cache(async (eventId: string): Promise<HackathonMentor[]> => {
+    if (!eventId) return [];
+    const snap = await adminDb.collection(COLLECTIONS.HACKATHON_MENTORS).where("eventId", "==", eventId).get();
+    return snap.docs
+        .map((d: QueryDocumentSnapshot) => mapToMentor(d.data(), d.id))
+        .sort((a: HackathonMentor, b: HackathonMentor) => a.name.localeCompare(b.name));
+});
+
+/* ------------------------------------------------ announcements (spec 3.4) */
+
+export function mapToAnnouncement(raw: any, fallbackId?: string): HackathonAnnouncement {
+    return {
+        id: String(raw?.id || fallbackId || ""),
+        eventId: String(raw?.eventId || ""),
+        trackId: String(raw?.trackId || ""),
+        title: String(raw?.title || ""),
+        body: String(raw?.body || ""),
+        emailedCount: Number(raw?.emailedCount ?? 0) || 0,
+        createdAt: toIsoString(raw?.createdAt) || "",
+    };
+}
+
+export const listAnnouncements = cache(async (eventId: string): Promise<HackathonAnnouncement[]> => {
+    if (!eventId) return [];
+    const snap = await adminDb.collection(COLLECTIONS.HACKATHON_ANNOUNCEMENTS).where("eventId", "==", eventId).get();
+    return snap.docs
+        .map((d: QueryDocumentSnapshot) => mapToAnnouncement(d.data(), d.id))
+        .sort((a: HackathonAnnouncement, b: HackathonAnnouncement) => b.createdAt.localeCompare(a.createdAt));
+});
+
+/* -------------------------------------------------- online mode (spec 3.5) */
+
+/**
+ * One settings document per event, keyed by the event id.
+ *
+ * Its own document rather than fields on the event, because these apply only to
+ * a hackathon and `EventModel` drops any field its constructor does not assign.
+ */
+export const getHackathonSettings = cache(async (eventId: string): Promise<HackathonSettings> => {
+    if (!eventId) return { eventId: "", ...EMPTY_SETTINGS };
+    const snap = await adminDb.collection(COLLECTIONS.HACKATHON_SETTINGS).doc(eventId).get();
+    const raw = snap.exists ? snap.data() : null;
+    return {
+        eventId,
+        onlineMode: !!raw?.onlineMode,
+        livestreamUrl: String(raw?.livestreamUrl || ""),
+        updatedAt: toIsoString(raw?.updatedAt) || "",
+    };
+});

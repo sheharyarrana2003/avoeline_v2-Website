@@ -115,6 +115,29 @@ export interface TeamSubmission {
 
 export type FeeStatus = "not_required" | "fee_pending" | "fee_paid";
 
+/**
+ * One judge's card for one team in one round.
+ *
+ * Declared here rather than in `judging.ts` because it lives ON the team
+ * document, and the team is handed to Client Components -- so its read-mapper
+ * has to know this shape well enough to turn `scoredAt` into a string. Leaving
+ * `scores` opaque cost a page: a Firestore Timestamp inside it reached a client
+ * component and the render died with "Only plain objects... can be passed to
+ * Client Components".
+ */
+export interface JudgeScore {
+    /** categoryId -> score, each clamped to that category's max. */
+    byCategory: Record<string, number>;
+    /** Sum across categories, recomputed on write rather than trusted. */
+    total: number;
+    comment: string;
+    /** ISO. Never a Timestamp by the time it leaves the mapper. */
+    scoredAt: string;
+}
+
+/** `scores[judgeId][roundKey]`, as it sits on the team document. */
+export type TeamScores = Record<string, Record<string, JudgeScore>>;
+
 export interface HackathonTeam {
     id: string;
     eventId: string;
@@ -148,11 +171,8 @@ export interface HackathonTeam {
     /* --- reserved for the judging slice --- */
     round: number;
     eliminatedAtRound: number | null;
-    /**
-     * `scores[judgeId]` once judging lands. Kept opaque here so this slice
-     * carries the field without pretending to know its shape.
-     */
-    scores: Record<string, unknown>;
+    /** Every judge's card for this team, by judge and then by round. */
+    scores: TeamScores;
     createdAt: string;
     updatedAt: string;
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download, Users } from "lucide-react";
+import { ChevronLeft, Download, Gavel, Trophy, Users } from "lucide-react";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -14,7 +14,12 @@ import { formatCurrency } from "@/src/lib/money";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
-import { getTrack, isHackathon, listTeams } from "@/src/features/hackathon/hackathon.service";
+import { getTrack, isHackathon, judgesForTrack, listTeams } from "@/src/features/hackathon/hackathon.service";
+import { judgingReady, rankTeams, rubricMax } from "@/src/features/hackathon/judging";
+import { Leaderboard } from "@/src/features/hackathon/components/Leaderboard";
+import { LiveRefresh } from "@/src/features/hackathon/components/LiveRefresh";
+import { AdvanceRoundForm, RubricForm } from "@/src/features/hackathon/components/JudgingForms";
+import { advanceRound, saveRubric } from "@/src/features/hackathon/actions/judging.action";
 import {
     deadlinePassed,
     meetsMinimum,
@@ -51,7 +56,11 @@ export default async function TrackDetailPage({
     const track = await getTrack(trackId);
     if (!track || track.eventId !== event.id) notFound();
 
-    const [teams, orgs] = await Promise.all([listTeams(track.id), getEventOrganizations(event.id)]);
+    const [teams, orgs, judges] = await Promise.all([
+        listTeams(track.id),
+        getEventOrganizations(event.id),
+        judgesForTrack(event.id, track.id),
+    ]);
     const sponsor = trackSponsor(orgs, track.id);
     const base = `/organizer/${organizer_id}/events/${eventId}/hackathon`;
 
@@ -79,6 +88,9 @@ export default async function TrackDetailPage({
     const locked = rosterLocked(track, { unlockedByOrganizer: false });
     const closed = deadlinePassed(track);
 
+    const ranked = rankTeams(teams, track.rubric, track.currentRound, judges.length);
+    const inRound = ranked.length;
+
     return (
         <div className="space-y-8">
             <div>
@@ -92,7 +104,7 @@ export default async function TrackDetailPage({
 
             {e ? <FormFeedback error={e} /> : null}
 
-            <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+            <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-5 sm:divide-x sm:divide-line">
                 <MetricTile
                     label="Teams"
                     value={`${teams.length}`}
@@ -109,6 +121,16 @@ export default async function TrackDetailPage({
                     label="Roster"
                     value={locked ? "Locked" : "Open"}
                     sublabel={track.rosterLockDate ? `Locks ${formatDate(track.rosterLockDate)}` : "No lock date set"}
+                />
+                <MetricTile
+                    label="Round"
+                    value={`${track.currentRound}`}
+                    icon={<Trophy className="h-4 w-4" />}
+                    sublabel={
+                        judgingReady(track)
+                            ? `${judges.length} judge${judges.length === 1 ? "" : "s"} · ${inRound} team${inRound === 1 ? "" : "s"} in`
+                            : "No rubric yet"
+                    }
                 />
             </section>
 
@@ -136,6 +158,84 @@ export default async function TrackDetailPage({
                         />
                         {track.prizePool ? <Fact label="Prize pool" value={track.prizePool} wide /> : null}
                     </dl>
+                </CardBody>
+            </Card>
+
+            <Card title={`Judging — round ${track.currentRound}`}>
+                <CardBody>
+                    <div className="grid gap-8 lg:grid-cols-2">
+                        <div>
+                            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+                                <Gavel className="h-4 w-4" aria-hidden="true" />
+                                Rubric
+                            </h3>
+                            <RubricForm
+                                trackId={track.id}
+                                rubric={track.rubric}
+                                action={saveRubric.bind(null, eventId)}
+                            />
+                        </div>
+
+                        <div>
+                            <h3 className="mb-3 text-sm font-semibold text-ink">Judges on this track</h3>
+                            {judges.length ? (
+                                <ul className="divide-y divide-line border-y border-line">
+                                    {judges.map((judge) => (
+                                        <li key={judge.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2.5">
+                                            <span className="text-sm text-ink">
+                                                {judge.name}
+                                                <span className="text-ink-soft"> · {judge.email}</span>
+                                            </span>
+                                            <span className="text-xs text-ink-soft">
+                                                {judge.lastScoredAt
+                                                    ? `scored ${formatDateMedium(judge.lastScoredAt)}`
+                                                    : "not scored yet"}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-ink-soft">
+                                    No judges assigned to this track yet. Invite them from the Hackathon tab.
+                                </p>
+                            )}
+
+                            {judgingReady(track) && inRound > 0 ? (
+                                <div className="mt-6 border-t border-line pt-4">
+                                    <AdvanceRoundForm
+                                        trackId={track.id}
+                                        round={track.currentRound}
+                                        teamsInRound={inRound}
+                                        action={advanceRound.bind(null, eventId)}
+                                    />
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </CardBody>
+            </Card>
+
+            <Card
+                title="Leaderboard"
+                action={<LiveRefresh />}
+            >
+                <CardBody>
+                    <p className="pb-3 text-xs text-ink-soft">
+                        Round {track.currentRound}, ranked by the average of the judges&apos; totals out of{" "}
+                        {rubricMax(track.rubric) || "—"}. Averaged rather than summed, so a team scored by two
+                        judges is comparable with one scored by three.
+                    </p>
+                    <Leaderboard
+                        ranked={ranked}
+                        rubric={track.rubric}
+                        round={track.currentRound}
+                        showJudges
+                        emptyHint={
+                            judgingReady(track)
+                                ? "No team in this round has been scored yet."
+                                : "Publish a rubric above, then invite judges, and scores appear here."
+                        }
+                    />
                 </CardBody>
             </Card>
 
