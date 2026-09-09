@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { revalidatePath } from "next/cache";
 
@@ -16,7 +17,7 @@ export async function updateVendorCover(
     const docId = vendor.userId || vendorId;
     const portfolio: any = vendor.portfolio || {};
     portfolio.coverImage = coverUrl;
-    await adminDb.collection("vendor").doc(docId).update({ portfolio });
+    await adminDb.collection(COLLECTIONS.VENDORS).doc(docId).update({ portfolio });
 
     revalidatePath(`/vendor/${vendorId}/profile`);
     return { success: true };

@@ -78,11 +78,15 @@ export function MediaUpload({
 
   return (
     <div className={className}>
+      {/* Once something is uploaded this button contains only the preview
+          image, so without an explicit name it announces as an unnamed button
+          -- the visible text it otherwise carries is gone. */}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isPending}
         aria-busy={isPending}
+        aria-label={preview && !multiple ? `Replace ${label || "image"}` : undefined}
         className={buttonClassName}
       >
         {preview && !multiple ? (
@@ -90,7 +94,7 @@ export function MediaUpload({
             <video src={preview} muted className="absolute inset-0 h-full w-full object-cover" />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="preview" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
           )
         ) : (
           <>

@@ -15,6 +15,7 @@ import { ReportEvent } from "@/src/features/admin/components/ReportEvent";
 import { reportEvent } from "@/src/features/admin/actions/events.action";
 import { buttonClass } from "@/src/lib/ui";
 import { isHackathon, listTracks } from "@/src/features/hackathon/hackathon.service";
+import { AuthService } from "@/src/features/auth/authService";
 
 export const metadata = {
     title: "Register — Avoeline",
@@ -68,6 +69,9 @@ export default async function PublicEventPage({
 
     // Same live count the capacity guard uses, so what the page promises and what
     // the action enforces cannot disagree.
+    // Prefills the form for whoever is signed in. Registering never requires an
+    // account, so this is convenience only and every field stays editable.
+    const viewer = await AuthService.getCurrentUser().catch(() => null);
     const regs = await RegService.getRegsOfEvent(eventId);
     const organizations = await getEventOrganizations(eventId);
     // Only a hackathon has tracks, and only read for one -- every other event
@@ -157,6 +161,11 @@ export default async function PublicEventPage({
                                     joinsWaitlist={isFull}
                                     needsApproval={!!event.access?.requiresApproval}
                                     customFields={event.registration?.customForm ?? []}
+                                    attendee={
+                                        viewer?.userId
+                                            ? { name: viewer.name ?? "", email: viewer.email ?? "" }
+                                            : null
+                                    }
                                     tierChoices={
                                         event.access?.allowTierSelfSelect
                                             ? (event.access.attendeeTiers ?? []).filter((t) => !access.lockedTiers.includes(t))

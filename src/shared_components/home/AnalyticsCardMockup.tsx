@@ -5,7 +5,8 @@ export function AnalyticsCardMockup() {
       className="animate-float-card"
       style={{
         transform: "rotate(-6deg)",
-        width: 320,
+        width: "100%",
+        maxWidth: 320,
         background: "#FFFFFF",
         border: "1px solid #E8E7E4",
         borderRadius: 20,

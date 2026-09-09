@@ -202,16 +202,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — live analytics card */}
-            <div
-              style={{
-                flex: "0 0 auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "48px 72px 48px 24px",
-              }}
-            >
+            {/* Right — live analytics card.
+                `flex: 0 0 auto` plus 72px of right padding meant this could not
+                shrink, so on a phone the card ran off the right edge and its
+                third column was cut in half. It shrinks now. */}
+            <div className="flex min-w-0 flex-1 items-center justify-center px-5 py-12 sm:pl-6 sm:pr-[72px]">
               <AnalyticsCardMockup />
             </div>
           </div>

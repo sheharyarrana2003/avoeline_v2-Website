@@ -15,17 +15,12 @@ export function HomeHeader() {
         borderBottom: "1px solid #E8E7E4",
       }}
     >
+      {/* Inline styles cannot express a media query, so the responsive part of
+          this row is Tailwind: at 375px the fixed 32px padding plus the section
+          nav pushed the two buttons 200px off the right edge of the screen. */}
       <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 32px",
-          height: 68,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
-        }}
+        className="mx-auto flex h-[68px] items-center justify-between gap-3 px-4 sm:gap-6 sm:px-8"
+        style={{ maxWidth: 1200 }}
       >
         {/* ── Logo — the one place purple lives in the header ── */}
         <Link
@@ -53,7 +48,9 @@ export function HomeHeader() {
         </Link>
 
         {/* ── Nav ── */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        {/* Anchor links into the page below; the page itself scrolls to them,
+            so on a phone the buttons are the better use of the space. */}
+        <nav className="hidden items-center gap-1 sm:flex">
           {[
             { label: "Services", href: "#services" },
             { label: "How it works", href: "#how-it-works" },

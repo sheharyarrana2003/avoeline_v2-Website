@@ -29,8 +29,10 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
 
             <h3 className="font-display text-lg text-ink">{speaker.name}</h3>
 
-            {speaker.designation && (
-                <p className="mt-1 text-sm text-ink-soft">{speaker.designation}</p>
+            {(speaker.designation || speaker.company) && (
+                <p className="mt-1 text-sm text-ink-soft">
+                    {[speaker.designation, speaker.company].filter(Boolean).join(" · ")}
+                </p>
             )}
 
             {/* Was four identical grey paragraphs stacked with mb-6 each — designation,
@@ -49,6 +51,50 @@ export function SpeakerCard({ speaker }: { speaker: Speaker }) {
                             <dt className="text-2xs font-medium uppercase text-ink-soft">Time</dt>
                             <dd className="text-xs text-ink tabular-nums">{slot}</dd>
                         </div>
+                    )}
+                </dl>
+            )}
+
+            {(speaker.email || speaker.phone || speaker.linkedin || speaker.twitter || speaker.website) && (
+                <dl className="mt-3 w-full space-y-1.5 border-t border-line pt-3 text-left">
+                    {speaker.email && (
+                        <div className="flex justify-between gap-3">
+                            <dt className="text-2xs font-medium uppercase text-ink-soft">Email</dt>
+                            <dd className="truncate text-xs text-ink">{speaker.email}</dd>
+                        </div>
+                    )}
+                    {speaker.phone && (
+                        <div className="flex justify-between gap-3">
+                            <dt className="text-2xs font-medium uppercase text-ink-soft">Phone</dt>
+                            <dd className="text-xs text-ink tabular-nums">{speaker.phone}</dd>
+                        </div>
+                    )}
+                    {(speaker.linkedin || speaker.twitter) && (
+                        <div className="flex justify-between gap-3">
+                            <dt className="text-2xs font-medium uppercase text-ink-soft">Links</dt>
+                            <dd className="flex gap-2 text-xs">
+                                {speaker.linkedin && (
+                                    <a href={speaker.linkedin} target="_blank" rel="noopener noreferrer" className="text-ink underline">
+                                        LinkedIn
+                                    </a>
+                                )}
+                                {speaker.twitter && (
+                                    <a href={speaker.twitter} target="_blank" rel="noopener noreferrer" className="text-ink underline">
+                                        X
+                                    </a>
+                                )}
+                                {speaker.website && (
+                                    <a href={speaker.website} target="_blank" rel="noopener noreferrer" className="text-ink underline">
+                                        Site
+                                    </a>
+                                )}
+                            </dd>
+                        </div>
+                    )}
+                    {!speaker.isContactPublic && (speaker.email || speaker.phone) && (
+                        <p className="pt-1 text-2xs text-ink-faint">
+                            The speaker asked for their contact details not to be shown publicly.
+                        </p>
                     )}
                 </dl>
             )}

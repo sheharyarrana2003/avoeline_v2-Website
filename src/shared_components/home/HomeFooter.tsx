@@ -118,10 +118,11 @@ export function HomeFooter() {
                 Legal
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* /privacy, /terms and /help have never existed, so all three
+                    404'd from the public footer. Support is the one that does
+                    exist; the other two come back when the pages do. */}
                 {[
-                  { label: "Privacy", href: "/privacy" },
-                  { label: "Terms", href: "/terms" },
-                  { label: "Help Center", href: "/help" },
+                  { label: "Support", href: "/support" },
                 ].map((l) => (
                   <Link
                     key={l.label}

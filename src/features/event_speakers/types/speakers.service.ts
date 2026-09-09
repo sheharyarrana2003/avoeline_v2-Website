@@ -20,7 +20,6 @@ export const SpeakerService = {
             const designation = (formData.get("title") as string) || "";
             const bio = (formData.get("bio") as string) || "";
 
-            // Handle contact metadata parsing structures if you decide to preserve them later
             const email = (formData.get("email") as string) || "";
             const phone = (formData.get("phone") as string) || "";
             const isContactPublic = formData.get("isPublic") === "on"; // Checkboxes yield "on" when toggled active
@@ -28,6 +27,10 @@ export const SpeakerService = {
             // Social footprints
             const linkedin = (formData.get("linkedin") as string) || "";
             const twitter = (formData.get("twitter") as string) || "";
+            const website = (formData.get("website") as string) || "";
+            // The form marks this one required, so it was the only field an
+            // organizer was forced to fill in and guaranteed to lose.
+            const company = (formData.get("company") as string) || "";
 
             const purpose = (formData.get("purpose") as string) || "";
             const start_time = (formData.get("start_time") as string) || "";
@@ -35,7 +38,11 @@ export const SpeakerService = {
 
             // Avatar uploaded to Supabase Storage (public URL) via the form's
             // hidden profileImage input; fall back to the placeholder if none.
-            const profileImage = String(formData.get("profileImage") || "/placeholders/speaker-avatar.png");
+            // Blank, not a placeholder path: `/placeholders/speaker-avatar.png`
+            // has never existed in `public/`, so every speaker added without a
+            // photo requested a 404 image. `SpeakerCard` already renders its own
+            // fallback when this is empty -- inventing a URL defeated that guard.
+            const profileImage = String(formData.get("profileImage") || "");
             const sessionTitle = "Assigned Speaker Session"; // Can be populated dynamically based on active selected session arrays
 
             const new_speaker = {
@@ -47,7 +54,14 @@ export const SpeakerService = {
                 sessionTitle: sessionTitle,
                 purpose:purpose,
                 start_time: start_time,
-                end_time: end_time
+                end_time: end_time,
+                email: email.trim(),
+                phone: phone.trim(),
+                isContactPublic,
+                linkedin: linkedin.trim(),
+                twitter: twitter.trim(),
+                website: website.trim(),
+                company: company.trim()
             };
 
             Event.speakers.push(new_speaker);

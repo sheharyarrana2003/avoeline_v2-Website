@@ -153,7 +153,7 @@ export const getRegistrationById = cache(async (registrationId: string): Promise
 });
 
 /**
- * Create a registration for someone with no account.
+ * Create a registration, for an account holder or for nobody in particular.
  *
  * Writes one new document and touches nothing else. In particular it does not
  * maintain `event.analytics.registrations` or `event.capacity.availableSeats`:
@@ -171,6 +171,12 @@ export async function createPublicRegistration(
         /** Storage key of the uploaded payment screenshot, if any. */
         proofPath?: string | null;
         metadata?: { ipAddress: string; userAgent: string; deviceType: string };
+        /**
+         * The signed-in account this registration belongs to, when there is
+         * one. Registering deliberately does not require an account -- the
+         * ticket link is the credential -- so this is blank for a stranger.
+         */
+        userId?: string | null;
     },
     /** Access credentials the visitor presented: an invite token, a code. */
     attempt: AccessAttempt = {},
@@ -241,7 +247,14 @@ export async function createPublicRegistration(
     const registration: Registration = {
         registrationId: ref.id,
         eventId: event.id,
-        userId: "",
+        // Linked to the account when the person registering is signed in.
+        // This was hardcoded blank, and because `certsForUser`,
+        // `certificatesByUser` and the attendee dashboard all match on it, an
+        // attendee's own tickets and certificates were invisible to them and a
+        // certificate could not be matched back to the account it was issued
+        // to. Still blank for a registration made by a stranger, which is the
+        // other half of how this collection is used.
+        userId: String(extras?.userId ?? ""),
         attendee: { name: input.name.trim(), email, phone: input.phone.trim() },
         organizerId: event.organizerId,
         registrationDate: now,
