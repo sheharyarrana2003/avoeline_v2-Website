@@ -11,6 +11,8 @@ import { RegService } from "@/src/services/registeration.service";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { ReportEvent } from "@/src/features/admin/components/ReportEvent";
+import { reportEvent } from "@/src/features/admin/actions/events.action";
 import { buttonClass } from "@/src/lib/ui";
 import { isHackathon, listTracks } from "@/src/features/hackathon/hackathon.service";
 
@@ -188,6 +190,12 @@ export default async function PublicEventPage({
             ) : null}
 
             <SponsorStrip organizations={organizations} sponsorTiers={event.sponsorTiers} />
+
+            {/* Spec 9.4: the people best placed to notice a fake event are
+                strangers browsing it, not the organizer who posted it. */}
+            <div className="mt-12 border-t border-line pt-6">
+                <ReportEvent action={reportEvent.bind(null, event.id)} />
+            </div>
         </main>
     );
 }

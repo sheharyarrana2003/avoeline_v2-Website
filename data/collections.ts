@@ -23,5 +23,8 @@ export const COLLECTIONS = {
   HACKATHON_JUDGES: "hackathon_judges",
   HACKATHON_MENTORS: "hackathon_mentors",
   HACKATHON_ANNOUNCEMENTS: "hackathon_announcements",
-  HACKATHON_SETTINGS: "hackathon_settings"
+  HACKATHON_SETTINGS: "hackathon_settings",
+  MODERATION_LOG: "moderation_log",
+  EVENT_REPORTS: "event_reports",
+  SUPPORT_TICKETS: "support_tickets"
 } as const; 

@@ -1,4 +1,6 @@
 import { AuthService } from "@/src/features/auth/authService";
+import { UserService } from "@/src/services/user.service";
+import { accountIsLive } from "@/src/features/admin/types";
 import { EventService } from "@/src/services/event.service";
 import type { EventModel } from "@/src/services/models/event.model";
 import { getCollaboratingEventIds } from "@/src/features/organizations/organizations.service";
@@ -28,6 +30,17 @@ export async function assertOwnedEvent(eventId: string): Promise<EventModel | nu
     const current = await AuthService.getCurrentUser();
     if (!current?.userId) return null;
     if (String(current.userType).trim().toLowerCase() !== "organizer") return null;
+
+    // Spec 9.3, the half a read path cannot cover. Hiding a suspended
+    // organizer's public events and blocking their dashboard still leaves a
+    // form already open in a stale tab able to POST to a Server Action, because
+    // an action does not re-render the layout that turned them away. Every
+    // organizer action that mutates an event comes through here, so one check
+    // closes all of them at once.
+    if (!accountIsLive((await UserService.getUserById(current.userId)).accountStatus)) {
+        console.warn("[assertOwnedEvent] refused a suspended organizer", { caller: current.userId });
+        return null;
+    }
 
     const event = await EventService.getEventByID(eventId);
     if (!event) return null;

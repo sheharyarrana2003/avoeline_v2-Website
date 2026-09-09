@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CalendarDays, FolderTree, ListChecks, Plus, ShieldCheck, Sparkles, Store, Users } from "lucide-react";
+import { notFound } from "next/navigation";
+import { FolderTree, ListChecks, Plus, Sparkles } from "lucide-react";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
@@ -9,11 +10,8 @@ import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
-import { AuthService } from "@/src/features/auth/authService";
-import { promoteToAdminAction } from "@/src/features/auth/actions/promoteToAdmin.action";
 import { listTaxonomy } from "@/src/features/taxonomy/taxonomy.service";
-import { getPlatformTotals } from "@/src/features/admin/platform.service";
-import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { requireAdminArea } from "@/src/features/admin/guard";
 import {
     formatFieldLines,
     kindLabel,
@@ -34,17 +32,15 @@ export default async function AdminCategoriesPage({
 }: {
     searchParams: Promise<{ tab?: string; edit?: string; e?: string }>;
 }) {
+    // The layout proves they are an admin; this proves they hold this area, and
+    // every taxonomy action re-checks it because an action is reachable without
+    // ever loading this page.
+    if (!(await requireAdminArea("categories"))) notFound();
+
     const sp = await searchParams;
     const tab = sp.tab === "format" || sp.tab === "requests" ? sp.tab : "super";
     const all = await listTaxonomy();
 
-    // How did this visitor qualify? The layout has already let them in, so either
-    // their account really is userType "admin", or they matched the
-    // PLATFORM_ADMIN_EMAILS bootstrap allowlist. Only the latter is offered the
-    // promotion, and the offer disappears once the role is real.
-    const totals = await getPlatformTotals();
-    const viewer = await AuthService.getCurrentUser();
-    const viaEnvBootstrap = String(viewer?.userType ?? "").toLowerCase() !== "admin";
 
     // The taxonomy tables show the live vocabulary; anything still pending or
     // declined lives in the Requests tab, so a rejected name never sits in the
@@ -58,9 +54,9 @@ export default async function AdminCategoriesPage({
         });
 
     const tabs = [
-        { label: "Super categories", value: "super", href: "/admin?tab=super", count: ofKind(approved, "super").length },
-        { label: "Event formats", value: "format", href: "/admin?tab=format", count: ofKind(approved, "format").length },
-        { label: "Requests", value: "requests", href: "/admin?tab=requests", count: requests.filter((r) => r.status === "pending").length },
+        { label: "Super categories", value: "super", href: "/admin/categories?tab=super", count: ofKind(approved, "super").length },
+        { label: "Event formats", value: "format", href: "/admin/categories?tab=format", count: ofKind(approved, "format").length },
+        { label: "Requests", value: "requests", href: "/admin/categories?tab=requests", count: requests.filter((r) => r.status === "pending").length },
     ];
 
     return (
@@ -71,65 +67,6 @@ export default async function AdminCategoriesPage({
             />
 
             {sp.e ? <FormFeedback error={sp.e} className="mb-6" /> : null}
-
-            {viaEnvBootstrap ? (
-                <Card tone="raised" className="mb-6">
-                    <CardBody>
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                            <div className="max-w-xl">
-                                <h2 className="flex items-center gap-2 font-display text-base text-ink">
-                                    <ShieldCheck size={16} aria-hidden="true" />
-                                    You are here on the bootstrap allowlist
-                                </h2>
-                                <p className="mt-1 text-sm text-ink-soft">
-                                    This account is <strong>{viewer?.userType || "not an admin"}</strong>; access is coming from
-                                    <code className="mx-1 rounded bg-muted px-1 text-2xs">PLATFORM_ADMIN_EMAILS</code>.
-                                    Promoting makes it a real admin account, after which you can remove that variable.
-                                    It <strong>replaces</strong> the account&apos;s current role — promote a dedicated
-                                    account, not one that runs events.
-                                </p>
-                            </div>
-                            <form action={promoteToAdminAction}>
-                                <ConfirmSubmit
-                                    title="Make this account a platform admin?"
-                                    description={`${viewer?.email || "This account"} becomes userType "admin" and STOPS being ${viewer?.userType || "its current role"} — it will lose access to those pages. You will be signed out so the new role takes effect, because the session only picks up a role change at login.`}
-                                    confirmLabel="Promote and sign out"
-                                    className={buttonClass("primary")}
-                                >
-                                    Promote this account to admin
-                                </ConfirmSubmit>
-                            </form>
-                        </div>
-                    </CardBody>
-                </Card>
-            ) : null}
-
-            <section className="mb-8 grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
-                <MetricTile
-                    label="Organizers"
-                    value={`${totals.organizers}`}
-                    icon={<Users className="h-4 w-4" />}
-                    sublabel="Accounts on the platform"
-                />
-                <MetricTile
-                    label="Events"
-                    value={`${totals.events}`}
-                    icon={<CalendarDays className="h-4 w-4" />}
-                    sublabel={`${totals.liveEvents} live · ${totals.pastEvents} past`}
-                />
-                <MetricTile
-                    label="Registrations"
-                    value={`${totals.registrations}`}
-                    icon={<ListChecks className="h-4 w-4" />}
-                    sublabel={`${totals.certificates} certificates issued`}
-                />
-                <MetricTile
-                    label="Vendors"
-                    value={`${totals.vendors}`}
-                    icon={<Store className="h-4 w-4" />}
-                    sublabel="Listed on the marketplace"
-                />
-            </section>
 
             <FilterTabs tabs={tabs} activeValue={tab} label="Category management sections" />
 
@@ -190,7 +127,7 @@ function TaxonomyManager({
             align: "right",
             cell: (e) => (
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={`/admin?tab=${kind}&edit=${e.id}`} className={buttonClass("ghost", "sm")}>
+                    <Link href={`/admin/categories?tab=${kind}&edit=${e.id}`} className={buttonClass("ghost", "sm")}>
                         Edit
                     </Link>
                     {/* Only the three fields the toggle needs. upsertTaxonomyAction
@@ -246,7 +183,7 @@ function TaxonomyManager({
             ) : null}
 
             {editing ? (
-                <Card title={`Edit ${editing.name}`} action={<Link href={`/admin?tab=${kind}`} className="text-ink-soft hover:text-ink hover:underline">Cancel</Link>}>
+                <Card title={`Edit ${editing.name}`} action={<Link href={`/admin/categories?tab=${kind}`} className="text-ink-soft hover:text-ink hover:underline">Cancel</Link>}>
                     <CardBody>
                         <form action={upsertTaxonomyAction} className="flex flex-col gap-5">
                             <input type="hidden" name="kind" value={kind} />
@@ -281,7 +218,7 @@ function TaxonomyManager({
                             ) : null}
 
                             <div className="flex justify-end gap-2 border-t border-line pt-5">
-                                <Link href={`/admin?tab=${kind}`} className={buttonClass("secondary")}>Cancel</Link>
+                                <Link href={`/admin/categories?tab=${kind}`} className={buttonClass("secondary")}>Cancel</Link>
                                 <button type="submit" className={buttonClass("primary")}>Save changes</button>
                             </div>
                         </form>

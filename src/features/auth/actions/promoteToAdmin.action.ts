@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
+import { ADMIN_AREAS } from "@/src/features/admin/types";
 import { AuthService } from "@/src/features/auth/authService";
 
 /**
@@ -57,7 +58,16 @@ export async function promoteToAdminAction(): Promise<void> {
         }
 
         await adminDb.collection(COLLECTIONS.USERS).doc(user.userId).set(
-            { userType: "admin", updatedAt: new Date() },
+            {
+                userType: "admin",
+                // Seeded as a real owner, which is what lets the
+                // PLATFORM_ADMIN_EMAILS branch in `requireAdmin` eventually be
+                // deleted: without this, promoting produced an admin with no
+                // stored permissions who could only get in through the env var.
+                isOwner: true,
+                adminPermissions: [...ADMIN_AREAS],
+                updatedAt: new Date(),
+            },
             { merge: true },
         );
         console.log("[promoteToAdminAction] promoted", user.userId);

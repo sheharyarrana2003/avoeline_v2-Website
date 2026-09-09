@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
+import { UserService } from "@/src/services/user.service";
 import { toIsoString } from "@/src/lib/datetime";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import type { EventModel } from "@/src/services/models/event.model";
@@ -158,9 +159,16 @@ export async function resolveEventAccess(
     // Only read the guest list when the answer can change the outcome.
     const guestListInUse = type === "private" && !!email && !entry ? await hasGuestList(event.id) : false;
 
+    // The other of the two choke points. A suspended organizer's event stops
+    // resolving for anybody, so a direct link 404s exactly as an unpublished
+    // one does rather than quietly still working.
+    const suspended = await UserService.suspendedOrganizerIds();
+
     const decision = decideAccess({
         type,
-        open: isActiveLifecycle(eventLifecycle(event.status, event.schedule)),
+        open:
+            isActiveLifecycle(eventLifecycle(event.status, event.schedule)) &&
+            !suspended.has(String(event.organizerId)),
         hasCode: !!requiredCode,
         codeMatches: !!requiredCode && submittedCode === requiredCode,
         codeSubmitted: !!submittedCode,

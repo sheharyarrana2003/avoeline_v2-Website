@@ -4,6 +4,7 @@ import { BookingData } from "../bookings/types";
 import { adminDb } from "@/data/admin_db";
 import { QuerySnapshot } from "firebase-admin/firestore";
 import { COLLECTIONS } from "@/data/collections";
+import { vendorIsBookable } from "@/src/features/admin/types";
 
 // Normalize a stored timestamp (Firebase Timestamp | ISO string | Date) to a
 // Date so it round-trips as a Timestamp on whole-object vendor updates.
@@ -142,7 +143,11 @@ export function mapToVendorData(raw: any, fallbackId: string = ""): VendorData {
                 : []
         },
 
-        status: raw?.status || "inactive",
+        // A document with no status predates vendor approval: it was bookable
+        // before the field existed, so it stays bookable. A new signup gets
+        // "pending" explicitly from the Vendor constructor -- only a legacy
+        // document lands here.
+        status: raw?.status || "active",
         featured: Boolean(raw?.featured),
 
         createdAt: toDt(raw?.createdAt),
@@ -232,6 +237,12 @@ export const EventVendorService = {
         querySnapshot.forEach(x => {
             arr_of_vendors.push(mapToVendorData(x.data(), x.id));
         })
-        return arr_of_vendors;
+
+        // Spec 9.6: only an approved vendor is bookable. Until this line the
+        // marketplace showed whatever was in the collection, so a rejected or
+        // suspended vendor stayed bookable and "approval status" was a field
+        // nobody read. Filtered here rather than in the query because the
+        // status of legacy documents is normalized on read, not in Firestore.
+        return arr_of_vendors.filter((v: VendorData) => vendorIsBookable(v.status));
     }
 }

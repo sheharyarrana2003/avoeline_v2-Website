@@ -215,7 +215,7 @@ async function TrackSection({
                         />
                         <Fact
                             label="Roster"
-                            value={<StatusBadge status={locked ? "locked" : "open"} size="sm" />}
+                            value={<StatusBadge status={locked ? "locked" : "roster_open"} size="sm" />}
                         />
                     </dl>
 

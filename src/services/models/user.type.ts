@@ -43,6 +43,17 @@ export interface User {
   email: string;
   userType: "attendee" | "organizer" | "vendor" | "admin";
   accountStatus: "active" | "suspended" | "deactivated";
+  /**
+   * Platform-admin standing (spec 9.1). Empty and false for everybody else.
+   *
+   * On the user document rather than a collection of its own because that is
+   * what it describes, and because the promote flow already writes here -- so
+   * an account becomes an owner in the same write that makes it an admin.
+   * `mapToUser` maps both; a field this mapper does not assign is invisible on
+   * read, which is the trap the organizer and event mappers already carry.
+   */
+  isOwner: boolean;
+  adminPermissions: string[];
   profile: UserProfile;
   location: UserLocation;
   preferences: UserPreferences;

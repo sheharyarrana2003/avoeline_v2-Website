@@ -192,7 +192,7 @@ export default async function EventHackathonPage({
                                                                 locks {formatDate(track.rosterLockDate)}
                                                             </span>
                                                         ) : (
-                                                            <StatusBadge status="open" size="sm" />
+                                                            <StatusBadge status="roster_open" size="sm" />
                                                         )}
                                                     </td>
                                                     <td className={`${tableCell} pr-0 text-right`}>

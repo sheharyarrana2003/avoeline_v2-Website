@@ -4,6 +4,8 @@ import { OrganizerService } from "@/src/services/organizer.service";
 import { OrganizerFooter } from "@/src/shared_components/organizer/OrganizerFooter";
 import { NotificationServices } from "@/src/services/notification.services";
 import { redirect } from "next/navigation";
+import { UserService } from "@/src/services/user.service";
+import { accountIsLive } from "@/src/features/admin/types";
 
 export default async function OrganizerLayout({
     children,
@@ -14,6 +16,15 @@ export default async function OrganizerLayout({
     const u = await AuthService.getCurrentUser();
     if (u === null) {
         redirect("/auth/signup");
+    }
+
+    // Spec 9.3: a suspended organizer loses their dashboard, not only their
+    // public listings. Checked here because `accountStatus` is not in the
+    // session claims and their cookie stays valid for up to five days, so
+    // waiting for it to expire would leave them working for most of a week.
+    // The read is cache()-wrapped and this layout already awaits Firestore.
+    if (!accountIsLive((await UserService.getUserById(u.userId)).accountStatus)) {
+        redirect("/suspended");
     }
 
     // Request-cached read (deduped with the profile page); used for the header avatar.
