@@ -97,7 +97,7 @@ export default async function MentorsPage({
                                             <div className="flex flex-wrap items-baseline justify-between gap-2">
                                                 <span className="text-sm font-medium text-ink">{mentor.name}</span>
                                                 <StatusBadge
-                                                    status={free.length ? "open" : "booked"}
+                                                    status={free.length ? "roster_open" : "booked"}
                                                     label={free.length ? `${free.length} free` : "fully booked"}
                                                     size="sm"
                                                 />

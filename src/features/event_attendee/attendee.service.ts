@@ -180,6 +180,9 @@ export function userFromRegistration(reg: {
         email: contact?.email || "",
         userType: "attendee",
         accountStatus: "active",
+        // A synthesised attendee row, never a platform admin.
+        isOwner: false,
+        adminPermissions: [],
         profile: {
             // Never "": AttendeeListItem takes .charAt(0) for the avatar, and an
             // empty initial renders as a blank circle with no hint of who it is.

@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { adminDb } from "@/data/admin_db";
 import { COLLECTIONS } from "@/data/collections";
+import { UserService } from "@/src/services/user.service";
 import { EventModel } from "@/src/services/models/event.model";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import { isListedPublicly } from "@/src/features/access/access.service";
@@ -25,11 +26,20 @@ import { matchesQuery } from "@/src/lib/search";
  */
 export const getBrowsableEvents = cache(async (query?: string): Promise<EventModel[]> => {
     try {
-        const snap = await adminDb.collection(COLLECTIONS.EVENTS).get();
+        // Read once, not per event: this is the whole reason suspension is a set
+        // rather than a lookup inside the filter below.
+        const [snap, suspended] = await Promise.all([
+            adminDb.collection(COLLECTIONS.EVENTS).get(),
+            UserService.suspendedOrganizerIds(),
+        ]);
         const events = snap.docs
             .map((d: QueryDocumentSnapshot) => EventModel.fromJson({ ...d.data(), eventId: d.id }))
             .filter((event: EventModel) => isListedPublicly(event))
-            .filter((event: EventModel) => isActiveLifecycle(eventLifecycle(event.status, event.schedule)));
+            .filter((event: EventModel) => isActiveLifecycle(eventLifecycle(event.status, event.schedule)))
+            // Spec 9.3: suspending an organizer hides their public events. This
+            // is one of exactly two places an event must pass to be seen by a
+            // stranger, so the check belongs here rather than on each event.
+            .filter((event: EventModel) => !suspended.has(String(event.organizerId)));
 
         const filtered = query
             ? events.filter((event: EventModel) =>

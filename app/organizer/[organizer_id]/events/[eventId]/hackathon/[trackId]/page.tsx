@@ -376,7 +376,7 @@ export default async function TrackDetailPage({
                                                 ) : null}
                                                 <td className={tableCell}>
                                                     <StatusBadge
-                                                        status={rosterLocked(track, team) ? "locked" : "open"}
+                                                        status={rosterLocked(track, team) ? "locked" : "roster_open"}
                                                         size="sm"
                                                     />
                                                     {locked ? (

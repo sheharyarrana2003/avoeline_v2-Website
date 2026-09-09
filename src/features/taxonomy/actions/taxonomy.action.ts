@@ -119,7 +119,7 @@ function bounce(tab: TaxonomyKind | "requests", error?: string, edit?: string): 
     const params = new URLSearchParams({ tab });
     if (edit) params.set("edit", edit);
     if (error) params.set("e", error);
-    redirect(`/admin?${params.toString()}`);
+    redirect(`/admin/categories?${params.toString()}`);
 }
 
 function readKind(formData: FormData): TaxonomyKind {
@@ -145,7 +145,7 @@ function parseChecklist(text: unknown): string[] {
 export async function seedTaxonomyAction(formData: FormData): Promise<void> {
     const kind = readKind(formData);
     try {
-        if (!(await AuthService.requireAdmin())) bounce(kind, "Only a platform admin can do that.");
+        if (!(await AuthService.requireAdmin("categories"))) bounce(kind, "Only a platform admin can do that.");
 
         for (const [k, seeds] of [["super", SEED_SUPER_CATEGORIES], ["format", SEED_EVENT_FORMATS]] as const) {
             const ref = adminDb.collection(collectionFor(k as TaxonomyKind));
@@ -177,7 +177,7 @@ export async function seedTaxonomyAction(formData: FormData): Promise<void> {
             if (queued) await batch.commit();
         }
 
-        revalidatePath("/admin");
+        revalidatePath("/admin/categories");
     } catch (err) {
         if (isRedirectError(err)) throw err;
         console.error("[seedTaxonomyAction]", err);
@@ -198,7 +198,7 @@ export async function seedTaxonomyAction(formData: FormData): Promise<void> {
 export async function upsertTaxonomyAction(formData: FormData): Promise<void> {
     const kind = readKind(formData);
     try {
-        if (!(await AuthService.requireAdmin())) bounce(kind, "Only a platform admin can do that.");
+        if (!(await AuthService.requireAdmin("categories"))) bounce(kind, "Only a platform admin can do that.");
 
         const existingId = String(formData.get("id") ?? "").trim();
         const ref = adminDb.collection(collectionFor(kind));
@@ -227,7 +227,7 @@ export async function upsertTaxonomyAction(formData: FormData): Promise<void> {
                 decidedAt: null,
             });
 
-            revalidatePath("/admin");
+            revalidatePath("/admin/categories");
             revalidatePath("/organizer", "layout");
             bounce(kind);
         }
@@ -253,7 +253,7 @@ export async function upsertTaxonomyAction(formData: FormData): Promise<void> {
 
         await ref.doc(existingId).set(patch, { merge: true });
 
-        revalidatePath("/admin");
+        revalidatePath("/admin/categories");
         // A deactivated category must disappear from the wizard immediately.
         revalidatePath("/organizer", "layout");
     } catch (err) {
@@ -275,7 +275,7 @@ export async function upsertTaxonomyAction(formData: FormData): Promise<void> {
 export async function decideRequestAction(formData: FormData): Promise<void> {
     const kind = readKind(formData);
     try {
-        if (!(await AuthService.requireAdmin())) bounce("requests", "Only a platform admin can do that.");
+        if (!(await AuthService.requireAdmin("categories"))) bounce("requests", "Only a platform admin can do that.");
 
         const id = String(formData.get("id") ?? "").trim();
         const adminNote = String(formData.get("adminNote") ?? "").trim();
@@ -323,7 +323,7 @@ export async function decideRequestAction(formData: FormData): Promise<void> {
             revalidatePath(`/organizer/${organizerId}`, "layout");
         }
 
-        revalidatePath("/admin");
+        revalidatePath("/admin/categories");
     } catch (err) {
         if (isRedirectError(err)) throw err;
         console.error("[decideRequestAction]", err);
@@ -385,7 +385,7 @@ export async function requestCategoryAction(
             decidedAt: null,
         });
 
-        revalidatePath("/admin");
+        revalidatePath("/admin/categories");
         return ok();
     } catch (err) {
         if (isRedirectError(err)) throw err;

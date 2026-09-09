@@ -20,8 +20,21 @@ import { headers } from "next/headers";
  */
 export async function absoluteUrl(path: string): Promise<string> {
     const h = await headers();
-    const host = h.get("host") ?? "localhost:3000";
-    const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+
+    // A chain of proxies appends rather than replaces, so these can arrive as
+    // "a.com, b.internal" -- the first entry is the host the visitor actually
+    // typed, which is the one belonging in an emailed link.
+    const first = (value: string | null) => value?.split(",")[0]?.trim() || null;
+
+    // `x-forwarded-host` before `host`: behind Vercel's edge, and behind any
+    // rewrite or proxy, `host` can be the internal hostname the request was
+    // routed to rather than the domain the visitor is on. Getting that wrong
+    // puts an unreachable link in an email nobody can correct afterwards.
+    const host = first(h.get("x-forwarded-host")) ?? first(h.get("host")) ?? "localhost:3000";
+    const proto =
+        first(h.get("x-forwarded-proto")) ??
+        (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
+
     return `${proto}://${host}${path.startsWith("/") ? path : `/${path}`}`;
 }
 

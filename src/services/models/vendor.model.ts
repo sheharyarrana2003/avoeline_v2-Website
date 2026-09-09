@@ -128,7 +128,12 @@ export class Vendor implements VendorData {
         this.serviceCategories = [];
         this.pricingPackages = [];
         this.services = []; // Initialized as empty array
-        this.status = 'active';
+        // Spec 9.6: a new application waits for an admin. This used to be
+        // 'active', which meant every vendor was bookable the moment they
+        // signed up and made "Approve/Reject new vendor applications"
+        // impossible to express. Existing documents already carry 'active' and
+        // are unaffected.
+        this.status = 'pending';
         this.featured = false;
         
         this.createdAt = now;

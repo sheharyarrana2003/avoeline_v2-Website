@@ -86,7 +86,7 @@ const STATUS: Record<string, StatusMeta> = {
     // A locked roster is the intended end state once the lock date passes, so
     // it reads as information rather than as a problem.
     locked: { label: "Roster locked", tone: "neutral" },
-    open: { label: "Roster open", tone: "info" },
+    roster_open: { label: "Roster open", tone: "info" },
     looking: { label: "Looking for members", tone: "info" },
     fee_pending: { label: "Fee pending", tone: "warning" },
     fee_paid: { label: "Fee paid", tone: "success" },
@@ -99,6 +99,19 @@ const STATUS: Record<string, StatusMeta> = {
     eliminated: { label: "Eliminated", tone: "danger" },
     judging: { label: "Judging", tone: "info" },
     booked: { label: "Booked", tone: "info" },
+
+    // -- Platform administration ------------------------------------------
+    // A suspended account is a decision somebody made, so it reads as danger
+    // rather than as the grey `humanize()` fallback it used to get.
+    suspended: { label: "Suspended", tone: "danger" },
+    deactivated: { label: "Deactivated", tone: "neutral" },
+    // Support tickets and the flagged-content queue.
+    open: { label: "Open", tone: "warning" },
+    resolved: { label: "Resolved", tone: "success" },
+    dismissed: { label: "Dismissed", tone: "neutral" },
+    actioned: { label: "Actioned", tone: "success" },
+    unpublished: { label: "Unpublished", tone: "warning" },
+    removed: { label: "Removed", tone: "danger" },
 };
 
 /** "quote_requested" -> "Quote requested", for statuses not in the map. */

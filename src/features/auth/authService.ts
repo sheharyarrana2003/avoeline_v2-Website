@@ -10,6 +10,13 @@ import { auth } from '@/data/db';
 import { Organizer } from "@/src/services/models/organizer.model";
 import { Vendor } from "@/src/services/models/vendor.model";
 import { adminAuth, adminDb } from "@/data/admin_db";
+import {
+    accountIsLive,
+    holdsArea,
+    sanitizeAreas,
+    type AdminArea,
+    type AdminIdentity,
+} from "@/src/features/admin/types";
 import { UserService } from "@/src/services/user.service";
 import { cookies } from "next/headers";
 import { CurrentUserData, User } from "@/src/services/models/user.type";
@@ -94,6 +101,9 @@ function isValidCurrentUserData(data: unknown): data is CurrentUserData {
 const handleAuthAndCreateCookie = async (token: string) => {
     const obj = await adminAuth.verifyIdToken(token);
     const user_from_obj = await UserService.getUserById(obj.uid);
+    if (!accountIsLive(user_from_obj.accountStatus)) {
+        throw new Error("This account has been suspended. Contact Avoeline support.");
+    }
     const current_user = await converting_to_current_user_data(user_from_obj);
     await adminAuth.setCustomUserClaims(obj.uid, { ...current_user });
     const expiresIn = 1000 * 60 * 60 * 24 * 5;
@@ -141,6 +151,15 @@ const converting_to_current_user_data = async (user: User) => {
 const setClaimsForUser = async (token: string) => {
     const obj = await adminAuth.verifyIdToken(token);
     const user_from_obj = await UserService.getUserById(obj.uid);
+
+    // Spec 9.3: a suspended account cannot come back. Refused here rather than
+    // in loginWithEmail because this is where the user document is already in
+    // hand on every login path, so the check costs no extra read -- and it
+    // happens before a session cookie exists, so there is nothing to revoke.
+    if (!accountIsLive(user_from_obj.accountStatus)) {
+        throw new Error("This account has been suspended. Contact Avoeline support.");
+    }
+
     const current_user = await converting_to_current_user_data(user_from_obj);
     await adminAuth.setCustomUserClaims(obj.uid, { ...current_user });
     return obj.uid;
@@ -199,37 +218,66 @@ export const AuthService = {
     }),
 
     /**
-     * The signed-in user if they are a platform admin, otherwise null.
+     * The signed-in admin, narrowed to one area of the panel (spec 9.1).
      *
-     * Two ways in, and the second one is load-bearing. `userType` reaches the
-     * session only through `setClaimsForUser`, which copies it off the users
-     * doc **at login**, and signup never writes "admin" -- so gating on the
-     * claim alone means a manual Firestore edit plus a re-login before anyone
-     * can reach /admin at all. PLATFORM_ADMIN_EMAILS is the bootstrap: it takes
-     * effect on the next request and needs no write.
+     * Called with no argument it answers "is this an admin at all", which is
+     * what the /admin shell needs. Called with an area it also answers "may
+     * they act here", which is what every page and every action inside the
+     * panel needs -- and they all ask, because a Server Action is a public
+     * endpoint the layout guard never sees.
      *
-     * ponytail: this is an allowlist, not a permissions layer -- every admin
-     * has every power, and the env var lives outside the user record. The spec
-     * wants a separate admin login with its own permissions (module 9); when
-     * that lands, drop the env branch and keep the claim check.
+     * Permissions are read from the user document, NOT from the session
+     * claims. Claims are written once, by `setClaimsForUser`, and the cookie
+     * lasts five days -- so a permission held in a claim would keep working for
+     * five days after an owner revoked it. Reading the document instead makes a
+     * change take effect on the admin's very next request. The read is
+     * `cache()`-wrapped by `UserService.getUserById`, so the layout and the
+     * page it wraps pay for it once, and a non-admin never pays for it at all:
+     * the claim check short-circuits first.
+     *
+     * ponytail: PLATFORM_ADMIN_EMAILS still grants owner, and that is
+     * deliberate rather than left over. It is currently the only way into an
+     * empty platform, so removing it before a real owner account exists locks
+     * everybody out of /admin with no Server Action left that could create the
+     * first one. Removal condition: once an account exists with
+     * `userType: "admin"` and `isOwner: true`, delete this branch and the
+     * `promoteToAdminAction` that seeds it, together.
      */
-    requireAdmin: async (): Promise<CurrentUserData | null> => {
+    requireAdmin: async (area?: AdminArea): Promise<AdminIdentity | null> => {
         const user = await AuthService.getCurrentUser();
         if (!user?.userId) return null;
 
-        if (String(user.userType).trim().toLowerCase() === "admin") {
-            return user as CurrentUserData;
-        }
-
         const email = String(user.email ?? "").trim().toLowerCase();
-        if (!email) return null;
+        const bootstrapped =
+            !!email &&
+            String(process.env.PLATFORM_ADMIN_EMAILS ?? "")
+                .split(",")
+                .map((e) => e.trim().toLowerCase())
+                .filter(Boolean)
+                .includes(email);
 
-        const allowed = String(process.env.PLATFORM_ADMIN_EMAILS ?? "")
-            .split(",")
-            .map((e) => e.trim().toLowerCase())
-            .filter(Boolean);
+        const isAdminClaim = String(user.userType).trim().toLowerCase() === "admin";
+        if (!isAdminClaim && !bootstrapped) return null;
 
-        return allowed.includes(email) ? (user as CurrentUserData) : null;
+        // Only now is a read worth making. A bootstrap admin may have no stored
+        // permissions at all, which is exactly why the env branch implies owner.
+        const record = isAdminClaim ? await UserService.getUserById(user.userId) : null;
+        if (record && !accountIsLive(record.accountStatus)) return null;
+
+        const identity: AdminIdentity = {
+            userId: user.userId,
+            email: user.email ?? "",
+            name: user.name ?? "",
+            isOwner: bootstrapped || !!record?.isOwner,
+            permissions: sanitizeAreas(record?.adminPermissions ?? []),
+            viaBootstrap: bootstrapped && !isAdminClaim,
+        };
+
+        if (area && !holdsArea(identity, area)) {
+            console.warn("[requireAdmin] refused", { area, admin: identity.email });
+            return null;
+        }
+        return identity;
     },
 
     async loginWithEmail(email: string, password: string) {

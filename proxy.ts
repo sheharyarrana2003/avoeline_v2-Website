@@ -11,12 +11,29 @@ const all_possible_roles = ['organizer', 'vendor', 'attendee'];
 
 /** Send an unauthenticated visitor to sign in, remembering where they were headed. */
 function redirectToSignIn(request: NextRequest) {
-    const url = new URL('/auth/signin', request.url);
+    // The admin panel has its own login, so an admin-bound visitor goes there
+    // rather than to the form that redirects organizers to their dashboard.
+    const isAdminBound = request.nextUrl.pathname.startsWith('/admin');
+    const url = new URL(isAdminBound ? '/admin/signin' : '/auth/signin', request.url);
     url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
 }
 
+/**
+ * Paths under a guarded prefix that must stay reachable while signed out.
+ *
+ * `/admin/signin` is the admin login (spec 9.1). The matcher below covers
+ * `/admin/:path*` so a signed-out visitor is redirected rather than reaching a
+ * panel page -- and without this exception that redirect would also catch the
+ * one page they need in order to sign in at all.
+ */
+const PUBLIC_PATHS = ['/admin/signin'];
+
 export async function proxy(request: NextRequest) {
+    if (PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
+        return NextResponse.next();
+    }
+
     const session_cookie_val = request.cookies.get('firebaseSession')?.value;
 
     // Guard BEFORE verifying: verifySessionCookie(undefined) throws, and an
