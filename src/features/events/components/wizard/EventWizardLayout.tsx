@@ -216,6 +216,19 @@ export default function CreateEventPage({
 
     const step1Incomplete = currentStep === 1 && (!formData.superCategoryId || !formData.eventFormatId);
 
+    /*
+     * A published event has to say when it happens.
+     *
+     * Only step 1 was ever gated, and `create_event` accepts a blank date, so
+     * an event could be published with no start date at all -- its public page
+     * then shows a dash where the date belongs and it can never sort correctly
+     * among upcoming events. Saving a draft is deliberately still allowed
+     * without one: a draft is unfinished by definition.
+     */
+    const missingSchedule = !String(formData.startDate || "").trim();
+    const cannotPublish =
+        !formData.agreeToTerms || !formData.confirmRights || missingSchedule || isPublishing;
+
     // --- Step 1: Basic Information ---
     const renderStep1 = () => (
         <div className="space-y-8">
@@ -237,10 +250,11 @@ export default function CreateEventPage({
 
                     {/* Event Title */}
                     <div>
-                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">
+                        <label htmlFor="wiz-title" className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">
                             Event Title <span className="float-right text-ink-soft font-normal">{formData.eventTitle.length}/100</span>
                         </label>
                         <input
+                            id="wiz-title"
                             type="text"
                             value={formData.eventTitle}
                             onChange={(e) => updateForm('eventTitle', e.target.value)}
@@ -251,7 +265,7 @@ export default function CreateEventPage({
 
                     {/* Description */}
                     <div>
-                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Description</label>
+                        <label htmlFor="wiz-description" className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Description</label>
                         <div className="border border-line rounded-xl overflow-hidden">
                             <div className="flex items-center gap-2 px-3 py-2 border-b border-line bg-muted">
                                 <button className="p-1 hover:bg-muted-strong rounded-xs text-xs font-bold">B</button>
@@ -261,6 +275,7 @@ export default function CreateEventPage({
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => updateForm('description', e.target.value)}
+                                id="wiz-description"
                                 placeholder="Tell your attendees what to expect..."
                                 rows={4}
                                 className="w-full px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none resize-none"
@@ -270,8 +285,9 @@ export default function CreateEventPage({
 
                     {/* Short Description */}
                     <div>
-                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Short Description</label>
+                        <label htmlFor="wiz-short" className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Short Description</label>
                         <input
+                            id="wiz-short"
                             type="text"
                             value={formData.shortDescription}
                             onChange={(e) => updateForm('shortDescription', e.target.value)}
@@ -295,6 +311,7 @@ export default function CreateEventPage({
                                 value={tagInput}
                                 onChange={(e) => setTagInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                                aria-label="Add a tag"
                                 placeholder="Add tag..."
                                 className="flex-1 text-sm outline-none min-w-[80px] py-1"
                             />
@@ -368,12 +385,13 @@ export default function CreateEventPage({
 
                     {/* Video URL */}
                     <div>
-                        <label className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Video Promo URL</label>
+                        <label htmlFor="wiz-video" className="block text-2xs font-bold text-ink-soft uppercase tracking-wider mb-2">Video Promo URL</label>
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={formData.videoUrl}
                                 onChange={(e) => updateForm('videoUrl', e.target.value)}
+                                id="wiz-video"
                                 placeholder="https://youtube.com/..."
                                 className="flex-1 bg-paper border border-line rounded-xl px-4 py-3 text-sm text-ink placeholder-gray-400 outline-none focus:ring-2 focus:ring-line"
                             />
@@ -1441,7 +1459,10 @@ export default function CreateEventPage({
             {/* Top Progress Bar */}
             <div className="border-b border-line bg-paper sticky top-0 z-20">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex items-center justify-between h-16">
+                    {/* Wrapped rather than a fixed 64px row: on a phone the step
+                        dots and the completion figure did not fit beside the
+                        heading and pushed the page sideways. */}
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3 md:h-16 md:flex-nowrap md:py-0">
                         <div>
                             <p className="text-2xs font-bold text-ink-soft uppercase tracking-wider">Step {currentStep} of {STEPS.length}</p>
                             <h1 className="text-lg font-bold text-ink">{STEPS[currentStep - 1].label}</h1>
@@ -1469,7 +1490,7 @@ export default function CreateEventPage({
                             ))}
                         </div>
 
-                        <div className="text-right">
+                        <div className="ml-auto shrink-0 text-right">
                             <p className="text-sm font-bold text-ink">{completionPercent}% Complete</p>
                         </div>
                     </div>
@@ -1485,6 +1506,15 @@ export default function CreateEventPage({
                     all. A refused publish that looks like a no-op is the worst
                     outcome available, so the banner follows you. */}
                 {serverError ? <FormFeedback error={serverError} className="mb-6" /> : null}
+
+                {/* Says why Publish is greyed out. A disabled button with only a
+                    tooltip on it reads as broken rather than as a requirement. */}
+                {currentStep === 4 && missingSchedule ? (
+                    <FormFeedback
+                        error="This event has no start date yet. Add one under Schedule & Location before publishing — you can still save it as a draft."
+                        className="mb-6"
+                    />
+                ) : null}
 
                 {currentStep === 1 && renderStep1()}
                 {currentStep === 2 && renderStep2()}
@@ -1540,7 +1570,8 @@ export default function CreateEventPage({
                     ) : (
                         <button
                             onClick={() => handling_submission_client(formData)}
-                            disabled={!formData.agreeToTerms || !formData.confirmRights || isPublishing}
+                            disabled={cannotPublish}
+                            title={missingSchedule ? "Set a start date on Schedule & Location first" : undefined}
                             aria-busy={isPublishing}
                             className="bg-ink text-ink-invert px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-ink-soft transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >

@@ -117,7 +117,9 @@ export default function OrganizerChatBotClient({ handleSubmitServer }: any) {
                     {/* Input Area */}
                     <div className="border-t border-line px-5 pb-5 pt-4 md:px-8">
                         <form onSubmit={handleSubmit} className="flex w-full items-center gap-2">
-                            <div className="flex flex-1 items-center gap-2 rounded-full border border-line-loud bg-paper px-4 py-1.5 focus-within:border-ink">
+                            {/* min-w-0: without it a flex child cannot shrink below the intrinsic
+                                width of the input inside, so this row ran off a phone. */}
+                            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-line-loud bg-paper px-4 py-1.5 focus-within:border-ink">
                                 <input
                                     value={input}
                                     onChange={(e) => SetInput(e.target.value)}

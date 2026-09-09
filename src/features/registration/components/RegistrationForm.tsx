@@ -34,6 +34,12 @@ export interface RegistrationFormProps {
      * collected nothing.
      */
     customFields?: CustomFieldOption[];
+    /**
+     * Who is signed in, when anybody is. Registering does not need an account,
+     * so these are only ever prefilled convenience -- every field stays
+     * editable, because the person booking is not always the account holder.
+     */
+    attendee?: { name?: string; email?: string } | null;
 }
 
 /**
@@ -111,6 +117,7 @@ export function RegistrationForm({
     joinsWaitlist = false,
     needsApproval = false,
     customFields = [],
+    attendee = null,
 }: RegistrationFormProps) {
     const boundAction = registerAttendeeAction.bind(null, eventId);
     const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
@@ -132,6 +139,7 @@ export function RegistrationForm({
                 <input
                     id="reg-name"
                     name="name"
+                    defaultValue={attendee?.name ?? ""}
                     type="text"
                     required
                     maxLength={120}
@@ -148,6 +156,7 @@ export function RegistrationForm({
                 <input
                     id="reg-email"
                     name="email"
+                    defaultValue={attendee?.email ?? ""}
                     type="email"
                     required
                     autoComplete="email"

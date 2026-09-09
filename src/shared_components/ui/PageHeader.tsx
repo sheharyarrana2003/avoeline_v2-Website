@@ -18,7 +18,10 @@ export default function PageHeader({
     return (
         <header className="mb-8 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h1 className="font-display text-3xl text-ink">{title}</h1>
+                {/* Titles are data -- an organizer with no organization name
+                    falls back to their email address, which has no space to
+                    break at and pushed every page sideways on a phone. */}
+                <h1 className="font-display text-3xl break-words text-ink">{title}</h1>
                 {description ? <p className="mt-1 text-sm text-ink-soft">{description}</p> : null}
             </div>
             {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}

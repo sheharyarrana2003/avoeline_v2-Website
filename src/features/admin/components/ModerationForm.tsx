@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
@@ -43,6 +43,10 @@ export function ModerationForm({
     successMessage?: string;
 }) {
     const [state, formAction] = useActionState<ActionResult | null, FormData>(action, null);
+    // Several of these render on one page, so the label needs an id unique to
+    // this instance to point at -- without one the textarea had no accessible
+    // name at all.
+    const reasonId = `reason-${useId()}`;
 
     return (
         <form action={formAction} className="flex flex-col gap-3">
@@ -55,8 +59,9 @@ export function ModerationForm({
 
             {requiresReason ? (
                 <div className="flex flex-col gap-1.5">
-                    <label className={labelClass}>{reasonLabel ?? "Reason"}</label>
+                    <label htmlFor={reasonId} className={labelClass}>{reasonLabel ?? "Reason"}</label>
                     <textarea
+                        id={reasonId}
                         name="reason"
                         rows={2}
                         maxLength={2000}

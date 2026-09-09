@@ -149,15 +149,24 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                             onChange={handleChange}
                             className={`${fieldClass} cursor-pointer appearance-none pr-10`}
                         >
+                            {/* Values are the names themselves, not slugs. These are
+                                stored on the organizer's and vendor's address and
+                                displayed straight back, so a slug showed up in the UI
+                                as "new-york, usa". Pakistan leads because it is what
+                                the address falls back to everywhere else in the code. */}
                             <option value="" disabled>Select a country</option>
-                            <option value="usa">United States</option>
-                            <option value="uk">United Kingdom</option>
-                            <option value="canada">Canada</option>
-                            <option value="australia">Australia</option>
-                            <option value="germany">Germany</option>
-                            <option value="france">France</option>
-                            <option value="india">India</option>
-                            <option value="japan">Japan</option>
+                            <option value="Pakistan">Pakistan</option>
+                            <option value="United Arab Emirates">United Arab Emirates</option>
+                            <option value="Saudi Arabia">Saudi Arabia</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                            <option value="India">India</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Other">Other</option>
                         </select>
                         <ChevronDown
                             aria-hidden="true"
@@ -169,27 +178,20 @@ export default function SignInClient({ handleSubmitLogin }: { handleSubmitLogin:
                     <div>
                       <label htmlFor="signup-city" className={labelClass}>City</label>
                       <div className="relative mt-1.5">
-                        <select
+                        {/* Typed, not chosen. The list here was eight cities with no
+                            relationship to the country above it, so "United States"
+                            plus "Tokyo" was a valid answer and nobody outside those
+                            eight could enter where they actually are. */}
+                        <input
                             id="signup-city"
                             name="city"
+                            type="text"
                             autoComplete="address-level2"
+                            maxLength={80}
+                            placeholder="Lahore"
                             value={formData.city}
                             onChange={handleChange}
-                            className={`${fieldClass} cursor-pointer appearance-none pr-10`}
-                        >
-                            <option value="" disabled>Select a city</option>
-                            <option value="new-york">New York</option>
-                            <option value="london">London</option>
-                            <option value="toronto">Toronto</option>
-                            <option value="sydney">Sydney</option>
-                            <option value="berlin">Berlin</option>
-                            <option value="paris">Paris</option>
-                            <option value="mumbai">Mumbai</option>
-                            <option value="tokyo">Tokyo</option>
-                        </select>
-                        <ChevronDown
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-ink-soft"
+                            className={fieldClass}
                         />
                       </div>
                     </div>

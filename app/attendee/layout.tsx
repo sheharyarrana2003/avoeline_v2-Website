@@ -38,6 +38,12 @@ export default async function AttendeeLayout({ children }: { children: React.Rea
                         <BrandMark className="h-7 w-7" />
                         <span className="text-2xs font-medium uppercase tracking-wider text-ink-soft">My events</span>
                     </Link>
+                    {/* The shell had exactly one link, to the page you are already
+                        on, so an attendee with no tickets yet had nowhere to go
+                        from here and no way back to the public site. */}
+                    <Link href="/events" className="text-sm text-ink-soft hover:text-ink">
+                        Browse events
+                    </Link>
                     <div className="ml-auto flex items-center gap-4">
                         <span className="truncate text-xs text-ink-soft">{user.email}</span>
                         <form action={signOutAction}>

@@ -114,6 +114,11 @@ export default async function AttendeeDashboard({
                                     icon={<Ticket size={28} />}
                                     title="No registrations yet"
                                     description="Events you register for will appear here with their ticket."
+                                    action={
+                                        <Link href="/events" className={buttonClass("primary", "sm")}>
+                                            Browse events
+                                        </Link>
+                                    }
                                 />
                             </div>
                         }

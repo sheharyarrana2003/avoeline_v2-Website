@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { revalidatePath } from "next/cache";
 
@@ -14,7 +15,7 @@ export async function updateVendorLogo(
 
     // Vendor docs are keyed by the auth uid (== vendor.userId), not the vendorId field.
     const docId = vendor.userId || vendorId;
-    await adminDb.collection("vendor").doc(docId).update({ logo: logoUrl });
+    await adminDb.collection(COLLECTIONS.VENDORS).doc(docId).update({ logo: logoUrl });
 
     revalidatePath(`/vendor/${vendorId}/profile`);
     return { success: true };

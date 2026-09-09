@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb } from "@/data/admin_db";
+import { COLLECTIONS } from "@/data/collections";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { PortfolioImage, VendorPortfolio } from "@/src/services/models/vendor.model";
 import { formatDate } from "@/src/lib/datetime";
@@ -25,7 +26,7 @@ async function mutatePortfolio(
         const portfolio: VendorPortfolio = vendor.portfolio;
         mutate(portfolio);
 
-        await adminDb.collection("vendor").doc(docId).update({ portfolio });
+        await adminDb.collection(COLLECTIONS.VENDORS).doc(docId).update({ portfolio });
         revalidatePath(`/vendor/${vendorId}/profile`);
         return { success: true };
     } catch (err: any) {

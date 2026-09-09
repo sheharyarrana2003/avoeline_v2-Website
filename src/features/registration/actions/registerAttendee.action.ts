@@ -13,6 +13,7 @@ import { absoluteUrl } from "@/src/lib/appUrl";
 import { RegistrationRefusal } from "../types";
 import { readAnswers } from "@/src/lib/customFields";
 import { missingRequired } from "@/src/features/taxonomy/types";
+import { AuthService } from "@/src/features/auth/authService";
 
 /**
  * What each refusal reads like to the person who just pressed the button.
@@ -152,11 +153,15 @@ export async function registerAttendeeAction(
         }
 
         const headerList = await headers();
+        // Registration is open to strangers, so this is a link when it can be
+        // made and nothing when it cannot -- never a requirement.
+        const signedIn = await AuthService.getCurrentUser().catch(() => null);
         const result = await createPublicRegistration(
             eventId,
             { name, email, phone, tier, customResponses },
             {
                 proofPath,
+                userId: signedIn?.userId ?? null,
                 metadata: {
                     ipAddress: headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "",
                     userAgent: headerList.get("user-agent") ?? "",

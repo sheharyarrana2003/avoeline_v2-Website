@@ -114,6 +114,21 @@ export interface Speaker {
   purpose: string;
   start_time: string;
   end_time: string;
+  /*
+   * The create form has always asked for these five and `createNewSpeaker`
+   * always threw them away, so an organizer's typing was silently lost. They
+   * are optional because every speaker stored before this carries none of them.
+   * `isContactPublic` is the speaker's own answer about their details being
+   * shown, and is recorded rather than assumed either way.
+   */
+  email?: string;
+  phone?: string;
+  isContactPublic?: boolean;
+  linkedin?: string;
+  twitter?: string;
+  /** Required by the create form, and until now not read from it at all. */
+  company?: string;
+  website?: string;
 }
 
 export interface CertificateConfig {
