@@ -1,0 +1,30 @@
+import { ReactNode } from "react";
+
+/**
+ * The organizer dashboard's masthead, lifted verbatim so every other page can
+ * stop re-inventing its own title block. Server Component: `actions` arrives as
+ * already-rendered children, so a page can hand it a <Link> or a client island
+ * without either crossing the RSC boundary as a function.
+ */
+export default function PageHeader({
+    title,
+    description,
+    actions,
+}: {
+    title: string;
+    description?: string;
+    actions?: ReactNode;
+}) {
+    return (
+        <header className="mb-8 flex flex-col gap-4 border-b border-line pb-7 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                {/* Titles are data -- an organizer with no organization name
+                    falls back to their email address, which has no space to
+                    break at and pushed every page sideways on a phone. */}
+                <h1 className="font-display text-3xl tracking-tight break-words text-ink">{title}</h1>
+                {description ? <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">{description}</p> : null}
+            </div>
+            {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        </header>
+    );
+}

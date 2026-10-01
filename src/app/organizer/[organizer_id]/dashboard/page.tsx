@@ -1,0 +1,242 @@
+import { Suspense } from "react";
+import { AuthService } from "@/src/features/auth/authService";
+import { AnalyticsService } from "@/src/services/anaylService";
+import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import { Calendar, Plus, Star, Users, Wallet, Bot } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui";
+
+import TodaysSchedule from "@/src/features/dashboard/components/TodaysSchedule";
+import RecentRegistrations from "@/src/features/dashboard/components/RecentRegistrations";
+import RegistrationTrendChart from "@/src/features/dashboard/components/RegistrationTrendChart.lazy";
+import { CurrentUserData } from "@/src/services/models/user.type";
+import { redirect } from "next/navigation";
+import UpcomingEvents from "@/src/features/dashboard/components/UpcomingEvents";
+import { getPlanForOrganizer } from "@/src/features/department/department.service";
+import { PlanStatusBanner } from "@/src/features/department/components/PlanStatusBanner";
+
+export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
+    const { organizer_id } = await params;
+
+    const u: CurrentUserData | null = await AuthService.getCurrentUser();
+
+    if (u === null) {
+        redirect('/auth/signup');
+    }
+
+    const isPlatformAdmin = u.role === "platform_admin" || u.userType === "admin";
+    const isSelf = u.userId === organizer_id;
+    const isManagedOrg = u.role === "department_admin" && (u.orgId === organizer_id || u.managedOrgIds?.includes(organizer_id));
+
+    if (!isPlatformAdmin && !isSelf && !isManagedOrg) {
+        redirect("/access-denied?reason=unauthorized_organizer");
+    }
+
+    const displayName = u.name?.trim() || u.email?.split("@")[0]?.trim() || "";
+    const plan = await getPlanForOrganizer(organizer_id);
+
+    return (
+        <div className="px-4 py-8 text-ink sm:px-6 lg:px-8 font-sans">
+            <div className="mx-auto max-w-6xl space-y-8">
+            <PlanStatusBanner plan={plan} audience="organizer" />
+                <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="space-y-1">
+                        <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+                            {displayName ? `Welcome back, ${displayName}` : "Welcome back"}
+                        </h1>
+                        <p className="text-sm text-ink-soft">Manage your events, registrations, and analytics.</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <Button
+                            href={`/organizer/${organizer_id}/chatbot`}
+                            variant="secondary"
+                            size="md"
+                            icon={<Bot size={16} />}
+                        >
+                            Chat with AI
+                        </Button>
+                        <Button
+                            href={`/organizer/${organizer_id}/events/create`}
+                            variant="primary"
+                            size="md"
+                            icon={<Plus size={16} />}
+                        >
+                            Create event
+                        </Button>
+                    </div>
+                </header>
+
+                {/* Streamed Stats Cards */}
+                <Suspense fallback={<StatsSkeleton />}>
+                    <DashboardStats organizerId={organizer_id} />
+                </Suspense>
+
+                {/* Main Dashboard Layout */}
+                <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
+                    <div className="space-y-6">
+                        <Suspense fallback={<WidgetSkeleton height="h-64" />}>
+                            <DashboardMain organizerId={organizer_id} />
+                        </Suspense>
+                    </div>
+
+                    <aside className="space-y-6">
+                        <Suspense fallback={<WidgetSkeleton height="h-48" />}>
+                            <DashboardUpcoming organizerId={organizer_id} />
+                        </Suspense>
+                    </aside>
+                </section>
+            </div>
+        </div>
+    );
+}
+
+// ── Streamed data regions ──────────────────────────────────────────────────────
+
+async function DashboardStats({ organizerId }: { organizerId: string }) {
+    // getDashboardData is cache()-wrapped, so pulling todayEvents here as well as in
+    // DashboardMain costs nothing — the three Suspense regions share one fetch.
+    const { stats, todayEvents } = await AnalyticsService.getDashboardData(organizerId);
+
+    // One figure carries the screen and the other three support it, rather than four
+    // equal tiles where nothing is the answer to "how is it going". The lead sits on
+    // ink because with hue gone, a large dark shape is the only way to say "start
+    // here" — the nav rail was the only dark region in the product and the pages
+    // behind it had no anchor at all.
+    //
+    // The sublabels name each figure's SOURCE. That matters more than it looks: these
+    // four numbers come from four different collections, and "Revenue" next to
+    // "Registrations" reads as revenue *from* those registrations, which is exactly
+    // what it is — but "Avg Rating" is the reviews collection and says nothing about
+    // either. Nothing here is a new number; it is the same value, labelled honestly.
+    return (
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+            <div className="ink-panel on-ink relative overflow-hidden rounded-xl border border-neutral-800 p-6 shadow-xs">
+                <p className="text-2xs font-medium uppercase tracking-wider text-white/60">Registrations</p>
+                <p className="figure mt-2.5 text-5xl font-bold tracking-tight text-white">{stats.registrations}</p>
+                <p className="mt-3 flex items-center gap-1.5 text-sm text-white/70">
+                    <Users size={14} aria-hidden="true" />
+                    across {stats.activeEvents} active {stats.activeEvents === 1 ? "event" : "events"}
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 rounded-xl border border-line bg-paper shadow-xs sm:grid-cols-3">
+                <MetricTile
+                    label="Active events"
+                    value={String(stats.activeEvents)}
+                    icon={<Calendar size={14} />}
+                    sublabel={
+                        todayEvents.length > 0
+                            ? `${todayEvents.length} happening today`
+                            : "Nothing on today"
+                    }
+                />
+                <MetricTile
+                    label="Revenue"
+                    value={stats.revenue}
+                    icon={<Wallet size={14} />}
+                    sublabel="Paid across all registrations"
+                />
+                <MetricTile
+                    label="Avg rating"
+                    value={String(stats.avgRating)}
+                    icon={<Star size={14} />}
+                    sublabel={stats.avgRating > 0 ? "Across your event reviews" : "No reviews yet"}
+                />
+            </div>
+        </section>
+    );
+}
+
+async function DashboardMain({ organizerId }: { organizerId: string }) {
+    const { todayEvents, recentReg, regTrend } = await AnalyticsService.getDashboardData(organizerId);
+
+    // Carded, where these three were uncarded <section>s separated by a bottom rule.
+    // Three widgets of identical weight stacked down a page is what made the dashboard
+    // read as a list of headings; containment is what gives them rank.
+    return (
+        <div className="space-y-6">
+            <Card title="Today's schedule">
+                <CardBody>
+                    <TodaysSchedule events={todayEvents} />
+                </CardBody>
+            </Card>
+
+            <Card
+                title="Registration trend"
+                action={<span className="text-xs text-ink-soft">Last 7 days</span>}
+            >
+                <CardBody>
+                    <RegistrationTrendChart data={regTrend} />
+                </CardBody>
+            </Card>
+
+            <Card
+                title="Recent registrations"
+                action={
+                    <Button href={`/organizer/${organizerId}/analytics`} variant="ghost" size="sm">
+                        Analytics
+                    </Button>
+                }
+            >
+                <div className="pb-1">
+                    <RecentRegistrations registerations={recentReg} />
+                </div>
+            </Card>
+        </div>
+    );
+}
+
+async function DashboardUpcoming({ organizerId }: { organizerId: string }) {
+    const { upcomingEvents } = await AnalyticsService.getDashboardData(organizerId);
+    return (
+        <Card
+            title="Upcoming events"
+            action={
+                <Button href={`/organizer/${organizerId}/events`} variant="ghost" size="sm">
+                    View all
+                </Button>
+            }
+        >
+            <CardBody>
+                <UpcomingEvents events={upcomingEvents} />
+            </CardBody>
+        </Card>
+    );
+}
+
+// ── Stream Skeletons ─────────────────────────────────────────────────────────
+
+// These must match DashboardStats and the uncarded widgets exactly. A skeleton that
+// resolves into a different shape reads as a bug on every navigation, and this route
+// previously had three disagreeing frames: the page, these fallbacks, and loading.tsx.
+//
+// gray-200 rather than gray-100 for the fill: the page sits on --canvas (#FAFAFA), and
+// gray-100 against it is 1.04:1 — a skeleton nobody can see. gray-200 is 1.21:1, which
+// is still decoration, so role/aria-label carry the state for anyone who cannot see it.
+
+function StatsSkeleton() {
+    return (
+        <section role="status" aria-label="Loading statistics" className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
+            <div className="h-44 animate-pulse rounded-xl bg-muted-strong" />
+            <div className="grid grid-cols-2 rounded-xl border border-line bg-paper sm:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border-line p-5 not-last:border-r sm:p-6">
+                        <div className="h-3 w-20 animate-pulse rounded-md bg-muted-strong" />
+                        <div className="mt-3 h-9 w-24 animate-pulse rounded-md bg-muted-strong" />
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function WidgetSkeleton({ height }: { height: string }) {
+    return (
+        <div
+            role="status"
+            aria-label="Loading"
+            className={`${height} animate-pulse rounded-xl bg-muted-strong`}
+        />
+    );
+}

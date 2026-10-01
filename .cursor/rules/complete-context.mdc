@@ -1,0 +1,26 @@
+---
+description: Always read and update completeContext.md before implementing page or feature changes
+alwaysApply: true
+---
+
+# Complete context first
+
+Before exploring the repo or implementing anything:
+
+1. Read `completeContext.md` at the project root.
+2. Use it to locate the owning feature, routes, models, and collections.
+3. Open only the files that context names. Do not scan the whole tree first.
+
+After any change to a page, route, feature, model, collection, action, layout, or nav:
+
+1. Update `completeContext.md` in the **same session** as the code change.
+2. Keep the matching sections accurate (routes, feature tree, models, data, conventions).
+3. Append a dated line under **Change log** describing what changed and which paths to open next time.
+
+Do not skip the context update because the change was “small”. A new tab, renamed field, or moved action is a context change.
+
+```md
+### YYYY-MM-DD — short title
+- What: …
+- Files: `path/a`, `path/b`
+```
