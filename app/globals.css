@@ -1,0 +1,657 @@
+@import "tailwindcss";
+
+/* ── Raw tokens ──
+   A plain :root rather than @theme on purpose. These are always emitted (Tailwind
+   tree-shakes unused @theme variables), and they are the single place a future dark
+   mode re-points. The @theme block below only *names* them for the utility engine. */
+:root {
+  /* Product surface. Achromatic — chroma is literally 0.
+       paper      cards, dialogs, the top surface
+       canvas     page background
+       line       hairline
+       line-loud  input + interactive borders
+       ink        primary text, primary fill
+       ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
+       ink-faint  decorative ONLY — 2.5:1, never text */
+  --paper: #FFFFFF;
+  --canvas: oklch(0.985 0 0);
+  --line: oklch(0.922 0 0);
+  --line-loud: oklch(0.870 0 0);
+  --ink: oklch(0.205 0 0);
+  --ink-soft: oklch(0.545 0 0);
+  --ink-faint: oklch(0.708 0 0);
+  --ink-invert: #FFFFFF;
+
+  /* Recessive fills: chips, meter tracks, table zebra, avatar placeholders. These
+     existed only as bg-gray-100 / bg-gray-200, which are ramp steps and therefore
+     do NOT flip with the theme — a gray is a gray. Naming them semantically is what
+     lets dark mode re-point them. */
+  --muted: oklch(0.970 0 0);
+  --muted-strong: oklch(0.922 0 0);
+
+  /* .ink-panel's own surface, split out from --ink because the two diverge in dark
+     mode: --ink becomes near-white (it is text), while the panel must STAY dark —
+     it is the loudest surface on the page, and a white slab on a dark page is a
+     flashbang, not a hierarchy. Dark mode lifts it above --paper instead. */
+  --panel-bg: var(--ink);
+  --panel-fg: #FFFFFF;
+
+  /* Legacy names. `home/` consumes these by name via inline styles, so they stay
+     defined rather than being renamed across the marketing components. */
+  --bg: var(--canvas);
+  --surface: var(--paper);
+  --border: var(--line);
+
+  /* ── Accent ──
+     The product is monochrome except here. The accent is the brand violet the
+     marketing site already used, which means this reunites two systems that had
+     drifted apart rather than introducing a third.
+
+     It earns its place on interactive and stateful things only — active nav,
+     focus, links, selection, chart series, progress fills. Never on decoration,
+     never on surfaces, never on a button (a filled black button is stronger).
+     Kept to a few percent of pixels, which is what makes an accent read as
+     deliberate rather than as decoration.
+
+     Contrast, measured: --accent is 4.86:1 on paper and 4.65:1 on canvas, so it
+     clears AA as text on light. On ink it is only 3.69:1 — fine for an indicator
+     bar, NOT for text, which is why rail labels stay white and --accent-on-ink
+     exists for the cases that do need to read on a dark surface. */
+  --accent: #6C5CE7;
+  --accent-strong: #5646D4;   /* 6.5:1 on paper — small text, links that must shout */
+  --accent-on-ink: #C3B8F7;   /* 9.8:1 on ink — the accent that survives a dark surface */
+  --accent-soft: #EFECFD;     /* tinted surface, decorative only */
+  --accent-line: #DDD7FB;
+
+  /* ── Semantic status ──
+     Green, amber and red for the states everyone already expects them on. These
+     ADD to the channels status already had — every badge still carries its icon
+     and its text label — because the accessibility rule is that colour must not
+     be the ONLY channel, not that colour is forbidden. Icon plus label plus hue
+     beats any one of them alone, which is why removing hue entirely was the wrong
+     reading of it.
+
+     The shades are darker than the ones usually reached for, and deliberately:
+     the common #16A34A green and #D97706 amber measure 3.30 and 3.19 against
+     white, so both FAIL as body text. These are 5.02, 5.02 and 6.47 on paper, and
+     4.80, 4.81 and 4.62 on the canvas — all clear of AA.
+
+     The -on-ink values are the inverse case: 9 to 13 to 1 on a dark surface and
+     nowhere near passing on a light one, so they are only ever used on ink. */
+  --success: #15803D;
+  --success-soft: #ECFDF3;
+  --success-line: #BBF7D0;
+  --success-on-ink: #86EFAC;
+
+  --warning: #B45309;
+  --warning-soft: #FFFBEB;
+  --warning-line: #FDE68A;
+  --warning-on-ink: #FCD34D;
+
+  --danger: #B91C1C;
+  --danger-soft: #FEF2F2;
+  --danger-line: #FECACA;
+  --danger-on-ink: #FCA5A5;
+
+  /* ── Chart series ──
+     The ONLY place hue is allowed to carry meaning rather than state. Chrome stays
+     monochrome; marks get colour, because a grayscale ramp genuinely cannot separate
+     three categories and "black and white dominant" is about the product's surfaces,
+     not about crippling its charts.
+
+     Slot 1 is the brand violet, so the most important series is always on-brand.
+     Green, amber and red are deliberately ABSENT: they are reserved for status, and a
+     series that borrows a status hue starts lying about itself.
+
+     Validated, not eyeballed — the dataviz validator, both modes, `--pairs all`:
+     lightness band, chroma floor, CVD separation (worst adjacent ΔE 10.3 light /
+     10.7 dark against a target of 8), normal-vision floor (18.3 / 17.6 against a
+     floor of 15) and >=3:1 on the surface all PASS.
+
+     HARD CAP: three. A fourth hue cannot clear the gates against these three, and a
+     generated hue is indistinguishable under CVD. A fourth series folds into "Other"
+     or the chart becomes small multiples. */
+  --series-1: #6C5CE7;   /* brand violet — 4.86:1 on paper */
+  --series-2: #0891B2;   /* cyan        — 3.68:1 on paper */
+  --series-3: #DB2777;   /* pink        — 4.60:1 on paper */
+
+  /* Legacy names. `home/` consumes these by name via inline styles. */
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────────────
+   This is the payoff for :root existing at all. Every @theme colour aliases a
+   variable declared above, so re-pointing them here repaints the whole product —
+   the ~2,600 gray-* utilities keep their literal ramp values (a gray stays a gray,
+   deliberately: bg-gray-800 means "a dark chip" in both modes and must not invert),
+   while everything expressed semantically flips.
+
+   The gray ramp is NOT inverted. That was the tempting one-block trick and it is
+   wrong here: gray-900 is used both as "the ink fill that must flip" and as "a dark
+   chip that must not", so inverting the ramp would flip the second kind too. The
+   honest fix is that semantic intent wears a semantic token, which is what the
+   sweep in this commit finishes.
+
+   Contrast, measured against --paper #171717 / --canvas #0a0a0a:
+     ink 17.2:1 · ink-soft 6.9:1 · accent 6.3:1 · success 12.8:1
+     warning 12.4:1 · danger 9.5:1 — all AA text or better.
+   --ink-soft is gray-400, NOT the gray-500 it is in light mode: gray-500 measures
+   3.62:1 on the dark surface and fails as body text. That is the one value that
+   does not simply mirror.
+
+   The OS preference is resolved in JS, not here. The no-flash script in
+   app/layout.tsx stamps data-theme="dark" | "light" onto <html> before first paint,
+   reading localStorage and falling back to prefers-color-scheme. So this file needs
+   ONE attribute-scoped block rather than the same 35 tokens duplicated into a media
+   query — and the toggle wins over the OS setting for free, in both directions. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: oklch(0.205 0 0);
+  --canvas: oklch(0.145 0 0);
+  --line: oklch(0.269 0 0);
+  --line-loud: oklch(0.371 0 0);
+  --ink: oklch(0.985 0 0);
+  --ink-soft: oklch(0.708 0 0);
+  --ink-faint: oklch(0.545 0 0);
+  --ink-invert: oklch(0.205 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-strong: oklch(0.371 0 0);
+
+  /* Lifted above --paper rather than inverted to white. */
+  --panel-bg: oklch(0.269 0 0);
+  --panel-fg: oklch(0.985 0 0);
+
+  /* The -on-ink values were already chosen against #171717, which is exactly what
+     --paper becomes here — so dark mode's semantic layer largely already existed.
+     -strong swaps direction: in light it is DARKER than --accent (text that must
+     shout on white); in dark it must be lighter. */
+  --accent: #9B8AF5;
+  --accent-strong: #C3B8F7;
+  --accent-soft: #211D3A;
+  --accent-line: #383151;
+
+  --success: #86EFAC;
+  --success-soft: #0B2818;
+  --success-line: #1C4A31;
+
+  --warning: #FCD34D;
+  --warning-soft: #2A1F05;
+  --warning-line: #4A3A0C;
+
+  --danger: #FCA5A5;
+  --danger-soft: #2C1414;
+  --danger-line: #4E2323;
+
+  /* Same three hues, snapped to the dark lightness band (L 0.48–0.67) rather than a
+     separate palette — re-stepping, not re-choosing. */
+  --series-1: #7A6DF9;
+  --series-2: #1394B6;
+  --series-3: #E5347F;
+}
+
+@theme {
+  /* ── One achromatic ramp. Repaints every existing gray-* utility, ~2.6k of them,
+     with zero file edits — this is what makes the conversion a single reviewable
+     diff instead of a 21,000-line sweep.
+
+     Contrast on white:  400 → 2.5:1 (decoration)   500 → 4.7:1 (AA body)
+                         600 → 7.4:1 (AAA)          900 → 16.1:1                */
+  --color-gray-50: oklch(0.985 0 0);
+  --color-gray-100: oklch(0.970 0 0);
+  --color-gray-200: oklch(0.922 0 0);
+  --color-gray-300: oklch(0.870 0 0);
+  --color-gray-400: oklch(0.708 0 0);
+  --color-gray-500: oklch(0.545 0 0);
+  --color-gray-600: oklch(0.439 0 0);
+  --color-gray-700: oklch(0.371 0 0);
+  --color-gray-800: oklch(0.269 0 0);
+  --color-gray-900: oklch(0.205 0 0);
+  --color-gray-950: oklch(0.145 0 0);
+
+  /* ── The one chromatic namespace that survives. Deliberately narrow: five
+     values, not a 10-step ramp, so there is nowhere to reach for a sixth. ── */
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-on-ink: var(--accent-on-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-line: var(--success-line);
+  --color-success-on-ink: var(--success-on-ink);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-line: var(--warning-line);
+  --color-warning-on-ink: var(--warning-on-ink);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-line: var(--danger-line);
+  --color-danger-on-ink: var(--danger-on-ink);
+
+  /* ── Semantic names for new code: bg-paper, text-ink, border-line. ── */
+  --color-paper: var(--paper);
+  --color-canvas: var(--canvas);
+  --color-line: var(--line);
+  --color-line-loud: var(--line-loud);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-invert: var(--ink-invert);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-panel: var(--panel-bg);
+  --color-panel-fg: var(--panel-fg);
+
+  /* Charts only. Never reach for these as chrome — that is what the accent is for. */
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+
+  /* ── Delete every chromatic namespace.
+     `initial` rather than an alias onto gray, deliberately: a leftover `bg-red-500`
+     then compiles to NOTHING and is loud in review, instead of silently rendering a
+     wrong-but-plausible grey that nobody ever goes back to fix.
+
+     `stone` survives — its uses are all in the certificate design canvas, which
+     simulates warm printed paper. That is content, not chrome. */
+  --color-red-*: initial;
+  --color-orange-*: initial;
+  --color-amber-*: initial;
+  --color-yellow-*: initial;
+  --color-lime-*: initial;
+  --color-green-*: initial;
+  --color-emerald-*: initial;
+  --color-teal-*: initial;
+  --color-cyan-*: initial;
+  --color-sky-*: initial;
+  --color-blue-*: initial;
+  --color-indigo-*: initial;
+  --color-violet-*: initial;
+  --color-purple-*: initial;
+  --color-fuchsia-*: initial;
+  --color-pink-*: initial;
+  --color-rose-*: initial;
+  --color-slate-*: initial;
+  --color-zinc-*: initial;
+  --color-neutral-*: initial;
+
+  /* ── Radius: 15 distinct values in use → 4 real steps, zero file edits.
+     rounded-xl folds onto lg, rounded-3xl onto 2xl. ── */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1rem;
+  --radius-4xl: 1rem;
+
+  /* ── Shadow: four real elevations, layered rather than blurred.
+     These were flattened to almost nothing on the theory that black and white
+     leans on borders. It does — but with no elevation at all nothing ever reads
+     as raised or interactive, which is what made the product look drawn rather
+     than built. Each step pairs a tight contact shadow with a wider ambient one,
+     which is what separates a surface from a rectangle. ── */
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 4px -2px rgb(0 0 0 / 0.08), 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 4px 8px -4px rgb(0 0 0 / 0.10), 0 12px 28px -6px rgb(0 0 0 / 0.12);
+  --shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.12), 0 24px 48px -12px rgb(0 0 0 / 0.16);
+  --shadow-2xl: 0 16px 32px -12px rgb(0 0 0 / 0.18), 0 40px 80px -20px rgb(0 0 0 / 0.22);
+
+  /* ── Type. --font-heading/-body/-mono are set by next/font on <html> in
+     app/layout.tsx. Do NOT redeclare them here: `--font-heading: var(--font-heading)`
+     is a self-reference that resolves to nothing. Reference them instead. ── */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Type scale ──
+     Lives INSIDE this @theme block, directly after the --font-sans / --font-display
+     lines, before the closing brace.
+
+     There were no --text-* keys here before, so every size in the product is a raw
+     Tailwind default picked ad hoc per file: text-sm 586 uses, text-xs 431, and
+     only 6 uses above text-3xl. Redefining Tailwind's OWN --text-* names repaints
+     all ~1,195 text-* utilities with zero file edits — the identical lever the
+     --color-gray-* ramp above already used on ~2,600 colour utilities.
+
+     Two ratios on purpose: ~1.125 through the UI range so a table cell, a field
+     label and a card title can differ without wasting rows; ~1.25 above 1.5rem so
+     the display tier finally has somewhere to go. The gap that matters is 3xl
+     (32px page title) against 2xl (24px KPI) — the title must outrank a number,
+     which today it does not.
+
+     text-sm STAYS at 0.875rem. It is 586 sites and the product's complaint is
+     that everything is already small.
+
+     Line-heights are absolute rem, not unitless, so headings land on the 4px grid
+     and the uncarded layouts do not drift. Tracking rides with the size: positive
+     on small uppercase (caps crowd), negative on display (Space Grotesk is drawn
+     wide and reads loose above 1.5rem). Nobody has to remember the ramp. ── */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-2xs--letter-spacing: 0.08em;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-xs--letter-spacing: 0.06em;   /* almost always uppercase micro-labels here */
+
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-sm--letter-spacing: 0em;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-base--letter-spacing: -0.006em;
+
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-lg--letter-spacing: -0.01em;
+
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-xl--letter-spacing: -0.012em;
+
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-2xl--letter-spacing: -0.016em;
+
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-3xl--letter-spacing: -0.022em;
+
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.625rem;
+  --text-4xl--letter-spacing: -0.026em;
+
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 3.25rem;
+  --text-5xl--letter-spacing: -0.03em;
+
+  --text-6xl: 4rem;
+  --text-6xl--line-height: 4rem;
+  --text-6xl--letter-spacing: -0.032em;
+
+  /* ── Weight ──
+     386 bold + 216 semibold + 106 extrabold + 6 black against SEVEN font-normal.
+     When everything is bold, bold means nothing and hierarchy has to be carried by
+     size alone — which is why the scale above matters. Aliasing collapses the
+     palette to three real weights and repaints all 708 sites without a sweep.
+
+     NOTE FOR FUTURE READERS: font-semibold renders 500 and font-bold renders 600
+     here. The class names lie. That is the deliberate price of not hand-editing
+     708 call sites. New code should use font-medium and reach for size or
+     font-display for emphasis, not weight.
+
+     --font-weight-black stays 800 so the marketing hero (app/page.tsx,
+     src/shared_components/home/*) keeps a display voice — it is a deliberately
+     separate violet system and must not be flattened by a product-side alias. ── */
+  --font-weight-light: 400;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 800;
+}
+
+/* ── Light-only subtree ──
+   The marketing site (app/page.tsx, src/shared_components/home/*) is a deliberately
+   separate system: violet skin, inline styles, ~29 hardcoded hex values. It reads
+   --ink, --ink-soft, --surface and --border BY NAME, but its surfaces are literal
+   hex — so under a dark theme its body text would flip to near-white while the
+   panels behind it stayed hardcoded white, and the page would be unreadable.
+
+   Pinning the tokens back for that subtree is the smallest correct fix: better than
+   excluding the marketing routes from the toggle (the toggle does not appear there
+   anyway) and far better than converting 29 hex values that were never in scope. */
+.light-only {
+  --paper: #FFFFFF;
+  --canvas: oklch(0.985 0 0);
+  --line: oklch(0.922 0 0);
+  --line-loud: oklch(0.870 0 0);
+  --ink: oklch(0.205 0 0);
+  --ink-soft: oklch(0.545 0 0);
+  --ink-faint: oklch(0.708 0 0);
+  --ink-invert: #FFFFFF;
+  --muted: oklch(0.970 0 0);
+  --muted-strong: oklch(0.922 0 0);
+  --panel-bg: oklch(0.205 0 0);
+  --panel-fg: #FFFFFF;
+  --bg: var(--canvas);
+  --surface: var(--paper);
+  --border: var(--line);
+  --accent: #6C5CE7;
+  --accent-strong: #5646D4;
+  --accent-soft: #EFECFD;
+  --accent-line: #DDD7FB;
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
+  color-scheme: light;
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  /* Set explicitly rather than relying on --default-font-family. */
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Focus ──
+   There were no focus-visible styles anywhere in this app, across 147 buttons
+   and 337 rounded-full pills, so keyboard navigation was untrackable: you
+   could tab, but nothing told you where you had got to. This is the floor.
+   Components that want something tighter override it with their own
+   focus-visible: utilities; :focus-visible only matches keyboard focus, so
+   mouse users never see it.
+
+   Elements carrying `focus:outline-none` plus their own ring keep it: that
+   class is more specific than this rule, which is the right outcome since
+   they already show focus their own way. */
+:focus-visible {
+  /* Accent, not ink. A black ring on a black-and-white page is indistinguishable
+     from a border; the accent makes keyboard position unmistakable at a glance,
+     which is the whole job of a focus indicator. 3:1 against both surfaces. */
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A black ring on a black surface is invisible. `outline-offset` rescues an ink
+   button sitting on a white page, but not a control *inside* an ink-filled panel.
+   Anything painted with ink opts its subtree into a white ring by adding `on-ink`. */
+.on-ink:focus-visible,
+.on-ink :focus-visible {
+  outline-color: var(--accent-on-ink);
+}
+
+/* ── Animations (must live outside @layer for SVG stroke-dasharray) ── */
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes float-card {
+
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0px);
+  }
+
+  50% {
+    transform: rotate(-6deg) translateY(-10px);
+  }
+}
+
+@keyframes sparkline-draw {
+  from {
+    stroke-dashoffset: 300;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── Custom component classes (inside @layer so Tailwind respects them) ── */
+@layer components {
+
+  /* ---- Nav ---- */
+  .home-nav-link {
+    color: #6B6B76;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .home-nav-link:hover {
+    color: #14141A;
+    background-color: #F0ECFE;
+  }
+
+  /* ---- Cards ---- */
+  .service-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E8E7E4;
+    border-radius: 16px;
+    padding: 28px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .service-card:hover {
+    transform: translateY(-2px);
+    border-color: #14141A;
+    box-shadow: 0 16px 40px rgba(108, 92, 231, 0.10);
+  }
+
+  /* ---- Animations ---- */
+  .animate-pulse-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .animate-float-card {
+    animation: float-card 5s ease-in-out infinite;
+  }
+
+  .animate-sparkline {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: sparkline-draw 2s ease-out forwards;
+  }
+
+  /* Respect users who prefer reduced motion: stop the always-running loops. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse-dot,
+    .animate-float-card,
+    .animate-sparkline {
+      animation: none;
+    }
+  }
+}
+
+/* ── Numerals ──
+   Lives OUTSIDE @theme, at the end of this file — @theme takes variable
+   declarations only, so this rule cannot be moved up into it.
+
+   tabular-nums appears in exactly 2 files today (NotificationsView,
+   NotificationBell), neither a stat surface, so every KPI grid and currency figure
+   renders in proportional figures and the digits visibly jitter between values.
+   One rule beats a ten-file sweep and it covers numeric surfaces nobody has
+   written yet. Running prose keeps proportional figures, where they read better.
+   Tailwind already ships a `tabular-nums` utility — do not invent a `.tnum`
+   duplicate of it. ── */
+@layer base {
+  table, th, td, time, output, .num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+
+/* The indeterminate bar in ProfileLoadingState. A keyframe rather than a Tailwind
+   animate-* because it travels further than it is wide, which no built-in does. */
+@keyframes loading-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  [class*="loading-sweep"] { animation: none; }
+}
+
+/* ── Surface treatments ──────────────────────────────────────────────────────
+   Everything below is additive craft rather than structure. With hue gone, the
+   instruments left are elevation, texture, scale and motion, and the product was
+   using none of them — every surface was the same flat white field, and nothing
+   responded to being pointed at. */
+
+/* A large area of pure black reads as a hole rather than a surface. A very faint
+   off-centre highlight plus a fine grid gives it a light source and a material,
+   which is the difference between an ink panel and a missing rectangle. */
+.ink-panel {
+  background-color: var(--panel-bg);
+  background-image:
+    radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 26px 26px, 26px 26px;
+  color: var(--panel-fg);
+}
+
+/* Interactive rows and cards. The lift is deliberately small -- 1px reads as
+   responsive, 4px reads as a toy -- and the border darkens at the same time so
+   the state survives for anyone who cannot perceive the shadow. */
+.lift {
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+.lift:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-loud);
+  box-shadow: var(--shadow-md);
+}
+.lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Figures large enough to anchor a screen. Tight tracking and lining numerals,
+   because at this size default spacing looks loose and proportional digits make
+   a column of numbers ragged. */
+.figure {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .lift:hover, .lift:active { transition: none; transform: none; }
+}
