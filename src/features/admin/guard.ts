@@ -1,5 +1,6 @@
 import { AuthService } from "@/src/features/auth/authService";
-import type { AdminArea, AdminIdentity } from "./types";
+import { safeFail, type SafeActionResult } from "@/src/lib/safeAction";
+import { canWebsiteCap, type AdminArea, type AdminIdentity, type WebsiteCap } from "./types";
 
 /**
  * The guard every admin page uses, so no page has to remember the import path
@@ -11,5 +12,20 @@ import type { AdminArea, AdminIdentity } from "./types";
  * plumbing.
  */
 export function requireAdminArea(area?: AdminArea): Promise<AdminIdentity | null> {
-    return AuthService.requireAdmin(area);
+  return AuthService.requireAdmin(area);
+}
+
+/**
+ * Server-action gate for `/admin/website` writes (and fine-grained reads).
+ * Requires a platform admin session, then `canWebsiteCap`.
+ */
+export async function requireWebsiteCap(
+  cap: WebsiteCap,
+): Promise<AdminIdentity | SafeActionResult<never>> {
+  const admin = await AuthService.requireAdmin();
+  if (!admin) return safeFail("UNAUTHORIZED", "Please sign in as an admin.");
+  if (!canWebsiteCap(admin, cap)) {
+    return safeFail("FORBIDDEN", `You need ${cap} to do that.`);
+  }
+  return admin;
 }

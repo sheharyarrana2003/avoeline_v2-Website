@@ -16,14 +16,24 @@ export function EventHeaderMedia({
   const src = String(banner || "").trim() || String(gallery?.[0] || "").trim();
   if (!src) return null;
   const video = isVideoUrl(src);
-  const thumb = (
+  // Wide bar (≈16:9) so the layout header is the only banner — not a tiny square thumb.
+  const thumb =
     // eslint-disable-next-line @next/next/no-img-element
     video ? (
-      <video src={src} muted className="h-16 w-24 rounded-lg object-cover" />
+      <video
+        src={src}
+        muted
+        className="aspect-video h-14 w-auto max-w-[11rem] rounded-lg object-cover sm:h-16 sm:max-w-[14rem]"
+        suppressHydrationWarning
+      />
     ) : (
-      <img src={src} alt="" className="h-16 w-24 rounded-lg object-cover" />
-    )
-  );
+      <img
+        src={src}
+        alt=""
+        className="aspect-video h-14 w-auto max-w-[11rem] rounded-lg object-cover sm:h-16 sm:max-w-[14rem]"
+        suppressHydrationWarning
+      />
+    );
   if (video) {
     return (
       <VideoPreview src={src} title={title} className="shrink-0">

@@ -1,55 +1,110 @@
+import Link from "next/link";
 import { RecentRegistration } from "@/src/features/dashboard/types";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { DataTable, CellStack, type Column } from "@/src/shared_components/ui/DataTable";
+import { EventThumb } from "@/src/shared_components/ui/EventThumb";
 import { Users } from "lucide-react";
 
-/**
- * This file is why DataTable exists. It had the table recipe from `src/lib/ui.ts`
- * re-typed inline rather than imported, so the shared strings had three users and a
- * fourth copy sitting right here drifting away from them.
- */
-const columns: Column<RecentRegistration>[] = [
-  {
-    key: "attendee",
-    header: "Attendee",
-    // This table sits in the dashboard's narrower main column, so both text
-    // columns need a ceiling or a long name shoves Status and Amount out.
-    width: "w-[32%] max-w-0",
-    cell: (r) => (
+function AttendeeCell({ row }: { row: RecentRegistration }) {
+  const primary = row.isTeam && row.teamName ? row.teamName : row.attendeeName || "Attendee";
+  const secondary = row.isTeam
+    ? [
+        row.competitionName,
+        row.memberCount != null
+          ? `${row.memberCount} ${row.memberCount === 1 ? "member" : "members"}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : row.attendeeEmail || undefined;
+
+  return (
+    <div className="min-w-0">
       <div className="flex items-center gap-3">
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted-strong text-2xs font-medium text-ink"
           aria-hidden="true"
         >
-          {r.attendeeName.charAt(0)}
+          {(primary.charAt(0) || "A").toUpperCase()}
         </span>
-        <CellStack primary={r.attendeeName} />
+        <CellStack primary={primary} secondary={secondary || undefined} />
       </div>
-    ),
-  },
-  {
-    key: "event",
-    header: "Event",
-    width: "w-[38%] max-w-0",
-    cell: (r) => <span className="block truncate text-ink-soft">{r.eventName}</span>,
-  },
-  { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} size="sm" /> },
-  {
-    key: "amount",
-    header: "Amount",
-    align: "right",
-    cell: (r) => <span className="whitespace-nowrap">{formatCurrency(r.amountPaid)}</span>,
-  },
-];
+      {row.isTeam && row.members && row.members.length > 0 ? (
+        <details className="mt-1.5 pl-10">
+          <summary className="cursor-pointer text-2xs text-ink-soft hover:text-ink">
+            Show members
+          </summary>
+          <ul className="mt-1 space-y-0.5 text-2xs text-ink-soft">
+            {row.members.map((m, i) => (
+              <li key={`${m.email || m.name}-${i}`} className="truncate">
+                {m.name || "Attendee"}
+                {m.email ? ` · ${m.email}` : ""}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </div>
+  );
+}
 
-export default function RecentRegistrations({ registerations }: { registerations: RecentRegistration[] }) {
+function buildColumns(): Column<RecentRegistration>[] {
+  return [
+    {
+      key: "attendee",
+      header: "Attendee",
+      width: "w-[34%] max-w-0",
+      cell: (r) => (
+        <Link
+          href={r.href}
+          className="block min-w-0 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <AttendeeCell row={r} />
+        </Link>
+      ),
+    },
+    {
+      key: "event",
+      header: "Event",
+      width: "w-[36%] max-w-0",
+      cell: (r) => (
+        <Link
+          href={r.href}
+          className="block min-w-0 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <EventThumb title={r.eventName || "—"} src={r.eventBanner} size="sm" />
+        </Link>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) => <StatusBadge status={r.status} size="sm" />,
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      align: "right",
+      cell: (r) => <span className="whitespace-nowrap">{formatCurrency(r.amountPaid)}</span>,
+    },
+  ];
+}
+
+export default function RecentRegistrations({
+  registerations,
+  organizerId,
+}: {
+  registerations: RecentRegistration[];
+  organizerId: string;
+}) {
+  void organizerId;
   return (
     <DataTable
-      caption="The ten most recent registrations across your events"
+      caption="The most recent registrations across your events"
       rows={registerations}
-      columns={columns}
+      columns={buildColumns()}
       getKey={(r) => r.id}
       empty={
         <EmptyState

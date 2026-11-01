@@ -14,7 +14,10 @@ export async function listAgendaItemOptions(eventId: string): Promise<AgendaItem
 
 export async function setAgendaSpeakers(agendaItemId: string, speakerIds: string[]): Promise<void> {
   if (!agendaItemId) return;
-  await supabaseAdmin.from(TABLES.EVENT_AGENDA_SPEAKERS).delete().eq("agenda_item_id", agendaItemId);
+  await supabaseAdmin
+    .from(TABLES.EVENT_AGENDA_SPEAKERS)
+    .delete()
+    .eq("agenda_item_id", agendaItemId);
   const rows = [...new Set(speakerIds.filter(Boolean))].map((speaker_id) => ({
     agenda_item_id: agendaItemId,
     speaker_id,
@@ -25,7 +28,10 @@ export async function setAgendaSpeakers(agendaItemId: string, speakerIds: string
   }
 }
 
-export async function setSpeakerSessions(speakerId: string, agendaItemIds: string[]): Promise<void> {
+export async function setSpeakerSessions(
+  speakerId: string,
+  agendaItemIds: string[],
+): Promise<void> {
   if (!speakerId) return;
   await supabaseAdmin.from(TABLES.EVENT_AGENDA_SPEAKERS).delete().eq("speaker_id", speakerId);
   const rows = [...new Set(agendaItemIds.filter(Boolean))].map((agenda_item_id) => ({
@@ -39,14 +45,38 @@ export async function setSpeakerSessions(speakerId: string, agendaItemIds: strin
 }
 
 export async function sessionsForSpeaker(speakerId: string): Promise<string[]> {
-  const { data } = await supabaseAdmin
+  const bySpeaker = await sessionsBySpeakerIds([speakerId]);
+  return bySpeaker.get(speakerId) ?? [];
+}
+
+/** One join query for an event’s speakers → session titles. */
+export async function sessionsBySpeakerIds(speakerIds: string[]): Promise<Map<string, string[]>> {
+  const unique = [...new Set(speakerIds.filter(Boolean))];
+  const out = new Map<string, string[]>();
+  for (const id of unique) out.set(id, []);
+  if (!unique.length) return out;
+  const { data: links } = await supabaseAdmin
     .from(TABLES.EVENT_AGENDA_SPEAKERS)
-    .select("agenda_item_id")
-    .eq("speaker_id", speakerId);
-  const ids = (data ?? []).map((r) => String(r.agenda_item_id));
-  if (!ids.length) return [];
-  const { data: items } = await supabaseAdmin.from(TABLES.EVENT_AGENDA_ITEMS).select("id, title").in("id", ids);
-  return (items ?? []).map((i) => String(i.title || "Session"));
+    .select("agenda_item_id, speaker_id")
+    .in("speaker_id", unique);
+  const agendaIds = [
+    ...new Set((links ?? []).map((r) => String(r.agenda_item_id)).filter(Boolean)),
+  ];
+  if (!agendaIds.length) return out;
+  const { data: items } = await supabaseAdmin
+    .from(TABLES.EVENT_AGENDA_ITEMS)
+    .select("id, title")
+    .in("id", agendaIds);
+  const titleById = new Map((items ?? []).map((i) => [String(i.id), String(i.title || "Session")]));
+  for (const row of links ?? []) {
+    const speakerId = String(row.speaker_id);
+    const title = titleById.get(String(row.agenda_item_id));
+    if (!title) continue;
+    const list = out.get(speakerId) ?? [];
+    list.push(title);
+    out.set(speakerId, list);
+  }
+  return out;
 }
 
 export async function speakersByAgendaItem(eventId: string): Promise<Map<string, string[]>> {

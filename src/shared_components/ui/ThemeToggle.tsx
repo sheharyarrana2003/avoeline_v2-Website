@@ -29,51 +29,59 @@ import { Moon, Sun } from "lucide-react";
 export const THEME_KEY = "avoeline-theme";
 
 function subscribe(onChange: () => void) {
-    const observer = new MutationObserver(onChange);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => observer.disconnect();
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
 }
 
 const readTheme = () => (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 const readServerTheme = () => null;
 
 export function ThemeToggle({ onInk = false }: { onInk?: boolean }) {
-    const theme = useSyncExternalStore(subscribe, readTheme, readServerTheme);
-    const isDark = theme === "dark";
+  const theme = useSyncExternalStore(subscribe, readTheme, readServerTheme);
+  const isDark = theme === "dark";
 
-    function toggle() {
-        const next = isDark ? "light" : "dark";
-        document.documentElement.dataset.theme = next;
-        try {
-            localStorage.setItem(THEME_KEY, next);
-        } catch {
-            // Private mode or blocked storage: the theme still applies for this page
-            // load, it just will not be remembered. Not worth failing the click over.
-        }
+  function toggle() {
+    const next = isDark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {
+      // Private mode or blocked storage: the theme still applies for this page
+      // load, it just will not be remembered. Not worth failing the click over.
     }
+  }
 
-    return (
-        <button
-            type="button"
-            onClick={toggle}
-            // The label states the destination, not the current state: a control
-            // announced as "dark theme" leaves a screen reader user unsure whether
-            // that is what it is or what it does.
-            aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-            title={isDark ? "Light theme" : "Dark theme"}
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                onInk
-                    ? "text-white/70 hover:bg-white/[0.07] hover:text-white"
-                    : "text-ink-soft hover:bg-muted hover:text-ink"
-            }`}
-        >
-            {theme === null ? (
-                <span className="h-[18px] w-[18px]" aria-hidden="true" />
-            ) : isDark ? (
-                <Sun className="h-[18px] w-[18px]" aria-hidden="true" />
-            ) : (
-                <Moon className="h-[18px] w-[18px]" aria-hidden="true" />
-            )}
-        </button>
-    );
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      // The label states the destination, not the current state: a control
+      // announced as "dark theme" leaves a screen reader user unsure whether
+      // that is what it is or what it does.
+      aria-label={
+        theme === null
+          ? "Toggle color theme"
+          : isDark
+            ? "Switch to light theme"
+            : "Switch to dark theme"
+      }
+      title={theme === null ? "Theme" : isDark ? "Light theme" : "Dark theme"}
+      suppressHydrationWarning
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        onInk
+          ? "text-white/70 hover:bg-white/[0.07] hover:text-white"
+          : "text-ink-soft hover:bg-muted hover:text-ink"
+      }`}
+    >
+      {/* Icon may differ from SSR blank once the client reads data-theme; suppress warns. */}
+      <span className="flex h-[18px] w-[18px] items-center justify-center" suppressHydrationWarning>
+        {theme === null ? null : isDark ? (
+          <Sun className="h-[18px] w-[18px]" aria-hidden="true" />
+        ) : (
+          <Moon className="h-[18px] w-[18px]" aria-hidden="true" />
+        )}
+      </span>
+    </button>
+  );
 }

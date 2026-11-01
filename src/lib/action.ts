@@ -1,10 +1,6 @@
 /**
- * What every Server Action in this app returns.
- *
- * Actions never throw to the client -- they catch, log, and hand back a result
- * the caller can render. This type was being redeclared per action file, which
- * is how call sites ended up disagreeing about whether there was an error
- * channel at all.
+ * Legacy Server Action result (`{ success, error? }`).
+ * New actions should use `SafeActionResult` / `safeAction` from `@/src/lib/safeAction` (C2).
  */
 export type ActionResult = { success: boolean; error?: string };
 
@@ -13,3 +9,6 @@ export const ok = (): ActionResult => ({ success: true });
 
 /** Convenience for the failure path. The message is shown to the user. */
 export const fail = (error: string): ActionResult => ({ success: false, error });
+
+export type { SafeActionResult } from "./safeAction";
+export { safeAction, safeOk, safeFail, toLegacyResult } from "./safeAction";

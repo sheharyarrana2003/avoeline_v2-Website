@@ -18,10 +18,16 @@ export default async function UshersPage({
   }
   return (
     <div className="px-4 py-8">
-      <PageHeader title="Ushers / on-ground ops" description="Zone check-in and staff task boards reuse event staff teams." />
+      <PageHeader
+        title="Ushers / on-ground ops"
+        description="Zone check-in and staff task boards reuse event staff teams."
+      />
       <Card>
         <CardBody>
-          <p className="text-sm text-ink-soft">Module unlocked. Use the event Staff tab for rosters; zone boards will extend that roster.</p>
+          <p className="text-sm text-ink-soft">
+            Module unlocked. Use the event Team tab for rosters; zone boards will extend that
+            roster.
+          </p>
         </CardBody>
       </Card>
     </div>

@@ -1,175 +1,119 @@
-import { notFound } from "next/navigation";
-import { Shield, Users } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { AuthService } from "@/src/features/auth/authService";
 import { TeamEngineService } from "@/src/features/teams/teamEngine.service";
-import { TeamCreator } from "@/src/features/teams/components/TeamCreator";
-import { TeamRosterView } from "@/src/features/teams/components/TeamRosterView";
 import type { TeamWithMembers } from "@/src/features/teams/teamEngine.types";
-import { EVENT_STAFF_POSITIONS } from "@/src/features/teams/teamEngine.types";
 import { hasModuleAccess } from "@/src/features/permissions/permissions.service";
+import { staffMayOpenTab } from "@/src/features/hackathon/staffEventAccess";
 import { LockedModulePanel } from "@/src/features/permissions/components/LockedModulePanel";
-import { addStaffApplicant, addStaffPosition, setStaffApplicantStatus } from "@/src/features/teams/actions/staffAdvanced.action";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
-import { buttonClass } from "@/src/lib/ui";
+import { eventIsHackathon, listTracks } from "@/src/features/hackathon/hackathon.service";
+import { absoluteUrl } from "@/src/lib/appUrl";
+import { saveEventStaffAssignmentsAction } from "@/src/features/teams/actions/teamEngine.action";
+import { TeamsManager } from "@/src/features/teams/components/TeamsManager";
+import { can } from "@/src/features/permissions/can";
 
 export default async function EventStaffPage({
-    params,
-    searchParams,
+  params,
+  searchParams,
 }: {
-    params: Promise<{ organizer_id: string; eventId: string }>;
-    searchParams?: Promise<{ e?: string; ok?: string }>;
+  params: Promise<{ organizer_id: string; eventId: string }>;
+  searchParams?: Promise<{ e?: string; ok?: string }>;
 }) {
-    const { organizer_id, eventId } = await params;
-    const sp = searchParams ? await searchParams : {};
+  const { organizer_id, eventId } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const overview = `/organizer/${organizer_id}/events/${eventId}`;
 
-    const event = await assertOwnedEvent(eventId);
-    if (!event) notFound();
+  const event = await assertOwnedEvent(eventId);
+  if (!event) notFound();
+  if (!(await staffMayOpenTab(eventId, "staff"))) redirect(overview);
 
-    const current = await AuthService.getCurrentUser().catch(() => null);
-    const advanced = await hasModuleAccess(event.organizerId, "teams_advanced_roles");
+  const current = await AuthService.getCurrentUser().catch(() => null);
+  if (
+    current &&
+    !(await can(current, "teams:manage", { eventId, organizerId: event.organizerId })) &&
+    String(event.organizerId) !== current.userId
+  ) {
+    redirect(overview);
+  }
 
-    // Fetch staff teams for this event
-    const staffTeams = await TeamEngineService.getTeamsByContext({
-        contextType: "event_staff",
-        eventId,
+  const [basic, advanced] = await Promise.all([
+    hasModuleAccess(event.organizerId, "teams_basic"),
+    hasModuleAccess(event.organizerId, "teams_advanced_roles"),
+  ]);
+  if (!basic && !advanced) {
+    return (
+      <LockedModulePanel
+        moduleKey="teams_basic"
+        title="Teams is not on this plan"
+        ctaHref={`/organizer/${organizer_id}/dashboard`}
+      />
+    );
+  }
+
+  const [libraryDocs, assigned, applyRoot, isHack] = await Promise.all([
+    TeamEngineService.listOrganizerStaffTeams(event.organizerId),
+    TeamEngineService.listEventStaffAssignments(eventId),
+    absoluteUrl("/"),
+    eventIsHackathon(event),
+  ]);
+  const library: TeamWithMembers[] = await TeamEngineService.getTeamsWithMembers(libraryDocs);
+  const assignedIds = new Set(assigned.map((a) => a.teamId));
+  const assignedTeams = library
+    .filter((t) => assignedIds.has(t.id))
+    .map((team) => {
+      const subset = assigned.find((a) => a.teamId === team.id)?.memberIds ?? [];
+      const members = subset.length
+        ? team.members.filter((m) => subset.includes(m.id))
+        : team.members;
+      return { ...team, members };
     });
 
-    const teamsWithMembers: TeamWithMembers[] = await Promise.all(
-        staffTeams.map(async (team) => {
-            const members = await TeamEngineService.getTeamMembers(team.id);
-            return { ...team, members };
-        })
-    );
-    const advancedDetails = advanced
-        ? await Promise.all(
-              teamsWithMembers.map(async (team) => ({
-                  team,
-                  positions: await TeamEngineService.listPositions(team.id),
-                  applicants: await TeamEngineService.listApplicants(team.id),
-              })),
-          )
-        : [];
+  const assignedTeamIds = assignedTeams.map((t) => t.id);
+  const [positionsByTeam, applicantsByTeam, formsByTeam, tracks] = await Promise.all([
+    advanced
+      ? TeamEngineService.listPositionsForTeams(assignedTeamIds)
+      : Promise.resolve(new Map()),
+    advanced
+      ? TeamEngineService.listApplicantsForTeams(assignedTeamIds)
+      : Promise.resolve(new Map()),
+    advanced
+      ? TeamEngineService.listRecruitmentFormsForTeams(assignedTeamIds)
+      : Promise.resolve(new Map()),
+    isHack ? listTracks(eventId) : Promise.resolve([]),
+  ]);
+  const advancedDetails = advanced
+    ? assignedTeams.map((team) => ({
+        team,
+        positions: positionsByTeam.get(team.id) ?? [],
+        applicants: applicantsByTeam.get(team.id) ?? [],
+        forms: formsByTeam.get(team.id) ?? [],
+      }))
+    : [];
 
-    return (
-        <div className="space-y-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <h2 className="font-display text-2xl font-bold text-ink">
-                        Event Staff & Volunteers
-                    </h2>
-                    <p className="mt-1 text-sm text-ink-soft">
-                        Create and manage staff teams for this event. Staff can join rosters using team join codes.
-                    </p>
-                </div>
-            </div>
-
-            {/* Generic TeamCreator for Event Staff */}
-            <TeamCreator
-                contextType="event_staff"
-                parentRef={eventId}
-                eventId={eventId}
-                title="Add Operational Staff Roster"
-                subtitle="e.g. Check-in & Registration, Stage Management, Technical Support, Security"
-            />
-
-            {/* Existing Rosters */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    <h3 className="font-display text-lg font-semibold text-ink">
-                        Staff Rosters ({teamsWithMembers.length})
-                    </h3>
-                </div>
-
-                {teamsWithMembers.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-line bg-paper p-10 text-center">
-                        <Users className="mx-auto h-8 w-8 text-ink-faint" />
-                        <h4 className="mt-3 font-display text-sm font-semibold text-ink">
-                            No staff rosters yet
-                        </h4>
-                        <p className="mt-1 text-xs text-ink-soft">
-                            Use the form above to create your first operational team for this event.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {teamsWithMembers.map((team) => (
-                            <TeamRosterView
-                                key={team.id}
-                                team={team}
-                                currentUserId={current?.userId}
-                                isOrganizerOrAdmin={true}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-            {advanced ? (
-                <div className="space-y-6 rounded-2xl border border-line bg-paper p-6">
-                    <FormFeedback error={sp.e} success={sp.ok} />
-                    <h3 className="font-display text-lg font-semibold text-ink">Named positions & recruitment</h3>
-                    {advancedDetails.map(({ team, positions, applicants }) => (
-                            <div key={`adv-${team.id}`} className="space-y-3 border-t border-line pt-4">
-                                <p className="text-sm font-medium text-ink">{team.name}</p>
-                                <ul className="text-sm text-ink-soft">
-                                    {positions.map((p) => (
-                                        <li key={p.id}>{p.title}</li>
-                                    ))}
-                                    {positions.length === 0 ? <li>No named positions yet.</li> : null}
-                                </ul>
-                                <form action={addStaffPosition} className="flex flex-wrap gap-2">
-                                    <input type="hidden" name="eventId" value={eventId} />
-                                    <input type="hidden" name="organizerId" value={organizer_id} />
-                                    <input type="hidden" name="teamId" value={team.id} />
-                                    <select name="title" className="rounded-md border border-line px-3 py-2 text-sm">
-                                        {EVENT_STAFF_POSITIONS.map((title) => (
-                                            <option key={title}>{title}</option>
-                                        ))}
-                                    </select>
-                                    <button type="submit" className={buttonClass("secondary", "sm")}>
-                                        Add position
-                                    </button>
-                                </form>
-                                <form action={addStaffApplicant} className="flex flex-wrap gap-2">
-                                    <input type="hidden" name="eventId" value={eventId} />
-                                    <input type="hidden" name="organizerId" value={organizer_id} />
-                                    <input type="hidden" name="teamId" value={team.id} />
-                                    <input name="name" placeholder="Applicant name" className="rounded-md border border-line px-3 py-2 text-sm" required />
-                                    <input name="note" placeholder="Note" className="rounded-md border border-line px-3 py-2 text-sm" />
-                                    <button type="submit" className={buttonClass("secondary", "sm")}>
-                                        Add applicant
-                                    </button>
-                                </form>
-                                <ul className="space-y-2">
-                                    {applicants.map((a) => (
-                                        <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                                            <span>
-                                                {String(a.responses.name || "Applicant")} · {a.status}
-                                            </span>
-                                            <form action={setStaffApplicantStatus} className="flex gap-2">
-                                                <input type="hidden" name="eventId" value={eventId} />
-                                                <input type="hidden" name="organizerId" value={organizer_id} />
-                                                <input type="hidden" name="applicantId" value={a.id} />
-                                                <select name="status" defaultValue={a.status} className="rounded-md border border-line px-2 py-1 text-xs">
-                                                    <option value="applied">Applied</option>
-                                                    <option value="interview">Interview</option>
-                                                    <option value="accepted">Accepted</option>
-                                                    <option value="rejected">Rejected</option>
-                                                </select>
-                                                <button type="submit" className={buttonClass("secondary", "sm")}>
-                                                    Update
-                                                </button>
-                                            </form>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                    ))}
-                </div>
-            ) : (
-                <LockedModulePanel moduleKey="teams_advanced_roles" />
-            )}
-        </div>
-    );
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-ink">Event team</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Ops team for this event — assign people from your Teams library, manage roles, recruit,
+          and export.
+        </p>
+      </div>
+      <FormFeedback error={sp.e} success={sp.ok} />
+      <TeamsManager
+        scope={{ kind: "event", eventId, organizerId: organizer_id }}
+        currentUserId={current?.userId}
+        teams={assignedTeams}
+        library={library}
+        assigned={assigned}
+        assignAction={saveEventStaffAssignmentsAction}
+        advanced={advanced}
+        advancedDetails={advancedDetails}
+        tracks={tracks.map((t) => ({ id: t.id, name: t.name }))}
+        applyRoot={applyRoot.replace(/\/$/, "")}
+        contextType="event_staff"
+      />
+    </div>
+  );
 }

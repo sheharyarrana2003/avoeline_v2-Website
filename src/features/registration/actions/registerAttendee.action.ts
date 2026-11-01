@@ -5,328 +5,438 @@ import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { ActionResult, fail } from "@/src/lib/action";
-import { uploadMedia } from "@/src/features/media/uploadMedia.action";
-import { CERTIFICATES_BUCKET } from "@/data/supabase";
-import { createPublicRegistration, getPublicEvent, isPaidEvent, recordCommunication } from "../registration.service";
+import { rateLimit } from "@/src/lib/rateLimit";
+import { createPublicRegistration, getPublicEvent, isPaidEvent } from "../registration.service";
 import { getTrack, listTracks } from "@/src/features/hackathon/hackathon.service";
-import { insertHackathonTeam } from "@/src/features/hackathon/actions/teams.action";
+import { createHackathonTeamWithMembers } from "@/src/features/hackathon/teamWrite";
+import { joinCodeTaken } from "@/src/features/hackathon/hackathon.service";
+import { makeJoinCode } from "@/src/features/hackathon/types";
 import { trackDueAmount } from "@/src/features/hackathon/types";
-import { sendRegistrationEmail } from "../registrationEmail";
-import { absoluteUrl } from "@/src/lib/appUrl";
-import { RegistrationRefusal } from "../types";
-import { readAnswers } from "@/src/lib/customFields";
-import { missingRequired } from "@/src/features/taxonomy/types";
+import { maybeAutoEventEmail } from "@/src/features/event_attendee/eventEmail.service";
+import type { RegistrationRefusal } from "@/src/features/registration/types";
 import { AuthService } from "@/src/features/auth/authService";
-import { sendNotification } from "@/src/lib/notifications";
-import { attachRegistrationsToGroup, createRegistrationGroup } from "@/src/features/registration_groups/groups.service";
+import {
+  attachRegistrationsToGroup,
+  createRegistrationGroup,
+} from "@/src/features/registration_groups/groups.service";
+import { listActiveFields } from "../forms/formFields.service";
+import {
+  buildMemberRegistrationSchema,
+  buildRegistrationSchema,
+} from "../forms/buildRegistrationSchema";
+import { registrationUploadExists } from "./requestRegistrationUpload.action";
+import { TicketingService } from "@/src/features/ticketing/ticketing.service";
+import { TABLES } from "@/data/collections";
+import { PAYMENT_SCREENSHOTS_BUCKET, supabaseAdmin } from "@/data/supabase";
+import type { EventFormField } from "../forms/formFields.types";
 
-/**
- * What each refusal reads like to the person who just pressed the button.
- *
- * The service returns a reason code rather than a sentence so this stays the only
- * place wording lives, and so the service never has to care about phrasing.
- */
 const REFUSAL_MESSAGE: Record<RegistrationRefusal, string> = {
-    event_not_found: "This event is no longer open for registration.",
-    event_closed: "Registration for this event has closed.",
-    event_full: "This event is fully booked.",
-    already_registered: "That email address is already registered for this event.",
-    needs_code: "This is a private event. Enter the access code to register.",
-    bad_code: "That access code is not right.",
-    needs_invite: "This event is invite only. Please use the link you were sent.",
-    invite_expired: "That invitation has expired.",
-    invite_used: "That invitation has already been used.",
-    // Deliberately does not confirm whether the address is on the list -- that
-    // would let anyone test an event's guest list one address at a time.
-    not_whitelisted: "That email address cannot register for this event.",
-    tier_locked: "That ticket tier needs the access code for this event.",
-    track_required: "Choose a competition to enter.",
-    track_ended: "That competition has ended. Choose another one.",
+  event_not_found: "This event is no longer open for registration.",
+  event_closed: "Registration for this event has closed.",
+  event_full: "This event is fully booked.",
+  already_registered: "That email address is already registered for this event.",
+  needs_code: "This is a private event. Enter the access code to register.",
+  bad_code: "That access code is not right.",
+  needs_invite: "This event is invite only. Please use the link you were sent.",
+  invite_expired: "That invitation has expired.",
+  invite_used: "That invitation has already been used.",
+  not_whitelisted: "That email address cannot register for this event.",
+  tier_locked: "That ticket tier needs the access code for this event.",
+  track_required: "Choose a competition to enter.",
+  track_ended: "That competition has ended. Choose another one.",
 };
 
-/**
- * Payment proofs are stored in the private `certificates` bucket under
- * `payment-proofs/`. The `payment-screenshots` bucket is also private
- * (`PAYMENT_SCREENSHOTS_BUCKET`) for a later one-line switch.
- */
-const PROOF_BUCKET = CERTIFICATES_BUCKET;
-const PROOF_FOLDER = "payment-proofs";
+const SYSTEM_KEYS = new Set(["name", "email", "phone", "payment_screenshot"]);
 
-/** Deliberately generous for a phone photo, far below uploadMedia's 50MB ceiling. */
-const MAX_PROOF_BYTES = 5 * 1024 * 1024;
-
-/** Deliberately permissive. The real proof an address works is the email arriving. */
-function looksLikeEmail(value: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+function readFieldValue(formData: FormData, field: EventFormField, prefix = ""): unknown {
+  const name = `${prefix}${field.key}`;
+  if (field.type === "checkbox") {
+    if ((field.options ?? []).length) {
+      return formData
+        .getAll(`${name}[]`)
+        .map((v) => String(v).trim())
+        .filter(Boolean);
+    }
+    return formData.get(name) !== null;
+  }
+  if (field.type === "file") {
+    const raw = String(formData.get(name) ?? "").trim();
+    if (!raw) return undefined;
+    try {
+      const parsed = JSON.parse(raw) as { path?: string; bucket?: string };
+      if (parsed?.path) return { path: parsed.path, bucket: parsed.bucket };
+    } catch {
+      /* plain path */
+      return { path: raw };
+    }
+    return undefined;
+  }
+  const text = String(formData.get(name) ?? "").trim();
+  if (field.type === "number") return text === "" ? undefined : Number(text);
+  return text;
 }
 
-/**
- * Register an attendee who has no account.
- *
- * Bound-arg-first signature: `bind(null, eventId)` leaves `(prevState, formData)`
- * for `useActionState`. Getting that order wrong is the classic way this pattern
- * breaks, and it fails at runtime rather than at compile time.
- *
- * This is a public endpoint by design -- no session, no role check. What replaces
- * authorization is that a caller can only ever create a registration against an
- * event the gate already accepts, and can supply nothing beyond their own contact
- * details. Every consequential field (price, tier, status, organizer) is derived
- * server-side from the event, never taken from the form.
- */
-export async function registerAttendeeAction(
-    eventId: string,
-    prevState: ActionResult | null,
-    formData: FormData,
-): Promise<ActionResult> {
-    try {
-        const name = String(formData.get("name") ?? "").trim();
-        const email = String(formData.get("email") ?? "").trim();
-        const phone = String(formData.get("phone") ?? "").trim();
+function answersFromFields(
+  formData: FormData,
+  fields: EventFormField[],
+  prefix = "",
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const field of fields) {
+    out[field.key] = readFieldValue(formData, field, prefix);
+  }
+  return out;
+}
 
-        if (!name || !email || !phone) {
-            return fail("Please fill in your name, email and phone number.");
-        }
-        if (name.length > 120) {
-            return fail("That name is too long.");
-        }
-        if (!looksLikeEmail(email)) {
-            return fail("That email address does not look right.");
-        }
-
-        // Access credentials travel with the form as hidden inputs, so the gate
-        // can be re-decided here. They are re-checked rather than trusted: the
-        // page that rendered this form proves nothing about who is submitting it.
-        const attempt = {
-            token: String(formData.get("inviteToken") ?? "").trim() || null,
-            code: String(formData.get("accessCode") ?? "").trim() || null,
-        };
-        const promoCode = String(formData.get("promoCode") ?? "").trim();
-        const ticketTierId = String(formData.get("ticketTierId") ?? "").trim();
-        const tier = String(formData.get("tier") ?? "").trim();
-        const trackId = String(formData.get("trackId") ?? "").trim();
-
-        // Re-check the event here rather than trusting the page that rendered the
-        // form: it may have been open when the page loaded and closed since.
-        const event = await getPublicEvent(eventId);
-        if (!event) return fail(REFUSAL_MESSAGE.event_not_found);
-
-        const tracks = await listTracks(event.id);
-        let amountDue = isPaidEvent(event) ? 1 : 0;
-        if (tracks.length) {
-            const track = tracks.find((t) => t.id === trackId) ?? (trackId ? await getTrack(trackId) : null);
-            if (!track || track.eventId !== event.id) return fail(REFUSAL_MESSAGE.track_required);
-            if (track.status === "ended") return fail(REFUSAL_MESSAGE.track_ended);
-            amountDue = trackDueAmount(track);
-        }
-
-        // The event's own registration questions. Read against the stored
-        // question list and validated here rather than trusting the form: the
-        // `required` flag lives on the event, and a hand-made POST carries
-        // whichever inputs it likes.
-        const questions = event.registration?.customForm ?? [];
-        const groupRegister = formData.get("groupRegister") === "1" && !!event.registration?.groupRegistration && !tracks.length;
-        const leadQuestions = groupRegister ? questions : questions;
-        const customResponses = readAnswers(formData, leadQuestions);
-        const unanswered = missingRequired(leadQuestions, customResponses);
-        if (unanswered.length) {
-            return fail(`Please answer: ${unanswered.join(", ")}.`);
-        }
-        const memberQuestions = questions.filter((q) => q.askOnce !== "group");
-
-        const teamName = String(formData.get("teamName") ?? "").trim();
-        const memberPeople: { name: string; email: string; phone: string; customResponses: typeof customResponses }[] = [];
-        if (tracks.length || groupRegister) {
-            if (!teamName) return fail(groupRegister ? "Give your group a name." : "Give your team a name.");
-            const track = tracks.length ? tracks.find((t) => t.id === trackId) ?? (await getTrack(trackId)) : null;
-            const maxTeam = groupRegister
-                ? event.registration?.groupMaxSize ?? 8
-                : track?.maxTeamSize ?? 1;
-            const minTeam = groupRegister ? event.registration?.groupMinSize ?? 2 : 1;
-            const extraCount = Math.max(0, Math.min(Number(formData.get("memberCount") ?? 0) || 0, Math.max(0, maxTeam - 1)));
-            if (groupRegister && extraCount + 1 < minTeam) {
-                return fail(`This event needs groups of at least ${minTeam}.`);
-            }
-            const seen = new Set([email.toLowerCase()]);
-            for (let i = 0; i < extraCount; i += 1) {
-                const mName = String(formData.get(`member_${i}_name`) ?? "").trim();
-                const mEmail = String(formData.get(`member_${i}_email`) ?? "").trim();
-                const mPhone = String(formData.get(`member_${i}_phone`) ?? "").trim();
-                if (!mName || !mEmail || !mPhone) return fail("Fill in every team member's name, email and phone.");
-                if (!looksLikeEmail(mEmail)) return fail("A team member email does not look right.");
-                if (seen.has(mEmail.toLowerCase())) return fail("Each team member needs a different email address.");
-                seen.add(mEmail.toLowerCase());
-                const memberAnswers = readAnswers(formData, memberQuestions, `member_${i}_custom_`);
-                const memberMissing = missingRequired(memberQuestions, memberAnswers);
-                if (memberMissing.length) {
-                    return fail(`Please answer for ${mName}: ${memberMissing.join(", ")}.`);
-                }
-                memberPeople.push({ name: mName, email: mEmail, phone: mPhone, customResponses: memberAnswers });
-            }
-        }
-
-        // Optional even on a paid event: the requirement is that an attendee *can*
-        // send proof, and refusing to register someone who has not paid yet would
-        // lock out the exact person the awaiting_payment status exists for.
-        let proofPath: string | null = null;
-        const proof = formData.get("paymentProof");
-        if (amountDue > 0 && proof instanceof File && proof.size > 0) {
-            // Validated here rather than leaning on uploadMedia, which permits video
-            // and 50MB. Checked before the upload so a bad file costs no storage.
-            if (!proof.type.startsWith("image/")) {
-                return fail("The payment proof needs to be an image.");
-            }
-            if (proof.size > MAX_PROOF_BYTES) {
-                return fail("That image is too large. Please upload one under 5MB.");
-            }
-
-            const upload = new FormData();
-            upload.append("file", proof);
-            upload.append("folder", PROOF_FOLDER);
-            upload.append("bucket", PROOF_BUCKET);
-
-            const uploaded = await uploadMedia(upload);
-            if (!uploaded.success) {
-                console.error("[registerAttendeeAction] proof upload failed", uploaded.error);
-                return fail("Your payment proof could not be uploaded. Please try again.");
-            }
-            // The storage key, not the signed URL uploadMedia also returns -- that URL
-            // expires within the hour and would be a dead image by the time an
-            // organizer opened it.
-            proofPath = uploaded.path;
-        }
-
-        const headerList = await headers();
-        // Registration is open to strangers, so this is a link when it can be
-        // made and nothing when it cannot -- never a requirement.
-        const signedIn = await AuthService.getCurrentUser().catch(() => null);
-        const metadata = {
-            ipAddress: headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "",
-            userAgent: headerList.get("user-agent") ?? "",
-            deviceType: /mobile|android|iphone/i.test(headerList.get("user-agent") ?? "")
-                ? "mobile"
-                : "desktop",
-        };
-
-        const result = await createPublicRegistration(
-            eventId,
-            { name, email, phone, tier, customResponses, promoCode, ticketTierId, trackId },
-            {
-                proofPath,
-                userId: signedIn?.userId ?? null,
-                metadata,
-                hackathonRole: tracks.length ? "team_lead" : undefined,
-                groupRole: groupRegister ? "lead" : undefined,
-            },
-            attempt,
-        );
-
-        if (!result.ok) return fail(REFUSAL_MESSAGE[result.refusal]);
-
-        const teamMembers = [
-            { registrationId: result.registrationId, name, email, isOwner: true },
-        ];
-
-        for (const person of memberPeople) {
-            const extra = await createPublicRegistration(
-                eventId,
-                {
-                    name: person.name,
-                    email: person.email,
-                    phone: person.phone,
-                    customResponses: person.customResponses,
-                    trackId,
-                },
-                {
-                    userId: null,
-                    metadata,
-                    holdForTeamPayment: amountDue > 0,
-                    skipCapacity: true,
-                    hackathonRole: tracks.length ? "participant" : undefined,
-                    groupRole: groupRegister ? "member" : undefined,
-                },
-                attempt,
-            );
-            if (!extra.ok) return fail(REFUSAL_MESSAGE[extra.refusal]);
-            teamMembers.push({
-                registrationId: extra.registrationId,
-                name: person.name,
-                email: person.email,
-                isOwner: false,
-            });
-            const extraTicket = `/events/${eventId}/ticket/${extra.registrationId}`;
-            const extraSent = await sendRegistrationEmail(
-                extra.registration,
-                extra.event,
-                await absoluteUrl(extraTicket),
-            );
-            if (extraSent) await recordCommunication(extra.registrationId, extraSent);
-        }
-
-        if (groupRegister) {
-            const group = await createRegistrationGroup({
-                eventId: event.id,
-                groupName: teamName,
-                leadRegistrationId: result.registrationId,
-                paymentStatus: amountDue > 0 ? "pending" : "completed",
-                paymentProofPath: proofPath,
-            });
-            await attachRegistrationsToGroup(
-                group.id,
-                teamMembers.map((m) => m.registrationId),
-            );
-        }
-
-        if (tracks.length) {
-            const track = tracks.find((t) => t.id === trackId) ?? (await getTrack(trackId));
-            const team = await insertHackathonTeam({
-                eventId: event.id,
-                organizerId: event.organizerId,
-                trackId,
-                name: teamName,
-                members: teamMembers,
-                maxTeamSize: track?.maxTeamSize ?? teamMembers.length,
-                fee: amountDue,
-                feeProofPath: proofPath,
-            });
-            if (!team.ok) return fail(team.error);
-        }
-
-        const ticketPath = `/events/${eventId}/ticket/${result.registrationId}`;
-
-        // Awaited rather than fired and forgotten: this runtime does not guarantee
-        // work outliving the response, so a floating promise here would be killed
-        // mid-flight and the email would vanish. `sendRegistrationEmail` never
-        // throws and returns null when it did not send, so the cost of waiting is
-        // bounded and a failure cannot take the registration down with it.
-        const sent = await sendRegistrationEmail(
-            result.registration,
-            result.event,
-            await absoluteUrl(ticketPath),
-        );
-        if (sent) await recordCommunication(result.registrationId, sent);
-
-        // Notifications Engine: notify attendee of confirmed registration
-        if (result.registration.status === "confirmed") {
-            const recipientUserId = result.registration.userId || email;
-            await sendNotification(recipientUserId, "registration_confirmed", {
-                attendeeName: name,
-                eventTitle: result.event.title || "Event",
-                eventId,
-                ticketTier: tier || "General",
-            }).catch((err) => console.error("[registerAttendeeAction] sendNotification error:", err));
-        }
-
-        // So the organizer's attendee list shows the new registration rather than a
-        // cached page without it.
-        revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
-        revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
-
-        redirect(ticketPath);
-    } catch (err) {
-        // redirect() reports itself by throwing. Swallowing it here would leave the
-        // attendee staring at a form that appears to have done nothing.
-        if (isRedirectError(err)) throw err;
-        console.error("[registerAttendeeAction]", err);
-        return fail("Something went wrong while registering you. Please try again.");
+function splitSystemAnswers(answers: Record<string, unknown>) {
+  const name = String(answers.name ?? "").trim();
+  const email = String(answers.email ?? "").trim();
+  const phone = String(answers.phone ?? "").trim();
+  const custom: Record<string, string | number | boolean> = {};
+  let proofPath: string | null = null;
+  for (const [key, value] of Object.entries(answers)) {
+    if (SYSTEM_KEYS.has(key) && key !== "payment_screenshot") continue;
+    if (key === "website") continue;
+    if (key === "payment_screenshot") {
+      if (value && typeof value === "object" && "path" in value) {
+        proofPath = String((value as { path: string }).path);
+      }
+      continue;
     }
+    if (value === undefined || value === null || value === "") continue;
+    if (typeof value === "object" && value !== null && "path" in value) {
+      custom[key] = String((value as { path: string }).path);
+      continue;
+    }
+    if (typeof value === "boolean" || typeof value === "number") custom[key] = value;
+    else if (Array.isArray(value)) custom[key] = value.join(", ");
+    else custom[key] = String(value);
+  }
+  return { name, email, phone, custom, proofPath };
+}
+
+async function verifyFileAnswers(answers: Record<string, unknown>, fields: EventFormField[]) {
+  for (const field of fields) {
+    if (field.type !== "file") continue;
+    const value = answers[field.key];
+    if (!value) {
+      if (field.required) return `${field.label} is required.`;
+      continue;
+    }
+    const path =
+      typeof value === "object" && value && "path" in value
+        ? String((value as { path: string }).path)
+        : String(value);
+    if (!(await registrationUploadExists(path))) {
+      return `${field.label} upload could not be verified. Please upload again.`;
+    }
+  }
+  return null;
+}
+
+export async function registerAttendeeAction(
+  eventId: string,
+  prevState: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  void prevState;
+  try {
+    const headerList = await headers();
+    const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+    const limited = rateLimit(`register:${eventId}:${ip}`, 8, 60);
+    if (!limited.ok) return fail("Too many registrations from this network. Please wait a minute.");
+
+    // Honeypot
+    if (String(formData.get("website") ?? "").trim()) {
+      return fail("Registration could not be completed.");
+    }
+
+    const legalAccepted =
+      formData.get("legalAccepted") === "1" || formData.get("legalAccepted") === "on";
+    const communityOptIn =
+      formData.get("communityOptIn") === "1" || formData.get("communityOptIn") === "on";
+    if (!legalAccepted) {
+      return fail("You must accept the Terms and Privacy Policy to register.");
+    }
+
+    const attempt = {
+      token: String(formData.get("inviteToken") ?? "").trim() || null,
+      code: String(formData.get("accessCode") ?? "").trim() || null,
+    };
+    const promoCode = String(formData.get("promoCode") ?? "").trim();
+    const ticketTierId = String(formData.get("ticketTierId") ?? "").trim();
+    const tier = String(formData.get("tier") ?? "").trim();
+    const trackId = String(formData.get("trackId") ?? "").trim();
+
+    const event = await getPublicEvent(eventId);
+    if (!event) return fail(REFUSAL_MESSAGE.event_not_found);
+
+    const fields = await listActiveFields(event.id);
+    if (!fields.length) return fail("This event has no registration form configured yet.");
+
+    const tracks = await listTracks(event.id);
+    let amountDue = isPaidEvent(event) ? 1 : 0;
+    if (tracks.length) {
+      const track =
+        tracks.find((t) => t.id === trackId) ?? (trackId ? await getTrack(trackId) : null);
+      if (!track || track.eventId !== event.id) return fail(REFUSAL_MESSAGE.track_required);
+      if (track.status === "ended") return fail(REFUSAL_MESSAGE.track_ended);
+      amountDue = trackDueAmount(track);
+    }
+
+    const groupRegister =
+      formData.get("groupRegister") === "1" &&
+      !!event.registration?.groupRegistration &&
+      !tracks.length;
+
+    const perGroupFields = fields.filter((f) => f.scope === "per_group");
+    const perMemberFields = fields.filter((f) => f.scope === "per_member");
+    const leadSchemaFields =
+      groupRegister || tracks.length ? [...perMemberFields, ...perGroupFields] : fields;
+
+    const leadAnswers = answersFromFields(formData, leadSchemaFields);
+    leadAnswers.website = String(formData.get("website") ?? "");
+    const leadParsed = buildRegistrationSchema(leadSchemaFields).safeParse(leadAnswers);
+    if (!leadParsed.success) {
+      return fail(leadParsed.error.issues[0]?.message || "Please check your answers.");
+    }
+
+    const fileErr = await verifyFileAnswers(leadAnswers, leadSchemaFields);
+    if (fileErr) return fail(fileErr);
+
+    const { name, email, phone, custom, proofPath } = splitSystemAnswers(leadAnswers);
+    if (!email) return fail("Email is required.");
+
+    const teamName = String(formData.get("teamName") ?? "").trim();
+    const memberPeople: {
+      name: string;
+      email: string;
+      phone: string;
+      customResponses: Record<string, string | number | boolean>;
+    }[] = [];
+
+    if (tracks.length || groupRegister) {
+      if (!teamName)
+        return fail(groupRegister ? "Give your group a name." : "Give your team a name.");
+      const track = tracks.length
+        ? (tracks.find((t) => t.id === trackId) ?? (await getTrack(trackId)))
+        : null;
+      const maxTeam = groupRegister
+        ? (event.registration?.groupMaxSize ?? 8)
+        : (track?.maxTeamSize ?? 1);
+      const minTeam = groupRegister ? (event.registration?.groupMinSize ?? 2) : 1;
+      const extraCount = Math.max(
+        0,
+        Math.min(Number(formData.get("memberCount") ?? 0) || 0, Math.max(0, maxTeam - 1)),
+      );
+      if (groupRegister && extraCount + 1 < minTeam) {
+        return fail(`This event needs groups of at least ${minTeam}.`);
+      }
+      const seen = new Set([email.toLowerCase()]);
+      const memberSchema = buildMemberRegistrationSchema(perMemberFields);
+      for (let i = 0; i < extraCount; i += 1) {
+        const memberAnswers = answersFromFields(formData, perMemberFields, `member_${i}_`);
+        const parsed = memberSchema.safeParse(memberAnswers);
+        if (!parsed.success) {
+          return fail(parsed.error.issues[0]?.message || `Please check member ${i + 2}'s answers.`);
+        }
+        const split = splitSystemAnswers(memberAnswers);
+        if (!split.email) return fail("Each team member needs an email address.");
+        if (seen.has(split.email.toLowerCase())) {
+          return fail("Each team member needs a different email address.");
+        }
+        seen.add(split.email.toLowerCase());
+        memberPeople.push({
+          name: split.name,
+          email: split.email,
+          phone: split.phone,
+          customResponses: split.custom,
+        });
+      }
+    }
+
+    // Prefer payment_screenshot field path; legacy paymentProof no longer used.
+    let finalProof = proofPath;
+    if (finalProof && !(await registrationUploadExists(finalProof))) {
+      return fail("Payment screenshot could not be verified. Please upload again.");
+    }
+
+    const signedIn = await AuthService.getCurrentUser().catch(() => null);
+    const metadata = {
+      ipAddress: ip,
+      userAgent: headerList.get("user-agent") ?? "",
+      deviceType: /mobile|android|iphone/i.test(headerList.get("user-agent") ?? "")
+        ? "mobile"
+        : "desktop",
+    };
+
+    const result = await createPublicRegistration(
+      eventId,
+      {
+        name,
+        email,
+        phone,
+        tier,
+        customResponses: custom,
+        promoCode,
+        ticketTierId,
+        trackId,
+      },
+      {
+        proofPath: finalProof,
+        userId: signedIn?.userId ?? null,
+        metadata,
+        hackathonRole: tracks.length ? "team_lead" : undefined,
+        groupRole: groupRegister ? "lead" : undefined,
+        deferPromoRedeem: groupRegister,
+      },
+      attempt,
+    );
+
+    if (!result.ok) {
+      if (result.refusal === "already_registered") {
+        return fail("That email address is already registered for this event.");
+      }
+      return fail(REFUSAL_MESSAGE[result.refusal]);
+    }
+
+    const teamMembers = [{ registrationId: result.registrationId, name, email, isOwner: true }];
+
+    for (const person of memberPeople) {
+      const extra = await createPublicRegistration(
+        eventId,
+        {
+          name: person.name,
+          email: person.email,
+          phone: person.phone,
+          customResponses: person.customResponses,
+          trackId,
+        },
+        {
+          userId: null,
+          metadata,
+          holdForTeamPayment: amountDue > 0,
+          skipCapacity: true,
+          hackathonRole: tracks.length ? "participant" : undefined,
+          groupRole: groupRegister ? "member" : undefined,
+        },
+        attempt,
+      );
+      if (!extra.ok) {
+        if (extra.refusal === "already_registered") {
+          return fail(`${person.email} is already registered for this event.`);
+        }
+        return fail(REFUSAL_MESSAGE[extra.refusal]);
+      }
+      teamMembers.push({
+        registrationId: extra.registrationId,
+        name: person.name,
+        email: person.email,
+        isOwner: false,
+      });
+    }
+
+    if (groupRegister) {
+      const group = await createRegistrationGroup({
+        eventId: event.id,
+        groupName: teamName,
+        leadRegistrationId: result.registrationId,
+        paymentStatus: amountDue > 0 ? "pending" : "completed",
+        paymentProofPath: finalProof,
+      });
+      await attachRegistrationsToGroup(
+        group.id,
+        teamMembers.map((m) => m.registrationId),
+      );
+
+      if (result.promoId && result.listPrice > 0) {
+        const redeemed = await TicketingService.redeemPromo({
+          promoId: result.promoId,
+          eventId: event.id,
+          trackId: result.chosenTrackId,
+          email,
+          listPrice: result.listPrice,
+          registrationId: null,
+          groupId: group.id,
+        });
+        if ("total" in redeemed) {
+          await supabaseAdmin
+            .from(TABLES.REGISTRATIONS)
+            .update({
+              final_price: redeemed.total,
+              amount_paid: redeemed.total,
+              promo_code_used: redeemed.code,
+              payment_proof_path: finalProof,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", result.registrationId);
+        }
+      }
+    }
+
+    if (tracks.length) {
+      const track = tracks.find((t) => t.id === trackId) ?? (await getTrack(trackId));
+      const team = await createHackathonTeamWithMembers({
+        eventId: event.id,
+        organizerId: event.organizerId,
+        trackId,
+        name: teamName,
+        members: teamMembers,
+        maxTeamSize: track?.maxTeamSize ?? teamMembers.length,
+        fee: amountDue,
+        feeProofPath: finalProof,
+        allocateJoinCode: async () => {
+          for (let attempt = 0; attempt < 6; attempt += 1) {
+            const candidate = makeJoinCode();
+            if (!(await joinCodeTaken(candidate))) return candidate;
+          }
+          return null;
+        },
+      });
+      if (!team.ok) return fail(team.error);
+    }
+
+    if (finalProof) {
+      await supabaseAdmin
+        .from(TABLES.REGISTRATIONS)
+        .update({
+          payment_proof_path: finalProof,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", result.registrationId);
+      void PAYMENT_SCREENSHOTS_BUCKET;
+    }
+
+    const ticketPath = `/events/${eventId}/ticket/${result.registrationId}`;
+    await maybeAutoEventEmail(result.registrationId);
+
+    try {
+      const { recordLegalAcceptance, grantMarketingConsent } =
+        await import("@/src/features/website/consent.service");
+      const { hashIp } = await import("@/src/features/website/consent.logic");
+      const ipHash = hashIp(ip);
+      await recordLegalAcceptance({
+        userId: signedIn?.userId ?? null,
+        email,
+        context: "event_registration",
+        ipHash,
+      });
+      if (communityOptIn) {
+        await grantMarketingConsent({
+          email,
+          userId: signedIn?.userId ?? null,
+          source: "event_registration",
+        });
+      }
+    } catch (consentErr) {
+      console.error("[registerAttendeeAction] consent", consentErr);
+    }
+
+    revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
+    redirect(ticketPath);
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    console.error("[registerAttendeeAction]", err);
+    return fail("Something went wrong while registering you. Please try again.");
+  }
 }

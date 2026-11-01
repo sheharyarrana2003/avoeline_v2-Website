@@ -1,81 +1,60 @@
 import Link from "next/link";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
-import { DataTable, type Column } from "@/src/shared_components/ui/DataTable";
-import { EmptyState } from "@/src/shared_components/ui/EmptyState";
-import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { buttonClass } from "@/src/lib/ui";
-import { CalendarDays } from "lucide-react";
-import { listScopedEvents, resolveDepartment, type DeptEventRow } from "@/src/features/department/department.service";
+import { ScopedEventsTable } from "@/src/features/events/components/ScopedEventsTable";
+import {
+  listClubOverviews,
+  listScopedEvents,
+  resolveDepartment,
+} from "@/src/features/department/department.service";
 
 export const metadata = { title: "Department events — Avoeline" };
 
 export default async function DepartmentEventsPage({
-    searchParams,
+  searchParams,
 }: {
-    searchParams: Promise<{ orgId?: string }>;
+  searchParams: Promise<{ orgId?: string; scope?: string }>;
 }) {
-    const { orgId } = await searchParams;
-    const { user, department } = await resolveDepartment(orgId);
-    const events = await listScopedEvents(department.id, user.userId);
+  const { orgId, scope: rawScope } = await searchParams;
+  const { user, department } = await resolveDepartment(orgId);
+  const clubs = await listClubOverviews(department.id);
+  const scope =
+    rawScope === "department" || clubs.some((c) => c.id === rawScope)
+      ? (rawScope as string)
+      : "all";
 
-    const columns: Column<DeptEventRow>[] = [
-        {
-            key: "title",
-            header: "Event",
-            cell: (row) =>
-                row.source === "department" ? (
-                    <Link href={`/organizer/${row.organizerId}/events/${row.id}`} className="font-medium text-ink hover:underline">
-                        {row.title}
-                    </Link>
-                ) : (
-                    <Link href={`/events/${row.id}`} className="font-medium text-ink hover:underline">
-                        {row.title}
-                    </Link>
-                ),
-        },
-        {
-            key: "source",
-            header: "Source",
-            cell: (row) => <StatusBadge status={row.source === "department" ? "department" : row.clubName || "club"} size="sm" />,
-        },
-        {
-            key: "act",
-            header: "",
-            align: "right",
-            cell: (row) =>
-                row.source === "department" ? (
-                    <span className="text-2xs uppercase text-ink-soft">Manage</span>
-                ) : (
-                    <span className="text-2xs uppercase text-ink-faint">Read only</span>
-                ),
-        },
-    ];
+  const events = await listScopedEvents(department.id, user.userId, scope);
+  const q = orgId ? `orgId=${encodeURIComponent(orgId)}&` : "";
 
-    return (
-        <div className="mx-auto max-w-6xl space-y-6">
-            <PageHeader
-                title="Events"
-                description="Department events you can edit. Club events are listed for oversight only — open the public page, not the club's workspace."
-                actions={
-                    <Link href={`/organizer/${user.userId}/events/create`} className={buttonClass()}>
-                        New department event
-                    </Link>
-                }
-            />
-            <DataTable
-                caption={`${events.length} event${events.length === 1 ? "" : "s"}`}
-                rows={events}
-                columns={columns}
-                getKey={(r) => r.id}
-                empty={
-                    <EmptyState
-                        size="sm"
-                        icon={<CalendarDays className="h-5 w-5" />}
-                        title="No events yet"
-                        description="Create a department event, or wait for clubs to publish theirs."
-                    />
-                }
-            />
-        </div>
-    );
+  const tabs = [
+    {
+      label: "All",
+      value: "all",
+      href: `/department/events?${q}scope=all`,
+      count: undefined as number | undefined,
+    },
+    { label: "Department", value: "department", href: `/department/events?${q}scope=department` },
+    ...clubs.map((c) => ({
+      label: c.name,
+      value: c.id,
+      href: `/department/events?${q}scope=${c.id}`,
+    })),
+  ];
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHeader
+        title="Events"
+        description="Department events and every club event. Open a row for the public page (status banner when closed)."
+        actions={
+          <Link href={`/organizer/${user.userId}/events/create`} className={buttonClass()}>
+            New department event
+          </Link>
+        }
+      />
+      <FilterTabs tabs={tabs} activeValue={scope} label="Event scope" />
+      <ScopedEventsTable rows={events} manageBase={`/organizer/${user.userId}`} />
+    </div>
+  );
 }

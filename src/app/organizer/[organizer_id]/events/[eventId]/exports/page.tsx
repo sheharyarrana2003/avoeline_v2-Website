@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
-import { assertOwnedEvent } from "@/src/features/events/ownership";
+import { assertEventActor } from "@/src/features/events/ownership";
 import { ExportPanel } from "@/src/features/exports/components/ExportPanel";
-import { exportEventSheetAction, type StatusFilter } from "@/src/features/exports/actions/exportEventSheet.action";
+import {
+  exportEventSheetAction,
+  type StatusFilter,
+} from "@/src/features/exports/actions/exportEventSheet.action";
 import { isSheetFormat } from "@/src/features/exports/writeSheet";
 import { isSheetKind, type SheetKind } from "@/src/features/exports/eventSheets";
 import { eventIsHackathon } from "@/src/features/hackathon/hackathon.service";
@@ -16,41 +19,41 @@ import { eventIsHackathon } from "@/src/features/hackathon/hackathon.service";
  * side rather than to go looking.
  */
 export default async function EventExportsPage({
-    params,
+  params,
 }: {
-    params: Promise<{ eventId: string }>;
+  params: Promise<{ eventId: string }>;
 }) {
-    const { eventId } = await params;
+  const { eventId } = await params;
 
-    const event = await assertOwnedEvent(eventId);
-    if (!event) notFound();
+  const event = await assertEventActor(eventId, "attendees");
+  if (!event) notFound();
 
-    // Bound server-side so the event id never reaches the client, matching the
-    // attendees tab. The action re-checks ownership regardless -- this only means
-    // a tampered request cannot name a different event in the first place.
-    const run = async (kind: SheetKind, format: "csv" | "xlsx", status?: string) => {
-        "use server";
-        return exportEventSheetAction({
-            eventId,
-            kind: isSheetKind(kind) ? kind : "attendees",
-            format: isSheetFormat(format) ? format : "csv",
-            status: (status ?? "all") as StatusFilter,
-        });
-    };
+  // Bound server-side so the event id never reaches the client, matching the
+  // attendees tab. The action re-checks ownership regardless -- this only means
+  // a tampered request cannot name a different event in the first place.
+  const run = async (kind: SheetKind, format: "csv" | "xlsx", status?: string) => {
+    "use server";
+    return exportEventSheetAction({
+      eventId,
+      kind: isSheetKind(kind) ? kind : "attendees",
+      format: isSheetFormat(format) ? format : "csv",
+      status: (status ?? "all") as StatusFilter,
+    });
+  };
 
-    return (
-        <Card title="Exports">
-            <CardBody>
-                <p className="pb-2 text-xs text-ink-soft">
-                    Each of these downloads as an Excel workbook or a CSV. The links are private and
-                    expire an hour after you ask for them.
-                </p>
-                <ExportPanel
-                    run={run}
-                    questionCount={(event.registration?.customForm ?? []).length}
-                    showHackathonTeams={await eventIsHackathon(event)}
-                />
-            </CardBody>
-        </Card>
-    );
+  return (
+    <Card title="Exports">
+      <CardBody>
+        <p className="pb-2 text-xs text-ink-soft">
+          Each of these downloads as an Excel workbook or a CSV. The links are private and expire an
+          hour after you ask for them.
+        </p>
+        <ExportPanel
+          run={run}
+          questionCount={(event.registration?.customForm ?? []).length}
+          showHackathonTeams={await eventIsHackathon(event)}
+        />
+      </CardBody>
+    </Card>
+  );
 }

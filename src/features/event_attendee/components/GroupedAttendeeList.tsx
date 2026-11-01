@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import { ChevronDown, Download } from "lucide-react";
 import { AttendeeListItem } from "./AttendeeListItem";
 import type { AttendeeClientSideProp } from "./AttendeeClientSide";
 import type { Registration } from "@/src/services/models/reg.type";
+import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { formatCurrency } from "@/src/lib/money";
 
 export type GroupedAttendeeGroup = {
   id: string;
@@ -12,6 +15,9 @@ export type GroupedAttendeeGroup = {
   payment?: string | null;
   accessCode?: string | null;
   subtitle?: string;
+  amount?: number;
+  currency?: string;
+  proofUrl?: string | null;
 };
 
 export function GroupedAttendeeList({
@@ -19,6 +25,7 @@ export function GroupedAttendeeList({
   leftover,
   expandedId,
   onToggle,
+  onOpenTeam,
   handleOnClick,
   openRegistrationId,
   onQuickStatusChange,
@@ -27,6 +34,7 @@ export function GroupedAttendeeList({
   leftover: AttendeeClientSideProp[];
   expandedId: string | null;
   onToggle: (id: string) => void;
+  onOpenTeam: (id: string) => void;
   handleOnClick: (registration_id: string) => void;
   openRegistrationId: string | null;
   onQuickStatusChange: (reg: Registration, newStatus: "confirmed" | "rejected") => void;
@@ -37,24 +45,42 @@ export function GroupedAttendeeList({
     <div className="space-y-3">
       {visible.map((group) => {
         const open = expandedId === group.id;
+        const hasAmount = typeof group.amount === "number" && group.amount > 0;
+        const paymentStatus = hasAmount && group.payment === "not_required" ? null : group.payment;
         return (
-          <div key={group.id} className="overflow-hidden rounded-xl border border-line bg-paper shadow-xs">
-            <button
-              type="button"
-              onClick={() => onToggle(group.id)}
-              className="flex w-full flex-wrap items-center gap-3 px-4 py-3 text-left hover:bg-muted"
-            >
-              <span className="min-w-0 flex-1">
+          <div
+            key={group.id}
+            className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm"
+          >
+            <div className="flex items-center gap-3 px-5 py-4">
+              <button
+                type="button"
+                onClick={() => onOpenTeam(group.id)}
+                className="min-w-0 flex-1 text-left hover:opacity-90"
+              >
                 <span className="block truncate text-sm font-medium text-ink">{group.name}</span>
-                <span className="block text-xs text-ink-soft">
-                  {group.subtitle ? `${group.subtitle} · ` : ""}
-                  {group.members.length} {group.members.length === 1 ? "member" : "members"}
-                  {group.payment ? ` · ${group.payment}` : ""}
+                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
+                  {group.subtitle ? <span>{group.subtitle}</span> : null}
+                  {group.subtitle ? <span aria-hidden="true">·</span> : null}
+                  <span>
+                    {group.members.length} {group.members.length === 1 ? "member" : "members"}
+                  </span>
+                  {hasAmount ? (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span className="tabular-nums text-ink">
+                        {formatCurrency(group.amount!, group.currency || "PKR")}
+                      </span>
+                    </>
+                  ) : null}
+                  {paymentStatus ? (
+                    <StatusBadge status={paymentStatus} size="sm" marker="dot" />
+                  ) : null}
                 </span>
-              </span>
+              </button>
               {group.accessCode ? (
                 <span
-                  className="font-mono text-xs tracking-wide text-ink"
+                  className="hidden shrink-0 font-mono text-2xs tracking-wide text-ink-soft sm:inline"
                   onClick={(e) => {
                     e.stopPropagation();
                     void navigator.clipboard.writeText(group.accessCode ?? "");
@@ -63,10 +89,29 @@ export function GroupedAttendeeList({
                 >
                   {group.accessCode}
                 </span>
-              ) : group.accessCode === null ? (
-                <span className="text-xs text-ink-soft">Code after pay + confirm</span>
               ) : null}
-            </button>
+              {group.proofUrl ? (
+                <a
+                  href={group.proofUrl}
+                  download
+                  onClick={(e) => e.stopPropagation()}
+                  className="shrink-0 text-ink-soft hover:text-ink"
+                  aria-label="Download payment proof"
+                  title="Download proof"
+                >
+                  <Download size={14} />
+                </a>
+              ) : null}
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-label={open ? "Hide members" : "Show members"}
+                onClick={() => onToggle(group.id)}
+                className="shrink-0 rounded-md p-1 text-ink-soft hover:bg-muted hover:text-ink"
+              >
+                <ChevronDown size={16} className={open ? "rotate-180" : ""} />
+              </button>
+            </div>
             {open ? (
               <div className="border-t border-line">
                 <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr] border-b border-line bg-muted/30 px-4 py-2 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
@@ -93,8 +138,10 @@ export function GroupedAttendeeList({
         );
       })}
       {leftover.length ? (
-        <div className="overflow-hidden rounded-xl border border-line bg-paper shadow-xs">
-          <p className="border-b border-line px-4 py-3 text-sm font-medium text-ink">Unassigned people</p>
+        <div className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm">
+          <p className="border-b border-line px-5 py-4 text-sm font-medium text-ink">
+            Unassigned people
+          </p>
           <div className="divide-y divide-line">
             {leftover.map((acs) => (
               <AttendeeListItem

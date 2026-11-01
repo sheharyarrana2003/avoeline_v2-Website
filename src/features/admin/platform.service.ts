@@ -1,7 +1,5 @@
 import { cache } from "react";
-import type { QueryDocumentSnapshot } from "@/data/admin_db";
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS, TABLES } from "@/data/collections";
+import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { toIsoString } from "@/src/lib/datetime";
 
@@ -12,162 +10,188 @@ import { toIsoString } from "@/src/lib/datetime";
  * `where("organizerId", "==", organizerId)` -- so there was no way to count
  * anything across the whole platform. These are the unscoped counterparts.
  *
- * The derive* helpers in anaylService take documents rather than an id, so they
- * work on these snapshots unchanged; this only widens the fetch.
- *
- * Every one of these is a full collection scan, which is what a platform total
- * is. ponytail: fine while the platform is small. Past a few thousand events,
- * keep the counters on an aggregate document updated on write and read that
- * instead -- Firestore has no COUNT that avoids reading the documents.
+ * Every one of these is a full table scan, which is what a platform total
+ * is. Fine while the platform is small. Past a few thousand events,
+ * keep the counters on an aggregate row updated on write and read that
+ * instead.
  */
 
 export type PlatformTotals = {
-    totalOrgs: number;
-    departmentsCount: number;
-    clubsCount: number;
-    organizers: number;
-    events: number;
-    liveEvents: number;
-    pastEvents: number;
-    registrations: number;
-    certificates: number;
-    vendors: number;
-    /** Events created per ISO week, oldest first, last 12 -- for the chart. */
-    eventsPerWeek: { label: string; count: number }[];
+  totalOrgs: number;
+  departmentsCount: number;
+  clubsCount: number;
+  organizers: number;
+  events: number;
+  liveEvents: number;
+  pastEvents: number;
+  registrations: number;
+  certificates: number;
+  vendors: number;
+  pendingVendors: number;
+  pendingOrganizers: number;
+  /** Events created per ISO week, oldest first, last 12 -- for the chart. */
+  eventsPerWeek: { label: string; count: number }[];
 };
 
 /** ISO week key, e.g. "2026-W35". Zero-padded so it sorts lexically. */
 function weekKey(iso: string): string {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-    // Thursday of the current week decides the year, per ISO 8601.
-    target.setUTCDate(target.getUTCDate() + 3 - ((target.getUTCDay() + 6) % 7));
-    const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
-    firstThursday.setUTCDate(firstThursday.getUTCDate() + 3 - ((firstThursday.getUTCDay() + 6) % 7));
-    const week = 1 + Math.round((target.getTime() - firstThursday.getTime()) / (7 * 86400000));
-    return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  // Thursday of the current week decides the year, per ISO 8601.
+  target.setUTCDate(target.getUTCDate() + 3 - ((target.getUTCDay() + 6) % 7));
+  const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+  firstThursday.setUTCDate(firstThursday.getUTCDate() + 3 - ((firstThursday.getUTCDay() + 6) % 7));
+  const week = 1 + Math.round((target.getTime() - firstThursday.getTime()) / (7 * 86400000));
+  return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
 export const getPlatformTotals = cache(async (): Promise<PlatformTotals> => {
-    try {
-        const [orgsSnap, organizers, events, registrations, certificates, vendors] = await Promise.all([
-            adminDb.collection(COLLECTIONS.ORGS).get(),
-            adminDb.collection(COLLECTIONS.ORGANIZERS).get(),
-            adminDb.collection(COLLECTIONS.EVENTS).get(),
-            adminDb.collection(COLLECTIONS.REGISTRATIONS).get(),
-            adminDb.collection(COLLECTIONS.CERTIFICATES).get(),
-            adminDb.collection(COLLECTIONS.VENDORS).get(),
-        ]);
+  try {
+    const [orgs, organizers, events, registrations, certificates, vendors] = await Promise.all([
+      supabaseAdmin.from(TABLES.ORGANIZATIONS).select("id, org_type"),
+      supabaseAdmin.from(TABLES.ORGANIZER_PROFILES).select("user_id, review_status"),
+      supabaseAdmin.from(TABLES.EVENTS).select("id, status, created_at, end_date, extra"),
+      supabaseAdmin.from(TABLES.REGISTRATIONS).select("id"),
+      supabaseAdmin.from(TABLES.CERTIFICATES).select("id"),
+      supabaseAdmin.from(TABLES.VENDOR_PROFILES).select("user_id, status"),
+    ]);
 
-        let departmentsCount = 0;
-        let clubsCount = 0;
-        orgsSnap.docs.forEach((doc: QueryDocumentSnapshot) => {
-            const data = doc.data();
-            if (data.type === "department") departmentsCount++;
-            else if (data.type === "club") clubsCount++;
-        });
-
-        // "Live" means published and not yet finished, derived from the end date
-        // rather than trusted from status alone -- status is written once at
-        // creation and never updated, so a finished event still reads published.
-        const today = new Date().toISOString().slice(0, 10);
-        let liveEvents = 0;
-        let pastEvents = 0;
-        const perWeek = new Map<string, number>();
-
-        events.docs.forEach((d: QueryDocumentSnapshot) => {
-            const data = d.data();
-            const status = String(data.status ?? "").toLowerCase();
-            const created = toIsoString(data.createdAt);
-            if (created) {
-                const key = weekKey(created);
-                if (key) perWeek.set(key, (perWeek.get(key) ?? 0) + 1);
-            }
-
-            if (status === "draft" || status === "cancelled") return;
-
-            // schedule dates are DD/MM/YYYY strings, so compare on a rebuilt ISO
-            // key instead of parsing them into a Date.
-            const parts = String(data.schedule?.endDate ?? "").split("/");
-            const endIso = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : "";
-            if (endIso && endIso < today) pastEvents += 1;
-            else liveEvents += 1;
-        });
-
-        return {
-            totalOrgs: orgsSnap.size,
-            departmentsCount,
-            clubsCount,
-            organizers: organizers.size,
-            events: events.size,
-            liveEvents,
-            pastEvents,
-            registrations: registrations.size,
-            certificates: certificates.size,
-            vendors: vendors.size,
-            eventsPerWeek: Array.from(perWeek.entries())
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .slice(-12)
-                .map(([label, count]) => ({ label, count })),
-        };
-    } catch (err) {
-        console.error("[getPlatformTotals] Firestore read failed", err);
-        throw new Error("Failed to read platform totals", { cause: err });
+    for (const result of [orgs, organizers, events, registrations, certificates, vendors]) {
+      if (result.error) throw result.error;
     }
+
+    let pendingOrganizers = 0;
+    for (const row of organizers.data ?? []) {
+      if (String(row.review_status ?? "").toLowerCase() === "pending") pendingOrganizers += 1;
+    }
+    let pendingVendors = 0;
+    for (const row of vendors.data ?? []) {
+      if (String(row.status ?? "").toLowerCase() === "pending") pendingVendors += 1;
+    }
+
+    let departmentsCount = 0;
+    let clubsCount = 0;
+    for (const row of orgs.data ?? []) {
+      if (row.org_type === "department") departmentsCount++;
+      else if (row.org_type === "club") clubsCount++;
+    }
+
+    // "Live" means published and not yet finished, derived from the end date
+    // rather than trusted from status alone -- status is written once at
+    // creation and never updated, so a finished event still reads published.
+    const today = new Date().toISOString().slice(0, 10);
+    let liveEvents = 0;
+    let pastEvents = 0;
+    const perWeek = new Map<string, number>();
+
+    for (const row of events.data ?? []) {
+      const status = String(row.status ?? "").toLowerCase();
+      const created = toIsoString(row.created_at);
+      if (created) {
+        const key = weekKey(created);
+        if (key) perWeek.set(key, (perWeek.get(key) ?? 0) + 1);
+      }
+
+      if (status === "draft" || status === "cancelled") continue;
+
+      const extra =
+        row.extra && typeof row.extra === "object" && !Array.isArray(row.extra)
+          ? (row.extra as Record<string, unknown>)
+          : {};
+      const schedule = (extra.schedule as Record<string, unknown> | undefined) ?? {};
+      // schedule dates are DD/MM/YYYY strings, so compare on a rebuilt ISO
+      // key instead of parsing them into a Date.
+      const endRaw = String(schedule.endDate ?? row.end_date ?? "");
+      const parts = endRaw.includes("/") ? endRaw.split("/") : [];
+      const endIso =
+        parts.length === 3
+          ? `${parts[2]}-${parts[1]}-${parts[0]}`
+          : /^\d{4}-\d{2}-\d{2}/.test(endRaw)
+            ? endRaw.slice(0, 10)
+            : "";
+      if (endIso && endIso < today) pastEvents += 1;
+      else liveEvents += 1;
+    }
+
+    return {
+      totalOrgs: (orgs.data ?? []).length,
+      departmentsCount,
+      clubsCount,
+      organizers: (organizers.data ?? []).length,
+      events: (events.data ?? []).length,
+      liveEvents,
+      pastEvents,
+      registrations: (registrations.data ?? []).length,
+      certificates: (certificates.data ?? []).length,
+      vendors: (vendors.data ?? []).length,
+      pendingVendors,
+      pendingOrganizers,
+      eventsPerWeek: Array.from(perWeek.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .slice(-12)
+        .map(([label, count]) => ({ label, count })),
+    };
+  } catch (err) {
+    console.error("[getPlatformTotals] read failed", err);
+    throw new Error("Failed to read platform totals", { cause: err });
+  }
 });
 
 export interface SupportScopeEntity {
-    id: string;
-    name: string;
-    type: "department" | "organizer";
-    email?: string;
-    targetHref: string;
-    detail: string;
+  id: string;
+  name: string;
+  type: "department" | "organizer";
+  email?: string;
+  targetHref: string;
+  detail: string;
 }
 
 export const getSupportEntities = cache(async (): Promise<SupportScopeEntity[]> => {
-    try {
-        const [orgs, organizers] = await Promise.all([
-            supabaseAdmin
-                .from(TABLES.ORGANIZATIONS)
-                .select("id, name, owner_user_id")
-                .eq("org_type", "department")
-                .limit(20),
-            supabaseAdmin
-                .from(TABLES.ORGANIZER_PROFILES)
-                .select("user_id, org_name, contact_email")
-                .limit(20),
-        ]);
+  try {
+    const [orgs, organizers] = await Promise.all([
+      supabaseAdmin
+        .from(TABLES.ORGANIZATIONS)
+        .select("id, name, owner_user_id")
+        .eq("org_type", "department")
+        .limit(20),
+      supabaseAdmin.from(TABLES.ORGANIZER_PROFILES).select("user_id, org_name, extra").limit(20),
+    ]);
 
-        const list: SupportScopeEntity[] = [];
+    const list: SupportScopeEntity[] = [];
 
-        for (const row of orgs.data ?? []) {
-            const owner = row.owner_user_id ? String(row.owner_user_id) : "";
-            list.push({
-                id: String(row.id),
-                name: row.name || "Unnamed Department",
-                type: "department",
-                targetHref: `/department?orgId=${row.id}`,
-                detail: `Department · ${owner ? `Owner ${owner.slice(0, 8)}…` : "Unassigned"}`,
-            });
-        }
-
-        for (const row of organizers.data ?? []) {
-            const id = String(row.user_id);
-            list.push({
-                id,
-                name: row.org_name || "Organizer Account",
-                type: "organizer",
-                email: row.contact_email ?? undefined,
-                targetHref: `/organizer/${id}/dashboard`,
-                detail: `Organizer · ${row.contact_email || `${id.slice(0, 8)}…`}`,
-            });
-        }
-
-        return list;
-    } catch (err) {
-        console.error("[getSupportEntities] failed to fetch entities", err);
-        return [];
+    for (const row of orgs.data ?? []) {
+      const owner = row.owner_user_id ? String(row.owner_user_id) : "";
+      list.push({
+        id: String(row.id),
+        name: row.name || "Unnamed Department",
+        type: "department",
+        targetHref: `/department?orgId=${row.id}`,
+        detail: `Department · ${owner ? `Owner ${owner.slice(0, 8)}…` : "Unassigned"}`,
+      });
     }
+
+    for (const row of organizers.data ?? []) {
+      const id = String(row.user_id);
+      const extra =
+        row.extra && typeof row.extra === "object" && !Array.isArray(row.extra)
+          ? (row.extra as Record<string, unknown>)
+          : {};
+      const contact = (extra.contact as Record<string, unknown> | undefined) ?? {};
+      const email = String(contact.primaryEmail || extra.contact_email || "") || undefined;
+      list.push({
+        id,
+        name: row.org_name || "Organizer Account",
+        type: "organizer",
+        email,
+        targetHref: `/organizer/${id}/dashboard`,
+        detail: `Organizer · ${email || `${id.slice(0, 8)}…`}`,
+      });
+    }
+
+    return list;
+  } catch (err) {
+    console.error("[getSupportEntities] failed to fetch entities", err);
+    return [];
+  }
 });

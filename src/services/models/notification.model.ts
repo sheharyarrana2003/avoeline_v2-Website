@@ -8,18 +8,13 @@ export type NotificationType =
   | "booking_confirmation"
   | "category_request"
   | "org_announcement"
-  | "org_request";
+  | "org_request"
+  | "plan_change";
 
 export type NotificationPriority = "high" | "medium" | "low";
 
 export type NotificationStatus =
-  | "queued"
-  | "sending"
-  | "sent"
-  | "delivered"
-  | "read"
-  | "failed"
-  | "cancelled";
+  "queued" | "sending" | "sent" | "delivered" | "read" | "failed" | "cancelled";
 
 export interface NotificationDataPayload {
   eventId?: string;

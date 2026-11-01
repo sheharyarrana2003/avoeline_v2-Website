@@ -3,138 +3,246 @@ import { supabaseAdmin } from "@/data/supabase";
 import { revalidatePath } from "next/cache";
 
 import {
-    type NotificationChannel,
-    type NotificationStatus,
-    type NotificationDoc,
-    type NotificationTemplateDoc,
-    DEFAULT_NOTIFICATION_TEMPLATES,
+  type NotificationChannel,
+  type NotificationStatus,
+  type NotificationDoc,
+  type NotificationTemplateDoc,
+  DEFAULT_NOTIFICATION_TEMPLATES,
 } from "./notifications.types";
+import { resendConfigured, sendPlatformEmail } from "./email/resend";
+import { renderNotificationEmail } from "./email/renderNotification";
+import { absoluteUrl } from "./appUrl";
 
 export { DEFAULT_NOTIFICATION_TEMPLATES };
-export type {
-    NotificationChannel,
-    NotificationStatus,
-    NotificationDoc,
-    NotificationTemplateDoc,
-};
+export type { NotificationChannel, NotificationStatus, NotificationDoc, NotificationTemplateDoc };
 
-export async function interpolateTemplate(text: string, variables: Record<string, unknown>): Promise<string> {
-    if (!text) return "";
-    return text.replace(/\{\{\s*([a-zA-Z0-9_-]+)\s*\}\}/g, (_, key) => {
-        const val = variables[key];
-        return val !== undefined && val !== null ? String(val) : "";
-    });
+export async function interpolateTemplate(
+  text: string,
+  variables: Record<string, unknown>,
+): Promise<string> {
+  if (!text) return "";
+  return text.replace(/\{\{\s*([a-zA-Z0-9_-]+)\s*\}\}/g, (_, key) => {
+    const val = variables[key];
+    return val !== undefined && val !== null ? String(val) : "";
+  });
 }
 
 export async function sendNotification(
-    userId: string,
-    templateKey: string,
-    variables: Record<string, unknown> = {},
-    channels?: NotificationChannel[],
+  userId: string,
+  templateKey: string,
+  variables: Record<string, unknown> = {},
+  channels?: NotificationChannel[],
 ): Promise<string[]> {
-    if (!userId) return [];
-    try {
-        let template = DEFAULT_NOTIFICATION_TEMPLATES[templateKey];
-        const { data: tplRow } = await supabaseAdmin
-            .from(TABLES.NOTIFICATION_TEMPLATES)
-            .select("*")
-            .eq("key", templateKey)
-            .maybeSingle();
-        if (tplRow) {
-            template = {
-                subject: tplRow.subject,
-                body: tplRow.body,
-                defaultChannels: Array.isArray(tplRow.default_channels) ? tplRow.default_channels : ["email"],
-            };
-        }
-        if (!template) {
-            template = {
-                subject: String(variables.subject || "Notification from Avoeline"),
-                body: String(variables.body || variables.message || "You have a new notification."),
-                defaultChannels: ["email"],
-            };
-        }
-        const title = await interpolateTemplate(template.subject, variables);
-        const body = await interpolateTemplate(template.body, variables);
-        const targetChannels = channels?.length ? channels : template.defaultChannels;
-        const ids: string[] = [];
-        for (const ch of targetChannels) {
-            const { data, error } = await supabaseAdmin.from(TABLES.NOTIFICATIONS).insert({
-                user_id: String(userId).trim(),
-                type: templateKey,
-                title,
-                message: body,
-                channel: ch,
-                status: "pending",
-                related_event_id: (variables.eventId || variables.relatedEventId || null) as string | null,
-            }).select("id").single();
-            if (error || !data) continue;
-            ids.push(data.id);
-            await dispatchNotification(data.id);
-        }
-        return ids;
-    } catch (err) {
-        console.error("[sendNotification]", err);
-        return [];
+  if (!userId) return [];
+  try {
+    let template = DEFAULT_NOTIFICATION_TEMPLATES[templateKey];
+    const { data: tplRow } = await supabaseAdmin
+      .from(TABLES.NOTIFICATION_TEMPLATES)
+      .select("*")
+      .eq("key", templateKey)
+      .maybeSingle();
+    if (tplRow) {
+      template = {
+        subject: tplRow.subject,
+        body: tplRow.body,
+        defaultChannels: Array.isArray(tplRow.default_channels)
+          ? tplRow.default_channels
+          : ["email"],
+      };
     }
+    if (!template) {
+      template = {
+        subject: String(variables.subject || "Notification from Avoeline"),
+        body: String(variables.body || variables.message || "You have a new notification."),
+        defaultChannels: ["email"],
+      };
+    }
+    const title = await interpolateTemplate(template.subject, variables);
+    const body = await interpolateTemplate(template.body, variables);
+    const targetChannels = channels?.length ? channels : template.defaultChannels;
+    const ids: string[] = [];
+    for (const ch of targetChannels) {
+      const { data, error } = await supabaseAdmin
+        .from(TABLES.NOTIFICATIONS)
+        .insert({
+          user_id: String(userId).trim(),
+          type: templateKey,
+          title,
+          message: body,
+          channel: ch,
+          status: "pending",
+          related_event_id: (variables.eventId || variables.relatedEventId || null) as
+            string | null,
+        })
+        .select("id")
+        .single();
+      if (error || !data) continue;
+      ids.push(data.id);
+      await dispatchNotification(data.id);
+    }
+    return ids;
+  } catch (err) {
+    console.error("[sendNotification]", err);
+    return [];
+  }
+}
+
+function looksLikeEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+async function recipientEmail(userId: string): Promise<string | null> {
+  const id = String(userId ?? "").trim();
+  if (!id) return null;
+  if (looksLikeEmail(id)) return id;
+  const { data } = await supabaseAdmin
+    .from(TABLES.USERS)
+    .select("email")
+    .eq("id", id)
+    .maybeSingle();
+  return data?.email && looksLikeEmail(data.email) ? data.email : null;
+}
+
+async function eventActionUrl(eventId: string | null | undefined): Promise<string | undefined> {
+  if (!eventId) return undefined;
+  try {
+    return await absoluteUrl(`/events/${eventId}`);
+  } catch {
+    return undefined;
+  }
+}
+
+async function deliverEmailNotification(row: {
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  related_event_id?: string | null;
+  event_id?: string | null;
+  deep_link?: string | null;
+}): Promise<boolean> {
+  if (!resendConfigured()) {
+    console.warn("[DISPATCH] email skipped — RESEND_API_KEY missing", row.user_id, row.title);
+    return false;
+  }
+
+  const to = await recipientEmail(row.user_id);
+  if (!to) {
+    console.warn("[DISPATCH] email notification has no recipient address", row.user_id);
+    return false;
+  }
+
+  const actionUrl =
+    (row.deep_link && /^https?:\/\//i.test(row.deep_link) ? row.deep_link : undefined) ||
+    (await eventActionUrl(row.related_event_id || row.event_id));
+
+  const lane =
+    row.type === "support_reply" || row.type?.startsWith("support_")
+      ? "support"
+      : row.type?.includes("security")
+        ? "security"
+        : "notifications";
+  const result = await sendPlatformEmail({
+    lane,
+    to,
+    subject: row.title || "Notification from Avoeline",
+    react: renderNotificationEmail({
+      type: row.type,
+      title: row.title,
+      body: row.message,
+      actionUrl,
+    }),
+  });
+  return result.ok;
 }
 
 export async function dispatchNotification(notificationId: string) {
-    try {
-        const { data } = await supabaseAdmin.from(TABLES.NOTIFICATIONS).select("*").eq("id", notificationId).maybeSingle();
-        if (!data) return { success: false };
-        console.log("[DISPATCH]", data.channel, data.user_id, data.title);
-        await supabaseAdmin.from(TABLES.NOTIFICATIONS).update({
-            status: "sent",
-        }).eq("id", notificationId);
-        return { success: true, channel: data.channel as NotificationChannel };
-    } catch {
-        await supabaseAdmin.from(TABLES.NOTIFICATIONS).update({ status: "failed" }).eq("id", notificationId);
-        return { success: false };
+  try {
+    const { data } = await supabaseAdmin
+      .from(TABLES.NOTIFICATIONS)
+      .select("*")
+      .eq("id", notificationId)
+      .maybeSingle();
+    if (!data) return { success: false };
+
+    if (data.channel === "email") {
+      const delivered = await deliverEmailNotification(data);
+      await supabaseAdmin
+        .from(TABLES.NOTIFICATIONS)
+        .update({
+          status: delivered ? "sent" : "failed",
+        })
+        .eq("id", notificationId);
+      return { success: delivered, channel: "email" as NotificationChannel };
     }
+
+    console.log("[DISPATCH]", data.channel, data.user_id, data.title);
+    await supabaseAdmin
+      .from(TABLES.NOTIFICATIONS)
+      .update({
+        status: "sent",
+      })
+      .eq("id", notificationId);
+    return { success: true, channel: data.channel as NotificationChannel };
+  } catch {
+    await supabaseAdmin
+      .from(TABLES.NOTIFICATIONS)
+      .update({ status: "failed" })
+      .eq("id", notificationId);
+    return { success: false };
+  }
 }
 
-export async function getUserNotifications(userId: string, limitCount = 20): Promise<NotificationDoc[]> {
-    if (!userId) return [];
-    const { data } = await supabaseAdmin
-        .from(TABLES.NOTIFICATIONS)
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(limitCount);
-    return (data ?? []).map((d) => ({
-        id: d.id,
-        userId: d.user_id,
-        type: d.type,
-        title: d.title,
-        body: d.message,
-        channel: d.channel,
-        status: d.status,
-        read: d.status === "read",
-        relatedEventId: d.related_event_id,
-        createdAt: d.created_at,
-        sentAt: null,
-    }));
+export async function getUserNotifications(
+  userId: string,
+  limitCount = 20,
+): Promise<NotificationDoc[]> {
+  if (!userId) return [];
+  const { data } = await supabaseAdmin
+    .from(TABLES.NOTIFICATIONS)
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limitCount);
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    userId: d.user_id,
+    type: d.type,
+    title: d.title,
+    body: d.message,
+    channel: d.channel,
+    status: d.status,
+    read: d.status === "read",
+    relatedEventId: d.related_event_id,
+    createdAt: d.created_at,
+    sentAt: null,
+  }));
 }
 
 export async function markNotificationAsReadAction(notificationId: string): Promise<boolean> {
-    if (!notificationId) return false;
-    const { error } = await supabaseAdmin.from(TABLES.NOTIFICATIONS).update({
-        status: "read",
-        read_at: new Date().toISOString(),
-    }).eq("id", notificationId);
-    if (error) return false;
-    revalidatePath("/");
-    return true;
+  if (!notificationId) return false;
+  const { error } = await supabaseAdmin
+    .from(TABLES.NOTIFICATIONS)
+    .update({
+      status: "read",
+      read_at: new Date().toISOString(),
+    })
+    .eq("id", notificationId);
+  if (error) return false;
+  revalidatePath("/");
+  return true;
 }
 
 export async function markAllNotificationsAsReadAction(userId: string): Promise<boolean> {
-    if (!userId) return false;
-    const { error } = await supabaseAdmin.from(TABLES.NOTIFICATIONS).update({
-        status: "read",
-        read_at: new Date().toISOString(),
-    }).eq("user_id", userId);
-    if (error) return false;
-    revalidatePath("/");
-    return true;
+  if (!userId) return false;
+  const { error } = await supabaseAdmin
+    .from(TABLES.NOTIFICATIONS)
+    .update({
+      status: "read",
+      read_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+  if (error) return false;
+  revalidatePath("/");
+  return true;
 }

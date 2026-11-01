@@ -1,5 +1,6 @@
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
+import { TABLES } from "@/data/collections";
+import { supabaseAdmin } from "@/data/supabase";
+import { logger } from "@/src/lib/logger";
 import type { AdminIdentity, ModerationAction, ModerationTarget } from "../types";
 
 /**
@@ -20,27 +21,33 @@ import type { AdminIdentity, ModerationAction, ModerationTarget } from "../types
  * the console instead, which is the only honest thing left to do.
  */
 export async function logModeration(input: {
-    admin: AdminIdentity;
-    targetType: ModerationTarget;
-    targetId: string;
-    targetLabel: string;
-    action: ModerationAction;
-    reason: string;
+  admin: AdminIdentity;
+  targetType: ModerationTarget;
+  targetId: string;
+  targetLabel: string;
+  action: ModerationAction;
+  reason: string;
+  /** Stored on moderation_logs.extra (e.g. `{ notified: true }`). */
+  extra?: Record<string, unknown> | null;
 }): Promise<void> {
-    try {
-        const ref = adminDb.collection(COLLECTIONS.MODERATION_LOG).doc();
-        await ref.set({
-            id: ref.id,
-            targetType: input.targetType,
-            targetId: input.targetId,
-            targetLabel: input.targetLabel.slice(0, 200),
-            action: input.action,
-            reason: input.reason.slice(0, 2000),
-            adminId: input.admin.userId,
-            adminEmail: input.admin.email,
-            createdAt: new Date(),
-        });
-    } catch (err) {
-        console.error("[logModeration] could not record", { action: input.action, target: input.targetId, err });
-    }
+  try {
+    const { error } = await supabaseAdmin.from(TABLES.MODERATION_LOGS).insert({
+      target_type: input.targetType,
+      target_id: input.targetId,
+      target_label: input.targetLabel.slice(0, 200),
+      action: input.action,
+      reason: input.reason.slice(0, 2000),
+      admin_id: input.admin.userId,
+      admin_email: input.admin.email,
+      created_at: new Date().toISOString(),
+      ...(input.extra != null ? { extra: input.extra } : {}),
+    });
+    if (error) throw error;
+  } catch (err) {
+    logger.error("[logModeration] could not record", {
+      action: input.action,
+      target: input.targetId,
+      err: err instanceof Error ? err.message : "unknown",
+    });
+  }
 }

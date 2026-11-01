@@ -32,7 +32,7 @@ export async function listPendingTenants() {
 export async function listOrganizerPlanRows() {
   const { data } = await supabaseAdmin
     .from(TABLES.ORGANIZER_PROFILES)
-    .select("user_id, org_name, plan_type, review_status")
+    .select("user_id, org_name, plan_type, review_status, plan_expires_at")
     .limit(80);
   return data ?? [];
 }
@@ -48,12 +48,15 @@ export type PlanRow = {
   is_active: boolean;
   sort_order: number;
   included_modules: string[] | null;
+  audience?: string | null;
 };
 
 export async function listPlans(opts: { activeOnly?: boolean } = {}): Promise<PlanRow[]> {
   let q = supabaseAdmin
     .from(TABLES.SUBSCRIPTION_PLANS)
-    .select("*")
+    .select(
+      "id, key, name, description, price_monthly, price_yearly, currency, is_active, sort_order, included_modules, audience",
+    )
     .order("sort_order")
     .order("price_monthly");
   if (opts.activeOnly) q = q.eq("is_active", true);

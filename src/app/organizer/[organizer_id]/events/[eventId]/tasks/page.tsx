@@ -3,7 +3,14 @@ import { HackathonTabGate } from "@/src/features/hackathon/components/HackathonT
 
 export default async function EventTasksPage(props: {
   params: Promise<{ organizer_id: string; eventId: string }>;
-  searchParams: Promise<{ edit?: string; e?: string; ok?: string; tab?: string; track?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    e?: string;
+    ok?: string;
+    tab?: string;
+    track?: string;
+    task?: string;
+  }>;
 }) {
   const { organizer_id, eventId } = await props.params;
   return (

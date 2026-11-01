@@ -1,6 +1,7 @@
 import { cache } from "react";
+import { randomUUID } from "crypto";
 import { EventFormData, EventModel } from "./models/event.model";
-import { RecentRegistration } from '../features/dashboard/types';
+import { RecentRegistration } from "../features/dashboard/types";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { formatDate, formatTime, toIsoDate } from "@/src/lib/datetime";
@@ -10,6 +11,16 @@ import { missingRequired, resolveChecklist, selectable } from "@/src/features/ta
 import { CategoryEngineService } from "@/src/features/taxonomy/categoryEngine.service";
 import { seedEventTasksFromTemplate } from "@/src/features/taxonomy/actions/categoryEngine.action";
 import { parseHackathonKind } from "@/src/features/hackathon/kinds";
+import { isValidMapsUrl } from "@/src/lib/mapsUrl";
+import {
+  FormFieldsService,
+  fieldsToCustomForm,
+  listActiveFields,
+} from "@/src/features/registration/forms/formFields.service";
+import type {
+  FormFieldDraft,
+  FormFieldType,
+} from "@/src/features/registration/forms/formFields.types";
 
 const VISIBILITY = new Set(["public", "private", "invite_only", "hybrid", "vip_tiered"]);
 
@@ -32,7 +43,9 @@ function locationFormat(format: string): "physical" | "virtual" | "hybrid" {
   return "physical";
 }
 
-function pgMessage(error: { message?: string; details?: string; hint?: string } | null | undefined): string {
+function pgMessage(
+  error: { message?: string; details?: string; hint?: string } | null | undefined,
+): string {
   if (!error) return "The event could not be saved.";
   return [error.message, error.details, error.hint].filter(Boolean).join(" — ");
 }
@@ -46,7 +59,11 @@ function mapAgendaItem(a: Record<string, unknown>) {
     startTime: a.start_clock ?? a.startTime,
     endTime: a.end_clock ?? a.endTime,
     date: toIsoDate(dateRaw) || String(dateRaw ?? ""),
-    speakerNames: Array.isArray(a.speaker_names) ? a.speaker_names : Array.isArray(a.speakerNames) ? a.speakerNames : [],
+    speakerNames: Array.isArray(a.speaker_names)
+      ? a.speaker_names
+      : Array.isArray(a.speakerNames)
+        ? a.speakerNames
+        : [],
     location: a.location,
     description: a.description,
     tiers: Array.isArray(a.tiers) ? a.tiers : [],
@@ -66,19 +83,15 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     recurrencePattern: formData.isRecurring ? formData.recurrenceType : null,
   };
 
-  // 2. Structure the location object (mapping coordinates and flat fields safely)
+  // 2. Structure the location object (maps link only — no lat/lng)
   const location = {
     venueName: formData.venueName,
     address: formData.address,
     city: formData.city,
-    country: "", // Add if available in your form later, otherwise defaults to model safe fallback
-    coordinates: {
-      latitude: formData.coordinates?.lat ?? 0,
-      longitude: formData.coordinates?.lng ?? 0,
-    },
-    // Map virtual properties if it's virtual or hybrid
-    meetingPlatform: formData.locationType !== 'physical' ? "Custom" : null,
-    meetingLink: formData.locationType !== 'physical' ? (formData.meetingLink || formData.videoUrl) : null,
+    country: formData.country || "",
+    meetingPlatform: formData.locationType !== "physical" ? "Custom" : null,
+    meetingLink:
+      formData.locationType !== "physical" ? formData.meetingLink || formData.videoUrl : null,
     meetingId: null,
     meetingPassword: null,
     parkingInfo: "",
@@ -93,7 +106,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     reservedSeats: formData.reservedSeats,
     availableSeats: Math.max(0, formData.totalSeats - formData.reservedSeats),
     waitingListEnabled: formData.enableWaitingList,
-    waitingListCapacity: formData.enableWaitingList ? formData.waitingListCapacity : 0, 
+    waitingListCapacity: formData.enableWaitingList ? formData.waitingListCapacity : 0,
     maxRegistrationsPerUser: formData.maxTicketsPerPerson,
   };
 
@@ -110,8 +123,12 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 
   // 5. Structure the registration limits and setups
   const registration = {
-    registrationOpenDate: formData.registrationOpenDate ? formatDate(formData.registrationOpenDate) : "",
-    registrationCloseDate: formData.registrationCloseDate ? formatDate(formData.registrationCloseDate) : "",
+    registrationOpenDate: formData.registrationOpenDate
+      ? formatDate(formData.registrationOpenDate)
+      : "",
+    registrationCloseDate: formData.registrationCloseDate
+      ? formatDate(formData.registrationCloseDate)
+      : "",
     requiresApproval: formData.requiresApproval,
     customForm: customForm,
     groupRegistrationEnabled: !!formData.groupRegistration,
@@ -123,11 +140,11 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
 
   // 6. Map TicketTiers from form to the expected pricing structures
   const pricing = {
-    isFree: formData.ticketType === 'free',
+    isFree: formData.ticketType === "free",
     currency: "PKR", // Default application currency
     tiers: (formData.ticketTiers ?? []).map((tier) => ({
       name: tier.name,
-      price: formData.ticketType === 'free' ? 0 : tier.price,
+      price: formData.ticketType === "free" ? 0 : tier.price,
       availableUntil: tier.availableUntil ? formatDate(tier.availableUntil) : "",
       seats: tier.seatsAvailable,
       description: tier.description,
@@ -150,7 +167,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
   // updatedAt/publishedAt are Postgres timestamptz columns.
   const rawModelPayload = {
     eventId: "",
-    organizerId: "", 
+    organizerId: "",
     title: formData.eventTitle,
     description: formData.description,
     shortDescription: formData.shortDescription,
@@ -175,33 +192,72 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     capacity: capacity,
     registration: registration,
     pricing: pricing,
-    speakers: [], 
-    agenda: [],   
+    speakers: [],
+    agenda: [],
     vendorRequirements: [],
     teamMembers: [],
     status: formData.isDraft || !formData.publishImmediately ? "draft" : "published",
-    accessType: formData.accessType || ((formData.visibility as string) === "tiered" ? "vip_tiered" : formData.visibility) || "public",
-    visibility: formData.accessType === "vip_tiered" ? "vip_tiered" : (formData.accessType || formData.visibility || "public"),
+    accessType:
+      formData.accessType ||
+      ((formData.visibility as string) === "tiered" ? "vip_tiered" : formData.visibility) ||
+      "public",
+    visibility:
+      formData.accessType === "vip_tiered"
+        ? "vip_tiered"
+        : formData.accessType || formData.visibility || "public",
     whitelistEmails: Array.isArray(formData.whitelistEmails) ? formData.whitelistEmails : [],
     accessCode: formData.accessCode ? formData.accessCode.trim() : null,
     capacityCount: formData.totalSeats || 0,
-    waitlistEnabled: formData.waitlistEnabled !== undefined ? Boolean(formData.waitlistEnabled) : Boolean(formData.enableWaitingList),
-    approvalRequired: formData.approvalRequired !== undefined ? Boolean(formData.approvalRequired) : Boolean(formData.requiresApproval),
+    // Wizard may set either the Review access flags or RegistrationStep checkboxes.
+    waitlistEnabled: Boolean(formData.waitlistEnabled || formData.enableWaitingList),
+    approvalRequired: Boolean(formData.approvalRequired || formData.requiresApproval),
     createdAt: new Date(),
     updatedAt: new Date(),
     publishedAt: formData.isDraft || !formData.publishImmediately ? null : new Date(),
     archivedAt: null,
     deletedAt: null,
-    PriceOfTicket : formData.PriceOfTicket,
-    mapUrl: formData.mapUrl || "",
+    PriceOfTicket: formData.PriceOfTicket,
+    mapsUrl: formData.mapsUrl || formData.mapUrl || "",
+    mapUrl: formData.mapsUrl || formData.mapUrl || "",
     requiresRegistration: formData.requiresRegistration !== false,
+    showSponsors: !!formData.showSponsors,
+    showCollaborators: !!formData.showCollaborators,
+    showPartners: !!formData.showPartners,
   };
 
   // Return generated implementation via the class factory instance
   return EventModel.fromJson(rawModelPayload);
 }
 
+export type EventTitleRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  eventType: string | null;
+};
+
 export const EventService = {
+  /** Lightweight batch for dashboards that only need titles (no checklist/speakers/agenda). */
+  async getEventTitlesByIds(ids: string[]): Promise<Map<string, EventTitleRow>> {
+    const unique = [...new Set(ids.map((id) => String(id ?? "").trim()).filter(Boolean))];
+    const map = new Map<string, EventTitleRow>();
+    if (!unique.length) return map;
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.EVENTS)
+      .select("id, title, category, event_type")
+      .in("id", unique);
+    if (error) throw error;
+    for (const row of data ?? []) {
+      map.set(String(row.id), {
+        id: String(row.id),
+        title: String(row.title || row.id),
+        category: row.category ? String(row.category) : null,
+        eventType: row.event_type ? String(row.event_type) : null,
+      });
+    }
+    return map;
+  },
+
   getEventByID: cache(async (id: string) => {
     const eventId = String(id ?? "").trim();
     if (!eventId) {
@@ -209,21 +265,35 @@ export const EventService = {
       return null;
     }
     try {
-      const { data, error } = await supabaseAdmin.from(TABLES.EVENTS).select("*").eq("id", eventId).maybeSingle();
+      const { data, error } = await supabaseAdmin
+        .from(TABLES.EVENTS)
+        .select("*")
+        .eq("id", eventId)
+        .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const [{ data: checklist }, { data: speakers }, { data: agenda }] = await Promise.all([
-        supabaseAdmin.from(TABLES.EVENT_CHECKLIST_ITEMS).select("*").eq("event_id", eventId),
-        supabaseAdmin.from(TABLES.EVENT_SPEAKERS).select("*").eq("event_id", eventId),
-        supabaseAdmin.from(TABLES.EVENT_AGENDA_ITEMS).select("*").eq("event_id", eventId),
-      ]);
-      const extra = data.extra && typeof data.extra === "object" && !Array.isArray(data.extra) ? (data.extra as Record<string, unknown>) : {};
+      const [{ data: checklist }, { data: speakers }, { data: agenda }, formFields] =
+        await Promise.all([
+          supabaseAdmin.from(TABLES.EVENT_CHECKLIST_ITEMS).select("*").eq("event_id", eventId),
+          supabaseAdmin.from(TABLES.EVENT_SPEAKERS).select("*").eq("event_id", eventId),
+          supabaseAdmin.from(TABLES.EVENT_AGENDA_ITEMS).select("*").eq("event_id", eventId),
+          listActiveFields(eventId).catch(() => []),
+        ]);
+      const extra =
+        data.extra && typeof data.extra === "object" && !Array.isArray(data.extra)
+          ? (data.extra as Record<string, unknown>)
+          : {};
       const extraAgenda = Array.isArray(extra.agenda) ? extra.agenda : [];
-      const tableAgenda = (agenda ?? []).filter((a) => a && typeof a === "object").map((a) => mapAgendaItem(a as Record<string, unknown>));
+      const tableAgenda = (agenda ?? [])
+        .filter((a) => a && typeof a === "object")
+        .map((a) => mapAgendaItem(a as Record<string, unknown>));
       const mappedAgenda =
         tableAgenda.length > 0
           ? tableAgenda
-          : extraAgenda.filter((row) => row && typeof row === "object").map((row) => mapAgendaItem(row as Record<string, unknown>));
+          : extraAgenda
+              .filter((row) => row && typeof row === "object")
+              .map((row) => mapAgendaItem(row as Record<string, unknown>));
+      const customFormFromFields = formFields.length ? fieldsToCustomForm(formFields) : null;
       const payload = {
         ...data,
         id: data.id,
@@ -249,20 +319,34 @@ export const EventService = {
         })),
         agenda: mappedAgenda,
         pricing: data.pricing || {},
+        // Prefer event_form_fields; fall back to legacy custom_form JSON.
+        custom_form: customFormFromFields ?? data.custom_form,
+        allow_group_registration: data.allow_group_registration,
+        group_min_size: data.group_min_size,
+        group_max_size: data.group_max_size,
+        formFields,
       };
       try {
         return EventModel.fromJson(payload);
       } catch (mapErr) {
         console.error("[getEventByID] map failed, returning core row", { id: eventId, mapErr });
-        return EventModel.fromJson({ ...data, id: data.id, eventId: data.id, pricing: data.pricing || {} });
+        return EventModel.fromJson({
+          ...data,
+          id: data.id,
+          eventId: data.id,
+          pricing: data.pricing || {},
+        });
       }
     } catch (err) {
       console.error("[getEventByID] read failed", { id: eventId, err });
       throw new Error(`Failed to fetch event ${eventId}`, { cause: err });
     }
   }),
-  async getRecentRegEvents(event_id: string): Promise<RecentRegistration[]> {
-    const { data: snap, error } = await supabaseAdmin.from(TABLES.REGISTRATIONS).select("*").eq("event_id", event_id);
+  async getRecentRegEvents(event_id: string, organizerId?: string): Promise<RecentRegistration[]> {
+    const { data: snap, error } = await supabaseAdmin
+      .from(TABLES.REGISTRATIONS)
+      .select("*")
+      .eq("event_id", event_id);
     if (error) throw error;
     const allDocs = (snap ?? []).map((row) => ({
       row,
@@ -279,25 +363,45 @@ export const EventService = {
       rejected: "CANCELLED",
       waitlisted: "PENDING",
     };
-    return top10.map(({ row }) => ({
-      id: row.id,
-      attendeeName: row.attendee_name || "—",
-      eventName: "—",
-      amountPaid: row.amount_paid ?? row.final_price ?? 0,
-      status: statusMap[String(row.status || "").toLowerCase()] ?? "PENDING",
-    }));
+    const org = organizerId || "";
+    return top10.map(({ row }) => {
+      const name = String(row.attendee_name || "").trim();
+      const email = String(row.attendee_email || "").trim();
+      const attendeeName = name || (email ? email.split("@")[0] : "") || "Attendee";
+      const oid = org || String(row.organizer_id || "");
+      return {
+        id: row.id,
+        attendeeName,
+        attendeeEmail: email || undefined,
+        eventId: event_id,
+        eventName: "—",
+        amountPaid: Number(row.amount_paid ?? row.final_price ?? 0) || 0,
+        status: statusMap[String(row.status || "").toLowerCase()] ?? "PENDING",
+        href: oid ? `/organizer/${oid}/events/${event_id}/attendees` : `/events/${event_id}`,
+      };
+    });
   },
   async getAllEventsByOrganizer(organizer_id: string) {
-    const { data, error } = await supabaseAdmin.from(TABLES.EVENTS).select("*").eq("organizer_id", organizer_id);
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.EVENTS)
+      .select("*")
+      .eq("organizer_id", organizer_id);
     if (error) throw error;
     return (data ?? []).map((row) => EventModel.fromJson(row));
   },
   async getRecentReg(event_id: string) {
-    const { data, error } = await supabaseAdmin.from(TABLES.REGISTRATIONS).select("*").eq("event_id", event_id);
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.REGISTRATIONS)
+      .select("*")
+      .eq("event_id", event_id);
     if (error) throw error;
     return (data ?? []).map((row) => EventModel.fromJson(row));
   },
   async create_event(formdata: EventFormData, organizer_id: string) {
+    const mapsLink = formdata.mapsUrl || formdata.mapUrl || "";
+    if (mapsLink && !isValidMapsUrl(mapsLink)) {
+      throw new Error("Maps link must be an https:// URL.");
+    }
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id;
 
@@ -308,23 +412,31 @@ export const EventService = {
     const engineFormat = await CategoryEngineService.getEventFormatById(targetFormatId);
 
     const taxonomy = await listTaxonomy();
-    let superCategory = engineSuper || selectable(taxonomy, "super").find((t) => t.id === targetSuperId);
-    let eventFormat = engineFormat || selectable(taxonomy, "format").find((t) => t.id === targetFormatId);
+    let superCategory =
+      engineSuper || selectable(taxonomy, "super").find((t) => t.id === targetSuperId);
+    let eventFormat =
+      engineFormat || selectable(taxonomy, "format").find((t) => t.id === targetFormatId);
 
     const wantsHackathon =
       String(targetFormatId || "").toLowerCase() === "hackathon" ||
-      String(formdata.eventType || "").toLowerCase().includes("hackathon");
+      String(formdata.eventType || "")
+        .toLowerCase()
+        .includes("hackathon");
     if (wantsHackathon && !eventFormat) {
       eventFormat = selectable(taxonomy, "format").find((t) => {
         const id = String(t.id || "").toLowerCase();
         const name = String(t.name || "").toLowerCase();
-        return id === "hackathon" || name === "hackathon" || id.includes("hackathon") || name.includes("hackathon");
+        return (
+          id === "hackathon" ||
+          name === "hackathon" ||
+          id.includes("hackathon") ||
+          name.includes("hackathon")
+        );
       });
     }
     if (wantsHackathon && eventFormat && !superCategory) {
       const supers = selectable(taxonomy, "super");
-      superCategory =
-        supers.find((t) => /tech/i.test(`${t.id} ${t.name}`)) || supers[0];
+      superCategory = supers.find((t) => /tech/i.test(`${t.id} ${t.name}`)) || supers[0];
     }
 
     if (!superCategory || !eventFormat) {
@@ -332,7 +444,10 @@ export const EventService = {
     }
 
     if ("fields" in superCategory && Array.isArray((superCategory as any).fields)) {
-      const missing = missingRequired((superCategory as any).fields, event_to_be_added.categoryFields);
+      const missing = missingRequired(
+        (superCategory as any).fields,
+        event_to_be_added.categoryFields,
+      );
       if (missing.length) {
         throw new Error(`Please fill in: ${missing.join(", ")}.`);
       }
@@ -348,13 +463,16 @@ export const EventService = {
     event_to_be_added.categorySuperId = targetSuperId;
     event_to_be_added.eventFormatId = targetFormatId;
     event_to_be_added.categoryFormatId = targetFormatId;
-    event_to_be_added.customFieldValues = formdata.customFieldValues || formdata.categoryFields || {};
+    event_to_be_added.customFieldValues =
+      formdata.customFieldValues || formdata.categoryFields || {};
 
     if ("checklist" in superCategory || "checklist" in eventFormat) {
-      event_to_be_added.checklist = resolveChecklist(superCategory as any, eventFormat as any).map((label) => ({
-        label,
-        done: false,
-      }));
+      event_to_be_added.checklist = resolveChecklist(superCategory as any, eventFormat as any).map(
+        (label) => ({
+          label,
+          done: false,
+        }),
+      );
     }
 
     if (formdata.isDraft) {
@@ -368,14 +486,29 @@ export const EventService = {
       .maybeSingle();
 
     let orgId: string | null = profile?.org_id || null;
+    let tenureId: string | null = null;
     if (orgId) {
-      const { data: orgRow } = await supabaseAdmin.from(TABLES.ORGANIZATIONS).select("id").eq("id", orgId).maybeSingle();
+      const { data: orgRow } = await supabaseAdmin
+        .from(TABLES.ORGANIZATIONS)
+        .select("id, org_type")
+        .eq("id", orgId)
+        .maybeSingle();
       if (!orgRow) orgId = null;
+      else if (orgRow.org_type === "club") {
+        const { data: tenure } = await supabaseAdmin
+          .from(TABLES.ORG_TENURES)
+          .select("id")
+          .eq("org_id", orgId)
+          .eq("is_current", true)
+          .maybeSingle();
+        tenureId = tenure?.id ?? null;
+      }
     }
 
     const payload = {
       organizer_id,
       org_id: orgId,
+      tenure_id: tenureId,
       title: event_to_be_added.title,
       short_description: event_to_be_added.shortDescription,
       description: event_to_be_added.description,
@@ -384,21 +517,28 @@ export const EventService = {
       custom_field_values: event_to_be_added.customFieldValues,
       event_type: event_to_be_added.eventType,
       category: event_to_be_added.category,
-      format: locationFormat(String(event_to_be_added.format || formdata.locationType || "physical")),
+      format: locationFormat(
+        String(event_to_be_added.format || formdata.locationType || "physical"),
+      ),
       status: event_to_be_added.status === "published" ? "published" : "draft",
       visibility: allowedVisibility(event_to_be_added.accessType, event_to_be_added.visibility),
       access_code: event_to_be_added.accessCode,
       language: event_to_be_added.language,
-      banner_image: typeof event_to_be_added.bannerImage === "string" ? event_to_be_added.bannerImage : "",
-      gallery_images: (event_to_be_added.galleryImages ?? []).filter((u): u is string => typeof u === "string" && u.length > 0),
+      banner_image:
+        typeof event_to_be_added.bannerImage === "string" ? event_to_be_added.bannerImage : "",
+      gallery_images: (event_to_be_added.galleryImages ?? []).filter(
+        (u): u is string => typeof u === "string" && u.length > 0,
+      ),
       venue_name: event_to_be_added.location.venueName,
       address: event_to_be_added.location.address,
       city: event_to_be_added.location.city,
       country: event_to_be_added.location.country,
-      coordinates: { lat: event_to_be_added.location.coordinates.latitude, lng: event_to_be_added.location.coordinates.longitude },
       meeting_link: event_to_be_added.location.meetingLink,
-      map_url: event_to_be_added.mapUrl || formdata.mapUrl || "",
+      maps_url: event_to_be_added.mapsUrl || formdata.mapsUrl || formdata.mapUrl || "",
       requires_registration: formdata.requiresRegistration !== false,
+      show_sponsors: !!event_to_be_added.showSponsors || !!formdata.showSponsors,
+      show_collaborators: !!event_to_be_added.showCollaborators || !!formdata.showCollaborators,
+      show_partners: !!event_to_be_added.showPartners || !!formdata.showPartners,
       promo_video_url: event_to_be_added.promoVideoUrl || formdata.videoUrl || "",
       start_date: asIsoDate(formdata.startDate),
       end_date: asIsoDate(formdata.endDate || formdata.startDate),
@@ -414,15 +554,50 @@ export const EventService = {
       currency: event_to_be_added.pricing.currency,
       pricing: event_to_be_added.pricing,
       requires_approval: event_to_be_added.approvalRequired,
+      // Access block from ReviewStep (gated tiers + flags). Columns above are source of truth
+      // for visibility / waitlist / approval / access_code; extra.access is for hybrid gates.
+      extra: {
+        access: {
+          accessType: event_to_be_added.accessType,
+          gatedTiers: Array.isArray(formdata.gatedTiers) ? formdata.gatedTiers.map(String) : [],
+          waitlistEnabled: event_to_be_added.waitlistEnabled,
+          requiresApproval: event_to_be_added.approvalRequired,
+        },
+      },
       registration_open_date: asIsoDate(formdata.registrationOpenDate),
       registration_close_date: asIsoDate(formdata.registrationCloseDate),
-      custom_form: formdata.requiresRegistration === false ? [] : event_to_be_added.registration.customForm,
+      custom_form:
+        formdata.requiresRegistration === false ? [] : event_to_be_added.registration.customForm,
+      allow_group_registration:
+        formdata.requiresRegistration !== false &&
+        !!formdata.groupRegistration &&
+        !formdata.isHackathon,
+      group_min_size:
+        formdata.requiresRegistration !== false &&
+        formdata.groupRegistration &&
+        !formdata.isHackathon
+          ? Number(formdata.groupMinSize) || 2
+          : null,
+      group_max_size:
+        formdata.requiresRegistration !== false &&
+        formdata.groupRegistration &&
+        !formdata.isHackathon
+          ? Number(formdata.groupMaxSize) || 8
+          : null,
       published_at: event_to_be_added.status === "published" ? new Date().toISOString() : null,
     };
 
-    let { data: inserted, error } = await supabaseAdmin.from(TABLES.EVENTS).insert(payload).select("id").single();
+    let { data: inserted, error } = await supabaseAdmin
+      .from(TABLES.EVENTS)
+      .insert(payload)
+      .select("id")
+      .single();
     if (error && orgId && /org_id|foreign key/i.test(`${error.message} ${error.details || ""}`)) {
-      const retry = await supabaseAdmin.from(TABLES.EVENTS).insert({ ...payload, org_id: null }).select("id").single();
+      const retry = await supabaseAdmin
+        .from(TABLES.EVENTS)
+        .insert({ ...payload, org_id: null })
+        .select("id")
+        .single();
       inserted = retry.data;
       error = retry.error;
     }
@@ -432,10 +607,63 @@ export const EventService = {
     }
     const id_generated = inserted.id;
 
+    if (formdata.requiresRegistration !== false) {
+      try {
+        const drafts: FormFieldDraft[] = (formdata.customFields ?? []).map((field) => {
+          const typeRaw = String(field.type || "text");
+          const type: FormFieldType =
+            typeRaw === "long_text"
+              ? "textarea"
+              : typeRaw === "checkboxes"
+                ? "checkbox"
+                : typeRaw === "image"
+                  ? "file"
+                  : typeRaw === "select"
+                    ? "dropdown"
+                    : (typeRaw as FormFieldType);
+          return {
+            key: String(field.id || "").replace(/^field-/, "field_") || `field_${Date.now()}`,
+            label: field.label,
+            type: [
+              "text",
+              "textarea",
+              "number",
+              "email",
+              "phone",
+              "url",
+              "date",
+              "dropdown",
+              "radio",
+              "checkbox",
+              "file",
+            ].includes(type)
+              ? type
+              : "text",
+            required: !!field.required,
+            options: (field.options || []).map((o) => String(o).trim()).filter(Boolean),
+            scope: field.askOnce === "group" ? "per_group" : "per_member",
+            isSystem: false,
+          };
+        });
+        await FormFieldsService.replaceEventFieldsFromWizard(id_generated, drafts, {
+          isFree: !!event_to_be_added.pricing.isFree,
+        });
+      } catch (formErr) {
+        console.error("[create_event] form fields seed failed", formErr);
+      }
+    }
+
     if (event_to_be_added.checklist.length) {
-      await supabaseAdmin.from(TABLES.EVENT_CHECKLIST_ITEMS).insert(
-        event_to_be_added.checklist.map((c, i) => ({ event_id: id_generated, label: c.label, done: c.done, sort_order: i })),
-      );
+      await supabaseAdmin
+        .from(TABLES.EVENT_CHECKLIST_ITEMS)
+        .insert(
+          event_to_be_added.checklist.map((c, i) => ({
+            event_id: id_generated,
+            label: c.label,
+            done: c.done,
+            sort_order: i,
+          })),
+        );
     }
 
     if (Array.isArray(formdata.eventTiers) && formdata.eventTiers.length > 0) {
@@ -449,30 +677,138 @@ export const EventService = {
       );
     }
 
+    // Paid SKUs for Access tab (pricing jsonb alone is not enough for TicketingService).
+    if (
+      formdata.requiresRegistration !== false &&
+      formdata.ticketType === "paid" &&
+      Array.isArray(formdata.ticketTiers) &&
+      formdata.ticketTiers.length > 0
+    ) {
+      const { error: tierErr } = await supabaseAdmin.from(TABLES.TICKET_TIERS).insert(
+        formdata.ticketTiers.map((tier) => ({
+          event_id: id_generated,
+          name:
+            String(tier.name || "General")
+              .trim()
+              .slice(0, 120) || "General",
+          description: String(tier.description || ""),
+          price: Math.max(0, Number(tier.price) || 0),
+          seats_available: Number(tier.seatsAvailable) || null,
+          available_until: asIsoDate(tier.availableUntil),
+          active: true,
+          student_discount_enabled: !!formdata.studentDiscount,
+          student_discount_pct: Number(formdata.studentDiscountPercent) || 0,
+          group_discount_enabled: !!formdata.groupDiscount,
+          group_discount_pct: Number(formdata.groupDiscountPercent) || 0,
+          group_min_size: Number(formdata.minSizeForGroupDiscounts) || null,
+        })),
+      );
+      if (tierErr) console.error("[create_event] ticket tiers failed", tierErr);
+    }
+
+    // Whitelist / invite emails from ReviewStep AccessTypeSelector.
+    const guestEmails: { email: string; kind: "whitelist" | "invite_link" }[] = [];
+    const accessKind = String(event_to_be_added.accessType || "public");
+    if (accessKind === "private" && Array.isArray(formdata.whitelistEmails)) {
+      for (const raw of formdata.whitelistEmails) {
+        const email = String(raw || "")
+          .trim()
+          .toLowerCase();
+        if (email.includes("@")) guestEmails.push({ email, kind: "whitelist" });
+      }
+    }
+    const inviteList = Array.isArray((formdata as { inviteEmails?: string[] }).inviteEmails)
+      ? (formdata as { inviteEmails?: string[] }).inviteEmails!
+      : [];
+    if (accessKind === "invite_only" && inviteList.length) {
+      for (const raw of inviteList) {
+        const email = String(raw || "")
+          .trim()
+          .toLowerCase();
+        if (email.includes("@")) guestEmails.push({ email, kind: "invite_link" });
+      }
+    }
+    if (guestEmails.length) {
+      const now = new Date().toISOString();
+      const seen = new Set<string>();
+      const rows = guestEmails
+        .filter((g) => {
+          if (seen.has(g.email)) return false;
+          seen.add(g.email);
+          return true;
+        })
+        .slice(0, 2000)
+        .map((g) => ({
+          event_id: id_generated,
+          email: g.email,
+          name: null as string | null,
+          kind: g.kind,
+          token:
+            g.kind === "invite_link" ? `${randomUUID()}${randomUUID()}`.replace(/-/g, "") : null,
+          tier: "",
+          expires_at: null as string | null,
+          single_use: g.kind === "invite_link",
+          created_at: now,
+          updated_at: now,
+        }));
+      if (rows.length) {
+        const { error: guestErr } = await supabaseAdmin.from(TABLES.EVENT_INVITES).insert(rows);
+        if (guestErr) console.error("[create_event] guest list seed failed", guestErr);
+      }
+    }
+
     try {
-      await seedEventTasksFromTemplate(id_generated, targetSuperId, targetFormatId, formdata.startDate);
+      await seedEventTasksFromTemplate(
+        id_generated,
+        targetSuperId,
+        targetFormatId,
+        formdata.startDate,
+      );
     } catch (taskErr) {
       console.error("[create_event] Error seeding event tasks:", taskErr);
     }
 
     try {
-      await CertificateTemplateService.insert_generic_Template(organizer_id);
+      await CertificateTemplateService.insert_generic_Template(id_generated, organizer_id);
     } catch (certErr) {
       console.error("[create_event] certificate template skipped", certErr);
     }
 
     const formatName = String(eventFormat.name || "").toLowerCase();
     const formatId = String(targetFormatId || "").toLowerCase();
-    const isHackathonEvent = !!formdata.isHackathon || formatId === "hackathon" || formatName === "hackathon" || formatId.includes("hackathon") || formatName.includes("hackathon");
+    const isHackathonEvent =
+      !!formdata.isHackathon ||
+      formatId === "hackathon" ||
+      formatName === "hackathon" ||
+      formatId.includes("hackathon") ||
+      formatName.includes("hackathon");
     if (isHackathonEvent) {
-      const drafts = Array.isArray(formdata.wizardTracks) && formdata.wizardTracks.length
-        ? formdata.wizardTracks
-        : [{ name: "Main", description: "", imageUrl: "", fee: 0, discountPercent: 0, discountNote: "", discountExpiresAt: "", policies: "", instructions: "", minTeamSize: 1, maxTeamSize: 4 }];
+      const drafts =
+        Array.isArray(formdata.wizardTracks) && formdata.wizardTracks.length
+          ? formdata.wizardTracks
+          : [
+              {
+                name: "Main",
+                description: "",
+                imageUrl: "",
+                fee: 0,
+                discountPercent: 0,
+                discountNote: "",
+                discountExpiresAt: "",
+                policies: "",
+                instructions: "",
+                minTeamSize: 1,
+                maxTeamSize: 4,
+              },
+            ];
       const { error: trackError } = await supabaseAdmin.from(TABLES.HACKATHON_TRACKS).insert(
         drafts.map((track) => ({
           event_id: id_generated,
           organizer_id,
-          name: String(track.name || "Main").trim().slice(0, 120) || "Main",
+          name:
+            String(track.name || "Main")
+              .trim()
+              .slice(0, 120) || "Main",
           description: String(track.description || "").slice(0, 4000),
           fee: Math.max(0, Number(track.fee) || 0),
           currency: "PKR",
@@ -483,7 +819,9 @@ export const EventService = {
           instructions: track.instructions || "",
           discount_percent: Math.max(0, Number(track.discountPercent) || 0),
           discount_note: track.discountNote || "",
-          discount_expires_at: asIsoDate("discountExpiresAt" in track ? track.discountExpiresAt : ""),
+          discount_expires_at: asIsoDate(
+            "discountExpiresAt" in track ? track.discountExpiresAt : "",
+          ),
           status: "open",
           kind: parseHackathonKind("kind" in track ? track.kind : "other"),
           rules_text: String("rulesText" in track ? track.rulesText : ""),
@@ -512,6 +850,7 @@ export const EventService = {
     const map: Record<string, string> = {
       title: "title",
       description: "description",
+      shortDescription: "short_description",
       status: "status",
       visibility: "visibility",
       accessCode: "access_code",
@@ -519,9 +858,27 @@ export const EventService = {
       waitlistEnabled: "waitlist_enabled",
       approvalRequired: "requires_approval",
       bannerImage: "banner_image",
+      galleryImages: "gallery_images",
+      startDate: "start_date",
+      endDate: "end_date",
+      startTime: "start_time",
+      endTime: "end_time",
+      totalSeats: "total_seats",
+      isFree: "is_free",
+      pricing: "pricing",
+      archivedAt: "archived_at",
+      publishedAt: "published_at",
+      showSponsors: "show_sponsors",
+      showCollaborators: "show_collaborators",
+      showPartners: "show_partners",
     };
     for (const [k, v] of Object.entries(patch)) {
-      snake[map[k] || k] = v;
+      const col = map[k] || k;
+      if ((col === "start_date" || col === "end_date") && typeof v === "string") {
+        snake[col] = asIsoDate(v);
+      } else {
+        snake[col] = v;
+      }
     }
     const { error } = await supabaseAdmin.from(TABLES.EVENTS).update(snake).eq("id", event_id);
     if (error) {
@@ -530,4 +887,3 @@ export const EventService = {
     }
   },
 };
-

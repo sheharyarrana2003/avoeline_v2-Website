@@ -56,3 +56,26 @@ export interface ChecklistTemplateDoc {
   eventFormatId: string;
   items: ChecklistTemplateItem[];
 }
+
+/** Stable id for a category+format checklist template row. */
+export function checklistTemplateId(superCategoryId: string, eventFormatId: string): string {
+  return `${String(superCategoryId || "").trim()}_${String(eventFormatId || "").trim()}`;
+}
+
+/**
+ * Normalize checklist template items before persist: trim titles, coerce offsets,
+ * drop blank titles. Used by save + unit smoke tests.
+ */
+export function sanitizeChecklistTemplateItems(
+  items: Array<{ title?: unknown; dueOffsetDays?: unknown } | null | undefined>,
+): ChecklistTemplateItem[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((it) => {
+      const title = String(it?.title ?? "").trim();
+      const raw = Number(it?.dueOffsetDays);
+      const dueOffsetDays = Number.isFinite(raw) ? Math.trunc(raw) : 0;
+      return { title, dueOffsetDays };
+    })
+    .filter((it) => it.title.length > 0);
+}

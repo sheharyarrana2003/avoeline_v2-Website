@@ -1,8 +1,100 @@
 "use client";
 
 import { DateField } from "@/src/shared_components/DateField";
-import type { EventFormData, TicketTier } from "@/src/services/models/event.model";
-import { FormBuilder } from "../FormBuilder";
+import type { CustomField, EventFormData, TicketTier } from "@/src/services/models/event.model";
+import { EventFormFieldsEditor } from "@/src/features/registration/forms/components/EventFormFieldsEditor";
+import type { FormFieldDraft } from "@/src/features/registration/forms/formFields.types";
+
+function draftsFromCustomFields(fields: CustomField[]): FormFieldDraft[] {
+  return (fields ?? []).map((field) => {
+    const typeRaw = String(field.type || "text");
+    const type =
+      typeRaw === "long_text"
+        ? "textarea"
+        : typeRaw === "checkboxes"
+          ? "checkbox"
+          : typeRaw === "image"
+            ? "file"
+            : typeRaw === "select"
+              ? "dropdown"
+              : (typeRaw as FormFieldDraft["type"]);
+    return {
+      localId: field.id,
+      key: String(field.id || "").replace(/^field-/, "field_") || `field_${Date.now()}`,
+      label: field.label,
+      type: [
+        "text",
+        "textarea",
+        "number",
+        "email",
+        "phone",
+        "url",
+        "date",
+        "dropdown",
+        "radio",
+        "checkbox",
+        "file",
+      ].includes(type)
+        ? type
+        : "text",
+      required: !!field.required,
+      options: (field.options || []).map((o) => String(o).trim()).filter(Boolean),
+      scope: field.askOnce === "group" ? "per_group" : "per_member",
+      isSystem: false,
+    };
+  });
+}
+
+function customFieldsFromDrafts(drafts: FormFieldDraft[]): CustomField[] {
+  return drafts
+    .filter((d) => !d.isSystem && !["name", "email", "phone", "payment_screenshot"].includes(d.key))
+    .map((d) => ({
+      id: d.localId || d.key,
+      label: d.label,
+      type:
+        d.type === "textarea"
+          ? "long_text"
+          : d.type === "checkbox" && (d.options?.length ?? 0) > 0
+            ? "checkboxes"
+            : d.type,
+      required: d.required,
+      options: d.options ?? [],
+      askOnce: d.scope === "per_group" ? "group" : "member",
+    }));
+}
+
+const SYSTEM_DRAFTS: FormFieldDraft[] = [
+  {
+    key: "name",
+    label: "Full name",
+    type: "text",
+    required: true,
+    options: [],
+    scope: "per_member",
+    isSystem: true,
+    localId: "sys-name",
+  },
+  {
+    key: "email",
+    label: "Email",
+    type: "email",
+    required: true,
+    options: [],
+    scope: "per_member",
+    isSystem: true,
+    localId: "sys-email",
+  },
+  {
+    key: "phone",
+    label: "Phone",
+    type: "phone",
+    required: true,
+    options: [],
+    scope: "per_member",
+    isSystem: true,
+    localId: "sys-phone",
+  },
+];
 
 export function RegistrationStep({
   formData,
@@ -14,6 +106,24 @@ export function RegistrationStep({
   hideGroupToggle?: boolean;
 }) {
   const on = formData.requiresRegistration !== false;
+  const editorFields = [
+    ...SYSTEM_DRAFTS,
+    ...(formData.ticketType === "paid"
+      ? [
+          {
+            key: "payment_screenshot",
+            label: "Payment screenshot",
+            type: "file" as const,
+            required: true,
+            options: [] as string[],
+            scope: "per_group" as const,
+            isSystem: true,
+            localId: "sys-payment",
+          },
+        ]
+      : []),
+    ...draftsFromCustomFields(formData.customFields ?? []),
+  ];
 
   return (
     <div className="space-y-8">
@@ -25,9 +135,12 @@ export function RegistrationStep({
           className="mt-1"
         />
         <span>
-          <span className="block text-sm font-bold text-ink">This event does not take registrations</span>
+          <span className="block text-sm font-bold text-ink">
+            This event does not take registrations
+          </span>
           <span className="text-xs text-ink-soft">
-            Hide ticket tiers, approval, and the public Register button. People can still view the event page.
+            Hide ticket tiers, approval, and the public Register button. People can still view the
+            event page.
           </span>
         </span>
       </label>
@@ -37,25 +150,51 @@ export function RegistrationStep({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs text-ink-soft">Registration opens</label>
-              <DateField value={formData.registrationOpenDate} onChange={(e) => updateForm("registrationOpenDate", e.target.value)} />
+              <DateField
+                value={formData.registrationOpenDate}
+                onChange={(e) => updateForm("registrationOpenDate", e.target.value)}
+              />
             </div>
             <div>
               <label className="mb-2 block text-xs text-ink-soft">Registration closes</label>
-              <DateField value={formData.registrationCloseDate} onChange={(e) => updateForm("registrationCloseDate", e.target.value)} />
+              <DateField
+                value={formData.registrationCloseDate}
+                onChange={(e) => updateForm("registrationCloseDate", e.target.value)}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <label className="text-xs text-ink-soft">
-              Total seats
-              <input
-                type="number"
-                min={0}
-                value={formData.totalSeats}
-                onChange={(e) => updateForm("totalSeats", Number(e.target.value) || 0)}
-                className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm"
-              />
-            </label>
+            <div>
+              <label className="text-xs text-ink-soft">
+                Total seats
+                <input
+                  type="number"
+                  min={0}
+                  disabled={formData.totalSeats === 0}
+                  value={formData.totalSeats}
+                  onChange={(e) => updateForm("totalSeats", Number(e.target.value) || 0)}
+                  className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm disabled:bg-muted disabled:opacity-60"
+                />
+              </label>
+              <label className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={formData.totalSeats === 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      updateForm("totalSeats", 0);
+                    } else {
+                      updateForm(
+                        "totalSeats",
+                        formData.totalSeats === 0 ? 100 : formData.totalSeats,
+                      );
+                    }
+                  }}
+                />
+                Unlimited seats
+              </label>
+            </div>
             <label className="text-xs text-ink-soft">
               Max tickets / person
               <input
@@ -81,7 +220,9 @@ export function RegistrationStep({
                   type="button"
                   onClick={() => updateForm("ticketType", kind)}
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
-                    formData.ticketType === kind ? "bg-ink text-ink-invert" : "bg-muted text-ink-soft"
+                    formData.ticketType === kind
+                      ? "bg-ink text-ink-invert"
+                      : "bg-muted text-ink-soft"
                   }`}
                 >
                   {kind}
@@ -89,52 +230,6 @@ export function RegistrationStep({
               ))}
             </div>
           </div>
-
-          {!hideGroupToggle ? (
-            <div className="space-y-3 rounded-2xl border border-line bg-paper p-4">
-              <p className="text-sm font-bold text-ink">Registration style</p>
-              <div className="flex gap-2">
-                {(["single", "group"] as const).map((kind) => (
-                  <button
-                    key={kind}
-                    type="button"
-                    onClick={() => updateForm("groupRegistration", kind === "group")}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
-                      (kind === "group") === !!formData.groupRegistration ? "bg-ink text-ink-invert" : "bg-muted text-ink-soft"
-                    }`}
-                  >
-                    {kind}
-                  </button>
-                ))}
-              </div>
-              {formData.groupRegistration ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="text-xs text-ink-soft">
-                    Min group size
-                    <input
-                      type="number"
-                      min={2}
-                      value={formData.groupMinSize}
-                      onChange={(e) => updateForm("groupMinSize", Number(e.target.value) || 2)}
-                      className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm"
-                    />
-                  </label>
-                  <label className="text-xs text-ink-soft">
-                    Max group size
-                    <input
-                      type="number"
-                      min={formData.groupMinSize || 2}
-                      value={formData.groupMaxSize}
-                      onChange={(e) => updateForm("groupMaxSize", Number(e.target.value) || 8)}
-                      className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm"
-                    />
-                  </label>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <p className="text-xs text-ink-soft">Hackathon teams are sized per competition. Group registration here is unused.</p>
-          )}
 
           {formData.ticketType === "paid" ? (
             <div className="space-y-3">
@@ -160,11 +255,21 @@ export function RegistrationStep({
                   Add tier
                 </button>
               </div>
+              {formData.ticketTiers.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-line bg-muted px-4 py-3 text-sm text-ink-soft">
+                  Add at least one ticket tier for a paid event.
+                </p>
+              ) : null}
               {formData.ticketTiers.map((tier) => (
-                <div key={tier.id} className="grid grid-cols-1 gap-2 rounded-xl border border-line p-3 md:grid-cols-4">
+                <div
+                  key={tier.id}
+                  className="grid grid-cols-1 gap-2 rounded-xl border border-line p-3 md:grid-cols-4"
+                >
                   <input
                     value={tier.name}
-                    onChange={(e) => patchTier(formData, updateForm, tier.id, { name: e.target.value })}
+                    onChange={(e) =>
+                      patchTier(formData, updateForm, tier.id, { name: e.target.value })
+                    }
                     placeholder="Tier name"
                     className="rounded-lg border border-line px-3 py-2 text-sm"
                   />
@@ -172,7 +277,11 @@ export function RegistrationStep({
                     type="number"
                     min={0}
                     value={tier.price}
-                    onChange={(e) => patchTier(formData, updateForm, tier.id, { price: Number(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      patchTier(formData, updateForm, tier.id, {
+                        price: Number(e.target.value) || 0,
+                      })
+                    }
                     placeholder="Price"
                     className="rounded-lg border border-line px-3 py-2 text-sm"
                   />
@@ -181,7 +290,9 @@ export function RegistrationStep({
                     min={0}
                     value={tier.seatsAvailable}
                     onChange={(e) =>
-                      patchTier(formData, updateForm, tier.id, { seatsAvailable: Number(e.target.value) || 0 })
+                      patchTier(formData, updateForm, tier.id, {
+                        seatsAvailable: Number(e.target.value) || 0,
+                      })
                     }
                     placeholder="Seats"
                     className="rounded-lg border border-line px-3 py-2 text-sm"
@@ -203,10 +314,20 @@ export function RegistrationStep({
             </div>
           ) : null}
 
-          <FormBuilder
-            fields={formData.customFields}
-            onChange={(next) => updateForm("customFields", next)}
-            showAskOnce={!hideGroupToggle && !!formData.groupRegistration}
+          <EventFormFieldsEditor
+            mode="draft"
+            initialFields={editorFields}
+            groupRegistration={!!formData.groupRegistration}
+            groupMinSize={formData.groupMinSize}
+            groupMaxSize={formData.groupMaxSize}
+            isPaid={formData.ticketType === "paid"}
+            hideGroupToggle={hideGroupToggle}
+            onDraftChange={(drafts, group) => {
+              updateForm("customFields", customFieldsFromDrafts(drafts));
+              updateForm("groupRegistration", group.enabled);
+              updateForm("groupMinSize", group.min);
+              updateForm("groupMaxSize", group.max);
+            }}
           />
         </>
       ) : (

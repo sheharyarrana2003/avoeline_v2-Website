@@ -21,58 +21,82 @@ import type { ReactNode } from "react";
  * dividing rule coming from the container) so it drops into the existing stat grids
  * without touching their layout.
  */
+const ICON_TONE = {
+  info: "bg-series-2/15 text-series-2",
+  neutral: "bg-muted text-ink-soft",
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-warning",
+} as const;
+
 export function MetricTile({
-    label,
-    value,
-    sublabel,
-    icon,
-    facts,
-    size = "lg",
-    className = "",
-    children,
+  label,
+  value,
+  sublabel,
+  icon,
+  iconTone,
+  facts,
+  size = "lg",
+  className = "",
+  children,
 }: {
-    label: string;
-    value: ReactNode;
-    sublabel?: ReactNode;
-    icon?: ReactNode;
-    facts?: { label: string; value: ReactNode }[];
-    /** "md" for a dense row of six; "lg" (default) for a headline row of four. */
-    size?: "md" | "lg";
-    className?: string;
-    children?: ReactNode;
+  label: string;
+  value: ReactNode;
+  sublabel?: ReactNode;
+  icon?: ReactNode;
+  /** Soft tinted circle behind the icon. Omit to keep the original faint glyph. */
+  iconTone?: keyof typeof ICON_TONE;
+  facts?: { label: string; value: ReactNode }[];
+  /** "md" for a dense row of six; "lg" (default) for a headline row of four. */
+  size?: "md" | "lg";
+  className?: string;
+  children?: ReactNode;
 }) {
-    return (
-        <div className={`border-line p-5 not-last:border-b sm:border-b-0 sm:not-last:border-r sm:p-6 ${className}`}>
-            <p className="flex items-center gap-1.5 text-2xs font-medium uppercase text-ink-soft">
-                {/* ink-faint is 2.5:1 — decoration only, so the label carries all the
+  return (
+    <div
+      className={`border-line p-5 not-last:border-b sm:border-b-0 sm:not-last:border-r sm:p-6 ${className}`}
+    >
+      {icon && iconTone ? (
+        <span
+          className={`mb-3 flex h-8 w-8 items-center justify-center rounded-full ${ICON_TONE[iconTone]}`}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+      ) : null}
+      <p className="flex items-center gap-2 text-2xs font-medium uppercase tracking-wide text-ink-soft">
+        {/* ink-faint is 2.5:1 — decoration only, so the label carries all the
                     meaning and the icon is never the sole channel. */}
-                {icon ? (
-                    <span className="text-ink-faint" aria-hidden="true">
-                        {icon}
-                    </span>
-                ) : null}
-                {label}
-            </p>
+        {icon && !iconTone ? (
+          <span className="text-ink-faint" aria-hidden="true">
+            {icon}
+          </span>
+        ) : null}
+        {label}
+      </p>
 
-            <p className={`figure mt-3 text-ink ${size === "lg" ? "text-4xl" : "text-3xl"}`}>{value}</p>
+      <p
+        className={`figure mt-3 font-semibold tracking-tight text-ink ${size === "lg" ? "text-4xl" : "text-3xl"}`}
+      >
+        {value}
+      </p>
 
-            {sublabel ? <p className="mt-2 text-xs text-ink-soft">{sublabel}</p> : null}
+      {sublabel ? <p className="mt-2 text-xs text-ink-soft">{sublabel}</p> : null}
 
-            {children ? <div className="mt-4">{children}</div> : null}
+      {children ? <div className="mt-4">{children}</div> : null}
 
-            {facts?.length ? (
-                // Hairline above rather than a gap: it ties the secondary figures to
-                // the headline they qualify, instead of letting them read as three
-                // more tiles that happen to be smaller.
-                <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-3">
-                    {facts.map((f) => (
-                        <div key={f.label} className="min-w-0">
-                            <dt className="text-2xs uppercase text-ink-faint">{f.label}</dt>
-                            <dd className="text-sm font-medium text-ink tabular-nums">{f.value}</dd>
-                        </div>
-                    ))}
-                </dl>
-            ) : null}
-        </div>
-    );
+      {facts?.length ? (
+        // Hairline above rather than a gap: it ties the secondary figures to
+        // the headline they qualify, instead of letting them read as three
+        // more tiles that happen to be smaller.
+        <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-3">
+          {facts.map((f) => (
+            <div key={f.label} className="min-w-0">
+              <dt className="text-2xs uppercase text-ink-faint">{f.label}</dt>
+              <dd className="text-sm font-medium text-ink tabular-nums">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
 import type { EventModel } from "@/src/services/models/event.model";
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
-import type { InviteLinkDoc } from "@/src/features/access/accessEngine.types";
+import { supabaseAdmin } from "@/data/supabase";
+import { TABLES } from "@/data/collections";
+import type { InviteLinkDoc, InviteLinkStatus } from "@/src/features/access/accessEngine.types";
 
 export interface AccessUser {
   email?: string | null;
@@ -38,7 +38,7 @@ export interface AccessResult {
 export async function checkAccessGate(
   event: EventModel | any | null,
   user?: AccessUser | null,
-  options?: AccessOptions | string | null
+  options?: AccessOptions | string | null,
 ): Promise<AccessResult> {
   if (!event) {
     return { allowed: false, reason: "not_found" };
@@ -47,7 +47,10 @@ export async function checkAccessGate(
   const token = typeof options === "string" ? options : options?.token;
   const code = typeof options === "object" ? options?.code : undefined;
 
-  const rawAccess = event.accessType || (event.visibility === "tiered" ? "vip_tiered" : event.visibility) || "public";
+  const rawAccess =
+    event.accessType ||
+    (event.visibility === "tiered" ? "vip_tiered" : event.visibility) ||
+    "public";
   const accessType = rawAccess === "tiered" ? "vip_tiered" : rawAccess;
 
   // 1. Public events
@@ -71,32 +74,28 @@ export async function checkAccessGate(
     const cleanToken = String(token).trim();
     if (cleanToken) {
       try {
-        // Query inviteLinks collection
-        let snap = await adminDb
-          .collection(COLLECTIONS.INVITE_LINKS)
-          .where("token", "==", cleanToken)
-          .limit(1)
-          .get();
+        const { data: rows, error } = await supabaseAdmin
+          .from(TABLES.EVENT_INVITES)
+          .select("*")
+          .eq("token", cleanToken)
+          .limit(1);
+        if (error) throw error;
 
-        // Fallback to legacy collection if empty
-        if (snap.empty && COLLECTIONS.EVENT_INVITES) {
-          snap = await adminDb
-            .collection(COLLECTIONS.EVENT_INVITES)
-            .where("token", "==", cleanToken)
-            .limit(1)
-            .get();
-        }
-
-        if (!snap.empty) {
-          const doc = snap.docs[0];
-          const data = doc.data();
-          const inviteEventId = String(data.eventId || "");
+        const row = rows?.[0];
+        if (row) {
+          const inviteEventId = String(row.event_id || "");
+          const extra = (row.extra && typeof row.extra === "object" ? row.extra : {}) as Record<
+            string,
+            unknown
+          >;
 
           if (inviteEventId === event.id) {
-            const isSingleUse = Boolean(data.singleUse);
-            const isRegistered = data.status === "registered" || Boolean(data.registeredAt);
-            const expiresAt = data.expiresAt ? new Date(data.expiresAt) : null;
-            const isExpired = expiresAt && !isNaN(expiresAt.getTime()) && expiresAt.getTime() < Date.now();
+            const isSingleUse = Boolean(row.single_use);
+            const isRegistered =
+              Boolean(row.registered_at) || String(extra.status || "") === "registered";
+            const expiresAt = row.expires_at ? new Date(row.expires_at) : null;
+            const isExpired =
+              expiresAt && !isNaN(expiresAt.getTime()) && expiresAt.getTime() < Date.now();
 
             if (isExpired) {
               return { allowed: false, reason: "invite_expired" };
@@ -106,16 +105,20 @@ export async function checkAccessGate(
             }
 
             validInvite = {
-              id: doc.id,
+              id: row.id,
               eventId: inviteEventId,
-              email: String(data.email || "").toLowerCase().trim(),
+              email: String(row.email || "")
+                .toLowerCase()
+                .trim(),
               token: cleanToken,
-              status: data.status || "pending",
-              expiresAt: data.expiresAt,
+              status: String(
+                extra.status || (row.registered_at ? "registered" : "pending"),
+              ) as InviteLinkStatus,
+              expiresAt: row.expires_at,
               singleUse: isSingleUse,
-              createdAt: data.createdAt ? String(data.createdAt) : null,
-              openedAt: data.openedAt ? String(data.openedAt) : null,
-              registeredAt: data.registeredAt ? String(data.registeredAt) : null,
+              createdAt: row.created_at ? String(row.created_at) : null,
+              openedAt: row.opened_at ? String(row.opened_at) : null,
+              registeredAt: row.registered_at ? String(row.registered_at) : null,
             };
           }
         }
@@ -182,7 +185,7 @@ export async function checkAccessGate(
 export async function canAccessEvent(
   event: EventModel | any | null,
   user?: AccessUser | null,
-  token?: string | null
+  token?: string | null,
 ): Promise<boolean> {
   const res = await checkAccessGate(event, user, { token });
   return res.allowed;

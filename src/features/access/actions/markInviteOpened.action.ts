@@ -1,36 +1,37 @@
 "use server";
 
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
+import { z } from "zod";
+import { supabaseAdmin } from "@/data/supabase";
+import { TABLES } from "@/data/collections";
+import { safeAction, safeOk } from "@/src/lib/safeAction";
+import { rateLimit } from "@/src/lib/rateLimit";
 import { findInviteByToken } from "../access.service";
 
+const markInviteOpenedInner = safeAction({
+  input: z.object({
+    token: z.string().trim().min(8).max(200),
+  }),
+  run: async ({ token }) => {
+    const limited = rateLimit(`invite-open:${token.slice(0, 16)}`, 30, 60);
+    if (!limited.ok) return safeOk(undefined);
+
+    const invite = await findInviteByToken(token);
+    if (!invite || invite.openedAt) return safeOk(undefined);
+
+    await supabaseAdmin
+      .from(TABLES.EVENT_INVITES)
+      .update({ opened_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq("id", invite.id)
+      .is("opened_at", null);
+
+    return safeOk(undefined);
+  },
+});
+
 /**
- * Record that an invite link was opened (spec 2.2).
- *
- * Called from the event page once, from the browser, rather than during the
- * render: a Server Component render can be repeated or replayed, and a write in
- * one turns "opened" into a count of renders. It is also not the render's job to
- * have side effects.
- *
- * Only ever sets `openedAt` when it is still null, so the value is the FIRST
- * time they looked rather than the most recent. Requires no authorization: the
- * token is the credential, and the only thing this can do to the holder of a
- * valid token is note that they used it.
+ * Record that an invite link was opened.
+ * Only sets opened_at when still null (first open).
  */
 export async function markInviteOpened(token: string): Promise<void> {
-    try {
-        const clean = String(token ?? "").trim();
-        if (!clean) return;
-
-        const invite = await findInviteByToken(clean);
-        if (!invite || invite.openedAt) return;
-
-        await adminDb
-            .collection(COLLECTIONS.EVENT_INVITES)
-            .doc(invite.id)
-            .set({ openedAt: new Date(), updatedAt: new Date() }, { merge: true });
-    } catch (err) {
-        // Tracking is never worth failing a page view over.
-        console.error("[markInviteOpened]", err);
-    }
+  await markInviteOpenedInner({ token: String(token ?? "") });
 }

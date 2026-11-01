@@ -1,86 +1,121 @@
-import { AuthService, OrganizerSetupProfileData } from '@/src/features/auth/authService';
-import { redirect } from 'next/navigation';
-import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import OrganizerSetupClient from './OrganizerSetupClient';
+import { AuthService, OrganizerSetupProfileData } from "@/src/features/auth/authService";
+import { redirect } from "next/navigation";
+import OrganizerSetupClient from "./OrganizerSetupClient";
+import { listPlansForAudience } from "@/src/features/onboarding/onboarding.service";
+import { getPlatformBillingSettings } from "@/src/features/billing/billing.service";
+import {
+  selectFreePlanAction,
+  submitPaidPlanAction,
+} from "@/src/features/onboarding/actions/onboarding.action";
+import { getUserOnboarding } from "@/src/features/onboarding/onboarding.service";
+import { logger } from "@/src/lib/logger";
+import { ConsentFlushClient } from "@/src/features/website/components/ConsentFlushClient";
 
 export default async function SignUpOrganizerPage() {
   const user = await AuthService.getCurrentUser();
-  // Signed out (or an expired session) belongs at sign-in, not at the signup form
-  // — the account already exists by the time anyone reaches setup.
   if (!user) {
-    redirect('/auth/signin?next=/auth/signup/organizerSetup');
+    redirect("/auth/signin?next=/auth/signup/organizerSetup");
   }
   const userType = String(user.userType).toLowerCase();
-  if (userType !== 'organizer') {
-    // Signed in as someone else: send them to their own setup rather than a
-    // signup form they don't need.
-    redirect(userType === 'vendor' ? '/auth/signup/vendorSetup' : '/auth/signin');
+  if (userType !== "organizer") {
+    redirect(userType === "vendor" ? "/auth/signup/vendorSetup" : "/auth/signin");
   }
 
-  // Verification state is read live from Supabase Auth — the emailed link is
-  // clicked outside the app, so nothing else tells us it happened.
+  const onboarding = await getUserOnboarding(user.userId);
+  if (onboarding?.onboarding_status === "awaiting_payment") {
+    redirect("/auth/signup/awaiting-approval");
+  }
+  if (onboarding?.onboarding_status === "complete" && onboarding.setup_complete) {
+    const { TABLES } = await import("@/data/collections");
+    const { supabaseAdmin } = await import("@/data/supabase");
+    const { data: org } = await supabaseAdmin
+      .from(TABLES.ORGANIZER_PROFILES)
+      .select("review_status")
+      .eq("user_id", user.userId)
+      .maybeSingle();
+    if (String(org?.review_status || "approved").toLowerCase() !== "approved") {
+      redirect("/auth/signup/awaiting-approval");
+    }
+    redirect(`/organizer/${user.userId}/dashboard`);
+  }
+
   const { verified: initialVerified } = await AuthService.getEmailVerificationStatus();
+  const [plans, billing] = await Promise.all([
+    listPlansForAudience("organizer"),
+    getPlatformBillingSettings(),
+  ]);
 
   const handleCheckVerification = async () => {
-    'use server';
+    "use server";
     try {
       return await AuthService.getEmailVerificationStatus();
     } catch (error) {
-      console.error('[organizerSetup] verification check failed', error);
+      logger.error("[organizerSetup] verification check failed", {
+        err: error instanceof Error ? error.message : "unknown",
+      });
       return { verified: false };
     }
   };
 
   const handleResendVerification = async () => {
-    'use server';
+    "use server";
     try {
       return await AuthService.resendVerificationEmail();
     } catch (error) {
-      console.error('[organizerSetup] resend verification failed', error);
+      logger.error("[organizerSetup] resend verification failed", {
+        err: error instanceof Error ? error.message : "unknown",
+      });
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to send the email.',
+        error: error instanceof Error ? error.message : "Failed to send the email.",
       };
     }
   };
 
   const handleSaveProfile = async (data: OrganizerSetupProfileData) => {
-    'use server';
+    "use server";
     try {
+      const status = await AuthService.getEmailVerificationStatus();
+      if (!status.verified) {
+        return { success: false, error: "Verify your email before saving your profile." };
+      }
       await AuthService.completeOrganizerSetup(data);
       return { success: true };
     } catch (error) {
-      console.error('[organizerSetup] save profile failed', error);
+      logger.error("[organizerSetup] save profile failed", {
+        err: error instanceof Error ? error.message : "unknown",
+      });
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to save organizer profile.',
+        error: error instanceof Error ? error.message : "Failed to save organizer profile.",
       };
     }
   };
 
-  const handleFinishSetup = async () => {
-    'use server';
-    try {
-      const result = await AuthService.finalizeSetup();
-      redirect(`/organizer/${result.userId}/dashboard`);
-    } catch (error) {
-      if (isRedirectError(error)) throw error;
-      console.error('[organizerSetup] finish setup failed', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to finish setup.',
-      };
-    }
+  const handleSelectFree = async (planKey: string) => {
+    "use server";
+    return selectFreePlanAction("organizer", planKey);
+  };
+
+  const handleSubmitPaid = async (planKey: string, formData: FormData) => {
+    "use server";
+    return submitPaidPlanAction("organizer", planKey, formData);
   };
 
   return (
-    <OrganizerSetupClient
-      email={user.email || ''}
-      initialVerified={initialVerified}
-      onCheckVerification={handleCheckVerification}
-      onResendVerification={handleResendVerification}
-      onSaveProfile={handleSaveProfile}
-      onFinishSetup={handleFinishSetup}
-    />
+    <>
+      <ConsentFlushClient email={user.email || ""} userId={user.userId} role="organizer" />
+      <OrganizerSetupClient
+        email={user.email || ""}
+        initialVerified={initialVerified}
+        plans={plans}
+        billing={billing}
+        onCheckVerification={handleCheckVerification}
+        onResendVerification={handleResendVerification}
+        onSaveProfile={handleSaveProfile}
+        onSelectFreePlan={handleSelectFree}
+        onSubmitPaidPlan={handleSubmitPaid}
+      />
+    </>
   );
 }

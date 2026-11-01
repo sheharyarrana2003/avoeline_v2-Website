@@ -9,10 +9,12 @@ import { parseScheduleDateTime } from "@/src/lib/datetime";
 // EventFormat below is a DIFFERENT concept: the `format` field, physical vs
 // virtual vs hybrid. The spec's "EventFormat" (Seminar, Hackathon) is the
 // `eventType` field. Do not conflate them.
-export type EventFormat = 'physical' | 'virtual' | 'hybrid';
-export type MeetingPlatform = 'Google Meet' | 'Zoom' | 'Microsoft Teams';
-export type CertificateType = 'digital' | 'blockchain' | 'both';
-export type EventStatus = 'draft' | 'published' | 'registration_open' | 'ongoing' | 'completed' | 'cancelled';
+export type EventFormat = "physical" | "virtual" | "hybrid";
+export type MeetingPlatform = "Google Meet" | "Zoom" | "Microsoft Teams";
+/** Certificates are always digital (on-demand PDF). */
+export type CertificateType = "digital";
+/** DB intent only (`events_status_check`). Lifecycle (upcoming/ongoing/completed) is derived in `eventLifecycle`. */
+export type EventStatus = "draft" | "published" | "archived" | "cancelled";
 /**
  * The five access models. `hybrid` and `tiered` are new; the first three were
  * already stored, so existing documents keep working.
@@ -20,7 +22,7 @@ export type EventStatus = 'draft' | 'published' | 'registration_open' | 'ongoing
  * Lives here rather than in src/features/access because it is the type of a
  * field on this document -- the feature imports it, not the other way round.
  */
-export type EventVisibility = 'public' | 'private' | 'invite_only' | 'hybrid' | 'tiered';
+export type EventVisibility = "public" | "private" | "invite_only" | "hybrid" | "tiered";
 
 /** Per-event access configuration, stored under `access`. */
 export interface EventAccess {
@@ -48,7 +50,7 @@ export interface EventSchedule {
   endTime: string;
   timezone: string;
   isRecurring: boolean;
-  recurrencePattern: 'weekly' | 'monthly' | null;
+  recurrencePattern: "weekly" | "monthly" | null;
 }
 
 export interface EventLocation {
@@ -57,7 +59,8 @@ export interface EventLocation {
   address: string;
   city: string;
   country: string;
-  coordinates: Coordinates;
+  /** @deprecated Phase 4 — maps links only; kept optional for legacy reads */
+  coordinates?: Coordinates;
 
   // Virtual Location
   meetingPlatform: MeetingPlatform | null;
@@ -166,8 +169,17 @@ export interface EventAnalytics {
 export interface AgendaItem {
   sessionId: string;
   title: string;
-  type: 'talk' | 'workshop' | 'panel' | 'networking' | 'break' | 'keynote' | 'qna' | 'registration' | 'closing';
-  status: 'confirmed' | 'tentative' | 'cancelled' | 'completed';
+  type:
+    | "talk"
+    | "workshop"
+    | "panel"
+    | "networking"
+    | "break"
+    | "keynote"
+    | "qna"
+    | "registration"
+    | "closing";
+  status: "confirmed" | "tentative" | "cancelled" | "completed";
   date: string;
   startTime: string;
   endTime: string;
@@ -198,7 +210,7 @@ export interface VendorRequirement {
   serviceCategory: string;
   description: string;
   budget: number;
-  status: 'open' | 'assigned' | 'completed' | 'cancelled';
+  status: "open" | "assigned" | "completed" | "cancelled";
   assignedVendorId: string | null;
   requestedBy: string;
   requestedAt: Date;
@@ -235,9 +247,9 @@ export class EventModel {
   customFieldValues?: Record<string, any>;
   /** The starter checklist resolved from the category + format templates. */
   checklist: { label: string; done: boolean }[];
-  language: 'en' | 'ur'; 
+  language: "en" | "ur";
   schedule: EventSchedule;
-  location: EventLocation & { 
+  location: EventLocation & {
     parkingInfo?: string;
     accessibilityInfo?: string;
     nearbyHotels?: string[];
@@ -250,11 +262,11 @@ export class EventModel {
     totalSeats: number;
     reservedSeats: number;
     availableSeats: number;
-    waitingListEnabled: boolean; 
-    waitingListCapacity: number; 
-    maxRegistrationsPerUser: number; 
+    waitingListEnabled: boolean;
+    waitingListCapacity: number;
+    maxRegistrationsPerUser: number;
   };
-  registration: EventRegistration & { 
+  registration: EventRegistration & {
     earlyBirdDeadline?: string;
     groupRegistrationEnabled?: boolean;
     groupRegistration?: boolean;
@@ -264,9 +276,9 @@ export class EventModel {
   };
   pricing: EventPricing;
   speakers: Speaker[];
-  agenda: AgendaItem[]; 
-  vendorRequirements: VendorRequirement[]; 
-  teamMembers: TeamMember[]; 
+  agenda: AgendaItem[];
+  vendorRequirements: VendorRequirement[];
+  teamMembers: TeamMember[];
   certificateConfig: CertificateConfig;
   status: EventStatus;
   visibility: EventVisibility;
@@ -284,14 +296,23 @@ export class EventModel {
    */
   sponsorTiers: string[];
   analytics: EventAnalytics;
-  createdAt: Date|string;
-  updatedAt: Date|string;
-  publishedAt: Date |string| null;
-  archivedAt: Date |string| null;
-  deletedAt: Date |string| null;   
-  PriceOfTicket : number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  publishedAt: Date | string | null;
+  archivedAt: Date | string | null;
+  deletedAt: Date | string | null;
+  PriceOfTicket: number;
+  /** Google Maps (or other https) share link — DB column `maps_url`. */
+  mapsUrl: string;
+  /** @deprecated use mapsUrl */
   mapUrl: string;
   requiresRegistration: boolean;
+  /** When true, sponsors appear on the public event page. */
+  showSponsors: boolean;
+  /** When true, collaborators appear on the public event page. */
+  showCollaborators: boolean;
+  /** When true, partners appear on the public event page. */
+  showPartners: boolean;
 
   constructor(raw: any) {
     this.id = String(raw.id || raw.event_id || raw.eventId || "").trim();
@@ -305,21 +326,33 @@ export class EventModel {
     // create_event does set({...instance}), so a field missing an assignment
     // here is silently dropped on write -- no type error, no runtime error,
     // just absent data. Add to the declaration AND to this constructor.
-    this.superCategoryId = raw.superCategoryId || raw.categorySuperId || raw.super_category_id || "";
+    this.superCategoryId =
+      raw.superCategoryId || raw.categorySuperId || raw.super_category_id || "";
     this.eventFormatId = raw.eventFormatId || raw.categoryFormatId || raw.event_format_id || "";
     this.categorySuperId = raw.categorySuperId || raw.superCategoryId || "";
     this.categoryFormatId = raw.categoryFormatId || raw.eventFormatId || "";
-    this.categoryFields = raw.categoryFields && typeof raw.categoryFields === "object" ? raw.categoryFields : (raw.customFieldValues || {});
-    this.customFieldValues = raw.customFieldValues && typeof raw.customFieldValues === "object" ? raw.customFieldValues : (raw.categoryFields || {});
+    this.categoryFields =
+      raw.categoryFields && typeof raw.categoryFields === "object"
+        ? raw.categoryFields
+        : raw.customFieldValues || {};
+    this.customFieldValues =
+      raw.customFieldValues && typeof raw.customFieldValues === "object"
+        ? raw.customFieldValues
+        : raw.categoryFields || {};
     this.checklist = Array.isArray(raw.checklist)
       ? (raw.checklist as { label?: unknown; done?: unknown }[])
           .filter((c) => c?.label)
           .map((c) => ({ label: String(c.label), done: !!c.done }))
       : [];
-    this.language = raw.language || "en"; 
+    this.language = raw.language || "en";
     this.PriceOfTicket = raw?.PriceOfTicket || 0;
-    this.mapUrl = raw.mapUrl || raw.map_url || "";
-    this.requiresRegistration = raw.requiresRegistration !== false && raw.requires_registration !== false;
+    this.mapsUrl = raw.mapsUrl || raw.maps_url || raw.mapUrl || raw.map_url || "";
+    this.mapUrl = this.mapsUrl;
+    this.requiresRegistration =
+      raw.requiresRegistration !== false && raw.requires_registration !== false;
+    this.showSponsors = !!(raw.showSponsors ?? raw.show_sponsors);
+    this.showCollaborators = !!(raw.showCollaborators ?? raw.show_collaborators);
+    this.showPartners = !!(raw.showPartners ?? raw.show_partners);
 
     this.schedule = {
       startDate: raw.schedule?.startDate || raw.start_date || "",
@@ -336,22 +369,22 @@ export class EventModel {
       address: raw.location?.address || raw.address || "",
       city: raw.location?.city || raw.city || "",
       country: raw.location?.country || raw.country || "",
-      coordinates: {
-        latitude: raw.location?.coordinates?.latitude ?? raw.coordinates?.lat ?? 0,
-        longitude: raw.location?.coordinates?.longitude ?? raw.coordinates?.lng ?? 0,
-      },
       meetingPlatform: raw.location?.meetingPlatform || raw.meeting_platform || null,
       meetingLink: raw.location?.meetingLink || raw.meeting_link || null,
       meetingId: raw.location?.meetingId || raw.meeting_id || null,
       meetingPassword: raw.location?.meetingPassword || raw.meeting_password || null,
-       parkingInfo: raw.location?.parkingInfo || "",
+      parkingInfo: raw.location?.parkingInfo || "",
       accessibilityInfo: raw.location?.accessibilityInfo || "",
       nearbyHotels: Array.isArray(raw.location?.nearbyHotels) ? raw.location.nearbyHotels : [],
-      nearbyRestaurants: Array.isArray(raw.location?.nearbyRestaurants) ? raw.location.nearbyRestaurants : [],
+      nearbyRestaurants: Array.isArray(raw.location?.nearbyRestaurants)
+        ? raw.location.nearbyRestaurants
+        : [],
     };
 
     this.bannerImage = raw.bannerImage || raw.banner_image || "";
-    this.galleryImages = Array.isArray(raw.galleryImages) ? raw.galleryImages : (raw.gallery_images || []);
+    this.galleryImages = Array.isArray(raw.galleryImages)
+      ? raw.galleryImages
+      : raw.gallery_images || [];
     this.promoVideoUrl = raw.promoVideoUrl || raw.promo_video_url || "";
 
     this.capacity = {
@@ -361,30 +394,34 @@ export class EventModel {
 
       waitingListEnabled: !!(raw.capacity?.waitingListEnabled ?? raw.waitlist_enabled),
       waitingListCapacity: raw.capacity?.waitingListCapacity ?? raw.waitlist_capacity ?? 0,
-      maxRegistrationsPerUser: raw.capacity?.maxRegistrationsPerUser ?? raw.max_registrations_per_user ?? 1,
+      maxRegistrationsPerUser:
+        raw.capacity?.maxRegistrationsPerUser ?? raw.max_registrations_per_user ?? 1,
     };
 
+    const groupFromColumns = !!(
+      raw.allow_group_registration ??
+      raw.registration?.groupRegistration ??
+      raw.groupRegistration ??
+      raw.registration?.groupRegistrationEnabled
+    );
     this.registration = {
-      registrationOpenDate: raw.registration?.registrationOpenDate || raw.registration_open_date || "",
-      registrationCloseDate: raw.registration?.registrationCloseDate || raw.registration_close_date || "",
+      registrationOpenDate:
+        raw.registration?.registrationOpenDate || raw.registration_open_date || "",
+      registrationCloseDate:
+        raw.registration?.registrationCloseDate || raw.registration_close_date || "",
       requiresApproval: !!(raw.registration?.requiresApproval ?? raw.requires_approval),
+      // Prefer event_form_fields-backed custom_form when present on the payload.
       customForm: Array.isArray(raw.registration?.customForm)
         ? raw.registration.customForm
-        : (raw.custom_form || []),
+        : raw.custom_form || [],
 
       earlyBirdDeadline: raw.registration?.earlyBirdDeadline || "",
-      groupRegistrationEnabled: !!(
-        raw.registration?.groupRegistration ??
-        raw.groupRegistration ??
-        raw.registration?.groupRegistrationEnabled
-      ),
-      groupRegistration: !!(
-        raw.registration?.groupRegistration ??
-        raw.groupRegistration ??
-        raw.registration?.groupRegistrationEnabled
-      ),
-      groupMinSize: Number(raw.registration?.groupMinSize ?? raw.groupMinSize ?? 2) || 2,
-      groupMaxSize: Number(raw.registration?.groupMaxSize ?? raw.groupMaxSize ?? 8) || 8,
+      groupRegistrationEnabled: groupFromColumns,
+      groupRegistration: groupFromColumns,
+      groupMinSize:
+        Number(raw.registration?.groupMinSize ?? raw.group_min_size ?? raw.groupMinSize ?? 2) || 2,
+      groupMaxSize:
+        Number(raw.registration?.groupMaxSize ?? raw.group_max_size ?? raw.groupMaxSize ?? 8) || 8,
       groupDiscountEnabled: !!raw.registration?.groupDiscountEnabled,
     };
 
@@ -401,32 +438,38 @@ export class EventModel {
         enabled: !!raw.pricing?.groupDiscount?.enabled,
         minGroupSize: raw.pricing?.groupDiscount?.minGroupSize ?? 0,
         percentage: raw.pricing?.groupDiscount?.percentage ?? 0,
-      }
+      },
     };
 
     this.speakers = Array.isArray(raw.speakers) ? raw.speakers : [];
 
-    this.agenda = Array.isArray(raw.agenda) ? raw.agenda.map((item: any) => ({
-      ...item,
-      activities: Array.isArray(item.activities) ? item.activities : [],
-      customFields: item.customFields || {},
-      tiers: Array.isArray(item.tiers) ? item.tiers.map(String) : [],
-    })) : [];
+    this.agenda = Array.isArray(raw.agenda)
+      ? raw.agenda.map((item: any) => ({
+          ...item,
+          activities: Array.isArray(item.activities) ? item.activities : [],
+          customFields: item.customFields || {},
+          tiers: Array.isArray(item.tiers) ? item.tiers.map(String) : [],
+        }))
+      : [];
 
-    const parseDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : new Date();
-    const parseOptionalDate = (d: any) => d ? (d.toDate ? d.toDate() : new Date(d)) : null;
+    const parseDate = (d: any) => (d ? (d.toDate ? d.toDate() : new Date(d)) : new Date());
+    const parseOptionalDate = (d: any) => (d ? (d.toDate ? d.toDate() : new Date(d)) : null);
 
-    this.vendorRequirements = Array.isArray(raw.vendorRequirements) ? raw.vendorRequirements.map((v: any) => ({
-      ...v,
-      requestedAt: parseDate(v.requestedAt),
-      assignedAt: parseOptionalDate(v.assignedAt),
-      completedAt: parseOptionalDate(v.completedAt),
-    })) : [];
+    this.vendorRequirements = Array.isArray(raw.vendorRequirements)
+      ? raw.vendorRequirements.map((v: any) => ({
+          ...v,
+          requestedAt: parseDate(v.requestedAt),
+          assignedAt: parseOptionalDate(v.assignedAt),
+          completedAt: parseOptionalDate(v.completedAt),
+        }))
+      : [];
 
-    this.teamMembers = Array.isArray(raw.teamMembers) ? raw.teamMembers.map((tm: any) => ({
-      ...tm,
-      addedAt: parseDate(tm.addedAt),
-    })) : [];
+    this.teamMembers = Array.isArray(raw.teamMembers)
+      ? raw.teamMembers.map((tm: any) => ({
+          ...tm,
+          addedAt: parseDate(tm.addedAt),
+        }))
+      : [];
     // ----------------------------
 
     this.certificateConfig = {
@@ -436,7 +479,7 @@ export class EventModel {
       requirements: {
         minAttendance: raw.certificateConfig?.requirements?.minAttendance ?? 0,
         mustCompleteSurvey: !!raw.certificateConfig?.requirements?.mustCompleteSurvey,
-      }
+      },
     };
 
     // Normalised, not raw. `statusMeta` lowercases and underscores before it looks a
@@ -445,32 +488,67 @@ export class EventModel {
     // the app misses it. That mismatch put such events in the All tab and no other,
     // and left the per-status counts not adding up to the total. Normalising here
     // fixes it once for every consumer instead of at each comparison.
-    this.status = (String(raw.status || "draft").toLowerCase().replace(/\s+/g, "_")) as EventStatus;
-    const rawAccess = raw.accessType || (raw.visibility === "tiered" ? "vip_tiered" : raw.visibility) || "public";
+    this.status = String(raw.status || "draft")
+      .toLowerCase()
+      .replace(/\s+/g, "_") as EventStatus;
+    const rawAccess =
+      raw.accessType || (raw.visibility === "tiered" ? "vip_tiered" : raw.visibility) || "public";
     this.accessType = rawAccess === "tiered" ? "vip_tiered" : rawAccess;
-    this.visibility = (raw.visibility === "tiered" || this.accessType === "vip_tiered"
-      ? "tiered"
-      : (raw.visibility || this.accessType)) as EventVisibility;
+    this.visibility = (
+      raw.visibility === "tiered" || this.accessType === "vip_tiered"
+        ? "tiered"
+        : raw.visibility || this.accessType
+    ) as EventVisibility;
     this.whitelistEmails = Array.isArray(raw.whitelistEmails)
       ? raw.whitelistEmails.map((e: any) => String(e).trim().toLowerCase()).filter(Boolean)
       : [];
-    this.accessCode = (raw.accessCode || raw.access_code) ? String(raw.accessCode || raw.access_code).trim() : null;
-    this.waitlistEnabled = raw.waitlistEnabled !== undefined ? Boolean(raw.waitlistEnabled) : (raw.access?.waitlistEnabled ?? !!raw.capacity?.waitingListEnabled);
-    this.approvalRequired = raw.approvalRequired !== undefined ? Boolean(raw.approvalRequired) : (raw.access?.requiresApproval ?? !!raw.registration?.requiresApproval);
-    this.capacityCount = typeof raw.capacity === "number" ? raw.capacity : (raw.capacity?.totalSeats ?? raw.totalSeats ?? 0);
-    this.sponsorTiers = Array.isArray(raw.sponsorTiers) && raw.sponsorTiers.length
-      ? raw.sponsorTiers.map(String)
-      : ["Title", "Platinum", "Gold", "Silver", "In-Kind"];
+    this.accessCode =
+      raw.accessCode || raw.access_code ? String(raw.accessCode || raw.access_code).trim() : null;
+    this.waitlistEnabled =
+      raw.waitlistEnabled !== undefined
+        ? Boolean(raw.waitlistEnabled)
+        : (raw.access?.waitlistEnabled ?? !!raw.capacity?.waitingListEnabled);
+    this.approvalRequired =
+      raw.approvalRequired !== undefined
+        ? Boolean(raw.approvalRequired)
+        : (raw.access?.requiresApproval ?? !!raw.registration?.requiresApproval);
+    this.capacityCount =
+      typeof raw.capacity === "number"
+        ? raw.capacity
+        : (raw.capacity?.totalSeats ?? raw.totalSeats ?? 0);
+    this.sponsorTiers =
+      Array.isArray(raw.sponsorTiers) && raw.sponsorTiers.length
+        ? raw.sponsorTiers.map(String)
+        : ["Title", "Platinum", "Gold", "Silver", "In-Kind"];
+    const extraAccess =
+      raw.extra && typeof raw.extra === "object" && !Array.isArray(raw.extra)
+        ? (raw.extra as { access?: Record<string, unknown> }).access
+        : undefined;
     this.access = {
-      attendeeTiers: Array.isArray(raw.access?.attendeeTiers) && raw.access.attendeeTiers.length
-        ? raw.access.attendeeTiers.map(String)
-        : ["General", "Premium", "VIP", "Speaker", "Sponsor"],
-      gatedTiers: Array.isArray(raw.access?.gatedTiers) ? raw.access.gatedTiers.map(String) : [],
+      attendeeTiers:
+        Array.isArray(raw.access?.attendeeTiers) && raw.access.attendeeTiers.length
+          ? raw.access.attendeeTiers.map(String)
+          : ["General", "Premium", "VIP", "Speaker", "Sponsor"],
+      gatedTiers: Array.isArray(raw.access?.gatedTiers)
+        ? raw.access.gatedTiers.map(String)
+        : Array.isArray(extraAccess?.gatedTiers)
+          ? (extraAccess!.gatedTiers as unknown[]).map(String)
+          : [],
       allowTierSelfSelect: !!raw.access?.allowTierSelfSelect,
       // Falls back to the older top-level flag, which is where every event
       // created before this block stored the same setting.
-      requiresApproval: raw.access?.requiresApproval ?? !!raw.registration?.requiresApproval,
-      waitlistEnabled: raw.access?.waitlistEnabled ?? !!raw.capacity?.waitingListEnabled,
+      requiresApproval: !!(
+        raw.access?.requiresApproval ??
+        extraAccess?.requiresApproval ??
+        raw.registration?.requiresApproval ??
+        raw.requires_approval
+      ),
+      waitlistEnabled: !!(
+        raw.access?.waitlistEnabled ??
+        extraAccess?.waitlistEnabled ??
+        raw.capacity?.waitingListEnabled ??
+        raw.waitlist_enabled
+      ),
     };
     this.analytics = {
       views: raw.analytics?.views ?? raw.views ?? 0,
@@ -482,9 +560,14 @@ export class EventModel {
 
     this.createdAt = parseDate(raw.createdAt || raw.created_at);
     this.updatedAt = parseDate(raw.updatedAt || raw.updated_at);
-    this.publishedAt = (raw.publishedAt || raw.published_at) ? parseDate(raw.publishedAt || raw.published_at) : null;
-    this.archivedAt = (raw.archivedAt || raw.archived_at) ? parseOptionalDate(raw.archivedAt || raw.archived_at) : null;
-    this.deletedAt = (raw.deletedAt || raw.deleted_at) ? parseOptionalDate(raw.deletedAt || raw.deleted_at) : null;   
+    this.publishedAt =
+      raw.publishedAt || raw.published_at ? parseDate(raw.publishedAt || raw.published_at) : null;
+    this.archivedAt =
+      raw.archivedAt || raw.archived_at
+        ? parseOptionalDate(raw.archivedAt || raw.archived_at)
+        : null;
+    this.deletedAt =
+      raw.deletedAt || raw.deleted_at ? parseOptionalDate(raw.deletedAt || raw.deleted_at) : null;
   }
 
   static fromJson(json: any): EventModel {
@@ -513,10 +596,7 @@ export class EventModel {
   get formattedRevenue(): string {
     return `${this.pricing.currency} ${this.analytics.revenue.toLocaleString()}`;
   }
-
 }
-
-
 
 export interface CreateEventDTO {
   title: string;
@@ -548,7 +628,6 @@ export interface EventStats {
   cancelledCount: number;
 }
 
-
 // --- Types ---
 export interface TicketTier {
   id: string;
@@ -570,10 +649,10 @@ export interface WizardTrackDraft {
   discountExpiresAt: string;
   policies: string;
   instructions: string;
-    minTeamSize: number;
-    maxTeamSize: number;
-    kind: string;
-    rulesText: string;
+  minTeamSize: number;
+  maxTeamSize: number;
+  kind: string;
+  rulesText: string;
 }
 
 export interface CustomField {
@@ -614,25 +693,27 @@ export interface EventFormData {
   isAllDay: boolean;
   timezone: string;
   isRecurring: boolean;
-  recurrenceType: 'daily' | 'weekly' | 'monthly' | 'custom';
-  locationType: 'physical' | 'virtual' | 'hybrid';
+  recurrenceType: "daily" | "weekly" | "monthly" | "custom";
+  locationType: "physical" | "virtual" | "hybrid";
   venueName: string;
   address: string;
   city: string;
   postalCode: string;
-  coordinates: { lat: number; lng: number };
-  mapUrl: string;
+  country?: string;
+  /** Google Maps share link (https). */
+  mapsUrl: string;
+  /** @deprecated use mapsUrl */
+  mapUrl?: string;
   meetingLink: string;
   totalSeats: number;
   reservedSeats: number;
   enableWaitingList: boolean;
-  waitingListCapacity : number
-  PriceOfTicket : number
-  minSizeForGroupDiscounts : number;
-
+  waitingListCapacity: number;
+  PriceOfTicket: number;
+  minSizeForGroupDiscounts: number;
 
   // Step 3: Registration & Tickets
-  ticketType: 'free' | 'paid';
+  ticketType: "free" | "paid";
   ticketTiers: TicketTier[];
   studentDiscount: boolean;
   studentDiscountPercent: number;
@@ -648,22 +729,27 @@ export interface EventFormData {
   multiTrack: boolean;
   wizardTracks: WizardTrackDraft[];
 
-  registrationOpenDate : string
-  registrationCloseDate : string
+  registrationOpenDate: string;
+  registrationCloseDate: string;
 
   requiresApproval: boolean;
   maxTicketsPerPerson: number;
 
   // Step 4: Review & Publish
-  visibility: 'public' | 'private' | 'invite_only';
-  accessType?: 'public' | 'private' | 'invite_only' | 'hybrid' | 'vip_tiered';
+  visibility: "public" | "private" | "invite_only";
+  accessType?: "public" | "private" | "invite_only" | "hybrid" | "vip_tiered";
   whitelistEmails?: string[];
+  inviteEmails?: string[];
   accessCode?: string;
   waitlistEnabled?: boolean;
   approvalRequired?: boolean;
   eventTiers?: Array<{ id?: string; name: string; description: string; order: number }>;
   gatedTiers?: string[];
   publishImmediately: boolean;
+  /** Public page: show sponsors strip (default off). */
+  showSponsors?: boolean;
+  showCollaborators?: boolean;
+  showPartners?: boolean;
   agreeToTerms: boolean;
   confirmRights: boolean;
   isDraft: boolean;

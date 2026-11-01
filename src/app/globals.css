@@ -13,20 +13,20 @@
        ink        primary text, primary fill
        ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
        ink-faint  decorative ONLY — 2.5:1, never text */
-  --paper: #FFFFFF;
+  --paper: #ffffff;
   --canvas: oklch(0.985 0 0);
   --line: oklch(0.922 0 0);
-  --line-loud: oklch(0.870 0 0);
+  --line-loud: oklch(0.87 0 0);
   --ink: oklch(0.205 0 0);
   --ink-soft: oklch(0.545 0 0);
   --ink-faint: oklch(0.708 0 0);
-  --ink-invert: #FFFFFF;
+  --ink-invert: #ffffff;
 
   /* Recessive fills: chips, meter tracks, table zebra, avatar placeholders. These
      existed only as bg-gray-100 / bg-gray-200, which are ramp steps and therefore
      do NOT flip with the theme — a gray is a gray. Naming them semantically is what
      lets dark mode re-point them. */
-  --muted: oklch(0.970 0 0);
+  --muted: oklch(0.97 0 0);
   --muted-strong: oklch(0.922 0 0);
 
   /* .ink-panel's own surface, split out from --ink because the two diverge in dark
@@ -34,7 +34,7 @@
      it is the loudest surface on the page, and a white slab on a dark page is a
      flashbang, not a hierarchy. Dark mode lifts it above --paper instead. */
   --panel-bg: var(--ink);
-  --panel-fg: #FFFFFF;
+  --panel-fg: #ffffff;
 
   /* Legacy names. `home/` consumes these by name via inline styles, so they stay
      defined rather than being renamed across the marketing components. */
@@ -58,17 +58,17 @@
      bar, NOT for text, which is why rail labels stay white and --accent-on-ink
      exists for the cases that do need to read on a dark surface. */
   /* ── Primary & Accent ── */
-  --primary: #6366F1;
-  --primary-hover: #4F46E5;
-  --primary-foreground: #FFFFFF;
-  --primary-soft: #EEF2FF;
-  --primary-line: #C7D2FE;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-foreground: #ffffff;
+  --primary-soft: #eef2ff;
+  --primary-line: #c7d2fe;
 
-  --accent: #6C5CE7;
-  --accent-strong: #5646D4;   /* 6.5:1 on paper — small text, links that must shout */
-  --accent-on-ink: #C3B8F7;   /* 9.8:1 on ink — the accent that survives a dark surface */
-  --accent-soft: #EFECFD;     /* tinted surface, decorative only */
-  --accent-line: #DDD7FB;
+  --accent: #6c5ce7;
+  --accent-strong: #5646d4; /* 6.5:1 on paper — small text, links that must shout */
+  --accent-on-ink: #c3b8f7; /* 9.8:1 on ink — the accent that survives a dark surface */
+  --accent-soft: #efecfd; /* tinted surface, decorative only */
+  --accent-line: #ddd7fb;
 
   /* ── Semantic status ──
      Green, amber and red for the states everyone already expects them on. These
@@ -85,20 +85,20 @@
 
      The -on-ink values are the inverse case: 9 to 13 to 1 on a dark surface and
      nowhere near passing on a light one, so they are only ever used on ink. */
-  --success: #15803D;
-  --success-soft: #ECFDF3;
-  --success-line: #BBF7D0;
-  --success-on-ink: #86EFAC;
+  --success: #15803d;
+  --success-soft: #ecfdf3;
+  --success-line: #bbf7d0;
+  --success-on-ink: #86efac;
 
-  --warning: #B45309;
-  --warning-soft: #FFFBEB;
-  --warning-line: #FDE68A;
-  --warning-on-ink: #FCD34D;
+  --warning: #b45309;
+  --warning-soft: #fffbeb;
+  --warning-line: #fde68a;
+  --warning-on-ink: #fcd34d;
 
-  --danger: #B91C1C;
-  --danger-soft: #FEF2F2;
-  --danger-line: #FECACA;
-  --danger-on-ink: #FCA5A5;
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --danger-line: #fecaca;
+  --danger-on-ink: #fca5a5;
 
   /* ── Chart series ──
      The ONLY place hue is allowed to carry meaning rather than state. Chrome stays
@@ -118,9 +118,9 @@
      HARD CAP: three. A fourth hue cannot clear the gates against these three, and a
      generated hue is indistinguishable under CVD. A fourth series folds into "Other"
      or the chart becomes small multiples. */
-  --series-1: #6C5CE7;   /* brand violet — 4.86:1 on paper */
-  --series-2: #0891B2;   /* cyan        — 3.68:1 on paper */
-  --series-3: #DB2777;   /* pink        — 4.60:1 on paper */
+  --series-1: #6c5ce7; /* brand violet — 4.86:1 on paper */
+  --series-2: #0891b2; /* cyan        — 3.68:1 on paper */
+  --series-3: #db2777; /* pink        — 4.60:1 on paper */
 
   /* Legacy names. `home/` consumes these by name via inline styles. */
   --violet: var(--accent);
@@ -177,34 +177,34 @@
      --paper becomes here — so dark mode's semantic layer largely already existed.
      -strong swaps direction: in light it is DARKER than --accent (text that must
      shout on white); in dark it must be lighter. */
-  --primary: #818CF8;
-  --primary-hover: #6366F1;
-  --primary-foreground: #FFFFFF;
-  --primary-soft: #1E1B4B;
-  --primary-line: #312E81;
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-foreground: #ffffff;
+  --primary-soft: #1e1b4b;
+  --primary-line: #312e81;
 
-  --accent: #9B8AF5;
-  --accent-strong: #C3B8F7;
-  --accent-soft: #211D3A;
+  --accent: #9b8af5;
+  --accent-strong: #c3b8f7;
+  --accent-soft: #211d3a;
   --accent-line: #383151;
 
-  --success: #86EFAC;
-  --success-soft: #0B2818;
-  --success-line: #1C4A31;
+  --success: #86efac;
+  --success-soft: #0b2818;
+  --success-line: #1c4a31;
 
-  --warning: #FCD34D;
-  --warning-soft: #2A1F05;
-  --warning-line: #4A3A0C;
+  --warning: #fcd34d;
+  --warning-soft: #2a1f05;
+  --warning-line: #4a3a0c;
 
-  --danger: #FCA5A5;
-  --danger-soft: #2C1414;
-  --danger-line: #4E2323;
+  --danger: #fca5a5;
+  --danger-soft: #2c1414;
+  --danger-line: #4e2323;
 
   /* Same three hues, snapped to the dark lightness band (L 0.48–0.67) rather than a
      separate palette — re-stepping, not re-choosing. */
-  --series-1: #7A6DF9;
-  --series-2: #1394B6;
-  --series-3: #E5347F;
+  --series-1: #7a6df9;
+  --series-2: #1394b6;
+  --series-3: #e5347f;
 }
 
 @theme {
@@ -215,9 +215,9 @@
      Contrast on white:  400 → 2.5:1 (decoration)   500 → 4.7:1 (AA body)
                          600 → 7.4:1 (AAA)          900 → 16.1:1                */
   --color-gray-50: oklch(0.985 0 0);
-  --color-gray-100: oklch(0.970 0 0);
+  --color-gray-100: oklch(0.97 0 0);
   --color-gray-200: oklch(0.922 0 0);
-  --color-gray-300: oklch(0.870 0 0);
+  --color-gray-300: oklch(0.87 0 0);
   --color-gray-400: oklch(0.708 0 0);
   --color-gray-500: oklch(0.545 0 0);
   --color-gray-600: oklch(0.439 0 0);
@@ -334,7 +334,7 @@
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 1px 3px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 2px 4px -2px rgb(0 0 0 / 0.08), 0 4px 12px -2px rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 4px 8px -4px rgb(0 0 0 / 0.10), 0 12px 28px -6px rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 4px 8px -4px rgb(0 0 0 / 0.1), 0 12px 28px -6px rgb(0 0 0 / 0.12);
   --shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.12), 0 24px 48px -12px rgb(0 0 0 / 0.16);
   --shadow-2xl: 0 16px 32px -12px rgb(0 0 0 / 0.18), 0 40px 80px -20px rgb(0 0 0 / 0.22);
 
@@ -373,7 +373,7 @@
 
   --text-xs: 0.75rem;
   --text-xs--line-height: 1rem;
-  --text-xs--letter-spacing: 0.06em;   /* almost always uppercase micro-labels here */
+  --text-xs--letter-spacing: 0.06em; /* almost always uppercase micro-labels here */
 
   --text-sm: 0.875rem;
   --text-sm--line-height: 1.25rem;
@@ -445,25 +445,25 @@
    excluding the marketing routes from the toggle (the toggle does not appear there
    anyway) and far better than converting 29 hex values that were never in scope. */
 .light-only {
-  --paper: #FFFFFF;
+  --paper: #ffffff;
   --canvas: oklch(0.985 0 0);
   --line: oklch(0.922 0 0);
-  --line-loud: oklch(0.870 0 0);
+  --line-loud: oklch(0.87 0 0);
   --ink: oklch(0.205 0 0);
   --ink-soft: oklch(0.545 0 0);
   --ink-faint: oklch(0.708 0 0);
-  --ink-invert: #FFFFFF;
-  --muted: oklch(0.970 0 0);
+  --ink-invert: #ffffff;
+  --muted: oklch(0.97 0 0);
   --muted-strong: oklch(0.922 0 0);
   --panel-bg: oklch(0.205 0 0);
-  --panel-fg: #FFFFFF;
+  --panel-fg: #ffffff;
   --bg: var(--canvas);
   --surface: var(--paper);
   --border: var(--line);
-  --accent: #6C5CE7;
-  --accent-strong: #5646D4;
-  --accent-soft: #EFECFD;
-  --accent-line: #DDD7FB;
+  --accent: #6c5ce7;
+  --accent-strong: #5646d4;
+  --accent-soft: #efecfd;
+  --accent-line: #ddd7fb;
   --violet: var(--accent);
   --violet-soft: var(--accent-soft);
   color-scheme: light;
@@ -503,8 +503,12 @@ body::after {
 }
 
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee {
@@ -512,8 +516,12 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .animate-marquee { animation: none; }
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-marquee {
+    animation: none;
+  }
 }
 
 /* ── Focus ──
@@ -545,7 +553,6 @@ body::after {
 
 /* ── Animations (must live outside @layer for SVG stroke-dasharray) ── */
 @keyframes pulse-dot {
-
   0%,
   100% {
     opacity: 1;
@@ -559,7 +566,6 @@ body::after {
 }
 
 @keyframes float-card {
-
   0%,
   100% {
     transform: rotate(-6deg) translateY(0px);
@@ -582,7 +588,6 @@ body::after {
 
 /* ── Custom component classes (inside @layer so Tailwind respects them) ── */
 @layer components {
-
   /* ---- Nav ---- */
   .home-nav-link {
     color: var(--ink-soft);
@@ -591,7 +596,9 @@ body::after {
     text-decoration: none;
     padding: 6px 14px;
     border-radius: 8px;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
   }
 
   .home-nav-link:hover {
@@ -605,7 +612,10 @@ body::after {
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 28px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .service-card:hover {
@@ -651,22 +661,32 @@ body::after {
    Tailwind already ships a `tabular-nums` utility — do not invent a `.tnum`
    duplicate of it. ── */
 @layer base {
-  table, th, td, time, output, .num {
+  table,
+  th,
+  td,
+  time,
+  output,
+  .num {
     font-variant-numeric: tabular-nums;
   }
 }
 
-
 /* The indeterminate bar in ProfileLoadingState. A keyframe rather than a Tailwind
    animate-* because it travels further than it is wide, which no built-in does. */
 @keyframes loading-sweep {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-spin,
-  [class*="loading-sweep"] { animation: none; }
+  [class*="loading-sweep"] {
+    animation: none;
+  }
 }
 
 /* ── Surface treatments ──────────────────────────────────────────────────────
@@ -681,10 +701,13 @@ body::after {
 .ink-panel {
   background-color: var(--panel-bg);
   background-image:
-    radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+    radial-gradient(120% 90% at 12% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
     linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 100% 100%, 26px 26px, 26px 26px;
+  background-size:
+    100% 100%,
+    26px 26px,
+    26px 26px;
   color: var(--panel-fg);
 }
 
@@ -692,7 +715,10 @@ body::after {
    responsive, 4px reads as a toy -- and the border darkens at the same time so
    the state survives for anyone who cannot perceive the shadow. */
 .lift {
-  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
 }
 .lift:hover {
   transform: translateY(-1px);
@@ -715,5 +741,33 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lift, .lift:hover, .lift:active { transition: none; transform: none; }
+  .lift,
+  .lift:hover,
+  .lift:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Marketing site tokens (docs/19 §2) — aliases scoped to the marketing shell. */
+.marketing-shell {
+  --mkt-ink: #0b1020;
+  --mkt-accent: #4f46e5;
+  --mkt-accent-soft: #c7cbff;
+  --mkt-accent-tint: #eef0ff;
+  --mkt-text: #1f2937;
+  --mkt-muted: #6b7280;
+  --mkt-line: #d9dce8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-shell .lift,
+  .marketing-shell .lift:hover,
+  .marketing-shell .lift:active {
+    transition: none;
+    transform: none;
+  }
+  .marketing-shell .animate-marquee {
+    animation: none;
+  }
 }

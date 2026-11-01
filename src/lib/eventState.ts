@@ -25,18 +25,19 @@ import { parseScheduleDateTime } from "@/src/lib/datetime";
  * `statusMeta` and `StatusBadge` render it without changes.
  */
 export type EventLifecycle =
-    | "draft"
-    | "cancelled"
-    | "published" // live, but carrying no usable date — cannot be placed in time
-    | "upcoming"
-    | "ongoing"
-    | "completed";
+  | "draft"
+  | "cancelled"
+  | "archived"
+  | "published" // live, but carrying no usable date — cannot be placed in time
+  | "upcoming"
+  | "ongoing"
+  | "completed";
 
 export interface EventScheduleish {
-    startDate?: unknown;
-    endDate?: unknown;
-    startTime?: unknown;
-    endTime?: unknown;
+  startDate?: unknown;
+  endDate?: unknown;
+  startTime?: unknown;
+  endTime?: unknown;
 }
 
 /**
@@ -44,35 +45,38 @@ export interface EventScheduleish {
  * compares them all against one instant rather than drifting across the loop.
  */
 export function eventLifecycle(
-    status: string | null | undefined,
-    schedule: EventScheduleish | null | undefined,
-    now: Date = new Date(),
+  status: string | null | undefined,
+  schedule: EventScheduleish | null | undefined,
+  now: Date = new Date(),
 ): EventLifecycle {
-    const intent = String(status || "draft").toLowerCase().replace(/\s+/g, "_");
+  const intent = String(status || "draft")
+    .toLowerCase()
+    .replace(/\s+/g, "_");
 
-    // Intent wins outright: a cancelled event is cancelled whatever the calendar
-    // says, and a draft is not "upcoming" — it is not happening at all yet.
-    if (intent === "draft") return "draft";
-    if (intent === "cancelled") return "cancelled";
+  // Intent wins outright: a cancelled event is cancelled whatever the calendar
+  // says, and a draft is not "upcoming" — it is not happening at all yet.
+  if (intent === "draft") return "draft";
+  if (intent === "cancelled") return "cancelled";
+  if (intent === "archived") return "archived";
 
-    const start = parseScheduleDateTime(schedule?.startDate, schedule?.startTime);
-    if (!start) return "published";
+  const start = parseScheduleDateTime(schedule?.startDate, schedule?.startTime);
+  if (!start) return "published";
 
-    // An event with a start and no end is treated as ending that same day, which
-    // is what a single-day event without an explicit end time means in this data.
-    const end =
-        parseScheduleDateTime(schedule?.endDate ?? schedule?.startDate, schedule?.endTime) ??
-        endOfDay(start);
+  // An event with a start and no end is treated as ending that same day, which
+  // is what a single-day event without an explicit end time means in this data.
+  const end =
+    parseScheduleDateTime(schedule?.endDate ?? schedule?.startDate, schedule?.endTime) ??
+    endOfDay(start);
 
-    if (now > end) return "completed";
-    if (now >= start) return "ongoing";
-    return "upcoming";
+  if (now > end) return "completed";
+  if (now >= start) return "ongoing";
+  return "upcoming";
 }
 
 function endOfDay(d: Date): Date {
-    const r = new Date(d);
-    r.setHours(23, 59, 59, 999);
-    return r;
+  const r = new Date(d);
+  r.setHours(23, 59, 59, 999);
+  return r;
 }
 
 /**
@@ -82,5 +86,5 @@ function endOfDay(d: Date): Date {
  * ran three weeks ago stayed in the active count forever.
  */
 export function isActiveLifecycle(state: EventLifecycle): boolean {
-    return state === "upcoming" || state === "ongoing" || state === "published";
+  return state === "upcoming" || state === "ongoing" || state === "published";
 }

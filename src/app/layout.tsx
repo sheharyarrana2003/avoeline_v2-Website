@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/src/shared_components/ui/Toast";
 
 const spaceGrotesk = Space_Grotesk({
@@ -38,6 +38,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // Matches globals.css `scroll-behavior: smooth` so Next route transitions
+      // can opt out correctly (see missing-data-scroll-behavior docs).
+      data-scroll-behavior="smooth"
       // The script below stamps data-theme onto this element before React hydrates,
       // so the server HTML and the client DOM legitimately differ by one attribute.
       suppressHydrationWarning

@@ -1,0 +1,128 @@
+import { z } from "zod";
+
+/**
+ * Env validation (ENGINEERING_RULES C9).
+ * Public vars may be read anywhere. Server vars are parsed on first getServerEnv().
+ */
+
+const publicSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
+  /** Cloudflare Turnstile site key (contact form). Omit to hide the widget. */
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
+});
+
+const serverSchema = publicSchema.extend({
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
+  /** Required when compete cookies are used; optional at boot so CI build works. */
+  HACKATHON_COMPETE_SECRET: z.string().min(16).optional(),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  /** Default/fallback From only (`info@…`). Lane aliases override via RESEND_FROM_*. */
+  RESEND_FROM_EMAIL: z.string().min(1).optional(),
+  RESEND_FROM: z.string().min(1).optional(),
+  RESEND_REPLY_TO: z.string().min(1).optional(),
+  RESEND_ARCHIVE_BCC: z.string().min(1).optional(),
+  RESEND_FROM_NOTIFICATIONS: z.string().min(1).optional(),
+  RESEND_FROM_EVENTS: z.string().min(1).optional(),
+  RESEND_FROM_BILLING: z.string().min(1).optional(),
+  RESEND_FROM_ONBOARDING: z.string().min(1).optional(),
+  RESEND_FROM_SUPPORT: z.string().min(1).optional(),
+  RESEND_FROM_SECURITY: z.string().min(1).optional(),
+  MAIL_FROM: z.string().min(1).optional(),
+  BREVO_API_KEY: z.string().min(1).optional(),
+  /** AES key material for organizer email connection secrets (min 16 chars). */
+  EMAIL_CONNECTION_SECRET: z.string().min(16).optional(),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  GOOGLE_REDIRECT_URI: z.string().url().optional(),
+  PLATFORM_ADMIN_EMAILS: z.string().optional(),
+  SAAS_OWNER_EMAILS: z.string().optional(),
+  /** Protects /api/cron/* (Authorization: Bearer or ?secret=). */
+  CRON_SECRET: z.string().min(16).optional(),
+  /** Platform Resend daily budget (docs/16). */
+  PLATFORM_EMAIL_DAILY_CAP: z.string().optional(),
+  PLATFORM_EMAIL_ESSENTIAL_RESERVE: z.string().optional(),
+  AI_API_KEY: z.string().optional(),
+  AI_URL: z.string().optional(),
+  /** Server-only Gemini for feedback analysis (never NEXT_PUBLIC_). */
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().optional(),
+  /** Cloudflare Turnstile secret — when set, contact form verifies tokens. */
+  TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+  NODE_ENV: z.enum(["development", "test", "production"]).optional(),
+});
+
+export type PublicEnv = z.infer<typeof publicSchema>;
+export type ServerEnv = z.infer<typeof serverSchema>;
+
+function readPublic(): PublicEnv {
+  return publicSchema.parse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || undefined,
+  });
+}
+
+function readServer(): ServerEnv {
+  return serverSchema.parse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    HACKATHON_COMPETE_SECRET: process.env.HACKATHON_COMPETE_SECRET || undefined,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || undefined,
+    RESEND_FROM: process.env.RESEND_FROM || undefined,
+    RESEND_REPLY_TO: process.env.RESEND_REPLY_TO || undefined,
+    RESEND_ARCHIVE_BCC: process.env.RESEND_ARCHIVE_BCC || undefined,
+    RESEND_FROM_NOTIFICATIONS: process.env.RESEND_FROM_NOTIFICATIONS || undefined,
+    RESEND_FROM_EVENTS: process.env.RESEND_FROM_EVENTS || undefined,
+    RESEND_FROM_BILLING: process.env.RESEND_FROM_BILLING || undefined,
+    RESEND_FROM_ONBOARDING: process.env.RESEND_FROM_ONBOARDING || undefined,
+    RESEND_FROM_SUPPORT: process.env.RESEND_FROM_SUPPORT || undefined,
+    RESEND_FROM_SECURITY: process.env.RESEND_FROM_SECURITY || undefined,
+    MAIL_FROM: process.env.MAIL_FROM || undefined,
+    BREVO_API_KEY: process.env.BREVO_API_KEY || undefined,
+    EMAIL_CONNECTION_SECRET: process.env.EMAIL_CONNECTION_SECRET || undefined,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || undefined,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || undefined,
+    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || undefined,
+    PLATFORM_ADMIN_EMAILS: process.env.PLATFORM_ADMIN_EMAILS || undefined,
+    SAAS_OWNER_EMAILS: process.env.SAAS_OWNER_EMAILS || undefined,
+    CRON_SECRET: process.env.CRON_SECRET || undefined,
+    PLATFORM_EMAIL_DAILY_CAP: process.env.PLATFORM_EMAIL_DAILY_CAP || undefined,
+    PLATFORM_EMAIL_ESSENTIAL_RESERVE: process.env.PLATFORM_EMAIL_ESSENTIAL_RESERVE || undefined,
+    AI_API_KEY: process.env.AI_API_KEY || undefined,
+    AI_URL: process.env.AI_URL || undefined,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || undefined,
+    GEMINI_MODEL: process.env.GEMINI_MODEL || undefined,
+    TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY || undefined,
+    NODE_ENV: process.env.NODE_ENV as ServerEnv["NODE_ENV"],
+  });
+}
+
+let publicCache: PublicEnv | null = null;
+let serverCache: ServerEnv | null = null;
+
+/** Client-safe public env. Fail-fast when NEXT_PUBLIC_* are missing/invalid. */
+export function getPublicEnv(): PublicEnv {
+  if (!publicCache) publicCache = readPublic();
+  return publicCache;
+}
+
+/** Server env including secrets. Call only from server modules. */
+export function getServerEnv(): ServerEnv {
+  if (!serverCache) serverCache = readServer();
+  return serverCache;
+}
+
+/** Compete HMAC — required at use site (S7), not at boot. Prefer live process.env so tests can set it. */
+export function requireCompeteSecret(): string {
+  const live = process.env.HACKATHON_COMPETE_SECRET?.trim();
+  const value = live && live.length >= 16 ? live : getServerEnv().HACKATHON_COMPETE_SECRET?.trim();
+  if (!value || value.length < 16) {
+    throw new Error(
+      "HACKATHON_COMPETE_SECRET is required (do not fall back to the service-role key).",
+    );
+  }
+  return value;
+}

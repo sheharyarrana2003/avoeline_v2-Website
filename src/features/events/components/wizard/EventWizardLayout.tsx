@@ -3,7 +3,11 @@
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { TaxonomyEntry } from "@/src/features/taxonomy/types";
-import type { SuperCategoryDoc, EventFormatDoc, CategoryFieldSetDoc } from "@/src/features/taxonomy/categoryEngine.types";
+import type {
+  SuperCategoryDoc,
+  EventFormatDoc,
+  CategoryFieldSetDoc,
+} from "@/src/features/taxonomy/categoryEngine.types";
 import { useMemo, useState, useTransition } from "react";
 import { EventFormData } from "@/src/services/models/event.model";
 import { BasicStep } from "./steps/BasicStep";
@@ -11,7 +15,7 @@ import { ScheduleLocationStep } from "./steps/ScheduleLocationStep";
 import { HackathonTracksStep } from "./steps/HackathonTracksStep";
 import { RegistrationStep } from "./steps/RegistrationStep";
 import { ReviewStep } from "./steps/ReviewStep";
-import { emptyTrack } from "./wizardUtils";
+import { emptyTrack, to24h } from "./wizardUtils";
 
 const INITIAL_FORM: EventFormData = {
   eventType: "",
@@ -43,18 +47,16 @@ const INITIAL_FORM: EventFormData = {
   address: "",
   city: "Lahore",
   postalCode: "",
-  coordinates: { lat: 31.5204, lng: 74.3587 },
-  mapUrl: "",
+  country: "Pakistan",
+  mapsUrl: "",
   meetingLink: "",
   totalSeats: 100,
   reservedSeats: 10,
   enableWaitingList: false,
   waitingListCapacity: 0,
 
-  ticketType: "paid",
-  ticketTiers: [
-    { id: "1", name: "Early Bird Pass", price: 4500, seatsAvailable: 100, availableUntil: "", description: "VIP Lounge Access" },
-  ],
+  ticketType: "free",
+  ticketTiers: [],
   studentDiscount: false,
   studentDiscountPercent: 15,
   groupDiscount: false,
@@ -78,16 +80,68 @@ const INITIAL_FORM: EventFormData = {
   visibility: "public",
   accessType: "public",
   whitelistEmails: [],
+  inviteEmails: [],
   accessCode: "",
   waitlistEnabled: false,
   approvalRequired: false,
   eventTiers: [],
   gatedTiers: [],
   publishImmediately: true,
+  showSponsors: false,
+  showCollaborators: false,
+  showPartners: false,
   agreeToTerms: false,
   confirmRights: false,
   isDraft: false,
 };
+
+function scheduleValidationError(form: EventFormData): string | null {
+  const startDate = String(form.startDate || "").trim();
+  const endDate = String(form.endDate || form.startDate || "").trim();
+  if (startDate && endDate && endDate < startDate) {
+    return "End date must be on or after the start date.";
+  }
+  if (startDate && endDate && startDate === endDate) {
+    const startT = to24h(form.startTime);
+    const endT = to24h(form.endTime);
+    if (startT && endT && endT < startT) {
+      return "End time must be after start time on the same day.";
+    }
+  }
+  return null;
+}
+
+function tracksValidationError(form: EventFormData): string | null {
+  if (!form.isHackathon) return null;
+  const tracks = form.wizardTracks ?? [];
+  if (!tracks.some((t) => String(t.name || "").trim())) {
+    return "Add at least one competition with a name.";
+  }
+  return null;
+}
+
+function registrationValidationError(form: EventFormData): string | null {
+  if (form.requiresRegistration === false) return null;
+  if (form.ticketType === "paid" && (form.ticketTiers?.length ?? 0) < 1) {
+    return "Add at least one ticket tier for a paid event.";
+  }
+  return null;
+}
+
+function stepValidationError(stepKey: string, form: EventFormData): string | null {
+  if (stepKey === "schedule") return scheduleValidationError(form);
+  if (stepKey === "tracks") return tracksValidationError(form);
+  if (stepKey === "registration") return registrationValidationError(form);
+  return null;
+}
+
+function publishValidationError(form: EventFormData): string | null {
+  return (
+    scheduleValidationError(form) ||
+    tracksValidationError(form) ||
+    registrationValidationError(form)
+  );
+}
 
 export default function CreateEventPage({
   handle_submission,
@@ -123,6 +177,7 @@ export default function CreateEventPage({
   );
   const [isPublishing, startPublishing] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
 
   const hackathon = formData.isHackathon;
   const steps = useMemo(() => {
@@ -144,6 +199,15 @@ export default function CreateEventPage({
 
   const handling_submission_client = (payload: EventFormData) => {
     if (isPublishing) return;
+    if (!payload.isDraft) {
+      const err = publishValidationError(payload);
+      if (err) {
+        setStepError(err);
+        setServerError(null);
+        return;
+      }
+    }
+    setStepError(null);
     startPublishing(async () => {
       try {
         const response = await handle_submission(payload);
@@ -165,14 +229,24 @@ export default function CreateEventPage({
 
   const nextStep = () => {
     const from = Math.min(currentStep, lastStep);
+    const err = stepValidationError(currentKey, formData);
+    if (err) {
+      setStepError(err);
+      return;
+    }
+    setStepError(null);
     if (from < lastStep) setCurrentStep(from + 1);
   };
   const prevStep = () => {
     const from = Math.min(currentStep, lastStep);
+    setStepError(null);
     if (from > 1) setCurrentStep(from - 1);
   };
   const goToStep = (step: number) => {
-    if (step <= currentStep) setCurrentStep(step);
+    if (step <= currentStep) {
+      setStepError(null);
+      setCurrentStep(step);
+    }
   };
 
   const completionPercent = Math.round((safeStep / lastStep) * 100);
@@ -180,9 +254,11 @@ export default function CreateEventPage({
     currentStep === 1 &&
     (formData.isHackathon
       ? !String(formData.eventTitle || "").trim()
-      : !(formData.superCategoryId || formData.categorySuperId) || !(formData.eventFormatId || formData.categoryFormatId));
+      : !(formData.superCategoryId || formData.categorySuperId) ||
+        !(formData.eventFormatId || formData.categoryFormatId));
   const missingSchedule = !String(formData.startDate || "").trim();
-  const cannotPublish = !formData.agreeToTerms || !formData.confirmRights || missingSchedule || isPublishing;
+  const cannotPublish =
+    !formData.agreeToTerms || !formData.confirmRights || missingSchedule || isPublishing;
 
   return (
     <div>
@@ -198,12 +274,18 @@ export default function CreateEventPage({
             <div className="flex items-center gap-2">
               {steps.map((step, i) => (
                 <div key={step.key} className="flex items-center">
-                  {i > 0 ? <div className={`mx-1 h-0.5 w-6 ${i < safeStep ? "bg-ink" : "bg-muted-strong"}`} /> : null}
+                  {i > 0 ? (
+                    <div
+                      className={`mx-1 h-0.5 w-6 ${i < safeStep ? "bg-ink" : "bg-muted-strong"}`}
+                    />
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => goToStep(step.id)}
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
-                      step.id <= safeStep ? "bg-ink text-ink-invert" : "bg-muted-strong text-ink-soft"
+                      step.id <= safeStep
+                        ? "bg-ink text-ink-invert"
+                        : "bg-muted-strong text-ink-soft"
                     }`}
                   >
                     {step.id < safeStep ? "✓" : step.id}
@@ -220,6 +302,7 @@ export default function CreateEventPage({
 
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         {serverError ? <FormFeedback error={serverError} className="mb-6" /> : null}
+        {stepError ? <FormFeedback error={stepError} className="mb-6" /> : null}
         {currentKey === "review" && missingSchedule ? (
           <FormFeedback
             error="This event has no start date yet. Add one under Schedule & Location before publishing — you can still save it as a draft."
@@ -241,13 +324,26 @@ export default function CreateEventPage({
             canHackathon={canHackathon}
           />
         ) : null}
-        {currentKey === "schedule" ? <ScheduleLocationStep formData={formData} updateForm={updateForm} /> : null}
-        {currentKey === "tracks" ? <HackathonTracksStep formData={formData} updateForm={updateForm} /> : null}
+        {currentKey === "schedule" ? (
+          <ScheduleLocationStep formData={formData} updateForm={updateForm} />
+        ) : null}
+        {currentKey === "tracks" ? (
+          <HackathonTracksStep formData={formData} updateForm={updateForm} />
+        ) : null}
         {currentKey === "registration" ? (
-          <RegistrationStep formData={formData} updateForm={updateForm} hideGroupToggle={formData.isHackathon} />
+          <RegistrationStep
+            formData={formData}
+            updateForm={updateForm}
+            hideGroupToggle={formData.isHackathon}
+          />
         ) : null}
         {currentKey === "review" ? (
-          <ReviewStep formData={formData} updateForm={updateForm} patchForm={patchForm} goToStep={goToStep} />
+          <ReviewStep
+            formData={formData}
+            updateForm={updateForm}
+            patchForm={patchForm}
+            goToStep={goToStep}
+          />
         ) : null}
       </div>
 
@@ -260,13 +356,23 @@ export default function CreateEventPage({
               description="Your event will be saved but not published. You can come back and finish it later."
               confirmLabel="Save as draft"
               disabled={isPublishing}
-              onConfirm={() => handling_submission_client({ ...formData, isDraft: true, publishImmediately: false })}
+              onConfirm={() =>
+                handling_submission_client({
+                  ...formData,
+                  isDraft: true,
+                  publishImmediately: false,
+                })
+              }
               className="text-sm text-ink-soft transition hover:text-ink disabled:opacity-50"
             >
               Save as Draft
             </ConfirmButton>
             {safeStep > 1 ? (
-              <button type="button" onClick={prevStep} className="text-sm text-ink-soft hover:text-ink">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="text-sm text-ink-soft hover:text-ink"
+              >
                 Back
               </button>
             ) : null}
@@ -277,7 +383,13 @@ export default function CreateEventPage({
               type="button"
               onClick={nextStep}
               disabled={step1Incomplete}
-              title={step1Incomplete ? (formData.isHackathon ? "Give the hackathon a title first" : "Choose a category and an event format first") : undefined}
+              title={
+                step1Incomplete
+                  ? formData.isHackathon
+                    ? "Give the hackathon a title first"
+                    : "Choose a category and an event format first"
+                  : undefined
+              }
               className="flex items-center gap-2 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-ink-invert disabled:pointer-events-none disabled:opacity-50"
             >
               Next: {steps[safeStep]?.label}
@@ -291,7 +403,11 @@ export default function CreateEventPage({
               aria-busy={isPublishing}
               className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-ink-invert disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isPublishing ? "Publishing…" : formData.isHackathon ? "Publish hackathon" : "Publish Event"}
+              {isPublishing
+                ? "Publishing…"
+                : formData.isHackathon
+                  ? "Publish hackathon"
+                  : "Publish Event"}
             </button>
           )}
         </div>

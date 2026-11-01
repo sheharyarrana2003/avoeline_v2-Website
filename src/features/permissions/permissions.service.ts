@@ -3,7 +3,10 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { isModuleKey, type ModuleKey } from "./moduleKeys";
 
-function overrideLive(row: { expires_at?: string | null } | null | undefined, nowIso: string): boolean {
+function overrideLive(
+  row: { expires_at?: string | null } | null | undefined,
+  nowIso: string,
+): boolean {
   if (!row) return false;
   return !row.expires_at || String(row.expires_at) > nowIso;
 }
@@ -23,10 +26,12 @@ export const clubsLedByUser = cache(async (userId: string): Promise<string[]> =>
       .eq("org_type", "club")
       .eq("owner_user_id", userId),
   ]);
-  return [...new Set([
-    ...(memberships ?? []).map((m) => String(m.org_id)),
-    ...(owned ?? []).map((o) => String(o.id)),
-  ])];
+  return [
+    ...new Set([
+      ...(memberships ?? []).map((m) => String(m.org_id)),
+      ...(owned ?? []).map((o) => String(o.id)),
+    ]),
+  ];
 });
 
 /**
@@ -35,59 +40,86 @@ export const clubsLedByUser = cache(async (userId: string): Promise<string[]> =>
  * A deny override wins. Then a grant. Club grants from a department beat a
  * weaker personal plan (president may still be on Free as an organizer).
  */
-export const hasModuleAccess = cache(async (organizerId: string, moduleKey: ModuleKey): Promise<boolean> => {
-  if (!organizerId || !moduleKey) return false;
+export const hasModuleAccess = cache(
+  async (organizerId: string, moduleKey: ModuleKey): Promise<boolean> => {
+    if (!organizerId || !moduleKey) return false;
 
-  const nowIso = new Date().toISOString();
-  const [{ data: profile }, { data: overrides }, { data: orgOverrides }] = await Promise.all([
-    supabaseAdmin.from(TABLES.ORGANIZER_PROFILES).select("plan_type, org_id").eq("user_id", organizerId).maybeSingle(),
-    supabaseAdmin
-      .from(TABLES.FEATURE_OVERRIDES)
-      .select("id, expires_at, denied")
-      .eq("organizer_id", organizerId)
-      .eq("module_key", moduleKey),
-    supabaseAdmin
-      .from(TABLES.FEATURE_OVERRIDES)
-      .select("id, expires_at, denied, target_org_id")
-      .eq("module_key", moduleKey)
-      .not("target_org_id", "is", null)
-      .limit(40),
-  ]);
+    const nowIso = new Date().toISOString();
+    const [{ data: profile }, { data: overrides }, { data: orgOverrides }] = await Promise.all([
+      supabaseAdmin
+        .from(TABLES.ORGANIZER_PROFILES)
+        .select("plan_type, org_id")
+        .eq("user_id", organizerId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from(TABLES.FEATURE_OVERRIDES)
+        .select("id, expires_at, denied")
+        .eq("organizer_id", organizerId)
+        .eq("module_key", moduleKey),
+      supabaseAdmin
+        .from(TABLES.FEATURE_OVERRIDES)
+        .select("id, expires_at, denied, target_org_id")
+        .eq("module_key", moduleKey)
+        .not("target_org_id", "is", null)
+        .limit(40),
+    ]);
 
-  const live = (overrides ?? []).filter((row) => overrideLive(row, nowIso));
-  if (live.some((row) => row.denied)) return false;
-  if (live.some((row) => !row.denied)) return true;
+    const live = (overrides ?? []).filter((row) => overrideLive(row, nowIso));
+    if (live.some((row) => row.denied)) return false;
+    if (live.some((row) => !row.denied)) return true;
 
-  const orgId = profile?.org_id as string | undefined;
-  const orgLive = (orgOverrides ?? []).filter(
-    (row) => row.target_org_id === orgId && overrideLive(row, nowIso),
-  );
-  if (orgLive.some((row) => row.denied)) return false;
-  if (orgLive.some((row) => !row.denied)) return true;
+    const orgId = profile?.org_id as string | undefined;
+    const orgLive = (orgOverrides ?? []).filter(
+      (row) => row.target_org_id === orgId && overrideLive(row, nowIso),
+    );
+    if (orgLive.some((row) => row.denied)) return false;
+    if (orgLive.some((row) => !row.denied)) return true;
 
-  const ledClubs = await clubsLedByUser(organizerId);
-  const clubIds = [...new Set([orgId, ...ledClubs].filter(Boolean))] as string[];
-  if (clubIds.length) {
-    const { data: clubRows } = await supabaseAdmin
-      .from(TABLES.ORG_MODULE_ACCESS)
-      .select("org_id, enabled")
-      .in("org_id", clubIds)
-      .eq("module_key", moduleKey);
-    if ((clubRows ?? []).some((row) => row.enabled !== false)) return true;
-  }
+    const ledClubs = await clubsLedByUser(organizerId);
+    const clubIds = [...new Set([orgId, ...ledClubs].filter(Boolean))] as string[];
+    if (clubIds.length) {
+      const { data: clubRows } = await supabaseAdmin
+        .from(TABLES.ORG_MODULE_ACCESS)
+        .select("org_id, enabled")
+        .in("org_id", clubIds)
+        .eq("module_key", moduleKey);
+      if ((clubRows ?? []).some((row) => row.enabled !== false)) return true;
+    }
 
-  const planKey = String(profile?.plan_type || "free");
-  const { data: plan } = await supabaseAdmin
-    .from(TABLES.SUBSCRIPTION_PLANS)
-    .select("included_modules, is_active")
-    .eq("key", planKey)
-    .maybeSingle();
+    const planKey = String(profile?.plan_type || "free");
+    const { data: plan } = await supabaseAdmin
+      .from(TABLES.SUBSCRIPTION_PLANS)
+      .select("included_modules, is_active")
+      .eq("key", planKey)
+      .maybeSingle();
 
-  if (plan && plan.is_active === false) return false;
+    if (plan && plan.is_active === false) return false;
 
-  const included = (plan?.included_modules as string[] | null) ?? [];
-  return included.includes(moduleKey);
-});
+    const included = (plan?.included_modules as string[] | null) ?? [];
+    return included.includes(moduleKey);
+  },
+);
+
+/** Vendor plan gate — reads `vendor_profiles.plan_type` + subscription_plans.included_modules. */
+export const hasVendorModuleAccess = cache(
+  async (vendorId: string, moduleKey: ModuleKey): Promise<boolean> => {
+    if (!vendorId || !moduleKey) return false;
+    const { data: profile } = await supabaseAdmin
+      .from(TABLES.VENDOR_PROFILES)
+      .select("plan_type")
+      .eq("user_id", vendorId)
+      .maybeSingle();
+    const planKey = String(profile?.plan_type || "vendor_free");
+    const { data: plan } = await supabaseAdmin
+      .from(TABLES.SUBSCRIPTION_PLANS)
+      .select("included_modules, is_active")
+      .eq("key", planKey)
+      .maybeSingle();
+    if (plan && plan.is_active === false) return false;
+    const included = (plan?.included_modules as string[] | null) ?? [];
+    return included.includes(moduleKey);
+  },
+);
 
 /**
  * Cross-cutting permission check (docs/00-INDEX). Module keys reuse hasModuleAccess
@@ -108,6 +140,9 @@ export async function checkPermission(userId: string, permissionKey: string): Pr
   if (isModuleKey(permissionKey) && user.user_type === "organizer") {
     return hasModuleAccess(userId, permissionKey);
   }
+  if (isModuleKey(permissionKey) && user.user_type === "vendor") {
+    return hasVendorModuleAccess(userId, permissionKey);
+  }
 
   const { data: memberships } = await supabaseAdmin
     .from(TABLES.TEAM_MEMBERS)
@@ -121,7 +156,11 @@ export async function checkPermission(userId: string, permissionKey: string): Pr
     .select("permissions")
     .in("id", positionIds);
 
-  return (positions ?? []).some((p) => ((p.permissions as string[]) ?? []).includes(permissionKey));
+  const { normalizePermissionList, normalizePermissionKey } = await import("@/src/lib/permissions");
+  const want = normalizePermissionKey(permissionKey);
+  return (positions ?? []).some((p) =>
+    normalizePermissionList(p.permissions as string[]).includes(want),
+  );
 }
 
 export async function clubHasModule(orgId: string, moduleKey: string): Promise<boolean> {

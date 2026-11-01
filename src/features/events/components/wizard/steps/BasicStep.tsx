@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { CategoryStep } from "@/src/features/taxonomy/components/CategoryStep";
 import type { TaxonomyEntry } from "@/src/features/taxonomy/types";
-import type { SuperCategoryDoc, EventFormatDoc, CategoryFieldSetDoc } from "@/src/features/taxonomy/categoryEngine.types";
+import type {
+  SuperCategoryDoc,
+  EventFormatDoc,
+  CategoryFieldSetDoc,
+} from "@/src/features/taxonomy/categoryEngine.types";
 import type { EventFormData } from "@/src/services/models/event.model";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from "@/src/features/media/media.utils";
@@ -69,32 +73,41 @@ export function BasicStep({
       </label>
       {skipCategory ? (
         <p className="rounded-2xl border border-line bg-muted px-4 py-3 text-sm text-ink-soft">
-          This publish flow always creates a hackathon. Competitions (CTF, Business, Web Dev, and others) are chosen in the next steps.
+          This publish flow always creates a hackathon. Competitions (CTF, Business, Web Dev, and
+          others) are chosen in the next steps.
         </p>
       ) : (
-      <CategoryStep
-        superCategories={superCategories}
-        eventFormats={eventFormats}
-        fieldSets={fieldSets}
-        entries={entries}
-        superCategoryId={formData.superCategoryId || formData.categorySuperId || ""}
-        eventFormatId={formData.eventFormatId || formData.categoryFormatId || ""}
-        categoryFields={formData.categoryFields}
-        customFieldValues={formData.customFieldValues}
-        onChange={patchForm}
-        hideHackathonFormats={hideHackathonFormats}
-      />
+        <CategoryStep
+          superCategories={superCategories}
+          eventFormats={eventFormats}
+          fieldSets={fieldSets}
+          entries={entries}
+          superCategoryId={formData.superCategoryId || formData.categorySuperId || ""}
+          eventFormatId={formData.eventFormatId || formData.categoryFormatId || ""}
+          categoryFields={formData.categoryFields}
+          customFieldValues={formData.customFieldValues}
+          onChange={patchForm}
+          hideHackathonFormats={hideHackathonFormats}
+        />
       )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="space-y-6">
           <div>
             <h3 className="mb-1 text-lg font-bold text-ink">General Info</h3>
-            <p className="mb-4 text-sm text-ink-soft">The essential details displayed on the event page.</p>
+            <p className="mb-4 text-sm text-ink-soft">
+              The essential details displayed on the event page.
+            </p>
           </div>
           <div>
-            <label htmlFor="wiz-title" className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
-              Event Title <span className="float-right font-normal text-ink-soft">{formData.eventTitle.length}/100</span>
+            <label
+              htmlFor="wiz-title"
+              className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft"
+            >
+              Event Title{" "}
+              <span className="float-right font-normal text-ink-soft">
+                {formData.eventTitle.length}/100
+              </span>
             </label>
             <input
               id="wiz-title"
@@ -107,7 +120,10 @@ export function BasicStep({
             />
           </div>
           <div>
-            <label htmlFor="wiz-description" className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
+            <label
+              htmlFor="wiz-description"
+              className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft"
+            >
               Description
             </label>
             <DescriptionEditor
@@ -117,7 +133,10 @@ export function BasicStep({
             />
           </div>
           <div>
-            <label htmlFor="wiz-short" className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
+            <label
+              htmlFor="wiz-short"
+              className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft"
+            >
               Short Description
             </label>
             <input
@@ -130,12 +149,26 @@ export function BasicStep({
             />
           </div>
           <div>
-            <label className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">Tags</label>
+            <label className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
+              Tags
+            </label>
             <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-paper px-3 py-2">
               {formData.tags.map((tag) => (
-                <span key={tag} className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-ink">
+                <span
+                  key={tag}
+                  className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-ink"
+                >
                   {tag}
-                  <button type="button" onClick={() => updateForm("tags", formData.tags.filter((t) => t !== tag))} className="text-ink-soft">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateForm(
+                        "tags",
+                        formData.tags.filter((t) => t !== tag),
+                      )
+                    }
+                    className="text-ink-soft"
+                  >
                     ×
                   </button>
                 </span>
@@ -172,11 +205,13 @@ export function BasicStep({
             value={formData.bannerImage ?? ""}
             label="Upload Event Banner"
             onUploaded={(url) => updateForm("bannerImage", url)}
-            buttonClassName="relative mx-auto flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
+            buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
           />
-          <p className="text-xs text-ink-soft">1080 × 1080px square recommended (JPG, PNG)</p>
+          <p className="text-xs text-ink-soft">1080 × 1350px (4:5) recommended (JPG, PNG)</p>
           <div>
-            <label className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">Gallery</label>
+            <label className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
+              Gallery
+            </label>
             <div className="flex flex-wrap items-center gap-3">
               <MediaUpload
                 folder="gallery"
@@ -185,7 +220,9 @@ export function BasicStep({
                 label="+"
                 className="shrink-0"
                 buttonClassName="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-line-loud bg-muted text-lg text-ink-soft"
-                onUploaded={(url) => updateForm("galleryImages", [...(formData.galleryImages ?? []), url])}
+                onUploaded={(url) =>
+                  updateForm("galleryImages", [...(formData.galleryImages ?? []), url])
+                }
               />
               {(formData.galleryImages ?? []).map((img, i) => (
                 <div key={img + i} className="group relative h-16 w-16 overflow-hidden rounded-xl">
@@ -193,11 +230,20 @@ export function BasicStep({
                     <video src={img} muted className="h-full w-full object-cover" />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={img} alt={`gallery ${i + 1}`} className="h-full w-full object-cover" />
+                    <img
+                      src={img}
+                      alt={`gallery ${i + 1}`}
+                      className="h-full w-full object-cover"
+                    />
                   )}
                   <button
                     type="button"
-                    onClick={() => updateForm("galleryImages", (formData.galleryImages ?? []).filter((_, idx) => idx !== i))}
+                    onClick={() =>
+                      updateForm(
+                        "galleryImages",
+                        (formData.galleryImages ?? []).filter((_, idx) => idx !== i),
+                      )
+                    }
                     className="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-black/70 text-2xs text-ink-invert opacity-0 group-hover:opacity-100"
                     aria-label="Remove image"
                   >
@@ -208,7 +254,10 @@ export function BasicStep({
             </div>
           </div>
           <div>
-            <label htmlFor="wiz-video" className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
+            <label
+              htmlFor="wiz-video"
+              className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft"
+            >
               Video Promo URL
             </label>
             <input

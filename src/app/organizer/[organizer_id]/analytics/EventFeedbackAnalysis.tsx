@@ -1,111 +1,233 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { MessageSquareText } from "lucide-react";
-import { EventFeedbackAnalysisRow } from "@/src/services/models/feedback.model";
+import type { OrganizerFeedbackAnalysis } from "@/src/features/analytics/feedbackAnalysis.service";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
-import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
-import { tableCell, tableHead, tableRow } from "@/src/lib/ui";
+import { buttonClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
+
+function Donut({ distribution }: { distribution: Record<string, number> }) {
+  const total = Object.values(distribution).reduce((a, b) => a + b, 0) || 1;
+  const colors = ["#c4c4c4", "#a3a3a3", "#737373", "#404040", "#171717"];
+  let acc = 0;
+  const stops: string[] = [];
+  for (let i = 1; i <= 5; i++) {
+    const n = distribution[String(i)] ?? 0;
+    const start = (acc / total) * 100;
+    acc += n;
+    const end = (acc / total) * 100;
+    stops.push(`${colors[i - 1]} ${start}% ${end}%`);
+  }
+  return (
+    <div
+      className="mx-auto size-36 rounded-full"
+      style={{ background: `conic-gradient(${stops.join(", ")})` }}
+      role="img"
+      aria-label="Rating distribution donut"
+    >
+      <div className="flex size-full items-center justify-center">
+        <div className="flex size-20 flex-col items-center justify-center rounded-full bg-paper text-center">
+          <span className="text-lg font-semibold tabular-nums text-ink">
+            {Object.values(distribution).reduce((a, b) => a + b, 0)}
+          </span>
+          <span className="text-2xs uppercase text-ink-soft">ratings</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Bars({ distribution }: { distribution: Record<string, number> }) {
+  const max = Math.max(1, ...Object.values(distribution));
+  return (
+    <ul className="space-y-2">
+      {[5, 4, 3, 2, 1].map((n) => {
+        const v = distribution[String(n)] ?? 0;
+        return (
+          <li key={n} className="flex items-center gap-2 text-sm">
+            <span className="w-6 tabular-nums text-ink-soft">{n}★</span>
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-ink"
+                style={{ width: `${(v / max) * 100}%` }}
+              />
+            </div>
+            <span className="w-8 text-right tabular-nums text-ink-soft">{v}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function EventFeedbackAnalysis({
-    analyzeFeedback,
+  loadAnalysis,
+  refreshAnalysis,
 }: {
-    analyzeFeedback: () => Promise<EventFeedbackAnalysisRow[]>;
+  loadAnalysis: () => Promise<OrganizerFeedbackAnalysis>;
+  refreshAnalysis: () => Promise<OrganizerFeedbackAnalysis>;
 }) {
-    const [rows, setRows] = useState<EventFeedbackAnalysisRow[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<OrganizerFeedbackAnalysis | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pending, startTransition] = useTransition();
 
-    useEffect(() => {
-        let cancelled = false;
+  const run = useCallback(async (fn: () => Promise<OrganizerFeedbackAnalysis>) => {
+    setError(null);
+    try {
+      const result = await fn();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to analyze feedback");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-        async function load() {
-            try {
-                const result = await analyzeFeedback();
-                if (!cancelled) {
-                    setRows(result);
-                }
-            } catch (err) {
-                if (!cancelled) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Failed to analyze feedback"
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        }
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial async load on mount
+    void run(loadAnalysis);
+  }, [loadAnalysis, run]);
 
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, [analyzeFeedback]);
-
+  if (loading) {
     return (
-        <section>
-            <div className="flex flex-col gap-1 border-b border-line pb-3 sm:flex-row sm:items-end sm:justify-between">
-                <h2 className="font-display text-xl text-ink">Event Feedback Analysis</h2>
-                <p className="text-sm text-ink-soft">AI-powered insights from attendee feedback</p>
-            </div>
-
-            {loading ? (
-                <p className="py-12 text-center text-sm text-ink-soft" aria-live="polite">
-                    Analyzing feedback with AI…
-                </p>
-            ) : error ? (
-                <EmptyState
-                    size="sm"
-                    className="mt-6"
-                    icon={<MessageSquareText size={24} />}
-                    title="Feedback analysis failed"
-                    description={error}
-                />
-            ) : rows.length === 0 ? (
-                <EmptyState
-                    size="sm"
-                    className="mt-6"
-                    icon={<MessageSquareText size={24} />}
-                    title="No feedback yet"
-                    description="Once attendees rate a completed event, their comments are summarised here."
-                />
-            ) : (
-                <div className="mt-2 overflow-x-auto">
-                    <table className="w-full min-w-[860px] border-collapse">
-                        <thead>
-                            <tr className="border-b border-line">
-                                <th className={tableHead}>Event</th>
-                                <th className={tableHead}>Feedback</th>
-                                <th className={tableHead}>Summary</th>
-                                <th className={tableHead}>Strengths</th>
-                                <th className={tableHead}>Improvements</th>
-                                <th className={tableHead}>Sentiment</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.map((row) => (
-                                <tr key={row.eventId} className={`${tableRow} align-top`}>
-                                    <td className={tableCell}>
-                                        <p className="font-medium text-ink">{row.eventName}</p>
-                                        <p className="mt-1 text-2xs text-ink-soft tabular-nums">{row.eventId}</p>
-                                    </td>
-                                    <td className={`${tableCell} tabular-nums`}>{row.feedbackCount}</td>
-                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.summary}</td>
-                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.strengths}</td>
-                                    <td className={`${tableCell} max-w-xs text-ink-soft`}>{row.improvements}</td>
-                                    <td className={tableCell}>
-                                        <StatusBadge status={row.sentiment} size="sm" />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </section>
+      <p className="py-12 text-center text-sm text-ink-soft" aria-live="polite">
+        Loading feedback analysis…
+      </p>
     );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        size="sm"
+        className="mt-6"
+        icon={<MessageSquareText size={24} />}
+        title="Feedback analysis failed"
+        description={error}
+      />
+    );
+  }
+
+  if (!data || data.responseCount === 0) {
+    return (
+      <EmptyState
+        size="sm"
+        className="mt-6"
+        icon={<MessageSquareText size={24} />}
+        title="No feedback yet"
+        description="Once attendees rate a completed event, their comments are summarised here."
+      />
+    );
+  }
+
+  const needed = data.commentsNeeded ?? 0;
+  const aiLabel =
+    data.source === "gemini"
+      ? `Generated by AI from ${data.responseCount} responses`
+      : `Local summary from ${data.responseCount} responses (AI insights unavailable)`;
+
+  return (
+    <section className="space-y-6">
+      <div className="flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="font-display text-xl text-ink">Event feedback analysis</h2>
+          <p className="text-sm text-ink-soft">{aiLabel}</p>
+        </div>
+        <button
+          type="button"
+          disabled={pending || needed > 0}
+          className={buttonClass("secondary", "sm")}
+          onClick={() =>
+            startTransition(() => {
+              setLoading(true);
+              void run(refreshAnalysis);
+            })
+          }
+        >
+          Refresh analysis
+        </button>
+      </div>
+
+      {needed > 0 ? (
+        <p className="rounded-xl border border-line bg-muted/40 px-4 py-3 text-sm text-ink-soft">
+          {needed} more response{needed === 1 ? "" : "s"} needed for AI analysis.
+        </p>
+      ) : null}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-line bg-paper p-5">
+          <p className="mb-4 text-2xs font-medium uppercase tracking-wide text-ink-soft">
+            Rating distribution
+            {data.averageRating != null ? (
+              <span className="ml-2 tabular-nums text-ink">
+                avg {data.averageRating.toFixed(1)}
+              </span>
+            ) : null}
+          </p>
+          <Donut distribution={data.ratingDistribution} />
+          <div className="mt-4">
+            <Bars distribution={data.ratingDistribution} />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Block title="Summary" body={data.summary} />
+          <ChipList title="Themes" items={data.themes} />
+          <ChipList title="Strengths" items={data.strengths} />
+          <ChipList title="Problems" items={data.problems} />
+          <ChipList title="Actions" items={data.actions} />
+        </div>
+      </div>
+
+      {data.topWords?.length ? (
+        <div className="overflow-x-auto rounded-2xl border border-line">
+          <table className="w-full min-w-[320px] border-collapse">
+            <thead>
+              <tr className="border-b border-line">
+                <th className={tableHead}>Word</th>
+                <th className={`${tableHead} text-right`}>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.topWords.map((w) => (
+                <tr key={w.word} className={tableRow}>
+                  <td className={tableCell}>{w.word}</td>
+                  <td className={`${tableCell} text-right tabular-nums`}>{w.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function Block({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-paper p-4">
+      <p className="text-2xs font-medium uppercase tracking-wide text-ink-soft">{title}</p>
+      <p className="mt-2 text-sm text-ink">{body}</p>
+    </div>
+  );
+}
+
+function ChipList({ title, items }: { title: string; items: string[] }) {
+  if (!items?.length) return null;
+  return (
+    <div>
+      <p className="text-2xs font-medium uppercase tracking-wide text-ink-soft">{title}</p>
+      <ul className="mt-2 flex flex-wrap gap-1.5">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="rounded-md border border-line bg-muted/50 px-2 py-1 text-xs text-ink"
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }

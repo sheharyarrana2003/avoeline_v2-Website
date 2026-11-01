@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { ImageUp, TriangleAlert } from "lucide-react";
+import { compressImage } from "./compressImage";
 import { uploadMedia } from "./uploadMedia.action";
 import { isVideoUrl } from "./media.utils";
 
@@ -59,7 +60,12 @@ export function MediaUpload({
       return;
     }
     startTransition(async () => {
-      for (const file of Array.from(files)) {
+      for (const raw of Array.from(files)) {
+        const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
+        if (file.size > MAX_BYTES) {
+          setError(`"${file.name}" is too large after compression (max 50MB).`);
+          continue;
+        }
         const fd = new FormData();
         fd.append("file", file);
         fd.append("folder", folder);

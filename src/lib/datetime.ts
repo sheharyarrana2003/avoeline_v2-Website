@@ -6,12 +6,12 @@
  *   - times  -> h:mm AM/PM (12-hour)
  *
  * These helpers accept the many shapes dates arrive in across the codebase:
- * JS `Date`, Firestore `Timestamp` (either a live `{ toDate() }` object or the
- * serialized `{ seconds, nanoseconds }` shape), ISO strings (`2026-07-21`,
+ * JS `Date`, legacy serialized `{ seconds }` / `{ _seconds }` shapes (and any
+ * leftover `{ toDate() }` objects), ISO strings (`2026-07-21`,
  * `2026-07-21T10:00:00Z`), slash dates (`DD/MM/YYYY` or legacy `MM/DD/YYYY`),
  * and bare `HH:mm` / `hh:mm AM/PM` time strings.
  *
- * Note on slash dates: new events store DD/MM/YYYY, but some existing docs were
+ * Note on slash dates: new events store DD/MM/YYYY, but some existing rows were
  * saved as MM/DD/YYYY. We disambiguate with a swap heuristic (see toDate) —
  * a value where one part is > 12 is unambiguous; a fully-ambiguous value like
  * `08/10/2026` is interpreted under the DD/MM convention.
@@ -20,8 +20,18 @@
 const EMPTY = "—";
 
 const MONTH_ABBR = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 type Timestampish = { toDate?: () => Date; seconds?: number; _seconds?: number };
@@ -31,10 +41,11 @@ type Timestampish = { toDate?: () => Date; seconds?: number; _seconds?: number }
  *
  * Exported because comparing and bucketing dates is as common as formatting them,
  * and callers that needed a Date were reaching for `new Date(x)` instead. That
- * silently produces `Invalid Date` for a Firestore Timestamp — which is what every
- * booking carries when a service skips its read-mapper — and the resulting NaN
- * comparison is always false, so revenue totals and "last 7 days" filters came back
- * empty with no error anywhere. Use this for any stored value; never `new Date(x)`.
+ * silently produces `Invalid Date` for a legacy serialized `{seconds}` shape —
+ * which is what every booking carries when a service skips its read-mapper — and
+ * the resulting NaN comparison is always false, so revenue totals and "last 7 days"
+ * filters came back empty with no error anywhere. Use this for any stored value;
+ * never `new Date(x)`.
  */
 export function toDate(value: unknown): Date | null {
   if (value == null || value === "") return null;
@@ -43,7 +54,7 @@ export function toDate(value: unknown): Date | null {
     return isNaN(value.getTime()) ? null : value;
   }
 
-  // Firestore Timestamp — live object or serialized form.
+  // Legacy serialized {seconds} / {toDate()} shapes.
   if (typeof value === "object") {
     const ts = value as Timestampish;
     if (typeof ts.toDate === "function") {
@@ -117,9 +128,7 @@ export function toDate(value: unknown): Date | null {
 
 /** Turn a loose time token ("5:00 PM", "17:00", "9") into "HH:mm". */
 function normalizeTimeToken(token: string): string {
-  const m = token
-    .trim()
-    .match(/^(\d{1,2})(?::(\d{1,2}))?\s*([AaPp][Mm])?/);
+  const m = token.trim().match(/^(\d{1,2})(?::(\d{1,2}))?\s*([AaPp][Mm])?/);
   if (!m) return "00:00";
   let hour = parseInt(m[1], 10);
   const minute = m[2] ? parseInt(m[2], 10) : 0;
@@ -151,13 +160,18 @@ export function formatDate(value: unknown): string {
 
 /**
  * 12-hour time, "h:mm AM/PM". Accepts bare time strings ("17:00", "5:00 PM")
- * as well as Date/Timestamp values. Returns "—" for empty/unparseable input.
+ * as well as Date or legacy `{seconds}` shapes. Returns "—" for empty/unparseable input.
  */
 export function formatTime(value: unknown): string {
   if (value == null || value === "") return EMPTY;
 
   // Bare time string (no date component).
-  if (typeof value === "string" && !value.includes("/") && !value.includes("-") && !value.includes("T")) {
+  if (
+    typeof value === "string" &&
+    !value.includes("/") &&
+    !value.includes("-") &&
+    !value.includes("T")
+  ) {
     const hhmm = normalizeTimeToken(value);
     const [h, m] = hhmm.split(":").map((n) => parseInt(n, 10));
     const probe = new Date(2000, 0, 1, h, m);
@@ -185,9 +199,8 @@ export function formatDateTime(value: unknown): string {
 export function parseScheduleDateTime(dateStr: unknown, timeStr: unknown): Date | null {
   const d = toDate(dateStr);
   if (!d) return null;
-  const hhmm = typeof timeStr === "string" && timeStr.trim()
-    ? normalizeTimeToken(timeStr)
-    : "00:00";
+  const hhmm =
+    typeof timeStr === "string" && timeStr.trim() ? normalizeTimeToken(timeStr) : "00:00";
   const y = d.getFullYear();
   const mo = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
@@ -197,11 +210,11 @@ export function parseScheduleDateTime(dateStr: unknown, timeStr: unknown): Date 
 }
 
 /**
- * Serialize any supported date value (Firestore Timestamp, Date, ISO/slash
+ * Serialize any supported date value (legacy `{seconds}` shape, Date, ISO/slash
  * string, epoch number) to an ISO string, or null if empty/unparseable.
- * Use this in Firestore read-mappers so server-fetched docs stay plain and
- * serializable across the Server→Client Component boundary (a raw admin-SDK
- * `Timestamp` is a class instance and cannot be passed to a Client Component).
+ * Use this in Supabase read-mappers so server-fetched rows stay plain and
+ * serializable across the Server→Client Component boundary (a raw class-instance
+ * date object cannot be passed to a Client Component).
  */
 export function toIsoString(value: unknown): string | null {
   const d = toDate(value);
@@ -260,4 +273,108 @@ export function timeAgo(value: unknown): string {
   if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
 
   return formatDate(d);
+}
+
+/** Parts of an instant as wall-clock numbers in `timeZone`. */
+function zonedParts(
+  date: Date,
+  timeZone: string,
+): {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+} {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  const bag: Record<string, string> = {};
+  for (const p of dtf.formatToParts(date)) {
+    if (p.type !== "literal") bag[p.type] = p.value;
+  }
+  return {
+    year: Number(bag.year),
+    month: Number(bag.month),
+    day: Number(bag.day),
+    hour: Number(bag.hour),
+    minute: Number(bag.minute),
+    second: Number(bag.second),
+  };
+}
+
+/** Offset (ms) such that `utcMs + offset` ≈ wall time in `timeZone` as UTC components. */
+function tzOffsetMs(utcMs: number, timeZone: string): number {
+  const p = zonedParts(new Date(utcMs), timeZone);
+  const asIfUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+  return asIfUtc - utcMs;
+}
+
+/**
+ * Convert a `datetime-local` value (`YYYY-MM-DDTHH:mm`) in the event timezone to a UTC ISO string.
+ * Empty / invalid → null. Never returns slash dates.
+ */
+export function fromEventLocalInput(local: string, timeZone = "UTC"): string | null {
+  const raw = String(local || "").trim();
+  if (!raw) return null;
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const h = Number(m[4]);
+  const mi = Number(m[5]);
+  const s = Number(m[6] ?? 0);
+  if (![y, mo, d, h, mi, s].every((n) => Number.isFinite(n))) return null;
+  const tz = timeZone.trim() || "UTC";
+  let utc = Date.UTC(y, mo - 1, d, h, mi, s);
+  const off1 = tzOffsetMs(utc, tz);
+  utc = Date.UTC(y, mo - 1, d, h, mi, s) - off1;
+  const off2 = tzOffsetMs(utc, tz);
+  if (off2 !== off1) utc = Date.UTC(y, mo - 1, d, h, mi, s) - off2;
+  const out = new Date(utc);
+  return Number.isNaN(out.getTime()) ? null : out.toISOString();
+}
+
+/**
+ * Format a UTC ISO / Date for a `datetime-local` input in the event timezone.
+ */
+export function toEventLocalInput(value: unknown, timeZone = "UTC"): string {
+  const d = toDate(value);
+  if (!d) return "";
+  const tz = timeZone.trim() || "UTC";
+  const p = zonedParts(d, tz);
+  return `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}T${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}`;
+}
+
+/**
+ * Exact stamp to the second in the event timezone, e.g. `12/10/2026, 3:05:09 PM PKT`.
+ */
+export function formatExactSecond(value: unknown, timeZone = "UTC"): string {
+  const d = toDate(value);
+  if (!d) return EMPTY;
+  const tz = timeZone.trim() || "UTC";
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    }).format(d);
+  } catch {
+    return formatDateTime(d);
+  }
 }

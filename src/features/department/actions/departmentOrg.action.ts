@@ -14,32 +14,25 @@ export async function createTenure(formData: FormData): Promise<void> {
 }
 
 export async function setClubModuleAccess(formData: FormData): Promise<void> {
-  finishForm(formData, "/department/clubs", await setClubModuleAccessImpl(formData), "Club feature access saved.");
+  finishForm(
+    formData,
+    "/department/clubs",
+    await setClubModuleAccessImpl(formData),
+    "Club feature access saved.",
+  );
 }
 
 export async function postOrgAnnouncement(formData: FormData): Promise<void> {
-  finishForm(formData, "/department/announcements", await postOrgAnnouncementImpl(formData), "Announcement posted.");
+  finishForm(
+    formData,
+    "/department/announcements",
+    await postOrgAnnouncementImpl(formData),
+    "Announcement posted.",
+  );
 }
 
-async function createTenureImpl(formData: FormData): Promise<ActionResult> {
-  const user = await AuthService.getCurrentUser();
-  if (!user) return fail("Please sign in.");
-  const orgId = String(formData.get("orgId") ?? "");
-  const label = String(formData.get("label") ?? "").trim();
-  const start = String(formData.get("startDate") ?? "");
-  const end = String(formData.get("endDate") ?? "");
-  if (!orgId || !label || !start || !end) return fail("Tenure label and dates are required.");
-  if (end < start) return fail("The tenure must end after it starts.");
-  if (!(await canManageOrg(user, orgId))) return fail("You can't manage this department.");
-  await supabaseAdmin.from(TABLES.ORG_TENURES).insert({
-    org_id: orgId,
-    label,
-    start_date: start,
-    end_date: end,
-    is_current: formData.get("isCurrent") === "on",
-  });
-  revalidatePath("/department");
-  return ok();
+async function createTenureImpl(_formData: FormData): Promise<ActionResult> {
+  return fail("Use Add tenure on Clubs (start_org_tenure). Tenures are per club, not department.");
 }
 
 async function setClubModuleAccessImpl(formData: FormData): Promise<ActionResult> {
@@ -47,7 +40,8 @@ async function setClubModuleAccessImpl(formData: FormData): Promise<ActionResult
   if (!user) return fail("Please sign in.");
   const { isModuleKey } = await import("@/src/features/permissions/moduleKeys");
   const { getDepartmentPlan, moduleOptions } = await import("../department.service");
-  const TeamEngineService = (await import("@/src/features/teams/teamEngine.service")).TeamEngineService;
+  const TeamEngineService = (await import("@/src/features/teams/teamEngine.service"))
+    .TeamEngineService;
 
   const departmentId = String(formData.get("departmentId") ?? "");
   const orgId = String(formData.get("orgId") ?? "");
@@ -65,7 +59,8 @@ async function setClubModuleAccessImpl(formData: FormData): Promise<ActionResult
     targets.push(...(await TeamEngineService.listClubsByDepartment(departmentId)).map((c) => c.id));
   } else if (orgId) {
     const club = await TeamEngineService.getOrg(orgId);
-    if (!club || club.parentOrgId !== departmentId) return fail("That club is not in this department.");
+    if (!club || club.parentOrgId !== departmentId)
+      return fail("That club is not in this department.");
     targets.push(orgId);
   } else {
     return fail("Pick a club or apply to all clubs.");
@@ -96,7 +91,8 @@ async function postOrgAnnouncementImpl(formData: FormData): Promise<ActionResult
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
   if (!orgId || !title || !body) return fail("Title and body are required.");
-  if (!(await canManageOrg(user, orgId)) && !(await canLeadClub(user, orgId))) return fail("You can't post to this club.");
+  if (!(await canManageOrg(user, orgId)) && !(await canLeadClub(user, orgId)))
+    return fail("You can't post to this club.");
   await supabaseAdmin.from(TABLES.ORG_ANNOUNCEMENTS).insert({
     org_id: orgId,
     title,
@@ -104,7 +100,11 @@ async function postOrgAnnouncementImpl(formData: FormData): Promise<ActionResult
     created_by: user.userId,
   });
 
-  const { data: org } = await supabaseAdmin.from(TABLES.ORGANIZATIONS).select("owner_user_id").eq("id", orgId).maybeSingle();
+  const { data: org } = await supabaseAdmin
+    .from(TABLES.ORGANIZATIONS)
+    .select("owner_user_id")
+    .eq("id", orgId)
+    .maybeSingle();
   const presidentId = org?.owner_user_id ? String(org.owner_user_id) : "";
   if (presidentId && presidentId !== user.userId) {
     await NotificationServices.createNotification({

@@ -8,11 +8,18 @@ export const TIMEZONES = [
   "Central European Time (CET, UTC+1)",
 ];
 
-export function isHackathonForm(form: Pick<EventFormData, "eventFormatId" | "eventType" | "categoryFormatId" | "isHackathon">): boolean {
+export function isHackathonForm(
+  form: Pick<EventFormData, "eventFormatId" | "eventType" | "categoryFormatId" | "isHackathon">,
+): boolean {
   if (form.isHackathon) return true;
   const id = String(form.eventFormatId || form.categoryFormatId || "").toLowerCase();
   const name = String(form.eventType || "").toLowerCase();
-  return id === "hackathon" || name === "hackathon" || id.includes("hackathon") || name.includes("hackathon");
+  return (
+    id === "hackathon" ||
+    name === "hackathon" ||
+    id.includes("hackathon") ||
+    name.includes("hackathon")
+  );
 }
 
 export function emptyTrack(partial?: Partial<WizardTrackDraft>): WizardTrackDraft {
@@ -29,12 +36,17 @@ export function emptyTrack(partial?: Partial<WizardTrackDraft>): WizardTrackDraf
     instructions: partial?.instructions ?? "",
     minTeamSize: partial?.minTeamSize ?? 1,
     maxTeamSize: partial?.maxTeamSize ?? 4,
-    kind: partial?.kind ?? "ctf",
+    kind: partial?.kind ?? "business",
     rulesText: partial?.rulesText ?? "",
   };
 }
 
-export function durationLabel(startDate: string, endDate: string, startTime: string, endTime: string): string {
+export function durationLabel(
+  startDate: string,
+  endDate: string,
+  startTime: string,
+  endTime: string,
+): string {
   const start = parseLocal(startDate, startTime);
   const end = parseLocal(endDate || startDate, endTime);
   if (!start || !end || end <= start) return "Set start and end to see duration";
@@ -107,7 +119,11 @@ export function osmEmbedFromMapUrl(url: string): string | null {
     if (bbox && bbox.split(",").length === 4) {
       return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}`;
     }
-    if (host.includes("google.") || host.includes("maps.app.goo.gl") || host.includes("openstreetmap.org")) {
+    if (
+      host.includes("google.") ||
+      host.includes("maps.app.goo.gl") ||
+      host.includes("openstreetmap.org")
+    ) {
       const at = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
       if (at) return bboxEmbed(Number(at[1]), Number(at[2]));
       const qMatch = raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);

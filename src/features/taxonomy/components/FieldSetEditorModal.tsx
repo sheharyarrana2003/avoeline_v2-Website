@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Trash2, Save, X, Settings2 } from "lucide-react";
-import type { CategoryFieldDefinition, CategoryFieldType, SuperCategoryDoc } from "../categoryEngine.types";
+import { Save, X, Settings2 } from "lucide-react";
+import type { CategoryFieldDefinition, SuperCategoryDoc } from "../categoryEngine.types";
 import { saveCategoryFieldSetAction } from "../actions/categoryEngine.action";
-import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import { buttonClass } from "@/src/lib/ui";
+import {
+  DynamicFieldBuilder,
+  type DynamicFieldDefinition,
+} from "@/src/shared_components/DynamicFieldBuilder";
 
 interface FieldSetEditorModalProps {
   superCategory: SuperCategoryDoc;
@@ -20,46 +24,26 @@ export const FieldSetEditorModal: React.FC<FieldSetEditorModalProps> = ({
   onSaved,
 }) => {
   const [fields, setFields] = useState<CategoryFieldDefinition[]>(
-    initialFields.length > 0 ? initialFields : []
+    initialFields.length > 0 ? initialFields : [],
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addField = () => {
-    setFields((prev) => [
-      ...prev,
-      {
-        key: `field_${Date.now().toString(36)}`,
-        label: "",
-        type: "text",
-        required: false,
-        options: [],
-      },
-    ]);
-  };
-
-  const updateField = (index: number, patch: Partial<CategoryFieldDefinition>) => {
-    setFields((prev) => {
-      const next = [...prev];
-      next[index] = { ...next[index], ...patch };
-      // Auto-generate key from label if key was auto-generated
-      if (patch.label && (!next[index].key || next[index].key.startsWith("field_"))) {
-        next[index].key = patch.label
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/^_+|_+$/g, "");
-      }
-      return next;
-    });
-  };
-
-  const removeField = (index: number) => {
-    setFields((prev) => prev.filter((_, i) => i !== index));
+  const handleFields = (next: DynamicFieldDefinition[]) => {
+    setFields(
+      next.map((f) => ({
+        key: f.key,
+        label: f.label,
+        type: f.type === "long_text" ? "text" : (f.type as CategoryFieldDefinition["type"]),
+        required: f.required,
+        options: f.options,
+      })),
+    );
   };
 
   const handleSave = async () => {
     setError(null);
+    const seenKeys = new Set<string>();
     for (const f of fields) {
       if (!f.label.trim()) {
         setError("All custom fields must have a display label.");
@@ -69,6 +53,12 @@ export const FieldSetEditorModal: React.FC<FieldSetEditorModalProps> = ({
         setError("All custom fields must have a unique identifier key.");
         return;
       }
+      const key = f.key.trim().toLowerCase();
+      if (seenKeys.has(key)) {
+        setError(`Duplicate field key "${f.key}". Each key must be unique.`);
+        return;
+      }
+      seenKeys.add(key);
       if (f.type === "select" && (!f.options || f.options.length === 0)) {
         setError(`Please provide dropdown options for "${f.label}".`);
         return;
@@ -104,7 +94,7 @@ export const FieldSetEditorModal: React.FC<FieldSetEditorModalProps> = ({
                 Custom Fields: {superCategory.name}
               </h3>
               <p className="text-xs text-ink-soft">
-                Configure attributes collected when organizers select this super category.
+                Extra questions shown in Create Event when organizers pick this category.
               </p>
             </div>
           </div>
@@ -123,131 +113,57 @@ export const FieldSetEditorModal: React.FC<FieldSetEditorModalProps> = ({
               {error}
             </div>
           )}
-
-          {fields.length === 0 ? (
-            <div className="text-center py-10 border-2 border-dashed border-line rounded-xl">
-              <p className="text-sm text-ink-soft mb-3">
-                No custom fields attached to {superCategory.name} yet.
+          <p className="rounded-lg border border-line bg-muted/50 px-3 py-2 text-xs text-ink-soft">
+            Custom fields become additional Create Event form inputs (labels, types, and required
+            flags) after the organizer selects this super category. They do not replace the standard
+            event fields.
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <DynamicFieldBuilder
+              fields={fields}
+              onChange={handleFields}
+              emptyTitle={`No custom fields attached to ${superCategory.name} yet.`}
+            />
+            <aside className="rounded-xl border border-dashed border-line bg-muted/30 p-4">
+              <p className="text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+                Organizer preview
               </p>
-              <button
-                type="button"
-                onClick={addField}
-                className={buttonClass("secondary", "sm")}
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Add First Field
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {fields.map((field, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-xl border border-line bg-muted space-y-3 relative group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-ink-soft uppercase tracking-wider">
-                      Field #{idx + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeField(idx)}
-                      className="text-ink-soft hover:text-rose-600 p-1 rounded transition"
-                      title="Remove field"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className={labelClass}>Field Label</label>
-                      <input
-                        type="text"
-                        value={field.label}
-                        placeholder="e.g. Cuisine Type, Team Size"
-                        onChange={(e) => updateField(idx, { label: e.target.value })}
-                        className={fieldClass}
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Field Key (Storage ID)</label>
-                      <input
-                        type="text"
-                        value={field.key}
-                        placeholder="e.g. cuisine_type"
-                        onChange={(e) => updateField(idx, { key: e.target.value })}
-                        className={fieldClass}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-                    <div>
-                      <label className={labelClass}>Field Type</label>
-                      <select
-                        value={field.type}
-                        onChange={(e) =>
-                          updateField(idx, { type: e.target.value as CategoryFieldType })
-                        }
-                        className={fieldClass}
-                      >
-                        <option value="text">Text Input</option>
-                        <option value="number">Number Input</option>
-                        <option value="select">Dropdown Select</option>
-                        <option value="checkbox">Checkbox (Toggle)</option>
-                      </select>
-                    </div>
-                    <div className="pt-5">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm text-ink">
+              <p className="mt-1 text-xs text-ink-soft">Read-only mock of the Create Event step.</p>
+              <div className="mt-4 space-y-3">
+                {fields.length === 0 ? (
+                  <p className="text-sm text-ink-faint">No custom questions yet.</p>
+                ) : (
+                  fields.map((f) => (
+                    <div key={f.key || f.label} className="space-y-1">
+                      <label className="block text-xs font-medium text-ink">
+                        {f.label || "Untitled field"}
+                        {f.required ? <span className="text-danger"> *</span> : null}
+                      </label>
+                      {f.type === "select" ? (
+                        <select
+                          disabled
+                          className="w-full rounded-md border border-line bg-paper px-2 py-1.5 text-sm text-ink-faint"
+                        >
+                          <option>{(f.options && f.options[0]) || "Choose…"}</option>
+                        </select>
+                      ) : f.type === "checkbox" ? (
+                        <label className="flex items-center gap-2 text-sm text-ink-soft">
+                          <input type="checkbox" disabled /> Yes
+                        </label>
+                      ) : (
                         <input
-                          type="checkbox"
-                          checked={field.required || false}
-                          onChange={(e) => updateField(idx, { required: e.target.checked })}
-                          className="rounded border-line bg-paper text-ink"
+                          disabled
+                          type={f.type === "number" ? "number" : "text"}
+                          placeholder="Answer…"
+                          className="w-full rounded-md border border-line bg-paper px-2 py-1.5 text-sm text-ink-faint"
                         />
-                        <span>Required field in creation form</span>
-                      </label>
+                      )}
                     </div>
-                  </div>
-
-                  {field.type === "select" && (
-                    <div>
-                      <label className={labelClass}>
-                        Dropdown Options (comma separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={(field.options || []).join(", ")}
-                        placeholder="e.g. Italian, Mexican, Asian, Continental"
-                        onChange={(e) =>
-                          updateField(idx, {
-                            options: e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter(Boolean),
-                          })
-                        }
-                        className={fieldClass}
-                      />
-                      <p className="text-[11px] text-ink-soft mt-1">
-                        Separate multiple options with commas.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={addField}
-                className={buttonClass("secondary", "sm")}
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Add Another Field
-              </button>
-            </div>
-          )}
+                  ))
+                )}
+              </div>
+            </aside>
+          </div>
         </div>
 
         {/* Footer */}

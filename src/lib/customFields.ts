@@ -25,38 +25,50 @@ const MAX_ANSWER_LENGTH = 500;
  * stored. An unchecked checkbox sends nothing at all, which is why it reads as
  * `false` instead of being left out.
  */
-export function readAnswers(formData: FormData, fields: CustomFieldOption[], namePrefix = "custom_"): FieldAnswers {
-    const answers: FieldAnswers = {};
-    for (const field of fields) {
-        const key = `${namePrefix}${field.fieldId}`;
-        const raw = formData.get(key);
-        if (field.type === "checkbox") {
-            answers[field.fieldId] = raw !== null;
-            continue;
-        }
-        if (field.type === "checkboxes") {
-            const picked = formData.getAll(key).map((v) => String(v).trim()).filter(Boolean);
-            const allowed = new Set(field.options ?? []);
-            const clean = allowed.size ? picked.filter((v) => allowed.has(v)) : picked;
-            if (clean.length) answers[field.fieldId] = clean.join(", ").slice(0, MAX_ANSWER_LENGTH);
-            continue;
-        }
-        if (field.type === "file" || field.type === "image") {
-            const file = raw instanceof File && raw.size > 0 ? raw.name.slice(0, MAX_ANSWER_LENGTH) : "";
-            if (file) answers[field.fieldId] = file;
-            continue;
-        }
-        const text = String(raw ?? "").trim();
-        if (!text) continue;
-        if (field.type === "number") {
-            const n = Number(text);
-            if (Number.isFinite(n)) answers[field.fieldId] = n;
-            continue;
-        }
-        if ((field.type === "dropdown" || field.type === "radio") && field.options.length && !field.options.includes(text)) continue;
-        answers[field.fieldId] = text.slice(0, MAX_ANSWER_LENGTH);
+export function readAnswers(
+  formData: FormData,
+  fields: CustomFieldOption[],
+  namePrefix = "custom_",
+): FieldAnswers {
+  const answers: FieldAnswers = {};
+  for (const field of fields) {
+    const key = `${namePrefix}${field.fieldId}`;
+    const raw = formData.get(key);
+    if (field.type === "checkbox") {
+      answers[field.fieldId] = raw !== null;
+      continue;
     }
-    return answers;
+    if (field.type === "checkboxes") {
+      const picked = formData
+        .getAll(key)
+        .map((v) => String(v).trim())
+        .filter(Boolean);
+      const allowed = new Set(field.options ?? []);
+      const clean = allowed.size ? picked.filter((v) => allowed.has(v)) : picked;
+      if (clean.length) answers[field.fieldId] = clean.join(", ").slice(0, MAX_ANSWER_LENGTH);
+      continue;
+    }
+    if (field.type === "file" || field.type === "image") {
+      const file = raw instanceof File && raw.size > 0 ? raw.name.slice(0, MAX_ANSWER_LENGTH) : "";
+      if (file) answers[field.fieldId] = file;
+      continue;
+    }
+    const text = String(raw ?? "").trim();
+    if (!text) continue;
+    if (field.type === "number") {
+      const n = Number(text);
+      if (Number.isFinite(n)) answers[field.fieldId] = n;
+      continue;
+    }
+    if (
+      (field.type === "dropdown" || field.type === "radio") &&
+      field.options.length &&
+      !field.options.includes(text)
+    )
+      continue;
+    answers[field.fieldId] = text.slice(0, MAX_ANSWER_LENGTH);
+  }
+  return answers;
 }
 
 /**
@@ -64,28 +76,31 @@ export function readAnswers(formData: FormData, fields: CustomFieldOption[], nam
  *
  * `readAnswers` already produces a clean map, so this exists for the other
  * direction: an answers object arriving from anywhere else before it is
- * written to Firestore.
+ * written to Postgres.
  */
-export function sanitizeAnswers(fields: CustomFieldOption[], answers: FieldAnswers | undefined): FieldAnswers {
-    if (!answers) return {};
-    const byId = new Map(fields.map((f) => [f.fieldId, f]));
-    const clean: FieldAnswers = {};
-    for (const [key, value] of Object.entries(answers)) {
-        const field = byId.get(key);
-        if (!field || value === null || value === undefined) continue;
-        if (field.type === "checkbox") clean[key] = value === true || value === "true";
-        else if (field.type === "number") {
-            const n = Number(value);
-            if (Number.isFinite(n)) clean[key] = n;
-        } else clean[key] = String(value).slice(0, MAX_ANSWER_LENGTH);
-    }
-    return clean;
+export function sanitizeAnswers(
+  fields: CustomFieldOption[],
+  answers: FieldAnswers | undefined,
+): FieldAnswers {
+  if (!answers) return {};
+  const byId = new Map(fields.map((f) => [f.fieldId, f]));
+  const clean: FieldAnswers = {};
+  for (const [key, value] of Object.entries(answers)) {
+    const field = byId.get(key);
+    if (!field || value === null || value === undefined) continue;
+    if (field.type === "checkbox") clean[key] = value === true || value === "true";
+    else if (field.type === "number") {
+      const n = Number(value);
+      if (Number.isFinite(n)) clean[key] = n;
+    } else clean[key] = String(value).slice(0, MAX_ANSWER_LENGTH);
+  }
+  return clean;
 }
 
 /** One answer as a person reads it. Blank when they did not answer. */
 export function answerText(field: CustomFieldOption, answers: FieldAnswers | undefined): string {
-    const value = answers?.[field.fieldId];
-    if (value === undefined || value === null || value === "") return "";
-    if (field.type === "checkbox") return value === true ? "Yes" : "No";
-    return String(value);
+  const value = answers?.[field.fieldId];
+  if (value === undefined || value === null || value === "") return "";
+  if (field.type === "checkbox") return value === true ? "Yes" : "No";
+  return String(value);
 }

@@ -22,9 +22,32 @@ export const PAID_MODULE_KEYS = [
   "sponsors_invoicing_templates",
 ] as const;
 
+/** Vendor free modules (marketplace vendor dashboard). */
+export const VENDOR_FREE_MODULE_KEYS = [
+  "vendor_dashboard",
+  "vendor_quotes",
+  "vendor_services",
+  "vendor_bookings",
+] as const;
+
+/**
+ * Paid vendor modules.
+ * - `vendor_portfolio`: portfolio images/videos (gated on free).
+ * - `vendor_event_marketing`: soft-gate for “market event” UI when added; Plans can toggle it.
+ * - `vendor_analytics`: vendor analytics.
+ */
+export const VENDOR_PAID_MODULE_KEYS = [
+  "vendor_portfolio",
+  "vendor_event_marketing",
+  "vendor_analytics",
+] as const;
+
 export type FreeModuleKey = (typeof FREE_MODULE_KEYS)[number];
 export type PaidModuleKey = (typeof PAID_MODULE_KEYS)[number];
-export type ModuleKey = FreeModuleKey | PaidModuleKey;
+export type VendorFreeModuleKey = (typeof VENDOR_FREE_MODULE_KEYS)[number];
+export type VendorPaidModuleKey = (typeof VENDOR_PAID_MODULE_KEYS)[number];
+export type VendorModuleKey = VendorFreeModuleKey | VendorPaidModuleKey;
+export type ModuleKey = FreeModuleKey | PaidModuleKey | VendorModuleKey;
 
 export const MODULE_LABELS: Record<ModuleKey, string> = {
   events_dashboard: "Event Dashboard",
@@ -43,9 +66,29 @@ export const MODULE_LABELS: Record<ModuleKey, string> = {
   ushers_ops: "Ushers / on-ground ops",
   hackathon_ops: "Hackathon",
   sponsors_invoicing_templates: "Sponsor invoicing",
+  vendor_dashboard: "Vendor dashboard",
+  vendor_quotes: "Quotes",
+  vendor_services: "Services",
+  vendor_bookings: "Bookings",
+  vendor_portfolio: "Portfolio highlights",
+  vendor_event_marketing: "Event marketing",
+  vendor_analytics: "Vendor analytics",
 };
 
-export const ALL_MODULE_KEYS: ModuleKey[] = [...FREE_MODULE_KEYS, ...PAID_MODULE_KEYS];
+export const ORGANIZER_MODULE_KEYS: ModuleKey[] = [...FREE_MODULE_KEYS, ...PAID_MODULE_KEYS];
+export const VENDOR_MODULE_KEYS: ModuleKey[] = [
+  ...VENDOR_FREE_MODULE_KEYS,
+  ...VENDOR_PAID_MODULE_KEYS,
+];
+export const ALL_MODULE_KEYS: ModuleKey[] = [...ORGANIZER_MODULE_KEYS, ...VENDOR_MODULE_KEYS];
+
+export function isVendorModule(key: string): key is VendorModuleKey {
+  return (VENDOR_MODULE_KEYS as readonly string[]).includes(key);
+}
+
+export function isOrganizerModule(key: string): boolean {
+  return (ORGANIZER_MODULE_KEYS as readonly string[]).includes(key);
+}
 
 export function isFreeModule(key: string): key is FreeModuleKey {
   return (FREE_MODULE_KEYS as readonly string[]).includes(key);

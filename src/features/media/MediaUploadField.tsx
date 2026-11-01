@@ -48,28 +48,27 @@ export function MediaUploadField({
         label={label}
         buttonClassName={buttonClassName}
         className="shrink-0"
-        value={!multiple ? urls[0] ?? null : null}
+        value={!multiple ? (urls[0] ?? null) : null}
         onUploaded={(url) => setUrls((prev) => (multiple ? [...prev, url] : [url]))}
       />
-      {multiple &&
-        urls.map((u, i) => (
-          <div key={u + i} className="relative h-20 w-20 overflow-hidden rounded-xl group">
-            {isVideoUrl(u) ? (
-              <video src={u} muted className="h-full w-full object-cover" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={u} alt={`upload ${i + 1}`} className="h-full w-full object-cover" />
-            )}
-            <button
-              type="button"
-              onClick={() => setUrls((prev) => prev.filter((_, idx) => idx !== i))}
-              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-black/80 text-ink-invert transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              aria-label="Remove image"
-            >
-              <X className="h-3 w-3" aria-hidden="true" />
-            </button>
-          </div>
-        ))}
+      {urls.map((u, i) => (
+        <div key={u + i} className="relative h-20 w-20 overflow-hidden rounded-xl group">
+          {isVideoUrl(u) ? (
+            <video src={u} muted className="h-full w-full object-cover" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={u} alt="" className="h-full w-full object-cover" />
+          )}
+          <button
+            type="button"
+            onClick={() => setUrls((prev) => prev.filter((_, idx) => idx !== i))}
+            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/80 text-ink-invert transition hover:bg-ink"
+            aria-label="Remove image"
+          >
+            <X className="h-3 w-3" aria-hidden="true" />
+          </button>
+        </div>
+      ))}
       {urls.map((u, i) => (
         <input key={`hidden-${i}`} type="hidden" name={name} value={u} />
       ))}

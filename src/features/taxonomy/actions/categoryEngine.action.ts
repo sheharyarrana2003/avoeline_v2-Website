@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
+import { randomUUID } from "crypto";
+import { TABLES } from "@/data/collections";
+import { supabaseAdmin } from "@/data/supabase";
 import { AuthService } from "@/src/features/auth/authService";
 import { slugifyId } from "../types";
 import type {
@@ -10,7 +11,12 @@ import type {
   CategoryRequestType,
   ChecklistTemplateItem,
 } from "../categoryEngine.types";
+import { checklistTemplateId, sanitizeChecklistTemplateItems } from "../categoryEngine.types";
 import { sendNotification } from "@/src/lib/notifications";
+
+function categoryTypeFor(type: "superCategory" | "eventFormat"): "super_category" | "event_format" {
+  return type === "eventFormat" ? "event_format" : "super_category";
+}
 
 /**
  * Add a new SuperCategory or EventFormat
@@ -18,7 +24,7 @@ import { sendNotification } from "@/src/lib/notifications";
 export async function addCategoryItemAction(
   type: "superCategory" | "eventFormat",
   name: string,
-  description?: string
+  description?: string,
 ): Promise<{ success: boolean; error?: string; id?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
@@ -30,26 +36,27 @@ export async function addCategoryItemAction(
     const id = slugifyId(cleanName);
     if (!id) return { success: false, error: "Invalid name format." };
 
-    const colName =
-      type === "superCategory"
-        ? COLLECTIONS.SUPER_CATEGORIES
-        : COLLECTIONS.EVENT_FORMATS;
-
-    const docRef = adminDb.collection(colName).doc(id);
-    const existing = await docRef.get();
-    if (existing.exists) {
+    const { data: existing } = await supabaseAdmin
+      .from(TABLES.EVENT_CATEGORIES)
+      .select("id")
+      .eq("id", id)
+      .maybeSingle();
+    if (existing) {
       return { success: false, error: `"${cleanName}" already exists.` };
     }
 
-    await docRef.set({
+    const now = new Date().toISOString();
+    const { error } = await supabaseAdmin.from(TABLES.EVENT_CATEGORIES).insert({
       id,
-      categoryType: type === "eventFormat" ? "event_format" : "super_category",
+      category_type: categoryTypeFor(type),
       name: cleanName,
       active: true,
-      status: "approved",
-      createdAt: new Date().toISOString(),
-      ...(description ? { description: description.trim() } : {}),
+      description: description ? description.trim() : null,
+      created_at: now,
+      updated_at: now,
+      extra: { status: "approved" },
     });
+    if (error) throw error;
 
     revalidatePath("/admin/categories");
     return { success: true, id };
@@ -66,7 +73,7 @@ export async function renameCategoryItemAction(
   type: "superCategory" | "eventFormat",
   id: string,
   newName: string,
-  description?: string
+  description?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
@@ -76,27 +83,20 @@ export async function renameCategoryItemAction(
     if (!cleanName) return { success: false, error: "Name cannot be empty." };
     if (!id) return { success: false, error: "ID is required." };
 
-    const colName =
-      type === "superCategory"
-        ? COLLECTIONS.SUPER_CATEGORIES
-        : COLLECTIONS.EVENT_FORMATS;
-
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       name: cleanName,
-      updatedAt: new Date(),
+      updated_at: new Date().toISOString(),
     };
     if (description !== undefined) {
       updateData.description = description.trim();
     }
 
-    await adminDb.collection(colName).doc(id).set(updateData, { merge: true });
-
-    // Sync legacy collection
-    if (type === "superCategory" && COLLECTIONS.SUPER_CATEGORIES_LEGACY) {
-      await adminDb.collection(COLLECTIONS.SUPER_CATEGORIES_LEGACY).doc(id).set(updateData, { merge: true });
-    } else if (type === "eventFormat" && COLLECTIONS.EVENT_FORMATS_LEGACY) {
-      await adminDb.collection(COLLECTIONS.EVENT_FORMATS_LEGACY).doc(id).set(updateData, { merge: true });
-    }
+    const { error } = await supabaseAdmin
+      .from(TABLES.EVENT_CATEGORIES)
+      .update(updateData)
+      .eq("id", id)
+      .eq("category_type", categoryTypeFor(type));
+    if (error) throw error;
 
     revalidatePath("/admin/categories");
     return { success: true };
@@ -113,32 +113,22 @@ export async function renameCategoryItemAction(
 export async function toggleCategoryActiveAction(
   type: "superCategory" | "eventFormat",
   id: string,
-  active: boolean
+  active: boolean,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
     if (!admin) return { success: false, error: "Unauthorized. Admin required." };
     if (!id) return { success: false, error: "ID is required." };
 
-    const colName =
-      type === "superCategory"
-        ? COLLECTIONS.SUPER_CATEGORIES
-        : COLLECTIONS.EVENT_FORMATS;
-
-    await adminDb.collection(colName).doc(id).set(
-      {
+    const { error } = await supabaseAdmin
+      .from(TABLES.EVENT_CATEGORIES)
+      .update({
         active,
-        updatedAt: new Date(),
-      },
-      { merge: true }
-    );
-
-    // Sync legacy
-    if (type === "superCategory" && COLLECTIONS.SUPER_CATEGORIES_LEGACY) {
-      await adminDb.collection(COLLECTIONS.SUPER_CATEGORIES_LEGACY).doc(id).set({ active, updatedAt: new Date() }, { merge: true });
-    } else if (type === "eventFormat" && COLLECTIONS.EVENT_FORMATS_LEGACY) {
-      await adminDb.collection(COLLECTIONS.EVENT_FORMATS_LEGACY).doc(id).set({ active, updatedAt: new Date() }, { merge: true });
-    }
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .eq("category_type", categoryTypeFor(type));
+    if (error) throw error;
 
     revalidatePath("/admin/categories");
     return { success: true };
@@ -153,7 +143,7 @@ export async function toggleCategoryActiveAction(
  */
 export async function saveCategoryFieldSetAction(
   superCategoryId: string,
-  fields: CategoryFieldDefinition[]
+  fields: CategoryFieldDefinition[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
@@ -162,26 +152,27 @@ export async function saveCategoryFieldSetAction(
 
     // Format and sanitize fields
     const sanitizedFields = fields.map((f, idx) => ({
-      key: f.key ? f.key.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_") : `field_${idx}`,
+      key: f.key
+        ? f.key
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_]/g, "_")
+        : `field_${idx}`,
       label: f.label.trim(),
       type: f.type,
-      ...(f.options && f.options.length > 0 ? { options: f.options.map((o) => o.trim()).filter(Boolean) } : {}),
+      ...(f.options && f.options.length > 0
+        ? { options: f.options.map((o) => o.trim()).filter(Boolean) }
+        : {}),
       required: !!f.required,
     }));
 
     const docId = superCategoryId;
-    await adminDb
-      .collection(COLLECTIONS.CATEGORY_FIELD_SETS)
-      .doc(docId)
-      .set(
-        {
-          id: docId,
-          superCategoryId,
-          fields: sanitizedFields,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
+    const { error } = await supabaseAdmin.from(TABLES.CATEGORY_FIELD_SETS).upsert({
+      id: docId,
+      super_category_id: superCategoryId,
+      fields: sanitizedFields,
+    });
+    if (error) throw error;
 
     revalidatePath("/admin/categories");
     return { success: true };
@@ -196,7 +187,7 @@ export async function saveCategoryFieldSetAction(
  */
 export async function requestCategoryAction(
   name: string,
-  type: CategoryRequestType
+  type: CategoryRequestType,
 ): Promise<{ success: boolean; error?: string; requestId?: string }> {
   try {
     const user = await AuthService.getCurrentUser();
@@ -209,22 +200,21 @@ export async function requestCategoryAction(
       return { success: false, error: "Please enter a name for the category." };
     }
 
-    const reqRef = adminDb.collection(COLLECTIONS.CATEGORY_REQUESTS).doc();
-    const docData = {
-      id: reqRef.id,
-      requestedBy: user.userId,
-      requestedByName: user.name || user.email || "Organizer",
+    const id = randomUUID();
+    const { error } = await supabaseAdmin.from(TABLES.CATEGORY_REQUESTS).insert({
+      id,
+      requested_by: user.userId,
+      requested_by_name: user.name || user.email || "Organizer",
       name: cleanName,
-      type,
+      category_type: type === "eventFormat" ? "event_format" : "super_category",
       status: "pending",
-      createdAt: new Date(),
-    };
-
-    await reqRef.set(docData);
+      created_at: new Date().toISOString(),
+    });
+    if (error) throw error;
 
     revalidatePath("/admin/category-requests");
     revalidatePath("/admin/categories");
-    return { success: true, requestId: reqRef.id };
+    return { success: true, requestId: id };
   } catch (err: any) {
     console.error("[requestCategoryAction] error:", err);
     return { success: false, error: err?.message || "Failed to submit category request." };
@@ -237,88 +227,77 @@ export async function requestCategoryAction(
 export async function decideCategoryRequestAction(
   requestId: string,
   action: "approve" | "reject",
-  adminNote?: string
+  adminNote?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
     if (!admin) return { success: false, error: "Unauthorized. Admin required." };
     if (!requestId) return { success: false, error: "Request ID is required." };
 
-    const reqRef = adminDb.collection(COLLECTIONS.CATEGORY_REQUESTS).doc(requestId);
-    const reqSnap = await reqRef.get();
-    if (!reqSnap.exists) {
+    const { data: reqData, error: readError } = await supabaseAdmin
+      .from(TABLES.CATEGORY_REQUESTS)
+      .select("*")
+      .eq("id", requestId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!reqData) {
       return { success: false, error: "Category request not found." };
     }
 
-    const reqData = reqSnap.data()!;
     const name = String(reqData.name || "").trim();
-    const type: CategoryRequestType = reqData.type === "eventFormat" ? "eventFormat" : "superCategory";
+    const type: CategoryRequestType =
+      reqData.category_type === "event_format" ||
+      (reqData.extra as Record<string, unknown> | null)?.type === "eventFormat"
+        ? "eventFormat"
+        : "superCategory";
 
     if (action === "approve") {
-      // 1. Create the actual doc in superCategories or eventFormats
-      const targetCol =
-        type === "superCategory"
-          ? COLLECTIONS.SUPER_CATEGORIES
-          : COLLECTIONS.EVENT_FORMATS;
-
       const id = slugifyId(name);
       if (!id) return { success: false, error: "Could not derive a valid ID from the name." };
 
-      const targetDocRef = adminDb.collection(targetCol).doc(id);
-      await targetDocRef.set(
-        {
-          id,
-          name,
-          active: true,
-          createdAt: new Date(),
-        },
-        { merge: true }
-      );
+      const now = new Date().toISOString();
+      const { error: catError } = await supabaseAdmin.from(TABLES.EVENT_CATEGORIES).upsert({
+        id,
+        name,
+        category_type: categoryTypeFor(type),
+        active: true,
+        created_at: now,
+        updated_at: now,
+        extra: { status: "approved" },
+      });
+      if (catError) throw catError;
 
-      // Sync to legacy if applicable
-      if (type === "superCategory" && COLLECTIONS.SUPER_CATEGORIES_LEGACY) {
-        await adminDb.collection(COLLECTIONS.SUPER_CATEGORIES_LEGACY).doc(id).set(
-          { id, name, active: true, createdAt: new Date() },
-          { merge: true }
-        );
-      } else if (type === "eventFormat" && COLLECTIONS.EVENT_FORMATS_LEGACY) {
-        await adminDb.collection(COLLECTIONS.EVENT_FORMATS_LEGACY).doc(id).set(
-          { id, name, active: true, createdAt: new Date() },
-          { merge: true }
-        );
-      }
-
-      // 2. Update the categoryRequests status to "approved"
-      await reqRef.set(
-        {
+      const { error: reqError } = await supabaseAdmin
+        .from(TABLES.CATEGORY_REQUESTS)
+        .update({
           status: "approved",
-          adminNote: adminNote ? adminNote.trim() : "",
-          reviewedAt: new Date(),
-        },
-        { merge: true }
-      );
+          admin_note: adminNote ? adminNote.trim() : "",
+          decided_at: now,
+        })
+        .eq("id", requestId);
+      if (reqError) throw reqError;
     } else {
-      // Reject action: update status to "rejected" with optional adminNote
-      await reqRef.set(
-        {
+      const { error: reqError } = await supabaseAdmin
+        .from(TABLES.CATEGORY_REQUESTS)
+        .update({
           status: "rejected",
-          adminNote: adminNote ? adminNote.trim() : "",
-          reviewedAt: new Date(),
-        },
-        { merge: true }
-      );
+          admin_note: adminNote ? adminNote.trim() : "",
+          decided_at: new Date().toISOString(),
+        })
+        .eq("id", requestId);
+      if (reqError) throw reqError;
     }
 
     // Notifications Engine: notify requester of decision
-    if (reqData.requestedBy) {
+    if (reqData.requested_by) {
       await sendNotification(
-        String(reqData.requestedBy),
+        String(reqData.requested_by),
         action === "approve" ? "category_approved" : "category_rejected",
         {
           categoryName: name,
           categoryType: type === "eventFormat" ? "Event Format" : "Super Category",
           adminNote: adminNote ? adminNote.trim() : "",
-        }
+        },
       ).catch((err) => console.error("[decideCategoryRequestAction] sendNotification error:", err));
     }
 
@@ -337,30 +316,27 @@ export async function decideCategoryRequestAction(
 export async function saveChecklistTemplateAction(
   superCategoryId: string,
   eventFormatId: string,
-  items: ChecklistTemplateItem[]
+  items: ChecklistTemplateItem[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const admin = await AuthService.requireAdmin("categories");
     if (!admin) return { success: false, error: "Unauthorized. Admin required." };
-    if (!superCategoryId || !eventFormatId) {
+    const superId = String(superCategoryId || "").trim();
+    const formatId = String(eventFormatId || "").trim();
+    if (!superId || !formatId) {
       return { success: false, error: "Both SuperCategory and EventFormat are required." };
     }
 
-    const templateId = `${superCategoryId}_${eventFormatId}`;
-    const sanitizedItems = items
-      .map((it) => ({
-        title: String(it.title || "").trim(),
-        dueOffsetDays: Number(it.dueOffsetDays || 0),
-      }))
-      .filter((it) => it.title.length > 0);
+    const templateId = checklistTemplateId(superId, formatId);
+    const sanitizedItems = sanitizeChecklistTemplateItems(items);
 
-    await adminDb.collection(COLLECTIONS.CHECKLIST_TEMPLATES).doc(templateId).set({
+    const { error } = await supabaseAdmin.from(TABLES.CHECKLIST_TEMPLATES).upsert({
       id: templateId,
-      superCategoryId,
-      eventFormatId,
+      super_category_id: superId,
+      event_format_id: formatId,
       items: sanitizedItems,
-      updatedAt: new Date(),
     });
+    if (error) throw error;
 
     revalidatePath("/admin/categories");
     return { success: true };
@@ -371,37 +347,38 @@ export async function saveChecklistTemplateAction(
 }
 
 /**
- * Auto-populate `tasks` subcollection under an event from matching checklistTemplate
+ * Auto-populate event checklist items from matching checklistTemplate
  */
 export async function seedEventTasksFromTemplate(
   eventId: string,
   superCategoryId: string,
   eventFormatId: string,
-  startDateInput: Date | string | number | null | undefined
+  startDateInput: Date | string | number | null | undefined,
 ): Promise<number> {
   if (!eventId || !superCategoryId || !eventFormatId) return 0;
   try {
-    const templateId = `${superCategoryId}_${eventFormatId}`;
-    let templateSnap = await adminDb.collection(COLLECTIONS.CHECKLIST_TEMPLATES).doc(templateId).get();
+    const templateId = checklistTemplateId(superCategoryId, eventFormatId);
+    let { data: templateData } = await supabaseAdmin
+      .from(TABLES.CHECKLIST_TEMPLATES)
+      .select("*")
+      .eq("id", templateId)
+      .maybeSingle();
 
-    if (!templateSnap.exists) {
-      // Fallback query by fields
-      const querySnap = await adminDb
-        .collection(COLLECTIONS.CHECKLIST_TEMPLATES)
-        .where("superCategoryId", "==", superCategoryId)
-        .where("eventFormatId", "==", eventFormatId)
+    if (!templateData) {
+      const { data: fallback } = await supabaseAdmin
+        .from(TABLES.CHECKLIST_TEMPLATES)
+        .select("*")
+        .eq("super_category_id", superCategoryId)
+        .eq("event_format_id", eventFormatId)
         .limit(1)
-        .get();
-      if (!querySnap.empty) {
-        templateSnap = querySnap.docs[0];
-      } else {
-        return 0;
-      }
+        .maybeSingle();
+      templateData = fallback;
     }
 
-    const templateData = templateSnap.data();
-    const items: ChecklistTemplateItem[] = Array.isArray(templateData?.items)
-      ? templateData.items
+    if (!templateData) return 0;
+
+    const items: ChecklistTemplateItem[] = Array.isArray(templateData.items)
+      ? (templateData.items as ChecklistTemplateItem[])
       : [];
 
     if (items.length === 0) return 0;
@@ -416,27 +393,28 @@ export async function seedEventTasksFromTemplate(
       baseDate = new Date();
     }
 
-    const tasksColRef = adminDb.collection(COLLECTIONS.EVENTS).doc(eventId).collection("tasks");
-    const batch = adminDb.batch();
-
-    for (const item of items) {
-      const taskDocRef = tasksColRef.doc();
+    const rows = items.map((item, index) => {
       const dueDate = new Date(baseDate.getTime());
       dueDate.setDate(dueDate.getDate() + Number(item.dueOffsetDays || 0));
+      return {
+        id: randomUUID(),
+        event_id: eventId,
+        label: item.title,
+        done: false,
+        sort_order: index,
+        extra: {
+          dueOffsetDays: item.dueOffsetDays,
+          dueDate: dueDate.toISOString(),
+          completed: false,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+          source: "checklistTemplate",
+        },
+      };
+    });
 
-      batch.set(taskDocRef, {
-        id: taskDocRef.id,
-        title: item.title,
-        dueOffsetDays: item.dueOffsetDays,
-        dueDate: dueDate.toISOString(),
-        completed: false,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        source: "checklistTemplate",
-      });
-    }
-
-    await batch.commit();
+    const { error } = await supabaseAdmin.from(TABLES.EVENT_CHECKLIST_ITEMS).insert(rows);
+    if (error) throw error;
     return items.length;
   } catch (err) {
     console.error("[seedEventTasksFromTemplate] error:", err);

@@ -1,10 +1,14 @@
-import { adminAuth } from "@/data/admin_db";
+import { adminAuth } from "@/data/adminAuth";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 
 async function authIdsForOrg(orgId: string): Promise<string[]> {
   const [{ data: org }, { data: members }, { data: children }] = await Promise.all([
-    supabaseAdmin.from(TABLES.ORGANIZATIONS).select("id, owner_user_id").eq("id", orgId).maybeSingle(),
+    supabaseAdmin
+      .from(TABLES.ORGANIZATIONS)
+      .select("id, owner_user_id")
+      .eq("id", orgId)
+      .maybeSingle(),
     supabaseAdmin
       .from(TABLES.ORG_MEMBERSHIPS)
       .select("user_id, role")

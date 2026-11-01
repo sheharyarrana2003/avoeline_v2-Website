@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminDb } from "@/data/admin_db";
-import { COLLECTIONS } from "@/data/collections";
-import { assertOwnedEvent } from "@/src/features/events/ownership";
+import { supabaseAdmin } from "@/data/supabase";
+import { TABLES } from "@/data/collections";
+import { regStatusToDb, regStatusFromDb } from "@/data/statusMaps";
+import { assertEventActor } from "@/src/features/events/ownership";
 import { ActionResult, fail, ok } from "@/src/lib/action";
 
 /**
@@ -22,64 +23,68 @@ import { ActionResult, fail, ok } from "@/src/lib/action";
  * direction — the timestamp and the operator come from the server.
  */
 export async function setCheckIn(
-    _prevState: ActionResult | null,
-    formData: FormData,
+  _prevState: ActionResult | null,
+  formData: FormData,
 ): Promise<ActionResult> {
-    try {
-        const registrationId = String(formData.get("registrationId") ?? "").trim();
-        const checkedIn = String(formData.get("checkedIn")) === "true";
-        if (!registrationId) return fail("Missing registration.");
+  try {
+    const registrationId = String(formData.get("registrationId") ?? "").trim();
+    const checkedIn = String(formData.get("checkedIn")) === "true";
+    if (!registrationId) return fail("Missing registration.");
 
-        const ref = adminDb.collection(COLLECTIONS.REGISTRATIONS).doc(registrationId);
-        const snap = await ref.get();
-        if (!snap.exists) return fail("That registration no longer exists.");
+    const { data: row, error } = await supabaseAdmin
+      .from(TABLES.REGISTRATIONS)
+      .select("id, event_id, status, status_history")
+      .eq("id", registrationId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) return fail("That registration no longer exists.");
 
-        const data = snap.data() ?? {};
+    // The registration names its event; the event names its owner. Checking
+    // someone in is an organizer action on their own event, so authorization
+    // is resolved from stored data rather than anything the caller sent.
+    const event = await assertEventActor(String(row.event_id ?? ""), "attendees");
+    if (!event) return fail("You cannot check in attendees for that event.");
 
-        // The registration names its event; the event names its owner. Checking
-        // someone in is an organizer action on their own event, so authorization
-        // is resolved from stored data rather than anything the caller sent.
-        const event = await assertOwnedEvent(String(data.eventId ?? ""));
-        if (!event) return fail("You cannot check in attendees for that event.");
+    const appStatus = regStatusFromDb(row.status);
+    if (appStatus === "cancelled") return fail("That registration was cancelled.");
 
-        if (data.status === "cancelled") return fail("That registration was cancelled.");
+    const now = new Date().toISOString();
+    const history = Array.isArray(row.status_history) ? [...(row.status_history as unknown[])] : [];
 
-        const now = new Date().toISOString();
-        const history = Array.isArray(data.statusHistory) ? data.statusHistory : [];
+    // Undoing restores whatever they were before, not a hardcoded
+    // "confirmed": someone checked in while still awaiting payment would
+    // otherwise come back marked paid-up, which is a worse lie than the
+    // mistaken check-in it is meant to correct.
+    const previousStatus = [...history]
+      .reverse()
+      .map((entry) => {
+        const e = entry as { status?: string } | null;
+        return String(e?.status ?? "");
+      })
+      .find((status) => status && status !== "checked_in");
 
-        // Undoing restores whatever they were before, not a hardcoded
-        // "confirmed": someone checked in while still awaiting payment would
-        // otherwise come back marked paid-up, which is a worse lie than the
-        // mistaken check-in it is meant to correct.
-        const previousStatus = [...history]
-            .reverse()
-            .map((entry) => String(entry?.status ?? ""))
-            .find((status) => status && status !== "checked_in");
+    const nextStatus = checkedIn ? "checked_in" : previousStatus || "confirmed";
+    history.push({ status: nextStatus, timestamp: now });
 
-        const nextStatus = checkedIn ? "checked_in" : previousStatus || "confirmed";
+    const { error: updateError } = await supabaseAdmin
+      .from(TABLES.REGISTRATIONS)
+      .update({
+        status: regStatusToDb(nextStatus),
+        status_history: history,
+        checked_in: checkedIn,
+        check_in_time: checkedIn ? now : null,
+        check_in_method: checkedIn ? "manual" : null,
+        checked_in_by: checkedIn ? event.organizerId : null,
+        updated_at: now,
+      })
+      .eq("id", registrationId);
+    if (updateError) throw updateError;
 
-        await ref.set(
-            {
-                status: nextStatus,
-                // Appended, not replaced: the history is the audit trail for who
-                // was here and when, and an undo is itself an event worth keeping.
-                statusHistory: [...history, { status: nextStatus, timestamp: new Date() }],
-                checkIn: {
-                    checkedIn,
-                    checkInTime: checkedIn ? now : null,
-                    checkInMethod: checkedIn ? "manual" : null,
-                    checkedInBy: checkedIn ? event.organizerId : null,
-                    deviceId: null,
-                },
-                updatedAt: new Date(),
-            },
-            { merge: true },
-        );
-
-        revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
-        return ok();
-    } catch (err) {
-        console.error("[setCheckIn]", err);
-        return fail("Could not update check-in. Please try again.");
-    }
+    revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
+    revalidatePath(`/organizer/${event.organizerId}/events/${event.id}`);
+    return ok();
+  } catch (err) {
+    console.error("[setCheckIn]", err);
+    return fail("Could not update check-in. Please try again.");
+  }
 }

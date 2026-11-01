@@ -20,7 +20,7 @@ Avoeline is Pakistan's all-in-one event management platform. Key capabilities in
 - **Event Lifecycle**: Draft → Published → Ongoing → Completed workflow. Physical, virtual, or hybrid.
 - **Ticketing & Registration**: Custom dynamic forms, multi-tier pricing (Early bird, 20% student discount, 15% group discount), approval workflows, capacity limits.
 - **Check-in Logistics**: QR-code scanning for fast on-site check-in.
-- **Certificates**: Custom dynamic certificate editor, automated post-event issuing, and tamper-proof blockchain certificates (Polygon).
+- **Certificates**: Custom Konva certificate editor, bulk issue, on-demand PDF download, and public verification by code.
 - **Vendor Marketplace**: Request quotes (RFQs) for catering, photography, AV, and venue rentals directly inside the app.
 - **Agenda & Speakers**: Session schedules, panel/talk/workshop tags, resource attachments (PDFs, code repos), and speaker bios.
 
@@ -28,46 +28,46 @@ Give All the response in markdown. make sure if there are tables or such things 
 `;
 
 export async function callGemini(prompt: string): Promise<string[]> {
-    const url = `${process.env.AI_URL}${process.env.AI_API_KEY}`;
-    const textToProcess = `${prompt}
+  const url = `${process.env.AI_URL}${process.env.AI_API_KEY}`;
+  const textToProcess = `${prompt}
 ${AVOELINE_CONTEXT}`;
 
-    const data = {
-        contents: [
-            {
-                parts: [{ text: textToProcess }],
-            },
-        ],
-    };
+  const data = {
+    contents: [
+      {
+        parts: [{ text: textToProcess }],
+      },
+    ],
+  };
 
-    const response = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": process.env.AI_API_KEY || "",
-        },
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": process.env.AI_API_KEY || "",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const res: {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+    }>;
+  } = await response.json();
+
+  const aiResponse: string[] = [];
+
+  res.candidates?.forEach((candidate) => {
+    candidate.content?.parts?.forEach((part) => {
+      if (part.text) {
+        aiResponse.push(part.text);
+      }
     });
+  });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const res: {
-        candidates?: Array<{
-            content?: { parts?: Array<{ text?: string }> };
-        }>;
-    } = await response.json();
-
-    const aiResponse: string[] = [];
-
-    res.candidates?.forEach((candidate) => {
-        candidate.content?.parts?.forEach((part) => {
-            if (part.text) {
-                aiResponse.push(part.text);
-            }
-        });
-    });
-
-    return aiResponse;
+  return aiResponse;
 }

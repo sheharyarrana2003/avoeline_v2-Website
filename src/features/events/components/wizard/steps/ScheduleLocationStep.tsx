@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { DateField } from "@/src/shared_components/DateField";
 import type { EventFormData } from "@/src/services/models/event.model";
+import { isValidMapsUrl, mapsUrlHint } from "@/src/lib/mapsUrl";
 import { MapPreview } from "../MapPreview";
 import { TimeField } from "../TimeField";
-import { TIMEZONES, durationLabel } from "../wizardUtils";
+import { durationLabel, to24h } from "../wizardUtils";
 
 export function ScheduleLocationStep({
   formData,
@@ -18,6 +19,15 @@ export function ScheduleLocationStep({
   const [sameAsStart, setSameAsStart] = useState(false);
   const physical = formData.locationType !== "virtual";
   const virtual = formData.locationType !== "physical";
+
+  const startDate = String(formData.startDate || "").trim();
+  const endDate = String(formData.endDate || formData.startDate || "").trim();
+  const endBeforeStart = Boolean(startDate && endDate && endDate < startDate);
+  const startT = to24h(formData.startTime);
+  const endT = to24h(formData.endTime);
+  const sameDayEndBeforeStart = Boolean(
+    startDate && endDate && startDate === endDate && startT && endT && endT < startT,
+  );
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -36,7 +46,10 @@ export function ScheduleLocationStep({
           </div>
           <div>
             <label className="mb-2 block text-xs text-ink-soft">End Date</label>
-            <DateField value={formData.endDate} onChange={(e) => updateForm("endDate", e.target.value)} />
+            <DateField
+              value={formData.endDate}
+              onChange={(e) => updateForm("endDate", e.target.value)}
+            />
             <label className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
               <input
                 type="checkbox"
@@ -49,6 +62,11 @@ export function ScheduleLocationStep({
               />
               Same as start date
             </label>
+            {endBeforeStart ? (
+              <p className="mt-2 text-xs text-red-600">
+                End date must be on or after the start date.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -70,27 +88,17 @@ export function ScheduleLocationStep({
             onChange={(v) => updateForm("endTime", v)}
           />
         </div>
+        {sameDayEndBeforeStart ? (
+          <p className="text-xs text-red-600">End time must be after start time on the same day.</p>
+        ) : null}
         <p className="text-sm font-medium text-ink">
-          {durationLabel(formData.startDate, formData.endDate, formData.startTime, formData.endTime)}
+          {durationLabel(
+            formData.startDate,
+            formData.endDate,
+            formData.startTime,
+            formData.endTime,
+          )}
         </p>
-
-        <div>
-          <label htmlFor="wiz-tz" className="mb-2 block text-xs text-ink-soft">
-            Timezone
-          </label>
-          <select
-            id="wiz-tz"
-            value={formData.timezone}
-            onChange={(e) => updateForm("timezone", e.target.value)}
-            className="w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none"
-          >
-            {TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="space-y-6">
@@ -132,25 +140,30 @@ export function ScheduleLocationStep({
                 className="rounded-xl border border-line px-4 py-3 text-sm outline-none"
               />
               <input
-                value={formData.postalCode}
-                onChange={(e) => updateForm("postalCode", e.target.value)}
-                placeholder="Postal code"
+                value={formData.country || ""}
+                onChange={(e) => updateForm("country", e.target.value)}
+                placeholder="Country"
                 className="rounded-xl border border-line px-4 py-3 text-sm outline-none"
               />
             </div>
             <div>
               <label htmlFor="wiz-map" className="mb-2 block text-xs text-ink-soft">
-                Map link (Google Maps or OpenStreetMap)
+                Google Maps link
               </label>
               <input
                 id="wiz-map"
                 type="url"
-                value={formData.mapUrl}
-                onChange={(e) => updateForm("mapUrl", e.target.value)}
-                placeholder="https://maps.google.com/..."
-                className="mb-3 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none"
+                value={formData.mapsUrl || formData.mapUrl || ""}
+                onChange={(e) => updateForm("mapsUrl", e.target.value)}
+                placeholder="https://maps.app.goo.gl/… or maps.google.com/…"
+                className="mb-1 w-full rounded-xl border border-line px-4 py-3 text-sm outline-none"
               />
-              <MapPreview mapUrl={formData.mapUrl} />
+              <p className="mb-3 text-2xs text-ink-soft">{mapsUrlHint()}</p>
+              {(formData.mapsUrl || formData.mapUrl) &&
+              !isValidMapsUrl(formData.mapsUrl || formData.mapUrl) ? (
+                <p className="mb-2 text-xs text-red-600">Maps link must be an https:// URL.</p>
+              ) : null}
+              <MapPreview mapUrl={formData.mapsUrl || formData.mapUrl || ""} />
             </div>
           </>
         ) : null}

@@ -35,11 +35,15 @@ async function updateOrgImpl(formData: FormData): Promise<ActionResult> {
   const org = await TeamEngineService.getOrg(orgId);
   if (!org) return fail("That department or club does not exist.");
 
-  const patch: Record<string, unknown> = { name, updated_at: new Date().toISOString() };
+  // Clubs belong to departments — platform owner/staff cannot rename or reparent them.
   if (org.type === "club") {
-    if (!parentOrgId) return fail("A club needs a parent department.");
-    patch.parent_org_id = parentOrgId;
+    return fail(
+      "Clubs are managed by their department. Open the club’s read-only detail page instead.",
+    );
   }
+
+  const patch: Record<string, unknown> = { name, updated_at: new Date().toISOString() };
+  void parentOrgId;
 
   const { error } = await supabaseAdmin.from(TABLES.ORGANIZATIONS).update(patch).eq("id", orgId);
   if (error) return fail("Could not save those changes.");
@@ -61,11 +65,17 @@ async function updateOrgImpl(formData: FormData): Promise<ActionResult> {
 
   revalidateTenancy();
   revalidatePath(`/admin/orgs/${orgId}`);
+  revalidatePath(`/admin/departments/${orgId}`);
   return ok();
 }
 
 export async function deleteOrg(formData: FormData): Promise<void> {
-  finishForm(formData, "/admin/orgs", await deleteOrgImpl(formData), "Deleted, including related logins.");
+  finishForm(
+    formData,
+    "/admin/orgs",
+    await deleteOrgImpl(formData),
+    "Deleted, including related logins.",
+  );
 }
 
 async function deleteOrgImpl(formData: FormData): Promise<ActionResult> {
@@ -74,9 +84,13 @@ async function deleteOrgImpl(formData: FormData): Promise<ActionResult> {
   if (!admin.isOwner) return fail("Only a platform owner can delete a department or club.");
 
   const orgId = String(formData.get("orgId") ?? "").trim();
+  const confirmName = String(formData.get("confirmName") ?? "").trim();
   if (!orgId) return fail("Missing organization.");
   const org = await TeamEngineService.getOrg(orgId);
   if (!org) return fail("That department or club does not exist.");
+  if (!confirmName || confirmName !== org.name) {
+    return fail("Type the exact organization name to confirm deletion.");
+  }
 
   try {
     await purgeOrgWithAuth(orgId);
@@ -90,7 +104,12 @@ async function deleteOrgImpl(formData: FormData): Promise<ActionResult> {
 }
 
 export async function updateOrganizerAccount(formData: FormData): Promise<void> {
-  finishForm(formData, "/admin/organizers", await updateOrganizerAccountImpl(formData), "Organizer updated.");
+  finishForm(
+    formData,
+    "/admin/organizers",
+    await updateOrganizerAccountImpl(formData),
+    "Organizer updated.",
+  );
 }
 
 async function updateOrganizerAccountImpl(formData: FormData): Promise<ActionResult> {
@@ -131,7 +150,12 @@ async function updateOrganizerAccountImpl(formData: FormData): Promise<ActionRes
 }
 
 export async function deleteOrganizerAccount(formData: FormData): Promise<void> {
-  finishForm(formData, "/admin/organizers", await deleteOrganizerAccountImpl(formData), "Organizer and Auth login deleted.");
+  finishForm(
+    formData,
+    "/admin/organizers",
+    await deleteOrganizerAccountImpl(formData),
+    "Organizer and Auth login deleted.",
+  );
 }
 
 async function deleteOrganizerAccountImpl(formData: FormData): Promise<ActionResult> {
@@ -156,7 +180,12 @@ async function deleteOrganizerAccountImpl(formData: FormData): Promise<ActionRes
 }
 
 export async function updateVendorAccount(formData: FormData): Promise<void> {
-  finishForm(formData, "/admin/vendors", await updateVendorAccountImpl(formData), "Vendor updated.");
+  finishForm(
+    formData,
+    "/admin/vendors",
+    await updateVendorAccountImpl(formData),
+    "Vendor updated.",
+  );
 }
 
 async function updateVendorAccountImpl(formData: FormData): Promise<ActionResult> {
@@ -186,7 +215,12 @@ async function updateVendorAccountImpl(formData: FormData): Promise<ActionResult
 }
 
 export async function deleteVendorAccount(formData: FormData): Promise<void> {
-  finishForm(formData, "/admin/vendors", await deleteVendorAccountImpl(formData), "Vendor and Auth login deleted.");
+  finishForm(
+    formData,
+    "/admin/vendors",
+    await deleteVendorAccountImpl(formData),
+    "Vendor and Auth login deleted.",
+  );
 }
 
 async function deleteVendorAccountImpl(formData: FormData): Promise<ActionResult> {

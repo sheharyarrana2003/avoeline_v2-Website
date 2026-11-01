@@ -69,22 +69,20 @@ export function Modal({
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
       />
 
-      {/* Modal Dialog Card */}
+      {/* Modal Dialog Card — max 90vh with scrollable body + sticky footer */}
       <div
-        className={`relative z-10 w-full overflow-hidden rounded-xl border border-line bg-paper shadow-lg transition-all ${MAX_WIDTH_CLASSES[maxWidth]} ${className}`.trim()}
+        className={`relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-line bg-paper shadow-lg transition-all ${MAX_WIDTH_CLASSES[maxWidth]} ${className}`.trim()}
       >
         {/* Header */}
         {(title || description) && (
-          <div className="flex items-start justify-between border-b border-line px-6 py-5">
+          <div className="flex shrink-0 items-start justify-between border-b border-line px-6 py-5">
             <div className="space-y-1 pr-4">
               {title && (
                 <h3 className="font-display text-lg font-semibold leading-none text-ink">
                   {title}
                 </h3>
               )}
-              {description && (
-                <p className="text-sm text-ink-soft">{description}</p>
-              )}
+              {description && <p className="text-sm text-ink-soft">{description}</p>}
             </div>
             <button
               type="button"
@@ -98,11 +96,11 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className="px-6 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-line bg-muted/40 px-6 py-4">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2.5 border-t border-line bg-muted/40 px-6 py-4">
             {footer}
           </div>
         )}

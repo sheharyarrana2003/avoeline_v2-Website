@@ -1,0 +1,8 @@
+.next
+node_modules
+out
+build
+coverage
+src/lib/database.types.ts
+package-lock.json
+*.md

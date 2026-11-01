@@ -13,29 +13,35 @@ export type ConfirmTone = "danger" | "default";
  * not "Confirm") -- that wording is the channel that actually prevents mistakes.
  */
 const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: string }> = {
-    danger: {
-        icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-danger-soft text-danger ring-1 ring-danger-line",
-        confirm: "bg-danger text-ink-invert hover:brightness-90 focus-visible:outline-accent",
-    },
-    default: {
-        icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
-        badge: "bg-muted text-ink-soft ring-1 ring-line",
-        confirm: "bg-ink text-ink-invert hover:bg-ink-soft focus-visible:outline-accent",
-    },
+  danger: {
+    icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
+    badge: "bg-danger-soft text-danger ring-1 ring-danger-line",
+    confirm: "bg-danger text-ink-invert hover:brightness-90 focus-visible:outline-accent",
+  },
+  default: {
+    icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
+    badge: "bg-muted text-ink-soft ring-1 ring-line",
+    confirm: "bg-ink text-ink-invert hover:bg-ink-soft focus-visible:outline-accent",
+  },
 };
 
 export type ConfirmDialogProps = {
-    open: boolean;
-    title: string;
-    description: string;
-    confirmLabel?: string;
-    cancelLabel?: string;
-    tone?: ConfirmTone;
-    /** Disables the confirm button and shows a busy label while an action runs. */
-    busy?: boolean;
-    onConfirm: () => void;
-    onCancel: () => void;
+  open: boolean;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  tone?: ConfirmTone;
+  /** Disables the confirm button and shows a busy label while an action runs. */
+  busy?: boolean;
+  /**
+   * When set, the user must type this exact string before Confirm enables
+   * (e.g. event title for deletes with registrations).
+   */
+  confirmPhrase?: string;
+  confirmPhraseLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 };
 
 /**
@@ -47,89 +53,119 @@ export type ConfirmDialogProps = {
  * things to get subtly wrong.
  */
 export function ConfirmDialog({
-    open,
-    title,
-    description,
-    confirmLabel = "Confirm",
-    cancelLabel = "Cancel",
-    tone = "danger",
-    busy = false,
-    onConfirm,
-    onCancel,
+  open,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  tone = "danger",
+  busy = false,
+  confirmPhrase,
+  confirmPhraseLabel = "Type the event title to confirm",
+  onConfirm,
+  onCancel,
 }: ConfirmDialogProps) {
-    const ref = useRef<HTMLDialogElement>(null);
+  const ref = useRef<HTMLDialogElement>(null);
+  const [typed, setTyped] = useState("");
 
-    useEffect(() => {
-        const dialog = ref.current;
-        if (!dialog) return;
-        if (open && !dialog.open) dialog.showModal();
-        if (!open && dialog.open) dialog.close();
-    }, [open]);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
 
-    const styles = TONE[tone];
+  useEffect(() => {
+    if (open) setTyped("");
+  }, [open]);
 
-    return (
-        <dialog
-            ref={ref}
-            // Escape fires `cancel`; without this the dialog would close while
-            // the parent still believes it is open.
-            onCancel={(e) => {
-                e.preventDefault();
-                if (!busy) onCancel();
-            }}
-            // The dialog element fills the viewport, so a click landing on it
-            // rather than on the panel inside is a backdrop click.
-            onClick={(e) => {
-                if (e.target === ref.current && !busy) onCancel();
-            }}
-            className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-paper p-0 text-ink shadow-2xl backdrop:bg-black/50"
-        >
-            <div className="p-6">
-                <div className="flex gap-4">
-                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${styles.badge}`}>
-                        {styles.icon}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                        <h2 className="text-base font-bold tracking-tight">{title}</h2>
-                        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{description}</p>
-                    </div>
-                </div>
+  const styles = TONE[tone];
+  const phraseOk = !confirmPhrase || typed.trim() === confirmPhrase.trim();
 
-                <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        disabled={busy}
-                        className="rounded-full border border-line-loud px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                    >
-                        {cancelLabel}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        disabled={busy}
-                        aria-busy={busy}
-                        className={`rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 ${styles.confirm}`}
-                    >
-                        {busy ? "Working…" : confirmLabel}
-                    </button>
-                </div>
-            </div>
-        </dialog>
-    );
+  return (
+    <dialog
+      ref={ref}
+      // Escape fires `cancel`; without this the dialog would close while
+      // the parent still believes it is open.
+      onCancel={(e) => {
+        e.preventDefault();
+        if (!busy) onCancel();
+      }}
+      // The dialog element fills the viewport, so a click landing on it
+      // rather than on the panel inside is a backdrop click.
+      onClick={(e) => {
+        if (e.target === ref.current && !busy) onCancel();
+      }}
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-paper p-0 text-ink shadow-2xl backdrop:bg-black/50"
+    >
+      <div className="p-6">
+        <div className="flex gap-4">
+          <span
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${styles.badge}`}
+          >
+            {styles.icon}
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-bold tracking-tight">{title}</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{description}</p>
+          </div>
+        </div>
+
+        {confirmPhrase ? (
+          <div className="mt-4">
+            <label
+              className="block text-2xs font-medium uppercase text-ink-soft"
+              htmlFor="confirm-phrase"
+            >
+              {confirmPhraseLabel}
+            </label>
+            <input
+              id="confirm-phrase"
+              className="mt-1.5 w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:outline-2 focus:outline-offset-2 focus:outline-ink"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={confirmPhrase}
+              autoComplete="off"
+              disabled={busy}
+            />
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={busy}
+            className="rounded-full border border-line-loud px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={busy || !phraseOk}
+            aria-busy={busy}
+            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 ${styles.confirm}`}
+          >
+            {busy ? "Working…" : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
 }
 
 type GateProps = Omit<ConfirmDialogProps, "open" | "onConfirm" | "onCancel"> & {
-    children: ReactNode;
-    className?: string;
-    disabled?: boolean;
-    /**
-     * Forwarded to the button, for a form with more than one submit button --
-     * `name="decision" value="reject"` beside a plain Approve button. Passed to
-     * requestSubmit() as the submitter, so the pair reaches the action.
-     */
-    name?: string;
-    value?: string;
+  children: ReactNode;
+  className?: string;
+  disabled?: boolean;
+  /**
+   * Forwarded to the button, for a form with more than one submit button --
+   * `name="decision" value="reject"` beside a plain Approve button. Passed to
+   * requestSubmit() as the submitter, so the pair reaches the action.
+   */
+  name?: string;
+  value?: string;
 };
 
 /**
@@ -142,74 +178,76 @@ type GateProps = Omit<ConfirmDialogProps, "open" | "onConfirm" | "onCancel"> & {
  * platform via requestSubmit(), so the action, the hidden inputs and the
  * page all stay exactly as they were.
  */
-export function ConfirmSubmit({ children, className = "", disabled, name, value, ...dialog }: GateProps) {
-    const [open, setOpen] = useState(false);
-    const buttonRef = useRef<HTMLButtonElement>(null);
+export function ConfirmSubmit({
+  children,
+  className = "",
+  disabled,
+  name,
+  value,
+  ...dialog
+}: GateProps) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-    return (
-        <>
-            <button
-                ref={buttonRef}
-                type="submit"
-                name={name}
-                value={value}
-                disabled={disabled}
-                className={className}
-                onClick={(e) => {
-                    e.preventDefault();
-                    setOpen(true);
-                }}
-            >
-                {children}
-            </button>
-            <ConfirmDialog
-                {...dialog}
-                open={open}
-                onCancel={() => setOpen(false)}
-                onConfirm={() => {
-                    setOpen(false);
-                    // requestSubmit, not submit(): it runs validation and fires
-                    // the submit event, which is what React's form action needs.
-                    // The button is passed as the submitter, or its name/value
-                    // is dropped -- which silently turns a two-button form
-                    // (Approve / Reject) into whichever branch is the default.
-                    const button = buttonRef.current;
-                    button?.form?.requestSubmit(button);
-                }}
-            />
-        </>
-    );
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="submit"
+        name={name}
+        value={value}
+        disabled={disabled}
+        className={className}
+        onClick={(e) => {
+          e.preventDefault();
+          setOpen(true);
+        }}
+      >
+        {children}
+      </button>
+      <ConfirmDialog
+        {...dialog}
+        open={open}
+        onCancel={() => setOpen(false)}
+        onConfirm={() => {
+          setOpen(false);
+          // requestSubmit, not submit(): it runs validation and fires
+          // the submit event, which is what React's form action needs.
+          // The button is passed as the submitter, or its name/value
+          // is dropped -- which silently turns a two-button form
+          // (Approve / Reject) into whichever branch is the default.
+          const button = buttonRef.current;
+          button?.form?.requestSubmit(button);
+        }}
+      />
+    </>
+  );
 }
 
 /** The same gate for an ordinary onClick handler rather than a form submit. */
 export function ConfirmButton({
-    children,
-    className = "",
-    disabled,
-    onConfirm,
-    ...dialog
+  children,
+  className = "",
+  disabled,
+  onConfirm,
+  ...dialog
 }: GateProps & { onConfirm: () => void }) {
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    return (
-        <>
-            <button
-                type="button"
-                disabled={disabled}
-                className={className}
-                onClick={() => setOpen(true)}
-            >
-                {children}
-            </button>
-            <ConfirmDialog
-                {...dialog}
-                open={open}
-                onCancel={() => setOpen(false)}
-                onConfirm={() => {
-                    setOpen(false);
-                    onConfirm();
-                }}
-            />
-        </>
-    );
+  return (
+    <>
+      <button type="button" disabled={disabled} className={className} onClick={() => setOpen(true)}>
+        {children}
+      </button>
+      <ConfirmDialog
+        {...dialog}
+        open={open}
+        onCancel={() => setOpen(false)}
+        onConfirm={() => {
+          setOpen(false);
+          onConfirm();
+        }}
+      />
+    </>
+  );
 }

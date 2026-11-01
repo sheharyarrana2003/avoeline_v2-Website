@@ -9,6 +9,13 @@ import type {
   CategoryRequestDoc,
   ChecklistTemplateDoc,
 } from "./categoryEngine.types";
+import { sanitizeChecklistTemplateItems } from "./categoryEngine.types";
+
+const EVENT_CATEGORY_COLS = "id, category_type, name, active, created_at, description";
+const CATEGORY_FIELD_SET_COLS = "id, super_category_id, fields";
+const CATEGORY_REQUEST_COLS =
+  "id, requested_by, requested_by_name, name, category_type, status, admin_note, created_at, decided_at";
+const CHECKLIST_TEMPLATE_COLS = "id, super_category_id, event_format_id, items";
 
 type CatRow = {
   id: string;
@@ -35,10 +42,12 @@ export class CategoryEngineService {
     try {
       const { data, error } = await supabaseAdmin
         .from(TABLES.EVENT_CATEGORIES)
-        .select("*")
+        .select(EVENT_CATEGORY_COLS)
         .eq("category_type", "super_category");
       if (error) throw error;
-      return (data ?? []).map((r) => mapCat(r as CatRow)).sort((a, b) => a.name.localeCompare(b.name));
+      return (data ?? [])
+        .map((r) => mapCat(r as CatRow))
+        .sort((a, b) => a.name.localeCompare(b.name));
     } catch (err) {
       console.error("[CategoryEngineService.getAllSuperCategories] error:", err);
       return [];
@@ -52,7 +61,11 @@ export class CategoryEngineService {
 
   static getSuperCategoryById = cache(async (id: string): Promise<SuperCategoryDoc | null> => {
     if (!id) return null;
-    const { data, error } = await supabaseAdmin.from(TABLES.EVENT_CATEGORIES).select("*").eq("id", id).maybeSingle();
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.EVENT_CATEGORIES)
+      .select(EVENT_CATEGORY_COLS)
+      .eq("id", id)
+      .maybeSingle();
     if (error || !data) return null;
     return mapCat(data as CatRow);
   });
@@ -61,10 +74,12 @@ export class CategoryEngineService {
     try {
       const { data, error } = await supabaseAdmin
         .from(TABLES.EVENT_CATEGORIES)
-        .select("*")
+        .select(EVENT_CATEGORY_COLS)
         .eq("category_type", "event_format");
       if (error) throw error;
-      return (data ?? []).map((r) => mapCat(r as CatRow)).sort((a, b) => a.name.localeCompare(b.name));
+      return (data ?? [])
+        .map((r) => mapCat(r as CatRow))
+        .sort((a, b) => a.name.localeCompare(b.name));
     } catch (err) {
       console.error("[CategoryEngineService.getAllEventFormats] error:", err);
       return [];
@@ -78,29 +93,37 @@ export class CategoryEngineService {
 
   static getEventFormatById = cache(async (id: string): Promise<EventFormatDoc | null> => {
     if (!id) return null;
-    const { data } = await supabaseAdmin.from(TABLES.EVENT_CATEGORIES).select("*").eq("id", id).maybeSingle();
+    const { data } = await supabaseAdmin
+      .from(TABLES.EVENT_CATEGORIES)
+      .select(EVENT_CATEGORY_COLS)
+      .eq("id", id)
+      .maybeSingle();
     if (!data) return null;
     return mapCat(data as CatRow);
   });
 
-  static getFieldSetBySuperCategoryId = cache(async (superCategoryId: string): Promise<CategoryFieldSetDoc | null> => {
-    if (!superCategoryId) return null;
-    const { data } = await supabaseAdmin
-      .from(TABLES.CATEGORY_FIELD_SETS)
-      .select("*")
-      .eq("super_category_id", superCategoryId)
-      .limit(1)
-      .maybeSingle();
-    if (!data) return null;
-    return {
-      id: data.id,
-      superCategoryId: String(data.super_category_id || superCategoryId),
-      fields: Array.isArray(data.fields) ? data.fields : [],
-    };
-  });
+  static getFieldSetBySuperCategoryId = cache(
+    async (superCategoryId: string): Promise<CategoryFieldSetDoc | null> => {
+      if (!superCategoryId) return null;
+      const { data } = await supabaseAdmin
+        .from(TABLES.CATEGORY_FIELD_SETS)
+        .select(CATEGORY_FIELD_SET_COLS)
+        .eq("super_category_id", superCategoryId)
+        .limit(1)
+        .maybeSingle();
+      if (!data) return null;
+      return {
+        id: data.id,
+        superCategoryId: String(data.super_category_id || superCategoryId),
+        fields: Array.isArray(data.fields) ? data.fields : [],
+      };
+    },
+  );
 
   static getAllFieldSets = cache(async (): Promise<CategoryFieldSetDoc[]> => {
-    const { data } = await supabaseAdmin.from(TABLES.CATEGORY_FIELD_SETS).select("*");
+    const { data } = await supabaseAdmin
+      .from(TABLES.CATEGORY_FIELD_SETS)
+      .select(CATEGORY_FIELD_SET_COLS);
     return (data ?? []).map((doc) => ({
       id: doc.id,
       superCategoryId: String(doc.super_category_id || doc.id),
@@ -108,59 +131,68 @@ export class CategoryEngineService {
     }));
   });
 
-  static getCategoryRequests = cache(async (status?: "pending" | "approved" | "rejected"): Promise<CategoryRequestDoc[]> => {
-    let q = supabaseAdmin.from(TABLES.CATEGORY_REQUESTS).select("*");
-    if (status) q = q.eq("status", status);
-    const { data } = await q;
-    const items: CategoryRequestDoc[] = (data ?? []).map((row) => ({
-      id: row.id,
-      requestedBy: String(row.requested_by || ""),
-      requestedByName: row.requested_by_name ? String(row.requested_by_name) : undefined,
-      name: String(row.name || ""),
-      type: row.category_type === "event_format" ? "eventFormat" : "superCategory",
-      status: (row.status || "pending") as CategoryRequestDoc["status"],
-      adminNote: row.admin_note ? String(row.admin_note) : undefined,
-      createdAt: toIsoString(row.created_at),
-      reviewedAt: toIsoString(row.decided_at),
-    }));
-    return items.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
-  });
+  static getCategoryRequests = cache(
+    async (status?: "pending" | "approved" | "rejected"): Promise<CategoryRequestDoc[]> => {
+      let q = supabaseAdmin.from(TABLES.CATEGORY_REQUESTS).select(CATEGORY_REQUEST_COLS);
+      if (status) q = q.eq("status", status);
+      const { data } = await q;
+      const items: CategoryRequestDoc[] = (data ?? []).map((row) => ({
+        id: row.id,
+        requestedBy: String(row.requested_by || ""),
+        requestedByName: row.requested_by_name ? String(row.requested_by_name) : undefined,
+        name: String(row.name || ""),
+        type: row.category_type === "event_format" ? "eventFormat" : "superCategory",
+        status: (row.status || "pending") as CategoryRequestDoc["status"],
+        adminNote: row.admin_note ? String(row.admin_note) : undefined,
+        createdAt: toIsoString(row.created_at),
+        reviewedAt: toIsoString(row.decided_at),
+      }));
+      return items.sort((a, b) =>
+        String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")),
+      );
+    },
+  );
 
   static getAllChecklistTemplates = cache(async (): Promise<ChecklistTemplateDoc[]> => {
-    const { data } = await supabaseAdmin.from(TABLES.CHECKLIST_TEMPLATES).select("*");
+    const { data } = await supabaseAdmin
+      .from(TABLES.CHECKLIST_TEMPLATES)
+      .select(CHECKLIST_TEMPLATE_COLS);
     return (data ?? []).map((doc) => ({
       id: doc.id,
       superCategoryId: String(doc.super_category_id || ""),
       eventFormatId: String(doc.event_format_id || ""),
-      items: Array.isArray(doc.items)
-        ? doc.items.map((it: { title?: string; dueOffsetDays?: number }) => ({
-            title: String(it.title || ""),
-            dueOffsetDays: Number(it.dueOffsetDays || 0),
-          }))
-        : [],
+      items: sanitizeChecklistTemplateItems(
+        Array.isArray(doc.items)
+          ? (doc.items as Array<{ title?: string; dueOffsetDays?: number }>)
+          : [],
+      ),
     }));
   });
 
-  static getChecklistTemplate = cache(async (superCategoryId: string, eventFormatId: string): Promise<ChecklistTemplateDoc | null> => {
-    if (!superCategoryId || !eventFormatId) return null;
-    const { data } = await supabaseAdmin
-      .from(TABLES.CHECKLIST_TEMPLATES)
-      .select("*")
-      .eq("super_category_id", superCategoryId)
-      .eq("event_format_id", eventFormatId)
-      .limit(1)
-      .maybeSingle();
-    if (!data) return null;
-    return {
-      id: data.id,
-      superCategoryId: String(data.super_category_id || ""),
-      eventFormatId: String(data.event_format_id || ""),
-      items: Array.isArray(data.items)
-        ? data.items.map((it: { title?: string; dueOffsetDays?: number }) => ({
-            title: String(it.title || ""),
-            dueOffsetDays: Number(it.dueOffsetDays || 0),
-          }))
-        : [],
-    };
-  });
+  static getChecklistTemplate = cache(
+    async (
+      superCategoryId: string,
+      eventFormatId: string,
+    ): Promise<ChecklistTemplateDoc | null> => {
+      if (!superCategoryId || !eventFormatId) return null;
+      const { data } = await supabaseAdmin
+        .from(TABLES.CHECKLIST_TEMPLATES)
+        .select(CHECKLIST_TEMPLATE_COLS)
+        .eq("super_category_id", superCategoryId)
+        .eq("event_format_id", eventFormatId)
+        .limit(1)
+        .maybeSingle();
+      if (!data) return null;
+      return {
+        id: data.id,
+        superCategoryId: String(data.super_category_id || ""),
+        eventFormatId: String(data.event_format_id || ""),
+        items: sanitizeChecklistTemplateItems(
+          Array.isArray(data.items)
+            ? (data.items as Array<{ title?: string; dueOffsetDays?: number }>)
+            : [],
+        ),
+      };
+    },
+  );
 }

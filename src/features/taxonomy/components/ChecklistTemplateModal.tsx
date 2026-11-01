@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Trash2, Save, X, CheckSquare, Calendar } from "lucide-react";
+import { Plus, Trash2, Save, X, CheckSquare } from "lucide-react";
 import type {
   ChecklistTemplateItem,
   EventFormatDoc,
@@ -30,19 +30,14 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
   onClose,
   onSaved,
 }) => {
-  const [selectedFormatId, setSelectedFormatId] = useState<string>(
-    eventFormats[0]?.id || ""
-  );
+  const [selectedFormatId, setSelectedFormatId] = useState<string>(eventFormats[0]?.id || "");
 
   // Find template for selected pair
   const currentTemplate = existingTemplates.find(
-    (t) =>
-      t.superCategoryId === superCategory.id && t.eventFormatId === selectedFormatId
+    (t) => t.superCategoryId === superCategory.id && t.eventFormatId === selectedFormatId,
   );
 
-  const [items, setItems] = useState<ChecklistTemplateItem[]>(
-    currentTemplate?.items || []
-  );
+  const [items, setItems] = useState<ChecklistTemplateItem[]>(currentTemplate?.items || []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +45,7 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
   const handleFormatChange = (fmtId: string) => {
     setSelectedFormatId(fmtId);
     const match = existingTemplates.find(
-      (t) => t.superCategoryId === superCategory.id && t.eventFormatId === fmtId
+      (t) => t.superCategoryId === superCategory.id && t.eventFormatId === fmtId,
     );
     setItems(match?.items || []);
   };
@@ -77,21 +72,25 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
       setError("Please select an Event Format.");
       return;
     }
+    if (eventFormats.length === 0) {
+      setError("Add an event format before saving a checklist template.");
+      return;
+    }
 
     for (const it of items) {
       if (!it.title.trim()) {
         setError("All checklist tasks must have a title.");
         return;
       }
+      if (!Number.isFinite(Number(it.dueOffsetDays))) {
+        setError("Due offset must be a whole number of days (e.g. -7 or 0).");
+        return;
+      }
     }
 
     setSaving(true);
     try {
-      const res = await saveChecklistTemplateAction(
-        superCategory.id,
-        selectedFormatId,
-        items
-      );
+      const res = await saveChecklistTemplateAction(superCategory.id, selectedFormatId, items);
       if (res.success) {
         onSaved();
       } else {
@@ -104,8 +103,7 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
     }
   };
 
-  const selectedFormatName =
-    eventFormats.find((f) => f.id === selectedFormatId)?.name || "Format";
+  const selectedFormatName = eventFormats.find((f) => f.id === selectedFormatId)?.name || "Format";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
@@ -121,7 +119,8 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
                 Checklist Template: {superCategory.name}
               </h3>
               <p className="text-xs text-ink-soft">
-                Auto-populate tasks for events created with this category + format combination.
+                Default tasks copied into the event checklist when organizers use this category +
+                format.
               </p>
             </div>
           </div>
@@ -141,6 +140,12 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
             </div>
           )}
 
+          <p className="rounded-lg border border-line bg-muted/50 px-3 py-2 text-xs text-ink-soft">
+            Checklist items are starter tasks for the organizer&apos;s event workspace (title + due
+            offset from event start). They are copied once at create time — editing the template
+            later does not rewrite existing events.
+          </p>
+
           <div>
             <label className={labelClass}>Pair with Event Format</label>
             <select
@@ -155,7 +160,8 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
               ))}
             </select>
             <p className="text-[11px] text-ink-soft mt-1">
-              Events created with &quot;{superCategory.name}&quot; and &quot;{selectedFormatName}&quot; will receive these tasks.
+              Events created with &quot;{superCategory.name}&quot; and &quot;{selectedFormatName}
+              &quot; will receive these tasks.
             </p>
           </div>
 
@@ -164,11 +170,7 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
               <span className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
                 Checklist Items ({items.length})
               </span>
-              <button
-                type="button"
-                onClick={addItem}
-                className={buttonClass("secondary", "sm")}
-              >
+              <button type="button" onClick={addItem} className={buttonClass("secondary", "sm")}>
                 <Plus className="w-3.5 h-3.5 mr-1" />
                 Add Item
               </button>
@@ -233,6 +235,38 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
               </div>
             )}
           </div>
+
+          <aside className="rounded-xl border border-dashed border-line bg-muted/30 p-4">
+            <p className="text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+              Organizer preview
+            </p>
+            <p className="mt-1 text-xs text-ink-soft">
+              How the seeded checklist looks after Create Event ({selectedFormatName}).
+            </p>
+            <ul className="mt-3 space-y-2">
+              {items.length === 0 ? (
+                <li className="text-sm text-ink-faint">No tasks will be copied.</li>
+              ) : (
+                items.map((it, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start gap-2 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink"
+                  >
+                    <CheckSquare className="mt-0.5 h-4 w-4 shrink-0 text-ink-soft" aria-hidden />
+                    <span>
+                      {it.title.trim() || "Untitled task"}
+                      <span className="mt-0.5 block text-2xs text-ink-faint">
+                        Due{" "}
+                        {it.dueOffsetDays === 0
+                          ? "on event day"
+                          : `${it.dueOffsetDays} day(s) from start`}
+                      </span>
+                    </span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </aside>
         </div>
 
         {/* Footer */}

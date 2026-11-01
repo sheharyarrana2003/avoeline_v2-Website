@@ -32,25 +32,34 @@ export function ReviewStep({
         <h3 className="text-lg font-bold text-ink">Review details</h3>
         <ReviewCard title="Basic information" onEdit={() => goToStep(1)}>
           <p>{formData.eventTitle || "Untitled"}</p>
-          <p>Category: {formData.category || "—"} · Format: {formData.eventType || "—"}</p>
+          <p>
+            Category: {formData.category || "—"} · Format: {formData.eventType || "—"}
+          </p>
         </ReviewCard>
         <ReviewCard title="Schedule & location" onEdit={() => goToStep(2)}>
           <p>
-            {formData.startDate ? `${previewDate(formData.startDate)} – ${previewDate(formData.endDate || formData.startDate)}` : "Dates not set"}
+            {formData.startDate
+              ? `${previewDate(formData.startDate)} – ${previewDate(formData.endDate || formData.startDate)}`
+              : "Dates not set"}
           </p>
           <p>
-            {previewTime(formData.startTime)} – {previewTime(formData.endTime)} · {formData.timezone.split("(")[0]}
+            {previewTime(formData.startTime)} – {previewTime(formData.endTime)}
           </p>
           <p>
             {formData.locationType === "virtual"
               ? formData.meetingLink || "Meeting link not set"
               : `${formData.venueName || "Venue not set"} ${formData.city || ""}`}
           </p>
-          {formData.locationType !== "virtual" && formData.mapUrl ? <MapPreview mapUrl={formData.mapUrl} /> : null}
+          {formData.locationType !== "virtual" && (formData.mapsUrl || formData.mapUrl) ? (
+            <MapPreview mapUrl={formData.mapsUrl || formData.mapUrl || ""} />
+          ) : null}
         </ReviewCard>
         {isHackathonForm(formData) ? (
           <ReviewCard title="Competitions" onEdit={() => goToStep(3)}>
-            <p>{formData.wizardTracks.length || 1} track{(formData.wizardTracks.length || 1) === 1 ? "" : "s"}</p>
+            <p>
+              {formData.wizardTracks.length || 1} track
+              {(formData.wizardTracks.length || 1) === 1 ? "" : "s"}
+            </p>
             {(formData.wizardTracks.length ? formData.wizardTracks : []).map((t) => (
               <p key={t.id}>
                 {t.name} · PKR {t.fee}
@@ -63,8 +72,11 @@ export function ReviewStep({
             <p>No registration</p>
           ) : (
             <p>
-              {formData.ticketType === "free" ? "Free" : `${formData.ticketTiers.length} paid tier(s)`} · {formData.totalSeats} seats ·{" "}
-              {formData.customFields.length} extra question{formData.customFields.length === 1 ? "" : "s"}
+              {formData.ticketType === "free"
+                ? "Free"
+                : `${formData.ticketTiers.length} paid tier(s)`}{" "}
+              · {formData.totalSeats} seats · {formData.customFields.length} extra question
+              {formData.customFields.length === 1 ? "" : "s"}
             </p>
           )}
         </ReviewCard>
@@ -74,8 +86,13 @@ export function ReviewStep({
         <h3 className="mb-4 text-lg font-bold text-ink">Publishing</h3>
         <div className="space-y-6 rounded-2xl border border-line bg-paper p-6">
           <AccessTypeSelector
-            accessType={formData.accessType || ((formData.visibility as string) === "tiered" ? "vip_tiered" : formData.visibility) || "public"}
+            accessType={
+              formData.accessType ||
+              ((formData.visibility as string) === "tiered" ? "vip_tiered" : formData.visibility) ||
+              "public"
+            }
             whitelistEmails={formData.whitelistEmails || []}
+            inviteEmails={formData.inviteEmails || []}
             accessCode={formData.accessCode || ""}
             eventTiers={formData.eventTiers}
             gatedTiers={formData.gatedTiers}
@@ -103,17 +120,61 @@ export function ReviewStep({
               onClick={() => updateForm("publishImmediately", !formData.publishImmediately)}
               className={`relative h-6 w-11 rounded-full transition-colors ${formData.publishImmediately ? "bg-ink" : "bg-muted-strong"}`}
             >
-              <span className={`absolute top-1 h-4 w-4 rounded-full bg-paper shadow ${formData.publishImmediately ? "right-1" : "left-1"}`} />
+              <span
+                className={`absolute top-1 h-4 w-4 rounded-full bg-paper shadow ${formData.publishImmediately ? "right-1" : "left-1"}`}
+              />
             </button>
           </div>
           <div className="space-y-3 border-t border-line pt-4">
+            <p className="text-sm font-medium text-ink">Show on public page</p>
+            <p className="text-xs text-ink-soft">
+              Logos stay off until you turn these on. You can change them later on the Sponsors tab.
+            </p>
+            {(
+              [
+                ["showSponsors", "Sponsors", !!formData.showSponsors],
+                ["showCollaborators", "Collaborators", !!formData.showCollaborators],
+                ["showPartners", "Partners", !!formData.showPartners],
+              ] as const
+            ).map(([key, label, on]) => (
+              <div key={key} className="flex items-center justify-between gap-3">
+                <span className="text-sm text-ink">{label}</span>
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => updateForm(key, !on)}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${on ? "bg-ink" : "bg-muted-strong"}`}
+                >
+                  <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-paper shadow ${on ? "right-1" : "left-1"}`}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-3 border-t border-line pt-4">
             <label className="flex cursor-pointer items-start gap-3">
-              <input type="checkbox" checked={formData.confirmRights} onChange={(e) => updateForm("confirmRights", e.target.checked)} className="mt-0.5" />
-              <p className="text-xs text-ink-soft">I confirm that I have the rights to use all uploaded images and content for this event.</p>
+              <input
+                type="checkbox"
+                checked={formData.confirmRights}
+                onChange={(e) => updateForm("confirmRights", e.target.checked)}
+                className="mt-0.5"
+              />
+              <p className="text-xs text-ink-soft">
+                I confirm that I have the rights to use all uploaded images and content for this
+                event.
+              </p>
             </label>
             <label className="flex cursor-pointer items-start gap-3">
-              <input type="checkbox" checked={formData.agreeToTerms} onChange={(e) => updateForm("agreeToTerms", e.target.checked)} className="mt-0.5" />
-              <p className="text-xs text-ink-soft">I agree to the Terms of Service and Event Organizer Agreement.</p>
+              <input
+                type="checkbox"
+                checked={formData.agreeToTerms}
+                onChange={(e) => updateForm("agreeToTerms", e.target.checked)}
+                className="mt-0.5"
+              />
+              <p className="text-xs text-ink-soft">
+                I agree to the Terms of Service and Event Organizer Agreement.
+              </p>
             </label>
           </div>
         </div>
@@ -122,7 +183,15 @@ export function ReviewStep({
   );
 }
 
-function ReviewCard({ title, onEdit, children }: { title: string; onEdit: () => void; children: React.ReactNode }) {
+function ReviewCard({
+  title,
+  onEdit,
+  children,
+}: {
+  title: string;
+  onEdit: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
       <div className="mb-2 flex items-start justify-between">

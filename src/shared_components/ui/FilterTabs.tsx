@@ -20,52 +20,58 @@ import Link from "next/link";
  */
 
 export interface FilterTab {
-    label: string;
-    value: string;
-    href: string;
-    count?: number;
+  label: string;
+  value: string;
+  href: string;
+  count?: number;
+  /** When true and count > 0, badge uses amber (e.g. Flagged open reports). */
+  warnWhenPositive?: boolean;
 }
 
 export function FilterTabs({
-    tabs,
-    activeValue,
-    label,
+  tabs,
+  activeValue,
+  label,
 }: {
-    tabs: FilterTab[];
-    activeValue: string;
-    /** Names the strip, e.g. "Event filters". Two nav landmarks on a page need distinct names. */
-    label: string;
+  tabs: FilterTab[];
+  activeValue: string;
+  /** Names the strip, e.g. "Event filters". Two nav landmarks on a page need distinct names. */
+  label: string;
 }) {
-    return (
-        // Scrolls rather than wraps: a wrapping strip changes height when the window
-        // narrows and everything below it jumps.
-        <nav aria-label={label} className="mb-8 flex gap-1 overflow-x-auto border-b border-line">
-            {tabs.map((tab) => {
-                const isActive = tab.value === activeValue;
-                return (
-                    <Link
-                        key={tab.value}
-                        href={tab.href}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`flex shrink-0 items-center gap-2 border-b-2 px-3 pb-3 pt-1 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
-                            isActive
-                                ? "border-accent font-semibold text-ink"
-                                : "border-transparent font-medium text-ink-soft hover:border-line-loud hover:text-ink"
-                        }`}
-                    >
-                        {tab.label}
-                        {typeof tab.count === "number" ? (
-                            <span
-                                className={`rounded-full px-1.5 py-0.5 text-2xs tabular-nums ${
-                                    isActive ? "bg-ink text-ink-invert" : "bg-muted text-ink-soft"
-                                }`}
-                            >
-                                {tab.count}
-                            </span>
-                        ) : null}
-                    </Link>
-                );
-            })}
-        </nav>
-    );
+  return (
+    // Scrolls rather than wraps: a wrapping strip changes height when the window
+    // narrows and everything below it jumps.
+    <nav aria-label={label} className="mb-8 flex gap-1 overflow-x-auto border-b border-line">
+      {tabs.map((tab) => {
+        const isActive = tab.value === activeValue;
+        return (
+          <Link
+            key={tab.value}
+            href={tab.href}
+            aria-current={isActive ? "page" : undefined}
+            className={`flex shrink-0 items-center gap-2 border-b-2 px-3 pb-3 pt-1 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
+              isActive
+                ? "border-accent font-semibold text-ink"
+                : "border-transparent font-medium text-ink-soft hover:border-line-loud hover:text-ink"
+            }`}
+          >
+            {tab.label}
+            {typeof tab.count === "number" ? (
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-2xs tabular-nums ${
+                  tab.warnWhenPositive && tab.count > 0
+                    ? "bg-amber-100 text-amber-900 ring-1 ring-amber-300"
+                    : isActive
+                      ? "bg-ink text-ink-invert"
+                      : "bg-muted text-ink-soft"
+                }`}
+              >
+                {tab.count}
+              </span>
+            ) : null}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 }
