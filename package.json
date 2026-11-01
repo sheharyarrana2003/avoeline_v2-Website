@@ -29,15 +29,6 @@
     "seed:feedback": "node scripts/seed-feedback-reviews.mjs",
     "reset:wipe-data": "node scripts/reset-wipe-data.mjs"
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,mjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
-  },
   "dependencies": {
     "@react-email/components": "^1.0.12",
     "@supabase/ssr": "^0.12.7",
