@@ -1,0 +1,1705 @@
+{
+  "result": {
+    "lints": [
+      {
+        "name": "unindexed_foreign_keys",
+        "title": "Unindexed foreign keys",
+        "level": "INFO",
+        "facing": "EXTERNAL",
+        "categories": ["PERFORMANCE"],
+        "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+        "count": 90,
+        "findings": [
+          {
+            "detail": "Table \\`public.applicants\\` has a foreign key \\`applicants_position_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "applicants",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "applicants_position_id_fkey",
+              "fkey_columns": [11]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.applicants\\` has a foreign key \\`applicants_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "applicants",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "applicants_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.badge_meetup_attendees\\` has a foreign key \\`badge_meetup_attendees_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "badge_meetup_attendees",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "badge_meetup_attendees_user_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.badge_meetups\\` has a foreign key \\`badge_meetups_linked_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "badge_meetups",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "badge_meetups_linked_event_id_fkey",
+              "fkey_columns": [7]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.bookings\\` has a foreign key \\`bookings_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "bookings",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "bookings_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.bookings\\` has a foreign key \\`bookings_organizer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "bookings",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "bookings_organizer_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.bookings\\` has a foreign key \\`bookings_vendor_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "bookings",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "bookings_vendor_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.budget_entries\\` has a foreign key \\`budget_entries_org_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "budget_entries",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "budget_entries_org_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.category_field_sets\\` has a foreign key \\`category_field_sets_super_category_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "category_field_sets",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "category_field_sets_super_category_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.category_requests\\` has a foreign key \\`category_requests_requested_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "category_requests",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "category_requests_requested_by_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.certificate_templates\\` has a foreign key \\`certificate_templates_organizer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "certificate_templates",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "certificate_templates_organizer_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.checklist_templates\\` has a foreign key \\`checklist_templates_event_format_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "checklist_templates",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "checklist_templates_event_format_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.checklist_templates\\` has a foreign key \\`checklist_templates_super_category_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "checklist_templates",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "checklist_templates_super_category_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.custom_pricing_agreements\\` has a foreign key \\`custom_pricing_agreements_set_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "custom_pricing_agreements",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "custom_pricing_agreements_set_by_fkey",
+              "fkey_columns": [6]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_access_tiers\\` has a foreign key \\`event_access_tiers_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_access_tiers",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_access_tiers_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_agenda_items\\` has a foreign key \\`event_agenda_items_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_agenda_items",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_agenda_items_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_agenda_items\\` has a foreign key \\`event_agenda_items_linked_child_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_agenda_items",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_agenda_items_linked_child_event_id_fkey",
+              "fkey_columns": [17]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_agenda_speakers\\` has a foreign key \\`event_agenda_speakers_speaker_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_agenda_speakers",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_agenda_speakers_speaker_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_checklist_items\\` has a foreign key \\`event_checklist_items_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_checklist_items",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_checklist_items_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_external_vendors\\` has a foreign key \\`event_external_vendors_created_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_external_vendors",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_external_vendors_created_by_fkey",
+              "fkey_columns": [9]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_invites\\` has a foreign key \\`event_invites_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_invites",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_invites_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_invites\\` has a foreign key \\`event_invites_registration_fk\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_invites",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_invites_registration_fk",
+              "fkey_columns": [12]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_reports\\` has a foreign key \\`event_reports_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_reports",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_reports_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_speakers\\` has a foreign key \\`event_speakers_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_speakers",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_speakers_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_sponsors_partners\\` has a foreign key \\`event_sponsors_partners_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_sponsors_partners",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_sponsors_partners_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_sponsors_partners\\` has a foreign key \\`event_sponsors_partners_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_sponsors_partners",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_sponsors_partners_track_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_sponsors_partners\\` has a foreign key \\`event_sponsors_partners_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "event_sponsors_partners",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "event_sponsors_partners_user_id_fkey",
+              "fkey_columns": [15]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.feature_overrides\\` has a foreign key \\`feature_overrides_granted_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "feature_overrides",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "feature_overrides_granted_by_fkey",
+              "fkey_columns": [5]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_announcements\\` has a foreign key \\`hackathon_announcements_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_announcements",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_announcements_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_announcements\\` has a foreign key \\`hackathon_announcements_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_announcements",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_announcements_track_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_anomalies\\` has a foreign key \\`hackathon_anomalies_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_anomalies",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_anomalies_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_anomalies\\` has a foreign key \\`hackathon_anomalies_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_anomalies",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_anomalies_hackathon_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_attendance\\` has a foreign key \\`hackathon_attendance_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_attendance",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_attendance_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_attendance\\` has a foreign key \\`hackathon_attendance_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_attendance",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_attendance_hackathon_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_attendance\\` has a foreign key \\`hackathon_attendance_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_attendance",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_attendance_user_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_ctf_challenges\\` has a foreign key \\`hackathon_ctf_challenges_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_ctf_challenges",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_ctf_challenges_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_ctf_challenges\\` has a foreign key \\`hackathon_ctf_challenges_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_ctf_challenges",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_ctf_challenges_track_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_flag_submissions\\` has a foreign key \\`hackathon_flag_submissions_challenge_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_flag_submissions",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_flag_submissions_challenge_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_flag_submissions\\` has a foreign key \\`hackathon_flag_submissions_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_flag_submissions",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_flag_submissions_hackathon_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_flag_submissions\\` has a foreign key \\`hackathon_flag_submissions_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_flag_submissions",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_flag_submissions_user_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_judges\\` has a foreign key \\`hackathon_judges_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_judges",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_judges_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_mentor_slots\\` has a foreign key \\`hackathon_mentor_slots_booked_by_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_mentor_slots",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_mentor_slots_booked_by_team_id_fkey",
+              "fkey_columns": [6]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_mentor_slots\\` has a foreign key \\`hackathon_mentor_slots_mentor_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_mentor_slots",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_mentor_slots_mentor_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_mentors\\` has a foreign key \\`hackathon_mentors_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_mentors",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_mentors_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_phases\\` has a foreign key \\`hackathon_phases_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_phases",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_phases_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_sandboxes\\` has a foreign key \\`hackathon_sandboxes_challenge_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_sandboxes",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_sandboxes_challenge_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_sandboxes\\` has a foreign key \\`hackathon_sandboxes_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_sandboxes",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_sandboxes_hackathon_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_schedules\\` has a foreign key \\`hackathon_schedules_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_schedules",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_schedules_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_scores\\` has a foreign key \\`hackathon_scores_judge_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_scores",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_scores_judge_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_submissions\\` has a foreign key \\`hackathon_submissions_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_submissions",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_submissions_hackathon_team_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_submissions\\` has a foreign key \\`hackathon_submissions_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_submissions",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_submissions_track_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_task_assignments\\` has a foreign key \\`hackathon_task_assignments_task_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_task_assignments",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_task_assignments_task_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_members\\` has a foreign key \\`hackathon_team_members_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_members",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_members_hackathon_team_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_members\\` has a foreign key \\`hackathon_team_members_registration_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_members",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_members_registration_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_members\\` has a foreign key \\`hackathon_team_members_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_members",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_members_user_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_phases\\` has a foreign key \\`hackathon_team_phases_hackathon_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_phases",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_phases_hackathon_team_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_phases\\` has a foreign key \\`hackathon_team_phases_phase_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_phases",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_phases_phase_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_team_task_starts\\` has a foreign key \\`hackathon_team_task_starts_task_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_team_task_starts",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_team_task_starts_task_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_tracks\\` has a foreign key \\`hackathon_tracks_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_tracks",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_tracks_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_tracks\\` has a foreign key \\`hackathon_tracks_organizer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "hackathon_tracks",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "hackathon_tracks_organizer_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.moderation_logs\\` has a foreign key \\`moderation_logs_admin_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "moderation_logs",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "moderation_logs_admin_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.org_announcements\\` has a foreign key \\`org_announcements_created_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "org_announcements",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "org_announcements_created_by_fkey",
+              "fkey_columns": [6]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.org_module_access\\` has a foreign key \\`org_module_access_granted_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "org_module_access",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "org_module_access_granted_by_fkey",
+              "fkey_columns": [5]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.org_requests\\` has a foreign key \\`org_requests_requested_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "org_requests",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "org_requests_requested_by_fkey",
+              "fkey_columns": [10]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.org_requests\\` has a foreign key \\`org_requests_reviewed_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "org_requests",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "org_requests_reviewed_by_fkey",
+              "fkey_columns": [8]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.organizations\\` has a foreign key \\`organizations_owner_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "organizations",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "organizations_owner_user_id_fkey",
+              "fkey_columns": [5]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.organizer_profiles\\` has a foreign key \\`organizer_profiles_org_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "organizer_profiles",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "organizer_profiles_org_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.payments\\` has a foreign key \\`payments_payer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "payments",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "payments_payer_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.payments\\` has a foreign key \\`payments_receiver_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "payments",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "payments_receiver_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.pending_invites\\` has a foreign key \\`pending_invites_invited_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "pending_invites",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "pending_invites_invited_by_fkey",
+              "fkey_columns": [5]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.pending_invites\\` has a foreign key \\`pending_invites_parent_org_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "pending_invites",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "pending_invites_parent_org_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.plan_changes\\` has a foreign key \\`plan_changes_changed_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "plan_changes",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "plan_changes_changed_by_fkey",
+              "fkey_columns": [5]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.promo_codes\\` has a foreign key \\`promo_codes_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "promo_codes",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "promo_codes_track_id_fkey",
+              "fkey_columns": [11]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.recruitment_forms\\` has a foreign key \\`recruitment_forms_position_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "recruitment_forms",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "recruitment_forms_position_id_fkey",
+              "fkey_columns": [8]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.recruitment_forms\\` has a foreign key \\`recruitment_forms_team_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "recruitment_forms",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "recruitment_forms_team_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.registration_groups\\` has a foreign key \\`registration_groups_lead_registration_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "registration_groups",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "registration_groups_lead_registration_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.reviews\\` has a foreign key \\`reviews_reviewer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "reviews",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "reviews_reviewer_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.solo_participants\\` has a foreign key \\`solo_participants_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "solo_participants",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "solo_participants_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.solo_participants\\` has a foreign key \\`solo_participants_track_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "solo_participants",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "solo_participants_track_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.solo_participants\\` has a foreign key \\`solo_participants_user_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "solo_participants",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "solo_participants_user_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.team_activity_pings\\` has a foreign key \\`team_activity_pings_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "team_activity_pings",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "team_activity_pings_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.team_integrity_events\\` has a foreign key \\`team_integrity_events_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "team_integrity_events",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "team_integrity_events_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.teams\\` has a foreign key \\`teams_created_by_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "teams",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "teams_created_by_fkey",
+              "fkey_columns": [7]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.teams\\` has a foreign key \\`teams_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "teams",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "teams_event_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.teams\\` has a foreign key \\`teams_org_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "teams",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "teams_org_id_fkey",
+              "fkey_columns": [4]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.teams\\` has a foreign key \\`teams_organizer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "teams",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "teams_organizer_id_fkey",
+              "fkey_columns": [11]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.ticket_tiers\\` has a foreign key \\`ticket_tiers_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "ticket_tiers",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "ticket_tiers_event_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.user_badges\\` has a foreign key \\`user_badges_badge_tier_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "user_badges",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "user_badges_badge_tier_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.vendor_profiles\\` has a foreign key \\`vendor_profiles_org_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "vendor_profiles",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "vendor_profiles_org_id_fkey",
+              "fkey_columns": [3]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.vendor_services\\` has a foreign key \\`vendor_services_vendor_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+            "metadata": {
+              "name": "vendor_services",
+              "type": "table",
+              "schema": "public",
+              "fkey_name": "vendor_services_vendor_id_fkey",
+              "fkey_columns": [2]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          }
+        ]
+      },
+      {
+        "name": "auth_rls_initplan",
+        "title": "Auth RLS Initialization Plan",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": ["PERFORMANCE"],
+        "description": "Detects if calls to \\`current_setting()\\` and \\`auth.<function>()\\` in RLS policies are being unnecessarily re-evaluated for each row",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0003_auth_rls_initplan",
+        "count": 14,
+        "findings": [
+          {
+            "detail": "Table \\`public.notifications\\` has a row level security policy \\`Allow select own notifications\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has a row level security policy \\`Users can view their own notifications\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.users\\` has a row level security policy \\`users_self\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "users", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has a row level security policy \\`organizer_own_events\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_agenda_items\\` has a row level security policy \\`event_children_public\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "event_agenda_items", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.event_speakers\\` has a row level security policy \\`event_speakers_read\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "event_speakers", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.registrations\\` has a row level security policy \\`registrations_own\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.registrations\\` has a row level security policy \\`registrations_insert_self\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.bookings\\` has a row level security policy \\`bookings_parties\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "bookings", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.organizations\\` has a row level security policy \\`orgs_members\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "organizations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.org_memberships\\` has a row level security policy \\`memberships_self\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "org_memberships", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has a row level security policy \\`notifications_own\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.reviews\\` has a row level security policy \\`reviews_public\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "reviews", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.ticket_tiers\\` has a row level security policy \\`ticket_tiers_read\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+            "metadata": { "name": "ticket_tiers", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          }
+        ]
+      },
+      {
+        "name": "unused_index",
+        "title": "Unused Index",
+        "level": "INFO",
+        "facing": "EXTERNAL",
+        "categories": ["PERFORMANCE"],
+        "description": "Detects if an index has never been used and may be a candidate for removal.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+        "count": 71,
+        "findings": [
+          {
+            "detail": "Index \\`certificate_template_versions_template_id_idx\\` on table \\`public.certificate_template_versions\\` has not been used",
+            "metadata": {
+              "name": "certificate_template_versions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`idx_notifications_created_at\\` on table \\`public.notifications\\` has not been used",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_event_id_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`access_grants_grantee_idx\\` on table \\`public.access_grants\\` has not been used",
+            "metadata": { "name": "access_grants", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`access_grants_scope_idx\\` on table \\`public.access_grants\\` has not been used",
+            "metadata": { "name": "access_grants", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`access_grants_active_idx\\` on table \\`public.access_grants\\` has not been used",
+            "metadata": { "name": "access_grants", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_user_id_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`promo_redemptions_promo_idx\\` on table \\`public.promo_redemptions\\` has not been used",
+            "metadata": { "name": "promo_redemptions", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`promo_redemptions_registration_idx\\` on table \\`public.promo_redemptions\\` has not been used",
+            "metadata": { "name": "promo_redemptions", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`promo_redemptions_group_idx\\` on table \\`public.promo_redemptions\\` has not been used",
+            "metadata": { "name": "promo_redemptions", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_config_event_id_idx\\` on table \\`public.hackathon_config\\` has not been used",
+            "metadata": { "name": "hackathon_config", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_submissions_track_submitted_idx\\` on table \\`public.hackathon_task_submissions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_submissions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_submissions_task_idx\\` on table \\`public.hackathon_task_submissions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_submissions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_submissions_team_idx\\` on table \\`public.hackathon_task_submissions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_submissions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_team_task_starts_team_idx\\` on table \\`public.hackathon_team_task_starts\\` has not been used",
+            "metadata": {
+              "name": "hackathon_team_task_starts",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`team_activity_pings_team_created_idx\\` on table \\`public.team_activity_pings\\` has not been used",
+            "metadata": { "name": "team_activity_pings", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`team_integrity_events_team_created_idx\\` on table \\`public.team_integrity_events\\` has not been used",
+            "metadata": { "name": "team_integrity_events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`compete_access_failures_event_created_idx\\` on table \\`public.compete_access_failures\\` has not been used",
+            "metadata": { "name": "compete_access_failures", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_teams_event_id_idx\\` on table \\`public.hackathon_teams\\` has not been used",
+            "metadata": { "name": "hackathon_teams", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_teams_track_id_idx\\` on table \\`public.hackathon_teams\\` has not been used",
+            "metadata": { "name": "hackathon_teams", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_completions_task_id_idx\\` on table \\`public.hackathon_task_completions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_completions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_submissions_phase_id_idx\\` on table \\`public.hackathon_task_submissions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_submissions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_task_submissions_submitted_by_idx\\` on table \\`public.hackathon_task_submissions\\` has not been used",
+            "metadata": {
+              "name": "hackathon_task_submissions",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_organizer_id_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_template_id_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_user_id_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_event_id_created_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_event_id_created_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_booking_id_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_created_by_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_external_vendor_id_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`access_grants_granted_by_idx\\` on table \\`public.access_grants\\` has not been used",
+            "metadata": { "name": "access_grants", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_event_id_created_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_certificate_id_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_checked_in_by_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_invite_id_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_ticket_tier_id_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_tickets_from_user_id_idx\\` on table \\`public.support_tickets\\` has not been used",
+            "metadata": { "name": "support_tickets", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_tickets_created_idx\\` on table \\`public.support_tickets\\` has not been used",
+            "metadata": { "name": "support_tickets", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_ticket_messages_author_idx\\` on table \\`public.support_ticket_messages\\` has not been used",
+            "metadata": { "name": "support_ticket_messages", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_ticket_messages_ticket_created_idx\\` on table \\`public.support_ticket_messages\\` has not been used",
+            "metadata": { "name": "support_ticket_messages", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`team_members_user_id_idx\\` on table \\`public.team_members\\` has not been used",
+            "metadata": { "name": "team_members", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`team_members_position_id_idx\\` on table \\`public.team_members\\` has not been used",
+            "metadata": { "name": "team_members", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`promo_redemptions_promo_id_idx\\` on table \\`public.promo_redemptions\\` has not been used",
+            "metadata": { "name": "promo_redemptions", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`moderation_logs_created_idx\\` on table \\`public.moderation_logs\\` has not been used",
+            "metadata": { "name": "moderation_logs", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`announcement_deliveries_announcement_idx\\` on table \\`public.announcement_deliveries\\` has not been used",
+            "metadata": { "name": "announcement_deliveries", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_registration_id_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`certificates_verification_code_idx\\` on table \\`public.certificates\\` has not been used",
+            "metadata": { "name": "certificates", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`plan_changes_organizer_id_idx\\` on table \\`public.plan_changes\\` has not been used",
+            "metadata": { "name": "plan_changes", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`custom_pricing_agreements_organizer_id_idx\\` on table \\`public.custom_pricing_agreements\\` has not been used",
+            "metadata": {
+              "name": "custom_pricing_agreements",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_tasks_phase_id_idx\\` on table \\`public.hackathon_tasks\\` has not been used",
+            "metadata": { "name": "hackathon_tasks", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_sandboxes_team_id_idx\\` on table \\`public.hackathon_sandboxes\\` has not been used",
+            "metadata": { "name": "hackathon_sandboxes", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`hackathon_attendance_track_id_idx\\` on table \\`public.hackathon_attendance\\` has not been used",
+            "metadata": { "name": "hackathon_attendance", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`organizer_profiles_plan_type_idx\\` on table \\`public.organizer_profiles\\` has not been used",
+            "metadata": { "name": "organizer_profiles", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`badge_meetups_badge_tier_id_idx\\` on table \\`public.badge_meetups\\` has not been used",
+            "metadata": { "name": "badge_meetups", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`reviews_booking_id_idx\\` on table \\`public.reviews\\` has not been used",
+            "metadata": { "name": "reviews", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`events_event_format_id_idx\\` on table \\`public.events\\` has not been used",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`events_super_category_id_idx\\` on table \\`public.events\\` has not been used",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`club_roster_user_id_idx\\` on table \\`public.club_roster\\` has not been used",
+            "metadata": { "name": "club_roster", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`registrations_group_id_idx\\` on table \\`public.registrations\\` has not been used",
+            "metadata": { "name": "registrations", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_ticket_messages_ticket_id_idx\\` on table \\`public.support_ticket_messages\\` has not been used",
+            "metadata": { "name": "support_ticket_messages", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`announcement_deliveries_announcement_id_idx\\` on table \\`public.announcement_deliveries\\` has not been used",
+            "metadata": { "name": "announcement_deliveries", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`announcement_deliveries_user_id_idx\\` on table \\`public.announcement_deliveries\\` has not been used",
+            "metadata": { "name": "announcement_deliveries", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`partner_types_organizer_id_idx\\` on table \\`public.partner_types\\` has not been used",
+            "metadata": { "name": "partner_types", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`support_ticket_attachments_message_id_idx\\` on table \\`public.support_ticket_attachments\\` has not been used",
+            "metadata": {
+              "name": "support_ticket_attachments",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`org_tenures_no_overlap\\` on table \\`public.org_tenures\\` has not been used",
+            "metadata": { "name": "org_tenures", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`events_tenure_id_idx\\` on table \\`public.events\\` has not been used",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`org_announcements_department_id_idx\\` on table \\`public.org_announcements\\` has not been used",
+            "metadata": { "name": "org_announcements", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_external_vendors_event_id_idx\\` on table \\`public.event_external_vendors\\` has not been used",
+            "metadata": { "name": "event_external_vendors", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_event_status_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Index \\`event_expenses_event_category_idx\\` on table \\`public.event_expenses\\` has not been used",
+            "metadata": { "name": "event_expenses", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          }
+        ]
+      },
+      {
+        "name": "multiple_permissive_policies",
+        "title": "Multiple Permissive Policies",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": ["PERFORMANCE"],
+        "description": "Detects if multiple permissive row level security policies are present on a table for the same \\`role\\` and \\`action\\` (e.g. insert). Multiple permissive policies are suboptimal for performance as each policy must be executed for every relevant query.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies",
+        "count": 27,
+        "findings": [
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`anon\\` for action \\`DELETE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`anon\\` for action \\`INSERT\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`anon\\` for action \\`SELECT\\`. Policies include \\`{org_scoped_events,organizer_own_events,platform_admin_all_events,public_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`anon\\` for action \\`UPDATE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`DELETE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`INSERT\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{org_scoped_events,organizer_own_events,platform_admin_all_events,public_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`UPDATE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticator\\` for action \\`DELETE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticator\\` for action \\`INSERT\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticator\\` for action \\`SELECT\\`. Policies include \\`{org_scoped_events,organizer_own_events,platform_admin_all_events,public_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticator\\` for action \\`UPDATE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`dashboard_user\\` for action \\`DELETE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`dashboard_user\\` for action \\`INSERT\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`dashboard_user\\` for action \\`SELECT\\`. Policies include \\`{org_scoped_events,organizer_own_events,platform_admin_all_events,public_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`dashboard_user\\` for action \\`UPDATE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`supabase_privileged_role\\` for action \\`DELETE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`supabase_privileged_role\\` for action \\`INSERT\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`supabase_privileged_role\\` for action \\`SELECT\\`. Policies include \\`{org_scoped_events,organizer_own_events,platform_admin_all_events,public_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`supabase_privileged_role\\` for action \\`UPDATE\\`. Policies include \\`{organizer_own_events,platform_admin_all_events}\\`",
+            "metadata": { "name": "events", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.hackathon_tasks\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{hackathon_tasks_read,hackathon_tasks_write}\\`",
+            "metadata": { "name": "hackathon_tasks", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`anon\\` for action \\`SELECT\\`. Policies include \\`{\"Allow select own notifications\",\"Users can view their own notifications\",notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`authenticated\\` for action \\`INSERT\\`. Policies include \\`{notifications_insert_self,notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{\"Allow select own notifications\",\"Users can view their own notifications\",notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`authenticator\\` for action \\`SELECT\\`. Policies include \\`{\"Allow select own notifications\",\"Users can view their own notifications\",notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`dashboard_user\\` for action \\`SELECT\\`. Policies include \\`{\"Allow select own notifications\",\"Users can view their own notifications\",notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.notifications\\` has multiple permissive policies for role \\`supabase_privileged_role\\` for action \\`SELECT\\`. Policies include \\`{\"Allow select own notifications\",\"Users can view their own notifications\",notifications_own}\\`",
+            "metadata": { "name": "notifications", "type": "table", "schema": "public" },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          }
+        ]
+      },
+      {
+        "name": "duplicate_index",
+        "title": "Duplicate Index",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": ["PERFORMANCE"],
+        "description": "Detects cases where two ore more identical indexes exist.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0009_duplicate_index",
+        "count": 4,
+        "findings": [
+          {
+            "detail": "Table \\`public.certificates\\` has identical indexes {certificates_certificate_number_key,certificates_certificate_number_uidx}. Drop all except one of them",
+            "metadata": {
+              "name": "certificates",
+              "type": "table",
+              "schema": "public",
+              "indexes": [
+                "certificates_certificate_number_key",
+                "certificates_certificate_number_uidx"
+              ]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.certificates\\` has identical indexes {certificates_verification_code_key,certificates_verification_code_uidx}. Drop all except one of them",
+            "metadata": {
+              "name": "certificates",
+              "type": "table",
+              "schema": "public",
+              "indexes": [
+                "certificates_verification_code_key",
+                "certificates_verification_code_uidx"
+              ]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.promo_redemptions\\` has identical indexes {promo_redemptions_promo_id_idx,promo_redemptions_promo_idx}. Drop all except one of them",
+            "metadata": {
+              "name": "promo_redemptions",
+              "type": "table",
+              "schema": "public",
+              "indexes": ["promo_redemptions_promo_id_idx", "promo_redemptions_promo_idx"]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          },
+          {
+            "detail": "Table \\`public.support_ticket_messages\\` has identical indexes {support_ticket_messages_ticket_created_idx,support_ticket_messages_ticket_id_idx}. Drop all except one of them",
+            "metadata": {
+              "name": "support_ticket_messages",
+              "type": "table",
+              "schema": "public",
+              "indexes": [
+                "support_ticket_messages_ticket_created_idx",
+                "support_ticket_messages_ticket_id_idx"
+              ]
+            },
+            "observed_at": "2026-10-12T09:33:59.553Z"
+          }
+        ]
+      }
+    ]
+  }
+}

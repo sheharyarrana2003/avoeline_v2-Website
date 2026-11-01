@@ -1,6 +1,6 @@
 /** Column allowlists from supabase/migrations. */
 export const TABLE_COLUMNS: Record<string, string[]> = {
-  "users": [
+  users: [
     "id",
     "email",
     "full_name",
@@ -27,9 +27,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "admin_permissions",
     "setup_complete",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "organizations": [
+  organizations: [
     "id",
     "name",
     "org_type",
@@ -47,17 +47,10 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "is_verified",
     "verification_level",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "org_memberships": [
-    "id",
-    "org_id",
-    "user_id",
-    "role",
-    "title",
-    "joined_at"
-  ],
-  "pending_invites": [
+  org_memberships: ["id", "org_id", "user_id", "role", "title", "joined_at"],
+  pending_invites: [
     "id",
     "email",
     "org_type",
@@ -67,9 +60,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "token",
     "expires_at",
     "created_at",
-    "accepted_at"
+    "accepted_at",
   ],
-  "attendee_profiles": [
+  attendee_profiles: [
     "user_id",
     "university",
     "department",
@@ -88,9 +81,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "networking_connections",
     "total_reviews_written",
     "average_rating_given",
-    "updated_at"
+    "updated_at",
   ],
-  "organizer_profiles": [
+  organizer_profiles: [
     "user_id",
     "org_name",
     "org_id",
@@ -121,9 +114,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "verification_level",
     "username",
     "recovery_contact",
-    "updated_at"
+    "updated_at",
   ],
-  "vendor_profiles": [
+  vendor_profiles: [
     "user_id",
     "business_name",
     "org_id",
@@ -147,9 +140,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "verification_method",
     "verified_at",
     "portfolio",
-    "updated_at"
+    "updated_at",
   ],
-  "vendor_services": [
+  vendor_services: [
     "id",
     "vendor_id",
     "category",
@@ -161,9 +154,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "images",
     "videos",
     "pricing_packages",
-    "created_at"
+    "created_at",
   ],
-  "event_categories": [
+  event_categories: [
     "id",
     "category_type",
     "name",
@@ -172,9 +165,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "checklist",
     "admin_note",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "category_requests": [
+  category_requests: [
     "id",
     "requested_by",
     "requested_by_name",
@@ -183,21 +176,11 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "status",
     "admin_note",
     "decided_at",
-    "created_at"
+    "created_at",
   ],
-  "category_field_sets": [
-    "id",
-    "super_category_id",
-    "fields"
-  ],
-  "checklist_templates": [
-    "id",
-    "super_category_id",
-    "event_format_id",
-    "items",
-    "created_at"
-  ],
-  "events": [
+  category_field_sets: ["id", "super_category_id", "fields"],
+  checklist_templates: ["id", "super_category_id", "event_format_id", "items", "created_at"],
+  events: [
     "id",
     "organizer_id",
     "org_id",
@@ -262,16 +245,10 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "updated_at",
     "published_at",
     "archived_at",
-    "deleted_at"
+    "deleted_at",
   ],
-  "event_checklist_items": [
-    "id",
-    "event_id",
-    "label",
-    "done",
-    "sort_order"
-  ],
-  "event_agenda_items": [
+  event_checklist_items: ["id", "event_id", "label", "done", "sort_order"],
+  event_agenda_items: [
     "id",
     "event_id",
     "title",
@@ -288,9 +265,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "location",
     "room",
     "description",
-    "linked_child_event_id"
+    "linked_child_event_id",
   ],
-  "event_speakers": [
+  event_speakers: [
     "id",
     "event_id",
     "name",
@@ -308,16 +285,10 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "twitter",
     "company",
     "website",
-    "created_at"
+    "created_at",
   ],
-  "event_access_tiers": [
-    "id",
-    "event_id",
-    "name",
-    "description",
-    "sort_order"
-  ],
-  "event_invites": [
+  event_access_tiers: ["id", "event_id", "name", "description", "sort_order"],
+  event_invites: [
     "id",
     "event_id",
     "email",
@@ -331,9 +302,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "registered_at",
     "registration_id",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "ticket_tiers": [
+  ticket_tiers: [
     "id",
     "event_id",
     "name",
@@ -348,9 +319,10 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "group_discount_pct",
     "student_discount_enabled",
     "student_discount_pct",
-    "created_at"
+    "active",
+    "created_at",
   ],
-  "promo_codes": [
+  promo_codes: [
     "id",
     "event_id",
     "code",
@@ -360,9 +332,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "usage_count",
     "expires_at",
     "active",
-    "track_id"
+    "track_id",
   ],
-  "registration_groups": [
+  registration_groups: [
     "id",
     "event_id",
     "group_name",
@@ -370,13 +342,10 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "payment_status",
     "payment_proof_path",
     "extra",
-    "created_at"
+    "created_at",
   ],
-  "event_agenda_speakers": [
-    "agenda_item_id",
-    "speaker_id"
-  ],
-  "registrations": [
+  event_agenda_speakers: ["agenda_item_id", "speaker_id"],
+  registrations: [
     "id",
     "event_id",
     "user_id",
@@ -409,9 +378,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "updated_at",
     "cancelled_at",
     "hackathon_access_code_hash",
-    "group_id"
+    "group_id",
   ],
-  "teams": [
+  teams: [
     "id",
     "context_type",
     "event_id",
@@ -419,47 +388,50 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "name",
     "join_code",
     "created_by",
-    "created_at"
+    "created_at",
   ],
-  "team_positions": [
-    "id",
-    "team_id",
-    "title",
-    "permissions"
-  ],
-  "team_members": [
+  team_positions: ["id", "team_id", "title", "permissions", "extra"],
+  team_members: [
     "id",
     "team_id",
     "user_id",
     "role",
     "position_id",
-    "joined_at"
+    "joined_at",
+    "display_name",
+    "email",
+    "phone",
+    "extra",
   ],
-  "recruitment_forms": [
-    "id",
-    "team_id",
-    "title",
-    "fields",
-    "is_open",
-    "created_at"
-  ],
-  "applicants": [
+  recruitment_forms: ["id", "team_id", "position_id", "title", "fields", "is_open", "created_at"],
+  applicants: [
     "id",
     "form_id",
     "team_id",
+    "position_id",
+    "email",
     "responses",
     "status",
     "interview_at",
     "interview_notes",
-    "applied_at"
+    "applied_at",
   ],
-  "hackathon_settings": [
+  hackathon_settings: [
     "event_id",
     "online_mode",
     "livestream_url",
-    "updated_at"
+    "max_attachment_mb",
+    "updated_at",
   ],
-  "hackathon_tracks": [
+  hackathon_track_prizes: [
+    "id",
+    "track_id",
+    "position_label",
+    "amount",
+    "description",
+    "order_index",
+  ],
+  hackathon_tracks: [
     "id",
     "event_id",
     "organizer_id",
@@ -487,9 +459,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "kind",
     "rules_text",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "hackathon_teams": [
+  hackathon_teams: [
     "id",
     "track_id",
     "event_id",
@@ -504,9 +476,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "member_registration_ids",
     "access_code_hash",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "hackathon_team_members": [
+  hackathon_team_members: [
     "id",
     "hackathon_team_id",
     "registration_id",
@@ -516,18 +488,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "is_owner",
     "skills",
     "status",
-    "joined_at"
+    "joined_at",
   ],
-  "solo_participants": [
-    "id",
-    "event_id",
-    "track_id",
-    "user_id",
-    "skills",
-    "status",
-    "created_at"
-  ],
-  "hackathon_submissions": [
+  hackathon_submissions: [
     "id",
     "hackathon_team_id",
     "track_id",
@@ -538,9 +501,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "deck_name",
     "unlocked_by_organizer",
     "submitted_at",
-    "updated_at"
+    "updated_at",
   ],
-  "hackathon_judges": [
+  hackathon_judges: [
     "id",
     "event_id",
     "name",
@@ -548,9 +511,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "invite_token",
     "track_ids",
     "invited_at",
-    "last_scored_at"
+    "last_scored_at",
   ],
-  "hackathon_scores": [
+  hackathon_scores: [
     "id",
     "hackathon_team_id",
     "judge_id",
@@ -558,36 +521,19 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "category",
     "score",
     "comment",
-    "scored_at"
+    "scored_at",
   ],
-  "hackathon_mentors": [
-    "id",
-    "event_id",
-    "name",
-    "email",
-    "bio",
-    "expertise"
-  ],
-  "hackathon_mentor_slots": [
-    "id",
-    "mentor_id",
-    "slot_date",
-    "start_time",
-    "end_time",
-    "booked_by_team_id",
-    "booked_team_name",
-    "booked_at"
-  ],
-  "hackathon_announcements": [
+  hackathon_mentors: ["id", "event_id", "name", "email", "bio", "expertise"],
+  hackathon_announcements: [
     "id",
     "event_id",
     "track_id",
     "title",
     "body",
     "emailed_count",
-    "created_at"
+    "created_at",
   ],
-  "hackathon_ctf_challenges": [
+  hackathon_ctf_challenges: [
     "id",
     "event_id",
     "track_id",
@@ -603,18 +549,18 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "attachment_url",
     "attachment_name",
     "docker_image",
-    "created_at"
+    "created_at",
   ],
-  "hackathon_flag_submissions": [
+  hackathon_flag_submissions: [
     "id",
     "challenge_id",
     "hackathon_team_id",
     "user_id",
     "flag_value",
     "correct",
-    "submitted_at"
+    "submitted_at",
   ],
-  "hackathon_phases": [
+  hackathon_phases: [
     "id",
     "event_id",
     "name",
@@ -624,16 +570,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "track_id",
     "opens_at",
     "closes_at",
-    "order_index"
+    "order_index",
   ],
-  "hackathon_team_phases": [
-    "id",
-    "phase_id",
-    "hackathon_team_id",
-    "unlocked",
-    "completed_at"
-  ],
-  "hackathon_sandboxes": [
+  hackathon_sandboxes: [
     "id",
     "challenge_id",
     "hackathon_team_id",
@@ -642,32 +581,19 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "instance_url",
     "team_id",
     "event_id",
-    "created_at"
+    "created_at",
   ],
-  "hackathon_anomalies": [
-    "id",
-    "event_id",
-    "hackathon_team_id",
-    "kind",
-    "detail",
-    "created_at"
-  ],
-  "hackathon_schedules": [
-    "id",
-    "event_id",
-    "schedule_date",
-    "title",
-    "body"
-  ],
-  "hackathon_attendance": [
+  hackathon_anomalies: ["id", "event_id", "hackathon_team_id", "kind", "detail", "created_at"],
+  hackathon_schedules: ["id", "event_id", "schedule_date", "title", "body"],
+  hackathon_attendance: [
     "id",
     "event_id",
     "hackathon_team_id",
     "user_id",
     "track_id",
-    "checked_in_at"
+    "checked_in_at",
   ],
-  "event_sponsors_partners": [
+  event_sponsors_partners: [
     "id",
     "event_id",
     "track_id",
@@ -689,9 +615,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "invited_at",
     "accepted_at",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "bookings": [
+  bookings: [
     "id",
     "event_id",
     "organizer_id",
@@ -727,9 +653,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "updated_at",
     "confirmed_at",
     "completed_at",
-    "cancelled_at"
+    "cancelled_at",
   ],
-  "certificate_templates": [
+  certificate_templates: [
     "id",
     "organizer_id",
     "event_id",
@@ -745,9 +671,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "blockchain_enabled",
     "blockchain_network",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "certificates": [
+  certificates: [
     "id",
     "template_id",
     "event_id",
@@ -778,9 +704,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "blockchain_tx_hash",
     "blockchain_ipfs_hash",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "payments": [
+  payments: [
     "id",
     "payer_id",
     "receiver_id",
@@ -800,9 +726,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "screenshot_verified",
     "screenshot_uploaded_at",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "budget_entries": [
+  budget_entries: [
     "id",
     "org_id",
     "category",
@@ -810,9 +736,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "entry_type",
     "note",
     "entry_date",
-    "created_at"
+    "created_at",
   ],
-  "reviews": [
+  reviews: [
     "id",
     "reviewer_id",
     "reviewer_type",
@@ -831,16 +757,21 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "booking_id",
     "event_id",
     "created_at",
-    "updated_at"
+    "updated_at",
   ],
-  "notification_templates": [
+  event_email_templates: [
     "id",
-    "key",
+    "event_id",
+    "kind",
     "subject",
     "body",
-    "default_channels"
+    "include_blocks",
+    "extra",
+    "created_at",
+    "updated_at",
   ],
-  "notifications": [
+  notification_templates: ["id", "key", "subject", "body", "default_channels"],
+  notifications: [
     "id",
     "user_id",
     "type",
@@ -851,9 +782,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "status",
     "read_at",
     "related_event_id",
-    "created_at"
+    "created_at",
   ],
-  "moderation_logs": [
+  moderation_logs: [
     "id",
     "admin_id",
     "admin_email",
@@ -862,9 +793,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "target_id",
     "target_label",
     "reason",
-    "created_at"
+    "created_at",
   ],
-  "event_reports": [
+  event_reports: [
     "id",
     "event_id",
     "event_title",
@@ -872,9 +803,9 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "reporter_email",
     "status",
     "created_at",
-    "decided_at"
+    "decided_at",
   ],
-  "support_tickets": [
+  support_tickets: [
     "id",
     "from_user_id",
     "from_email",
@@ -884,6 +815,6 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "status",
     "admin_note",
     "created_at",
-    "updated_at"
-  ]
+    "updated_at",
+  ],
 };

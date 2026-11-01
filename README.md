@@ -29,7 +29,7 @@ AVOELINE is an end-to-end event management platform built specifically for Pakis
 ## 🎯 Features Implemented
 
 ### User Management & Authentication
-- Firebase Authentication (email/password, social login)
+- Supabase Authentication (email/password)
 - Role-based access control (Attendee, Organizer, Vendor, Admin)
 <!-- - Student email verification (@*.edu.pk domains)
 - Custom user profiles with avatar uploads
@@ -114,24 +114,21 @@ AVOELINE is an end-to-end event management platform built specifically for Pakis
 
 2. **Server Action** (Next.js server-side code running on backend)
    - Receives form data from frontend
-   - Verifies user is authenticated via Firebase token
+   - Verifies the user via Supabase Auth session cookies
    - Validates pricing tier (early bird still available? student discount applicable?)
    - Calculates final price with discounts
-   - Creates registration record in Firestore
+   - Creates a registration row in Postgres (`registrations`)
    - Sends confirmation email to attendee
    - Generates unique QR code for check-in
 
-3. **Data Storage** (Firestore)
+3. **Data Storage** (Supabase Postgres)
    ```
-   registrations/{registrationId}
-   ├── eventId: "EVT001"
-   ├── userId: "U001"
+   registrations
+   ├── id, event_id, user_id
    ├── status: "confirmed"
-   ├── finalPrice: 1500
-   ├── formResponses: {...}
-   ├── qrCode: {data, imageUrl}
-   ├── createdAt: timestamp
-   └── checkedIn: false
+   ├── final_price, form_responses, qr fields
+   ├── created_at
+   └── checked_in / attendance fields
    ```
 
 4. **Frontend Updates**
@@ -165,11 +162,10 @@ avoeline/
 │   ├── layout.tsx
 │   └── page.tsx          # Public-facing application landing view
 |
-├── data/                 # Database configuration layers and security rules
-│   ├── admin_db.ts       # Secure administrative Firebase configuration setups
-│   ├── avoelinev2-firebase-adminsdk...json
-│   ├── collections.ts    # Firestore strongly typed schema boundaries
-│   └── db.ts             # Initialized client-side Firebase operations
+├── data/                 # Supabase clients and table constants
+│   ├── supabase.ts       # supabaseAdmin + createSupabaseServer
+│   ├── collections.ts    # TABLES / COLLECTIONS Postgres names
+│   └── adminAuth.ts      # Auth Admin helpers (create/update/disable users)
 |
 ├── public/               # Public assets and multimedia vectors
 |

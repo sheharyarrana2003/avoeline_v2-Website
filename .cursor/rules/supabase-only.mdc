@@ -1,0 +1,17 @@
+---
+description: Firebase is gone — use typed Supabase only; never reintroduce adminDb or Firestore APIs
+alwaysApply: true
+---
+
+# Supabase-only data access
+
+- **Never** import `adminDb`, `FieldValue`, `DocumentReference`, or `@/data/admin_db`.
+- **Never** use Firestore-shaped APIs (`collection().doc().get/set/update`).
+- Reads/writes go through `supabaseAdmin` from `@/data/supabase` (typed `Database`) or `createSupabaseServer()` for user JWT.
+- Table names: `TABLES` from `@/data/collections`. Columns: Postgres snake_case.
+- Status/payment/booking enums must match Postgres check constraints (no dual remaps).
+- Multi-row integrity: Postgres `rpc` or single statements — not fake transactions.
+- Parallel reads: `Promise.all` of **batched** `.in()` queries, not per-id loops.
+- Auth before every write: `getAuthenticatedUser` / `requireRole` / `assertOwnedEvent`.
+- Never import `supabaseAdmin` in `"use client"` files.
+- After schema changes: regenerate types (`npm run types:db`) and update `completeContext.md`.

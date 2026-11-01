@@ -1,0 +1,21 @@
+{
+  "_note": "Subset captured 2026-10-12. Full per-column dump: re-run SQL in README.md → non-null-counts.json",
+  "events.maps_url": { "nn": 4, "total": 18 },
+  "events.tenure_id": { "nn": 0, "total": 18 },
+  "events.budget_total": { "nn": 0, "total": 18 },
+  "events.event_type": { "nn": 5, "total": 18 },
+  "events.format": { "nn": 18, "total": 18 },
+  "events.category": { "nn": 18, "total": 18 },
+  "events.super_category_id": { "nn": 17, "total": 18 },
+  "events.event_format_id": { "nn": 18, "total": 18 },
+  "hackathon_tracks.opens_at": { "nn": 0, "total": 11 },
+  "hackathon_tracks.closes_at": { "nn": 0, "total": 11 },
+  "hackathon_tracks.registration_closes_at": { "nn": 0, "total": 11 },
+  "hackathon_tracks.roster_locks_at": { "nn": 1, "total": 11 },
+  "hackathon_tracks.submission_deadline_at": { "nn": 1, "total": 11 },
+  "hackathon_teams.rules_acknowledged_at": { "nn": 0, "total": 8 },
+  "hackathon_teams.access_code_hash": { "nn": 6, "total": 8 },
+  "hackathon_track_prizes.amount": { "nn": 2, "total": 3 },
+  "registrations.custom_responses": { "nn": 69, "total": 69 },
+  "certificates.data": { "nn": 4, "total": 4 }
+}

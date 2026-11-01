@@ -1,0 +1,1125 @@
+[
+  {
+    "table": "hackathon_mentor_slots",
+    "fileCount": 1,
+    "consts": ["HACKATHON_MENTOR_SLOTS"],
+    "sample": ["supabase/migrations\\20260920120000_complete_schema.sql"]
+  },
+  {
+    "table": "hackathon_team_phases",
+    "fileCount": 1,
+    "consts": ["HACKATHON_TEAM_PHASES"],
+    "sample": ["supabase/migrations\\20260920120000_complete_schema.sql"]
+  },
+  {
+    "table": "badge_meetup_attendees",
+    "fileCount": 2,
+    "consts": ["BADGE_MEETUP_ATTENDEES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql"
+    ]
+  },
+  {
+    "table": "badge_tiers",
+    "fileCount": 2,
+    "consts": ["BADGE_TIERS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "src\\features\\registration\\registration.service.ts"
+    ]
+  },
+  {
+    "table": "certificate_template_versions",
+    "fileCount": 2,
+    "consts": ["CERTIFICATE_TEMPLATE_VERSIONS"],
+    "sample": [
+      "supabase/migrations\\20261012170000_phase5_certificates_json.sql",
+      "src\\features\\certificates\\certificates.service.ts"
+    ]
+  },
+  {
+    "table": "compete_access_failures",
+    "fileCount": 2,
+    "consts": ["COMPETE_ACCESS_FAILURES"],
+    "sample": [
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\actions\\enterCompete.action.ts"
+    ]
+  },
+  {
+    "table": "event_access_tiers",
+    "fileCount": 2,
+    "consts": ["EVENT_ACCESS_TIERS", "EVENT_TIERS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\services\\event.service.ts"
+    ]
+  },
+  {
+    "table": "event_agenda_speakers",
+    "fileCount": 2,
+    "consts": ["EVENT_AGENDA_SPEAKERS"],
+    "sample": [
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "src\\features\\agendas\\agendaSpeakers.service.ts"
+    ]
+  },
+  {
+    "table": "event_email_templates",
+    "fileCount": 2,
+    "consts": ["EVENT_EMAIL_TEMPLATES"],
+    "sample": [
+      "supabase/migrations\\20261005120000_event_email_templates.sql",
+      "src\\features\\event_attendee\\eventEmail.service.tsx"
+    ]
+  },
+  {
+    "table": "hackathon_scores",
+    "fileCount": 2,
+    "consts": ["HACKATHON_SCORES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\actions\\judging.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_task_assignments",
+    "fileCount": 2,
+    "consts": ["HACKATHON_TASK_ASSIGNMENTS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "src\\features\\hackathon\\tasks.service.ts"
+    ]
+  },
+  {
+    "table": "hackathon_team_task_starts",
+    "fileCount": 2,
+    "consts": ["HACKATHON_TEAM_TASK_STARTS"],
+    "sample": [
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\actions\\tasks.action.ts"
+    ]
+  },
+  {
+    "table": "solo_participants",
+    "fileCount": 2,
+    "consts": ["SOLO_PARTICIPANTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql"
+    ]
+  },
+  {
+    "table": "team_activity_pings",
+    "fileCount": 2,
+    "consts": ["TEAM_ACTIVITY_PINGS"],
+    "sample": [
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\actions\\participantSignals.action.ts"
+    ]
+  },
+  {
+    "table": "team_integrity_events",
+    "fileCount": 2,
+    "consts": ["TEAM_INTEGRITY_EVENTS"],
+    "sample": [
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\actions\\participantSignals.action.ts"
+    ]
+  },
+  {
+    "table": "budget_entries",
+    "fileCount": 3,
+    "consts": ["BUDGET_ENTRIES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\department\\clubDetail.service.ts",
+      "src\\features\\clubs\\actions\\orgRequests.action.ts"
+    ]
+  },
+  {
+    "table": "club_roster",
+    "fileCount": 3,
+    "consts": ["CLUB_ROSTER"],
+    "sample": [
+      "supabase/migrations\\20260927160000_club_dashboard_requests_roster.sql",
+      "src\\features\\clubs\\club.service.ts",
+      "src\\features\\clubs\\actions\\clubTeams.action.ts"
+    ]
+  },
+  {
+    "table": "custom_pricing_agreements",
+    "fileCount": 3,
+    "consts": ["CUSTOM_PRICING_AGREEMENTS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\saas\\actions\\subscriptions.action.ts"
+    ]
+  },
+  {
+    "table": "event_checklist_items",
+    "fileCount": 3,
+    "consts": ["EVENT_CHECKLIST_ITEMS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\taxonomy\\actions\\categoryEngine.action.ts",
+      "src\\services\\event.service.ts"
+    ]
+  },
+  {
+    "table": "event_staff_assignments",
+    "fileCount": 3,
+    "consts": ["EVENT_STAFF_ASSIGNMENTS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20261006200000_organizer_staff_library.sql",
+      "src\\features\\teams\\teamEngine.service.ts"
+    ]
+  },
+  {
+    "table": "hackathon_announcements",
+    "fileCount": 3,
+    "consts": ["HACKATHON_ANNOUNCEMENTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\actions\\live.action.ts",
+      "src\\features\\hackathon\\hackathon.service.ts"
+    ]
+  },
+  {
+    "table": "hackathon_anomalies",
+    "fileCount": 3,
+    "consts": ["HACKATHON_ANOMALIES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_ctf_challenges",
+    "fileCount": 3,
+    "consts": ["HACKATHON_CTF_CHALLENGES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_judges",
+    "fileCount": 3,
+    "consts": ["HACKATHON_JUDGES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\hackathon.service.ts",
+      "src\\features\\hackathon\\actions\\judging.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_mentors",
+    "fileCount": 3,
+    "consts": ["HACKATHON_MENTORS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\hackathon.service.ts",
+      "src\\features\\hackathon\\actions\\live.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_schedules",
+    "fileCount": 3,
+    "consts": ["HACKATHON_SCHEDULES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_track_prizes",
+    "fileCount": 3,
+    "consts": ["HACKATHON_TRACK_PRIZES"],
+    "sample": [
+      "supabase/migrations\\20261006140000_prizes_challenge_files_staff_roster.sql",
+      "src\\features\\hackathon\\hackathon.service.ts",
+      "src\\features\\hackathon\\actions\\tracks.action.ts"
+    ]
+  },
+  {
+    "table": "notification_templates",
+    "fileCount": 3,
+    "consts": ["NOTIFICATION_TEMPLATES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\lib\\notifications.ts",
+      "src\\lib\\notifications.types.ts"
+    ]
+  },
+  {
+    "table": "partner_types",
+    "fileCount": 3,
+    "consts": ["PARTNER_TYPES"],
+    "sample": [
+      "supabase/migrations\\20261012160000_phase4_event_tabs.sql",
+      "src\\features\\organizations\\organizations.service.ts",
+      "src\\features\\organizations\\actions\\organizations.action.ts"
+    ]
+  },
+  {
+    "table": "pending_invites",
+    "fileCount": 3,
+    "consts": ["PENDING_INVITES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\teams\\actions\\department.action.ts"
+    ]
+  },
+  {
+    "table": "plan_changes",
+    "fileCount": 3,
+    "consts": ["PLAN_CHANGES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\saas\\actions\\subscriptions.action.ts"
+    ]
+  },
+  {
+    "table": "promo_redemptions",
+    "fileCount": 3,
+    "consts": ["PROMO_REDEMPTIONS"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012190000_phase7_event_form_fields.sql",
+      "src\\features\\ticketing\\ticketing.service.ts"
+    ]
+  },
+  {
+    "table": "support_ticket_attachments",
+    "fileCount": 3,
+    "consts": ["SUPPORT_TICKET_ATTACHMENTS"],
+    "sample": [
+      "supabase/migrations\\20261012140000_phase2_support_threads_attachments.sql",
+      "src\\features\\admin\\supportThread.service.ts",
+      "src\\features\\admin\\actions\\support.action.ts"
+    ]
+  },
+  {
+    "table": "user_badges",
+    "fileCount": 3,
+    "consts": ["USER_BADGES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "src\\features\\networking\\badges.service.ts",
+      "src\\features\\registration\\registration.service.ts"
+    ]
+  },
+  {
+    "table": "vendor_services",
+    "fileCount": 3,
+    "consts": ["VENDOR_SERVICES"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\auth\\authService.ts"
+    ]
+  },
+  {
+    "table": "announcement_deliveries",
+    "fileCount": 4,
+    "consts": ["ANNOUNCEMENT_DELIVERIES"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "src\\features\\department\\announcements.service.ts",
+      "src\\features\\department\\actions\\announcements.action.ts"
+    ]
+  },
+  {
+    "table": "badge_meetups",
+    "fileCount": 4,
+    "consts": ["BADGE_MEETUPS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "src\\features\\networking\\badges.service.ts"
+    ]
+  },
+  {
+    "table": "category_field_sets",
+    "fileCount": 4,
+    "consts": ["CATEGORY_FIELD_SETS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926151000_taxonomy_text_ids.sql",
+      "src\\features\\taxonomy\\categoryEngine.service.ts",
+      "src\\features\\taxonomy\\actions\\categoryEngine.action.ts"
+    ]
+  },
+  {
+    "table": "category_requests",
+    "fileCount": 4,
+    "consts": ["CATEGORY_REQUESTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\taxonomy\\categoryEngine.service.ts",
+      "src\\features\\taxonomy\\actions\\categoryEngine.action.ts"
+    ]
+  },
+  {
+    "table": "checklist_templates",
+    "fileCount": 4,
+    "consts": ["CHECKLIST_TEMPLATES"],
+    "sample": [
+      "supabase/migrations\\20260926151000_taxonomy_text_ids.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\taxonomy\\categoryEngine.service.ts",
+      "src\\features\\taxonomy\\actions\\categoryEngine.action.ts"
+    ]
+  },
+  {
+    "table": "event_external_vendors",
+    "fileCount": 4,
+    "consts": ["EVENT_EXTERNAL_VENDORS"],
+    "sample": [
+      "supabase/migrations\\20261012160000_phase4_event_tabs.sql",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\vendors\\page.tsx",
+      "src\\features\\event_external_vendors\\externalVendors.service.ts",
+      "src\\features\\event_external_vendors\\actions\\externalVendors.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_flag_submissions",
+    "fileCount": 4,
+    "consts": ["HACKATHON_FLAG_SUBMISSIONS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_sandboxes",
+    "fileCount": 4,
+    "consts": ["HACKATHON_SANDBOXES"],
+    "sample": [
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_settings",
+    "fileCount": 4,
+    "consts": ["HACKATHON_SETTINGS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261006140000_prizes_challenge_files_staff_roster.sql",
+      "src\\features\\hackathon\\hackathon.service.ts",
+      "src\\features\\hackathon\\actions\\live.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_submissions",
+    "fileCount": 4,
+    "consts": ["HACKATHON_SUBMISSIONS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\hackathon\\taskSubmissions.service.ts",
+      "src\\features\\hackathon\\actions\\taskSubmissions.action.ts",
+      "src\\features\\hackathon\\actions\\tasks.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_task_submissions",
+    "fileCount": 4,
+    "consts": ["HACKATHON_TASK_SUBMISSIONS"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\taskSubmissions.service.ts",
+      "src\\features\\hackathon\\actions\\taskSubmissions.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_team_members",
+    "fileCount": 4,
+    "consts": ["HACKATHON_TEAM_MEMBERS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql"
+    ]
+  },
+  {
+    "table": "promo_codes",
+    "fileCount": 4,
+    "consts": ["PROMO_CODES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "supabase/migrations\\20261012190000_phase7_event_form_fields.sql",
+      "src\\features\\ticketing\\ticketing.service.ts"
+    ]
+  },
+  {
+    "table": "recruitment_forms",
+    "fileCount": 4,
+    "consts": ["RECRUITMENT_FORMS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261012180000_phase6_teams_access.sql",
+      "supabase/migrations\\20261006120000_staff_recruitment_and_tier_active.sql",
+      "src\\features\\teams\\teamEngine.service.ts"
+    ]
+  },
+  {
+    "table": "support_ticket_messages",
+    "fileCount": 4,
+    "consts": ["SUPPORT_TICKET_MESSAGES"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012140000_phase2_support_threads_attachments.sql",
+      "src\\features\\admin\\supportThread.service.ts",
+      "src\\features\\admin\\actions\\support.action.ts"
+    ]
+  },
+  {
+    "table": "ticket_tiers",
+    "fileCount": 4,
+    "consts": ["TICKET_TIERS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261006120000_staff_recruitment_and_tier_active.sql",
+      "src\\features\\ticketing\\ticketing.service.ts"
+    ]
+  },
+  {
+    "table": "access_grants",
+    "fileCount": 5,
+    "consts": ["ACCESS_GRANTS"],
+    "sample": [
+      "src\\lib\\permissions.ts",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012180000_phase6_teams_access.sql",
+      "src\\features\\permissions\\can.ts",
+      "src\\features\\permissions\\grants.service.ts"
+    ]
+  },
+  {
+    "table": "certificate_templates",
+    "fileCount": 5,
+    "consts": ["CERTIFICATE_TEMPLATES", "CERTIFICATE_TEMPLATE"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261012170000_phase5_certificates_json.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\certificates\\certificates.service.ts"
+    ]
+  },
+  {
+    "table": "event_expenses",
+    "fileCount": 5,
+    "consts": ["EVENT_EXPENSES"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012160000_phase4_event_tabs.sql",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\expenses\\page.tsx",
+      "src\\features\\event_expenses\\expenses.service.ts",
+      "src\\features\\event_expenses\\actions\\expenses.action.ts"
+    ]
+  },
+  {
+    "table": "event_reports",
+    "fileCount": 5,
+    "consts": ["EVENT_REPORTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "src\\features\\admin\\admin.service.ts",
+      "src\\features\\admin\\actions\\events.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_attendance",
+    "fileCount": 5,
+    "consts": ["HACKATHON_ATTENDANCE"],
+    "sample": [
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\hackathon\\ctf.service.ts",
+      "src\\features\\hackathon\\actions\\ctf.action.ts"
+    ]
+  },
+  {
+    "table": "hackathon_task_completions",
+    "fileCount": 5,
+    "consts": ["HACKATHON_TASK_COMPLETIONS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260929120000_hackathon_access_codes.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "src\\features\\hackathon\\tasks.service.ts",
+      "src\\features\\hackathon\\actions\\tasks.action.ts"
+    ]
+  },
+  {
+    "table": "moderation_logs",
+    "fileCount": 5,
+    "consts": ["MODERATION_LOGS", "MODERATION_LOG"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "src\\features\\admin\\admin.service.ts",
+      "src\\features\\admin\\actions\\moderation.ts"
+    ]
+  },
+  {
+    "table": "org_tenures",
+    "fileCount": 5,
+    "consts": ["ORG_TENURES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "src\\features\\department\\department.service.ts",
+      "src\\services\\event.service.ts",
+      "src\\features\\admin\\orgDetail.service.ts"
+    ]
+  },
+  {
+    "table": "org_requests",
+    "fileCount": 6,
+    "consts": ["ORG_REQUESTS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260927160000_club_dashboard_requests_roster.sql",
+      "src\\features\\clubs\\club.service.ts",
+      "src\\features\\clubs\\actions\\orgRequests.action.ts"
+    ]
+  },
+  {
+    "table": "attendee_profiles",
+    "fileCount": 7,
+    "consts": ["ATTENDEE_PROFILES", "ATTENDEES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "supabase/migrations\\20260927140000_staff_and_feature_denies.sql",
+      "src\\features\\auth\\authService.ts",
+      "src\\features\\networking\\badges.service.ts",
+      "src\\features\\event_attendee\\attendee.service.ts"
+    ]
+  },
+  {
+    "table": "event_categories",
+    "fileCount": 7,
+    "consts": [
+      "EVENT_CATEGORIES",
+      "SUPER_CATEGORIES",
+      "EVENT_FORMATS",
+      "SUPER_CATEGORIES_LEGACY",
+      "EVENT_FORMATS_LEGACY"
+    ],
+    "sample": [
+      "supabase/migrations\\20260926151000_taxonomy_text_ids.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\services\\models\\event.model.tsx",
+      "src\\features\\taxonomy\\taxonomy.service.ts",
+      "src\\features\\taxonomy\\categoryEngine.service.ts",
+      "src\\features\\taxonomy\\actions\\taxonomy.action.ts",
+      "src\\features\\taxonomy\\actions\\categoryEngine.action.ts"
+    ]
+  },
+  {
+    "table": "event_form_fields",
+    "fileCount": 7,
+    "consts": ["EVENT_FORM_FIELDS"],
+    "sample": [
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012190000_phase7_event_form_fields.sql",
+      "src\\services\\models\\event.model.tsx",
+      "src\\services\\event.service.ts",
+      "src\\features\\registration\\forms\\formFields.types.ts",
+      "src\\features\\registration\\forms\\formFields.service.ts",
+      "src\\features\\registration\\components\\RegistrationForm.tsx"
+    ]
+  },
+  {
+    "table": "event_invites",
+    "fileCount": 7,
+    "consts": ["EVENT_INVITES", "INVITE_LINKS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\lib\\access.ts",
+      "src\\features\\access\\access.service.ts",
+      "src\\features\\access\\actions\\markInviteOpened.action.ts",
+      "src\\features\\access\\actions\\inviteLinks.action.ts",
+      "src\\features\\access\\actions\\guestList.action.ts",
+      "src\\features\\registration\\registration.service.ts"
+    ]
+  },
+  {
+    "table": "event_sponsors_partners",
+    "fileCount": 7,
+    "consts": ["EVENT_SPONSORS_PARTNERS", "EVENT_ORGANIZATIONS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012160000_phase4_event_tabs.sql",
+      "src\\features\\organizations\\organizations.service.ts",
+      "src\\features\\organizations\\actions\\organizations.action.ts",
+      "src\\features\\hackathon\\actions\\tracks.action.ts"
+    ]
+  },
+  {
+    "table": "feature_overrides",
+    "fileCount": 7,
+    "consts": ["FEATURE_OVERRIDES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260927140000_staff_and_feature_denies.sql",
+      "src\\features\\saas\\saas.service.ts",
+      "src\\features\\saas\\actions\\subscriptions.action.ts",
+      "src\\features\\permissions\\permissions.service.ts"
+    ]
+  },
+  {
+    "table": "support_tickets",
+    "fileCount": 7,
+    "consts": ["SUPPORT_TICKETS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012140000_phase2_support_threads_attachments.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\admin\\supportThread.service.ts",
+      "src\\features\\admin\\admin.service.ts",
+      "src\\features\\admin\\actions\\support.action.ts"
+    ]
+  },
+  {
+    "table": "event_agenda_items",
+    "fileCount": 8,
+    "consts": ["EVENT_AGENDA_ITEMS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "src\\services\\event.service.ts",
+      "src\\features\\agendas\\agendaSpeakers.service.ts",
+      "src\\features\\agendas\\agenda.service.ts"
+    ]
+  },
+  {
+    "table": "org_announcements",
+    "fileCount": 8,
+    "consts": ["ORG_ANNOUNCEMENTS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "src\\features\\department\\announcements.service.ts",
+      "src\\features\\department\\actions\\departmentOrg.action.ts",
+      "src\\features\\department\\actions\\announcements.action.ts",
+      "src\\app\\clubs\\[clubId]\\page.tsx"
+    ]
+  },
+  {
+    "table": "org_module_access",
+    "fileCount": 8,
+    "consts": ["ORG_MODULE_ACCESS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\features\\department\\components\\ClubsWorkspace.tsx",
+      "src\\features\\teams\\actions\\department.action.ts",
+      "src\\features\\permissions\\permissions.service.ts",
+      "src\\features\\department\\department.service.ts",
+      "src\\features\\department\\actions\\departmentOrg.action.ts"
+    ]
+  },
+  {
+    "table": "applicants",
+    "fileCount": 9,
+    "consts": ["APPLICANTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261006120000_staff_recruitment_and_tier_active.sql",
+      "supabase/migrations\\20261012180000_phase6_teams_access.sql",
+      "src\\lib\\permissions.ts",
+      "src\\features\\teams\\components\\TeamsManager.tsx",
+      "src\\features\\teams\\components\\StaffRecruitmentSection.tsx",
+      "src\\features\\exports\\actions\\exportEventSheet.action.ts",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\staff\\page.tsx"
+    ]
+  },
+  {
+    "table": "hackathon_config",
+    "fileCount": 9,
+    "consts": ["HACKATHON_CONFIG"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\tasks.service.ts",
+      "src\\features\\hackathon\\actions\\tasks.action.ts",
+      "src\\features\\hackathon\\__tests__\\settingsResolver.test.ts",
+      "src\\app\\events\\[eventId]\\compete\\page.tsx",
+      "src\\features\\hackathon\\configKeys.ts"
+    ]
+  },
+  {
+    "table": "hackathon_tasks",
+    "fileCount": 9,
+    "consts": ["HACKATHON_TASKS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260928140000_hackathon_track_kind.sql",
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "supabase/migrations\\20261006140000_prizes_challenge_files_staff_roster.sql",
+      "supabase/migrations\\20261012120000_phase1a_security_rls_tighten.sql",
+      "src\\features\\hackathon\\taskSubmissions.service.ts",
+      "src\\features\\hackathon\\tasks.service.ts"
+    ]
+  },
+  {
+    "table": "payments",
+    "fileCount": 9,
+    "consts": ["PAYMENTS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "src\\features\\exports\\eventSheets.ts",
+      "src\\app\\vendor\\[vendor_id]\\dashboard\\page.tsx",
+      "src\\features\\registration\\registration.service.ts",
+      "src\\features\\bookings\\bookings.service.ts",
+      "src\\features\\bookings\\bookingValue.ts"
+    ]
+  },
+  {
+    "table": "hackathon_phases",
+    "fileCount": 10,
+    "consts": ["HACKATHON_PHASES"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20261012200000_phase8_hackathon_ops.sql",
+      "src\\features\\hackathon\\taskSubmissions.service.ts",
+      "src\\features\\hackathon\\tasks.service.ts",
+      "src\\features\\hackathon\\ctf.service.ts"
+    ]
+  },
+  {
+    "table": "subscription_plans",
+    "fileCount": 10,
+    "consts": ["SUBSCRIPTION_PLANS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260926150000_dynamic_subscription_plans.sql",
+      "src\\services\\models\\organizer.interfaces.ts",
+      "src\\features\\department\\department.service.ts",
+      "src\\features\\saas\\saas.service.ts",
+      "src\\features\\saas\\actions\\tenants.action.ts",
+      "src\\features\\saas\\actions\\subscriptions.action.ts",
+      "src\\features\\saas\\actions\\plans.action.ts"
+    ]
+  },
+  {
+    "table": "event_speakers",
+    "fileCount": 11,
+    "consts": ["EVENT_SPEAKERS"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "src\\features\\agendas\\types\\agenda.ts",
+      "src\\features\\agendas\\actions\\createAgenda.action.ts",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\agenda\\create-agenda\\page.tsx",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\speakers\\page.tsx"
+    ]
+  },
+  {
+    "table": "registration_groups",
+    "fileCount": 11,
+    "consts": ["REGISTRATION_GROUPS"],
+    "sample": [
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "supabase/migrations\\20261012190000_phase7_event_form_fields.sql",
+      "src\\features\\event_attendee\\eventEmail.service.tsx",
+      "src\\features\\event_attendee\\actions\\eventEmail.action.ts",
+      "src\\features\\registration\\registration.service.ts",
+      "src\\features\\exports\\actions\\exportEventSheet.action.ts",
+      "src\\features\\registration\\actions\\registerAttendee.action.ts",
+      "src\\app\\organizer\\[organizer_id]\\events\\[eventId]\\page.tsx"
+    ]
+  },
+  {
+    "table": "team_positions",
+    "fileCount": 12,
+    "consts": ["TEAM_POSITIONS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20261006120000_staff_recruitment_and_tier_active.sql",
+      "supabase/migrations\\20261006180000_team_positions_extra.sql",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "supabase/migrations\\20261012180000_phase6_teams_access.sql",
+      "src\\lib\\permissions.ts",
+      "src\\features\\permissions\\permissions.service.ts",
+      "src\\features\\permissions\\can.ts"
+    ]
+  },
+  {
+    "table": "org_memberships",
+    "fileCount": 13,
+    "consts": ["ORG_MEMBERSHIPS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "src\\services\\user.service.ts",
+      "src\\services\\models\\user.type.ts",
+      "src\\features\\auth\\authService.ts",
+      "src\\features\\teams\\teamEngine.service.ts"
+    ]
+  },
+  {
+    "table": "vendor_profiles",
+    "fileCount": 17,
+    "consts": ["VENDOR_PROFILES", "VENDORS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260927140000_staff_and_feature_denies.sql",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\admin\\types.ts",
+      "src\\features\\event_vendors\\event_venders.services.ts",
+      "src\\features\\auth\\authService.ts"
+    ]
+  },
+  {
+    "table": "hackathon_tracks",
+    "fileCount": 19,
+    "consts": ["HACKATHON_TRACKS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260927170000_event_wizard_map_reg_tracks.sql",
+      "supabase/migrations\\20260927180000_hackathon_track_discount_end.sql",
+      "supabase/migrations\\20260928140000_hackathon_track_kind.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql"
+    ]
+  },
+  {
+    "table": "team_members",
+    "fileCount": 20,
+    "consts": ["TEAM_MEMBERS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012180000_phase6_teams_access.sql",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "supabase/migrations\\20261006200000_organizer_staff_library.sql"
+    ]
+  },
+  {
+    "table": "hackathon_teams",
+    "fileCount": 24,
+    "consts": ["HACKATHON_TEAMS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260930120000_team_dashboard_access_code.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "supabase/migrations\\20261005120000_event_email_templates.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql"
+    ]
+  },
+  {
+    "table": "organizer_profiles",
+    "fileCount": 25,
+    "consts": ["ORGANIZER_PROFILES", "ORGANIZERS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926150000_dynamic_subscription_plans.sql",
+      "supabase/migrations\\20260927140000_staff_and_feature_denies.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "src\\features\\permissions\\permissions.service.ts"
+    ]
+  },
+  {
+    "table": "reviews",
+    "fileCount": 26,
+    "consts": ["REVIEWS", "FEEDBACK"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "src\\services\\models\\vendor.model.ts",
+      "src\\services\\models\\feedback.model.ts",
+      "src\\services\\feedback.service.ts",
+      "src\\services\\anaylService.ts"
+    ]
+  },
+  {
+    "table": "notifications",
+    "fileCount": 29,
+    "consts": ["NOTIFICATIONS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012120000_phase1a_security_rls_tighten.sql",
+      "src\\features\\event_attendee\\eventEmail.service.tsx",
+      "src\\features\\access\\actions\\registrationDecision.action.ts",
+      "src\\features\\department\\department.service.ts"
+    ]
+  },
+  {
+    "table": "bookings",
+    "fileCount": 44,
+    "consts": ["BOOKINGS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql",
+      "supabase/migrations\\20261012160000_phase4_event_tabs.sql",
+      "src\\features\\bookings\\shared_components\\VendorPrepBookingClient.tsx",
+      "src\\features\\bookings\\components\\AcceptQuoteButton.tsx"
+    ]
+  },
+  {
+    "table": "organizations",
+    "fileCount": 44,
+    "consts": ["ORGANIZATIONS", "ORGS"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20261012150000_phase3_tenures_announcements.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "src\\features\\teams\\components\\DepartmentDashboardView.tsx",
+      "src\\app\\events\\[eventId]\\tracks\\[trackId]\\leaderboard\\page.tsx",
+      "src\\app\\events\\[eventId]\\tracks\\page.tsx"
+    ]
+  },
+  {
+    "table": "certificates",
+    "fileCount": 53,
+    "consts": ["CERTIFICATES"],
+    "sample": [
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\create-buckets.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql",
+      "supabase/migrations\\20261012170000_phase5_certificates_json.sql"
+    ]
+  },
+  {
+    "table": "users",
+    "fileCount": 53,
+    "consts": ["USERS"],
+    "sample": [
+      "scripts\\seed-saas-owners.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260926120000_drop_fcm_storage_auth.sql",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260927140000_staff_and_feature_denies.sql",
+      "supabase/migrations\\20260927160000_club_dashboard_requests_roster.sql"
+    ]
+  },
+  {
+    "table": "registrations",
+    "fileCount": 66,
+    "consts": ["REGISTRATIONS", "WAITLIST"],
+    "sample": [
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260929120000_hackathon_access_codes.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql",
+      "supabase/migrations\\20261012120000_phase1a_security_rls_tighten.sql",
+      "supabase/migrations\\20261012220000_phase10_hardening_indexes_security.sql"
+    ]
+  },
+  {
+    "table": "teams",
+    "fileCount": 121,
+    "consts": ["TEAMS"],
+    "sample": [
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "supabase/migrations\\20260926140000_adminDb_filter_columns.sql",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260927160000_club_dashboard_requests_roster.sql",
+      "supabase/migrations\\20260930120000_team_dashboard_access_code.sql",
+      "supabase/migrations\\20261001120000_unified_event_hackathon_v2.sql"
+    ]
+  },
+  {
+    "table": "events",
+    "fileCount": 226,
+    "consts": ["EVENTS"],
+    "sample": [
+      "scripts\\seed-saas-owners.mjs",
+      "supabase/migrations\\20260920120000_complete_schema.sql",
+      "scripts\\seed-demo.mjs",
+      "supabase/migrations\\20260926130000_docs_01_to_07_tables.sql",
+      "supabase/migrations\\20260927120000_admin_purge_tenant.sql",
+      "supabase/migrations\\20260926151000_taxonomy_text_ids.sql",
+      "supabase/migrations\\20260927170000_event_wizard_map_reg_tracks.sql",
+      "supabase/migrations\\20260928120000_admin_purge_event_children.sql"
+    ]
+  }
+]

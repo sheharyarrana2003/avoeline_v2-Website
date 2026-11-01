@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/**/{page,layout,loading,error,not-found,default,template,route}.{ts,tsx,js,jsx}",
+    "src/proxy.ts",
+    "scripts/*.{mjs,js,ts}"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "data/**/*.{ts,tsx}"],
+  "ignore": [".next/**", "src/lib/database.types.ts", "src/features/hackathon/components/ctf/**"],
+  "ignoreDependencies": [
+    "@tailwindcss/typography",
+    "@react-email/components",
+    "react-email",
+    "newrelic",
+    "react-icons",
+    "lint-staged",
+    "husky",
+    "prettier",
+    "eslint-config-prettier"
+  ],
+  "ignoreBinaries": ["supabase"]
+}

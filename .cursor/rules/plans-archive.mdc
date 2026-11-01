@@ -1,0 +1,11 @@
+---
+description: Keep the repo plans/ archive in sync with agent plans
+alwaysApply: true
+---
+
+# Plans archive
+
+- Canonical plan archive: repo root [`plans/`](plans/) (not only `.cursor/plans/`).
+- After CreatePlan, completing a plan, or shipping plan work: write/copy the plan to `plans/YYYY-MM-DD-short-slug.md` and update `plans/INDEX.md` in the same session.
+- Follow naming and status rules in `plans/README.md`.
+- Point humans/agents at `plans/` from `completeContext.md` when mentioning plan history.

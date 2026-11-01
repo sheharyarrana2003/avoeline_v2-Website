@@ -13,7 +13,7 @@
 
 | Working on... | Open only this file |
 |---|---|
-| SaaS owner subscriptions, tenant approvals, admin-created accounts | `01-saas-owner.md` |
+| SaaS owner subscriptions, tenant approvals, admin-created accounts | `01-saas-owner.md` (+ `/admin/tenants` board: `plans/2026-10-25-admin-tenants-redesign.md`, email rules `16-platform-email.md`) |
 | Department dashboard, club oversight, tenures, budgets | `02-department.md` |
 | Club president portal, club team roles, requests to department | `03-club-president.md` |
 | Organizer dashboard, any paid vs free feature question | `04-organizer.md` |
