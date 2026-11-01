@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   title: "Avoeline — Event Management Platform",
   description:
     "Avoeline helps organizers plan, execute, and analyse events — while connecting them with the best vendors in one place.",
+  verification: {
+    google: "Bo1baJxtjhLB4HXAPwN6ATf5nsgYrPx1DkjrkXY48xY",
+  },
 };
 
 export default function RootLayout({

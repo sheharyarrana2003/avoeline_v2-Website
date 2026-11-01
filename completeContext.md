@@ -719,6 +719,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 
 ## Change log
 
+### 2026-11-01 — Google Search Console verification
+- What: Site verification for `avoeline.aroxes.com` via root metadata `verification.google` + static HTML file in `public/`.
+- Files: `src/app/layout.tsx`, `public/google00e8ccd1ef8247ac.html`
+- Next: After Vercel deploy, verify in Search Console (meta tag and/or HTML file URL).
+
 ### 2026-11-01 — Marketing W5 hardening
 - What: Sanitize `rich_text.markdown` / FAQ answers + require image/logo alts; legal preview `skipHtml`; security/SEO unit tests; FAQPage JSON-LD; Lighthouse script + a11y checklist; skip-link; remove `randomuser.me` CSP/images; optional marketing RLS npm/CI; docs/11 + docs/19 W5 shipped.
 - Files: `src/features/website/{blockSanitize,media.logic,publishedContent.logic,seo.logic,contact.logic,__tests__/*}.ts`, `src/app/(marketing)/{layout,page,plans/page}.tsx`, `scripts/{marketing-lighthouse,test-marketing-rls}.mjs`, `reports/marketing/*`, `next.config.ts`, `.github/workflows/ci.yml`, `plans/2026-11-01-marketing-w5-hardening.md`
