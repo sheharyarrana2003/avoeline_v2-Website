@@ -81,6 +81,7 @@ export default async function EventLayout({
     ...(certsOk
       ? [{ label: "Certificates", value: "certificates", href: `${ev}/certificates` }]
       : []),
+    { label: "Files", value: "files", href: `${ev}/files` },
     { label: "Exports", value: "exports", href: `${ev}/exports` },
   ];
   const visibleTabs = tabs.filter((tab) => tabAllowedByGrant(grant, tab.value));

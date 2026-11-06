@@ -189,6 +189,10 @@ export async function decideRegistration(formData: FormData): Promise<ActionResu
 
     if (!approved) await promoteWaitlistTransaction(eventId);
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(eventId, ["attendees", "checkin"]);
+
     revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
     return ok();
   } catch (err) {
@@ -233,6 +237,10 @@ export async function cancelRegistrationAction(formData: FormData): Promise<Acti
     if (updErr) throw updErr;
 
     await promoteWaitlistTransaction(eventId);
+
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(eventId, ["attendees", "checkin"]);
 
     const { data: event } = await supabaseAdmin
       .from(TABLES.EVENTS)

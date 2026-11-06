@@ -159,13 +159,21 @@ export default async function VendorProfilePage({
               : "Your public profile, and the account details behind it."
           }
           actions={
-            <Link
-              href={`/vendor/${vendor_id}/profile?preview=${!isPreview}`}
-              aria-pressed={isPreview}
-              className={buttonClass(isPreview ? "primary" : "secondary")}
-            >
-              {isPreview ? "Exit organizer preview" : "Preview as organizer"}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`/vendor/${vendor_id}/settings/connections`}
+                className={buttonClass("secondary")}
+              >
+                Connections
+              </Link>
+              <Link
+                href={`/vendor/${vendor_id}/profile?preview=${!isPreview}`}
+                aria-pressed={isPreview}
+                className={buttonClass(isPreview ? "primary" : "secondary")}
+              >
+                {isPreview ? "Exit organizer preview" : "Preview as organizer"}
+              </Link>
+            </div>
           }
         />
 

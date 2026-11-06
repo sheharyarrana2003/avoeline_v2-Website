@@ -1,0 +1,3 @@
+﻿next@16.2.6 (installed)
+npm audit: 60 vulnerabilities (4 low, 43 moderate, 12 high, 1 critical)
+Critical package: next — advisories include GHSA-6gpp-xcg3-4w24 (Middleware/Proxy bypass, Turbopack+single locale) and GHSA-m99w-x7hq-7vfj (DoS via Server Actions); fixAvailable next@16.4.5

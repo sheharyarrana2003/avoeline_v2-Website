@@ -1,55 +1,54 @@
 import type { PublicEventDto } from "@/src/features/events/types";
 import { parseScheduleDateTime } from "@/src/lib/datetime";
+import {
+  buildIcs,
+  googleCalendarTemplateUrl,
+  type CalendarFallbackInput,
+} from "@/src/features/connections/lib/calendarFallbacks";
 
-/** Build a downloadable .ics blob URL for the event schedule. */
+function eventFallbackInput(
+  dto: Pick<
+    PublicEventDto,
+    "id" | "title" | "shortDescription" | "schedule" | "location" | "sharePath"
+  >,
+): CalendarFallbackInput {
+  const start = parseScheduleDateTime(dto.schedule.startDate, dto.schedule.startTime) ?? new Date();
+  const end =
+    parseScheduleDateTime(dto.schedule.endDate || dto.schedule.startDate, dto.schedule.endTime) ??
+    new Date(start.getTime() + 2 * 60 * 60 * 1000);
+
+  const location = [dto.location.venueName, dto.location.address, dto.location.city]
+    .filter(Boolean)
+    .join(", ");
+
+  return {
+    uid: dto.id,
+    title: dto.title,
+    description: dto.shortDescription || undefined,
+    location: location || undefined,
+    url: dto.sharePath || undefined,
+    start,
+    end,
+  };
+}
+
+/** Build a downloadable .ics blob contents for the event schedule. */
 export function buildEventIcs(
   dto: Pick<
     PublicEventDto,
     "id" | "title" | "shortDescription" | "schedule" | "location" | "sharePath"
   >,
 ): string {
-  const start = parseScheduleDateTime(dto.schedule.startDate, dto.schedule.startTime) ?? new Date();
-  const end =
-    parseScheduleDateTime(dto.schedule.endDate || dto.schedule.startDate, dto.schedule.endTime) ??
-    new Date(start.getTime() + 2 * 60 * 60 * 1000);
+  return buildIcs(eventFallbackInput(dto));
+}
 
-  const stamp = (d: Date) =>
-    d
-      .toISOString()
-      .replace(/[-:]/g, "")
-      .replace(/\.\d{3}/, "");
-
-  const location = [dto.location.venueName, dto.location.address, dto.location.city]
-    .filter(Boolean)
-    .join(", ");
-
-  const escape = (s: string) =>
-    String(s || "")
-      .replace(/\\/g, "\\\\")
-      .replace(/;/g, "\\;")
-      .replace(/,/g, "\\,")
-      .replace(/\n/g, "\\n");
-
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Avoeline//Event//EN",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    "BEGIN:VEVENT",
-    `UID:${dto.id}@avoeline`,
-    `DTSTAMP:${stamp(new Date())}`,
-    `DTSTART:${stamp(start)}`,
-    `DTEND:${stamp(end)}`,
-    `SUMMARY:${escape(dto.title)}`,
-    dto.shortDescription ? `DESCRIPTION:${escape(dto.shortDescription)}` : null,
-    location ? `LOCATION:${escape(location)}` : null,
-    dto.sharePath ? `URL:${escape(dto.sharePath)}` : null,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].filter(Boolean);
-
-  return lines.join("\r\n");
+export function eventGoogleCalendarUrl(
+  dto: Pick<
+    PublicEventDto,
+    "id" | "title" | "shortDescription" | "schedule" | "location" | "sharePath"
+  >,
+): string {
+  return googleCalendarTemplateUrl(eventFallbackInput(dto));
 }
 
 export function downloadEventIcs(dto: Parameters<typeof buildEventIcs>[0]): void {

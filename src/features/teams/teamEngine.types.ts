@@ -114,11 +114,20 @@ export const APPLICANT_STATUSES: ApplicantStatus[] = [
 export const APPLICANT_STATUS_LABEL: Record<ApplicantStatus, string> = {
   applied: "Applied",
   shortlisted: "Shortlisted",
-  interview_scheduled: "Interview Scheduled",
+  interview_scheduled: "Interview",
   accepted: "Onboarded",
   rejected: "Rejected",
   withdrawn: "Withdrawn",
 };
+
+/** Ordered pipeline shown in recruitment UI (excludes withdrawn). */
+export const APPLICANT_PIPELINE: ApplicantStatus[] = [
+  "applied",
+  "shortlisted",
+  "interview_scheduled",
+  "accepted",
+  "rejected",
+];
 
 export type OrganizerTeamsStats = {
   teamsCount: number;

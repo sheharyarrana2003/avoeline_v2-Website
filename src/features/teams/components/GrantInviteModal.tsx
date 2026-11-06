@@ -374,7 +374,10 @@ export function GrantInviteModal({
             </div>
           ) : null}
           {needsConnection ? (
-            <a href={`/organizer/${organizerId}/email`} className={buttonClass("ghost", "sm")}>
+            <a
+              href={`/organizer/${organizerId}/settings/connections`}
+              className={buttonClass("ghost", "sm")}
+            >
               Connect email
             </a>
           ) : null}

@@ -111,6 +111,30 @@ export const emailCertificatesAction = safeAction({
           );
     }
 
+    const { findActiveEmailConnection } =
+      await import("@/src/features/connections/server/connections.service");
+    const { getCapacity } = await import("@/src/features/connections/server/capacity.service");
+    const conn = await findActiveEmailConnection({
+      ownerType: "user",
+      ownerId: event.organizerId,
+    });
+    if (conn) {
+      const capacity = await getCapacity({
+        connection: conn,
+        ownerId: event.organizerId,
+        kind: "certificate",
+        eventId: input.eventId,
+      });
+      const cap = Math.min(capacity.maxPerSend, Math.max(0, capacity.remainingBulk));
+      if (cap < 1) {
+        return safeFail(
+          "CAPACITY",
+          "No bulk send capacity left today. Wait for slots to free up or schedule from Settings → Sent emails.",
+        );
+      }
+      outgoing.splice(cap);
+    }
+
     const organizer = await OrganizerService.getOrganizerById(event.organizerId).catch(() => null);
     const replyTo = organizer?.contact?.primaryEmail?.trim();
 
@@ -150,6 +174,7 @@ export const emailCertificatesAction = safeAction({
         subject: built.subject,
         html: built.html,
         text: built.text,
+        kind: "certificate",
         ...(replyTo ? { replyTo } : {}),
         ...(attachments ? { attachments } : {}),
       });

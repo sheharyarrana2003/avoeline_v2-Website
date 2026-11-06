@@ -131,6 +131,43 @@ function PlanForm({
           wrapperClassName="sm:col-span-2"
           defaultValue={plan?.description ?? ""}
         />
+        <Input
+          id={`${p}-email-daily`}
+          name="emailDailyCap"
+          type="number"
+          min={1}
+          label="Email daily cap"
+          defaultValue={
+            plan?.email_daily_cap != null
+              ? String(plan.email_daily_cap)
+              : plan?.key === "free"
+                ? "200"
+                : "1500"
+          }
+        />
+        <Input
+          id={`${p}-email-monthly`}
+          name="emailMonthlyCap"
+          type="number"
+          min={1}
+          label="Email monthly cap"
+          defaultValue={
+            plan?.email_monthly_cap != null
+              ? String(plan.email_monthly_cap)
+              : plan?.key === "free"
+                ? "1000"
+                : "10000"
+          }
+        />
+        <Input
+          id={`${p}-email-max-send`}
+          name="emailMaxPerSend"
+          type="number"
+          min={1}
+          max={5000}
+          label="Max recipients per send"
+          defaultValue={plan?.key === "free" ? "100" : "500"}
+        />
       </div>
       <fieldset className="space-y-2">
         <legend className="text-2xs font-medium uppercase tracking-wider text-ink-soft">

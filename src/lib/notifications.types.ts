@@ -64,4 +64,9 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: Record<
     body: "Your certificate for {{eventTitle}} is ready to download.",
     defaultChannels: ["email", "push"],
   },
+  connection_needs_reconnect: {
+    subject: "Reconnect Google: {{providerEmail}}",
+    body: "Your Google connection ({{providerEmail}}) needs to be reconnected. Queued organizer mail is paused until you reconnect: {{reconnectUrl}}",
+    defaultChannels: ["email", "push"],
+  },
 };

@@ -77,6 +77,11 @@ export default async function VendorLayout({ children }: { children: React.React
     ...(bookings
       ? [{ label: "Bookings", href: `${basePath}/bookings`, icon: "bookings" as const }]
       : []),
+    {
+      label: "Connections",
+      href: `${basePath}/settings/connections`,
+      icon: "connections" as const,
+    },
   ];
 
   return (

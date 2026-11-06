@@ -1,13 +1,13 @@
 import "server-only";
 
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
-import { getServerEnv } from "@/src/env";
+import { getConnectionsEncryptionKey } from "@/src/env";
 
 function keyBytes(): Buffer {
-  const secret = getServerEnv().EMAIL_CONNECTION_SECRET?.trim();
+  const secret = getConnectionsEncryptionKey();
   if (!secret || secret.length < 16) {
     throw new Error(
-      "EMAIL_CONNECTION_SECRET is required (min 16 characters) to store email connection secrets.",
+      "CONNECTIONS_ENCRYPTION_KEY (or EMAIL_CONNECTION_SECRET) is required (min 16 characters).",
     );
   }
   return createHash("sha256").update(secret).digest();
@@ -32,6 +32,5 @@ export function decryptSecret(payload: string): string {
 }
 
 export function emailConnectionSecretConfigured(): boolean {
-  const secret = getServerEnv().EMAIL_CONNECTION_SECRET?.trim();
-  return Boolean(secret && secret.length >= 16);
+  return Boolean(getConnectionsEncryptionKey());
 }

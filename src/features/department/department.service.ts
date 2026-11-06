@@ -422,6 +422,7 @@ export function departmentNavItems(modules?: readonly ModuleKey[] | null): NavIt
     { label: "Tenures", href: "/department/tenures", icon: "clubs" },
     { label: "Announcements", href: "/department/announcements", icon: "announce" },
     { label: "Requests", href: "/department/requests", icon: "requests" },
+    { label: "Connections", href: "/department/settings/connections", icon: "requests" },
   ];
 }
 

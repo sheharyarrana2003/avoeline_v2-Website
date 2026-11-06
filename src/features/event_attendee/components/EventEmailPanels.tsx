@@ -23,6 +23,10 @@ import {
 } from "../actions/eventEmail.action";
 import type { ActionResult } from "@/src/lib/action";
 import { useSearchParams } from "next/navigation";
+import { CapacityStrip } from "@/src/features/connections/components/CapacityStrip";
+import { CapacityDialog } from "@/src/features/connections/components/CapacityDialog";
+import { SenderPicker } from "@/src/features/connections/components/SenderPicker";
+import type { PreviewSendResult } from "@/src/features/connections/types";
 
 function TokenInsertMenu({
   onInsert,
@@ -100,7 +104,7 @@ export function EmailConnectionRequiredBanner({
   organizerId?: string;
 }) {
   if (!show) return null;
-  const href = organizerId ? `/organizer/${organizerId}/email` : null;
+  const href = organizerId ? `/organizer/${organizerId}/settings/connections` : null;
   return (
     <p
       role="status"
@@ -117,7 +121,7 @@ export function EmailConnectionRequiredBanner({
           .
         </>
       ) : (
-        ". Open Organizer → Email to connect your Google account."
+        ". Open Settings → Connections to connect your Google account."
       )}{" "}
       Platform Resend is not used for attendee mail.
     </p>
@@ -284,10 +288,12 @@ export function RegistrationEmailsModal({
 
 export function BulkAttendeeEmailModal({
   eventId,
+  organizerId,
   hasTeams,
   hidePayment,
 }: {
   eventId: string;
+  organizerId?: string;
   hasTeams?: boolean;
   hidePayment?: boolean;
 }) {
@@ -301,6 +307,13 @@ export function BulkAttendeeEmailModal({
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewMeta, setPreviewMeta] = useState<{ count: number; emails: string[] } | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [capacityPreview, setCapacityPreview] = useState<PreviewSendResult | null>(null);
+  const [resolvedRecipients, setResolvedRecipients] = useState<
+    Array<{ email: string; registrationId?: string | null }>
+  >([]);
+  const [capDialogOpen, setCapDialogOpen] = useState(false);
+  const [selectionCap, setSelectionCap] = useState<number | null>(null);
+  const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [state, action] = useActionState<(ActionResult & { sent?: number }) | null, FormData>(
     sendBulkAttendeeEmailAction,
@@ -317,6 +330,17 @@ export function BulkAttendeeEmailModal({
         <input type="hidden" name="payment" value={searchParams.get("payment") ?? "all"} />
         <input type="hidden" name="checkin" value={searchParams.get("checkin") ?? "all"} />
         <input type="hidden" name="track" value={searchParams.get("track") ?? "all"} />
+        <input
+          type="hidden"
+          name="sendMode"
+          value={selectionCap != null ? "selection_cap" : "send_and_schedule"}
+        />
+        {selectionCap != null ? (
+          <input type="hidden" name="selectionCap" value={String(selectionCap)} />
+        ) : null}
+        {senderConnectionId ? (
+          <input type="hidden" name="connectionId" value={senderConnectionId} />
+        ) : null}
       </>
     );
   }
@@ -363,6 +387,9 @@ export function BulkAttendeeEmailModal({
       }
       setPreviewHtml(result.html || "");
       setPreviewMeta({ count: result.count || 0, emails: result.sampleEmails || [] });
+      if (result.capacityPreview) setCapacityPreview(result.capacityPreview);
+      if (result.recipients) setResolvedRecipients(result.recipients);
+      setSelectionCap(null);
     });
   }
 
@@ -371,6 +398,30 @@ export function BulkAttendeeEmailModal({
       <button type="button" className={buttonClass("primary", "sm")} onClick={() => setOpen(true)}>
         Email these results
       </button>
+      {organizerId && capacityPreview && capDialogOpen ? (
+        <CapacityDialog
+          open={capDialogOpen}
+          onClose={() => setCapDialogOpen(false)}
+          ownerId={organizerId}
+          kind={kind}
+          subject={subject || "Event update"}
+          html={previewHtml || undefined}
+          eventId={eventId}
+          recipients={
+            selectionCap != null ? resolvedRecipients.slice(0, selectionCap) : resolvedRecipients
+          }
+          preview={capacityPreview}
+          onSelectionCap={(cap) => {
+            setSelectionCap(cap);
+            setConfirming(true);
+          }}
+          onDone={() => {
+            setOpen(false);
+            setConfirming(false);
+            setCapDialogOpen(false);
+          }}
+        />
+      ) : null}
       <Modal
         open={open}
         onClose={() => {
@@ -413,13 +464,28 @@ export function BulkAttendeeEmailModal({
                 >
                   Preview & continue
                 </button>
+              ) : capacityPreview &&
+                organizerId &&
+                previewMeta &&
+                previewMeta.count > capacityPreview.sendNow ? (
+                <button
+                  type="button"
+                  className={buttonClass("primary", "sm")}
+                  disabled={!previewMeta || previewMeta.count < 1}
+                  onClick={() => setCapDialogOpen(true)}
+                >
+                  Review capacity ({previewMeta.count})
+                </button>
               ) : (
                 <SubmitButton
                   form="bulk-email-form"
                   className={buttonClass("primary", "sm")}
                   disabled={!previewMeta || previewMeta.count < 1}
                 >
-                  Confirm send{previewMeta ? ` (${previewMeta.count})` : ""}
+                  Confirm send
+                  {previewMeta
+                    ? ` (${selectionCap != null ? selectionCap : previewMeta.count})`
+                    : ""}
                 </SubmitButton>
               )}
             </div>
@@ -428,6 +494,14 @@ export function BulkAttendeeEmailModal({
       >
         <form id="bulk-email-form" action={action} className="space-y-4">
           {filterHiddens()}
+          <SenderPicker
+            eventId={eventId}
+            value={senderConnectionId}
+            onChange={setSenderConnectionId}
+          />
+          {organizerId ? (
+            <CapacityStrip ownerId={organizerId} kind={kind} eventId={eventId} />
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass} htmlFor="bulk-email-type">
@@ -529,6 +603,11 @@ export function BulkAttendeeEmailModal({
                 <span className="font-medium text-ink">{previewMeta.count}</span> recipients. First{" "}
                 {previewMeta.emails.length}: {previewMeta.emails.join(", ") || "—"}
               </p>
+              {selectionCap != null && capacityPreview ? (
+                <p className="mt-1 font-medium text-ink">
+                  Selection capped: {selectionCap} / {capacityPreview.sendNow}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {previewHtml ? (
@@ -586,6 +665,7 @@ export function MemberEmailForm({
   hidePayment?: boolean;
 }) {
   const [open, setOpen] = useState(startOpen);
+  const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
   const [state, action] = useActionState<ActionResult | null, FormData>(
     sendMemberEmailAction,
     null,
@@ -605,6 +685,10 @@ export function MemberEmailForm({
     <form action={action} className="space-y-3 rounded-xl border border-line p-5">
       <input type="hidden" name="eventId" value={eventId} />
       <input type="hidden" name="registrationId" value={registrationId} />
+      {senderConnectionId ? (
+        <input type="hidden" name="connectionId" value={senderConnectionId} />
+      ) : null}
+      <SenderPicker eventId={eventId} value={senderConnectionId} onChange={setSenderConnectionId} />
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-ink">Compose</p>
         <button

@@ -1,0 +1,593 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> avoeline@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · optimizePackageImports
+  · proxyClientMaxBodySize: "50mb"
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 73s
+  Running TypeScript ...
+  Finished TypeScript in 118s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/61) ...
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/analytics couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/analytics couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/support couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/support couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/announcements couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/announcements couldn't be rendered statically because it used `cookies`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/clubs couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/clubs couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/signin couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/signin couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/events couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/events couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/tenants/new couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/tenants/new couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/tenants couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/tenants couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/marketplace couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/marketplace couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/vendors couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/vendors couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/requests couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/requests couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/settings/connections couldn't be rendered 
+statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/settings/connections couldn't be rendered statically because it used `cookies`. See 
+more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+  Generating static pages using 7 workers (15/61) 
+[getCurrentUser] failed Error: Dynamic server usage: Route /auth/change-password couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at l (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\[root-of-the-server]__0pyoge
+9._.js:1:10289) {
+  description: "Route /auth/change-password couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /department/tenures couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0_pcak6._.js:1:14623) {
+  description: "Route /department/tenures couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /network couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at o (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\[root-of-the-server]__0lnw_4
+g._.js:1:22422) {
+  description: "Route /network couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /organizer couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at p (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0oj61f9._.js:1:10409) {
+  description: "Route /organizer couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /auth/signup/choose-role couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at j (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0vo34-6._.js:1:12489) {
+  description: "Route /auth/signup/choose-role couldn't be rendered statically because it used `cookies`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /auth/signup/awaiting-approval couldn't be rendered 
+statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at k (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\[root-of-the-server]__0d7o6c
+m._.js:1:2413) {
+  description: "Route /auth/signup/awaiting-approval couldn't be rendered statically because it used `cookies`. See 
+more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /auth/signup/organizerSetup couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at q (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0_.1nw2._.js:5:9790) {
+  description: "Route /auth/signup/organizerSetup couldn't be rendered statically because it used `cookies`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /support couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at n (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\[root-of-the-server]__04dxqb
+x._.js:1:19515) {
+  description: "Route /support couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /auth/signup/vendorSetup couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at q (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0palruv._.js:5:9745) {
+  description: "Route /auth/signup/vendorSetup couldn't be rendered statically because it used `cookies`. See more 
+info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+  Generating static pages using 7 workers (30/61) 
+[getCurrentUser] failed Error: Dynamic server usage: Route /teams couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at k (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\[root-of-the-server]__06b82o
+q._.js:1:11672) {
+  description: "Route /teams couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+  Generating static pages using 7 workers (45/61) 
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/admins couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/admins couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/departments couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/departments couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/billing/pending couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/billing/pending couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/audit couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/audit couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/events couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/events couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/organizers couldn't be rendered statically because 
+it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/organizers couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/orgs couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/orgs couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin couldn't be rendered statically because it used 
+`cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/plans couldn't be rendered statically because it 
+used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/plans couldn't be rendered statically because it used `cookies`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[getCurrentUser] failed Error: Dynamic server usage: Route /admin/settings/billing couldn't be rendered statically 
+because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at dH (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_03ccdp_._.js:24:67175)
+    at <unknown> 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18400)
+    at Object.requireAdmin 
+(C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\_0u8ji22._.js:1:18683)
+    at m (C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\.next\server\chunks\ssr\src_0ej1e44._.js:1:5013) {
+  description: "Route /admin/settings/billing couldn't be rendered statically because it used `cookies`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+✓ Generating static pages using 7 workers (61/61) in 4.1s
+  Finalizing page optimization ...
+
+Route (app)                                                                  Revalidate  Expire
+┌ ○ /                                                                               10m      1y
+├ ○ /_not-found
+├ ○ /about                                                                          10m      1y
+├ ƒ /access-denied
+├ ƒ /admin
+├ ƒ /admin/admins
+├ ƒ /admin/audit
+├ ƒ /admin/billing/pending
+├ ƒ /admin/categories
+├ ƒ /admin/category-requests
+├ ƒ /admin/clubs/[id]
+├ ƒ /admin/departments
+├ ƒ /admin/departments/[id]
+├ ƒ /admin/events
+├ ƒ /admin/organizers
+├ ƒ /admin/organizers/[organizerId]
+├ ƒ /admin/orgs
+├ ƒ /admin/orgs/[orgId]
+├ ƒ /admin/plans
+├ ƒ /admin/settings/billing
+├ ƒ /admin/signin
+├ ƒ /admin/support
+├ ƒ /admin/support/[ticketId]
+├ ƒ /admin/support/registrations
+├ ƒ /admin/tenants
+├ ƒ /admin/tenants/new
+├ ƒ /admin/vendors
+├ ƒ /admin/vendors/[vendorId]
+├ ƒ /admin/website
+├ ƒ /api/certificates/[id]
+├ ƒ /api/connections/[provider]/callback
+├ ƒ /api/connections/[provider]/start
+├ ƒ /api/connections/google/picker-token
+├ ƒ /api/cron/connections-health
+├ ƒ /api/cron/email-outbox
+├ ƒ /api/cron/feature-override-expiry
+├ ƒ /api/cron/linked-files
+├ ƒ /api/cron/plan-expiry
+├ ƒ /api/cron/sheet-syncs
+├ ƒ /api/email/google/callback
+├ ƒ /apply/[token]
+├ ƒ /attendee/[attendee_id]/dashboard
+├ ƒ /auth/callback
+├ ƒ /auth/change-password
+├ ƒ /auth/signin
+├ ƒ /auth/signup
+├ ƒ /auth/signup/awaiting-approval
+├ ƒ /auth/signup/choose-role
+├ ƒ /auth/signup/organizerSetup
+├ ƒ /auth/signup/vendorSetup
+├ ƒ /certificate/[code]/download
+├ ƒ /clubs/[clubId]
+├ ƒ /clubs/[clubId]/analytics
+├ ƒ /clubs/[clubId]/designer
+├ ƒ /clubs/[clubId]/events
+├ ƒ /clubs/[clubId]/hackathon
+├ ƒ /clubs/[clubId]/hackathon/create
+├ ƒ /clubs/[clubId]/marketplace
+├ ƒ /clubs/[clubId]/requests
+├ ƒ /clubs/[clubId]/teams
+├ ƒ /clubs/[clubId]/ushers
+├ ƒ /collaborate/[token]
+├ ƒ /contact
+├ ƒ /department
+├ ƒ /department/analytics
+├ ƒ /department/announcements
+├ ƒ /department/announcements/[id]
+├ ƒ /department/clubs
+├ ƒ /department/clubs/[clubId]
+├ ƒ /department/clubs/[clubId]/settings/connections
+├ ƒ /department/events
+├ ƒ /department/marketplace
+├ ƒ /department/requests
+├ ƒ /department/settings/connections
+├ ƒ /department/tenures
+├ ƒ /e/[eventId]
+├ ƒ /events
+├ ƒ /events/[eventId]
+├ ƒ /events/[eventId]/compete
+├ ƒ /events/[eventId]/enter
+├ ƒ /events/[eventId]/mentors
+├ ƒ /events/[eventId]/staff-apply/[formId]
+├ ƒ /events/[eventId]/ticket/[registrationId]
+├ ƒ /events/[eventId]/ticket/[registrationId]/team
+├ ƒ /events/[eventId]/ticket/[registrationId]/tracks/[trackId]/tasks
+├ ƒ /events/[eventId]/tracks
+├ ƒ /events/[eventId]/tracks/[trackId]
+├ ƒ /events/[eventId]/tracks/[trackId]/leaderboard
+├ ƒ /events/[eventId]/tracks/[trackId]/tasks
+├ ƒ /f/[token]
+├ ƒ /judge/[token]
+├ ƒ /network
+├ ƒ /organizer
+├ ƒ /organizer/[organizer_id]
+├ ƒ /organizer/[organizer_id]/all-vendors
+├ ƒ /organizer/[organizer_id]/analytics
+├ ƒ /organizer/[organizer_id]/booking-details/[booking_id]
+├ ƒ /organizer/[organizer_id]/booking-details/[booking_id]/counter-offer
+├ ƒ /organizer/[organizer_id]/chatbot
+├ ƒ /organizer/[organizer_id]/dashboard
+├ ƒ /organizer/[organizer_id]/designer
+├ ƒ /organizer/[organizer_id]/email
+├ ƒ /organizer/[organizer_id]/events
+├ ƒ /organizer/[organizer_id]/events/[eventId]
+├ ƒ /organizer/[organizer_id]/events/[eventId]/access
+├ ƒ /organizer/[organizer_id]/events/[eventId]/agenda
+├ ƒ /organizer/[organizer_id]/events/[eventId]/agenda/create-agenda
+├ ƒ /organizer/[organizer_id]/events/[eventId]/attendees
+├ ƒ /organizer/[organizer_id]/events/[eventId]/certificates
+├ ƒ /organizer/[organizer_id]/events/[eventId]/certificates/making-template
+├ ƒ /organizer/[organizer_id]/events/[eventId]/competitions
+├ ƒ /organizer/[organizer_id]/events/[eventId]/competitions/[trackId]
+├ ƒ /organizer/[organizer_id]/events/[eventId]/edit
+├ ƒ /organizer/[organizer_id]/events/[eventId]/expenses
+├ ƒ /organizer/[organizer_id]/events/[eventId]/exports
+├ ƒ /organizer/[organizer_id]/events/[eventId]/files
+├ ƒ /organizer/[organizer_id]/events/[eventId]/hackathon
+├ ƒ /organizer/[organizer_id]/events/[eventId]/hackathon/[trackId]
+├ ƒ /organizer/[organizer_id]/events/[eventId]/pub-succ
+├ ƒ /organizer/[organizer_id]/events/[eventId]/scoreboard
+├ ƒ /organizer/[organizer_id]/events/[eventId]/settings
+├ ƒ /organizer/[organizer_id]/events/[eventId]/speakers
+├ ƒ /organizer/[organizer_id]/events/[eventId]/speakers/create-speaker
+├ ƒ /organizer/[organizer_id]/events/[eventId]/sponsors
+├ ƒ /organizer/[organizer_id]/events/[eventId]/staff
+├ ƒ /organizer/[organizer_id]/events/[eventId]/submissions
+├ ƒ /organizer/[organizer_id]/events/[eventId]/tasks
+├ ƒ /organizer/[organizer_id]/events/[eventId]/teams
+├ ƒ /organizer/[organizer_id]/events/[eventId]/tickets
+├ ƒ /organizer/[organizer_id]/events/[eventId]/vendors
+├ ƒ /organizer/[organizer_id]/events/create
+├ ƒ /organizer/[organizer_id]/forms
+├ ƒ /organizer/[organizer_id]/forms/[formId]
+├ ƒ /organizer/[organizer_id]/forms/[formId]/responses
+├ ƒ /organizer/[organizer_id]/hackathon
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/access
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/attendees
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/certificates
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/competitions
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/competitions/[trackId]
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/scoreboard
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/settings
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/submissions
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/tasks
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/teams
+├ ƒ /organizer/[organizer_id]/hackathon/[eventId]/tickets
+├ ƒ /organizer/[organizer_id]/hackathon/create
+├ ƒ /organizer/[organizer_id]/library
+├ ƒ /organizer/[organizer_id]/notifications
+├ ƒ /organizer/[organizer_id]/profile
+├ ƒ /organizer/[organizer_id]/quotes
+├ ƒ /organizer/[organizer_id]/settings/connections
+├ ƒ /organizer/[organizer_id]/settings/email-batches
+├ ƒ /organizer/[organizer_id]/teams
+├ ƒ /organizer/[organizer_id]/ushers
+├ ƒ /organizer/[organizer_id]/vendor-marketplace
+├ ƒ /organizer/[organizer_id]/view-vendor
+├ ƒ /organizer/[organizer_id]/view-vendor/[vendor_id]
+├ ƒ /organizer/[organizer_id]/view-vendor/[vendor_id]/req-quote
+├ ○ /partners                                                                       10m      1y
+├ ○ /plans
+├ ○ /privacy
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+├ ƒ /support
+├ ƒ /support/[ticketId]
+├ ○ /suspended
+├ ƒ /teams
+├ ○ /teams/join
+├ ○ /terms
+├ ƒ /unsubscribe
+├ ƒ /unsubscribe/organizer
+├ ƒ /vendor/[vendor_id]
+├ ƒ /vendor/[vendor_id]/bookings
+├ ƒ /vendor/[vendor_id]/bookings/[booking_id]
+├ ƒ /vendor/[vendor_id]/bookings/[booking_id]/counter-offer
+├ ƒ /vendor/[vendor_id]/dashboard
+├ ƒ /vendor/[vendor_id]/notifications
+├ ƒ /vendor/[vendor_id]/profile
+├ ƒ /vendor/[vendor_id]/quotes
+├ ƒ /vendor/[vendor_id]/quotes/[quote_detail_id]
+├ ƒ /vendor/[vendor_id]/quotes/prep-quote/[prep_quote_id]
+├ ƒ /vendor/[vendor_id]/quotes/templates
+├ ƒ /vendor/[vendor_id]/services
+├ ƒ /vendor/[vendor_id]/services/[service_id]/edit
+├ ƒ /vendor/[vendor_id]/services/add-service
+├ ƒ /vendor/[vendor_id]/settings/connections
+└ ƒ /verify/[code]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

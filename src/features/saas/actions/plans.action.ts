@@ -77,14 +77,46 @@ async function savePlanImpl(formData: FormData): Promise<ActionResult> {
 
   if (key === "free") row.is_active = true;
 
+  const emailDaily = toNumberOrNull(formData.get("emailDailyCap"));
+  const emailMonthly = toNumberOrNull(formData.get("emailMonthlyCap"));
+  const maxPerSend = toNumberOrNull(formData.get("emailMaxPerSend"));
+
   const { error } = id
-    ? await supabaseAdmin.from(TABLES.SUBSCRIPTION_PLANS).update(row).eq("id", id)
-    : await supabaseAdmin.from(TABLES.SUBSCRIPTION_PLANS).insert(row);
+    ? await supabaseAdmin
+        .from(TABLES.SUBSCRIPTION_PLANS)
+        .update({
+          ...row,
+          email_daily_cap: emailDaily,
+          email_monthly_cap: emailMonthly,
+        })
+        .eq("id", id)
+    : await supabaseAdmin.from(TABLES.SUBSCRIPTION_PLANS).insert({
+        ...row,
+        email_daily_cap: emailDaily,
+        email_monthly_cap: emailMonthly,
+      });
   if (error) {
     if (error.code === "23505") return fail("Another plan already uses that key.");
     console.error("[savePlan]", error);
     return fail("Could not save the plan.");
   }
+
+  const dailyCap =
+    emailDaily && emailDaily > 0 ? Math.floor(emailDaily) : key === "free" ? 200 : 1500;
+  const monthlyCap =
+    emailMonthly && emailMonthly > 0 ? Math.floor(emailMonthly) : key === "free" ? 1000 : 10000;
+  const maxSend =
+    maxPerSend && maxPerSend > 0
+      ? Math.min(5000, Math.floor(maxPerSend))
+      : key === "free"
+        ? 100
+        : 500;
+  await supabaseAdmin.from(TABLES.PLAN_EMAIL_LIMITS).upsert({
+    plan_key: key,
+    daily_cap: dailyCap,
+    monthly_cap: monthlyCap,
+    max_per_send: maxSend,
+  });
 
   revalidatePlans();
   return ok();

@@ -578,6 +578,10 @@ export const getHackathonSettings = cache(async (eventId: string): Promise<Hacka
         50,
         Math.max(1, Number((raw as any)?.max_attachment_mb ?? extra.maxAttachmentMb ?? 10) || 10),
       ),
+      judgingWindowStart: String(extra.judgingWindowStart || ""),
+      judgingWindowEnd: String(extra.judgingWindowEnd || ""),
+      onlineSessionStart: String(extra.onlineSessionStart || ""),
+      onlineSessionEnd: String(extra.onlineSessionEnd || ""),
       updatedAt: toIsoString(raw?.updated_at || extra.updatedAt) || "",
     };
   } catch (err) {

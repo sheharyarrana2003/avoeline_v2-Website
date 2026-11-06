@@ -15,6 +15,7 @@ import {
 } from "../actions/staffAdvanced.action";
 import {
   APPLICANT_NEXT,
+  APPLICANT_PIPELINE,
   APPLICANT_STATUS_LABEL,
   APPLICANT_STATUSES,
   STAFF_PERMISSIONS,
@@ -469,27 +470,32 @@ function ApplicantPipeline({
     return <p className="text-sm text-ink-soft">No applicants yet.</p>;
   }
   return (
-    <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-      {APPLICANT_STATUSES.map((status) => {
-        const rows = applicants.filter((a) => a.status === status);
-        return (
-          <div key={status} className="space-y-3 rounded-xl border border-line p-3">
-            <p className="text-2xs font-medium uppercase text-ink-soft">
-              {APPLICANT_STATUS_LABEL[status]} · {rows.length}
-            </p>
-            {rows.length === 0 ? <p className="text-xs text-ink-faint">None</p> : null}
-            {rows.map((a) => (
-              <ApplicantCard
-                key={a.id}
-                applicant={a}
-                eventId={eventId}
-                organizerId={organizerId}
-                positionTitle={positions.find((p) => p.id === a.positionId)?.title}
-              />
-            ))}
-          </div>
-        );
-      })}
+    <div className="space-y-3">
+      <p className="text-xs text-ink-soft">
+        Pipeline: Applied → Shortlist → Interview → Onboarded (or Rejected).
+      </p>
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {APPLICANT_PIPELINE.map((status) => {
+          const rows = applicants.filter((a) => a.status === status);
+          return (
+            <div key={status} className="space-y-3 rounded-xl border border-line p-3">
+              <p className="text-2xs font-medium uppercase text-ink-soft">
+                {APPLICANT_STATUS_LABEL[status]} · {rows.length}
+              </p>
+              {rows.length === 0 ? <p className="text-xs text-ink-faint">None</p> : null}
+              {rows.map((a) => (
+                <ApplicantCard
+                  key={a.id}
+                  applicant={a}
+                  eventId={eventId}
+                  organizerId={organizerId}
+                  positionTitle={positions.find((p) => p.id === a.positionId)?.title}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -102,7 +102,10 @@ export function OrganizerAccessTab({
             >
               Copy link
             </button>
-            <a href={`/organizer/${organizerId}/email`} className={buttonClass("ghost", "sm")}>
+            <a
+              href={`/organizer/${organizerId}/settings/connections`}
+              className={buttonClass("ghost", "sm")}
+            >
               Connect email
             </a>
           </div>

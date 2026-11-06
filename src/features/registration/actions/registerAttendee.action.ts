@@ -432,6 +432,10 @@ export async function registerAttendeeAction(
       console.error("[registerAttendeeAction] consent", consentErr);
     }
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(eventId, tracks.length ? ["attendees", "hackathon_teams"] : ["attendees"]);
+
     revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/attendees`);
     redirect(ticketPath);
   } catch (err) {

@@ -79,6 +79,7 @@ export default async function CertificateIssuancePage({
     <CertificateIssuanceClient
       attendees={attendeesWithData}
       eventId={eventId}
+      organizerId={organizer_id}
       onGenerateCertificates={handleGenerateCertificates}
       onEmailCertificates={handleEmailCertificates}
     />

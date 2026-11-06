@@ -136,11 +136,11 @@ export async function setStaffApplicantStatus(formData: FormData): Promise<void>
           willEmail = !existingUser?.id;
         }
         if (willEmail) {
-          const { getActiveConnectionRow } =
+          const { hasActiveOrganizerEmailConnection } =
             await import("@/src/features/email/organizerEmailConnection.service");
           const { RECRUITMENT_CONNECT_GOOGLE_MSG } =
             await import("@/src/features/teams/recruitmentEmail");
-          const connected = await getActiveConnectionRow(mailOrgId);
+          const connected = await hasActiveOrganizerEmailConnection(mailOrgId);
           if (!connected) {
             result = fail(RECRUITMENT_CONNECT_GOOGLE_MSG);
             finishForm(formData, `/organizer/${organizerId}/events/${eventId}/staff`, result);

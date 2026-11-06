@@ -1,0 +1,14 @@
+Pass 1 cross-check from completed read-only inventory agents (2026-11-04).
+
+- Routes inventory agent 38f9ae73-8910-4709-bf6e-df664787d255:
+  173 pages; 11 src/app/api/** route.ts; proxy PUBLIC_PATHS=/admin/signin;
+  /support page AuthService; legacy /api/email/google/callback redirect-only;
+  /api/certificates/[id] public JSON + rateLimit; 103 "use server" under features/actions.
+
+- Env/tables inventory agent e442ff4b-6c85-4700-9630-e1255aeff46c:
+  env.ts vs .env.example gaps; TABLES list; third parties; docs 12/15/20 absent
+  with interim notes (phase6 teams plan; connections-security-review docs/15 N/A).
+
+- knip+npm audit shell 618843: exit 1 expected; evidence already in 01-knip.txt / 01-npm-audit*.
+
+Merged into docs/audit/01-inventory.md (no source-code changes).

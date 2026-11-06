@@ -358,7 +358,7 @@ export async function sendOrganizerEmail(opts: {
   if (result.code === "NO_CONNECTION") {
     console.warn(
       "[sendOrganizerEmail] blocked — organizer has no Google connection. " +
-        `Connect at /organizer/${opts.event.organizerId}/email`,
+        `Connect at /organizer/${opts.event.organizerId}/settings/connections`,
     );
   } else if (result.error) {
     console.error("[sendOrganizerEmail] provider error", result.error);

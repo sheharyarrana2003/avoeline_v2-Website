@@ -174,6 +174,13 @@ export default async function OrganizerLayout({ children }: { children: React.Re
           ...(teamsOk
             ? [{ label: "Teams", href: `${basePath}/teams`, icon: "teams" as const }]
             : []),
+          { label: "Forms", href: `${basePath}/forms`, icon: "forms" as const },
+          {
+            label: "Connections",
+            href: `${basePath}/settings/connections`,
+            icon: "connections" as const,
+            activePrefix: `${basePath}/settings`,
+          },
           ...(storeOk
             ? [{ label: "Quotes", href: `${basePath}/quotes`, icon: "quotes" as const }]
             : []),

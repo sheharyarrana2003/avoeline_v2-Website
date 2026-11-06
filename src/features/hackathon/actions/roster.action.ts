@@ -142,6 +142,11 @@ export async function removeTeam(eventId: string, formData: FormData): Promise<v
       .delete()
       .eq("id", loaded.team.id);
     if (error) throw error;
+
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(eventId, ["hackathon_teams"]);
+
     done(loaded.backTo, eventId);
   } catch (err) {
     if (isRedirectError(err)) throw err;

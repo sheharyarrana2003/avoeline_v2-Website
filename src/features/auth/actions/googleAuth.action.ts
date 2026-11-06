@@ -4,6 +4,10 @@ import { headers } from "next/headers";
 import { createSupabaseServer } from "@/data/supabase";
 import { absoluteUrl } from "@/src/lib/appUrl";
 import { rateLimit } from "@/src/lib/rateLimit";
+import {
+  shouldBootstrapGoogleWorkspace,
+  WORKSPACE_GOOGLE_SCOPES,
+} from "@/src/features/connections/lib/workspaceScopes.logic";
 
 export async function startGoogleAuthAction(input: {
   next?: string;
@@ -30,11 +34,18 @@ export async function startGoogleAuthAction(input: {
       : "";
   const redirectTo = await absoluteUrl(`/auth/callback${nextQ}`);
 
+  const wantWorkspace = shouldBootstrapGoogleWorkspace(userType);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
       redirectTo,
-      queryParams: { access_type: "offline", prompt: "select_account" },
+      scopes: wantWorkspace ? WORKSPACE_GOOGLE_SCOPES.join(" ") : "openid email profile",
+      queryParams: {
+        access_type: "offline",
+        // consent so Google returns a refresh token we can store in Connections
+        prompt: wantWorkspace ? "consent" : "select_account",
+        include_granted_scopes: "true",
+      },
       ...(userType && ["organizer", "vendor", "attendee"].includes(userType)
         ? { data: { user_type: userType } }
         : {}),

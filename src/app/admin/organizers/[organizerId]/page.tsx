@@ -28,6 +28,8 @@ import {
   deleteOrganizerAccount,
   updateOrganizerAccount,
 } from "@/src/features/admin/actions/tenancy.action";
+import { AdminConnectionStatus } from "@/src/features/connections/components/AdminConnectionStatus";
+import { listConnections } from "@/src/features/connections/server/connections.service";
 
 /**
  * Spec 9.3: organizer detail inside the admin shell (no Enter View).
@@ -52,11 +54,12 @@ export default async function AdminOrganizerDetailPage({
   const row = await getOrganizerRow(organizerId);
   if (!row) notFound();
 
-  const [organizer, events, log, plans] = await Promise.all([
+  const [organizer, events, log, plans, connections] = await Promise.all([
     OrganizerService.getOrganizerById(row.userId).catch(() => null),
     EventService.getAllEventsByOrganizer(row.userId).catch(() => [] as EventModel[]),
     moderationFor(row.organizerId),
     listPlans({ activeOnly: true }),
+    listConnections({ ownerType: "user", ownerId: row.userId }).catch(() => []),
   ]);
 
   const suspended = row.accountStatus !== "active";
@@ -153,6 +156,8 @@ export default async function AdminOrganizerDetailPage({
         </Card>
 
         <div className="space-y-8">
+          <AdminConnectionStatus organizerId={row.userId} connections={connections} />
+
           <Card title="Edit organizer">
             <CardBody>
               <AdminEditNameForm

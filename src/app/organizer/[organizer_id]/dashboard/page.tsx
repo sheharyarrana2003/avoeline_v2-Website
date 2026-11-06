@@ -13,6 +13,10 @@ import RegistrationTrendChart from "@/src/features/dashboard/components/Registra
 import { CurrentUserData } from "@/src/services/models/user.type";
 import { redirect } from "next/navigation";
 import UpcomingEvents from "@/src/features/dashboard/components/UpcomingEvents";
+import { ConnectionsChecklistCard } from "@/src/features/connections/components/ConnectionsChecklistCard";
+import { hasActiveOrganizerEmailConnection } from "@/src/features/email/organizerEmailConnection.service";
+import { TABLES } from "@/data/collections";
+import { supabaseAdmin } from "@/data/supabase";
 
 export default async function Dashboard({ params }: { params: Promise<{ organizer_id: string }> }) {
   const { organizer_id } = await params;
@@ -67,6 +71,10 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
 
         <Suspense fallback={<StatsSkeleton />}>
           <DashboardStats organizerId={organizer_id} />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <DashboardConnectionsChecklist organizerId={organizer_id} />
         </Suspense>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
@@ -219,4 +227,14 @@ function WidgetSkeleton({ height }: { height: string }) {
       className={`${height} animate-pulse rounded-xl bg-muted-strong`}
     />
   );
+}
+
+async function DashboardConnectionsChecklist({ organizerId }: { organizerId: string }) {
+  const [{ data: user }, emailConnected] = await Promise.all([
+    supabaseAdmin.from(TABLES.USERS).select("extra").eq("id", organizerId).maybeSingle(),
+    hasActiveOrganizerEmailConnection(organizerId),
+  ]);
+  const extra = (user?.extra || {}) as { connections_checklist_dismissed_at?: string };
+  if (extra.connections_checklist_dismissed_at) return null;
+  return <ConnectionsChecklistCard organizerId={organizerId} emailConnected={emailConnected} />;
 }

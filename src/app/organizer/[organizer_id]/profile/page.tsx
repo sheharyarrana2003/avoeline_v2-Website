@@ -242,19 +242,30 @@ export default async function OrganizerProfile({
               </CardBody>
             </Card>
 
-            <Card title="Outbound email">
+            <Card title="Connections">
               <CardBody>
                 <p className="text-sm text-ink-soft">
                   {emailConnected
-                    ? `Connected (${emailConnection?.provider}) as ${emailConnection?.fromEmail}. Required for attendee and certificate mail.`
-                    : "Not connected. Attendee and certificate sends are blocked until you connect Google or SMTP."}
+                    ? `Connected as ${emailConnection?.fromEmail}. Required for attendee and certificate mail.`
+                    : "Not connected. Attendee and certificate sends are blocked until you connect Google."}
                 </p>
-                <Link
-                  href={`${basePath}/email`}
-                  className="mt-3 inline-flex text-sm font-medium text-ink underline"
-                >
-                  {emailConnected ? "Manage connection" : "Connect email"}
-                </Link>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-ink">
+                  <Link href={`${basePath}/settings/connections`} className="underline">
+                    {emailConnected ? "Manage connections" : "Connect Google"}
+                  </Link>
+                  <Link
+                    href={`${basePath}/settings/connections?tab=library`}
+                    className="underline text-ink-soft hover:text-ink"
+                  >
+                    Drive library
+                  </Link>
+                  <Link
+                    href={`${basePath}/forms`}
+                    className="underline text-ink-soft hover:text-ink"
+                  >
+                    Custom forms
+                  </Link>
+                </div>
               </CardBody>
             </Card>
 

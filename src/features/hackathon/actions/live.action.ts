@@ -389,7 +389,29 @@ export async function saveHackathonSettings(
       50,
       Math.max(1, Number(formData.get("maxAttachmentMb")) || 10),
     );
+    const judgingWindowStart = String(formData.get("judgingWindowStart") ?? "")
+      .trim()
+      .slice(0, 40);
+    const judgingWindowEnd = String(formData.get("judgingWindowEnd") ?? "")
+      .trim()
+      .slice(0, 40);
+    const onlineSessionStart = String(formData.get("onlineSessionStart") ?? "")
+      .trim()
+      .slice(0, 40);
+    const onlineSessionEnd = String(formData.get("onlineSessionEnd") ?? "")
+      .trim()
+      .slice(0, 40);
     const now = new Date().toISOString();
+
+    const { data: existing } = await supabaseAdmin
+      .from(TABLES.HACKATHON_SETTINGS)
+      .select("extra")
+      .eq("event_id", event.id)
+      .maybeSingle();
+    const prevExtra =
+      existing?.extra && typeof existing.extra === "object" && !Array.isArray(existing.extra)
+        ? (existing.extra as Record<string, unknown>)
+        : {};
 
     const { error } = await supabaseAdmin.from(TABLES.HACKATHON_SETTINGS).upsert({
       event_id: event.id,
@@ -397,6 +419,13 @@ export async function saveHackathonSettings(
       livestream_url: livestreamUrl,
       max_attachment_mb: maxAttachmentMb,
       updated_at: now,
+      extra: {
+        ...prevExtra,
+        judgingWindowStart,
+        judgingWindowEnd,
+        onlineSessionStart,
+        onlineSessionEnd,
+      },
     } as never);
     if (error) throw error;
 

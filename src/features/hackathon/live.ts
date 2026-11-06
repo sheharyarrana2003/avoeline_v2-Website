@@ -178,6 +178,12 @@ export interface HackathonSettings {
   livestreamUrl: string;
   /** CTF challenge/hint files. Default 10, hard cap 50. */
   maxAttachmentMb: number;
+  /** Optional judging window for calendar sync (ISO local date/time strings). */
+  judgingWindowStart?: string;
+  judgingWindowEnd?: string;
+  /** Optional online session window (defaults to event schedule when empty). */
+  onlineSessionStart?: string;
+  onlineSessionEnd?: string;
   updatedAt: string;
 }
 
@@ -185,6 +191,10 @@ export const EMPTY_SETTINGS: Omit<HackathonSettings, "eventId"> = {
   onlineMode: false,
   livestreamUrl: "",
   maxAttachmentMb: 10,
+  judgingWindowStart: "",
+  judgingWindowEnd: "",
+  onlineSessionStart: "",
+  onlineSessionEnd: "",
   updatedAt: "",
 };
 

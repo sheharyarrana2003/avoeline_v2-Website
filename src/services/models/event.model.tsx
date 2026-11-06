@@ -203,6 +203,8 @@ export interface AgendaItem {
   customFields: Record<string, any>;
   /** Attendee tiers this session is for. Empty or absent means everyone. */
   tiers?: string[];
+  /** Explicit opt-in for calendar sync (default off). */
+  addToCalendar?: boolean;
 }
 
 export interface VendorRequirement {

@@ -15,6 +15,8 @@ import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 import { DownloadCertificate } from "@/src/features/certificates/components/DownloadCertificate";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { CapacityStrip } from "@/src/features/connections/components/CapacityStrip";
+import { SenderPicker } from "@/src/features/connections/components/SenderPicker";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
 import { Award, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { Button, Input } from "@/components/ui";
@@ -30,6 +32,7 @@ export interface AttendeeCertProp {
 interface CertificateIssuanceClientProps {
   attendees: AttendeeCertProp[];
   eventId: string;
+  organizerId: string;
   onGenerateCertificates: (
     selectedAttendeeIds: string[],
     roles: Record<string, string>,
@@ -43,6 +46,8 @@ const ITEMS_PER_PAGE = 10;
 
 export default function CertificateIssuanceClient({
   attendees,
+  eventId,
+  organizerId,
   onGenerateCertificates,
   onEmailCertificates,
 }: CertificateIssuanceClientProps) {
@@ -59,6 +64,7 @@ export default function CertificateIssuanceClient({
   const [generationSummary, setGenerationSummary] = useState<string | null>(null);
   const [isEmailing, startEmailing] = useTransition();
   const [emailSummary, setEmailSummary] = useState<string | null>(null);
+  const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
 
   const pathName = usePathname();
 
@@ -323,6 +329,12 @@ export default function CertificateIssuanceClient({
       </section>
 
       <section className="space-y-3">
+        <CapacityStrip ownerId={organizerId} kind="certificate" eventId={eventId} />
+        <SenderPicker
+          eventId={eventId}
+          value={senderConnectionId}
+          onChange={setSenderConnectionId}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-ink">Issued</h2>
           <div className="flex flex-wrap gap-2">

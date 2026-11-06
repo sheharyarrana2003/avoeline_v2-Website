@@ -124,7 +124,14 @@ Auth IDs are **UUIDs** (`auth.users` → `public.users.id`). Vendor URLs use the
 | FEEDBACK_ANALYSES | `feedback_analyses` | Cached Gemini/local feedback analysis per organizer scope (`input_hash`, JSON result) |
 | NOTIFICATIONS / NOTIFICATION_TEMPLATES | `notifications`, `notification_templates` | In-app + templates |
 | EVENT_EMAIL_TEMPLATES | `event_email_templates` | Per-event `registration_received` / `registration_confirmed` / `custom`; partial unique `(event_id, kind)` where kind ≠ custom |
-| ORGANIZER_EMAIL_CONNECTIONS | `organizer_email_connections` | Organizer Google outbound credentials (encrypted secrets; service-role only). SMTP connect UI removed; legacy SMTP rows still send until revoked. Required for attendee/cert/bulk; no Resend fallback |
+| ORGANIZER_EMAIL_CONNECTIONS | `organizer_email_connections` | Legacy backup table (C1 backfill → `integration_*`). Prefer Connections tables below. |
+| INTEGRATION_CONNECTIONS / INTEGRATION_SECRETS / INTEGRATION_CAPABILITIES | matching names | Connections C1 (docs/17): Google accounts + encrypted refresh tokens (service-role only; no client grants on secrets) + per-capability enablement |
+| CALENDAR_LINKS | `calendar_links` | Connections C3: one-way platform→Google event sync + Meet URL (unique per connection+entity) |
+| LINKED_FILES | `linked_files` | Connections C4: Drive metadata links (event/team/club/booking); status ok/missing/no_access |
+| SHEET_SYNCS | `sheet_syncs` | Connections C5: one-way Google Sheets export/sync per event+kind |
+| CONNECTION_GRANTS / SENDER_PREFERENCES / CONNECTION_USAGE / OAUTH_STATES / CONNECTION_AUDIT | matching names | Org grants (C2), default sender, daily quota, PKCE OAuth state, audit |
+| EMAIL_OUTBOX | `email_outbox` | Queued organizer sends (batch_id, priority, time_sensitive, idempotency_key, skip_reason); drained by `/api/cron/email-outbox` |
+| PLAN_EMAIL_LIMITS / EMAIL_LIMIT_OVERRIDES / EMAIL_SEND_BATCHES / EMAIL_SUPPRESSIONS | matching names | Docs/18 plan caps, per-owner overrides, bulk batches, organizer unsubscribe suppressions |
 | PLATFORM_ALERTS | `platform_alerts` | Admin dashboard plan/pricing/expiry alerts (`kind`, `read_at`); service-role writes |
 | MODERATION_LOGS / EVENT_REPORTS / SUPPORT_TICKETS | matching names | Admin |
 | SUBSCRIPTION_PLANS / PLAN_CHANGES / FEATURE_OVERRIDES / CUSTOM_PRICING_AGREEMENTS | matching names | SaaS owner plans & unlocks (docs 01). Plans are dynamic rows (price monthly/yearly, currency, `is_active`, `sort_order`); `organizer_profiles.plan_type` FK → `subscription_plans.key` |
@@ -330,17 +337,29 @@ Browse + wizard + ownership. My Events list: `organizerEvents.filters.ts` / `org
 - Routes: `/organizer/.../events`, `create`, `[eventId]`, `pub-succ`; public `/events`, `/events/[eventId]` (allowlisted DTO; `/e/[eventId]` short redirect; sticky Register; Share in hero only; sponsor strips gated by show_*; SEO JSON-LD). Sponsors tab: “Show on public page” switches. Department/club create still uses the organizer wizard.
 - Public helpers: `publicEventPresentation` / `trackRegistrationOpen` in `src/lib/publicEventStatus.ts`; `ShareEventLink`
 
+### `connections` (docs/17 C1–C6 + docs/18 limits)
+
+Single module for Google integrations. Other features must not call Google directly. **C1–C6 shipped.**
+
+- `catalog.ts` — **all five active**; vendor omits `sheets.sync` card; Drive↔Sheets and Calendar↔Meet share scopes on connect
+- Services: OAuth/tokens/sender/grants/capacity/outbox + `calendarSync` + `linkedFiles` + `sheetSync` + `health`
+- Providers: Gmail, Calendar/Meet, Drive (Picker/create) + Sheets values + Docs text
+- Actions: `connections`, `grants`, `sender`, `send`, `adminLimits`, `calendar`, `drive`, `sheets`
+- UI: **ConnectionsHub** tabs (Accounts/Library/Calendar/Sheets/Sent email); CalendarSyncControls; Drive; **GoogleSheetsExportPanel** + attendee import on Exports
+- Crons: email-outbox, linked-files, sheet-syncs, connections-health (`CRON_SECRET`)
+- Docs: `docs/17`, **`docs/connections-complete-guide.md`** (end-to-end + organizer test flow), `docs/connections-security-review.md`, `docs/google-verification.md`, `docs/connections-picker-setup.md`
+- Tables: `CALENDAR_LINKS`, `LINKED_FILES`, `SHEET_SYNCS`, `CUSTOM_FORMS`, `CUSTOM_FORM_RESPONSES`
+
 ### `email`
 
-Platform Resend lanes + organizer **Google-only** outbound connections (SMTP UI deprecated).
+Platform Resend lanes. Organizer outbound sends go through **Connections** (`resolveSender` / `sendAsOrganizer`).
 
 - `platformMail.service.ts` — welcome/plan/invoice/announcement/support/staff/expiry via `sendPlatformEmail`
-- `organizerEmailConnection.service.ts` / `organizerTransport.service.ts` — connect, encrypt secrets, send fail-closed; `buildGoogleAuthUrl(state, loginHint?)`; tenant_provisioned accounts must OAuth-match `users.email`
-- Actions: `organizerEmailConnection.action.ts` (SMTP save/provision → DEPRECATED), `platformAnnouncement.action.ts`
-- UI: `OrganizerEmailConnectPanel` (Google connect / disconnect / test only); routes `/organizer/[id]/email`, `GET /api/email/google/callback`
-- Cron: `GET/POST /api/cron/plan-expiry` (`CRON_SECRET` Bearer or `?secret=`) — 5-day `plan_expires_at` reminders + `platform_alerts`
-- Admin: `platformAlerts.service.ts` (`createPlatformAlert`, `listOpenPlatformAlerts`); dashboard Plan alerts count → `/admin/tenants`
-- Docs: `docs/email-platform-setup.md`
+- `organizerEmailConnection.service.ts` / `organizerTransport.service.ts` — thin wrappers over Connections (no direct Google)
+- Actions: `organizerEmailConnection.action.ts` (delegates to connections; SMTP DEPRECATED), `platformAnnouncement.action.ts`
+- Cron: `GET/POST /api/cron/plan-expiry` (`CRON_SECRET` Bearer or `?secret=`) — 5-day `plan_expires_at` reminders + `platform_alerts`; `GET/POST /api/cron/email-outbox` — minute drain of queued organizer mail
+- Admin: `platformAlerts.service.ts`; organizer detail shows read-only Connections status + reconnect link; PlansBoard edits `plan_email_limits`; Tenants drawer Email tab → overrides/usage/pause
+- Docs: `docs/email-platform-setup.md`, `docs/17-connections-system.md`, `docs/18-email-send-limits-and-scheduling.md`
 
 ### `event_attendee`
 
@@ -348,7 +367,7 @@ Organizer attendee list, check-in, team/member drawers, registration emails.
 
 - `attendee.service.ts`, `roster.ts`, `emailTypes.ts`, `eventEmail.service.tsx` (sends via organizer Google connection, not Resend; `qr_code` include block + ticket-link QR in HTML)
 - Actions: `checkIn.action.ts` (also revalidates Overview), `eventEmail.action.ts` (save template, member send, bulk preview→confirm + rateLimit), `updateAttendeeDetails.action.ts` (`safeAction`; name/email/phone/custom answers; optional resend confirmation)
-- UI: `AttendeeClientSide`, `AttendeeListItem`, `SingleAttendeeView` (solo vs member; edit details form), `TeamGroupView`, `GroupedAttendeeList`, `AttendeeInput` (controlled search + filters), `EventEmailPanels` (`EmailConnectionRequiredBanner` → `/organizer/{id}/email`; IncludeChecklist injects body blocks live)
+- UI: `AttendeeClientSide`, `AttendeeListItem`, `SingleAttendeeView` (solo vs member; edit details form), `TeamGroupView`, `GroupedAttendeeList`, `AttendeeInput` (controlled search + filters), `EventEmailPanels` (`EmailConnectionRequiredBanner` → `/organizer/{id}/settings/connections`; IncludeChecklist injects body blocks live)
 - Stats: occupancy = team/group seats; people = non-cancelled; checked-in = `checkIn.checkedIn` or status `checked_in`/`attended`
 - Public ticket/status URL: `/events/{eventId}/ticket/{registrationId}`
 - Auto mail: `maybeAutoEventEmail` → team lead only; `registration_confirmed` defaults include `team_members`, `ticket_url`, `qr_code`
@@ -479,6 +498,7 @@ Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.ts
 | `sitemap.xml` / `robots.txt` | `src/app/sitemap.ts`, `src/app/robots.ts` |
 | `/events` | `src/app/events/page.tsx` |
 | `/apply/[token]` | public staff recruitment (token); legacy `staff-apply/[formId]` redirects here |
+| `/f/[token]` | public Custom Forms library submit |
 | `/e/[eventId]` | short redirect → `/events/[eventId]` (query preserved) |
 | `/events/[eventId]` | public event via `getPublicEventView` (hero/facts/register/about/agenda/speakers/competitions/sponsors; SEO + `loading.tsx`) |
 | `/events/[eventId]/ticket/[registrationId]` | ticket (hackathon: waiting + enter-code link) |
@@ -522,7 +542,7 @@ Layouts: `src/app/auth/layout.tsx`. Shared steps: `src/shared_components/auth/*`
 
 ### Organizer (`src/app/organizer/layout.tsx` → `DashboardNav`)
 
-Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same density as admin `AdminRail`. Nav items: Dashboard, Events, Analytics, Marketplace, Quotes, Designer, Ushers, Teams (hidden when the plan omits `teams_basic` and `teams_advanced_roles`). Profile + notifications in the rail.
+Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same density as admin `AdminRail`. Nav items: Dashboard, Events, Analytics, Marketplace, Quotes, Designer, Ushers, Teams (plan-gated), **Forms**, **Connections**, … Profile + notifications in the rail.
 
 | Path | Purpose |
 | --- | --- |
@@ -530,7 +550,12 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../dashboard` | home widgets (occupancy tiles, recent regs); plan banner on profile only |
 | `.../analytics` | URL `range`/`event` filters; occupancy tiles; local-day chart; Gemini feedback cache |
 | `.../events` | My Events list/grid (`?kind=&status=&q=&sort=&view=&page=`); occupancy columns |
-| `.../profile` | organizer profile + logo + **plan block** (modules / overrides / support) |
+| `.../profile` | organizer profile + logo + **plan block** (modules / overrides / support) + Connections link |
+| `.../settings/connections` | Connections **hub** tabs: Accounts / Library / Calendar / Sheets / Sent email (`?tab=`); disconnect on Accounts |
+| `.../settings/email-batches` | Redirect → `settings/connections?tab=email` |
+| `.../library` | Redirect → `settings/connections?tab=library` |
+| `.../forms`, `.../forms/[formId]`, `.../forms/[formId]/responses` | Organizer Custom Forms library + responses |
+| `.../email` | legacy redirect → `settings/connections` |
 | `.../events/create` | wizard (`?hackathon=1` pre-sets hackathon) |
 | `.../events/[eventId]` | unified dashboard |
 | `.../attendees` | roster; grouped default for hackathon or group registration; `?team=` opens that team; email templates + bulk on the same page |
@@ -547,7 +572,8 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../scoreboard` | task-completion scoreboard |
 | `.../settings` | hackathon_config apply-to |
 | `.../certificates`, `.../certificates/making-template` | certs |
-| `.../exports` | Excel/CSV including `hackathon_teams` |
+| `.../exports` | Excel/CSV + Google Sheets export + **attendee import** (xlsx/csv/Sheet; free events) |
+| `.../attendees` | Roster + **AttendeeImportPanel** |
 | `.../edit` | Edit basics (title, description, schedule, banner 4:5, gallery, seats, free/paid) |
 | `.../tickets` | Hackathon → Attendees; else Access |
 | `.../hackathon` | redirects to `.../events?kind=hackathon` |
@@ -602,6 +628,12 @@ Chrome: ThemeToggle, email, sign out. Nav is a slim **left rail** (`w-48`, `src/
 | `/admin/admins` | **Platform staff** — staff card grid + Add staff multi-step modal; card opens preview (grants + revoke); owners read-only; emails on create/update/revoke |
 | `/admin/settings/billing` | Platform bank / JazzCash / EasyPaisa **separate** cards (owner); single `platform_billing_settings` row |
 | `/api/cron/plan-expiry` | 5-day plan expiry reminders (`CRON_SECRET`) |
+| `/api/cron/email-outbox` | Minute worker: capacity + priority drain of `email_outbox` (`CRON_SECRET`) |
+| `/api/cron/linked-files` | Daily-ish: re-verify Drive access on `linked_files` (`CRON_SECRET`) |
+| `/api/cron/sheet-syncs` | Refresh keep-in-sync Google Sheets (`CRON_SECRET`) |
+| `/api/cron/connections-health` | Daily Connections status + 24h audit metrics + reconnect notifies (`CRON_SECRET`) |
+| `/api/connections/google/picker-token` | Short-lived Picker access token (never refresh) |
+| `/unsubscribe/organizer` | HMAC unsubscribe into `email_suppressions` (non-transactional) |
 
 ### Department
 
@@ -665,7 +697,7 @@ Styling helpers: `src/lib/ui.ts` (`buttonClass`, etc.). Theme: `data-theme` on `
 | `email/lanes.ts` | Platform From lane aliases (`notifications@`, `billing@`, …) + Reply-To / archive Bcc defaults (`info@aroxes.com`) |
 | `email/resend.ts` | Resend SDK. Prefer `sendPlatformEmail({ lane, … })` for SaaS (always Reply-To + Bcc). Low-level `sendEmail` supports `bcc`. Missing API key → `{ ok: false, dryRun: true }`. |
 | `email.ts` | HTML helpers (`escapeHtml`, `sendEmail`/`sendBulkEmail`). Prefers Resend; Brevo only as fallback. Not for organizer attendee/cert (use organizer transport). |
-| `email/secretCrypto.ts` | AES-GCM for organizer connection secrets (`EMAIL_CONNECTION_SECRET`) |
+| `email/secretCrypto.ts` | AES-GCM helper (legacy); Connections uses `features/connections/lib/crypto` + `tokens.service` (`CONNECTIONS_ENCRYPTION_KEY` ∥ `EMAIL_CONNECTION_SECRET`) |
 | `email/renderNotification.tsx` | maps notification `type` → React Email template |
 | `notifications.ts` + `.types.ts` | queue + dispatch; email channel uses `sendPlatformEmail` (`notifications` / `support` lanes) |
 | `csv.ts` | CSV parse/export |
@@ -691,7 +723,7 @@ Styling helpers: `src/lib/ui.ts` (`buttonClass`, etc.). Theme: `data-theme` on `
 - `implementation_plan.md` — ticketing plan; first UI is `src/features/ticketing` + `/tickets` event tab
 - Demo seed: `npm run seed:demo` (`scripts/seed-demo.mjs`). Mockdata / `seeding.js` removed with Firebase cutover.
 
-Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY`, optional `PLATFORM_ADMIN_EMAILS`, `SAAS_OWNER_EMAILS` + `SAAS_OWNER_PASSWORD_N` (seed script only). **Platform email (Resend):** `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (default/fallback only), `RESEND_REPLY_TO`, `RESEND_ARCHIVE_BCC`, optional `RESEND_FROM_*` lane overrides — see `docs/email-platform-setup.md`. **Organizer email:** `EMAIL_CONNECTION_SECRET` (≥16), optional `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` (Google only; SMTP connect deprecated). **Contact Turnstile (optional):** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` (secret unset → skip captcha verify). **Cron:** `CRON_SECRET` (≥16) for `/api/cron/plan-expiry`. Legacy `BREVO_API_KEY` + `MAIL_FROM` only if Resend unset. Configure Auth redirects in the Supabase project.
+Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY`, optional `PLATFORM_ADMIN_EMAILS`, `SAAS_OWNER_EMAILS` + `SAAS_OWNER_PASSWORD_N` (seed script only). **Platform email (Resend):** `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (default/fallback only), `RESEND_REPLY_TO`, `RESEND_ARCHIVE_BCC`, optional `RESEND_FROM_*` lane overrides — see `docs/email-platform-setup.md`. **Connections (docs/17):** preferred `CONNECTIONS_ENCRYPTION_KEY`, `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` / `GOOGLE_OAUTH_REDIRECT_URI` (`/api/connections/google/callback`), `CONNECTIONS_GOOGLE_ENABLED`, `GOOGLE_PICKER_API_KEY` / `GOOGLE_PICKER_APP_ID` (C4; see `docs/connections-picker-setup.md`); aliases `EMAIL_CONNECTION_SECRET`, `GOOGLE_CLIENT_*`, `GOOGLE_REDIRECT_URI` still work. **Contact Turnstile (optional):** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` (secret unset → skip captcha verify). **Cron:** `CRON_SECRET` (≥16) for `/api/cron/plan-expiry`, `/api/cron/email-outbox` (every minute), and `/api/cron/linked-files` (daily). Legacy `BREVO_API_KEY` + `MAIL_FROM` only if Resend unset. Configure Auth redirects in the Supabase project.
 
 ---
 
@@ -718,6 +750,76 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-04 — Audit Batch 1 (gates)
+- What: Next → 16.4.5 (AUD-1-002); attendee Sheets import via `connections/server/sheetRead.service` (AUD-1-005 / C6); restored docs `12`, `15`, `20` stubs (AUD-1-003); regression tests for C6 gate + Next floor.
+- Files: `package.json`, `src/features/connections/server/sheetRead.service.ts`, `src/features/event_attendee/import/attendeeImport.service.ts`, `src/features/connections/__tests__/c6ImportBoundary.test.ts`, `src/lib/__tests__/nextPatchedVersion.test.ts`, `docs/12-teams-and-staff.md`, `docs/15-security-baseline.md`, `docs/20-feature-coverage.md`, `docs/audit/findings.csv`
+- Intentionally open: lint/knip (AUD-1-001 remainder), Passes 2–11 (AUD-GAP-002), proxy token-route matrix (AUD-1-009)
+
+### 2026-11-04 — Connections hub, attendee import, Custom Forms, Teams polish
+- What: Organizer/vendor rail links; Connections hub tabs (Accounts/Library/Calendar/Sheets/Sent email); free-event attendee Excel/Sheet import; `custom_forms` + responses + `/f/[token]`; Recruitment pipeline legend + clone from Forms library.
+- Files: `src/features/connections/components/ConnectionsHub.tsx`, `src/features/event_attendee/import/**`, `src/features/custom_forms/**`, `src/app/organizer/.../forms/**`, `src/app/f/[token]/page.tsx`, `supabase/migrations/20261104120000_custom_forms.sql`, `plans/2026-11-04-organizer-connections-forms-import.md`
+- Next: Smoke-test hub disconnect, import on a free event, open a Custom Form public link.
+
+### 2026-11-03 — Production build green after workspace auto-link
+- What: Fixed duplicate `mode` binding, ticket `PublicSchedule` fields, `confirmSendAction` union, FilePicker typings, PlanRow email caps, EntityFilesPanel `reloadFiles`; `npm run build` succeeds.
+- Files: `src/features/event_attendee/actions/eventEmail.action.ts`, `src/app/events/[eventId]/ticket/[registrationId]/page.tsx`, `src/features/connections/actions/send.action.ts`, `src/features/connections/components/{EntityFilesPanel,FilePickerButton}.tsx`, `src/features/saas/saas.service.ts`
+- Next: Confirm Supabase Google provider uses same OAuth client as `GOOGLE_OAUTH_*`; set Cloud Console JS origins.
+
+### 2026-11-03 — Google sign-in auto-links Connections workspace
+- What: Organizer/vendor Google sign-up requests Gmail+Calendar+Drive scopes; auth callback seeds Connections from `provider_refresh_token` or redirects to `capability=workspace` OAuth; choose-role triggers same when needed.
+- Files: `src/features/auth/actions/googleAuth.action.ts`, `src/app/auth/callback/route.ts`, `src/app/auth/signup/choose-role/page.tsx`, `src/features/connections/{lib/workspaceScopes.logic,server/bootstrapFromAuth.service,server/oauth.service}.ts`, `src/app/api/connections/[provider]/start/route.ts`, `docs/connections-complete-guide.md`
+- Next: Use the **same** Google OAuth client in Supabase Auth provider as `GOOGLE_OAUTH_*` env; JS origins `localhost` + production; ignore `bis_skin_checked` hydration (browser extension).
+
+### 2026-11-03 — Google OAuth JS origins note
+- What: Documented Authorised JavaScript origins (`localhost` + `avoeline.aroxes.com`) vs Connections redirect URIs; clarified Supabase Google sign-in callback is separate. Hydration `bis_skin_checked` is Bitdefender extension noise, not app bug.
+- Files: `docs/connections-complete-guide.md`
+- Next: Fill empty JS origin in Cloud Console; restart local `npm run dev` after env save.
+
+### 2026-11-02 — Connections complete guide doc
+- What: Single guide covering C1–C6 + docs/18, security, schema, quality, parallel reads, and organizer test flow (Gmail / Calendar / Drive / Sheets).
+- Files: `docs/connections-complete-guide.md`, `completeContext.md`
+- Next: Use this doc for QA and onboarding; keep synced when Connections behavior changes.
+
+### 2026-11-02 — C6 Hardening checklist closeout
+- What: Google provider import boundary (`listCalendarsForConnection` + `scripts/check-connections-imports.mjs`); `oauthStateGate` / scope downgrade helpers; needs_reconnect notifications + 24h health metrics; refreshed security-review + google-verification §11 checklist; docs/11 banner.
+- Files: `src/features/connections/{actions/calendar.action,server/calendarSync.service,server/oauth.service,server/connections.service,server/health.service,lib/oauthState.logic,lib/securityChecks.logic,__tests__/c6Hardening.test}.ts`, `scripts/check-connections-imports.mjs`, `docs/{connections-security-review,google-verification,11-events-and-hackathon-complete-spec,17-connections-system}.md`
+- Next: Schedule connections-health (daily) + sheet-syncs / linked-files in prod; submit Google verification when demos ready.
+
+### 2026-11-02 — C5 Sheets checklist closeout
+- What: Chunked Sheets writes + retry/classify helpers; soft 429 defer vs pause on missing/revoke; `runActiveSheetSync` + `scheduleSheetRefresh` hooks (check-in, regs, teams); Stop sync UI; run-of-show from agenda; extended `c5Sheets` tests.
+- Files: `src/features/connections/{lib/sheetWrite.logic,lib/sheetSanitize,lib/templates.logic,providers/google/drive,server/sheetSync.service,components/GoogleSheetsExportPanel,__tests__/c5Sheets.test}.ts(x)`, mutation hooks in `event_attendee` / `access` / `registration` / `hackathon` actions, `docs/17-connections-system.md`
+- Next: None for C5; schedule `/api/cron/sheet-syncs` in prod if not already.
+
+### 2026-11-02 — C4 Drive checklist closeout
+- What: `provider_modified_at` on `linked_files`; verify-on-open via `gateOpenAfterVerify`; Library mime + added-by-me filters, load more, added_by name; `assertLinkedFileEntityAccess` on drive link/list/create; extended `c4Drive` tests.
+- Files: `supabase/migrations/20261103240000_linked_files_provider_modified_at.sql`, `src/features/connections/{lib/linkedFiles.logic,server/linkedFiles.service,server/linkedFileEntityAuth,actions/drive.action,components/LibraryList,components/OrganizerLibraryClient,__tests__/c4Drive.test}.ts(x)`, `src/lib/database.types.ts`, `docs/17-connections-system.md`
+- Next: None for C4; C5/C6 already shipped.
+
+### 2026-11-02 — Connections C5 + C6 (sheets + hardening)
+- What: `sheet_syncs` + Sheets export/keep-in-sync + templates on Exports; sheet-syncs cron; C6 security-review + google-verification docs; connections-health cron; threat/static unit tests.
+- Files: `supabase/migrations/20261103230000_sheet_syncs.sql`, `src/features/connections/{server/sheetSync,server/health,actions/sheets,components/GoogleSheetsExportPanel,lib/sheetSanitize,lib/templates,lib/securityChecks}.*`, `src/app/api/cron/{sheet-syncs,connections-health}`, `docs/{connections-security-review,google-verification,17-connections-system}.md`, `plans/2026-11-02-connections-c5-sheets.md`, `plans/2026-11-02-connections-c6-hardening.md`
+- Next: Connections docs/17 phases complete; operationalize crons + Google verification when ready for prod.
+
+### 2026-11-02 — Connections C4 Drive library
+- What: `linked_files` + GoogleDriveClient (`drive.file`); picker-token API; create Doc/Sheet/Slides; Library + Files on event/team/club/booking; cron verify; CSP/env; C4 unit tests.
+- Files: `supabase/migrations/20261103220000_linked_files.sql`, `src/features/connections/**`, `src/app/organizer/.../library`, `.../events/.../files`, `src/app/api/connections/google/picker-token`, `src/app/api/cron/linked-files`, `next.config.ts`, `docs/connections-picker-setup.md`, `docs/17-connections-system.md`, `plans/2026-11-02-connections-c4-drive-library.md`
+- Next: Pause for review; then C5 live attendee sheet / templates.
+
+### 2026-11-02 — Connections C3 Calendar and Meet
+- What: `calendar_links` + GoogleCalendarClient (Meet poll); catalog calendar/meet active; calendarSync + CalendarPicker/CalendarSyncControls; hooks on interview/event/agenda/mentor/judging/online; ICS + Google TEMPLATE on public hero + ticket; C3 unit tests.
+- Files: `supabase/migrations/20261103210000_calendar_links.sql`, `src/features/connections/**`, `src/features/events/components/{EditBasicsForm,public/addToCalendar,public/TicketCalendarActions,public/PublicEventHero}.tsx`, `src/features/teams/{components/OrganizerRecruitmentTab,interviewIcs}.ts*`, `src/features/agendas/**`, `src/features/hackathon/{live,actions/live.action,components/LiveForms,components/MentorForms}.*`, `src/app/events/.../ticket/.../page.tsx`, `docs/17-connections-system.md`, `plans/2026-11-02-connections-c3-calendar-meet.md`
+- Next: Pause for review; then C4 Drive/Picker.
+
+### 2026-11-02 — Connections C2 org grants + resolveSender
+- What: Org-owned connections + `connection_grants` UI; vendor/dept/club Connections mounts; full `resolveSender` + SenderPicker; validated reconnect tokens; `blocked_by_admin` copyable note; admin kill switch; C2 unit tests.
+- Files: `supabase/migrations/20261103200000_connections_c2.sql`, `src/features/connections/**`, `src/app/{vendor,department}/**/settings/connections`, `src/features/email/organizerTransport.service.ts`, `docs/17-connections-system.md`, `plans/2026-11-02-connections-c2-org-grants.md`
+- Next: Pause for review; then C3 Calendar/Meet. Call `markOwnerLeftForUser` from membership removal when that path is added.
+
+### 2026-11-02 — Email send limits and scheduling (docs/18)
+- What: Rolling 24h capacity + plan/override caps; `previewSend`/`confirmSend` + CapacityStrip/dialog; `email_send_batches` + outbox minute cron with priority/throttle/circuit breaker; organizer unsubscribe suppressions; admin plan limits + tenant override/pause; unit tests; docs/11.
+- Files: `supabase/migrations/20261102200000_email_limits_scheduling.sql`, `src/features/connections/**`, `src/app/api/cron/email-outbox`, `src/app/organizer/.../settings/email-batches`, `src/app/(marketing)/unsubscribe/organizer`, `src/features/saas/{actions/plans.action,components/PlansBoard,components/tenants/EmailLimitsPanel}.ts(x)`, `docs/18-email-send-limits-and-scheduling.md`, `plans/2026-11-02-email-limits-scheduling.md`
+- Next: Schedule `/api/cron/email-outbox` every minute with `CRON_SECRET`; smoke bulk overflow dialog + Workspace `hd` daily 1500; C2 org shared connections.
 
 ### 2026-11-01 — Google Search Console verification
 - What: Site verification for `avoeline.aroxes.com` via root metadata `verification.google` + static HTML file in `public/`.
@@ -1263,6 +1365,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 - What: Subscription/tenant admin (plans, overrides, custom pricing, create-tenant + forced password reset). Organizer `hasModuleAccess` + locked panels. Department tenures/module access/announcements/request queue. Club `org_requests`. Hackathon tasks + hashed flag submit + `hackathon_config` toggles (existing `hackathon_phases` extended, not duplicated). Networking directory, badge tiers, registration badge discount. Implemented sequentially on this working tree (docs 01→04→02/03→06/07→05) rather than three parallel branches.
 - Files: `supabase/migrations/20260926130000_docs_01_to_07_tables.sql`, `src/features/permissions/`, `src/features/saas/`, `src/features/department/`, `src/features/clubs/`, `src/features/hackathon/tasks.service.ts`, `src/features/networking/`, `completeContext.md`
 - Next: Per-module polish (AI designer generation, docker infra, materialized department analytics). Plan before coding each follow-up.
+
+### 2026-11-01 — Connections C1 foundation (docs/17)
+- What: `integration_*` + outbox stub + `email_log.connection_id` + org kill flag; AES-GCM tokens; catalog (email.send only); Google OAuth PKCE start/callback; Gmail send; organizer Settings → Connections + dashboard checklist + NeedsConnection; `requireConnectedSender` → `resolveSender`; admin read-only reconnect link; unit tests; legacy `/email` and `/api/email/google/callback` redirect.
+- Files: `supabase/migrations/20261101200000_connections_c1.sql`, `src/features/connections/**`, `src/app/api/connections/**`, `src/app/organizer/.../settings/connections`, `src/features/email/organizer{Transport,EmailConnection}.*`, `data/collections.ts`, `src/lib/database.types.ts`, `src/env.ts`, `.env.example`, `docs/17-connections-system.md`, `plans/2026-11-01-connections-c1-foundation.md`
+- Next: C2 org grants + sender picker; set `GOOGLE_OAUTH_REDIRECT_URI` to `/api/connections/google/callback` (legacy callback still redirects).
 
 ### 2026-09-26 — Remove Firebase; Auth trigger + Storage policies
 

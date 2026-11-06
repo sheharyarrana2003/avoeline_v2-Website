@@ -18,6 +18,7 @@ import {
 } from "@/src/features/hackathon/hackathon.service";
 import { eventLifecycle } from "@/src/lib/eventState";
 import TicketFeedbackForm from "@/src/features/analytics/components/TicketFeedbackForm";
+import { TicketCalendarActions } from "@/src/features/events/components/public/TicketCalendarActions";
 
 export const metadata = {
   title: "Your ticket — Avoeline",
@@ -125,6 +126,28 @@ export default async function TicketPage({
 
         <h1 className="font-display text-2xl text-ink">{copy.title}</h1>
         <p className="mt-2 text-sm text-ink-soft">{copy.note}</p>
+        <TicketCalendarActions
+          event={{
+            id: event.id,
+            title: event.title,
+            shortDescription: event.shortDescription || "",
+            schedule: {
+              startDate: event.schedule?.startDate || "",
+              endDate: event.schedule?.endDate || event.schedule?.startDate || "",
+              startTime: event.schedule?.startTime || "",
+              endTime: event.schedule?.endTime || "",
+              timezone: event.schedule?.timezone || "Asia/Karachi",
+              formatLabel: String(event.format || ""),
+            },
+            location: {
+              venueName: event.location?.venueName || "",
+              address: event.location?.address || "",
+              city: event.location?.city || "",
+              mapsUrl: event.mapsUrl || event.mapUrl || "",
+            },
+            sharePath: `/events/${event.id}`,
+          }}
+        />
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-paper">

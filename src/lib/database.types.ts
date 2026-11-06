@@ -530,6 +530,62 @@ export type Database = {
           },
         ]
       }
+      calendar_links: {
+        Row: {
+          connection_id: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          etag: string | null
+          google_calendar_id: string
+          google_event_id: string | null
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          meet_url: string | null
+          request_id: string
+          status: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          etag?: string | null
+          google_calendar_id: string
+          google_event_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          meet_url?: string | null
+          request_id: string
+          status?: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          etag?: string | null
+          google_calendar_id?: string
+          google_event_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          meet_url?: string | null
+          request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_links_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       category_field_sets: {
         Row: {
           extra: Json | null
@@ -922,6 +978,186 @@ export type Database = {
           },
         ]
       }
+      connection_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          connection_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          owner_id: string
+          owner_type: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          owner_id: string
+          owner_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          owner_id?: string
+          owner_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_audit_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_audit_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connection_grants: {
+        Row: {
+          capabilities: string[]
+          connection_id: string
+          created_at: string
+          granted_by: string | null
+          id: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          capabilities?: string[]
+          connection_id: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          capabilities?: string[]
+          connection_id?: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_grants_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_grants_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_grants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connection_reconnect_tokens: {
+        Row: {
+          connection_id: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          owner_id: string
+          owner_type: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          connection_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          owner_id: string
+          owner_type: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          connection_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          owner_type?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_reconnect_tokens_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_reconnect_tokens_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connection_usage: {
+        Row: {
+          capability: string
+          connection_id: string
+          count: number
+          usage_date: string
+        }
+        Insert: {
+          capability: string
+          connection_id: string
+          count?: number
+          usage_date: string
+        }
+        Update: {
+          capability?: string
+          connection_id?: string
+          count?: number
+          usage_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_usage_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           assigned_to: string | null
@@ -966,6 +1202,91 @@ export type Database = {
           {
             foreignKeyName: "contact_messages_assigned_to_fkey"
             columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_form_responses: {
+        Row: {
+          answers: Json
+          form_id: string
+          id: string
+          meta: Json
+          respondent_email: string | null
+          respondent_name: string | null
+          submitted_at: string
+        }
+        Insert: {
+          answers?: Json
+          form_id: string
+          id?: string
+          meta?: Json
+          respondent_email?: string | null
+          respondent_name?: string | null
+          submitted_at?: string
+        }
+        Update: {
+          answers?: Json
+          form_id?: string
+          id?: string
+          meta?: Json
+          respondent_email?: string | null
+          respondent_name?: string | null
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_form_responses_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "custom_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_forms: {
+        Row: {
+          created_at: string
+          description: string
+          fields: Json
+          id: string
+          kind: string
+          owner_user_id: string
+          public_token: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          fields?: Json
+          id?: string
+          kind?: string
+          owner_user_id: string
+          public_token: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          fields?: Json
+          id?: string
+          kind?: string
+          owner_user_id?: string
+          public_token?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_forms_owner_user_id_fkey"
+            columns: ["owner_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1020,9 +1341,61 @@ export type Database = {
           },
         ]
       }
+      email_limit_overrides: {
+        Row: {
+          created_at: string
+          daily_cap: number | null
+          expires_at: string | null
+          max_per_send: number | null
+          monthly_cap: number | null
+          owner_id: string
+          reason: string
+          set_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_cap?: number | null
+          expires_at?: string | null
+          max_per_send?: number | null
+          monthly_cap?: number | null
+          owner_id: string
+          reason: string
+          set_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_cap?: number | null
+          expires_at?: string | null
+          max_per_send?: number | null
+          monthly_cap?: number | null
+          owner_id?: string
+          reason?: string
+          set_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_limit_overrides_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_limit_overrides_set_by_fkey"
+            columns: ["set_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_log: {
         Row: {
           batch_key: string | null
+          connection_id: string | null
           created_at: string
           error: string | null
           id: string
@@ -1039,6 +1412,7 @@ export type Database = {
         }
         Insert: {
           batch_key?: string | null
+          connection_id?: string | null
           created_at?: string
           error?: string | null
           id?: string
@@ -1055,6 +1429,7 @@ export type Database = {
         }
         Update: {
           batch_key?: string | null
+          connection_id?: string | null
           created_at?: string
           error?: string | null
           id?: string
@@ -1071,8 +1446,204 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "email_log_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "email_log_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_outbox: {
+        Row: {
+          attempt_at: string | null
+          attempt_count: number
+          batch_id: string | null
+          connection_id: string | null
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          not_before: string | null
+          paused: boolean
+          payload: Json
+          priority: number
+          skip_reason: string | null
+          status: string
+          time_sensitive: boolean
+          updated_at: string
+        }
+        Insert: {
+          attempt_at?: string | null
+          attempt_count?: number
+          batch_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          not_before?: string | null
+          paused?: boolean
+          payload?: Json
+          priority?: number
+          skip_reason?: string | null
+          status?: string
+          time_sensitive?: boolean
+          updated_at?: string
+        }
+        Update: {
+          attempt_at?: string | null
+          attempt_count?: number
+          batch_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          not_before?: string | null
+          paused?: boolean
+          payload?: Json
+          priority?: number
+          skip_reason?: string | null
+          status?: string
+          time_sensitive?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_outbox_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "email_send_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_outbox_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_send_batches: {
+        Row: {
+          cancelled: number
+          connection_id: string
+          created_at: string
+          created_by: string | null
+          event_id: string | null
+          failed: number
+          id: string
+          kind: string
+          not_before: string | null
+          owner_id: string
+          owner_type: string
+          sent: number
+          skipped: number
+          spread_days: number | null
+          status: string
+          subject: string | null
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          cancelled?: number
+          connection_id: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          failed?: number
+          id?: string
+          kind: string
+          not_before?: string | null
+          owner_id: string
+          owner_type: string
+          sent?: number
+          skipped?: number
+          spread_days?: number | null
+          status?: string
+          subject?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          cancelled?: number
+          connection_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          failed?: number
+          id?: string
+          kind?: string
+          not_before?: string | null
+          owner_id?: string
+          owner_type?: string
+          sent?: number
+          skipped?: number
+          spread_days?: number | null
+          status?: string
+          subject?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_send_batches_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_send_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_send_batches_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_suppressions: {
+        Row: {
+          created_at: string
+          email_normalized: string
+          id: string
+          owner_id: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_normalized: string
+          id?: string
+          owner_id: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_normalized?: string
+          id?: string
+          owner_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_suppressions_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1116,6 +1687,7 @@ export type Database = {
       }
       event_agenda_items: {
         Row: {
+          add_to_calendar: boolean
           description: string | null
           duration: string | null
           end_clock: string | null
@@ -1136,6 +1708,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          add_to_calendar?: boolean
           description?: string | null
           duration?: string | null
           end_clock?: string | null
@@ -1156,6 +1729,7 @@ export type Database = {
           title: string
         }
         Update: {
+          add_to_calendar?: boolean
           description?: string | null
           duration?: string | null
           end_clock?: string | null
@@ -3585,6 +4159,144 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_capabilities: {
+        Row: {
+          capability: string
+          connection_id: string
+          enabled: boolean
+          settings: Json
+        }
+        Insert: {
+          capability: string
+          connection_id: string
+          enabled?: boolean
+          settings?: Json
+        }
+        Update: {
+          capability?: string
+          connection_id?: string
+          enabled?: boolean
+          settings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_capabilities_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_connections: {
+        Row: {
+          avatar_url: string | null
+          connected_at: string
+          connected_by: string | null
+          daily_limit: number
+          display_name: string | null
+          granted_scopes: string[]
+          id: string
+          is_workspace: boolean
+          last_error: string | null
+          last_error_at: string | null
+          last_used_at: string | null
+          owner_id: string
+          owner_type: string
+          per_minute_limit: number
+          provider: string
+          provider_account_id: string
+          provider_email: string
+          quota_exhausted_until: string | null
+          sending_paused_reason: string | null
+          sending_paused_until: string | null
+          status: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          connected_at?: string
+          connected_by?: string | null
+          daily_limit?: number
+          display_name?: string | null
+          granted_scopes?: string[]
+          id?: string
+          is_workspace?: boolean
+          last_error?: string | null
+          last_error_at?: string | null
+          last_used_at?: string | null
+          owner_id: string
+          owner_type: string
+          per_minute_limit?: number
+          provider: string
+          provider_account_id: string
+          provider_email: string
+          quota_exhausted_until?: string | null
+          sending_paused_reason?: string | null
+          sending_paused_until?: string | null
+          status?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          connected_at?: string
+          connected_by?: string | null
+          daily_limit?: number
+          display_name?: string | null
+          granted_scopes?: string[]
+          id?: string
+          is_workspace?: boolean
+          last_error?: string | null
+          last_error_at?: string | null
+          last_used_at?: string | null
+          owner_id?: string
+          owner_type?: string
+          per_minute_limit?: number
+          provider?: string
+          provider_account_id?: string
+          provider_email?: string
+          quota_exhausted_until?: string | null
+          sending_paused_reason?: string | null
+          sending_paused_until?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connections_connected_by_fkey"
+            columns: ["connected_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_secrets: {
+        Row: {
+          connection_id: string
+          encrypted_refresh_token: string
+          key_version: number
+          rotated_at: string | null
+        }
+        Insert: {
+          connection_id: string
+          encrypted_refresh_token: string
+          key_version?: number
+          rotated_at?: string | null
+        }
+        Update: {
+          connection_id?: string
+          encrypted_refresh_token?: string
+          key_version?: number
+          rotated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_secrets_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: true
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_document_versions: {
         Row: {
           body_md: string
@@ -3658,6 +4370,71 @@ export type Database = {
             columns: ["current_version_id"]
             isOneToOne: false
             referencedRelation: "legal_document_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      linked_files: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          connection_id: string
+          entity_id: string
+          entity_type: string
+          icon_url: string | null
+          id: string
+          last_checked_at: string | null
+          mime_type: string
+          owner_id: string
+          owner_type: string
+          provider_file_id: string
+          provider_modified_at: string | null
+          status: string
+          title: string
+          web_url: string | null
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          connection_id: string
+          entity_id: string
+          entity_type: string
+          icon_url?: string | null
+          id?: string
+          last_checked_at?: string | null
+          mime_type: string
+          owner_id: string
+          owner_type: string
+          provider_file_id: string
+          provider_modified_at?: string | null
+          status?: string
+          title: string
+          web_url?: string | null
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          connection_id?: string
+          entity_id?: string
+          entity_type?: string
+          icon_url?: string | null
+          id?: string
+          last_checked_at?: string | null
+          mime_type?: string
+          owner_id?: string
+          owner_type?: string
+          provider_file_id?: string
+          provider_modified_at?: string | null
+          status?: string
+          title?: string
+          web_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "linked_files_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
             referencedColumns: ["id"]
           },
         ]
@@ -3863,6 +4640,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      oauth_states: {
+        Row: {
+          capability: string
+          code_verifier_enc: string
+          created_at: string
+          expires_at: string
+          id: string
+          owner_id: string
+          owner_type: string
+          return_to: string
+          state_hash: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          capability: string
+          code_verifier_enc: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          owner_id: string
+          owner_type: string
+          return_to: string
+          state_hash: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          capability?: string
+          code_verifier_enc?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          owner_type?: string
+          return_to?: string
+          state_hash?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_states_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       org_announcements: {
         Row: {
@@ -4129,6 +4956,8 @@ export type Database = {
       organizations: {
         Row: {
           address: Json | null
+          connections_google_disabled: boolean
+          connections_google_disabled_reason: string | null
           contact_email: string | null
           contact_phone: string | null
           cover_image_url: string | null
@@ -4152,6 +4981,8 @@ export type Database = {
         }
         Insert: {
           address?: Json | null
+          connections_google_disabled?: boolean
+          connections_google_disabled_reason?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           cover_image_url?: string | null
@@ -4175,6 +5006,8 @@ export type Database = {
         }
         Update: {
           address?: Json | null
+          connections_google_disabled?: boolean
+          connections_google_disabled_reason?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           cover_image_url?: string | null
@@ -4325,6 +5158,7 @@ export type Database = {
           recovery_contact: string | null
           review_status: string | null
           specialties: string[] | null
+          timezone: string | null
           total_attendees: number | null
           total_events_created: number | null
           total_revenue: number | null
@@ -4361,6 +5195,7 @@ export type Database = {
           recovery_contact?: string | null
           review_status?: string | null
           specialties?: string[] | null
+          timezone?: string | null
           total_attendees?: number | null
           total_events_created?: number | null
           total_revenue?: number | null
@@ -4397,6 +5232,7 @@ export type Database = {
           recovery_contact?: string | null
           review_status?: string | null
           specialties?: string[] | null
+          timezone?: string | null
           total_attendees?: number | null
           total_events_created?: number | null
           total_revenue?: number | null
@@ -4659,6 +5495,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_email_limits: {
+        Row: {
+          daily_cap: number
+          max_per_send: number
+          monthly_cap: number
+          plan_key: string
+        }
+        Insert: {
+          daily_cap: number
+          max_per_send?: number
+          monthly_cap: number
+          plan_key: string
+        }
+        Update: {
+          daily_cap?: number
+          max_per_send?: number
+          monthly_cap?: number
+          plan_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_email_limits_plan_key_fkey"
+            columns: ["plan_key"]
+            isOneToOne: true
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -5261,6 +6126,118 @@ export type Database = {
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sender_preferences: {
+        Row: {
+          connection_id: string
+          event_id: string | null
+          id: string
+          owner_id: string
+          owner_type: string
+        }
+        Insert: {
+          connection_id: string
+          event_id?: string | null
+          id?: string
+          owner_id: string
+          owner_type: string
+        }
+        Update: {
+          connection_id?: string
+          event_id?: string | null
+          id?: string
+          owner_id?: string
+          owner_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sender_preferences_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sender_preferences_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sheet_syncs: {
+        Row: {
+          connection_id: string
+          created_at: string
+          created_by: string | null
+          event_id: string
+          id: string
+          keep_in_sync: boolean
+          kind: string
+          last_error: string | null
+          last_synced_at: string | null
+          linked_file_id: string | null
+          row_fingerprint: string | null
+          sheet_title: string
+          spreadsheet_id: string
+          status: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          id?: string
+          keep_in_sync?: boolean
+          kind: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          linked_file_id?: string | null
+          row_fingerprint?: string | null
+          sheet_title?: string
+          spreadsheet_id: string
+          status?: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          id?: string
+          keep_in_sync?: boolean
+          kind?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          linked_file_id?: string | null
+          row_fingerprint?: string | null
+          sheet_title?: string
+          spreadsheet_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sheet_syncs_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sheet_syncs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sheet_syncs_linked_file_id_fkey"
+            columns: ["linked_file_id"]
+            isOneToOne: false
+            referencedRelation: "linked_files"
             referencedColumns: ["id"]
           },
         ]
@@ -6533,10 +7510,7 @@ export type Database = {
           spent: number
         }[]
       }
-      get_marketing_insights: {
-        Args: never
-        Returns: Json
-      }
+      get_marketing_insights: { Args: never; Returns: Json }
       get_public_stats: {
         Args: never
         Returns: {
@@ -6725,3 +7699,4 @@ export const Constants = {
 
 /** App alias for `public.users` row (kept across `types:db` regenerations). */
 export type UserRow = Database["public"]["Tables"]["users"]["Row"]
+

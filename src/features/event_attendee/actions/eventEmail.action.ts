@@ -28,8 +28,13 @@ import {
 import type { Registration } from "@/src/services/models/reg.type";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { AuthService } from "@/src/features/auth/authService";
-
-const BULK_CAP = 500;
+import { enqueueBatch, previewSend } from "@/src/features/connections/server/batch.service";
+import { getCapacity } from "@/src/features/connections/server/capacity.service";
+import {
+  findActiveEmailConnection,
+  getConnectionById,
+} from "@/src/features/connections/server/connections.service";
+import { renderEmailPreview as renderForBatch } from "@/src/features/event_attendee/eventEmail.service";
 
 function blocksFromForm(formData: FormData): EmailIncludeBlock[] {
   return parseIncludeBlocks(formData.getAll("block").map(String));
@@ -117,7 +122,7 @@ function extrasFor(
 export async function sendBulkAttendeeEmailAction(
   _prev: ActionResult | null,
   formData: FormData,
-): Promise<ActionResult & { sent?: number }> {
+): Promise<ActionResult & { sent?: number; queued?: number; batchId?: string }> {
   try {
     const eventId = String(formData.get("eventId") ?? "").trim();
     const kindRaw = String(formData.get("kind") ?? "custom").trim();
@@ -183,45 +188,97 @@ export async function sendBulkAttendeeEmailAction(
     const withEmail = targets.filter(
       (r) => looksLikeEmail(r.attendee?.email || "") && r.status !== "cancelled",
     );
-    const capped = withEmail.slice(0, BULK_CAP);
-    if (!capped.length) return fail("Nobody in this filter has an email address.");
+    if (!withEmail.length) return fail("Nobody in this filter has an email address.");
 
     const actor = await AuthService.getCurrentUser();
-    const rl = rateLimit(`bulk-attendee-email:${actor?.userId || eventId}`, 5, 60);
+    if (!actor) return fail("Sign in required.");
+    const rl = rateLimit(`bulk-attendee-email:${actor.userId || eventId}`, 5, 60);
     if (!rl.ok) return fail(`Too many bulk sends. Try again in ${rl.retryAfterSec}s.`);
 
-    let sent = 0;
-    for (const registration of capped) {
-      const okSend = await sendOrganizerEmail({
-        registration,
-        event: full,
-        kind: kindRaw as EventEmailKind,
-        subjectOverride: String(formData.get("subject") ?? "") || undefined,
-        bodyOverride: String(formData.get("body") ?? "") || undefined,
-        includeBlocks: blocksFromForm(formData),
-      });
-      if (okSend) sent += 1;
+    const preferredConnectionId = String(formData.get("connectionId") ?? "").trim() || undefined;
+    const conn = preferredConnectionId
+      ? await getConnectionById(preferredConnectionId)
+      : await findActiveEmailConnection({
+          ownerType: "user",
+          ownerId: event.organizerId,
+        });
+    if (!conn || conn.status !== "active") {
+      return fail("Connect Google under Settings → Connections, then try again.");
     }
+    const capacity = await getCapacity({
+      connection: conn,
+      ownerId: event.organizerId,
+      kind: kindRaw,
+      eventId,
+    });
+    const selectionCapRaw = Number(formData.get("selectionCap") ?? "");
+    const selectionCap =
+      Number.isFinite(selectionCapRaw) && selectionCapRaw > 0 ? Math.floor(selectionCapRaw) : null;
+    const hardCap = Math.min(capacity.maxPerSend, selectionCap ?? capacity.maxPerSend);
+    const capped = withEmail.slice(0, hardCap);
+    const sendModeRaw = String(formData.get("sendMode") ?? "send_and_schedule").trim();
+    const sendMode =
+      sendModeRaw === "selection_cap" || sendModeRaw === "spread_days"
+        ? sendModeRaw
+        : "send_and_schedule";
+    const subject = String(formData.get("subject") ?? "") || "Event update";
+    const body = String(formData.get("body") ?? "");
+    const blocks = blocksFromForm(formData);
+    const sample = capped[0]!;
+    const preview = await renderForBatch({
+      registration: sample,
+      event: full,
+      kind: kindRaw as EventEmailKind,
+      subjectOverride: subject,
+      bodyOverride: body,
+      includeBlocks: blocks,
+    });
+
+    const result = await enqueueBatch({
+      ownerId: event.organizerId,
+      kind: kindRaw,
+      subject: preview.subject || subject,
+      html: preview.html,
+      text: undefined,
+      recipients: capped.map((r) => ({
+        email: String(r.attendee?.email || ""),
+        registrationId: r.registrationId,
+        userId: r.userId || null,
+        name: r.attendee?.name || null,
+      })),
+      mode: sendMode,
+      eventId,
+      connectionId: conn.id,
+      createdBy: actor.userId,
+    });
+
     revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
-    if (!sent) {
-      return fail("Nothing was sent. Connect Google under Organizer → Email, then try again.");
+    revalidatePath(`/organizer/${event.organizerId}/settings/email-batches`);
+    if (!result.sentNow && !result.queued) {
+      return fail("Nothing was sent. Check Connections capacity and try again.");
     }
-    return { success: true, sent };
+    return {
+      success: true,
+      sent: result.sentNow,
+      queued: result.queued,
+      batchId: result.batchId,
+    };
   } catch (err) {
     console.error("[sendBulkAttendeeEmailAction]", err);
     return fail("Could not send those emails.");
   }
 }
 
-export async function previewBulkAttendeeEmailAction(
-  formData: FormData,
-): Promise<
+export async function previewBulkAttendeeEmailAction(formData: FormData): Promise<
   ActionResult & {
     html?: string;
     subject?: string;
     to?: string;
     count?: number;
     sampleEmails?: string[];
+    sendNow?: number;
+    capacityPreview?: import("@/src/features/connections/types").PreviewSendResult;
+    recipients?: Array<{ email: string; registrationId: string }>;
   }
 > {
   try {
@@ -297,6 +354,23 @@ export async function previewBulkAttendeeEmailAction(
       includeBlocks: blocksFromForm(formData),
       hidePayment,
     });
+    const recipients = withEmail.map((r) => ({
+      email: String(r.attendee?.email || ""),
+      registrationId: r.registrationId,
+    }));
+    let capacityPreview: Awaited<ReturnType<typeof previewSend>> | undefined;
+    let sendNow: number | undefined;
+    try {
+      capacityPreview = await previewSend({
+        ownerId: event.organizerId,
+        kind: kindRaw,
+        recipients,
+        eventId,
+      });
+      sendNow = capacityPreview.sendNow;
+    } catch {
+      // capacity optional for preview HTML
+    }
     return {
       success: true,
       html: preview.html,
@@ -307,6 +381,9 @@ export async function previewBulkAttendeeEmailAction(
         .slice(0, 5)
         .map((r) => r.attendee?.email || "")
         .filter(Boolean),
+      sendNow,
+      capacityPreview,
+      recipients,
     };
   } catch (err) {
     console.error("[previewBulkAttendeeEmailAction]", err);

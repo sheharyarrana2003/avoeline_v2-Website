@@ -45,6 +45,7 @@ import { listRegistrationGroups } from "@/src/features/registration_groups/group
 import { teamFeeDisplay } from "@/src/features/event_attendee/roster";
 import { trackDueAmount } from "@/src/features/hackathon/types";
 import { hasActiveOrganizerEmailConnection } from "@/src/features/email/organizerEmailConnection.service";
+import { AttendeeImportPanel } from "@/src/features/event_attendee/import/AttendeeImportPanel";
 
 export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
   const resolvedParams = await params;
@@ -291,21 +292,28 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
       }
       emailConnectionMissing={!emailConnected}
       extra={
-        isHackathon ? (
-          <AssignLeftoverTeams
-            eventId={event_id}
-            returnTo={assignReturn}
-            leftover={leftover}
-            tracks={hackTracks.map((t) => ({ id: t.id, name: t.name, maxTeamSize: t.maxTeamSize }))}
-            teams={hackTeams.map((t) => ({
-              id: t.id,
-              name: t.name,
-              trackId: t.trackId,
-              size: t.members.length,
-              maxTeamSize: t.maxTeamSize,
-            }))}
-          />
-        ) : null
+        <>
+          <AttendeeImportPanel eventId={event_id} />
+          {isHackathon ? (
+            <AssignLeftoverTeams
+              eventId={event_id}
+              returnTo={assignReturn}
+              leftover={leftover}
+              tracks={hackTracks.map((t) => ({
+                id: t.id,
+                name: t.name,
+                maxTeamSize: t.maxTeamSize,
+              }))}
+              teams={hackTeams.map((t) => ({
+                id: t.id,
+                name: t.name,
+                trackId: t.trackId,
+                size: t.members.length,
+                maxTeamSize: t.maxTeamSize,
+              }))}
+            />
+          ) : null}
+        </>
       }
     />
   );

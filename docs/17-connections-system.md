@@ -216,7 +216,7 @@ oauth_states (id, state_hash unique, code_verifier_enc, user_id, owner_type, own
               capability, return_to, expires_at, used_at);
 linked_files (id, owner_type, owner_id, connection_id, provider_file_id, mime_type, title,
               web_url, icon_url, entity_type, entity_id, added_by, added_at,
-              last_checked_at, status check (status in ('ok','missing','no_access')),
+              last_checked_at, provider_modified_at, status check (status in ('ok','missing','no_access')),
               unique (connection_id, provider_file_id, entity_type, entity_id));
 calendar_links (id, connection_id, entity_type, entity_id, google_calendar_id, google_event_id,
                 meet_url, etag, status, last_synced_at, unique (connection_id, entity_type, entity_id));
@@ -268,6 +268,8 @@ Run one per fresh chat, attaching `@docs/ENGINEERING_RULES.md` and `@docs/17-con
 
 ### C1: Foundation, OAuth, Gmail, replace email accounts
 
+> **Status (2026-11-01):** Shipped. Module `src/features/connections/`, migration `supabase/migrations/20261101200000_connections_c1.sql`, organizer Settings → Connections, `resolveSender` / `requireConnectedSender` rewired, kill switches, unit tests. C2+ still open.
+
 ````text
 Build the Connections foundation exactly as specified in docs/17 (sections 2, 4, 5.1-5.4, 6, 9, 10).
 1. Create the module skeleton in src/features/connections/ and the route files. No other feature may call Google directly.
@@ -285,6 +287,8 @@ Pause for review.
 
 ### C2: Organization connections, vendors, sender picker
 
+**Status (2026-11-02):** Shipped — org grants + mounts + full `resolveSender` + SenderPicker + reconnect tokens + admin kill switch + unit tests. Pause for review before C3.
+
 ````text
 Read docs/17 sections 3, 5.5-5.7, 6. Extend the foundation.
 1. Org-owned connections: owner_type 'org', connected by users with connections:manage on that organization, connection_grants table and UI (grant/revoke use per member and capability), shared quotas, usage recorded with the acting user, and an "owner changed, re-authorize" state when the connecting user leaves.
@@ -298,6 +302,8 @@ Pause for review.
 
 ### C3: Calendar and Meet
 
+**Status (2026-11-02):** Shipped — `calendar_links` + GoogleCalendarClient/Meet poll; catalog calendar+meet active; sync service + CalendarPicker/CalendarSyncControls; hooks (interview, event dates, agenda, mentor slots, judging window, online session); ICS + Google TEMPLATE on public hero + ticket; unit tests. Pause for review before C4.
+
 ````text
 Read docs/17 sections 2 and 7. Enable the calendar and meet capabilities (scope calendar.events, incremental consent only).
 1. CalendarClient on the Google provider: create, update, delete events; Meet via conferenceDataVersion=1 and a hangoutsMeet createRequest with a stable requestId; poll when pending; map errors; quotas and backoff.
@@ -309,6 +315,8 @@ Pause for review.
 ````
 
 ### C4: Drive library
+
+**Status (2026-11-02):** Shipped — `linked_files` + GoogleDriveClient (`drive.file`); picker-token route; create Doc/Sheet/Slides in Avoeline folder; Library + Files on event/team/club/booking; daily verify cron; unit tests. Setup: `docs/connections-picker-setup.md`. **Closeout (2026-11-02):** `provider_modified_at`; verify-on-open gate; Library mime/added-by filters + load more; action-level entity auth; extended `c4Drive` tests.
 
 ````text
 Read docs/17 sections 2 and 8. Enable drive.files with the drive.file scope only. Never request drive or drive.readonly.
@@ -323,6 +331,8 @@ Pause for review.
 
 ### C5: Live attendee sheet and templates
 
+**Status (2026-11-02):** Shipped — `sheet_syncs` + Sheets write (RAW + formula sanitize); Export once / Keep in sync on event Exports; templates (run-of-show, sponsor tracker, MoU); cron `/api/cron/sheet-syncs`; unit tests. **Closeout (2026-11-02):** event-triggered `scheduleSheetRefresh`; cron-safe `runActiveSheetSync`; chunked writes + soft 429 defer; Stop sync UI; agenda-enriched run-of-show; extended `c5Sheets` tests.
+
 ````text
 Read docs/17 section 8. Using only drive.file on files the app created:
 1. "Export attendees to Google Sheets" (one-off) and "Keep in sync" (one-way, event-triggered plus a job) for registrations, teams and check-ins, using the form-field columns.
@@ -333,6 +343,8 @@ Pause for review.
 ````
 
 ### C6: Hardening and verification
+
+**Status (2026-11-02):** Shipped — `docs/connections-security-review.md`, `docs/google-verification.md`, `c6Hardening.test.ts`, `/api/cron/connections-health`. Connections phases C1–C6 complete for docs/17 scope. **Closeout (2026-11-02):** import-boundary script; `oauthStateGate`; needs_reconnect notify + 24h health metrics; evidence matrix; docs/11 + verification checklist.
 
 ````text
 Read docs/17 sections 10 and 11. Prove the system follows them and write docs/connections-security-review.md with evidence.

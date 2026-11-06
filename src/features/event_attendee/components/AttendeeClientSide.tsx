@@ -313,6 +313,7 @@ export function AttendeeClientSide({
             <div className="flex flex-wrap gap-2">
               <BulkAttendeeEmailModal
                 eventId={eventId}
+                organizerId={organizerId}
                 hasTeams={Boolean(teams?.length || groups?.length)}
                 hidePayment={isFree}
               />

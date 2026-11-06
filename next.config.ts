@@ -8,12 +8,12 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
  */
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://challenges.cloudflare.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://challenges.cloudflare.com https://apis.google.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co",
+  "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://ssl.gstatic.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://challenges.cloudflare.com",
-  "frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org https://challenges.cloudflare.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://challenges.cloudflare.com https://www.googleapis.com https://accounts.google.com",
+  "frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org https://challenges.cloudflare.com https://docs.google.com https://drive.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

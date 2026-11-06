@@ -72,23 +72,38 @@ export default async function ChooseRolePage() {
       onboarding_status: role === "attendee" ? "complete" : "incomplete",
       updated_at: now,
     });
-    if (role === "organizer") {
-      await supabaseAdmin.from(TABLES.ORGANIZER_PROFILES).upsert({
-        user_id: current.userId,
-        org_name: current.name || current.email,
-        review_status: "pending",
-      });
-      redirect("/auth/signup/organizerSetup");
-    }
-    if (role === "vendor") {
-      await supabaseAdmin.from(TABLES.VENDOR_PROFILES).upsert({
-        user_id: current.userId,
-        business_name: current.name || current.email,
-        business_email: current.email,
-        plan_type: "vendor_free",
-        status: "pending",
-      });
-      redirect("/auth/signup/vendorSetup");
+    if (role === "organizer" || role === "vendor") {
+      if (role === "organizer") {
+        await supabaseAdmin.from(TABLES.ORGANIZER_PROFILES).upsert({
+          user_id: current.userId,
+          org_name: current.name || current.email,
+          review_status: "pending",
+        });
+      } else {
+        await supabaseAdmin.from(TABLES.VENDOR_PROFILES).upsert({
+          user_id: current.userId,
+          business_name: current.name || current.email,
+          business_email: current.email,
+          plan_type: "vendor_free",
+          status: "pending",
+        });
+      }
+      const setupPath =
+        role === "organizer" ? "/auth/signup/organizerSetup" : "/auth/signup/vendorSetup";
+      const { hasActiveGoogleConnection } =
+        await import("@/src/features/connections/server/bootstrapFromAuth.service");
+      const { googleConnectionsConfigured } =
+        await import("@/src/features/connections/server/connections.service");
+      if (googleConnectionsConfigured() && !(await hasActiveGoogleConnection(current.userId))) {
+        const { WORKSPACE_OAUTH_CAPABILITY } =
+          await import("@/src/features/connections/lib/workspaceScopes.logic");
+        const returnTo = encodeURIComponent(setupPath);
+        const hint = encodeURIComponent(current.email || "");
+        redirect(
+          `/api/connections/google/start?capability=${WORKSPACE_OAUTH_CAPABILITY}&ownerType=user&ownerId=${encodeURIComponent(current.userId)}&returnTo=${returnTo}&loginHint=${hint}`,
+        );
+      }
+      redirect(setupPath);
     }
     await supabaseAdmin.from(TABLES.ATTENDEE_PROFILES).upsert({ user_id: current.userId });
     redirect(`/attendee/${current.userId}/dashboard`);

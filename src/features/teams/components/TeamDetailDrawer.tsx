@@ -29,6 +29,7 @@ import { EditMemberModal } from "./EditMemberModal";
 import { EditTeamModal } from "./EditTeamModal";
 import { ExportTeamsModal } from "./ExportTeamsModal";
 import { GrantInviteModal } from "./GrantInviteModal";
+import { EntityFilesPanel } from "@/src/features/connections/components/EntityFilesPanel";
 
 export function TeamDetailDrawer({
   team,
@@ -255,6 +256,16 @@ export function TeamDetailDrawer({
             ) : null}
           </ul>
         </aside>
+      </div>
+
+      <div className="border-t border-line px-4 py-4">
+        <EntityFilesPanel
+          ownerType="user"
+          ownerId={organizerId}
+          entityType="team"
+          entityId={team.id}
+          connectionsHrefOwnerId={organizerId}
+        />
       </div>
 
       <EditTeamModal open={editTeamOpen} onClose={() => setEditTeamOpen(false)} team={team} />

@@ -9,6 +9,8 @@ import {
 import { isSheetFormat } from "@/src/features/exports/writeSheet";
 import { isSheetKind, type SheetKind } from "@/src/features/exports/eventSheets";
 import { eventIsHackathon } from "@/src/features/hackathon/hackathon.service";
+import { GoogleSheetsExportPanel } from "@/src/features/connections/components/GoogleSheetsExportPanel";
+import { AttendeeImportPanel } from "@/src/features/event_attendee/import/AttendeeImportPanel";
 
 /**
  * Spec 6.2 -- every export for one event, in one place.
@@ -21,12 +23,14 @@ import { eventIsHackathon } from "@/src/features/hackathon/hackathon.service";
 export default async function EventExportsPage({
   params,
 }: {
-  params: Promise<{ eventId: string }>;
+  params: Promise<{ organizer_id: string; eventId: string }>;
 }) {
-  const { eventId } = await params;
+  const { eventId, organizer_id } = await params;
 
   const event = await assertEventActor(eventId, "attendees");
   if (!event) notFound();
+
+  const hackathon = await eventIsHackathon(event);
 
   // Bound server-side so the event id never reaches the client, matching the
   // attendees tab. The action re-checks ownership regardless -- this only means
@@ -42,18 +46,28 @@ export default async function EventExportsPage({
   };
 
   return (
-    <Card title="Exports">
-      <CardBody>
-        <p className="pb-2 text-xs text-ink-soft">
-          Each of these downloads as an Excel workbook or a CSV. The links are private and expire an
-          hour after you ask for them.
-        </p>
-        <ExportPanel
-          run={run}
-          questionCount={(event.registration?.customForm ?? []).length}
-          showHackathonTeams={await eventIsHackathon(event)}
-        />
-      </CardBody>
-    </Card>
+    <>
+      <Card title="Exports">
+        <CardBody>
+          <p className="pb-2 text-xs text-ink-soft">
+            Each of these downloads as an Excel workbook or a CSV. The links are private and expire
+            an hour after you ask for them.
+          </p>
+          <ExportPanel
+            run={run}
+            questionCount={(event.registration?.customForm ?? []).length}
+            showHackathonTeams={hackathon}
+          />
+        </CardBody>
+      </Card>
+      <div className="mt-6">
+        <AttendeeImportPanel eventId={eventId} />
+      </div>
+      <GoogleSheetsExportPanel
+        eventId={eventId}
+        organizerId={organizer_id}
+        showHackathonTeams={hackathon}
+      />
+    </>
   );
 }

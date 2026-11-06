@@ -115,6 +115,12 @@ export async function sendRecruitmentEmail(opts: {
     subject,
     html,
     text,
+    kind:
+      opts.kind === "interview"
+        ? "interview"
+        : opts.kind === "onboarded"
+          ? "guest_invite"
+          : "custom",
   });
 
   if (result.ok) return { ok: true };

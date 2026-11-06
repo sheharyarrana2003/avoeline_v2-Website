@@ -1,0 +1,25 @@
+Batch 1 verification (2026-11-04) branch audit/batch-1-gates
+
+AUD-1-002:
+- next was 16.2.6 → now 16.4.5 (package.json + node_modules)
+- npm audit: 47 vulns (4 low, 32 moderate, 11 high); 0 critical; next not listed
+- regression: npm run test:unit includes nextPatchedVersion.test.ts — pass
+
+AUD-1-005:
+- node scripts/check-connections-imports.mjs → "C6 import boundary: ok"
+- npm run test:unit → 275 pass / 0 fail
+
+AUD-1-003:
+- docs/12-teams-and-staff.md, docs/15-security-baseline.md, docs/20-feature-coverage.md exist
+- docs/00-INDEX.md links added
+
+AUD-GAP-019:
+- gitleaks 8.21.2 scanned 369 commits; 7 hits; report redacted in 01-gitleaks-report.json
+- summary: 01-gitleaks-summary.txt
+
+Not closed in Batch 1:
+- AUD-1-001 lint/knip remainder
+- AUD-1-009 Pass 2 required
+- AUD-GAP-002 Passes 2–11 required
+- AUD-1-016 owner rotation decision
+- Batches 4–7 findings still open

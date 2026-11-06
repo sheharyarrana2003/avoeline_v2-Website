@@ -1,0 +1,7 @@
+﻿npm run test:unit EXIT 1
+Gate failure (scripts/check-connections-imports.mjs):
+  C6 import boundary: Google providers imported outside connections/{server,providers,__tests__}:
+  - src/features/event_attendee/import/attendeeImport.service.ts
+No unit tests executed after gate.
+Sample (bypass gate): 13/13 pass on eventState, safeAction, permissions, oauthPkce.
+No npm script named 'test' (only test:unit, test:e2e, test:sql:*, etc.).

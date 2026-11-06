@@ -5,7 +5,7 @@ import { CalendarPlus } from "lucide-react";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { ShareEventLink } from "@/src/features/events/components/ShareEventLink";
 import type { PublicEventDto } from "@/src/features/events/types";
-import { downloadEventIcs } from "./addToCalendar";
+import { downloadEventIcs, eventGoogleCalendarUrl } from "./addToCalendar";
 import { buttonClass } from "@/src/lib/ui";
 
 const LIFECYCLE_LABEL: Record<string, string> = {
@@ -77,8 +77,16 @@ export function PublicEventHero({ dto, preview }: { dto: PublicEventDto; preview
               className={buttonClass("secondary", "sm")}
             >
               <CalendarPlus className="h-3.5 w-3.5" aria-hidden="true" />
-              Add to calendar
+              Download .ics
             </button>
+            <a
+              href={eventGoogleCalendarUrl(dto)}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonClass("secondary", "sm")}
+            >
+              Google Calendar
+            </a>
           </div>
         </div>
       </div>

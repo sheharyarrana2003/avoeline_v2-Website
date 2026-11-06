@@ -2,6 +2,8 @@
 
 Canonical rules for admin and platform outbound mail. Organizer → attendee mail uses Google/SMTP and is out of scope here.
 
+> **Superseded for organizer Google mail:** use [`docs/17-connections-system.md`](17-connections-system.md) + [`docs/18-email-send-limits-and-scheduling.md`](18-email-send-limits-and-scheduling.md). Platform Resend lanes in this file remain authoritative for SaaS/tenant mail only.
+
 ## Transport
 
 - **Only** `sendPlatformEmail` / `sendLoggedPlatformEmail` (Resend).

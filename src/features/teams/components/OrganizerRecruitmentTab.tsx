@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LayoutGrid, List, Plus } from "lucide-react";
 import { Modal } from "@/src/components/ui/Modal";
@@ -14,13 +14,18 @@ import type { CustomField } from "@/src/services/models/event.model";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import { CopyShareLink } from "./CopyShareLink";
 import {
+  APPLICANT_PIPELINE,
   APPLICANT_STATUS_LABEL,
   APPLICANT_STATUSES,
+  type ApplicantStatus,
   type RecruitmentFormDoc,
   type StaffApplicant,
   type TeamPositionDoc,
   type TeamWithMembers,
 } from "../teamEngine.types";
+import { listCustomFormsAction } from "@/src/features/custom_forms/actions/customForms.action";
+import type { CustomFormPublic } from "@/src/features/custom_forms/types";
+import Link from "next/link";
 import {
   deleteOrganizerRecruitmentFormAction,
   duplicateOrganizerRecruitmentFormAction,
@@ -29,6 +34,7 @@ import {
   setOrganizerApplicantStatusAction,
   setOrganizerRecruitmentFormOpenAction,
 } from "../actions/organizerRecruitment.action";
+import { CalendarSyncControls } from "@/src/features/connections/components/CalendarSyncControls";
 
 function applicantName(a: StaffApplicant): string {
   return String(a.responses.name || a.email || "Applicant");
@@ -114,6 +120,16 @@ export function OrganizerRecruitmentTab({
     return m;
   }, [applicants]);
 
+  const statusCounts = useMemo(() => {
+    const m = new Map<ApplicantStatus, number>();
+    for (const s of APPLICANT_PIPELINE) m.set(s, 0);
+    for (const a of applicants) {
+      if (a.status === "withdrawn") continue;
+      m.set(a.status, (m.get(a.status) ?? 0) + 1);
+    }
+    return m;
+  }, [applicants]);
+
   function refresh() {
     router.refresh();
   }
@@ -124,7 +140,12 @@ export function OrganizerRecruitmentTab({
         <div>
           <h2 className="font-display text-lg text-ink">Recruitment</h2>
           <p className="text-sm text-ink-soft">
-            Library forms for your organizer teams — assign staff from each event.
+            Apply → Shortlist → Interview → Onboard (or Reject). Forms target a library team; you
+            can clone questions from{" "}
+            <Link href={`/organizer/${organizerId}/forms`} className="underline hover:text-ink">
+              Custom Forms
+            </Link>
+            .
           </p>
         </div>
         <button
@@ -137,21 +158,41 @@ export function OrganizerRecruitmentTab({
         </button>
       </div>
 
+      <div className="flex flex-wrap gap-2" aria-label="Applicant pipeline">
+        {APPLICANT_PIPELINE.map((status) => (
+          <span
+            key={status}
+            className="rounded-full border border-line bg-canvas/40 px-3 py-1 text-xs text-ink"
+          >
+            {APPLICANT_STATUS_LABEL[status]}
+            <span className="ml-1.5 text-ink-soft">{statusCounts.get(status) ?? 0}</span>
+          </span>
+        ))}
+      </div>
+
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {flash ? <p className="text-sm text-ink">{flash}</p> : null}
 
       {!forms.length ? (
         <EmptyState
           title="No recruitment forms yet"
-          description="Create a form targeting a library team and position. Applicants apply via a public link."
+          description="Create an apply form for a library team, or start from a Custom Forms template."
           action={
-            <button
-              type="button"
-              className={buttonClass("primary", "sm")}
-              onClick={() => setFormModal("new")}
-            >
-              New form
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={buttonClass("primary", "sm")}
+                onClick={() => setFormModal("new")}
+              >
+                New form
+              </button>
+              <Link
+                href={`/organizer/${organizerId}/forms`}
+                className={buttonClass("secondary", "sm")}
+              >
+                Open Custom Forms
+              </Link>
+            </div>
           }
         />
       ) : (
@@ -439,7 +480,15 @@ function RecruitmentFormModal({
   const [isOpen, setIsOpen] = useState(initial?.isOpen ?? true);
   const [fields, setFields] = useState<CustomField[]>(() => toCustomFields(initial));
   const [showPreview, setShowPreview] = useState(false);
+  const [libraryForms, setLibraryForms] = useState<CustomFormPublic[]>([]);
+  const [libraryFormId, setLibraryFormId] = useState("");
   const positions = positionsByTeam[teamId] ?? [];
+
+  useEffect(() => {
+    void listCustomFormsAction({ ownerId: organizerId }).then((r) => {
+      if (r.ok) setLibraryForms(r.data.forms);
+    });
+  }, [organizerId]);
 
   function save() {
     setError(null);
@@ -496,6 +545,46 @@ function RecruitmentFormModal({
     >
       <div className="space-y-4">
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {libraryForms.length ? (
+          <div className="flex flex-wrap items-end gap-2 rounded-lg border border-line bg-canvas/30 px-3 py-3">
+            <label className="block min-w-[12rem] flex-1 text-xs text-ink">
+              Use library form
+              <select
+                className={`${fieldClass} mt-1`}
+                value={libraryFormId}
+                onChange={(e) => setLibraryFormId(e.target.value)}
+              >
+                <option value="">Choose a Custom Form…</option>
+                {libraryForms.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className={buttonClass("secondary", "sm")}
+              disabled={!libraryFormId}
+              onClick={() => {
+                const src = libraryForms.find((f) => f.id === libraryFormId);
+                if (!src?.fields?.length) return;
+                setFields(
+                  src.fields.map((f) => ({
+                    id: f.id,
+                    label: f.label,
+                    type: f.type,
+                    options: f.options || [],
+                    required: !!f.required,
+                  })),
+                );
+                if (!title || title === "Staff application") setTitle(src.title);
+              }}
+            >
+              Clone fields
+            </button>
+          </div>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className={labelClass} htmlFor="rf-title">
@@ -866,6 +955,24 @@ function ApplicantDrawer({
                     onChange={(e) => setInterviewNotes(e.target.value)}
                   />
                 </div>
+                {interviewAt ? (
+                  <CalendarSyncControls
+                    entityType="interview"
+                    entityId={applicant.id}
+                    summary={`Interview: ${applicantName(applicant)}`}
+                    description={interviewNotes || undefined}
+                    location={interviewLocation || interviewLink || undefined}
+                    startIso={new Date(interviewAt).toISOString()}
+                    endIso={new Date(
+                      new Date(interviewAt).getTime() + 60 * 60 * 1000,
+                    ).toISOString()}
+                    timeZone={interviewTz || "Asia/Karachi"}
+                    attendeeEmails={applicant.email ? [applicant.email] : undefined}
+                    showMeet
+                    showInviteOptIn
+                    meetUrl={interviewLink || null}
+                  />
+                ) : null}
               </div>
             )}
           </section>

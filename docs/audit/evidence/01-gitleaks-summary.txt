@@ -1,0 +1,11 @@
+gitleaks 8.21.2 — 369 commits, 7 hits (secrets redacted in report)
+- generic-api-key .github/workflows/ci.yml:40 commit=ebfdc3f87157
+- generic-api-key app/mockdata/events.mock.ts:581 commit=eb23e1d0e65c
+- generic-api-key app/mockdata/events.mock.ts:831 commit=eb23e1d0e65c
+- generic-api-key app/mockdata/events.mock.ts:519 commit=0fcc19e739f2
+- generic-api-key app/mockdata/events.mock.ts:737 commit=0fcc19e739f2
+- gcp-api-key data/db.ts:8 commit=2726ec1163f3
+- gcp-api-key data/db.ts:8 commit=c35a91737749
+Notes: data/db.ts and app/mockdata/events.mock.ts absent from working tree (history-only).
+ci.yml JWT-shaped values contain literal 'placeholder' — treat as false positive unless real keys were used.
+History GCP AIza… hit in data/db.ts: rotate in Google Cloud if that key was ever real.

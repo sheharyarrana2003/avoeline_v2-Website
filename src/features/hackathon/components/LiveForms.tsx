@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import { CalendarSyncControls } from "@/src/features/connections/components/CalendarSyncControls";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import type { ActionResult } from "@/src/lib/action";
 import type { HackathonSettings } from "../live";
@@ -195,6 +196,82 @@ export function HackathonSettingsForm({
           bucket cap.
         </p>
       </div>
+
+      <div className="space-y-3 rounded-xl border border-line px-3 py-3">
+        <p className="text-sm font-medium text-ink">Judging window (optional)</p>
+        <p className="text-xs text-ink-soft">
+          Save start/end below, then sync to Google Calendar if you have Calendar connected.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className="block text-xs">
+            Start
+            <input
+              type="datetime-local"
+              name="judgingWindowStart"
+              defaultValue={settings.judgingWindowStart || ""}
+              className={`${fieldClass} mt-1`}
+            />
+          </label>
+          <label className="block text-xs">
+            End
+            <input
+              type="datetime-local"
+              name="judgingWindowEnd"
+              defaultValue={settings.judgingWindowEnd || ""}
+              className={`${fieldClass} mt-1`}
+            />
+          </label>
+        </div>
+        {settings.judgingWindowStart && settings.judgingWindowEnd ? (
+          <CalendarSyncControls
+            entityType="judging_session"
+            entityId={settings.eventId}
+            summary="Judging window"
+            startIso={new Date(settings.judgingWindowStart).toISOString()}
+            endIso={new Date(settings.judgingWindowEnd).toISOString()}
+            timeZone="Asia/Karachi"
+            showMeet={false}
+          />
+        ) : null}
+      </div>
+
+      {online ? (
+        <div className="space-y-3 rounded-xl border border-line px-3 py-3">
+          <p className="text-sm font-medium text-ink">Online session calendar (optional)</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block text-xs">
+              Start
+              <input
+                type="datetime-local"
+                name="onlineSessionStart"
+                defaultValue={settings.onlineSessionStart || ""}
+                className={`${fieldClass} mt-1`}
+              />
+            </label>
+            <label className="block text-xs">
+              End
+              <input
+                type="datetime-local"
+                name="onlineSessionEnd"
+                defaultValue={settings.onlineSessionEnd || ""}
+                className={`${fieldClass} mt-1`}
+              />
+            </label>
+          </div>
+          {settings.onlineSessionStart && settings.onlineSessionEnd ? (
+            <CalendarSyncControls
+              entityType="hackathon_session"
+              entityId={settings.eventId}
+              summary="Online hackathon session"
+              location={settings.livestreamUrl || undefined}
+              startIso={new Date(settings.onlineSessionStart).toISOString()}
+              endIso={new Date(settings.onlineSessionEnd).toISOString()}
+              timeZone="Asia/Karachi"
+              showMeet
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
         <SubmitButton pendingText="Saving…" className={buttonClass("secondary", "sm")}>

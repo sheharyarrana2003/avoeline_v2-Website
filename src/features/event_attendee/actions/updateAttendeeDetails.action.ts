@@ -107,6 +107,10 @@ export const updateAttendeeDetailsAction = safeAction({
       }
     }
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(input.eventId, ["attendees"]);
+
     revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
     return safeOk({
       registrationId: input.registrationId,

@@ -46,6 +46,14 @@ export default async function DepartmentClubInspectPage({
       <PageHeader
         title={club.name}
         description="Department oversight. Past tenures are read-only."
+        actions={
+          <Link
+            href={`${base}/settings/connections`}
+            className="text-sm font-medium text-ink underline hover:no-underline"
+          >
+            Connections
+          </Link>
+        }
       />
       <FormFeedback error={sp.e} success={sp.ok} />
 

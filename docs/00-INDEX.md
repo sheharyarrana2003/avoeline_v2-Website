@@ -17,6 +17,9 @@
 | Department dashboard, club oversight, tenures, budgets | `02-department.md` |
 | Club president portal, club team roles, requests to department | `03-club-president.md` |
 | Organizer dashboard, any paid vs free feature question | `04-organizer.md` |
+| Teams, staff, recruitment, access grants | `12-teams-and-staff.md` (+ `plans/2026-10-12-phase6-teams.md`) |
+| Cross-cutting security checklist | `15-security-baseline.md` (+ Connections: `17-connections-system.md`) |
+| Feature × role × plan coverage matrix | `20-feature-coverage.md` |
 | Badges, networking, meetups, discounts | `05-networking-badges.md` |
 | Participant-facing hackathon screens (scoreboard, submissions, tasks) | `06-hackathon-participant.md` |
 | Organizer-facing hackathon setup/config (CTF flags, Docker, phases) | `07-hackathon-organizer-config.md` |

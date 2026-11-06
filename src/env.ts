@@ -32,9 +32,20 @@ const serverSchema = publicSchema.extend({
   BREVO_API_KEY: z.string().min(1).optional(),
   /** AES key material for organizer email connection secrets (min 16 chars). */
   EMAIL_CONNECTION_SECRET: z.string().min(16).optional(),
+  /** Preferred Connections encryption key (docs/17); aliases EMAIL_CONNECTION_SECRET. */
+  CONNECTIONS_ENCRYPTION_KEY: z.string().min(16).optional(),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
   GOOGLE_REDIRECT_URI: z.string().url().optional(),
+  /** Preferred Google OAuth names (docs/17); alias GOOGLE_CLIENT_*. */
+  GOOGLE_OAUTH_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
+  GOOGLE_OAUTH_REDIRECT_URI: z.string().url().optional(),
+  /** Global kill switch for Google connections (`true`/`false`). Missing = enabled when OAuth configured. */
+  CONNECTIONS_GOOGLE_ENABLED: z.enum(["true", "false"]).optional(),
+  /** Google Picker (Connections C4) — restrict by HTTP referrer in Cloud Console. */
+  GOOGLE_PICKER_API_KEY: z.string().min(1).optional(),
+  GOOGLE_PICKER_APP_ID: z.string().min(1).optional(),
   PLATFORM_ADMIN_EMAILS: z.string().optional(),
   SAAS_OWNER_EMAILS: z.string().optional(),
   /** Protects /api/cron/* (Authorization: Bearer or ?secret=). */
@@ -83,9 +94,19 @@ function readServer(): ServerEnv {
     MAIL_FROM: process.env.MAIL_FROM || undefined,
     BREVO_API_KEY: process.env.BREVO_API_KEY || undefined,
     EMAIL_CONNECTION_SECRET: process.env.EMAIL_CONNECTION_SECRET || undefined,
+    CONNECTIONS_ENCRYPTION_KEY: process.env.CONNECTIONS_ENCRYPTION_KEY || undefined,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || undefined,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || undefined,
     GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || undefined,
+    GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID || undefined,
+    GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET || undefined,
+    GOOGLE_OAUTH_REDIRECT_URI: process.env.GOOGLE_OAUTH_REDIRECT_URI || undefined,
+    CONNECTIONS_GOOGLE_ENABLED: (process.env.CONNECTIONS_GOOGLE_ENABLED === "true" ||
+    process.env.CONNECTIONS_GOOGLE_ENABLED === "false"
+      ? process.env.CONNECTIONS_GOOGLE_ENABLED
+      : undefined) as "true" | "false" | undefined,
+    GOOGLE_PICKER_API_KEY: process.env.GOOGLE_PICKER_API_KEY || undefined,
+    GOOGLE_PICKER_APP_ID: process.env.GOOGLE_PICKER_APP_ID || undefined,
     PLATFORM_ADMIN_EMAILS: process.env.PLATFORM_ADMIN_EMAILS || undefined,
     SAAS_OWNER_EMAILS: process.env.SAAS_OWNER_EMAILS || undefined,
     CRON_SECRET: process.env.CRON_SECRET || undefined,
@@ -125,4 +146,44 @@ export function requireCompeteSecret(): string {
     );
   }
   return value;
+}
+
+/** Connections AES key: CONNECTIONS_ENCRYPTION_KEY, else EMAIL_CONNECTION_SECRET. */
+export function getConnectionsEncryptionKey(): string | undefined {
+  const env = getServerEnv();
+  const key = env.CONNECTIONS_ENCRYPTION_KEY?.trim() || env.EMAIL_CONNECTION_SECRET?.trim();
+  return key && key.length >= 16 ? key : undefined;
+}
+
+/** Google OAuth client credentials with docs/17 names preferred over legacy aliases. */
+export function getGoogleOAuthConfig(): {
+  clientId: string | undefined;
+  clientSecret: string | undefined;
+  redirectUri: string | undefined;
+} {
+  const env = getServerEnv();
+  return {
+    clientId: env.GOOGLE_OAUTH_CLIENT_ID?.trim() || env.GOOGLE_CLIENT_ID?.trim() || undefined,
+    clientSecret:
+      env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() || env.GOOGLE_CLIENT_SECRET?.trim() || undefined,
+    redirectUri:
+      env.GOOGLE_OAUTH_REDIRECT_URI?.trim() || env.GOOGLE_REDIRECT_URI?.trim() || undefined,
+  };
+}
+
+/** Global Google connections kill switch. Missing env → enabled. */
+export function isConnectionsGoogleEnabled(): boolean {
+  return getServerEnv().CONNECTIONS_GOOGLE_ENABLED !== "false";
+}
+
+/** Google Picker browser credentials (API key restricted by HTTP referrer). */
+export function getGooglePickerConfig(): {
+  apiKey: string | undefined;
+  appId: string | undefined;
+} {
+  const env = getServerEnv();
+  return {
+    apiKey: env.GOOGLE_PICKER_API_KEY?.trim() || undefined,
+    appId: env.GOOGLE_PICKER_APP_ID?.trim() || undefined,
+  };
 }

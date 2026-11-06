@@ -1,0 +1,972 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> avoeline@0.1.0 lint
+> eslint .
+
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\lint-staged.config.mjs
+  15:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\check-connections-imports.mjs
+  55:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\create-buckets.mjs
+  28:7  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  34:5  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  38:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\gen-table-columns.mjs
+  19:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\marketing-lighthouse.mjs
+  95:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\reset-wipe-data.mjs
+   99:18  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  123:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  125:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  127:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  130:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  132:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  145:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  147:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  148:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  149:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  150:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\rotate-connections-key.mjs
+  88:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\schema-usage-scan.mjs
+  71:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\seed-demo.mjs
+    11:22  warning  'randomBytes' is defined but never used                                                  @typescript-eslint/no-unused-vars
+    33:1   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+   164:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+   427:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+   509:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+   513:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  1348:3   warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\seed-feedback-reviews.mjs
+  138:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\seed-saas-owners.mjs
+  57:7  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  67:7  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  84:5  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+  91:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\stub-server-only.mjs
+  8:46  warning  'parent' is defined but never used  @typescript-eslint/no-unused-vars
+  8:54  warning  'isMain' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\test-connections-rls.mjs
+  39:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\scripts\test-marketing-rls.mjs
+  43:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\access-denied\page.tsx
+  2:23  warning  'ArrowLeft' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\admin\billing\pending\PendingPaymentsClient.tsx
+  73:13  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+  75:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\auth\callback\route.ts
+  74:7  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\events\[eventId]\ticket\[registrationId]\tracks\[trackId]\tasks\page.tsx
+   78:26  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\events\[eventId]\ticket\[registrationId]\tracks\[trackId]\tasks\page.tsx:78:26
+  76 |
+  77 |   const cutoff = taskCutoff(cfg, track.submissionDeadline);
+> 78 |   const ended = cutoff ? Date.now() > Date.parse(cutoff) : false;
+     |                          ^^^^^^^^^^ Cannot call impure function
+  79 |   const myPoints = [...done.values()].reduce((n, c) => n + (c.correct ? c.points : 0), 0);
+  80 |   const base = `/events/${eventId}/ticket/${registrationId}/tracks/${track.id}/tasks`;
+  81 |                                                                                                                                                    react-hooks/purity
+  129:47  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\events\[eventId]\ticket\[registrationId]\tracks\[trackId]\tasks\page.tsx:129:47
+  127 |           const timed = cfg.on("per_task_timer") && !!t.time_limit_minutes;
+  128 |           const startedAt = state.taskStarts[t.id];
+> 129 |           const timeUp = timed && startedAt ? Date.now() > Date.parse(startedAt) + (t.time_limit_minutes ?? 0) * 60_000 : false;
+      |                                               ^^^^^^^^^^ Cannot call impure function
+  130 |           const takesFlag = cfg.on("ctf_flags") && !!t.flag_hash;
+  131 |           const canSubmit = takesFlag && !solved && !ended && (!timed || (startedAt && !timeUp));
+  132 |  react-hooks/purity
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\booking-details\[booking_id]\page.tsx
+  109:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:87  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\chatbot\ChatBotClient.tsx
+  28:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\chatbot\page.tsx
+  63:9  error  'ai_response' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\events\[eventId]\page.tsx
+  21:10  warning  'RecentRegistration' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\events\[eventId]\vendors\page.tsx
+  16:10  warning  'VendorData' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\events\create\page.tsx
+  42:13  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\quotes\page.tsx
+   97:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  216:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  327:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\vendor-marketplace\page.tsx
+   65:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\[organizer_id]\view-vendor\[vendor_id]\page.tsx
+   73:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   74:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  285:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  434:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\organizer\layout.tsx
+  9:10  warning  'UserService' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\teams\join\page.tsx
+  130:81  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\teams\page.tsx
+  3:17  warning  'Plus' is defined but never used        @typescript-eslint/no-unused-vars
+  3:28  warning  'Shield' is defined but never used      @typescript-eslint/no-unused-vars
+  3:36  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  8:10  warning  'EmptyState' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\bookings\[booking_id]\counter-offer\page.tsx
+  81:80  error  Error: Cannot modify local variables after render completes
+
+This argument is a function which may reassign or mutate `booking` after render, which can cause inconsistent behavior on subsequent renders. Consider using state instead.
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\bookings\[booking_id]\counter-offer\page.tsx:81:80
+  79 |                     }
+  80 |                 />
+> 81 |                 <VendorCounterOfferForm bookingData={booking} onSubmitCounter={onSubmitCounter} />
+     |                                                                                ^^^^^^^^^^^^^^^ This function may (indirectly) reassign or modify `booking` after render
+  82 |             </div>
+  83 |         </div>
+  84 |     )
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\bookings\[booking_id]\counter-offer\page.tsx:46:13
+  44 |         booking?.quote.negotiation.push(new_neg_message);
+  45 |         if (booking && booking.quote.vendorQuote) {
+> 46 |             booking.quote.vendorQuote.totalAmount = targetBudget;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^ This modifies `booking`
+  47 |         }
+  48 |           if (booking?.payment?.totalAmount) {
+  49 |             booking.payment.totalAmount = targetBudget  react-hooks/immutability
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\bookings\[booking_id]\page.tsx
+  119:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  227:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\bookings\page.tsx
+   89:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  167:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  186:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  324:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\dashboard\page.tsx
+   59:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   71:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  142:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  167:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  354:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  382:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  543:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  552:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  558:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\profile\page.tsx
+  105:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  279:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  291:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  432:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  519:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\quotes\[quote_detail_id]\page.tsx
+  197:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  268:83  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  299:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\quotes\page.tsx
+   90:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  245:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  330:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\quotes\prep-quote\[prep_quote_id]\page.tsx
+  147:37  error  Unexpected any. Specify a different type                    @typescript-eslint/no-explicit-any
+  257:7   error  'bookingId' is never reassigned. Use 'const' instead        prefer-const
+  258:7   error  'items' is never reassigned. Use 'const' instead            prefer-const
+  259:7   error  'discountAmount' is never reassigned. Use 'const' instead   prefer-const
+  261:7   error  'validityDate' is never reassigned. Use 'const' instead     prefer-const
+  262:7   error  'totalAmount' is never reassigned. Use 'const' instead      prefer-const
+  263:7   error  'taxRate' is never reassigned. Use 'const' instead          prefer-const
+  264:7   error  'templateId' is never reassigned. Use 'const' instead       prefer-const
+  265:17  error  'payloadCurrency' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\services\add-service\page.tsx
+  291:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\[vendor_id]\services\page.tsx
+  40:7   warning  'getCategoryCount' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  40:37  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+  41:30  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\app\vendor\layout.tsx
+  7:10  warning  'UserService' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\access\components\AccessGate.tsx
+  2:10  warning  'Lock' is defined but never used   @typescript-eslint/no-unused-vars
+  2:50  warning  'MailX' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\access\components\AccessTypeSelector.tsx
+  13:3  warning  'HelpCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\access\components\CsvWhitelistUploader.tsx
+  4:18  warning  'FileText' is defined but never used       @typescript-eslint/no-unused-vars
+  4:42  warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+  4:57  warning  'Trash2' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\FilterToolbar.tsx
+  59:19  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\FilterToolbar.tsx:59:19
+  57 |   const searchId = useId();
+  58 |
+> 59 |   useEffect(() => setQ(filters.q), [filters.q]);
+     |                   ^^^^ Avoid calling setState() directly within an effect
+  60 |
+  61 |   useEffect(() => {
+  62 |     if (!moreOpen) return;  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\ModerateEventModal.tsx
+   49:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\ModerateEventModal.tsx:49:5
+  47 |   useEffect(() => {
+  48 |     if (!open || !row) return;
+> 49 |     setReason("");
+     |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  50 |     setNotify(true);
+  51 |     setConfirmTitle("");
+  52 |     setError(null);                                                                                     react-hooks/set-state-in-effect
+  273:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\ModerateEventModal.tsx:273:5
+  271 |   useEffect(() => {
+  272 |     if (!eventId) return;
+> 273 |     setLeft(10);
+      |     ^^^^^^^ Avoid calling setState() directly within an effect
+  274 |     const tick = window.setInterval(() => setLeft((n) => n - 1), 1000);
+  275 |     const end = window.setTimeout(() => onDone(), 10_000);
+  276 |     return () => {  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\ReportReviewDrawer.tsx
+  46:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\admin\components\events\ReportReviewDrawer.tsx:46:5
+  44 |   useEffect(() => {
+  45 |     if (!open || !flagged) return;
+> 46 |     setNote("");
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  47 |     setError(null);
+  48 |     startTransition(async () => {
+  49 |       const rows = await listEventReportsForDrawer(flagged.eventId);  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\agendas\actions\createAgenda.action.ts
+  60:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\analytics\actions\submitTicketFeedback.action.ts
+  67:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\bookings\actions\reviewVendor.action.ts
+  155:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\bookings\bookingValue.test.ts
+  22:1  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\bookings\bookings.service.ts
+   16:18  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   20:47  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   21:81  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   36:60  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  131:29  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  161:67  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  169:58  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  181:44  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  191:42  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  213:48  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  261:40  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  293:33  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  478:48  error  Prefer using the primitive `string` as a type name, rather than the upper-cased `String`  @typescript-eslint/no-wrapper-object-types
+  488:42  error  Prefer using the primitive `string` as a type name, rather than the upper-cased `String`  @typescript-eslint/no-wrapper-object-types
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\bookings\shared_components\VendorPrepBookingClient.tsx
+  213:31  warning  '_id' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\certificates\certificates.service.ts
+  200:9  warning  'version' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\certificates\renderCertificate.ts
+  145:3   warning  '_assets' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  171:11  error    'size' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\components\CapacityStrip.tsx
+  38:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\components\CapacityStrip.tsx:38:7
+  36 |   useEffect(() => {
+  37 |     if (initial) {
+> 38 |       setCapacity(initial);
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  39 |       return;
+  40 |     }
+  41 |     start(async () => {  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\components\ConnectionsPage.tsx
+  15:20  warning  '_showBatchesLink' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\components\OrganizerLibraryClient.tsx
+  71:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\components\OrganizerLibraryClient.tsx:71:5
+  69 |
+  70 |   useEffect(() => {
+> 71 |     reload();
+     |     ^^^^^^ Avoid calling setState() directly within an effect
+  72 |   }, [reload]);
+  73 |
+  74 |   const chips: Array<{ id: MimeChip; label: string }> = [  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\connections\server\batch.service.ts
+  212:7  error  'sendNowCount' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\dashboard\dashboardDerive.ts
+  181:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\department\actions\departmentOrg.action.ts
+  34:33  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\email\organizerEmailConnection.service.ts
+  67:36  warning  '_state' is defined but never used      @typescript-eslint/no-unused-vars
+  67:52  warning  '_loginHint' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\attendee.service.ts
+   11:49  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   11:71  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   14:5   error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   58:36  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+   78:32  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  105:37  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  115:36  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  130:38  error  Prefer using the primitive `string` as a type name, rather than the upper-cased `String`  @typescript-eslint/no-wrapper-object-types
+  163:79  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  178:68  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+  208:81  error  Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\components\AttendeeClientSide.tsx
+  107:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\components\AttendeeClientSide.tsx:107:7
+  105 |     const team = searchParams.get("team");
+  106 |     if (team) {
+> 107 |       setExpandedTeamId(team);
+      |       ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  108 |       setOpenTeamId(team);
+  109 |       set_open_registration_id(null);
+  110 |     }  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\components\AttendeeInput.tsx
+  40:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\components\AttendeeInput.tsx:40:5
+  38 |
+  39 |   useEffect(() => {
+> 40 |     setDraft(query);
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  41 |   }, [query]);
+  42 |
+  43 |   useEffect(  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_attendee\components\SingleAttendeeView.tsx
+  90:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  91:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\event_vendors\event_venders.services.ts
+   19:6   warning  'VendorUpdate' is defined but never used  @typescript-eslint/no-unused-vars
+   21:18  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:81  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:42  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   83:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:37  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:28  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:64  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:57  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  192:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\events\components\OrganizerEventsToolbar.tsx
+  53:19  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\events\components\OrganizerEventsToolbar.tsx:53:19
+  51 |   const sortId = useId();
+  52 |
+> 53 |   useEffect(() => setQ(filters.q), [filters.q]);
+     |                   ^^^^ Avoid calling setState() directly within an effect
+  54 |
+  55 |   const push = (next: Partial<OrganizerEventFilters>) => {
+  56 |     startTransition(() => {  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\events\types.ts
+  11:15  warning  'EventFormat' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\actions\ctf.action.ts
+  21:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\actions\teams.action.ts
+  19:54  warning  'patchRegistration' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\CompeteMonitoring.tsx
+  32:36  warning  Functions returned from `useEffectEvent` must not be included in the dependency array. Remove `ping` from the list       react-hooks/exhaustive-deps
+  46:20  warning  Functions returned from `useEffectEvent` must not be included in the dependency array. Remove `integrity` from the list  react-hooks/exhaustive-deps
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonCountdown.tsx
+  8:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonCountdown.tsx:8:5
+   6 |   const [now, setNow] = useState<number | null>(null);
+   7 |   useEffect(() => {
+>  8 |     setNow(Date.now());
+     |     ^^^^^^ Avoid calling setState() directly within an effect
+   9 |     const id = setInterval(() => setNow(Date.now()), 1000);
+  10 |     return () => clearInterval(id);
+  11 |   }, []);  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonPhasesTasksPanel.tsx
+  114:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonPhasesTasksPanel.tsx:114:7
+  112 |     firstMatch.current = null;
+  113 |     if (!searching && !initialTaskId) {
+> 114 |       setOpenKeys(new Set());
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  115 |       return;
+  116 |     }
+  117 |     const next = new Set<string>();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/set-state-in-effect
+  367:51  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonPhasesTasksPanel.tsx:367:51
+  365 |               </span>
+  366 |             </button>
+> 367 |             {openKeys.has(`indep:${track.id}`) ? <IndependentBody track={track} /> : null}
+      |                                                   ^^^^^^^^^^^^^^^ This component is created during render
+  368 |           </div>
+  369 |         </div>
+  370 |       );
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonPhasesTasksPanel.tsx:258:3
+  256 |   }
+  257 |
+> 258 |   function IndependentBody({ track }: { track: HackathonTrack }) {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 259 |     const independent = tasks.filter((t) => t.track_id === track.id && !t.phase_id);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 260 |     return (
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 304 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 305 |   }
+      | ^^^^ The component is created during render here
+  306 |
+  307 |   function PhaseRowCard({ phase, dim }: { phase: PhaseRow; dim?: boolean }) {
+  308 |     const track = tracks.find((t) => t.id === phase.track_id);  react-hooks/static-components
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\HackathonWorkspace.tsx
+  422:36  warning  'flag_hash' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\LiveScoreboardTable.tsx
+  47:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\components\LiveScoreboardTable.tsx:47:5
+  45 |   const [nowMs, setNowMs] = useState<number | null>(null);
+  46 |   useEffect(() => {
+> 47 |     setNowMs(Date.now());
+     |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  48 |   }, []);
+  49 |   const noSolves = rows.length > 0 && rows.every((r) => r.points === 0 && r.solved === 0);
+  50 |  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\ctf.service.ts
+  598:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\hackathon\hackathon.service.ts
+   46:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   48:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   55:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  143:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  154:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  438:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  491:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  494:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  495:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  506:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  533:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  579:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\organizations\organizations.service.ts
+   10:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   11:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   18:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   21:5   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:65  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\registration\actions\registerAttendee.action.ts
+  259:9  error  'finalProof' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\registration\forms\components\EventFormFieldsEditor.tsx
+  100:28  warning  '_l' is defined but never used  @typescript-eslint/no-unused-vars
+  100:36  warning  '_i' is defined but never used  @typescript-eslint/no-unused-vars
+  100:48  warning  '_k' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\actions\categoryEngine.action.ts
+   63:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  307:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  343:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\CategoryManagementView.tsx
+   12:3   warning  'AlertCircle' is defined but never used   @typescript-eslint/no-unused-vars
+   96:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\CategoryRequestsView.tsx
+   4:55  warning  'Sparkles' is defined but never used      @typescript-eslint/no-unused-vars
+  39:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\CategoryStep.tsx
+    3:17  warning  'useState' is defined but never used      @typescript-eslint/no-unused-vars
+    4:28  warning  'CheckSquare' is defined but never used   @typescript-eslint/no-unused-vars
+    4:41  warning  'Sparkles' is defined but never used      @typescript-eslint/no-unused-vars
+   24:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   25:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   71:78  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:56  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\ChecklistTemplateModal.tsx
+  99:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\DynamicFieldRenderer.tsx
+   6:10  warning  'HelpCircle' is defined but never used    @typescript-eslint/no-unused-vars
+  10:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\FieldSetEditorModal.tsx
+  76:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\components\RequestCategoryModal.tsx
+  49:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\taxonomy\taxonomy.service.ts
+  8:31  warning  'kind' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\actions\department.action.ts
+  300:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  375:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\actions\teamEngine.action.ts
+  49:9  error  'resolvedEventId' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\AddMemberModal.tsx
+  49:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\AddMemberModal.tsx:49:5
+  47 |   useEffect(() => {
+  48 |     if (!open) return;
+> 49 |     setStep(1);
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  50 |     setError(null);
+  51 |     setTeamId(preselectTeamId || teams[0]?.id || "");
+  52 |     setName("");  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\CopyShareLink.tsx
+  12:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\CopyShareLink.tsx:12:7
+  10 |   useEffect(() => {
+  11 |     if (!showQr || !url) {
+> 12 |       setQr(null);
+     |       ^^^^^ Avoid calling setState() directly within an effect
+  13 |       return;
+  14 |     }
+  15 |     let cancelled = false;  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\DepartmentDashboardView.tsx
+  3:20  warning  'useTransition' is defined but never used  @typescript-eslint/no-unused-vars
+  5:42  warning  'ArrowRight' is defined but never used     @typescript-eslint/no-unused-vars
+  5:79  warning  'Mail' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\EditMemberModal.tsx
+  48:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\EditMemberModal.tsx:48:5
+  46 |     if (!open || !member) return;
+  47 |     const extra = parseMemberExtra(member.extra);
+> 48 |     setName(memberDisplayName(member));
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  49 |     setEmail(memberEmail(member));
+  50 |     setPhone(member.phone || "");
+  51 |     setDesignation(extra.designation);  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\EditTeamModal.tsx
+  40:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\EditTeamModal.tsx:40:5
+  38 |     if (!open || !team) return;
+  39 |     const extra = parseTeamExtra(team.extra);
+> 40 |     setName(team.name);
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  41 |     setDescription(extra.description);
+  42 |     setTeamType(extra.teamType);
+  43 |     setError(null);  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\JoinTeamModal.tsx
+   76:32  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  103:51  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\features\teams\components\StaffRecruitmentSection.tsx
+  20:3  warning  'APPLICANT_STATUSES' is defined but never used  @typescript-eslint/no-unused-vars
+  24:8  warning  'ApplicantStatus' is defined but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\lib\access.ts
+   39:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  186:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\lib\email.ts
+  96:3  warning  '_unused' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\lib\eventState.test.ts
+  34:3  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\lib\notifications.ts
+  179:5  warning  Unexpected console statement. Only these console methods are allowed: warn, error, info  no-console
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\anaylService.ts
+   16:3   warning  'toIsoDate' is defined but never used     @typescript-eslint/no-unused-vars
+   56:71  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:50  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   63:46  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   63:68  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:5   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:48  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:70  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:5   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:22  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:27  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  421:58  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  445:60  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\event.service.ts
+  446:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  448:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  470:71  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  470:91  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\models\event.model.tsx
+  203:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  249:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  319:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  449:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  457:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  458:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  470:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  505:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  575:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  683:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\models\feedback.model.ts
+  39:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\models\notification.model.ts
+  24:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\models\organizer.model.ts
+  87:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\models\vendor.model.ts
+   78:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  207:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\organizer.service.ts
+  51:38  error  Prefer using the primitive `string` as a type name, rather than the upper-cased `String`  @typescript-eslint/no-wrapper-object-types
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\registeration.service.ts
+   90:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  197:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\services\user.service.ts
+  128:38  error  Prefer using the primitive `string` as a type name, rather than the upper-cased `String`  @typescript-eslint/no-wrapper-object-types
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\DateField.tsx
+  97:27  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\DateField.tsx:97:27
+   95 |     // Follow externally-driven value changes (controlled callers, resets).
+   96 |     useEffect(() => {
+>  97 |         if (isControlled) setText(isoToDisplay(String(value ?? "")));
+      |                           ^^^^^^^ Avoid calling setState() directly within an effect
+   98 |     }, [isControlled, value]);
+   99 |
+  100 |     const iso = displayToIso(text);  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\NotificationBell.tsx
+  55:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\NotificationBell.tsx:55:9
+  53 |     // Keep unread count in sync if initial prop changes
+  54 |     useEffect(() => {
+> 55 |         setUnreadCount(initialUnreadCount);
+     |         ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  56 |     }, [initialUnreadCount]);
+  57 |
+  58 |     // Close on outside click or Escape key  react-hooks/set-state-in-effect
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\auth\OrganizerProfileStep.tsx
+  138:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\auth\VendorProfileStep.tsx
+  156:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\organizer\EventHeaderMedia.tsx
+  21:5  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+  30:7  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\ui\ConfirmDialog.tsx
+  79:15  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\sheha\OneDrive\Desktop\avoeline_v2-Website-main\src\shared_components\ui\ConfirmDialog.tsx:79:15
+  77 |
+  78 |   useEffect(() => {
+> 79 |     if (open) setTyped("");
+     |               ^^^^^^^^ Avoid calling setState() directly within an effect
+  80 |   }, [open]);
+  81 |
+  82 |   const styles = TONE[tone];  react-hooks/set-state-in-effect
+
+✖ 362 problems (269 errors, 93 warnings)
+  10 errors and 2 warnings potentially fixable with the `--fix` option.
+

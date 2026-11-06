@@ -1,0 +1,13 @@
+/api/certificates/[id]
+/api/connections/[provider]/callback
+/api/connections/[provider]/start
+/api/connections/google/picker-token
+/api/cron/connections-health
+/api/cron/email-outbox
+/api/cron/feature-override-expiry
+/api/cron/linked-files
+/api/cron/plan-expiry
+/api/cron/sheet-syncs
+/api/email/google/callback
+/auth/callback
+/certificate/[code]/download

@@ -1,0 +1,4 @@
+﻿Source: Supabase MCP list_tables(public) — READ ONLY. Project linked in Cursor MCP (treat as staging/linked; not modified).
+All listed tables reported rls_enabled=true.
+Count: 131 public tables (matches TABLES unique physical names 131).
+Includes custom_forms, custom_form_responses, sheet_syncs, linked_files, calendar_links, connections tables.

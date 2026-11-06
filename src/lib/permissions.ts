@@ -65,6 +65,7 @@ export const TAB_PERMISSION: Record<string, PermissionKey | null> = {
   expenses: "expenses:manage",
   certificates: "certificates:manage",
   exports: "exports:run",
+  files: "exports:run",
   competitions: "hackathon:manage",
   tasks: "hackathon:manage",
   teams: "hackathon:manage",

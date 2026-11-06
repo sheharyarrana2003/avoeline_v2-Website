@@ -3,11 +3,17 @@ import { createServerClient } from "@supabase/ssr";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { logger } from "@/src/lib/logger";
+import { maybeBootstrapGoogleWorkspaceFromAuth } from "@/src/features/connections/server/bootstrapFromAuth.service";
+import { WORKSPACE_OAUTH_CAPABILITY } from "@/src/features/connections/lib/workspaceScopes.logic";
 
 export const runtime = "nodejs";
 
 function appOrigin(req: NextRequest): string {
   return req.nextUrl.origin;
+}
+
+function copyCookies(from: NextResponse, to: NextResponse) {
+  for (const c of from.cookies.getAll()) to.cookies.set(c.name, c.value);
 }
 
 export async function GET(req: NextRequest) {
@@ -45,6 +51,7 @@ export async function GET(req: NextRequest) {
   }
 
   const user = data.user;
+  const session = data.session;
   const { data: profile } = await supabaseAdmin
     .from(TABLES.USERS)
     .select("id, user_type, setup_complete, onboarding_status")
@@ -148,7 +155,28 @@ export async function GET(req: NextRequest) {
 
   if (next.startsWith("/") && !next.startsWith("//")) dest = next;
 
+  // Link Gmail / Calendar / Drive into Connections when possible (organizer/vendor).
+  const boot = await maybeBootstrapGoogleWorkspaceFromAuth({
+    user,
+    session,
+    userType,
+  }).catch((err) => {
+    logger.error("[auth/callback] workspace bootstrap failed", {
+      err: err instanceof Error ? err.message : String(err),
+    });
+    return { linked: false, needsWorkspaceOAuth: false };
+  });
+
+  if (boot.needsWorkspaceOAuth && (userType === "organizer" || userType === "vendor")) {
+    const returnTo = encodeURIComponent(dest);
+    const loginHint = encodeURIComponent(user.email || "");
+    const connectPath = `/api/connections/google/start?capability=${WORKSPACE_OAUTH_CAPABILITY}&ownerType=user&ownerId=${encodeURIComponent(user.id)}&returnTo=${returnTo}&loginHint=${loginHint}`;
+    const finalRes = NextResponse.redirect(new URL(connectPath, origin));
+    copyCookies(redirectRes, finalRes);
+    return finalRes;
+  }
+
   const finalRes = NextResponse.redirect(new URL(dest, origin));
-  for (const c of redirectRes.cookies.getAll()) finalRes.cookies.set(c.name, c.value);
+  copyCookies(redirectRes, finalRes);
   return finalRes;
 }

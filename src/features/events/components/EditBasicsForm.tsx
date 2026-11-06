@@ -6,6 +6,8 @@ import { DescriptionEditor } from "@/src/features/events/components/wizard/Descr
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from "@/src/features/media/media.utils";
 import { updateEventBasics } from "@/src/features/events/actions/updateEventBasics.action";
+import { CalendarSyncControls } from "@/src/features/connections/components/CalendarSyncControls";
+import { parseScheduleDateTime } from "@/src/lib/datetime";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 
 export type EditBasicsInitial = {
@@ -158,6 +160,25 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
             />
           </label>
         </div>
+        {(() => {
+          const start = parseScheduleDateTime(startDate, startTime);
+          const end =
+            parseScheduleDateTime(endDate || startDate, endTime) ||
+            (start ? new Date(start.getTime() + 2 * 60 * 60 * 1000) : null);
+          if (!start || !end) return null;
+          return (
+            <CalendarSyncControls
+              entityType="event"
+              entityId={initial.eventId}
+              summary={title || "Event"}
+              description={shortDescription || undefined}
+              startIso={start.toISOString()}
+              endIso={end.toISOString()}
+              timeZone="Asia/Karachi"
+              showMeet={false}
+            />
+          );
+        })()}
       </section>
 
       <section className="space-y-4">

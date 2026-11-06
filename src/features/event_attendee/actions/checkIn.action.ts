@@ -80,6 +80,10 @@ export async function setCheckIn(
       .eq("id", registrationId);
     if (updateError) throw updateError;
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(String(event.id), ["checkin", "attendees"]);
+
     revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
     revalidatePath(`/organizer/${event.organizerId}/events/${event.id}`);
     return ok();

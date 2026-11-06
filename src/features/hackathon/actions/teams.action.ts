@@ -138,6 +138,10 @@ export async function createTeam(
       feeStatus: track.fee > 0 ? "fee_pending" : "not_required",
     });
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(who.event.id, ["hackathon_teams"]);
+
     revalidateAll(who.event.id, registrationId, who.event.organizerId, track.id);
     return ok();
   } catch (err) {
@@ -216,6 +220,10 @@ export async function joinTeam(
       updatedAt: now,
     });
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(who.event.id, ["hackathon_teams"]);
+
     revalidateAll(who.event.id, registrationId, who.event.organizerId, found.trackId);
     return ok();
   } catch (err) {
@@ -270,6 +278,10 @@ export async function leaveTeam(
       });
     }
 
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(who.event.id, ["hackathon_teams"]);
+
     revalidateAll(who.event.id, registrationId, who.event.organizerId, trackId);
     return ok();
   } catch (err) {
@@ -313,6 +325,10 @@ export async function updateTeamPrefs(
       : team.lookingForMembers;
 
     await patchHackathonTeam(team.id, { members, lookingForMembers, updatedAt: new Date() });
+
+    const { scheduleSheetRefresh } =
+      await import("@/src/features/connections/server/sheetSync.service");
+    scheduleSheetRefresh(who.event.id, ["hackathon_teams"]);
 
     revalidateAll(who.event.id, registrationId, who.event.organizerId, team.trackId);
     return ok();

@@ -1,0 +1,571 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> avoeline@0.1.0 knip
+> knip
+
+Unused files (47)
+data/tableColumns.ts                                                                               
+src/app/organizer/[organizer_id]/events/[eventId]/certificates/making-template/makingTemplateUi.tsx
+src/features/access/actions/markInviteOpened.action.ts                                             
+src/features/access/components/TrackInviteOpen.tsx                                                 
+src/features/admin/eventList.service.ts                                                            
+src/features/agendas/types/agenda.ts                                                               
+src/features/agendas/types/speaker.ts                                                              
+src/features/auth/auth.service.ts                                                                  
+src/features/certificates/actions/applyDesign.action.ts                                            
+src/features/certificates/actions/downloadCertificate.action.ts                                    
+src/features/certificates/components/DesignPicker.tsx                                              
+src/features/certificates/designs.ts                                                               
+src/features/certificates/renderCertificatePdf.ts                                                  
+src/features/clubs/actions/clubTeams.action.ts                                                     
+src/features/email/actions/organizerEmailConnection.action.ts                                      
+src/features/email/actions/platformAnnouncement.action.ts                                          
+src/features/email/components/OrganizerEmailConnectPanel.tsx                                       
+src/features/event_speakers/types/speaker.ts                                                       
+src/features/event_vendors/eventVendors.service.ts                                                 
+src/features/events/components/wizard/DomainCategoryPicker.tsx                                     
+src/features/events/components/wizard/results/components/ActionButtons.tsx                         
+src/features/events/components/wizard/results/components/EventStats.tsx                            
+src/features/events/components/wizard/results/components/SuccessHeader.tsx                         
+src/features/events/components/wizard/results/components/SuccessIcon.tsx                           
+src/features/hackathon/components/CreateOrJoinTeam.tsx                                             
+src/features/organizations/components/SponsorStrip.tsx                                             
+src/features/registration/registrations.list.ts                                                    
+src/features/saas/components/CreateTenantModal.tsx                                                 
+src/features/teams/actions/apply.action.ts                                                         
+src/features/teams/components/ClubDetailView.tsx                                                   
+src/features/teams/components/DepartmentDashboardView.tsx                                          
+src/features/teams/components/JoinTeamModal.tsx                                                    
+src/features/teams/components/OrgManagementView.tsx                                                
+src/features/teams/teamScope.ts                                                                    
+src/lib/email/secretCrypto.ts                                                                      
+src/services/ai.service.ts                                                                         
+src/services/analytics.service.ts                                                                  
+src/services/certificateTemplate.service.ts                                                        
+src/services/models/certificate.model.ts                                                           
+src/services/notification.service.ts                                                               
+src/services/registration.service.ts                                                               
+src/shared_components/home/AnalyticsCardMockup.tsx                                                 
+src/shared_components/home/HomeFooter.tsx                                                          
+src/shared_components/home/HomeHeader.tsx                                                          
+src/shared_components/organizer/OrganizerFooter.tsx                                                
+src/shared_components/ui/CompetitionFilter.tsx                                                     
+src/shared_components/ui/FileUploadField.tsx                                                       
+Unlisted binaries (2)
+rg    scripts/schema-usage-scan.mjs 
+psql  scripts/test-marketing-rls.mjs
+Unused exports (328)
+COLLECTIONS                                 data/collections.ts:153:14                                           
+pgDelete                          function  data/pg.ts:60:23                                                     
+pgAll                             function  data/pg.ts:65:23                                                     
+throwIfError                      function  data/supabase.ts:95:17                                               
+default                           function  src/components/ui/Badge.tsx:54:16                                    
+default                           variable  src/components/ui/Button.tsx:96:16                                   
+CardHeader                        function  src/components/ui/Card.tsx:49:17                                     
+CardTitle                         function  src/components/ui/Card.tsx:61:17                                     
+CardDescription                   function  src/components/ui/Card.tsx:76:17                                     
+CardFooter                        function  src/components/ui/Card.tsx:112:17                                    
+default                           function  src/components/ui/Card.tsx:127:16                                    
+default                           variable  src/components/ui/Input.tsx:89:16                                    
+default                           function  src/components/ui/Modal.tsx:112:16                                   
+default                           variable  src/components/ui/Select.tsx:95:16                                   
+getPublicEnv                      function  src/env.ts:128:17                                                    
+findInviteByToken                           src/features/access/access.service.ts:74:14                          
+findGuestEntry                    function  src/features/access/access.service.ts:93:23                          
+isListedPublicly                  function  src/features/access/access.service.ts:109:17                         
+hasGuestList                      function  src/features/access/access.service.ts:166:23                         
+createInviteLinksAction           function  src/features/access/actions/inviteLinks.action.ts:24:23              
+cancelRegistrationAction          function  src/features/access/actions/registrationDecision.action.ts:205:23    
+defaultEventAccess                function  src/features/access/types.ts:65:17                                   
+setDepartmentVerifiedAction       function  src/features/admin/actions/department.action.ts:61:23                
+moderateEvent                     function  src/features/admin/actions/events.action.ts:387:23                   
+decideReport                      function  src/features/admin/actions/events.action.ts:412:23                   
+listAllEvents                               src/features/admin/admin.service.ts:234:14                           
+listEventReports                            src/features/admin/admin.service.ts:397:14                           
+CreateAdminForm                   function  src/features/admin/components/AdminForms.tsx:560:17                  
+AdminRow                          function  src/features/admin/components/AdminForms.tsx:616:17                  
+OrgManagementView                           src/features/admin/components/OrgBoard.tsx:686:22                    
+TicketControls                    function  src/features/admin/components/SupportForms.tsx:70:17                 
+TicketReplyForm                   function  src/features/admin/components/SupportThread.tsx:27:17                
+getCurrentTenure                            src/features/admin/orgDetail.service.ts:99:14                        
+getSupportEntities                          src/features/admin/platform.service.ts:150:14                        
+getSupportTicket                  function  src/features/admin/supportThread.service.ts:78:23                    
+isTenantCap                       function  src/features/admin/types.ts:107:17                                   
+MODERATION_ACTIONS                          src/features/admin/types.ts:272:14                                   
+VENDOR_STATUSES                             src/features/admin/types.ts:459:14                                   
+sessionsForSpeaker                function  src/features/agendas/agendaSpeakers.service.ts:47:23                 
+speakersByAgendaItem              function  src/features/agendas/agendaSpeakers.service.ts:82:23                 
+parseIsoDay                       function  src/features/analytics/analytics.filters.ts:66:17                    
+filterRegsByCreatedAt             function  src/features/analytics/analyticsDerive.ts:107:17                     
+filterEventsById                  function  src/features/analytics/analyticsDerive.ts:115:17                     
+filterByEventId                   function  src/features/analytics/analyticsDerive.ts:120:17                     
+vendorSpendByEvent                function  src/features/analytics/analyticsDerive.ts:128:17                     
+expenseNetByEvent                 function  src/features/analytics/analyticsDerive.ts:140:17                     
+toIsoDate                                   src/features/analytics/analyticsDerive.ts:590:10                     
+parseDayToLocalDate                         src/features/analytics/analyticsDerive.ts:590:21                     
+startOfLocalDay                             src/features/analytics/analyticsDerive.ts:590:42                     
+endOfLocalDay                               src/features/analytics/analyticsDerive.ts:590:59                     
+localDayKey                                 src/features/analytics/analyticsDerive.ts:590:74                     
+stripPii                                    src/features/analytics/geminiFeedback.ts:21:3                        
+hashFeedbackInputs                          src/features/analytics/geminiFeedback.ts:22:3                        
+buildFallbackAnalysis                       src/features/analytics/geminiFeedback.ts:23:3                        
+validateGeminiPayload                       src/features/analytics/geminiFeedback.ts:24:3                        
+geminiAnalysisSchema                        src/features/analytics/geminiFeedback.ts:25:3                        
+default                           function  src/features/auth/components/RequireRole.tsx:32:16                   
+checkUserRole                     function  src/features/auth/rbac.service.ts:29:17                              
+assertTeamLead                    function  src/features/auth/rbac.service.ts:89:23                              
+emailCertificatesAction                     src/features/certificates/actions/emailCertificates.action.ts:29:14  
+getTemplateVersion                function  src/features/certificates/certificates.service.ts:228:23             
+clubNavItems                      function  src/features/clubs/club.service.ts:21:17                             
+listClubEventRows                 function  src/features/clubs/club.service.ts:218:23                            
+loadOwnerConnections              function  src/features/connections/actions/connections.action.ts:333:23        
+previewSendAction                           src/features/connections/actions/send.action.ts:63:14                
+setEventDefaultSenderAction                 src/features/connections/actions/sender.action.ts:107:14             
+baseIdentityScopes                function  src/features/connections/catalog.ts:77:17                            
+RESERVE_RATIO                               src/features/connections/lib/capacityMath.ts:3:14                    
+TIME_SENSITIVE_KINDS                        src/features/connections/lib/capacityMath.ts:9:14                    
+zonedLocalToUtc                   function  src/features/connections/lib/capacityMath.ts:66:17                   
+addLocalDays                      function  src/features/connections/lib/capacityMath.ts:112:17                  
+deriveKey                         function  src/features/connections/lib/crypto.ts:4:17                          
+sanitizeSheetRow                  function  src/features/connections/lib/sheetSanitize.ts:20:17                  
+signOrganizerUnsubPayload         function  src/features/connections/lib/suppressions.logic.ts:4:17              
+peekIdTokenClaims                 function  src/features/connections/providers/google/oauth.ts:147:17            
+dedupeRecipients24h               function  src/features/connections/server/batch.service.ts:32:23               
+filterSuppressions                function  src/features/connections/server/batch.service.ts:52:23               
+getCalendarLink                   function  src/features/connections/server/calendarSync.service.ts:266:23       
+resolveOrganizerTimezone          function  src/features/connections/server/capacity.service.ts:18:23            
+usedLast24h                       function  src/features/connections/server/capacity.service.ts:73:23            
+usedThisMonth                     function  src/features/connections/server/capacity.service.ts:90:23            
+markOwnerLeftForUser              function  src/features/connections/server/grants.service.ts:146:23             
+collectConnectionHealth           function  src/features/connections/server/health.service.ts:24:23              
+sameOriginReturnTo                          src/features/connections/server/oauth.service.ts:253:10              
+markBlockedByAdmin                          src/features/connections/server/oauth.service.ts:254:10              
+applyCircuitBreaker               function  src/features/connections/server/outboxWorker.service.ts:85:23        
+getDailyLimit                     function  src/features/connections/server/quota.service.ts:10:23               
+getUsageCount                     function  src/features/connections/server/quota.service.ts:23:23               
+assertWithinQuota                 function  src/features/connections/server/quota.service.ts:49:23               
+recordUsage                       function  src/features/connections/server/quota.service.ts:62:23               
+DEFAULT_DAILY                               src/features/connections/server/quota.service.ts:92:10               
+DEFAULT_PER_MINUTE                          src/features/connections/server/quota.service.ts:92:25               
+stampEmailLogConnection           function  src/features/connections/server/sender.service.ts:316:23             
+runActiveSheetSync                function  src/features/connections/server/sheetSync.service.ts:214:23          
+refreshActiveSheetsForEvent       function  src/features/connections/server/sheetSync.service.ts:318:23          
+organizerUnsubscribeUrl           function  src/features/connections/server/suppressions.service.ts:22:17        
+tokenHealthCheck                  function  src/features/connections/server/tokens.service.ts:56:17              
+ACCESS_CACHE_TTL_MS                         src/features/connections/server/tokens.service.ts:71:10              
+listFormResponsesAction                     src/features/custom_forms/actions/customForms.action.ts:126:14       
+resolveRegistrationEmail          function  src/features/dashboard/dashboardDerive.ts:85:17                      
+createTenure                      function  src/features/department/actions/departmentOrg.action.ts:12:23        
+postOrgAnnouncement               function  src/features/department/actions/departmentOrg.action.ts:25:23        
+setEventTenureAction                        src/features/department/actions/tenure.action.ts:66:14               
+listDepartmentAnnouncementsPage   function  src/features/department/announcements.service.ts:95:23               
+getPlanForOrganizer               function  src/features/department/department.service.ts:67:23                  
+getCurrentTenureId                function  src/features/department/department.service.ts:354:23                 
+departmentNavItems                function  src/features/department/department.service.ts:412:17                 
+setClubAccessSchema                         src/features/department/schemas.ts:13:14                             
+canSendKindNow                    function  src/features/email/emailLog.service.ts:64:23                         
+listEmailLogPage                  function  src/features/email/emailLog.service.ts:281:23                        
+googleOAuthConfigured             function  src/features/email/organizerEmailConnection.service.ts:62:17         
+buildGoogleAuthUrl                function  src/features/email/organizerEmailConnection.service.ts:67:17         
+revokeOrganizerEmailConnection    function  src/features/email/organizerEmailConnection.service.ts:71:23         
+testOrganizerConnection           function  src/features/email/organizerTransport.service.ts:101:23              
+sendInvoiceSummaryEmail           function  src/features/email/platformMail.service.ts:81:23                     
+sendPlatformAnnouncementEmail     function  src/features/email/platformMail.service.ts:104:23                    
+mapToAttendee                     function  src/features/event_attendee/attendee.service.ts:58:17                
+ResendTestBanner                  function  src/features/event_attendee/components/EventEmailPanels.tsx:95:17    
+EventEmailTemplatesCard           function  src/features/event_attendee/components/EventEmailPanels.tsx:640:17   
+BulkAttendeeEmail                 function  src/features/event_attendee/components/EventEmailPanels.tsx:650:17   
+EVENT_EMAIL_KINDS                           src/features/event_attendee/emailTypes.ts:1:14                       
+EMAIL_BLOCK_SNIPPETS                        src/features/event_attendee/emailTypes.ts:53:14                      
+wrapEmailBlock                    function  src/features/event_attendee/emailTypes.ts:62:17                      
+paymentOk                         function  src/features/event_attendee/eventEmail.service.tsx:41:17             
+admitted                          function  src/features/event_attendee/eventEmail.service.tsx:46:17             
+autoEmailKind                     function  src/features/event_attendee/eventEmail.service.tsx:50:17             
+loadEventEmailTemplate            function  src/features/event_attendee/eventEmail.service.tsx:80:23             
+teamContextForReg                 function  src/features/event_attendee/eventEmail.service.tsx:149:23            
+isTeamLead                        function  src/features/event_attendee/eventEmail.service.tsx:204:23            
+looksLikeEmail                    function  src/features/event_attendee/import/attendeeImport.logic.ts:125:17    
+isWithdrawn                       function  src/features/event_attendee/roster.ts:10:17                          
+registrationMatchesSearch         function  src/features/event_attendee/roster.ts:75:17                          
+signedReceiptUrl                  function  src/features/event_expenses/expenses.service.ts:84:23                
+mapToAddress                      function  src/features/event_vendors/event_venders.services.ts:35:17           
+mapToContact                      function  src/features/event_vendors/event_venders.services.ts:47:17           
+mapToPricingPackage               function  src/features/event_vendors/event_venders.services.ts:57:17           
+mapToService                      function  src/features/event_vendors/event_venders.services.ts:69:17           
+mapToRatings                      function  src/features/event_vendors/event_venders.services.ts:83:17           
+mapToPortfolio                    function  src/features/event_vendors/event_venders.services.ts:96:17           
+mapToVendorData                   function  src/features/event_vendors/event_venders.services.ts:192:17          
+TIMEZONES                                   src/features/events/components/wizard/wizardUtils.ts:3:14            
+osmEmbedFromMapUrl                function  src/features/events/components/wizard/wizardUtils.ts:105:17          
+EVENT_KINDS                                 src/features/events/organizerEvents.filters.ts:10:14                 
+EVENT_VIEWS                                 src/features/events/organizerEvents.filters.ts:16:14                 
+matchesOrganizerEventSearch       function  src/features/events/organizerEvents.filters.ts:224:17                
+checkedInAmongOccupying           function  src/features/events/organizerEvents.occupancy.ts:45:17               
+revenueAmongOccupying             function  src/features/events/organizerEvents.occupancy.ts:52:17               
+PUBLIC_EVENT_FORBIDDEN_KEYS                 src/features/events/publicEvent.logic.ts:11:14                       
+resolveRegisterButtonState                  src/features/events/publicEvent.service.ts:57:3                      
+dtoContainsForbiddenKey                     src/features/events/publicEvent.service.ts:58:3                      
+filterPublicOrgCredits                      src/features/events/publicEvent.service.ts:59:3                      
+SHEET_KINDS                                 src/features/exports/eventSheets.ts:18:14                            
+countsAsSale                      function  src/features/exports/eventSheets.ts:52:17                            
+hashAccessCode                    function  src/features/hackathon/accessCodes.service.ts:41:17                  
+findRegistrationByAccessCode      function  src/features/hackathon/accessCodes.service.ts:225:23                 
+teamAccessCodeVisible             function  src/features/hackathon/accessCodes.service.ts:233:17                 
+saveCTFChallengeAction            function  src/features/hackathon/actions/ctf.action.ts:30:23                   
+deleteCTFChallengeAction          function  src/features/hackathon/actions/ctf.action.ts:106:23                  
+savePhaseAction                   function  src/features/hackathon/actions/ctf.action.ts:277:23                  
+lockPhaseAction                   function  src/features/hackathon/actions/ctf.action.ts:333:23                  
+saveDailyScheduleAction           function  src/features/hackathon/actions/ctf.action.ts:610:23                  
+judgeLink                         function  src/features/hackathon/actions/judging.action.ts:333:23              
+createTeam                        function  src/features/hackathon/actions/teams.action.ts:84:23                 
+joinTeam                          function  src/features/hackathon/actions/teams.action.ts:158:23                
+ConfigToggleRow                   function  src/features/hackathon/components/ConfigToggleRow.tsx:15:17          
+HackathonConfigPanel              function  src/features/hackathon/components/ConfigToggleRow.tsx:125:17         
+computeDynamicFlag                function  src/features/hackathon/ctf.service.ts:39:17                          
+mapToChallenge                    function  src/features/hackathon/ctf.service.ts:73:17                          
+toPublicChallenge                 function  src/features/hackathon/ctf.service.ts:127:17                         
+listChallenges                              src/features/hackathon/ctf.service.ts:140:14                         
+mapToFlagSubmission               function  src/features/hackathon/ctf.service.ts:174:17                         
+getCTFScoreboard                            src/features/hackathon/ctf.service.ts:234:14                         
+mapToSandbox                      function  src/features/hackathon/ctf.service.ts:377:17                         
+getSandboxForTeam                           src/features/hackathon/ctf.service.ts:412:14                         
+mapToAnomaly                      function  src/features/hackathon/ctf.service.ts:442:17                         
+listAnomalies                               src/features/hackathon/ctf.service.ts:468:14                         
+mapToSchedule                     function  src/features/hackathon/ctf.service.ts:485:17                         
+listTeamDailySubmissions                    src/features/hackathon/ctf.service.ts:543:14                         
+mapToAttendance                   function  src/features/hackathon/ctf.service.ts:572:17                         
+listAttendanceCheckIns                      src/features/hackathon/ctf.service.ts:591:14                         
+mapToTrack                        function  src/features/hackathon/hackathon.service.ts:70:17                    
+mapToJudge                        function  src/features/hackathon/hackathon.service.ts:438:17                   
+mapToAnnouncement                 function  src/features/hackathon/hackathon.service.ts:533:17                   
+judgesTrack                       function  src/features/hackathon/judging.ts:202:17                             
+slotsBookedBy                     function  src/features/hackathon/live.ts:103:17                                
+slotKey                           function  src/features/hackathon/live.ts:161:17                                
+formatSlotLines                   function  src/features/hackathon/live.ts:165:17                                
+staffMayTouchTrack                function  src/features/hackathon/staffEventAccess.ts:114:23                    
+userIsEventStaff                  function  src/features/hackathon/staffEventAccess.ts:150:23                    
+getHackathonConfig                function  src/features/hackathon/tasks.service.ts:137:23                       
+assignedRandomTaskIds             function  src/features/hackathon/tasks.service.ts:270:23                       
+aggregateScoreboardDetail                   src/features/hackathon/tasks.service.ts:423:10                       
+isSafeInlinePreview                         src/features/hackathon/taskSubmissions.service.ts:8:10               
+getTaskSubmissionForEvent         function  src/features/hackathon/taskSubmissions.service.ts:120:23             
+feeStatusToDb                     function  src/features/hackathon/teamWrite.ts:7:17                             
+rosterLockedAt                    function  src/features/hackathon/types.ts:273:17                               
+deadlineAt                        function  src/features/hackathon/types.ts:280:17                               
+CTF_CATEGORIES                              src/features/hackathon/types.ts:467:14                               
+DOCUMENT_ACCEPT                             src/features/media/media.utils.ts:15:14                              
+ANY_UPLOAD_ACCEPT                           src/features/media/media.utils.ts:18:14                              
+isDocumentUrl                     function  src/features/media/media.utils.ts:21:17                              
+planIsFree                                  src/features/onboarding/onboarding.service.ts:22:10                  
+DEFAULT_SPONSOR_TIERS                       src/features/organizations/types.ts:48:14                            
+COLLABORATOR_ROLE_META                      src/features/organizations/types.ts:97:14                            
+listActiveGrantsForUser                     src/features/permissions/grants.service.ts:21:14                     
+FREE_MODULE_KEYS                            src/features/permissions/moduleKeys.ts:3:14                          
+PAID_MODULE_KEYS                            src/features/permissions/moduleKeys.ts:13:14                         
+VENDOR_FREE_MODULE_KEYS                     src/features/permissions/moduleKeys.ts:26:14                         
+VENDOR_PAID_MODULE_KEYS                     src/features/permissions/moduleKeys.ts:39:14                         
+default                           function  src/features/registration/components/RegistrationForm.tsx:385:16     
+listFormFieldsAction                        src/features/registration/forms/actions/formFields.action.ts:30:14   
+syncPaymentFieldAction                      src/features/registration/forms/actions/formFields.action.ts:135:14  
+mapFormFieldRow                   function  src/features/registration/forms/formFields.service.ts:72:17          
+replaceEventFieldsFromWizard      function  src/features/registration/forms/formFields.service.ts:389:23         
+SYSTEM_FIELD_KEYS                           src/features/registration/forms/formFields.types.ts:23:14            
+isSystemFieldKey                  function  src/features/registration/forms/formFields.types.ts:68:17            
+generateQrPng                     function  src/features/registration/qr.ts:40:23                                
+registrationCountsTowardCapacity            src/features/registration/registration.service.ts:81:3               
+occupyingRegsForOrganizer                   src/features/registration/registration.service.ts:84:3               
+buildRegistrationEmail            function  src/features/registration/registrationEmail.ts:19:17                 
+sendRegistrationEmail             function  src/features/registration/registrationEmail.ts:112:23                
+changeOrganizerPlan               function  src/features/saas/actions/subscriptions.action.ts:514:23             
+grantFeatureOverride              function  src/features/saas/actions/subscriptions.action.ts:517:23             
+clearFeatureOverride              function  src/features/saas/actions/subscriptions.action.ts:520:23             
+saveCustomPricing                 function  src/features/saas/actions/subscriptions.action.ts:523:23             
+createTenantAccount               function  src/features/saas/actions/tenants.action.ts:364:23                   
+setTenantVerification             function  src/features/saas/actions/tenants.action.ts:369:23                   
+listPendingTenants                function  src/features/saas/saas.service.ts:4:23                               
+listOrganizerPlanRows             function  src/features/saas/saas.service.ts:32:23                              
+listFeatureOverrides              function  src/features/saas/saas.service.ts:69:23                              
+emptyTenantFilters                function  src/features/saas/tenantBoard.filters.ts:61:17                       
+PAGE_SIZE                                   src/features/saas/tenantBoard.filters.ts:179:10                      
+upsertTaxonomyAction              function  src/features/taxonomy/actions/taxonomy.action.ts:251:23              
+decideRequestAction               function  src/features/taxonomy/actions/taxonomy.action.ts:354:23              
+requestCategoryAction             function  src/features/taxonomy/actions/taxonomy.action.ts:436:23              
+default                           function  src/features/taxonomy/components/CategoryStep.tsx:211:16             
+collectionFor                     function  src/features/taxonomy/taxonomy.service.ts:8:17                       
+TAXONOMY_KINDS                              src/features/taxonomy/types.ts:52:14                                 
+ofKind                            function  src/features/taxonomy/types.ts:83:17                                 
+pendingRequests                   function  src/features/taxonomy/types.ts:87:17                                 
+formatFieldLines                  function  src/features/taxonomy/types.ts:151:17                                
+addClubUnderDepartmentAction      function  src/features/teams/actions/department.action.ts:242:23               
+assignClubOwnerAction             function  src/features/teams/actions/department.action.ts:309:23               
+applyStaffRecruitment             function  src/features/teams/actions/staffAdvanced.action.ts:307:23            
+createOrgAction                   function  src/features/teams/actions/teamEngine.action.ts:493:23               
+OrganizerTeamsBoard               function  src/features/teams/components/OrganizerTeamsBoard.tsx:7:17           
+interviewGoogleCalendarUrl        function  src/features/teams/interviewIcs.ts:30:17                             
+ORGANIZER_TEAMS_PAGE_SIZE                   src/features/teams/organizerTeams.filters.ts:7:14                    
+STAFF_PAGE_KEYS                             src/features/teams/teamEngine.types.ts:54:14                         
+createTicketTierAction            function  src/features/ticketing/actions/ticketing.action.ts:15:23             
+createPromoCodeAction             function  src/features/ticketing/actions/ticketing.action.ts:40:23             
+listQuotationTemplatesAction                src/features/vendor_quotes/actions/quotationTemplates.action.ts:31:14
+getDefaultTemplate                function  src/features/vendor_quotes/quotationTemplates.service.ts:39:23       
+recordRegistrationConsentsAction            src/features/website/actions/consent.action.ts:63:14                 
+withdrawUnsubscribeAction                   src/features/website/actions/consent.action.ts:95:14                 
+getCurrentUserIdForConsent        function  src/features/website/actions/consent.action.ts:216:23                
+ctaLinkSchema                               src/features/website/blocks/schemas.ts:6:14                          
+heroBlockSchema                             src/features/website/blocks/schemas.ts:13:14                         
+statsStripItemSchema                        src/features/website/blocks/schemas.ts:25:14                         
+statsStripBlockSchema                       src/features/website/blocks/schemas.ts:33:14                         
+logoWallItemSchema                          src/features/website/blocks/schemas.ts:40:14                         
+logoWallBlockSchema                         src/features/website/blocks/schemas.ts:49:14                         
+featureGridItemSchema                       src/features/website/blocks/schemas.ts:56:14                         
+featureGridBlockSchema                      src/features/website/blocks/schemas.ts:65:14                         
+stepsItemSchema                             src/features/website/blocks/schemas.ts:73:14                         
+stepsBlockSchema                            src/features/website/blocks/schemas.ts:81:14                         
+audienceTabSchema                           src/features/website/blocks/schemas.ts:89:14                         
+audienceTabsBlockSchema                     src/features/website/blocks/schemas.ts:97:14                         
+eventShowcaseItemSchema                     src/features/website/blocks/schemas.ts:105:14                        
+eventShowcaseBlockSchema                    src/features/website/blocks/schemas.ts:116:14                        
+pricingTeaserItemSchema                     src/features/website/blocks/schemas.ts:124:14                        
+pricingTeaserBlockSchema                    src/features/website/blocks/schemas.ts:135:14                        
+testimonialItemSchema                       src/features/website/blocks/schemas.ts:146:14                        
+testimonialsBlockSchema                     src/features/website/blocks/schemas.ts:156:14                        
+faqItemSchema                               src/features/website/blocks/schemas.ts:163:14                        
+faqBlockSchema                              src/features/website/blocks/schemas.ts:170:14                        
+ctaBlockSchema                              src/features/website/blocks/schemas.ts:177:14                        
+richTextBlockSchema                         src/features/website/blocks/schemas.ts:186:14                        
+teamMemberSchema                            src/features/website/blocks/schemas.ts:193:14                        
+teamBlockSchema                             src/features/website/blocks/schemas.ts:202:14                        
+timelineItemSchema                          src/features/website/blocks/schemas.ts:210:14                        
+timelineBlockSchema                         src/features/website/blocks/schemas.ts:218:14                        
+contactInfoBlockSchema                      src/features/website/blocks/schemas.ts:226:14                        
+CONSENT_HASH_FALLBACK_SALT                  src/features/website/consent.logic.ts:3:14                           
+INSIGHTS_MIN_BUCKET                         src/features/website/consent.logic.ts:8:14                           
+hashConsentMaterial               function  src/features/website/consent.logic.ts:10:17                          
+signUnsubscribePayload            function  src/features/website/consent.logic.ts:41:17                          
+getCurrentLegalVersions           function  src/features/website/consent.service.ts:37:23                        
+CONTACT_TOPICS                              src/features/website/contact.logic.ts:22:3                           
+CONTACT_TOPIC_LABELS                        src/features/website/contact.logic.ts:23:3                           
+CONTACT_RATE_WINDOW_SEC                     src/features/website/contact.logic.ts:33:14                          
+contactRateLimitKey               function  src/features/website/contact.logic.ts:40:17                          
+tryMutateLegalVersion             function  src/features/website/legalCms.service.ts:230:23                      
+SITE_MEDIA_ALLOWED_MIME                     src/features/website/media.logic.ts:4:14                             
+normalizePublicStats                        src/features/website/siteContent.service.ts:11:10                    
+PUBLIC_STATS_KEYS                           src/features/website/siteContent.service.ts:11:32                    
+getSiteSetting                    function  src/features/website/siteContent.service.ts:95:17                    
+canAccessEvent                    function  src/lib/access.ts:185:23                                             
+safeAction                                  src/lib/action.ts:14:10                                              
+safeOk                                      src/lib/action.ts:14:22                                              
+safeFail                                    src/lib/action.ts:14:30                                              
+requireSession                    function  src/lib/assertSession.ts:5:23                                        
+readAnswers                       function  src/lib/customFields.ts:28:17                                        
+PLATFORM_EMAIL_KINDS                        src/lib/email/kinds.ts:7:14                                          
+isPlatformEmailKind               function  src/lib/email/kinds.ts:17:17                                         
+LANE_DEFAULTS                               src/lib/email/lanes.ts:66:10                                         
+RESEND_TEST_FROM                            src/lib/email/resend.ts:15:10                                        
+KEYSET_DEFAULT_LIMIT                        src/lib/keyset.ts:6:14                                               
+KEYSET_MAX_LIMIT                            src/lib/keyset.ts:7:14                                               
+keysetAfterFilter                 function  src/lib/keyset.ts:38:17                                              
+DEFAULT_NOTIFICATION_TEMPLATES              src/lib/notifications.ts:16:10                                       
+interpolateTemplate               function  src/lib/notifications.ts:19:23                                       
+dispatchNotification              function  src/lib/notifications.ts:159:23                                      
+isWithinRegistrationDates         function  src/lib/publicEventStatus.ts:22:17                                   
+initialTemplateLayout                       src/services/certificate.template.services.ts:18:14                  
+ensureTemplateForEvent                      src/services/certificate.template.services.ts:63:3                   
+getTemplateForEvent                         src/services/certificate.template.services.ts:64:3                   
+saveTemplateDraft                           src/services/certificate.template.services.ts:65:3                   
+publishTemplate                             src/services/certificate.template.services.ts:66:3                   
+defaultLayout                               src/services/certificate.template.services.ts:67:3                   
+mapFeedback                       function  src/services/feedback.service.ts:26:17                               
+Vendor                            class     src/services/models/vendor.model.ts:93:14                            
+default                           function  src/shared_components/SubmitButton.tsx:36:16                         
+default                           function  src/shared_components/ui/BrandMark.tsx:48:16                         
+default                           function  src/shared_components/ui/EmptyState.tsx:62:16                        
+default                           function  src/shared_components/ui/FormFeedback.tsx:49:16                      
+default                           function  src/shared_components/ui/StatusBadge.tsx:115:16                      
+THEME_KEY                                   src/shared_components/ui/ThemeToggle.tsx:29:14                       
+Unused exported types (150)
+BadgeVariant                         type       src/components/ui/Badge.tsx:3:13                               
+BadgeSize                            type       src/components/ui/Badge.tsx:12:13                              
+ButtonVariant                        type       src/components/ui/Button.tsx:5:13                              
+ButtonSize                           type       src/components/ui/Button.tsx:6:13                              
+CardTone                             type       src/components/ui/Card.tsx:3:13                                
+SelectOption                         interface  src/components/ui/Select.tsx:4:18                              
+PublicEnv                            type       src/env.ts:66:13                                               
+WaitlistDoc                          interface  src/features/access/accessEngine.types.ts:18:18                
+EventTierDoc                         interface  src/features/access/accessEngine.types.ts:28:18                
+CreateInviteLinksOptions             interface  src/features/access/actions/inviteLinks.action.ts:12:18        
+CreateInviteLinksResult              interface  src/features/access/actions/inviteLinks.action.ts:17:18        
+ParsedGuest                          type       src/features/access/types.ts:132:13                            
+AccessFilter                         type       src/features/admin/eventModeration.filters.ts:283:15           
+EventSort                            type       src/features/admin/eventModeration.filters.ts:283:62           
+LogActionFilter                      type       src/features/admin/eventModeration.filters.ts:283:73           
+AdminOrgTenure                       type       src/features/admin/orgDetail.service.ts:21:13                  
+ClubLeadership                       type       src/features/admin/orgDetail.service.ts:151:13                 
+SupportScopeEntity                   interface  src/features/admin/platform.service.ts:141:18                  
+AdminCapability                      type       src/features/admin/types.ts:189:13                             
+AnalyticsMetricTile                  type       src/features/analytics/analyticsDerive.ts:24:13                
+GeminiAnalysisCore                   type       src/features/analytics/geminiFeedback.ts:18:37                 
+SignInInput                          type       src/features/auth/auth.schema.ts:9:13                          
+SetupSocialLink                      interface  src/features/auth/authService.ts:27:18                         
+Requirements                         interface  src/features/bookings/types.ts:5:18                            
+AdditionalCharge                     interface  src/features/bookings/types.ts:19:18                           
+SystemTimestamp                      type       src/features/bookings/types.ts:42:13                           
+ContractTerms                        interface  src/features/bookings/types.ts:66:18                           
+Contract                             interface  src/features/bookings/types.ts:71:18                           
+PaymentInstallment                   interface  src/features/bookings/types.ts:80:18                           
+Commission                           interface  src/features/bookings/types.ts:88:18                           
+Payment                              interface  src/features/bookings/types.ts:94:18                           
+Delivery                             interface  src/features/bookings/types.ts:105:18                          
+OrganizerCheck                       interface  src/features/bookings/types.ts:114:18                          
+VendorSelfCheck                      interface  src/features/bookings/types.ts:121:18                          
+QualityCheck                         interface  src/features/bookings/types.ts:126:18                          
+Review                               interface  src/features/bookings/types.ts:145:18                          
+FitMode                              type       src/features/certificates/layout.types.ts:13:13                
+ShapeKind                            type       src/features/certificates/layout.types.ts:14:13                
+ElementStyle                         type       src/features/certificates/layout.types.ts:16:13                
+CertificateStatus                    type       src/features/certificates/types.ts:3:13                        
+TemplateStatus                       type       src/features/certificates/types.ts:4:13                        
+CertificateRole                      type       src/features/certificates/types.ts:13:13                       
+CertificateDocument                  type       src/features/certificates/types.ts:66:13                       
+ClubRequestType                      type       src/features/clubs/types.ts:3:13                               
+ClubRequestStatus                    type       src/features/clubs/types.ts:4:13                               
+ClubModules                          type       src/features/clubs/types.ts:41:13                              
+SenderCandidateSource                type       src/features/connections/lib/resolveSender.logic.ts:3:13       
+ProviderCapabilityMap                type       src/features/connections/providers/provider.ts:52:13           
+ConnectionOwnerType                  type       src/features/connections/server/sender.service.ts:326:15       
+ConnectionProvider                   type       src/features/connections/types.ts:2:13                         
+EmailSendKind                        type       src/features/connections/types.ts:86:13                        
+PreviewScheduleChunk                 type       src/features/connections/types.ts:119:13                       
+AnnouncementChannel                  type       src/features/department/announcements.service.ts:159:15        
+DeptEventScope                       type       src/features/department/types.ts:6:13                          
+OrgTenureRow                         type       src/features/department/types.ts:8:13                          
+OrganizerSendAttachment              type       src/features/email/organizerTransport.service.ts:9:13          
+TeamMailContext                      type       src/features/event_attendee/eventEmail.service.tsx:142:13      
+AcademicInfo                         interface  src/features/event_attendee/type.ts:1:18                       
+Skill                                interface  src/features/event_attendee/type.ts:12:18                      
+SocialLinks                          interface  src/features/event_attendee/type.ts:18:18                      
+AttendeeStats                        interface  src/features/event_attendee/type.ts:25:18                      
+AttendeeCertificate                  interface  src/features/event_attendee/type.ts:37:18                      
+Connection                           interface  src/features/event_attendee/type.ts:45:18                      
+UpdateEventBasicsInput               type       src/features/events/actions/updateEventBasics.action.ts:27:13  
+PublicOrganizerChip                  type       src/features/events/types.ts:13:13                             
+PublicPricingTier                    type       src/features/events/types.ts:41:13                             
+PublicSchedule                       type       src/features/events/types.ts:99:13                             
+PublicLocation                       type       src/features/events/types.ts:109:13                            
+EnterCompeteInput                    type       src/features/hackathon/compete.schema.ts:18:13                 
+SubmitFlagInput                      type       src/features/hackathon/compete.schema.ts:19:13                 
+ConfigFieldType                      type       src/features/hackathon/configKeys.ts:1:13                      
+ConfigField                          type       src/features/hackathon/configKeys.ts:3:13                      
+CTFScoreboardEntry                   interface  src/features/hackathon/ctf.service.ts:224:18                   
+ParticipantAccessReason              type       src/features/hackathon/participantAccess.ts:8:13               
+ScoreTaskCell                        type       src/features/hackathon/scoreboardAggregate.ts:3:13             
+ScorePhaseCell                       type       src/features/hackathon/scoreboardAggregate.ts:15:13            
+ScoreTaskCell                        type       src/features/hackathon/tasks.service.ts:341:13                 
+ScorePhaseCell                       type       src/features/hackathon/tasks.service.ts:353:13                 
+ContributionKind                     type       src/features/organizations/types.ts:91:13                      
+CollaboratorRole                     type       src/features/organizations/types.ts:94:13                      
+ActiveGrant                          type       src/features/permissions/grants.service.ts:7:13                
+PaidModuleKey                        type       src/features/permissions/moduleKeys.ts:46:13                   
+VendorFreeModuleKey                  type       src/features/permissions/moduleKeys.ts:47:13                   
+VendorPaidModuleKey                  type       src/features/permissions/moduleKeys.ts:48:13                   
+CompetitionChoice                    type       src/features/registration/components/RegistrationForm.tsx:19:13
+SystemFieldKey                       type       src/features/registration/forms/formFields.types.ts:24:13      
+TenantCardMetrics                    type       src/features/saas/tenantBoard.types.ts:41:13                   
+TenantOverrideChip                   type       src/features/saas/tenantBoard.types.ts:47:13                   
+CategoryFieldType                    type       src/features/taxonomy/categoryEngine.types.ts:1:13             
+CategoryRequestStatus                type       src/features/taxonomy/categoryEngine.types.ts:34:13            
+ApplicantTimelineEntry               type       src/features/teams/teamEngine.types.ts:182:13                  
+AnyBlockData                         type       src/features/website/blocks/registry.ts:91:15                  
+BlockSchema                          type       src/features/website/blocks/registry.ts:92:13                  
+ConsentStatus                        type       src/features/website/cms.logic.ts:5:13                         
+BlockLiveContext                     type       src/features/website/components/BlockRenderer.tsx:5:13         
+BlockType                            type       src/features/website/components/BlockRenderer.tsx:37:15        
+UserConsentRow                       type       src/features/website/consent.service.ts:283:15                 
+ContactTopic                         type       src/features/website/contact.logic.ts:24:8                     
+ModuleComparisonRow                  type       src/features/website/marketingData.service.ts:151:13           
+SafeActionResult                     type       src/lib/action.ts:13:15                                        
+ResendAttachment                     type       src/lib/email/resend.ts:24:13                                  
+PlatformEmailLane                    type       src/lib/email/resend.ts:182:15                                 
+NotificationStatus                   type       src/lib/notifications.ts:17:36                                 
+NotificationTemplateDoc              type       src/lib/notifications.ts:17:73                                 
+SafeActionAuthContext                type       src/lib/safeAction.ts:20:13                                    
+CertificateGenerationAttendeeResult  type       src/services/certificate.service.ts:17:3                       
+CertificateRow                       type       src/services/certificate.service.ts:59:15                      
+CertificateTemplate                  type       src/services/certificate.template.services.ts:16:13            
+Speaker                              interface  src/services/models/agenda.model.tsx:1:18                      
+MeetingPlatform                      type       src/services/models/event.model.tsx:13:13                      
+Coordinates                          interface  src/services/models/event.model.tsx:41:18                      
+PriceTier                            interface  src/services/models/event.model.tsx:102:18                     
+CreateEventDTO                       interface  src/services/models/event.model.tsx:603:18                     
+UpdateEventDTO                       interface  src/services/models/event.model.tsx:616:18                     
+EventStats                           interface  src/services/models/event.model.tsx:620:18                     
+EventFeedbackAnalysisRow             interface  src/services/models/feedback.model.ts:71:18                    
+NotificationPriority                 type       src/services/models/notification.model.ts:14:13                
+NotificationStatus                   type       src/services/models/notification.model.ts:16:13                
+NotificationDataPayload              interface  src/services/models/notification.model.ts:19:18                
+PushChannel                          interface  src/services/models/notification.model.ts:27:18                
+EmailChannel                         interface  src/services/models/notification.model.ts:36:18                
+SmsChannel                           interface  src/services/models/notification.model.ts:45:18                
+NotificationChannels                 interface  src/services/models/notification.model.ts:52:18                
+NotificationAnalytics                interface  src/services/models/notification.model.ts:58:18                
+OrganizationType                     type       src/services/models/organizer.interfaces.ts:3:13               
+PayoutScheduleType                   type       src/services/models/organizer.interfaces.ts:4:13               
+VerificationLevelType                type       src/services/models/organizer.interfaces.ts:5:13               
+SubscriptionPlanType                 type       src/services/models/organizer.interfaces.ts:7:13               
+ICoordinates                         interface  src/services/models/organizer.interfaces.ts:9:18               
+ISocialMedia                         interface  src/services/models/organizer.interfaces.ts:25:18              
+IVerificationDocuments               interface  src/services/models/organizer.interfaces.ts:76:18              
+IDefaultEventSettings                interface  src/services/models/organizer.interfaces.ts:91:18              
+INotificationPreferences             interface  src/services/models/organizer.interfaces.ts:98:18              
+StatusHistoryEntry                   interface  src/services/models/reg.type.ts:22:18                          
+PaymentInfo                          interface  src/services/models/reg.type.ts:27:18                          
+DiscountInfo                         interface  src/services/models/reg.type.ts:46:18                          
+CheckInInfo                          interface  src/services/models/reg.type.ts:53:18                          
+QRCodeInfo                           interface  src/services/models/reg.type.ts:61:18                          
+RegistrationCertificate              interface  src/services/models/reg.type.ts:68:18                          
+RegistrationMetadata                 interface  src/services/models/reg.type.ts:84:18                          
+RegistrantContact                    interface  src/services/models/reg.type.ts:98:18                          
+UserProfile                          interface  src/services/models/user.type.ts:1:18                          
+UserLocation                         interface  src/services/models/user.type.ts:8:18                          
+UserPreferences                      interface  src/services/models/user.type.ts:13:18                         
+UserSecurity                         interface  src/services/models/user.type.ts:20:18                         
+UserVerification                     interface  src/services/models/user.type.ts:28:18                         
+AdminRailIcon                        type       src/shared_components/AdminRail.tsx:27:13                      
+NavIcon                              type       src/shared_components/DashboardNav.tsx:53:13                   
+DynamicFieldType                     type       src/shared_components/DynamicFieldBuilder.tsx:6:13             
+Configuration hints (10)
+.next/**                   knip.json  Remove from ignore                                           
+@tailwindcss/typography    knip.json  Remove from ignoreDependencies                               
+@react-email/components    knip.json  Remove from ignoreDependencies                               
+newrelic                   knip.json  Remove from ignoreDependencies                               
+husky                      knip.json  Remove from ignoreDependencies                               
+prettier                   knip.json  Remove from ignoreDependencies                               
+eslint-config-prettier     knip.json  Remove from ignoreDependencies                               
+supabase                   knip.json  Remove from ignoreBinaries                                   
+src/proxy.ts               knip.json  Remove redundant entry pattern                               
+.css                       knip.json  Compiled extension excluded by project (imports not followed)
+ConfirmTone                          type       src/shared_components/ui/ConfirmDialog.tsx:6:13                
+Duplicate exports (16)
+TABLES|COLLECTIONS        data/collections.ts                                      
+Badge|default             src/components/ui/Badge.tsx                              
+Button|default            src/components/ui/Button.tsx                             
+Card|default              src/components/ui/Card.tsx                               
+Input|default             src/components/ui/Input.tsx                              
+Modal|default             src/components/ui/Modal.tsx                              
+Select|default            src/components/ui/Select.tsx                             
+RequireRole|default       src/features/auth/components/RequireRole.tsx             
+RegistrationForm|default  src/features/registration/components/RegistrationForm.tsx
+CategoryStep|default      src/features/taxonomy/components/CategoryStep.tsx        
+SubmitButton|default      src/shared_components/SubmitButton.tsx                   
+BrandMark|default         src/shared_components/ui/BrandMark.tsx                   
+EmptyState|default        src/shared_components/ui/EmptyState.tsx                  
+FormFeedback|default      src/shared_components/ui/FormFeedback.tsx                
+StarRating|default        src/shared_components/ui/StarRating.tsx                  
+StatusBadge|default       src/shared_components/ui/StatusBadge.tsx                 

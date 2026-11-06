@@ -16,6 +16,7 @@ import type {
   TenantBoardCard,
   TenantCapsFlags,
 } from "@/src/features/saas/tenantBoard.types";
+import { EmailLimitsPanel } from "./EmailLimitsPanel";
 
 type Effect = "plan_default" | "grant" | "deny";
 
@@ -50,7 +51,7 @@ export function TenantManageDrawer({
   onPricing: () => void;
   onReviewGrants: (staged: StagedChange[]) => void;
 }) {
-  const [tab, setTab] = useState<"plan" | "features" | "pricing" | "history">("features");
+  const [tab, setTab] = useState<"plan" | "features" | "pricing" | "email" | "history">("features");
   const [scope, setScope] = useState<"whole" | "club">("whole");
   const [clubId, setClubId] = useState("");
   const [staged, setStaged] = useState<Record<string, StagedChange>>({});
@@ -106,6 +107,7 @@ export function TenantManageDrawer({
               ["plan", "Plan"],
               ["features", "Features"],
               ["pricing", "Pricing"],
+              ["email", "Email"],
               ["history", "History"],
             ] as const
           ).map(([id, label]) => (
@@ -275,6 +277,13 @@ export function TenantManageDrawer({
                 </button>
               ) : null}
             </div>
+          ) : null}
+
+          {tab === "email" && card.kind !== "vendor" ? (
+            <EmailLimitsPanel
+              ownerId={card.id}
+              canManage={Boolean(caps.grants || caps.changePlan)}
+            />
           ) : null}
 
           {tab === "history" ? (

@@ -1,5 +1,7 @@
 # Avoeline — Events & Hackathon: Complete System Spec
 
+> **Organizer Google mail / Connections:** use [`docs/17-connections-system.md`](17-connections-system.md) + [`docs/18-email-send-limits-and-scheduling.md`](18-email-send-limits-and-scheduling.md). This file remains the source of truth for event/hackathon UI and tabs; do not treat its older email-connection notes as authoritative.
+
 This is the single source of truth for the unified Event/Hackathon dashboard. It replaces `10-events-and-hackathon-dashboards.md` AND `10-events-and-hackathon-dashboards-v2.md` — stop reading those two, read only this one. Everything agreed across the UI/UX cleanup rounds is folded in here. When working on any one tab, you only need this file plus the actual code — don't also pull the two superseded docs into context.
 
 ---
@@ -382,6 +384,8 @@ Shared rules across these three pages (cleanup 2026-10-25):
 **Who gets automatic email (all flows):** team/group registration → lead only (not extra members — they still get their own certificate email later, just not the registration confirmation). Solo → the attendee. Access code → lead only.
 
 **Automatic email kinds (organizer-editable per event via `event_email_templates`):** `registration_received` (submitted, not yet admitted/paid) and `registration_confirmed` (confirmed + paid, or free+auto-confirm skips straight to confirmed). Fired from one shared helper across every admission path (initial register, payment verify, waitlist promote) to avoid double-sends. Tokens: `attendeeName`, `eventTitle`, `eventWhen`, `eventVenue`, `teamName`, `teamMembers`, `competitionName`, `ticketUrl`, `paymentStatus` — unknown tokens render empty, all values HTML-escaped.
+
+**Send limits & scheduling (docs/18):** Organizer outbound mail uses Connections capacity — rolling 24h provider limit (Gmail 400 / Workspace 1500), plan daily/monthly caps, 20% reserve for time-sensitive kinds (`registration_confirmed`, ticket, access code, interview/guest invite). Bulk compose shows `CapacityStrip`; overflow opens a capacity dialog (send-now + schedule, selection cap, spread days, cancel). Batches live at `/organizer/[id]/settings/email-batches`; minute cron `/api/cron/email-outbox` drains `email_outbox` with priority, per-minute throttle, send-time revalidation, and Google rate-limit circuit breaker. Non-transactional mail gets organizer-scoped unsubscribe → `email_suppressions`. Admin edits plan caps on PlansBoard and per-tenant overrides/pause on Tenants → Email.
 
 ---
 

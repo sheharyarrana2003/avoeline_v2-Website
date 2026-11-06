@@ -140,6 +140,8 @@ export const AgendaService = {
       status: AgendaItem["status"];
       /** Attendee tiers this session is for. Empty means everyone. */
       tiers?: string[];
+      /** Explicit opt-in for Google Calendar sync (default off). */
+      addToCalendar?: boolean;
     },
   ): Promise<string> {
     // 1. Read the current event row
@@ -190,6 +192,7 @@ export const AgendaService = {
       speakerNames: formData.speakerNames ?? [],
       description: formData.description ?? "",
       tiers: formData.tiers ?? [],
+      addToCalendar: !!formData.addToCalendar,
       activities: [],
       notes: "",
       recordingUrl: "",
@@ -216,6 +219,7 @@ export const AgendaService = {
         speaker_names: newItem.speakerNames,
         location: newItem.location,
         description: newItem.description,
+        add_to_calendar: !!formData.addToCalendar,
       })
       .select("id")
       .single();

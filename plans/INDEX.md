@@ -2,6 +2,7 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-04 | [organizer-connections-forms-import](2026-11-04-organizer-connections-forms-import.md) | done | Connections hub nav/tabs; attendee Excel/Sheets import; Custom Forms library + `/f/[token]`; Teams Recruitment polish |
 | 2026-10-07 | [firebase-supabase-cutover](2026-10-07-firebase-supabase-cutover.md) | done | Full cutover off Firestore façade to `supabaseAdmin` + `TABLES` |
 | 2026-10-07 | [project-standardization](2026-10-07-project-standardization.md) | archived | Original standardization plan snapshot (waves, gates, delete façade) |
 | 2026-10-11 | [plans-archive-and-verification](2026-10-11-plans-archive-and-verification.md) | done | Plans archive + CI/RBAC verification + page-load parallelization |
@@ -35,6 +36,16 @@
 | 2026-11-01 | [marketing-w3-admin-cms](2026-11-01-marketing-w3-admin-cms.md) | done | W3: /admin/website editors, partner opt-in, legal notify cap, media WebP, contact inbox |
 | 2026-11-01 | [marketing-w4-consent-privacy](2026-11-01-marketing-w4-consent-privacy.md) | done | W4: consents, unsubscribe, Community/Insights, DSAR, audited registration PII |
 | 2026-11-01 | [marketing-w5-hardening](2026-11-01-marketing-w5-hardening.md) | done | W5: sanitize/XSS, security+SEO tests, Lighthouse script, CSP scrub, docs |
+| 2026-11-01 | [connections-c1-foundation](2026-11-01-connections-c1-foundation.md) | done | C1: integration_* schema, OAuth+PKCE Gmail, Connections UI, resolveSender migrate off organizer_email_connections |
+| 2026-11-02 | [email-limits-scheduling](2026-11-02-email-limits-scheduling.md) | done | Docs/18: plan/override caps, rolling capacity, batches + outbox cron, Capacity UI, suppressions, admin pause |
+| 2026-11-02 | [connections-c2-org-grants](2026-11-02-connections-c2-org-grants.md) | done | C2: org grants, vendor/dept/club mounts, full resolveSender + SenderPicker, reconnect/kill switch, tests |
+| 2026-11-02 | [connections-c3-calendar-meet](2026-11-02-connections-c3-calendar-meet.md) | done | C3: calendar_links + Meet, sync hooks, ICS/Google fallbacks on ticket/hero, unit tests; pause before C4 |
+| 2026-11-02 | [connections-c4-drive-library](2026-11-02-connections-c4-drive-library.md) | done | C4: linked_files + Picker + create Doc/Sheet/Slides, Library/Files mounts, cron verify, tests; pause before C5 |
+| 2026-11-02 | [c4-drive-closeout](2026-11-02-c4-drive-closeout.md) | done | C4 checklist closeout: provider_modified_at, verify-on-open, Library filters/load more, entity auth, tests |
+| 2026-11-02 | [connections-c5-sheets](2026-11-02-connections-c5-sheets.md) | done | C5: sheet_syncs, export/keep-in-sync, templates, formula sanitize, sheet-syncs cron |
+| 2026-11-02 | [c5-sheets-closeout](2026-11-02-c5-sheets-closeout.md) | done | C5 checklist closeout: event hooks, chunked writes, soft 429, cron-safe sync, tests |
+| 2026-11-02 | [connections-c6-hardening](2026-11-02-connections-c6-hardening.md) | done | C6: security-review + google-verification docs, threat tests, connections-health cron |
+| 2026-11-02 | [c6-hardening-closeout](2026-11-02-c6-hardening-closeout.md) | done | C6 closeout: import boundary, oauthStateGate, reconnect notify + metrics, evidence docs |
 
 ## Open follow-ups (not blocking this tranche)
 
@@ -53,3 +64,4 @@
 | Full audit P0 | HIBP dashboard; rateLimit on public sign-in + uploadMedia; Next bump for sharp — see `docs/full-audit-2026-10-18.md` |
 | Marketing analytics | docs/19 §10 cookieless vs GA still undecided |
 | Marketing Lighthouse | Run `npm run report:marketing` locally and fill `reports/marketing/CHECKLIST.md` |
+| Connections C2+ | Org grants / sender picker, Calendar/Meet, Drive — docs/17 |

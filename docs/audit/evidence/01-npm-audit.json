@@ -1,0 +1,1521 @@
+﻿{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@eslint/config-array": {
+      "name": "@eslint/config-array",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": ["eslint"],
+      "range": "*",
+      "nodes": ["node_modules/@eslint/config-array"],
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@eslint/eslintrc": {
+      "name": "@eslint/eslintrc",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": ["eslint"],
+      "range": "0.0.1 || >=0.1.1",
+      "nodes": ["node_modules/@eslint/eslintrc"],
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/core": {
+      "name": "@opentelemetry/core",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1153174,
+          "name": "@opentelemetry/core",
+          "dependency": "@opentelemetry/core",
+          "title": "OpenTelemetry Core: Unbounded memory allocation in W3C Baggage propagation",
+          "url": "https://github.com/advisories/GHSA-8988-4f7v-96qf",
+          "severity": "moderate",
+          "cwe": ["CWE-770"],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": "<2.8.0"
+        }
+      ],
+      "effects": [
+        "@opentelemetry/instrumentation-amqplib",
+        "@opentelemetry/instrumentation-connect",
+        "@opentelemetry/instrumentation-express",
+        "@opentelemetry/instrumentation-fs",
+        "@opentelemetry/instrumentation-hapi",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-koa",
+        "@opentelemetry/instrumentation-mongoose",
+        "@opentelemetry/instrumentation-pg",
+        "@opentelemetry/instrumentation-undici",
+        "@opentelemetry/resources",
+        "@opentelemetry/sdk-trace-base",
+        "@opentelemetry/sql-common",
+        "@sentry/node"
+      ],
+      "range": "<2.8.0",
+      "nodes": ["node_modules/@opentelemetry/core"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/instrumentation-amqplib": {
+      "name": "@opentelemetry/instrumentation-amqplib",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": ["@sentry/node"],
+      "range": "<=0.46.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-amqplib"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/instrumentation-connect": {
+      "name": "@opentelemetry/instrumentation-connect",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "<=0.43.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-connect"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-express": {
+      "name": "@opentelemetry/instrumentation-express",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "<=0.47.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-express"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-fs": {
+      "name": "@opentelemetry/instrumentation-fs",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": ["@sentry/node"],
+      "range": "<=0.19.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-fs"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/instrumentation-hapi": {
+      "name": "@opentelemetry/instrumentation-hapi",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "0.24.0 - 0.45.2",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-hapi"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-http": {
+      "name": "@opentelemetry/instrumentation-http",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "<=0.16.0 || 0.19.1-alpha.7 - 0.218.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-http"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-knex": {
+      "name": "@opentelemetry/instrumentation-knex",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1241249,
+          "name": "@opentelemetry/instrumentation-knex",
+          "dependency": "@opentelemetry/instrumentation-knex",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.65.0"
+        }
+      ],
+      "effects": ["@sentry/node"],
+      "range": "<0.65.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-knex"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/instrumentation-koa": {
+      "name": "@opentelemetry/instrumentation-koa",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "<=0.15.0 || 0.20.0 - 0.47.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-koa"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-mongoose": {
+      "name": "@opentelemetry/instrumentation-mongoose",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@opentelemetry/core",
+        {
+          "source": 1241251,
+          "name": "@opentelemetry/instrumentation-mongoose",
+          "dependency": "@opentelemetry/instrumentation-mongoose",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.67.0"
+        }
+      ],
+      "effects": ["@sentry/node"],
+      "range": "<=0.66.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-mongoose"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/instrumentation-mysql": {
+      "name": "@opentelemetry/instrumentation-mysql",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1241250,
+          "name": "@opentelemetry/instrumentation-mysql",
+          "dependency": "@opentelemetry/instrumentation-mysql",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.67.0"
+        }
+      ],
+      "effects": [],
+      "range": "<0.67.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-mysql"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-mysql2": {
+      "name": "@opentelemetry/instrumentation-mysql2",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@opentelemetry/sql-common",
+        {
+          "source": 1241248,
+          "name": "@opentelemetry/instrumentation-mysql2",
+          "dependency": "@opentelemetry/instrumentation-mysql2",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.67.0"
+        }
+      ],
+      "effects": [],
+      "range": "<=0.66.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-mysql2"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-pg": {
+      "name": "@opentelemetry/instrumentation-pg",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@opentelemetry/core",
+        "@opentelemetry/sql-common",
+        {
+          "source": 1241247,
+          "name": "@opentelemetry/instrumentation-pg",
+          "dependency": "@opentelemetry/instrumentation-pg",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.73.0"
+        }
+      ],
+      "effects": [],
+      "range": "<=0.72.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-pg"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-tedious": {
+      "name": "@opentelemetry/instrumentation-tedious",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1241253,
+          "name": "@opentelemetry/instrumentation-tedious",
+          "dependency": "@opentelemetry/instrumentation-tedious",
+          "title": "Multiple @opentelemetry/instrumentation-* packages expose database username via unconditional db.user span attribute",
+          "url": "https://github.com/advisories/GHSA-qqmp-wf37-98f9",
+          "severity": "moderate",
+          "cwe": ["CWE-532"],
+          "cvss": {
+            "score": 5.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N"
+          },
+          "range": "<0.40.0"
+        }
+      ],
+      "effects": [],
+      "range": "<0.40.0",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-tedious"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/instrumentation-undici": {
+      "name": "@opentelemetry/instrumentation-undici",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": ["@sentry/node"],
+      "range": "<=0.10.1",
+      "nodes": ["node_modules/@opentelemetry/instrumentation-undici"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@opentelemetry/resources": {
+      "name": "@opentelemetry/resources",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": [],
+      "range": "0.8.0 - 2.7.1",
+      "nodes": ["node_modules/@opentelemetry/resources"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/sdk-trace-base": {
+      "name": "@opentelemetry/sdk-trace-base",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core", "@opentelemetry/resources"],
+      "effects": [],
+      "range": "<=2.7.1",
+      "nodes": ["node_modules/@opentelemetry/sdk-trace-base"],
+      "fixAvailable": true
+    },
+    "@opentelemetry/sql-common": {
+      "name": "@opentelemetry/sql-common",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@opentelemetry/core"],
+      "effects": ["@opentelemetry/instrumentation-mysql2", "@opentelemetry/instrumentation-pg"],
+      "range": "<=0.40.1",
+      "nodes": ["node_modules/@opentelemetry/sql-common"],
+      "fixAvailable": true
+    },
+    "@puppeteer/browsers": {
+      "name": "@puppeteer/browsers",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["extract-zip", "proxy-agent"],
+      "effects": ["puppeteer-core"],
+      "range": "*",
+      "nodes": ["node_modules/@puppeteer/browsers"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@react-email/components": {
+      "name": "@react-email/components",
+      "severity": "low",
+      "isDirect": true,
+      "via": ["@react-email/render"],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/@react-email/components"],
+      "fixAvailable": false
+    },
+    "@react-email/render": {
+      "name": "@react-email/render",
+      "severity": "low",
+      "isDirect": false,
+      "via": ["html-to-text"],
+      "effects": ["@react-email/components"],
+      "range": "0.0.4 - 2.1.1",
+      "nodes": [
+        "node_modules/@react-email/components/node_modules/@react-email/render",
+        "node_modules/@react-email/render"
+      ],
+      "fixAvailable": false
+    },
+    "@sentry/node": {
+      "name": "@sentry/node",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@opentelemetry/core",
+        "@opentelemetry/instrumentation-amqplib",
+        "@opentelemetry/instrumentation-connect",
+        "@opentelemetry/instrumentation-express",
+        "@opentelemetry/instrumentation-fs",
+        "@opentelemetry/instrumentation-hapi",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-knex",
+        "@opentelemetry/instrumentation-koa",
+        "@opentelemetry/instrumentation-mongoose",
+        "@opentelemetry/instrumentation-mysql",
+        "@opentelemetry/instrumentation-mysql2",
+        "@opentelemetry/instrumentation-pg",
+        "@opentelemetry/instrumentation-tedious",
+        "@opentelemetry/instrumentation-undici",
+        "@opentelemetry/resources",
+        "@opentelemetry/sdk-trace-base",
+        "minimatch"
+      ],
+      "effects": ["lighthouse"],
+      "range": "8.0.0-alpha.1 - 10.53.1",
+      "nodes": ["node_modules/@sentry/node"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@typescript-eslint/eslint-plugin": {
+      "name": "@typescript-eslint/eslint-plugin",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@typescript-eslint/type-utils", "@typescript-eslint/utils"],
+      "effects": [],
+      "range": ">=6.16.0",
+      "nodes": ["node_modules/@typescript-eslint/eslint-plugin"],
+      "fixAvailable": true
+    },
+    "@typescript-eslint/parser": {
+      "name": "@typescript-eslint/parser",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@typescript-eslint/typescript-estree"],
+      "effects": ["typescript-eslint"],
+      "range": ">=6.16.0",
+      "nodes": ["node_modules/@typescript-eslint/parser"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "@typescript-eslint/type-utils": {
+      "name": "@typescript-eslint/type-utils",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@typescript-eslint/typescript-estree", "@typescript-eslint/utils"],
+      "effects": [],
+      "range": ">=6.16.0",
+      "nodes": ["node_modules/@typescript-eslint/type-utils"],
+      "fixAvailable": true
+    },
+    "@typescript-eslint/typescript-estree": {
+      "name": "@typescript-eslint/typescript-estree",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": [
+        "@typescript-eslint/parser",
+        "@typescript-eslint/type-utils",
+        "@typescript-eslint/utils",
+        "typescript-eslint"
+      ],
+      "range": ">=6.16.0",
+      "nodes": ["node_modules/@typescript-eslint/typescript-estree"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "@typescript-eslint/utils": {
+      "name": "@typescript-eslint/utils",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["@typescript-eslint/typescript-estree"],
+      "effects": ["@typescript-eslint/eslint-plugin", "typescript-eslint"],
+      "range": ">=6.16.0",
+      "nodes": ["node_modules/@typescript-eslint/utils"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "archiver": {
+      "name": "archiver",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["archiver-utils", "readdir-glob", "zip-stream"],
+      "effects": ["exceljs"],
+      "range": ">=0.20.0",
+      "nodes": ["node_modules/archiver"],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "archiver-utils": {
+      "name": "archiver-utils",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["glob"],
+      "effects": ["archiver", "zip-stream"],
+      "range": ">=0.2.0",
+      "nodes": [
+        "node_modules/archiver-utils",
+        "node_modules/zip-stream/node_modules/archiver-utils"
+      ],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "basic-ftp": {
+      "name": "basic-ftp",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240853,
+          "name": "basic-ftp",
+          "dependency": "basic-ftp",
+          "title": "basic-ftp: Quadratic-time CPU denial of service in Client.list() Unix directory-listing parser (RE_LINE backtracking)",
+          "url": "https://github.com/advisories/GHSA-c475-qrg2-pj4r",
+          "severity": "high",
+          "cwe": ["CWE-1333"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=6.2.0"
+        }
+      ],
+      "effects": ["get-uri"],
+      "range": "<=6.2.0",
+      "nodes": ["node_modules/basic-ftp"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "chromium-bidi": {
+      "name": "chromium-bidi",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["zod"],
+      "effects": ["puppeteer-core"],
+      "range": "0.5.13 - 157.0.8081-0",
+      "nodes": ["node_modules/chromium-bidi"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "deepmerge": {
+      "name": "deepmerge",
+      "severity": "low",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1243505,
+          "name": "deepmerge",
+          "dependency": "deepmerge",
+          "title": "deepmerge mergeObject() allows prototype poisoning of returned objects",
+          "url": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+          "severity": "low",
+          "cwe": ["CWE-1321"],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+          },
+          "range": ">=4.2.0 <=4.3.1"
+        }
+      ],
+      "effects": ["html-to-text"],
+      "range": ">=4.2.0",
+      "nodes": ["node_modules/deepmerge"],
+      "fixAvailable": false
+    },
+    "eslint": {
+      "name": "eslint",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": ["@eslint/config-array", "@eslint/eslintrc", "minimatch"],
+      "effects": [],
+      "range": "0.7.1 - 2.0.0-rc.1 || >=4.1.0",
+      "nodes": ["node_modules/eslint"],
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "eslint-config-next": {
+      "name": "eslint-config-next",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "eslint-plugin-import",
+        "eslint-plugin-jsx-a11y",
+        "eslint-plugin-react",
+        "typescript-eslint"
+      ],
+      "effects": [],
+      "range": ">=10.2.1-canary.2",
+      "nodes": ["node_modules/eslint-config-next"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "eslint-plugin-import": {
+      "name": "eslint-plugin-import",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": [],
+      "range": ">=1.15.0",
+      "nodes": ["node_modules/eslint-plugin-import"],
+      "fixAvailable": true
+    },
+    "eslint-plugin-jsx-a11y": {
+      "name": "eslint-plugin-jsx-a11y",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": ["eslint-config-next"],
+      "range": ">=6.5.0",
+      "nodes": ["node_modules/eslint-plugin-jsx-a11y"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "eslint-plugin-react": {
+      "name": "eslint-plugin-react",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": ["eslint-config-next"],
+      "range": ">=7.23.0",
+      "nodes": ["node_modules/eslint-plugin-react"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "exceljs": {
+      "name": "exceljs",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": ["archiver", "uuid"],
+      "effects": [],
+      "range": ">=3.5.0",
+      "nodes": ["node_modules/exceljs"],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "extract-zip": {
+      "name": "extract-zip",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1139346,
+          "name": "extract-zip",
+          "dependency": "extract-zip",
+          "title": "extract-zip unvalidated symlink path traversal",
+          "url": "https://github.com/advisories/GHSA-jmr9-qjv8-65gv",
+          "severity": "high",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 8.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+          },
+          "range": "<=2.0.1"
+        },
+        {
+          "source": 1193685,
+          "name": "extract-zip",
+          "dependency": "extract-zip",
+          "title": "extract-zip allows arbitrary file writes through symlink archive entries",
+          "url": "https://github.com/advisories/GHSA-7pqw-9j4j-h8q3",
+          "severity": "high",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 8.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:H"
+          },
+          "range": "<=2.0.1"
+        }
+      ],
+      "effects": ["@puppeteer/browsers"],
+      "range": "*",
+      "nodes": ["node_modules/extract-zip"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "fast-uri": {
+      "name": "fast-uri",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1243098,
+          "name": "fast-uri",
+          "dependency": "fast-uri",
+          "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+          "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg",
+          "severity": "moderate",
+          "cwe": ["CWE-172", "CWE-180"],
+          "cvss": {
+            "score": 6.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+          },
+          "range": ">=3.0.0 <3.1.9"
+        },
+        {
+          "source": 1243101,
+          "name": "fast-uri",
+          "dependency": "fast-uri",
+          "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+          "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h",
+          "severity": "low",
+          "cwe": ["CWE-41"],
+          "cvss": {
+            "score": 3.7,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
+          },
+          "range": ">=3.0.0 <3.1.9"
+        },
+        {
+          "source": 1243104,
+          "name": "fast-uri",
+          "dependency": "fast-uri",
+          "title": "fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization",
+          "url": "https://github.com/advisories/GHSA-wjr9-j795-jxcr",
+          "severity": "moderate",
+          "cwe": ["CWE-20", "CWE-436"],
+          "cvss": {
+            "score": 4.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N"
+          },
+          "range": ">=3.1.3 <3.1.9"
+        },
+        {
+          "source": 1243107,
+          "name": "fast-uri",
+          "dependency": "fast-uri",
+          "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+          "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp",
+          "severity": "low",
+          "cwe": ["CWE-41", "CWE-116"],
+          "cvss": {
+            "score": 3.7,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
+          },
+          "range": ">=3.0.0 <3.1.9"
+        }
+      ],
+      "effects": [],
+      "range": "3.0.0 - 3.1.8",
+      "nodes": ["node_modules/fast-uri"],
+      "fixAvailable": true
+    },
+    "get-uri": {
+      "name": "get-uri",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["basic-ftp"],
+      "effects": ["pac-proxy-agent"],
+      "range": ">=5.0.0",
+      "nodes": ["node_modules/get-uri"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "glob": {
+      "name": "glob",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1244013,
+          "name": "glob",
+          "dependency": "glob",
+          "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+          "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+          "severity": "moderate",
+          "cwe": ["CWE-400"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=9.0.0 <=14.0.1"
+        },
+        "minimatch"
+      ],
+      "effects": ["archiver-utils", "react-email", "rimraf"],
+      "range": "3.0.0 - 14.0.1",
+      "nodes": [
+        "node_modules/archiver-utils/node_modules/glob",
+        "node_modules/fstream/node_modules/glob",
+        "node_modules/glob",
+        "node_modules/zip-stream/node_modules/glob"
+      ],
+      "fixAvailable": {
+        "name": "react-email",
+        "version": "1.9.5",
+        "isSemVerMajor": true
+      }
+    },
+    "html-to-text": {
+      "name": "html-to-text",
+      "severity": "low",
+      "isDirect": false,
+      "via": ["deepmerge"],
+      "effects": ["@react-email/render"],
+      "range": "6.0.0 - 9.0.5",
+      "nodes": ["node_modules/html-to-text"],
+      "fixAvailable": false
+    },
+    "lighthouse": {
+      "name": "lighthouse",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["@sentry/node", "puppeteer-core"],
+      "effects": [],
+      "range": "11.7.0-dev.20240320 - 13.4.0",
+      "nodes": ["node_modules/lighthouse"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "minimatch": {
+      "name": "minimatch",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1244012,
+          "name": "minimatch",
+          "dependency": "minimatch",
+          "title": "minimatch has potential denial of service via globparts amplification",
+          "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+          "severity": "moderate",
+          "cwe": ["CWE-405"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<11.0.1"
+        }
+      ],
+      "effects": [
+        "@eslint/config-array",
+        "@eslint/eslintrc",
+        "@sentry/node",
+        "@typescript-eslint/typescript-estree",
+        "eslint",
+        "eslint-plugin-import",
+        "eslint-plugin-jsx-a11y",
+        "eslint-plugin-react",
+        "glob",
+        "readdir-glob"
+      ],
+      "range": "<11.0.1",
+      "nodes": [
+        "node_modules/@sentry/node/node_modules/minimatch",
+        "node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch",
+        "node_modules/glob/node_modules/minimatch",
+        "node_modules/minimatch",
+        "node_modules/readdir-glob/node_modules/minimatch"
+      ],
+      "fixAvailable": {
+        "name": "eslint",
+        "version": "4.0.0",
+        "isSemVerMajor": true
+      }
+    },
+    "next": {
+      "name": "next",
+      "severity": "critical",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1124170,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Middleware / Proxy bypass in App Router applications using Turbopack and single locale",
+          "url": "https://github.com/advisories/GHSA-6gpp-xcg3-4w24",
+          "severity": "high",
+          "cwe": ["CWE-285"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124171,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Denial of Service in App Router using Server Actions",
+          "url": "https://github.com/advisories/GHSA-m99w-x7hq-7vfj",
+          "severity": "high",
+          "cwe": ["CWE-834"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124184,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Server-Side Request Forgery in Server Actions on custom servers",
+          "url": "https://github.com/advisories/GHSA-89xv-2m56-2m9x",
+          "severity": "high",
+          "cwe": ["CWE-918"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124186,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Cache confusion of response bodies for requests with bodies",
+          "url": "https://github.com/advisories/GHSA-68g3-v927-f742",
+          "severity": "moderate",
+          "cwe": ["CWE-524"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124188,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+          "url": "https://github.com/advisories/GHSA-4633-3j49-mh5q",
+          "severity": "moderate",
+          "cwe": ["CWE-116"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124190,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unbounded Server Action payload in Edge runtime",
+          "url": "https://github.com/advisories/GHSA-4c39-4ccg-62r3",
+          "severity": "moderate",
+          "cwe": ["CWE-770"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124192,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+          "url": "https://github.com/advisories/GHSA-p9j2-gv94-2wf4",
+          "severity": "high",
+          "cwe": ["CWE-918"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124194,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Denial of Service in the Image Optimization API using SVGs",
+          "url": "https://github.com/advisories/GHSA-q8wf-6r8g-63ch",
+          "severity": "moderate",
+          "cwe": ["CWE-407"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1124196,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unauthenticated disclosure of internal Server Function endpoints",
+          "url": "https://github.com/advisories/GHSA-955p-x3mx-jcvp",
+          "severity": "moderate",
+          "cwe": ["CWE-201"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.2.11"
+        },
+        {
+          "source": 1193676,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unauthenticated Remote Code Execution on windows-hosted servers",
+          "url": "https://github.com/advisories/GHSA-p293-qw3h-jr36",
+          "severity": "critical",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+          },
+          "range": ">=16.0.0 <16.3.3"
+        },
+        {
+          "source": 1193732,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+          "url": "https://github.com/advisories/GHSA-2xp9-vwfh-vxw4",
+          "severity": "critical",
+          "cwe": ["CWE-1395"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <16.3.3"
+        },
+        {
+          "source": 1240609,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Remote Code Execution in next/og ImageResponse",
+          "url": "https://github.com/advisories/GHSA-vcvr-r3jv-pc5j",
+          "severity": "critical",
+          "cwe": ["CWE-1395"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.2.0 <16.3.6"
+        },
+        {
+          "source": 1241490,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+          "url": "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+          "severity": "moderate",
+          "cwe": ["CWE-524"],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": ">=16.0.0 <16.3.8"
+        },
+        {
+          "source": 1241492,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+          "url": "https://github.com/advisories/GHSA-39w2-rjm5-chcv",
+          "severity": "low",
+          "cwe": ["CWE-346"],
+          "cvss": {
+            "score": 5.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+          },
+          "range": ">=16.0.0 <16.3.8"
+        },
+        {
+          "source": 1241493,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js has information disclosure in App Router metadata image routes via dynamicParams bypass",
+          "url": "https://github.com/advisories/GHSA-f87g-xv8r-7p7x",
+          "severity": "moderate",
+          "cwe": ["CWE-346"],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+          },
+          "range": ">=16.0.0 <16.3.8"
+        },
+        {
+          "source": 1241495,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+          "url": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+          "severity": "moderate",
+          "cwe": ["CWE-524"],
+          "cvss": {
+            "score": 4.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:L"
+          },
+          "range": ">=16.0.0 <16.3.8"
+        },
+        {
+          "source": 1241496,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js has Server-Side Request Forgery in Image Optimization",
+          "url": "https://github.com/advisories/GHSA-cjq9-62q9-8jv4",
+          "severity": "high",
+          "cwe": ["CWE-918"],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:N"
+          },
+          "range": ">=16.0.0 <16.3.8"
+        },
+        {
+          "source": 1242816,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+          "url": "https://github.com/advisories/GHSA-2464-fhr4-w9xw",
+          "severity": "critical",
+          "cwe": ["CWE-1395"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <=16.4.0"
+        },
+        {
+          "source": 1242818,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Denial of Service in App Router using Server Actions",
+          "url": "https://github.com/advisories/GHSA-p3m5-59mp-jv5r",
+          "severity": "high",
+          "cwe": ["CWE-770"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <=16.4.0"
+        },
+        {
+          "source": 1242859,
+          "name": "next",
+          "dependency": "next",
+          "title": "Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+          "url": "https://github.com/advisories/GHSA-673q-mjm6-r5xr",
+          "severity": "critical",
+          "cwe": ["CWE-502"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=16.0.0 <=16.4.0"
+        },
+        "postcss",
+        "sharp"
+      ],
+      "effects": [],
+      "range": "9.3.4-canary.0 - 16.4.0",
+      "nodes": ["node_modules/next"],
+      "fixAvailable": {
+        "name": "next",
+        "version": "16.4.5",
+        "isSemVerMajor": false
+      }
+    },
+    "pac-proxy-agent": {
+      "name": "pac-proxy-agent",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["get-uri"],
+      "effects": ["proxy-agent"],
+      "range": ">=6.0.0",
+      "nodes": ["node_modules/pac-proxy-agent"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "postcss": {
+      "name": "postcss",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1117015,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
+          "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+          "severity": "moderate",
+          "cwe": ["CWE-79"],
+          "cvss": {
+            "score": 6.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+          },
+          "range": "<8.5.10"
+        },
+        {
+          "source": 1124252,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+          "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+          "severity": "high",
+          "cwe": ["CWE-22", "CWE-200"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": "<=8.5.11"
+        },
+        {
+          "source": 1130709,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+          "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+          "severity": "moderate",
+          "cwe": ["CWE-22", "CWE-200"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=8.5.22"
+        },
+        {
+          "source": 1139510,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+          "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+          "severity": "high",
+          "cwe": ["CWE-22"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": "<=8.5.17"
+        }
+      ],
+      "effects": ["next"],
+      "range": "<=8.5.22",
+      "nodes": ["node_modules/next/node_modules/postcss"],
+      "fixAvailable": {
+        "name": "next",
+        "version": "16.4.5",
+        "isSemVerMajor": false
+      }
+    },
+    "proxy-agent": {
+      "name": "proxy-agent",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["pac-proxy-agent"],
+      "effects": ["@puppeteer/browsers"],
+      "range": ">=6.0.0",
+      "nodes": ["node_modules/proxy-agent"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "puppeteer-core": {
+      "name": "puppeteer-core",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["@puppeteer/browsers", "chromium-bidi"],
+      "effects": ["lighthouse"],
+      "range": "19.8.4 - 25.12.0",
+      "nodes": ["node_modules/puppeteer-core"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    },
+    "react-email": {
+      "name": "react-email",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": ["glob"],
+      "effects": [],
+      "range": ">=1.10.0",
+      "nodes": ["node_modules/react-email"],
+      "fixAvailable": {
+        "name": "react-email",
+        "version": "1.9.5",
+        "isSemVerMajor": true
+      }
+    },
+    "readdir-glob": {
+      "name": "readdir-glob",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["minimatch"],
+      "effects": ["archiver"],
+      "range": "*",
+      "nodes": ["node_modules/readdir-glob"],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "rimraf": {
+      "name": "rimraf",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["glob"],
+      "effects": [],
+      "range": "2.3.0 - 3.0.2 || 4.2.0 - 6.1.3",
+      "nodes": ["node_modules/fstream/node_modules/rimraf"],
+      "fixAvailable": true
+    },
+    "sharp": {
+      "name": "sharp",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1124066,
+          "name": "sharp",
+          "dependency": "sharp",
+          "title": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+          "url": "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cwe": ["CWE-1395"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.35.0"
+        },
+        {
+          "source": 1193725,
+          "name": "sharp",
+          "dependency": "sharp",
+          "title": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cwe": ["CWE-122"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.35.4"
+        },
+        {
+          "source": 1241331,
+          "name": "sharp",
+          "dependency": "sharp",
+          "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cwe": ["CWE-416", "CWE-1395"],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.35.5"
+        }
+      ],
+      "effects": ["next"],
+      "range": "<=0.35.5-rc.1",
+      "nodes": ["node_modules/next/node_modules/sharp", "node_modules/sharp"],
+      "fixAvailable": {
+        "name": "sharp",
+        "version": "0.35.5",
+        "isSemVerMajor": true
+      }
+    },
+    "typescript-eslint": {
+      "name": "typescript-eslint",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "@typescript-eslint/typescript-estree",
+        "@typescript-eslint/utils"
+      ],
+      "effects": ["eslint-config-next"],
+      "range": "*",
+      "nodes": ["node_modules/typescript-eslint"],
+      "fixAvailable": {
+        "name": "eslint-config-next",
+        "version": "0.2.4",
+        "isSemVerMajor": true
+      }
+    },
+    "uuid": {
+      "name": "uuid",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119441,
+          "name": "uuid",
+          "dependency": "uuid",
+          "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+          "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+          "severity": "moderate",
+          "cwe": ["CWE-787", "CWE-1285"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<11.1.1"
+        }
+      ],
+      "effects": ["exceljs"],
+      "range": "<11.1.1",
+      "nodes": ["node_modules/uuid"],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "zip-stream": {
+      "name": "zip-stream",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": ["archiver-utils"],
+      "effects": [],
+      "range": "0.8.0 - 6.0.1",
+      "nodes": ["node_modules/zip-stream"],
+      "fixAvailable": true
+    },
+    "zod": {
+      "name": "zod",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1243066,
+          "name": "zod",
+          "dependency": "zod",
+          "title": "Zod can exhaust memory while validating oversized constrained collections",
+          "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+          "severity": "high",
+          "cwe": ["CWE-770"],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<4.6.6"
+        }
+      ],
+      "effects": ["chromium-bidi"],
+      "range": "<4.6.6",
+      "nodes": ["node_modules/chromium-bidi/node_modules/zod"],
+      "fixAvailable": {
+        "name": "lighthouse",
+        "version": "13.6.0",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 4,
+      "moderate": 43,
+      "high": 12,
+      "critical": 1,
+      "total": 60
+    },
+    "dependencies": {
+      "prod": 435,
+      "dev": 587,
+      "optional": 171,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 1104
+    }
+  }
+}

@@ -49,13 +49,15 @@ export type PlanRow = {
   sort_order: number;
   included_modules: string[] | null;
   audience?: string | null;
+  email_daily_cap?: number | null;
+  email_monthly_cap?: number | null;
 };
 
 export async function listPlans(opts: { activeOnly?: boolean } = {}): Promise<PlanRow[]> {
   let q = supabaseAdmin
     .from(TABLES.SUBSCRIPTION_PLANS)
     .select(
-      "id, key, name, description, price_monthly, price_yearly, currency, is_active, sort_order, included_modules, audience",
+      "id, key, name, description, price_monthly, price_yearly, currency, is_active, sort_order, included_modules, audience, email_daily_cap, email_monthly_cap",
     )
     .order("sort_order")
     .order("price_monthly");
