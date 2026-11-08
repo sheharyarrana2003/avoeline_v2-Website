@@ -9,8 +9,8 @@ import { AuthService } from "@/src/features/auth/authService";
 import { checkPermission } from "@/src/features/permissions/permissions.service";
 import { ActionResult, fail, ok } from "@/src/lib/action";
 import { deliverSheet } from "@/src/features/exports/writeSheet";
-import { listEventExpenses } from "../expenses.service";
-import type { EventExpense } from "../types";
+import { listEventLedgerLines } from "../expenses.service";
+import type { ExpenseKind, LedgerLine } from "../types";
 
 /** Owner/manager via assertEventActor, or staff with expenses:manage / page_expenses. */
 async function assertExpensesManage(eventId: string) {
@@ -22,8 +22,12 @@ async function assertExpensesManage(eventId: string) {
   const mayManage = await checkPermission(user.userId, "expenses:manage");
   const mayPage = await checkPermission(user.userId, "page_expenses");
   if (mayManage || mayPage) return event;
-  // assertEventActor already admitted owner-equivalents (dept/admin/etc.).
   return event;
+}
+
+function parseKind(raw: string): ExpenseKind {
+  if (raw === "credit" || raw === "income") return raw;
+  return "expense";
 }
 
 export async function saveEventExpenseAction(
@@ -38,7 +42,7 @@ export async function saveEventExpenseAction(
     if (!title) return fail("Title is required.");
     const amount = Number(String(formData.get("amount") ?? "").replace(/[^\d.-]/g, ""));
     if (Number.isNaN(amount) || amount < 0) return fail("Amount must be a non-negative number.");
-    const kind = String(formData.get("kind") ?? "expense") === "credit" ? "credit" : "expense";
+    const kind = parseKind(String(formData.get("kind") ?? "expense"));
     const status = String(formData.get("status") ?? "planned") === "paid" ? "paid" : "planned";
     const category = String(formData.get("category") ?? "Other").trim() || "Other";
     const id = String(formData.get("id") ?? "").trim();
@@ -51,7 +55,7 @@ export async function saveEventExpenseAction(
       category,
       amount,
       kind,
-      status,
+      status: kind === "expense" ? status : "paid",
       paid_on: String(formData.get("paidOn") ?? "").trim() || null,
       booking_id: String(formData.get("bookingId") ?? "").trim() || null,
       external_vendor_id: String(formData.get("externalVendorId") ?? "").trim() || null,
@@ -119,20 +123,22 @@ export async function setEventBudgetAction(
 export async function exportEventExpensesAction(eventId: string) {
   const event = await assertEventActor(eventId, "expenses");
   if (!event) throw new Error("Unauthorized");
-  const rows = await listEventExpenses(eventId);
-  return deliverSheet<EventExpense>(
-    `event-${eventId}-expenses`,
+  const rows = await listEventLedgerLines(eventId);
+  return deliverSheet<LedgerLine>(
+    `event-${eventId}-ledger`,
     "xlsx",
     rows,
     [
       { header: "Title", value: (r) => r.title },
       { header: "Category", value: (r) => r.category },
-      { header: "Kind", value: (r) => r.kind },
+      { header: "Source", value: (r) => r.source },
+      { header: "Direction", value: (r) => r.direction },
       { header: "Amount", value: (r) => r.amount },
       { header: "Status", value: (r) => r.status },
-      { header: "Paid on", value: (r) => r.paidOn || "" },
-      { header: "Description", value: (r) => r.description },
+      { header: "Superseded", value: (r) => (r.superseded ? "yes" : "") },
+      { header: "Booking id", value: (r) => r.bookingId || "" },
+      { header: "Manual id", value: (r) => r.manualExpenseId || "" },
     ],
-    "Expenses",
+    "Ledger",
   );
 }

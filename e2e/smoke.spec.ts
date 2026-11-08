@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { DEMO_ENTER_CODE, DEMO_HACKATHON_EVENT_ID } from "./helpers/demo";
 
 /**
- * Phase 10 Playwright smoke skeleton.
- * Requires a running app (`npm run dev`) and seeded demo data when exercising
- * authenticated flows. Public routes run without seed.
+ * Phase 10 / O8 Playwright smoke.
+ * Requires a running app (`npm run dev`) and seeded demo data for enter/compete.
  *
  * Cold Next.js compile can exceed default nav timeouts — use a long goto timeout
  * and prefer `domcontentloaded` so HMR/webpack does not fail the smoke.
@@ -65,9 +65,8 @@ test.describe("onboarding route smoke", () => {
   });
 });
 
-test.describe("hackathon access gate (needs event id)", () => {
-  const eventId = process.env.E2E_EVENT_ID;
-  test.skip(!eventId, "Set E2E_EVENT_ID to exercise enter/compete");
+test.describe("hackathon access gate (demo seed defaults)", () => {
+  const eventId = DEMO_HACKATHON_EVENT_ID;
 
   test("enter page shows access reason UI", async ({ page }) => {
     await page.goto(`/events/${eventId}/enter`, {
@@ -77,37 +76,33 @@ test.describe("hackathon access gate (needs event id)", () => {
     await expect(page.getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
   });
 
-  test("enter code unlocks compete tabs when E2E_ENTER_CODE is set", async ({ page }) => {
-    const enterCode = process.env.E2E_ENTER_CODE;
-    test.skip(!enterCode, "Set E2E_ENTER_CODE (e.g. AV-DEMO001) after seed:demo");
-
+  test("enter code unlocks compete tabs", async ({ page }) => {
     await page.goto(`/events/${eventId}/enter`, {
       waitUntil: "domcontentloaded",
       timeout: 120_000,
     });
-    const codeField = page.getByRole("textbox").first();
+    const codeField = page.locator("#access-code");
     await expect(codeField).toBeVisible({ timeout: 60_000 });
-    await codeField.fill(enterCode!);
-    await page
-      .getByRole("button", { name: /enter|continue|unlock|submit/i })
-      .first()
-      .click();
+    await codeField.fill(DEMO_ENTER_CODE);
+    await page.getByRole("button", { name: /open dashboard/i }).click();
     await expect(page).toHaveURL(new RegExp(`/events/${eventId}/compete`), {
       timeout: 60_000,
     });
-    await expect(page.getByRole("link", { name: /Instructions/i })).toBeVisible({
+    // First entry requires rules acknowledgement before workspace chrome.
+    const ack = page.getByRole("button", { name: /i understand/i });
+    await expect(ack).toBeVisible({ timeout: 30_000 });
+    await ack.click();
+    await expect(page.getByRole("heading", { name: /active rules/i })).toHaveCount(0, {
       timeout: 60_000,
     });
-    await expect(page.getByRole("link", { name: /Phases|Tasks/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Team/i })).toBeVisible();
+    await expect(page.getByText(/participant dashboard|phases|tasks|team/i).first()).toBeVisible({
+      timeout: 60_000,
+    });
   });
 });
 
 /**
- * Remaining flows (manual / future CI with seed):
- * - solo / group / hackathon registration + file upload
- * - payment approval, check-in
- * - flag + file submission
- * - certificate view/download
- * - owner vs staff permissions
+ * Full matrix (create/register/Drive/email/certs): manual — docs/O8-full-flow-checklist.md
+ * Authenticated tab smoke: e2e/organizer-tabs.spec.ts (demo login).
+ * A7 redirects: e2e/a7-redirects.spec.ts
  */

@@ -68,7 +68,6 @@ export const TAB_PERMISSION: Record<string, PermissionKey | null> = {
   files: "exports:run",
   competitions: "hackathon:manage",
   tasks: "hackathon:manage",
-  teams: "hackathon:manage",
   submissions: "hackathon:manage",
   scoreboard: "hackathon:manage",
   settings: "hackathon:manage",
@@ -81,7 +80,8 @@ export const LEGACY_PERMISSION_MAP: Record<string, PermissionKey> = {
   page_expenses: "expenses:manage",
   page_competitions: "hackathon:manage",
   page_tasks: "hackathon:manage",
-  page_teams: "hackathon:manage",
+  /** Phase B: Competitors tab removed; roster work is under Attendees. */
+  page_teams: "registrations:manage",
   page_submissions: "hackathon:manage",
   page_scoreboard: "hackathon:manage",
   page_settings: "hackathon:manage",

@@ -212,7 +212,15 @@ export async function createAndLinkFile(opts: {
 
   try {
     const token = await getAccessTokenForConnection(opts.connectionId);
-    const folderId = await ensureAvoelineFolder(opts.connectionId, token);
+    let folderId = await ensureAvoelineFolder(opts.connectionId, token);
+    if (opts.entityType === "event") {
+      const { resolveEventRootFolderId } = await import("@/src/features/files/folders");
+      folderId = await resolveEventRootFolderId({
+        connectionId: opts.connectionId,
+        accessToken: token,
+        eventId: opts.entityId,
+      });
+    }
     const created = await GoogleDriveClient.createBlankFile(token, {
       kind: opts.kind,
       name: opts.title.slice(0, 200) || `Untitled ${opts.kind}`,

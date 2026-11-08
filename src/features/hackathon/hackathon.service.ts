@@ -2,22 +2,16 @@ import { cache } from "react";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { toIsoString } from "@/src/lib/datetime";
-import type { HackathonJudge } from "./judging";
-import {
-  EMPTY_SETTINGS,
-  type HackathonAnnouncement,
-  type HackathonMentor,
-  type HackathonSettings,
-  type MentorSlot,
-} from "./live";
+import type { HackathonJudge, JudgeInviteStatus } from "./judging";
+import { normalizeJudgeInviteStatus } from "./judgeInvite.logic";
+import { EMPTY_SETTINGS, type HackathonSettings } from "./live";
 import { parseHackathonKind } from "./kinds";
-import { hydrateDoc } from "./teamWrite";
+import { hydrateDoc, pickExtra } from "./teamWrite";
 import {
   normalizeJoinCode,
   type FeeStatus,
   type HackathonTeam,
   type HackathonTrack,
-  type RubricCategory,
   type HackathonTeamMember,
   type TeamSubmission,
   type TeamScores,
@@ -34,23 +28,11 @@ const HACKATHON_TRACK_COLS =
 const HACKATHON_TEAM_COLS =
   "id, event_id, track_id, name, join_code, access_code_hash, member_registration_ids, looking_for_members, fee_status, fee_proof_path, round, eliminated_at_round, scores, rules_acknowledged_at, created_at, updated_at, extra, status";
 const HACKATHON_JUDGE_COLS =
-  "id, event_id, name, email, track_ids, invite_token, invited_at, last_scored_at, extra";
-const HACKATHON_MENTOR_COLS = "id, event_id, name, email, expertise, bio, extra";
-const HACKATHON_ANNOUNCEMENT_COLS =
-  "id, event_id, track_id, title, body, emailed_count, created_at, extra";
-const HACKATHON_SETTINGS_COLS =
-  "event_id, extra, livestream_url, max_attachment_mb, online_mode, updated_at";
+  "id, event_id, name, email, track_ids, invite_token, invited_at, last_scored_at, extra, updated_at";
+/** Deprecated columns online_mode / livestream_url not selected (docs/22 A7). */
+const HACKATHON_SETTINGS_COLS = "event_id, extra, max_attachment_mb, updated_at";
 
 const FEE_STATUSES: FeeStatus[] = ["not_required", "fee_pending", "fee_paid"];
-
-function mapToRubric(raw: any): RubricCategory[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.map((c: any, i: number) => ({
-    id: String(c?.id || `c${i}`),
-    label: String(c?.label || ""),
-    maxScore: Number(c?.maxScore ?? c?.max_score ?? 0) || 0,
-  }));
-}
 
 function mapFeeStatus(raw: any): FeeStatus {
   // Prefer app-facing value in extra (not_required | fee_pending | fee_paid).
@@ -107,7 +89,8 @@ export function mapToTrack(raw: any, fallbackId?: string): HackathonTrack {
         h?.rosterLocksAt || h?.roster_locks_at || h?.rosterLockDate || h?.roster_lock_date,
       ) || "",
     prizePool: String(h?.prizePool || h?.prize_pool || ""),
-    rubric: mapToRubric(h?.rubric),
+    // Deprecated column `rubric` — stop mapping into product (always empty for UI).
+    rubric: [],
     currentRound: Number(h?.currentRound ?? h?.current_round ?? 1) || 1,
     imageUrl: String(h?.imageUrl || h?.image_url || ""),
     policies: String(h?.policies || ""),
@@ -203,6 +186,7 @@ export function mapToTeam(raw: any, fallbackId?: string): HackathonTeam {
     organizerId: String(h?.organizerId || h?.organizer_id || ""),
     name: String(h?.name || ""),
     joinCode: String(h?.joinCode || h?.join_code || ""),
+    joinCodeRevoked: !!(h?.joinCodeRevoked ?? h?.join_code_revoked),
     accessCode: String(h?.accessCode || h?.access_code || "") || null,
     members,
     memberRegistrationIds: memberIds.length ? memberIds : members.map((m) => m.registrationId),
@@ -435,12 +419,20 @@ export async function eventIsHackathon(
 
 /* ------------------------------------------------------- judges (spec 3.3) */
 
+function mapJudgeInviteStatus(raw: unknown): JudgeInviteStatus {
+  return normalizeJudgeInviteStatus(raw);
+}
+
 export function mapToJudge(raw: any, fallbackId?: string): HackathonJudge {
   const h = hydrateDoc(raw as Record<string, unknown>);
+  const ex = pickExtra(raw as Record<string, unknown> | null);
+  const inviteStatus = mapJudgeInviteStatus(h?.inviteStatus ?? h?.invite_status ?? ex.inviteStatus);
   return {
     id: String(h?.id || fallbackId || ""),
     eventId: String(h?.eventId || h?.event_id || ""),
-    organizerId: String(h?.organizerId || h?.organizer_id || ""),
+    organizerId: String(
+      h?.organizerId || h?.organizer_id || ex.organizerId || ex.organizer_id || "",
+    ),
     name: String(h?.name || ""),
     email: String(h?.email || ""),
     trackIds: Array.isArray(h?.trackIds)
@@ -452,6 +444,13 @@ export function mapToJudge(raw: any, fallbackId?: string): HackathonJudge {
       h?.inviteToken || h?.invite_token ? String(h?.inviteToken || h?.invite_token) : null,
     invitedAt: toIsoString(h?.invitedAt || h?.invited_at) || "",
     lastScoredAt: toIsoString(h?.lastScoredAt || h?.last_scored_at),
+    inviteStatus,
+    inviteRespondedAt: toIsoString(
+      h?.inviteRespondedAt ??
+        h?.invite_responded_at ??
+        ex.inviteRespondedAt ??
+        ex.invite_responded_at,
+    ),
     createdAt: toIsoString(h?.createdAt || h?.created_at) || "",
     updatedAt: toIsoString(h?.updatedAt || h?.updated_at) || "",
   };
@@ -486,78 +485,7 @@ export const findJudgeByToken = cache(async (token: string): Promise<HackathonJu
   return data ? mapToJudge(data, data.id) : null;
 });
 
-/* ------------------------------------------------------ mentors (spec 3.4) */
-
-function mapToSlots(raw: any): MentorSlot[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .filter((s: any) => s && (s.date || s.slot_date))
-    .map((s: any) => ({
-      id: String(s.id || ""),
-      date: String(s.date || s.slot_date || ""),
-      startTime: String(s.startTime || s.start_time || ""),
-      endTime: String(s.endTime || s.end_time || ""),
-      bookedByTeamId: String(s.bookedByTeamId || s.booked_by_team_id || ""),
-      bookedTeamName: String(s.bookedTeamName || s.booked_team_name || ""),
-      bookedAt: toIsoString(s.bookedAt || s.booked_at),
-    }));
-}
-
-export function mapToMentor(raw: any, fallbackId?: string): HackathonMentor {
-  const h = hydrateDoc(raw as Record<string, unknown>);
-  return {
-    id: String(h?.id || fallbackId || ""),
-    eventId: String(h?.eventId || h?.event_id || ""),
-    name: String(h?.name || ""),
-    email: String(h?.email || ""),
-    expertise: Array.isArray(h?.expertise) ? h.expertise.map(String) : [],
-    bio: String(h?.bio || ""),
-    slots: mapToSlots(h?.slots),
-    createdAt: toIsoString(h?.createdAt || h?.created_at) || "",
-    updatedAt: toIsoString(h?.updatedAt || h?.updated_at) || "",
-  };
-}
-
-export const listMentors = cache(async (eventId: string): Promise<HackathonMentor[]> => {
-  if (!eventId) return [];
-  const { data, error } = await supabaseAdmin
-    .from(TABLES.HACKATHON_MENTORS)
-    .select(HACKATHON_MENTOR_COLS)
-    .eq("event_id", eventId);
-  if (error) throw error;
-  return (data ?? []).map((d) => mapToMentor(d, d.id)).sort((a, b) => a.name.localeCompare(b.name));
-});
-
-/* ------------------------------------------------ announcements (spec 3.4) */
-
-export function mapToAnnouncement(raw: any, fallbackId?: string): HackathonAnnouncement {
-  const h = hydrateDoc(raw as Record<string, unknown>);
-  return {
-    id: String(h?.id || fallbackId || ""),
-    eventId: String(h?.eventId || h?.event_id || ""),
-    trackId: String(h?.trackId || h?.track_id || ""),
-    title: String(h?.title || ""),
-    body: String(h?.body || ""),
-    emailedCount: Number(h?.emailedCount ?? h?.emailed_count ?? 0) || 0,
-    createdAt: toIsoString(h?.createdAt || h?.created_at) || "",
-  };
-}
-
-export const listAnnouncements = cache(
-  async (eventId: string): Promise<HackathonAnnouncement[]> => {
-    if (!eventId) return [];
-    const { data, error } = await supabaseAdmin
-      .from(TABLES.HACKATHON_ANNOUNCEMENTS)
-      .select(HACKATHON_ANNOUNCEMENT_COLS)
-      .eq("event_id", eventId);
-    if (error) throw error;
-    return (data ?? [])
-      .map((d) => mapToAnnouncement(d, d.id))
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  },
-);
-
-/* -------------------------------------------------- online mode (spec 3.5) */
+/* -------------------------------------------- settings (attachment + judging) */
 
 export const getHackathonSettings = cache(async (eventId: string): Promise<HackathonSettings> => {
   if (!eventId) return { eventId: "", ...EMPTY_SETTINGS };
@@ -572,16 +500,12 @@ export const getHackathonSettings = cache(async (eventId: string): Promise<Hacka
     const extra = pickExtraSafe(raw);
     return {
       eventId,
-      onlineMode: !!(raw?.online_mode ?? extra.onlineMode),
-      livestreamUrl: String(raw?.livestream_url || extra.livestreamUrl || ""),
       maxAttachmentMb: Math.min(
         50,
         Math.max(1, Number((raw as any)?.max_attachment_mb ?? extra.maxAttachmentMb ?? 10) || 10),
       ),
       judgingWindowStart: String(extra.judgingWindowStart || ""),
       judgingWindowEnd: String(extra.judgingWindowEnd || ""),
-      onlineSessionStart: String(extra.onlineSessionStart || ""),
-      onlineSessionEnd: String(extra.onlineSessionEnd || ""),
       updatedAt: toIsoString(raw?.updated_at || extra.updatedAt) || "",
     };
   } catch (err) {

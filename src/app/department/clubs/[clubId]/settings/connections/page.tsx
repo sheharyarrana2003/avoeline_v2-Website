@@ -22,7 +22,7 @@ export default async function ClubConnectionsPage({
   const { clubId } = await params;
   const sp = await searchParams;
   const user = await AuthService.getCurrentUser();
-  if (!user) redirect(`/signin?next=/department/clubs/${clubId}/settings/connections`);
+  if (!user) redirect(`/auth/signin?next=/department/clubs/${clubId}/settings/connections`);
   if (!(await canManageConnections(user, clubId))) redirect("/access-denied");
 
   let reconnectOk: string | undefined;

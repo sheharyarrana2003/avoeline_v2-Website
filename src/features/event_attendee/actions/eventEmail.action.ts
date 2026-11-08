@@ -113,10 +113,21 @@ export async function sendMemberEmailAction(
 
 function extrasFor(
   reg: Registration,
-  teams: { memberIds: string[]; name: string; trackName: string; accessCode: string | null }[],
+  teams: {
+    memberIds: string[];
+    name: string;
+    trackName: string;
+    accessCode: string | null;
+    joinCode: string | null;
+  }[],
 ) {
   const team = teams.find((t) => t.memberIds.includes(reg.registrationId));
-  return { teamName: team?.name, trackName: team?.trackName, accessCode: team?.accessCode };
+  return {
+    teamName: team?.name,
+    trackName: team?.trackName,
+    accessCode: team?.accessCode,
+    joinCode: team?.joinCode,
+  };
 }
 
 export async function sendBulkAttendeeEmailAction(
@@ -144,12 +155,14 @@ export async function sendBulkAttendeeEmailAction(
       name: string;
       trackName: string;
       accessCode: string | null;
+      joinCode: string | null;
       leadId: string | null;
     }[] = hackTeams.map((t) => ({
       memberIds: t.memberRegistrationIds,
       name: t.name,
       trackName: tracks.find((tr) => tr.id === t.trackId)?.name ?? "",
       accessCode: t.accessCode,
+      joinCode: t.joinCode || null,
       leadId:
         t.members.find((m) => m.isOwner)?.registrationId ?? t.members[0]?.registrationId ?? null,
     }));
@@ -159,6 +172,7 @@ export async function sendBulkAttendeeEmailAction(
         name: g.groupName,
         trackName: "",
         accessCode: null,
+        joinCode: null,
         leadId: g.leadRegistrationId,
       });
     }
@@ -302,12 +316,14 @@ export async function previewBulkAttendeeEmailAction(formData: FormData): Promis
       name: string;
       trackName: string;
       accessCode: string | null;
+      joinCode: string | null;
       leadId: string | null;
     }[] = hackTeams.map((t) => ({
       memberIds: t.memberRegistrationIds,
       name: t.name,
       trackName: tracks.find((tr) => tr.id === t.trackId)?.name ?? "",
       accessCode: t.accessCode,
+      joinCode: t.joinCode || null,
       leadId:
         t.members.find((m) => m.isOwner)?.registrationId ?? t.members[0]?.registrationId ?? null,
     }));
@@ -317,6 +333,7 @@ export async function previewBulkAttendeeEmailAction(formData: FormData): Promis
         name: g.groupName,
         trackName: "",
         accessCode: null,
+        joinCode: null,
         leadId: g.leadRegistrationId,
       });
     }

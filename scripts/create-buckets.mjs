@@ -19,6 +19,7 @@ const buckets = [
   { name: "media", options: { public: true } },
   { name: "certificates", options: { public: false } },
   { name: "payment-screenshots", options: { public: false } },
+  { name: "file-fallback", options: { public: false } },
 ];
 
 for (const b of buckets) {

@@ -1,43 +1,43 @@
+import type { AgendaSessionType } from "@/src/features/agendas/agendaTypes";
+
 export interface Speaker {
-	id: string;
-	name: string;
-	avatarUrl: string;
-	role?: string;
-	company?: string;
+  id: string;
+  name: string;
+  avatarUrl: string;
+  role?: string;
+  company?: string;
 }
 
-export type SessionType = 'TALK' | 'WORKSHOP' | 'PANEL' | 'BREAK' | 'NETWORKING';
+/** @deprecated Prefer AgendaSessionType — kept as alias for UI Session.type */
+export type SessionType = AgendaSessionType;
 
 export interface Session {
-	id: string;
-	eventId: string; 
-	title: string;
-	date: string; 
-	startTime: string; 
-	endTime: string; 
-	type: SessionType;
-	location: string;
-	speaker?: Speaker;
-	description?: string;
-	/**
-	 * Attendee tiers this session is for. Empty means everyone, which is what
-	 * every session written before tiers existed reads as -- so adding the field
-	 * hides nothing retroactively.
-	 *
-	 * Spec 2.1: a tiered event's attendees "see different agenda/seating based on
-	 * tier". This is that gate, and it is applied when the agenda is read for an
-	 * attendee rather than when it is written.
-	 */
-	tiers?: string[];
+  id: string;
+  eventId: string;
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  type: AgendaSessionType;
+  location: string;
+  room?: string;
+  speakers: Speaker[];
+  /** @deprecated use speakers[0] */
+  speaker?: Speaker;
+  description?: string;
+  trackId?: string | null;
+  trackName?: string | null;
+  tiers?: string[];
+  speakerIds?: string[];
 }
 
 export interface AgendaDay {
-	id: number;
-	date: string;  
-	label: string;  
+  id: number;
+  date: string;
+  label: string;
 }
 
 export interface AgendaStats {
-	totalSessions: number;
-	daysCount: number;
+  totalSessions: number;
+  daysCount: number;
 }

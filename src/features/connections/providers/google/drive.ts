@@ -247,6 +247,60 @@ export const GoogleDriveClient = {
     );
   },
 
+  /**
+   * Multipart upload of binary bytes into a Drive folder.
+   * Uses uploadType=multipart (metadata JSON + media).
+   */
+  async uploadBinaryFile(
+    accessToken: string,
+    opts: {
+      name: string;
+      mimeType: string;
+      parentId: string;
+      bytes: Buffer | Uint8Array;
+    },
+  ): Promise<DriveFileMetadata> {
+    const meta = JSON.stringify({
+      name: opts.name,
+      mimeType: opts.mimeType,
+      parents: [opts.parentId],
+    });
+    const boundary = `avoeline_${Date.now().toString(36)}`;
+    const body = Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n` +
+          `--${boundary}\r\nContent-Type: ${opts.mimeType}\r\n\r\n`,
+      ),
+      Buffer.from(opts.bytes),
+      Buffer.from(`\r\n--${boundary}--`),
+    ]);
+    const res = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink,iconLink,modifiedTime&supportsAllDrives=true",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": `multipart/related; boundary=${boundary}`,
+        },
+        body,
+      },
+    );
+    const text = await res.text();
+    if (!res.ok) {
+      const mapped = mapGoogleApiError(res.status, text);
+      throw Object.assign(new Error(mapped.message), { mapped, httpStatus: res.status });
+    }
+    const json = JSON.parse(text) as Record<string, string | undefined>;
+    return {
+      id: json.id!,
+      name: json.name || opts.name,
+      mimeType: json.mimeType || opts.mimeType,
+      webViewLink: json.webViewLink || null,
+      iconLink: json.iconLink || null,
+      modifiedTime: json.modifiedTime || null,
+    };
+  },
+
   /** Insert plain text at the start of a Google Doc the app created. */
   async writeDocPlainText(accessToken: string, documentId: string, body: string): Promise<void> {
     const res = await googleFetch(
@@ -271,5 +325,120 @@ export const GoogleDriveClient = {
       const mapped = mapGoogleApiError(res.status, text);
       throw Object.assign(new Error(mapped.message), { mapped });
     }
+  },
+
+  /** Download file bytes (not Google Docs export — binary uploads only). */
+  async downloadBinaryFile(
+    accessToken: string,
+    fileId: string,
+  ): Promise<{ bytes: Buffer; mime: string; name: string }> {
+    const meta = await GoogleDriveClient.getFileMetadata(accessToken, fileId);
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media&supportsAllDrives=true`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      const mapped = mapGoogleApiError(res.status, text);
+      throw Object.assign(new Error(mapped.message), { mapped, httpStatus: res.status });
+    }
+    const ab = await res.arrayBuffer();
+    return {
+      bytes: Buffer.from(ab),
+      mime: meta.mimeType,
+      name: meta.name,
+    };
+  },
+
+  async deleteFile(accessToken: string, fileId: string): Promise<void> {
+    const res = await googleFetch(
+      accessToken,
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?supportsAllDrives=true`,
+      { method: "DELETE" },
+    );
+    if (!res.ok && res.status !== 404) {
+      const text = await res.text();
+      const mapped = mapGoogleApiError(res.status, text);
+      throw Object.assign(new Error(mapped.message), { mapped, httpStatus: res.status });
+    }
+  },
+
+  /**
+   * Start a resumable upload session. Returns the session URL for the browser
+   * to PUT bytes directly (Origin must match the initiating request).
+   */
+  async createResumableUploadSession(
+    accessToken: string,
+    opts: {
+      name: string;
+      mimeType: string;
+      parentId: string;
+      size: number;
+      origin: string;
+    },
+  ): Promise<string> {
+    const res = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,name,mimeType,webViewLink,iconLink,modifiedTime",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json; charset=UTF-8",
+          "X-Upload-Content-Type": opts.mimeType,
+          "X-Upload-Content-Length": String(opts.size),
+          Origin: opts.origin,
+        },
+        body: JSON.stringify({
+          name: opts.name,
+          mimeType: opts.mimeType,
+          parents: [opts.parentId],
+        }),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      const mapped = mapGoogleApiError(res.status, text);
+      throw Object.assign(new Error(mapped.message), { mapped, httpStatus: res.status });
+    }
+    const sessionUrl = res.headers.get("location") || res.headers.get("Location");
+    if (!sessionUrl) {
+      throw new Error("Drive did not return a resumable session URL.");
+    }
+    return sessionUrl;
+  },
+
+  /**
+   * O7 opt-in: make a file readable by anyone with the link.
+   * Returns a webViewLink suitable for email (not the private FileStore proxy).
+   */
+  async shareAnyoneWithLink(accessToken: string, fileId: string): Promise<string> {
+    const permRes = await googleFetch(
+      accessToken,
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/permissions?supportsAllDrives=true`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          role: "reader",
+          type: "anyone",
+          allowFileDiscovery: false,
+        }),
+      },
+    );
+    if (!permRes.ok) {
+      const text = await permRes.text();
+      const mapped = mapGoogleApiError(permRes.status, text);
+      throw Object.assign(new Error(mapped.message), { mapped, httpStatus: permRes.status });
+    }
+    const meta = await googleFetch(
+      accessToken,
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=webViewLink,webContentLink&supportsAllDrives=true`,
+    );
+    if (!meta.ok) {
+      throw new Error("Could not read Drive share link.");
+    }
+    const json = (await meta.json()) as { webViewLink?: string; webContentLink?: string };
+    const url = json.webViewLink || json.webContentLink;
+    if (!url) throw new Error("Drive did not return a share URL.");
+    return url;
   },
 };

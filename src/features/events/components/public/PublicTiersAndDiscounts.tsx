@@ -2,10 +2,12 @@ import { formatCurrency } from "@/src/lib/money";
 import { formatDateMedium } from "@/src/lib/datetime";
 import type { PublicEventDto } from "@/src/features/events/types";
 
-/** Public pricing tiers + automatic discounts. Never surfaces promo codes. */
+/** Public pricing tiers + automatic student/group discounts (no promo material). */
 export function PublicTiersAndDiscounts({ dto }: { dto: PublicEventDto }) {
   if (dto.isHackathon) return null;
-  if (!dto.pricingTiers.length && !dto.discounts.length) return null;
+  if (!dto.pricingTiers.length && !dto.discounts.length) {
+    return null;
+  }
   if (dto.isFree && !dto.discounts.length && dto.pricingTiers.every((t) => t.price <= 0)) {
     return null;
   }
@@ -28,6 +30,11 @@ export function PublicTiersAndDiscounts({ dto }: { dto: PublicEventDto }) {
                 {t.availableUntil ? (
                   <p className="mt-0.5 text-2xs text-ink-faint">
                     Available until {formatDateMedium(t.availableUntil)}
+                  </p>
+                ) : null}
+                {t.seatsLeft != null ? (
+                  <p className="mt-0.5 text-2xs text-ink-faint">
+                    {t.seatsLeft} seat{t.seatsLeft === 1 ? "" : "s"} left
                   </p>
                 ) : null}
               </div>

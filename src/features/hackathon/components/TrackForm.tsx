@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { DateField } from "@/src/shared_components/DateField";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
@@ -9,7 +9,6 @@ import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import { toEventLocalInput, toIsoDate } from "@/src/lib/datetime";
 import type { ActionResult } from "@/src/lib/action";
 import type { HackathonTrack } from "../types";
-import { HACKATHON_KINDS, HACKATHON_KIND_LABELS } from "../kinds";
 import { PrizeListFields, type PrizeDraft } from "./PrizeListFields";
 
 export interface SponsorOption {
@@ -20,7 +19,7 @@ export interface SponsorOption {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-4 border-t border-line pt-5">
+    <section className="flex flex-col gap-4 border-t border-line pt-5 first:border-t-0 first:pt-0">
       <h3 className="text-2xs font-semibold uppercase tracking-wider text-ink-soft">{title}</h3>
       {children}
     </section>
@@ -64,6 +63,7 @@ export function TrackForm({
   currentSponsorId,
   cancelHref,
   onCancel,
+  onSuccess,
   timeZone = "UTC",
 }: {
   action: (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;
@@ -73,11 +73,17 @@ export function TrackForm({
   currentSponsorId: string;
   cancelHref: string;
   onCancel?: () => void;
+  onSuccess?: () => void;
   timeZone?: string;
 }) {
   const [state, formAction] = useActionState<ActionResult | null, FormData>(action, null);
   const editing = !!track;
   const tz = timeZone || "UTC";
+  const isCtf = track?.kind === "ctf";
+
+  useEffect(() => {
+    if (state?.success) onSuccess?.();
+  }, [state?.success, onSuccess]);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -91,7 +97,7 @@ export function TrackForm({
       <Section title="Basics">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="track-name" className={labelClass}>
-            Track name
+            Name
           </label>
           <input
             id="track-name"
@@ -117,25 +123,8 @@ export function TrackForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="track-kind" className={labelClass}>
-            Competition type
-          </label>
-          <select
-            id="track-kind"
-            name="kind"
-            defaultValue={track?.kind ?? "other"}
-            className={fieldClass}
-          >
-            {HACKATHON_KINDS.map((k) => (
-              <option key={k} value={k}>
-                {HACKATHON_KIND_LABELS[k]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1.5">
           <label htmlFor="track-image" className={labelClass}>
-            Competition image
+            Image
           </label>
           <input
             id="track-image"
@@ -149,14 +138,13 @@ export function TrackForm({
             <img src={track.imageUrl} alt="" className="h-16 w-16 rounded-lg object-cover" />
           ) : null}
         </div>
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" name="isCtf" value="true" defaultChecked={isCtf} />
+          This is a CTF
+        </label>
       </Section>
 
-      <Section title="Team & timing">
-        <p className="text-xs text-ink-soft">
-          All times are shown in the event timezone ({tz}) and stored in UTC. Leave blank to skip a
-          milestone. Order when set: registration closes ≤ roster locks ≤ opens ≤ submission
-          deadline ≤ closes.
-        </p>
+      <Section title="Team and pricing">
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="track-min" className={labelClass}>
@@ -186,46 +174,6 @@ export function TrackForm({
               className={`${fieldClass} tabular-nums`}
             />
           </div>
-          <DateTimeField
-            id="track-reg-closes"
-            name="registrationClosesAt"
-            label="Registration closes"
-            defaultIso={track?.registrationClosesAt}
-            timeZone={tz}
-          />
-          <DateTimeField
-            id="track-lock"
-            name="rosterLocksAt"
-            label="Roster locks"
-            defaultIso={track?.rosterLocksAt || track?.rosterLockDate}
-            timeZone={tz}
-          />
-          <DateTimeField
-            id="track-opens"
-            name="opensAt"
-            label="Opens (participants may work)"
-            defaultIso={track?.opensAt}
-            timeZone={tz}
-          />
-          <DateTimeField
-            id="track-deadline"
-            name="submissionDeadlineAt"
-            label="Submission deadline"
-            defaultIso={track?.submissionDeadlineAt || track?.submissionDeadline}
-            timeZone={tz}
-          />
-          <DateTimeField
-            id="track-closes"
-            name="closesAt"
-            label="Closes"
-            defaultIso={track?.closesAt}
-            timeZone={tz}
-          />
-        </div>
-      </Section>
-
-      <Section title="Pricing">
-        <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="track-fee" className={labelClass}>
               Entry fee per team
@@ -317,24 +265,30 @@ export function TrackForm({
         </div>
       </Section>
 
-      <Section title="Instructions">
+      <Section title="Rules & instructions">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="track-instructions" className={labelClass}>
-            Competition instructions{" "}
+            Rules and instructions{" "}
             <span className="normal-case text-ink-faint">(shown to participants)</span>
           </label>
           <textarea
             id="track-instructions"
             name="instructions"
-            rows={6}
-            defaultValue={track?.instructions ?? ""}
-            placeholder="Rules of engagement, scoring notes, links…"
+            rows={8}
+            defaultValue={
+              track?.instructions?.trim()
+                ? track.instructions
+                : track?.rulesText
+                  ? track.rulesText
+                  : ""
+            }
+            placeholder="Rules, instructions, scoring notes, links…"
             className={fieldClass}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="track-instructions-file" className={labelClass}>
-            Instructions attachment <span className="normal-case text-ink-faint">(optional)</span>
+            Attachment <span className="normal-case text-ink-faint">(optional)</span>
           </label>
           <input
             id="track-instructions-file"
@@ -343,45 +297,28 @@ export function TrackForm({
             accept=".pdf,.ppt,.pptx,.doc,.docx,image/*,application/pdf"
             className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
           />
-          {track?.instructionsFileName ? (
+          {track?.instructionsFileName || track?.rulesName ? (
             <p className="text-xs text-ink-soft">
-              Currently <span className="text-ink">{track.instructionsFileName}</span>.
+              Currently{" "}
+              <span className="text-ink">{track.instructionsFileName || track.rulesName}</span>.
             </p>
           ) : null}
         </div>
       </Section>
 
-      <Section title="Rules">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="track-rules-text" className={labelClass}>
-            Rules text
-          </label>
-          <textarea
-            id="track-rules-text"
-            name="rulesText"
-            rows={5}
-            defaultValue={track?.rulesText ?? ""}
-            className={fieldClass}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="track-rules" className={labelClass}>
-            Rules or problem statement{" "}
-            <span className="normal-case text-ink-faint">(PDF or slides, optional)</span>
-          </label>
-          <input
-            id="track-rules"
-            name="rules"
-            type="file"
-            accept=".pdf,.ppt,.pptx,.doc,.docx,application/pdf"
-            className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
-          />
-          {track?.rulesName ? (
-            <p className="text-xs text-ink-soft">
-              Currently <span className="text-ink">{track.rulesName}</span>.
-            </p>
-          ) : null}
-        </div>
+      <Section title="Registration closes">
+        <DateTimeField
+          id="track-reg-closes"
+          name="registrationClosesAt"
+          label="Optional date and time"
+          defaultIso={track?.registrationClosesAt}
+          timeZone={tz}
+        />
+        <p className="text-xs text-ink-soft">
+          If blank, the event registration close date applies. When registration closes, team
+          rosters lock automatically (you can still unlock a single team). Participant work windows
+          are controlled by Phases.
+        </p>
       </Section>
 
       <div className="flex items-center gap-2 border-t border-line pt-5">

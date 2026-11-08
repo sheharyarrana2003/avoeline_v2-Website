@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { getFocusableElements, trapFocusKeyDown } from "./modalFocus";
 
 export interface ModalProps {
   open: boolean;
@@ -32,57 +34,84 @@ export function Modal({
   maxWidth = "md",
   className = "",
 }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   useEffect(() => {
     if (!open) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    const frame = requestAnimationFrame(() => {
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusable = getFocusableElements(root);
+      (focusable[0] ?? root).focus();
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (!dialogRef.current) return;
+      trapFocusKeyDown(dialogRef.current, e, document.activeElement);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
+      cancelAnimationFrame(frame);
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = originalOverflow;
+      previouslyFocused.current?.focus?.();
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      data-modal-overlay="true"
     >
-      {/* Backdrop */}
       <div
-        ref={overlayRef}
         onClick={onClose}
         aria-hidden="true"
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/60 transition-opacity"
+        data-modal-backdrop="true"
       />
 
-      {/* Modal Dialog Card — max 90vh with scrollable body + sticky footer */}
       <div
-        className={`relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-line bg-paper shadow-lg transition-all ${MAX_WIDTH_CLASSES[maxWidth]} ${className}`.trim()}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={description ? descriptionId : undefined}
+        tabIndex={-1}
+        className={`relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-line bg-paper opacity-100 shadow-lg transition-all ${MAX_WIDTH_CLASSES[maxWidth]} ${className}`.trim()}
+        data-modal-panel="true"
       >
-        {/* Header */}
         {(title || description) && (
-          <div className="flex shrink-0 items-start justify-between border-b border-line px-6 py-5">
+          <div className="flex shrink-0 items-start justify-between border-b border-line bg-paper px-6 py-5">
             <div className="space-y-1 pr-4">
-              {title && (
-                <h3 className="font-display text-lg font-semibold leading-none text-ink">
+              {title ? (
+                <h3
+                  id={titleId}
+                  className="font-display text-lg font-semibold leading-none text-ink"
+                >
                   {title}
                 </h3>
-              )}
-              {description && <p className="text-sm text-ink-soft">{description}</p>}
+              ) : null}
+              {description ? (
+                <p id={descriptionId} className="text-sm text-ink-soft">
+                  {description}
+                </p>
+              ) : null}
             </div>
             <button
               type="button"
@@ -95,17 +124,16 @@ export function Modal({
           </div>
         )}
 
-        {/* Content */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto bg-paper px-6 py-5">{children}</div>
 
-        {/* Footer */}
-        {footer && (
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2.5 border-t border-line bg-muted/40 px-6 py-4">
+        {footer ? (
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2.5 border-t border-line bg-paper px-6 py-4">
             {footer}
           </div>
-        )}
+        ) : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

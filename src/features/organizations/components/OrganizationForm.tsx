@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
@@ -28,6 +28,9 @@ export function OrganizationForm({
   tracks = [],
   isHackathon = false,
   partnerTypes = [],
+  formId,
+  hideSubmit = false,
+  onSuccess,
 }: {
   eventId: string;
   sponsorTiers: string[];
@@ -36,8 +39,14 @@ export function OrganizationForm({
   tracks?: { id: string; name: string }[];
   isHackathon?: boolean;
   partnerTypes?: { label: string; description: string }[];
+  formId?: string;
+  hideSubmit?: boolean;
+  onSuccess?: () => void;
 }) {
   const [state, formAction] = useActionState<ActionResult | null, FormData>(saveOrganization, null);
+  useEffect(() => {
+    if (state?.success) onSuccess?.();
+  }, [state?.success, onSuccess]);
   const [type, setType] = useState<OrganizationType>(editing?.type ?? "sponsor");
   const [contribution, setContribution] = useState(
     editing?.contributionKind || CONTRIBUTION_KINDS[0],
@@ -59,7 +68,7 @@ export function OrganizationForm({
   ];
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form id={formId} action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="eventId" value={eventId} />
       {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
 
@@ -220,6 +229,48 @@ export function OrganizationForm({
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="org-pay-status" className={labelClass}>
+                Payment
+              </label>
+              <select
+                id="org-pay-status"
+                name="paymentStatus"
+                defaultValue={editing?.paymentStatus ?? "pending"}
+                className={fieldClass}
+              >
+                <option value="pending">Pending</option>
+                <option value="partial">Partial</option>
+                <option value="received">Received</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="org-amount-received" className={labelClass}>
+                Amount received
+              </label>
+              <input
+                id="org-amount-received"
+                name="amountReceived"
+                inputMode="numeric"
+                defaultValue={editing?.amountReceived ? String(editing.amountReceived) : ""}
+                className={`${fieldClass} tabular-nums`}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="org-received-on" className={labelClass}>
+                Received on
+              </label>
+              <input
+                id="org-received-on"
+                name="receivedOn"
+                type="date"
+                defaultValue={editing?.receivedOn ?? ""}
+                className={fieldClass}
+              />
+            </div>
+          </div>
+
           <BenefitChips
             name="benefits"
             initial={
@@ -365,23 +416,25 @@ export function OrganizationForm({
         </div>
       ) : null}
 
-      <div className="flex justify-end gap-2 border-t border-line pt-5">
-        {onDone ? (
-          <a href={onDone} className={buttonClass("secondary")}>
-            Cancel
-          </a>
-        ) : null}
-        <SubmitButton pendingText="Saving…" className={buttonClass("primary")}>
-          {editing ? (
-            "Save changes"
-          ) : (
-            <>
-              <Plus size={14} aria-hidden="true" />
-              Add
-            </>
-          )}
-        </SubmitButton>
-      </div>
+      {!hideSubmit ? (
+        <div className="flex justify-end gap-2 border-t border-line pt-5">
+          {onDone ? (
+            <a href={onDone} className={buttonClass("secondary")}>
+              Cancel
+            </a>
+          ) : null}
+          <SubmitButton pendingText="Saving…" className={buttonClass("primary")}>
+            {editing ? (
+              "Save changes"
+            ) : (
+              <>
+                <Plus size={14} aria-hidden="true" />
+                Add
+              </>
+            )}
+          </SubmitButton>
+        </div>
+      ) : null}
     </form>
   );
 }

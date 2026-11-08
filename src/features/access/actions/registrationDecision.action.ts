@@ -8,12 +8,17 @@ import { assertEventActor } from "@/src/features/events/ownership";
 import { AuthService } from "@/src/features/auth/authService";
 import { ActionResult, fail, ok } from "@/src/lib/action";
 import { absoluteUrl } from "@/src/lib/appUrl";
-import { escapeHtml, sendEmail } from "@/src/lib/email";
+import { escapeHtml } from "@/src/lib/email";
 import { RegService } from "@/src/services/registeration.service";
 import type { Registration, RegistrationStatus } from "@/src/services/models/reg.type";
 import { sendNotification } from "@/src/lib/notifications";
 import { maybeRevealHackathonAccessCodes } from "@/src/features/hackathon/accessCodes.service";
-import { maybeAutoEventEmail } from "@/src/features/event_attendee/eventEmail.service";
+import {
+  maybeAutoEventEmail,
+  sendOrganizerEmail,
+} from "@/src/features/event_attendee/eventEmail.service";
+import { EventService } from "@/src/services/event.service";
+import { sendViaOrganizerConnection } from "@/src/features/email/organizerTransport.service";
 
 async function setStatus(
   reg: Registration,
@@ -96,17 +101,21 @@ async function promoteWaitlistTransaction(eventId: string): Promise<{
       status: promotedStatus,
     };
 
-    if (result.attendeeEmail && result.registrationId) {
+    if (result.attendeeEmail && result.registrationId && event.organizer_id) {
       const ticketUrl = await absoluteUrl(`/events/${eventId}/ticket/${result.registrationId}`);
-      await sendEmail(
-        { email: result.attendeeEmail, name: result.attendeeName },
-        {
-          subject: `A place has opened up at ${result.eventTitle}`,
-          html: `<p>Good news — a place at <strong>${escapeHtml(result.eventTitle || "the event")}</strong> has opened up and you are off the waitlist.</p>
-<p><a href="${escapeHtml(ticketUrl)}">View your ticket</a></p>`,
-          senderName: result.eventTitle,
-        },
-      );
+      const subject = `A place has opened up at ${result.eventTitle}`;
+      const html = `<p>Good news — a place at <strong>${escapeHtml(result.eventTitle || "the event")}</strong> has opened up and you are off the waitlist.</p>
+<p><a href="${escapeHtml(ticketUrl)}">View your ticket</a></p>`;
+      const text = `Good news — a place at ${result.eventTitle || "the event"} has opened up and you are off the waitlist. View your ticket: ${ticketUrl}`;
+      await sendViaOrganizerConnection({
+        organizerId: String(event.organizer_id),
+        to: result.attendeeEmail,
+        subject,
+        html,
+        text,
+        kind: "waitlist_promoted",
+        eventId,
+      });
 
       await sendNotification(result.registrationId || result.attendeeEmail, "waitlist_promoted", {
         attendeeName: result.attendeeName || "Attendee",
@@ -166,25 +175,35 @@ export async function decideRegistration(formData: FormData): Promise<ActionResu
     await setStatus(reg, approved ? "confirmed" : "rejected");
     if (approved) {
       await maybeRevealHackathonAccessCodes(registrationId);
-      await maybeAutoEventEmail(registrationId);
     }
 
-    const email = reg.attendee?.email;
-    if (email) {
-      const ticketUrl = await absoluteUrl(`/events/${eventId}/ticket/${registrationId}`);
-      await sendEmail(
-        { email, name: reg.attendee?.name || undefined },
-        {
-          subject: approved
-            ? `You're confirmed for ${event.title}`
-            : `About your registration for ${event.title}`,
-          html: approved
-            ? `<p>Your registration for <strong>${escapeHtml(event.title)}</strong> has been approved.</p>
-<p><a href="${escapeHtml(ticketUrl)}">View your ticket</a></p>`
-            : `<p>Your registration for <strong>${escapeHtml(event.title)}</strong> was not approved by the organizer.</p>`,
-          senderName: event.title,
-        },
-      );
+    const fullEvent = await EventService.getEventByID(eventId);
+    const updatedRegs = await RegService.getRegsOfEvent(eventId);
+    const updatedReg = updatedRegs.find((r) => r.registrationId === registrationId);
+    const email = updatedReg?.attendee?.email;
+
+    if (email && fullEvent) {
+      if (approved && updatedReg) {
+        await sendOrganizerEmail({
+          registration: updatedReg,
+          event: fullEvent,
+          kind: "registration_confirmed",
+          skipIfSent: false,
+        });
+      } else if (!approved) {
+        const subject = `About your registration for ${event.title}`;
+        const html = `<p>Your registration for <strong>${escapeHtml(event.title)}</strong> was not approved by the organizer.</p>`;
+        const text = `Your registration for ${event.title} was not approved by the organizer.`;
+        await sendViaOrganizerConnection({
+          organizerId: fullEvent.organizerId,
+          to: email,
+          subject,
+          html,
+          text,
+          kind: "registration_rejected",
+          eventId,
+        });
+      }
     }
 
     if (!approved) await promoteWaitlistTransaction(eventId);

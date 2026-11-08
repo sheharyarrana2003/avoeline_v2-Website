@@ -46,10 +46,22 @@ import { teamFeeDisplay } from "@/src/features/event_attendee/roster";
 import { trackDueAmount } from "@/src/features/hackathon/types";
 import { hasActiveOrganizerEmailConnection } from "@/src/features/email/organizerEmailConnection.service";
 import { AttendeeImportPanel } from "@/src/features/event_attendee/import/AttendeeImportPanel";
+import { parseScheduleDateTime } from "@/src/lib/datetime";
+import { listConnections } from "@/src/features/connections/server/connections.service";
+import { DriveHealthBanner } from "@/src/features/files/components/DriveHealthBanner";
+import { RegistrationQuestionsCard } from "@/src/features/registration/forms/components/RegistrationQuestionsCard";
+import { getSheetSyncForEvent } from "@/src/features/connections/server/sheetSync.service";
+import { listPhasesForEvent } from "@/src/features/hackathon/tasks.service";
+import { joinCodeValidUntilIso } from "@/src/features/hackathon/joinCodeValidity";
 
-export default async function AttendeesPage({ params }: { params: Promise<{ eventId: string }> }) {
+export default async function AttendeesPage({
+  params,
+}: {
+  params: Promise<{ organizer_id: string; eventId: string }>;
+}) {
   const resolvedParams = await params;
   const event_id = resolvedParams.eventId;
+  const organizer_id = resolvedParams.organizer_id;
 
   // Needed only for its access settings, which decide where a paid registration
   // lands once payment clears.
@@ -65,11 +77,29 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     );
   }
 
+  const eventEndsAtIso =
+    parseScheduleDateTime(
+      eventForAccess.schedule?.endDate ?? eventForAccess.schedule?.startDate,
+      eventForAccess.schedule?.endTime,
+    )?.toISOString() ?? null;
+
   // Overlap ACL with the registration list (independent reads; unauthorized
   // callers still fail before any client payload is built).
-  const [owned, regs] = await Promise.all([
+  const [owned, regs, sheetConnected] = await Promise.all([
     assertEventActor(event_id, "attendees"),
     RegService.getRegsOfEvent(event_id),
+    (async () => {
+      const conns = await listConnections({
+        ownerType: "user",
+        ownerId: eventForAccess.organizerId,
+      });
+      const drive = conns.some((c) =>
+        c.capabilities.some((cap) => cap.capability === "drive.files" && cap.enabled),
+      );
+      if (!drive) return false;
+      const syncs = await getSheetSyncForEvent(event_id);
+      return syncs.length > 0;
+    })(),
   ]);
   if (!owned) {
     redirect("/access-denied?reason=unauthorized_attendee_list");
@@ -83,9 +113,16 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
       AttendeeService.getAttendeeProfilesByUserIds(userIds),
     ]);
 
-    // Dedupe storage paths then sign once per unique path (bucket is private).
+    // O1: file:{uuid} → /api/files; legacy Supabase paths still signed.
     const proofPaths = regs.map((r) => r.payment?.proofPath).filter((p): p is string => !!p);
-    const legacyProofs = proofPaths.filter((p) => !p.startsWith("registration/"));
+    const legacyProofs = proofPaths.filter(
+      (p) =>
+        !p.startsWith("registration/") &&
+        !p.startsWith("file:") &&
+        !p.startsWith("drive:") &&
+        !p.startsWith("/api/files/") &&
+        !p.includes("drive.google.com/"),
+    );
     const regProofs = proofPaths.filter((p) => p.startsWith("registration/"));
     const [signedLegacy, signedReg] = await Promise.all([
       getSignedUrlsByPath(CERTIFICATES_BUCKET, legacyProofs),
@@ -95,6 +132,18 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
     for (const r of regs) {
       const path = r.payment?.proofPath;
       if (!path) continue;
+      if (path.startsWith("file:")) {
+        proofUrls.set(r.registrationId, `/api/files/${path.slice("file:".length)}`);
+        continue;
+      }
+      if (path.startsWith("/api/files/")) {
+        proofUrls.set(r.registrationId, path);
+        continue;
+      }
+      // Legacy drive: refs are not publicly viewable — organizers open via Files tab / re-upload.
+      if (path.startsWith("drive:") || path.includes("drive.google.com/")) {
+        continue;
+      }
       const url = signedReg.get(path) ?? signedLegacy.get(path);
       if (url) proofUrls.set(r.registrationId, url);
     }
@@ -144,7 +193,7 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
 
   const isHackathon = await eventIsHackathon(eventForAccess);
   const groupRegistration = !isHackathon && !!eventForAccess.registration?.groupRegistration;
-  const [hackTracks, hackTeams, regGroups, emailTemplates, allFormFields, emailConnected] =
+  const [hackTracks, hackTeams, regGroups, emailTemplates, allFormFields, emailConnected, phases] =
     await Promise.all([
       isHackathon ? listTracks(event_id) : Promise.resolve([]),
       isHackathon ? listTeamsOfEvent(event_id) : Promise.resolve([]),
@@ -152,7 +201,28 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
       listEventEmailTemplates(event_id),
       listAllFields(event_id).catch(() => []),
       hasActiveOrganizerEmailConnection(eventForAccess.organizerId),
+      isHackathon ? listPhasesForEvent(event_id).catch(() => []) : Promise.resolve([]),
     ]);
+  const joinValidUntilIso = joinCodeValidUntilIso({
+    eventEndsAtIso,
+    phaseCloses: phases.map((p) => p.closes_at || p.ends_at || null),
+  });
+  const checkInActorIds = [
+    ...new Set(
+      regs
+        .map((r) => r.checkIn?.checkedInBy)
+        .filter((id): id is string => Boolean(id && String(id).trim())),
+    ),
+  ];
+  const checkInActors = checkInActorIds.length
+    ? await UserService.getUsersByIds(checkInActorIds)
+    : new Map();
+  const checkInByNames: Record<string, string> = {};
+  for (const id of checkInActorIds) {
+    const u = checkInActors.get(id);
+    const name = u?.profile?.fullName || u?.email || "";
+    if (name) checkInByNames[id] = name;
+  }
   const keysWithData = new Set<string>();
   for (const r of regs) {
     const answers = r.customResponses || {};
@@ -256,65 +326,81 @@ export default async function AttendeesPage({ params }: { params: Promise<{ even
           name: t.name,
           trackName: track?.name ?? "Competition",
           accessCode: t.accessCode,
+          joinCode: t.joinCode || null,
           memberIds: t.memberRegistrationIds,
           leadId,
           payment: fee.payment,
+          feeStatus: t.feeStatus,
           amount: fee.amount,
           currency: lead?.register.payment?.currency || "PKR",
           proofUrl,
           trackId: t.trackId,
+          eliminated: t.eliminatedAtRound != null,
+          joinCodeRevoked: Boolean(t.joinCodeRevoked),
         };
       })
     : undefined;
 
   return (
-    <AttendeeClientSide
-      attendees={attendeesWithUsers}
-      handle_reg_status={handle_reg_status}
-      onExport={handle_export}
-      occupyingCount={
-        isHackathon
-          ? occupyingHackathonRegs(regs, hackTeams).length
-          : groupRegistration
-            ? occupyingGroupRegs(regs, regGroups).length
-            : undefined
-      }
-      defaultGrouped={isHackathon || groupRegistration}
-      groups={groups}
-      requiresApproval={!!eventForAccess?.access?.requiresApproval}
-      eventId={event_id}
-      organizerId={eventForAccess.organizerId}
-      emailTemplates={emailTemplates}
-      questions={formQuestions}
-      teams={teams}
-      isFree={
-        eventForAccess.pricing?.isFree === true || Number(eventForAccess.PriceOfTicket ?? 0) <= 0
-      }
-      emailConnectionMissing={!emailConnected}
-      extra={
-        <>
-          <AttendeeImportPanel eventId={event_id} />
-          {isHackathon ? (
-            <AssignLeftoverTeams
-              eventId={event_id}
-              returnTo={assignReturn}
-              leftover={leftover}
-              tracks={hackTracks.map((t) => ({
-                id: t.id,
-                name: t.name,
-                maxTeamSize: t.maxTeamSize,
-              }))}
-              teams={hackTeams.map((t) => ({
-                id: t.id,
-                name: t.name,
-                trackId: t.trackId,
-                size: t.members.length,
-                maxTeamSize: t.maxTeamSize,
-              }))}
-            />
-          ) : null}
-        </>
-      }
-    />
+    <>
+      <DriveHealthBanner
+        organizerId={eventForAccess.organizerId}
+        eventId={event_id}
+        connectionsHref={`/organizer/${organizer_id}/connections`}
+      />
+      <AttendeeClientSide
+        attendees={attendeesWithUsers}
+        handle_reg_status={handle_reg_status}
+        onExport={handle_export}
+        occupyingCount={
+          isHackathon
+            ? occupyingHackathonRegs(regs, hackTeams).length
+            : groupRegistration
+              ? occupyingGroupRegs(regs, regGroups).length
+              : undefined
+        }
+        defaultGrouped={isHackathon || groupRegistration}
+        groups={groups}
+        requiresApproval={!!eventForAccess?.access?.requiresApproval}
+        eventId={event_id}
+        organizerId={eventForAccess.organizerId}
+        emailTemplates={emailTemplates}
+        questions={formQuestions}
+        teams={teams}
+        isFree={
+          eventForAccess.pricing?.isFree === true || Number(eventForAccess.PriceOfTicket ?? 0) <= 0
+        }
+        emailConnectionMissing={!emailConnected}
+        sheetsConnected={sheetConnected}
+        exportsHref={`/organizer/${organizer_id}/events/${event_id}/exports`}
+        eventEndsAtIso={joinValidUntilIso || eventEndsAtIso}
+        checkInByNames={checkInByNames}
+        registrationForm={<RegistrationQuestionsCard eventId={event_id} bare />}
+        extra={
+          <>
+            <AttendeeImportPanel eventId={event_id} />
+            {isHackathon ? (
+              <AssignLeftoverTeams
+                eventId={event_id}
+                returnTo={assignReturn}
+                leftover={leftover}
+                tracks={hackTracks.map((t) => ({
+                  id: t.id,
+                  name: t.name,
+                  maxTeamSize: t.maxTeamSize,
+                }))}
+                teams={hackTeams.map((t) => ({
+                  id: t.id,
+                  name: t.name,
+                  trackId: t.trackId,
+                  size: t.members.length,
+                  maxTeamSize: t.maxTeamSize,
+                }))}
+              />
+            ) : null}
+          </>
+        }
+      />
+    </>
   );
 }

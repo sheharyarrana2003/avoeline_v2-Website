@@ -34,6 +34,8 @@ type InviteRow = {
 
 function mapToInvite(raw: InviteRow): EventInvite {
   const kindRaw = raw.kind ?? (raw.extra as { kind?: string } | null)?.kind;
+  const extra = (raw.extra as Record<string, unknown> | null) ?? {};
+  const revokedRaw = extra.revokedAt ?? extra.revoked_at;
   return {
     id: String(raw.id || ""),
     eventId: String(raw.event_id || ""),
@@ -45,6 +47,7 @@ function mapToInvite(raw: InviteRow): EventInvite {
     openedAt: toIsoString(raw.opened_at),
     registeredAt: toIsoString(raw.registered_at),
     registrationId: raw.registration_id ? String(raw.registration_id) : null,
+    revokedAt: revokedRaw ? toIsoString(String(revokedRaw)) : null,
     expiresAt: String(raw.expires_at || ""),
     singleUse: !!raw.single_use,
     createdAt: toIsoString(raw.created_at),
@@ -102,6 +105,8 @@ export function accessTypeOf(event: Pick<EventModel, "visibility">): EventAccess
     .trim()
     .toLowerCase();
   if (!raw) return "public";
+  // Legacy UI id → stored `tiered`
+  if (raw === "vip_tiered") return "tiered";
   return isAccessType(raw) ? raw : "private";
 }
 
@@ -132,6 +137,7 @@ export async function resolveEventAccess(
     const invite = await findInviteByToken(String(attempt.token));
     if (invite && invite.eventId === event.id) {
       const refusal = inviteRefusal(invite);
+      if (refusal === "revoked") return { allowed: false, reason: "invite_used", entry: null };
       if (refusal === "expired") return { allowed: false, reason: "invite_expired", entry: null };
       if (refusal === "already_used") return { allowed: false, reason: "invite_used", entry: null };
       entry = invite;

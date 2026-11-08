@@ -72,7 +72,6 @@ export default async function EventLayout({
       ? [
           { label: "Competitions", value: "competitions", href: `${ev}/competitions` },
           { label: "Phases & Tasks", value: "tasks", href: `${ev}/tasks` },
-          { label: "Competitors", value: "teams", href: `${ev}/teams` },
           { label: "Submissions", value: "submissions", href: `${ev}/submissions` },
           { label: "Scoreboard", value: "scoreboard", href: `${ev}/scoreboard` },
           { label: "Settings", value: "settings", href: `${ev}/settings` },

@@ -304,10 +304,23 @@ export async function createPublicRegistration(
       registrationId,
       timestamp: now,
     }),
+    { organizerId: event.organizerId, eventId: event.id },
   );
   const dbTiers = await TicketingService.listTiers(event.id).catch(() => []);
-  const chosenTier =
-    dbTiers.find((t) => t.id === input.ticketTierId || t.name === input.tier) || dbTiers[0];
+  const requestedTier =
+    input.ticketTierId || input.tier
+      ? dbTiers.find((t) => t.id === input.ticketTierId || t.name === input.tier)
+      : undefined;
+  if ((input.ticketTierId || input.tier) && !requestedTier) {
+    return { ok: false, refusal: "tier_unavailable" };
+  }
+  const chosenTier = requestedTier || dbTiers.find((t) => t.active) || dbTiers[0];
+  if (chosenTier) {
+    if (!chosenTier.active) return { ok: false, refusal: "tier_unavailable" };
+    if (chosenTier.seatsLeft != null && chosenTier.seatsLeft <= 0) {
+      return { ok: false, refusal: "tier_unavailable" };
+    }
+  }
   let ticket = chosenTier
     ? { tierName: chosenTier.name, price: chosenTier.price, ticketTierId: chosenTier.id }
     : { ...ticketFor(event), ticketTierId: null as string | null };
@@ -520,7 +533,8 @@ export async function createPublicRegistration(
       payment_proof_path: registration.payment?.proofPath ?? null,
       checked_in: false,
       qr_code_data: registration.qrCode?.data || "",
-      qr_code_image_url: registration.qrCode?.imageUrl || "",
+      // O1 A6: stop writing hosted QR URLs — render via /api/qr/[token].png
+      qr_code_image_url: null,
       certificate_issued: false,
       ticket_tier_id: ticket.ticketTierId || null,
       promo_code_used: promoUsed,

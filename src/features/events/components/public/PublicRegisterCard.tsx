@@ -42,6 +42,9 @@ export function PublicRegisterCard({
                     until {formatDateMedium(t.availableUntil)}
                   </span>
                 ) : null}
+                {t.seatsLeft != null ? (
+                  <span className="ml-1 text-2xs text-ink-soft">{t.seatsLeft} left</span>
+                ) : null}
               </span>
               <span className="tabular-nums text-ink-soft">
                 {formatCurrency(t.price, dto.currency, "Free")}
@@ -148,6 +151,18 @@ function RegisterBody({
 
   if (state === "waitlist" || state === "open") {
     const openCompetitions = dto.competitions.filter((c) => c.registrationOpen);
+    const needsConnections =
+      !dto.isFree ||
+      dto.formFields.some((f) => f.type === "file" || f.key === "payment_screenshot") ||
+      openCompetitions.length > 0;
+    if (needsConnections && !dto.organizerConnectionsReady) {
+      return (
+        <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
+          {dto.organizerConnectionsMessage ||
+            "Registration uploads and confirmation email are not available until the organiser connects Google Drive and Gmail."}
+        </p>
+      );
+    }
     return (
       <>
         {state === "waitlist" ? (

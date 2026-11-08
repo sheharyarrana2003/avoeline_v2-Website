@@ -45,6 +45,8 @@ export type PublicPricingTier = {
   price: number;
   availableUntil: string | null;
   seatsAvailable: number | null;
+  /** max(0, seatsAvailable - seatsSold) when seats are tracked; else null. */
+  seatsLeft: number | null;
 };
 
 export type PublicDiscount = {
@@ -52,6 +54,12 @@ export type PublicDiscount = {
   percentage: number;
   minGroupSize?: number;
   requiresVerification?: boolean;
+};
+
+export type PublicAgendaSpeaker = {
+  id: string;
+  name: string;
+  photoUrl: string;
 };
 
 export type PublicAgendaItem = {
@@ -64,6 +72,8 @@ export type PublicAgendaItem = {
   location: string;
   description: string;
   speakerNames: string[];
+  speakers: PublicAgendaSpeaker[];
+  trackName?: string | null;
 };
 
 export type PublicSpeaker = {
@@ -74,11 +84,20 @@ export type PublicSpeaker = {
   photoUrl: string;
 };
 
+export type PublicCompetitionPrize = {
+  positionLabel: string;
+  amount: string;
+  description: string;
+};
+
+export type CompetitionRegisterState = "open" | "closed" | "full";
+
 export type PublicCompetition = {
   id: string;
   name: string;
   kind: HackathonKind;
   description: string;
+  /** Merged rules & instructions (public-safe). */
   rulesText: string;
   imageUrl: string;
   fee: number;
@@ -86,12 +105,19 @@ export type PublicCompetition = {
   currency: string;
   discountPercent: number;
   discountNote: string;
+  discountExpiresAt: string;
   minTeamSize: number;
   maxTeamSize: number;
   submissionDeadline: string;
+  /** Track-only close if set (raw). */
   registrationClosesAt: string;
+  /** Track close or event close fallback. */
+  effectiveRegistrationClosesAt: string | null;
   prizePool: string;
+  /** Structured prizes from hackathon_track_prizes (public-safe). */
+  prizes: PublicCompetitionPrize[];
   registrationOpen: boolean;
+  registerState: CompetitionRegisterState;
   sponsorLogoUrl?: string | null;
   sponsorName?: string | null;
 };
@@ -154,6 +180,8 @@ export type PublicEventDto = {
   showSponsors: boolean;
   showCollaborators: boolean;
   showPartners: boolean;
+  /** Tier order for public sponsor logo sizing — matches `EventModel.sponsorTiers`. */
+  sponsorTiers: string[];
   organizerChip: PublicOrganizerChip;
   sponsors: PublicOrgCredit[];
   collaborators: PublicOrgCredit[];
@@ -173,6 +201,9 @@ export type PublicEventDto = {
   registerOpensAt: string | null;
   admissionLabel: string;
   sharePath: string;
+  /** Phase A: organizer has active Drive + Gmail for proofs / registration mail. */
+  organizerConnectionsReady: boolean;
+  organizerConnectionsMessage: string | null;
 };
 
 export type PublicEventGateReason =

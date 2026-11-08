@@ -1,6 +1,11 @@
 import { toDate } from "@/src/lib/datetime";
 import type { EventLifecycle } from "@/src/lib/eventState";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
+import {
+  competitionRegisterState,
+  effectiveRegistrationClosesAt,
+  isCompetitionRegistrationOpen,
+} from "@/src/lib/competitionRegistration";
 
 export type PublicEventBanner = {
   lifecycle: EventLifecycle;
@@ -72,13 +77,35 @@ export function publicEventPresentation(
   };
 }
 
-/** Competition still accepts new entrants (not ended; registration_closes_at not past). */
+/** Competition still accepts new entrants (not ended; per-track + event close fallback). */
 export function trackRegistrationOpen(
   track: { status?: string | null; registrationClosesAt?: string | null },
-  now: Date = new Date(),
+  opts?: {
+    /** When false, competition registration is closed regardless of track dates. */
+    eventRegistrationOpen?: boolean;
+    eventRegistrationCloseDate?: string | null;
+    seatsLeft?: number | null;
+    waitlistEnabled?: boolean;
+    now?: Date;
+  },
 ): boolean {
-  if (String(track.status || "").toLowerCase() === "ended") return false;
-  const closes = track.registrationClosesAt ? Date.parse(track.registrationClosesAt) : NaN;
-  if (Number.isFinite(closes) && closes < now.getTime()) return false;
-  return true;
+  if (opts?.eventRegistrationOpen === false) return false;
+  const effective = effectiveRegistrationClosesAt(
+    track.registrationClosesAt,
+    opts?.eventRegistrationCloseDate,
+  );
+  const state = competitionRegisterState({
+    effectiveClosesAt: effective,
+    trackEnded: String(track.status || "").toLowerCase() === "ended",
+    eventLifecycleActive: opts?.eventRegistrationOpen !== false,
+    seatsLeft: opts?.seatsLeft ?? null,
+    waitlistEnabled: !!opts?.waitlistEnabled,
+    now: opts?.now,
+  });
+  return isCompetitionRegistrationOpen(state);
 }
+
+export {
+  effectiveRegistrationClosesAt,
+  competitionRegisterState,
+} from "@/src/lib/competitionRegistration";

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { linkPickedFileAction } from "../actions/drive.action";
+import { formatPickerUserError } from "../lib/pickerErrors";
 import type { LinkedFileEntityType } from "../types";
 
 type PickerDoc = { id: string };
@@ -89,7 +90,7 @@ export function FilePickerButton({
           appId?: string;
         };
         if (!res.ok || !json.ok || !json.accessToken || !json.apiKey || !json.appId) {
-          setError(json.error || "Could not start Google Picker.");
+          setError(formatPickerUserError(json.error || "Could not start Google Picker."));
           return;
         }
         await loadPickerScript();
@@ -125,7 +126,7 @@ export function FilePickerButton({
           .build();
         picker.setVisible(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Picker failed.");
+        setError(formatPickerUserError(err instanceof Error ? err.message : "Picker failed."));
       }
     });
   }

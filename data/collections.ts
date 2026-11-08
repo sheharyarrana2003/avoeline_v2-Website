@@ -37,8 +37,11 @@ export const TABLES = {
   HACKATHON_TEAM_MEMBERS: "hackathon_team_members",
   HACKATHON_SUBMISSIONS: "hackathon_submissions",
   HACKATHON_JUDGES: "hackathon_judges",
+  HACKATHON_JUDGE_SUBMISSION_SCORES: "hackathon_judge_submission_scores",
   HACKATHON_SCORES: "hackathon_scores",
+  /** @deprecated A7 / O0 — table retained; app no longer reads/writes. */
   HACKATHON_MENTORS: "hackathon_mentors",
+  /** @deprecated A7 / O0 — table retained; app no longer reads/writes. */
   HACKATHON_ANNOUNCEMENTS: "hackathon_announcements",
   HACKATHON_CTF_CHALLENGES: "hackathon_ctf_challenges",
   HACKATHON_FLAG_SUBMISSIONS: "hackathon_flag_submissions",
@@ -56,6 +59,7 @@ export const TABLES = {
   CERTIFICATE_TEMPLATES: "certificate_templates",
   CERTIFICATE_TEMPLATE_VERSIONS: "certificate_template_versions",
   CERTIFICATES: "certificates",
+  CERTIFICATE_JOBS: "certificate_jobs",
   PAYMENTS: "payments",
   BUDGET_ENTRIES: "budget_entries",
   REVIEWS: "reviews",
@@ -87,6 +91,8 @@ export const TABLES = {
   CONNECTION_RECONNECT_TOKENS: "connection_reconnect_tokens",
   CALENDAR_LINKS: "calendar_links",
   LINKED_FILES: "linked_files",
+  /** O1 FileStore binary metadata (Drive or Supabase fallback). */
+  STORED_FILES: "stored_files",
   SHEET_SYNCS: "sheet_syncs",
   CUSTOM_FORMS: "custom_forms",
   CUSTOM_FORM_RESPONSES: "custom_form_responses",

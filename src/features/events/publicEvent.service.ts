@@ -3,15 +3,19 @@ import "server-only";
 import { cache } from "react";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
-import { checkAccessGate } from "@/src/lib/access";
 import { absoluteUrl } from "@/src/lib/appUrl";
 import { formatCurrency } from "@/src/lib/money";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { eventLifecycle } from "@/src/lib/eventState";
-import { publicEventPresentation, trackRegistrationOpen } from "@/src/lib/publicEventStatus";
+import {
+  competitionRegisterState,
+  effectiveRegistrationClosesAt,
+  publicEventPresentation,
+  trackRegistrationOpen,
+} from "@/src/lib/publicEventStatus";
 import { toDate } from "@/src/lib/datetime";
 import { isSupportViewer } from "@/src/features/admin/supportPreview";
-import { accessTypeOf } from "@/src/features/access/access.service";
+import { accessTypeOf, resolveEventAccess } from "@/src/features/access/access.service";
 import {
   getCollaboratingEventIds,
   getEventOrganizations,
@@ -31,8 +35,10 @@ import {
 import { listRegistrationGroups } from "@/src/features/registration_groups/groups.service";
 import {
   eventIsHackathon,
+  listPrizesForTracks,
   listTeamsOfEvent,
   listTracks,
+  type TrackPrize,
 } from "@/src/features/hackathon/hackathon.service";
 import { trackDueAmount, trackSponsor } from "@/src/features/hackathon/types";
 import { isHackathonKind, type HackathonKind } from "@/src/features/hackathon/kinds";
@@ -52,6 +58,9 @@ import type {
   PublicOrgCredit,
 } from "./types";
 import { resolveRegisterButtonState } from "./publicEvent.logic";
+import { sortPublicAgendaItems } from "@/src/features/agendas/agendaSort";
+import { AgendaService } from "@/src/features/agendas/agenda.service";
+import { normalizeAgendaType } from "@/src/features/agendas/agendaTypes";
 
 export {
   resolveRegisterButtonState,
@@ -238,6 +247,8 @@ async function buildDto(
     }).catch(() => [] as EventFormField[]);
   }
 
+  const prizesByTrack = hackathon ? await listPrizesForTracks(tracks.map((t) => t.id)) : new Map();
+
   const taken = hackathon
     ? occupyingHackathonRegs(regs, teamsOnEvent).length
     : event.registration?.groupRegistration
@@ -246,7 +257,19 @@ async function buildDto(
   const totalSeats = Number(event.capacity?.totalSeats) || 0;
   const seatsLeft = totalSeats > 0 ? Math.max(0, totalSeats - taken) : null;
 
-  const openTracks = tracks.filter((t) => trackRegistrationOpen(t));
+  const eventCloseDate =
+    event.registration?.registrationCloseDate ||
+    (event as { registrationCloseDate?: string }).registrationCloseDate ||
+    null;
+  const waitlistEnabled = !!(event.access?.waitlistEnabled ?? event.capacity?.waitingListEnabled);
+  const openTracks = tracks.filter((t) =>
+    trackRegistrationOpen(t, {
+      eventRegistrationOpen: presentation.registrationOpen,
+      eventRegistrationCloseDate: eventCloseDate,
+      seatsLeft,
+      waitlistEnabled,
+    }),
+  );
   const showSponsors = !!(event as EventModel & { showSponsors?: boolean }).showSponsors;
   const showCollaborators = !!(event as EventModel & { showCollaborators?: boolean })
     .showCollaborators;
@@ -255,24 +278,42 @@ async function buildDto(
   const competitions: PublicCompetition[] = tracks.map((t) => {
     const sponsor = showSponsors ? trackSponsor(organizations, t.id) : null;
     const kind: HackathonKind = isHackathonKind(t.kind) ? t.kind : "business";
+    const prizeRows: TrackPrize[] = prizesByTrack.get(t.id) ?? [];
+    const effectiveClose = effectiveRegistrationClosesAt(t.registrationClosesAt, eventCloseDate);
+    const registerState = competitionRegisterState({
+      effectiveClosesAt: effectiveClose,
+      trackEnded: String(t.status || "").toLowerCase() === "ended",
+      eventLifecycleActive: presentation.registrationOpen,
+      seatsLeft,
+      waitlistEnabled,
+    });
+    const finalState = registerState;
     return {
       id: t.id,
       name: t.name,
       kind,
       description: t.description || "",
-      rulesText: t.rulesText || "",
+      rulesText: (t.instructions || "").trim() || t.rulesText || "",
       imageUrl: t.imageUrl || "",
       fee: t.fee,
       due: trackDueAmount(t),
       currency: t.currency || event.pricing?.currency || "PKR",
       discountPercent: t.discountPercent,
       discountNote: t.discountNote || "",
+      discountExpiresAt: t.discountExpiresAt || "",
       minTeamSize: t.minTeamSize,
       maxTeamSize: t.maxTeamSize,
       submissionDeadline: t.submissionDeadline || t.submissionDeadlineAt || "",
       registrationClosesAt: t.registrationClosesAt || "",
+      effectiveRegistrationClosesAt: effectiveClose,
       prizePool: t.prizePool || "",
-      registrationOpen: trackRegistrationOpen(t),
+      prizes: prizeRows.map((p) => ({
+        positionLabel: p.positionLabel,
+        amount: p.amount,
+        description: p.description,
+      })),
+      registerState: finalState,
+      registrationOpen: finalState === "open",
       sponsorLogoUrl: sponsor?.logoUrl || null,
       sponsorName: sponsor?.name || null,
     };
@@ -296,8 +337,10 @@ async function buildDto(
       ? formatCurrency(price, currency, "Free")
       : "Free";
 
+  // listTiers already demotes past available_until; only expose active in-window tiers.
   const activeTiers = (tiers ?? [])
     .filter((t) => t.active !== false)
+    .filter((t) => t.seatsLeft == null || t.seatsLeft > 0)
     .map((t) => ({
       id: t.id,
       name: t.name,
@@ -305,6 +348,7 @@ async function buildDto(
       price: t.price,
       availableUntil: t.availableUntil,
       seatsAvailable: t.seatsAvailable,
+      seatsLeft: t.seatsLeft,
     }));
 
   // Fallback to embedded pricing.tiers when ticket_tiers table is empty.
@@ -318,6 +362,7 @@ async function buildDto(
           price: Number(t.price) || 0,
           availableUntil: t.availableUntil || null,
           seatsAvailable: typeof t.seats === "number" ? t.seats : null,
+          seatsLeft: typeof t.seats === "number" ? t.seats : null,
         }));
 
   const discounts: PublicDiscount[] = [];
@@ -356,19 +401,26 @@ async function buildDto(
     photoUrl: s.profileImage || "",
   }));
 
-  const agenda = (event.agenda ?? [])
-    .filter((a) => String(a.status || "").toLowerCase() !== "cancelled")
-    .map((a) => ({
-      id: String(a.sessionId || `${a.title}-${a.startTime}`),
-      title: a.title || "",
-      type: String(a.type || ""),
-      date: a.date || "",
-      startTime: a.startTime || "",
-      endTime: a.endTime || "",
-      location: [a.location, a.room].filter(Boolean).join(" · "),
-      description: a.description || "",
-      speakerNames: Array.isArray(a.speakerNames) ? a.speakerNames.map(String) : [],
-    }));
+  const agendaSessions = await AgendaService.getSessionsByEventId(event.id).catch(() => []);
+  const agenda = sortPublicAgendaItems(
+    agendaSessions.map((s) => ({
+      id: s.id,
+      title: s.title || "",
+      type: normalizeAgendaType(s.type),
+      date: s.date || "",
+      startTime: s.startTime || "",
+      endTime: s.endTime || "",
+      location: [s.location, s.room].filter(Boolean).join(" · "),
+      description: s.description || "",
+      speakerNames: s.speakers.map((sp) => sp.name),
+      speakers: s.speakers.map((sp) => ({
+        id: sp.id,
+        name: sp.name,
+        photoUrl: sp.avatarUrl || "",
+      })),
+      trackName: s.trackName ?? null,
+    })),
+  );
 
   const tags: string[] = [];
   if (event.category) tags.push(String(event.category));
@@ -393,6 +445,10 @@ async function buildDto(
   }
 
   void opts.attempt;
+
+  const { getOrganizerDriveGmailStatus } =
+    await import("@/src/features/connections/server/assertOrganizerDriveAndGmail");
+  const connections = await getOrganizerDriveGmailStatus(event.organizerId);
 
   return {
     id: event.id,
@@ -436,6 +492,7 @@ async function buildDto(
     showSponsors,
     showCollaborators,
     showPartners,
+    sponsorTiers: Array.isArray(event.sponsorTiers) ? event.sponsorTiers.map(String) : [],
     organizerChip: chip,
     sponsors,
     collaborators,
@@ -455,6 +512,8 @@ async function buildDto(
     registerOpensAt,
     admissionLabel,
     sharePath: shareUrl,
+    organizerConnectionsReady: connections.ready,
+    organizerConnectionsMessage: connections.message,
   };
 }
 
@@ -492,59 +551,53 @@ export const getPublicEventView = cache(
       accessType === "private" ||
       !!String(event.accessCode || "").trim();
 
-    if (needsGate) {
-      // Rate-limit code / token probing when credentials are present.
-      if (attempt.code || attempt.token) {
-        const key = `public-gate:${id}:${viewer?.userId || viewer?.email || "anon"}`;
-        const rl = rateLimit(key, 20, 60);
-        if (!rl.ok) {
-          return {
-            kind: "gated",
-            title: event.title,
-            eventId: id,
-            reason: "rate_limited",
-            inviteToken: attempt.token ?? undefined,
-          };
-        }
-      }
-
-      const gate = await checkAccessGate(
-        event,
-        { email: viewer?.email, userId: viewer?.userId, name: viewer?.name },
-        { token: attempt.token, code: attempt.code },
-      );
-
-      if (!gate.allowed) {
-        // Staff preview bypasses the public gate.
-        if (preview) {
-          const dto = await buildDto(event, { preview: true, lockedTiers: [], attempt });
-          return {
-            kind: "full",
-            dto,
-            preview: true,
-            gate: {
-              reason: gateReasonOf(gate.reason),
-              inviteToken: attempt.token ?? undefined,
-            },
-          };
-        }
+    // Rate-limit code / token probing (including hybrid invite unlock probes).
+    if (attempt.code || attempt.token) {
+      const key = `public-gate:${id}:${viewer?.userId || viewer?.email || "anon"}`;
+      const rl = rateLimit(key, 20, 60);
+      if (!rl.ok) {
         return {
           kind: "gated",
           title: event.title,
           eventId: id,
-          reason: gateReasonOf(gate.reason),
+          reason: "rate_limited",
           inviteToken: attempt.token ?? undefined,
         };
       }
     }
 
-    // Hybrid locked tiers — use resolve-style gatedTiers when code/invite not presented.
+    // Unified gate: whitelist + invites via resolveEventAccess / decideAccess.
+    const access = await resolveEventAccess(event, {
+      token: attempt.token,
+      code: attempt.code,
+      email: viewer?.email,
+    });
+
+    if (needsGate && !access.allowed) {
+      if (preview) {
+        const dto = await buildDto(event, { preview: true, lockedTiers: [], attempt });
+        return {
+          kind: "full",
+          dto,
+          preview: true,
+          gate: {
+            reason: gateReasonOf(access.reason),
+            inviteToken: attempt.token ?? undefined,
+          },
+        };
+      }
+      return {
+        kind: "gated",
+        title: event.title,
+        eventId: id,
+        reason: gateReasonOf(access.reason),
+        inviteToken: attempt.token ?? undefined,
+      };
+    }
+
+    // Hybrid: unlock gated tiers only after a validated invite/code (no bare ?invite=).
     const lockedTiers: string[] =
-      accessType === "hybrid" &&
-      !(attempt.code && String(attempt.code).trim() === String(event.accessCode || "").trim()) &&
-      !attempt.token
-        ? [...(event.access?.gatedTiers ?? [])]
-        : [];
+      accessType === "hybrid" && access.allowed ? [...access.lockedTiers] : [];
 
     const dto = await buildDto(event, {
       preview,

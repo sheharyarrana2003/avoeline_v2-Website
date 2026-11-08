@@ -7,32 +7,27 @@ import { randomUUID } from "crypto";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { type ActionResult, fail, ok } from "@/src/lib/action";
-import { sendEmail } from "@/src/lib/email";
 import { absoluteUrl } from "@/src/lib/appUrl";
-import { assertEventActor } from "@/src/features/events/ownership";
-import { OrganizerService } from "@/src/services/organizer.service";
 import {
-  findJudgeByToken,
-  getTrack,
-  judgesForTrack,
-  listTeams,
-  listTracks,
-  mapToTeam,
-} from "../hackathon.service";
+  requireConnectedSender,
+  sendViaOrganizerConnection,
+} from "@/src/features/email/organizerTransport.service";
+import { assertEventActor } from "@/src/features/events/ownership";
+import { rateLimit } from "@/src/lib/rateLimit";
+import { findJudgeByToken, listTracks } from "../hackathon.service";
+import { applyJudgeInviteTemplate, statusAfterOpen, statusAfterResend } from "../judgeInvite.logic";
+import {
+  getTaskMaxPoints,
+  listSubmissionsForJudgeTracks,
+  upsertJudgeSubmissionScore,
+} from "../judgeScoring.service";
 import {
   hackathonDashPath,
   hackathonTrackManagePath,
   organizerHackathonCachePaths,
 } from "../kinds";
-import {
-  advanceSelection,
-  parseRubricLines,
-  rankTeams,
-  roundKey,
-  scoreCard,
-  type HackathonJudge,
-} from "../judging";
-import { pickExtra, patchHackathonTeam } from "../teamWrite";
+import { type HackathonJudge } from "../judging";
+import { pickExtra } from "../teamWrite";
 
 function mintToken(): string {
   return `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
@@ -42,35 +37,52 @@ function looksLikeEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
 }
 
-export async function saveRubric(
-  eventId: string,
-  prevState: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  try {
-    const event = await assertEventActor(eventId, "scoreboard");
-    if (!event) return fail("You cannot change that event.");
+const DEFAULT_SUBJECT = "You're invited to judge — {{eventTitle}}";
+const DEFAULT_BODY = `Hi {{name}},
 
-    const trackId = String(formData.get("trackId") ?? "").trim();
-    const track = trackId ? await getTrack(trackId) : null;
-    if (!track || track.eventId !== event.id)
-      return fail("That track does not belong to this event.");
+You have been asked to judge {{eventTitle}}.
 
-    const rubric = parseRubricLines(formData.get("rubric"));
-    const now = new Date().toISOString();
-    const { error } = await supabaseAdmin
-      .from(TABLES.HACKATHON_TRACKS)
-      .update({ rubric, updated_at: now })
-      .eq("id", track.id);
-    if (error) throw error;
+Open your private invite: {{link}}
 
-    revalidatePath(hackathonTrackManagePath(event.organizerId, event.id, track.id));
-    return ok();
-  } catch (err) {
-    if (isRedirectError(err)) throw err;
-    console.error("[saveRubric]", err);
-    return fail("Could not save the rubric. Please try again.");
-  }
+That link is yours alone — please do not forward it.`;
+
+async function sendJudgeInviteMail(opts: {
+  organizerId: string;
+  eventId: string;
+  eventTitle: string;
+  name: string;
+  email: string;
+  token: string;
+  subjectTpl: string;
+  bodyTpl: string;
+  trackNames: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const link = await absoluteUrl(`/judge/${opts.token}`);
+  const vars = {
+    name: opts.name,
+    link,
+    eventTitle: `${opts.eventTitle}${opts.trackNames ? ` (${opts.trackNames})` : ""}`,
+  };
+  const subject = applyJudgeInviteTemplate(opts.subjectTpl || DEFAULT_SUBJECT, vars);
+  const text = applyJudgeInviteTemplate(opts.bodyTpl || DEFAULT_BODY, vars);
+  const html = text
+    .split("\n")
+    .map((line) =>
+      line.trim() ? `<p>${line.replace(link, `<a href="${link}">${link}</a>`)}</p>` : "<br/>",
+    )
+    .join("");
+  const mail = await sendViaOrganizerConnection({
+    organizerId: opts.organizerId,
+    to: opts.email,
+    subject,
+    html,
+    text,
+    kind: "judge_invite",
+    eventId: opts.eventId,
+  });
+  if (!mail.ok)
+    return { ok: false, error: mail.error || "Connect organizer Gmail to send judge invites." };
+  return { ok: true };
 }
 
 export async function inviteJudge(
@@ -79,8 +91,11 @@ export async function inviteJudge(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const event = await assertEventActor(eventId, "scoreboard");
+    const event = await assertEventActor(eventId, "competitions");
     if (!event) return fail("You cannot change that event.");
+
+    const sender = await requireConnectedSender(event.organizerId, { eventId });
+    if (!sender.ok) return fail(sender.error || "Connect organizer Gmail to send judge invites.");
 
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "")
@@ -95,6 +110,9 @@ export async function inviteJudge(
     const tracks = await listTracks(event.id);
     const valid = trackIds.filter((id) => tracks.some((t) => t.id === id));
     if (!valid.length) return fail("Those tracks do not belong to this event.");
+
+    const subjectTpl = String(formData.get("subject") ?? "").trim() || DEFAULT_SUBJECT;
+    const bodyTpl = String(formData.get("body") ?? "").trim() || DEFAULT_BODY;
 
     const { data: existingRows, error: listErr } = await supabaseAdmin
       .from(TABLES.HACKATHON_JUDGES)
@@ -112,6 +130,7 @@ export async function inviteJudge(
       ...pickExtra(existing as Record<string, unknown> | null),
       organizerId: event.organizerId,
       organizer_id: event.organizerId,
+      ...(existing ? {} : { inviteStatus: "invited", inviteRespondedAt: null }),
       updatedAt: now,
       ...(existing ? {} : { createdAt: now }),
     };
@@ -126,24 +145,26 @@ export async function inviteJudge(
       invited_at: existing?.invited_at ?? now,
       last_scored_at: existing?.last_scored_at ?? null,
       extra,
+      updated_at: now,
     });
     if (error) throw error;
 
-    const link = await absoluteUrl(`/judge/${token}`);
-    const organizer = await OrganizerService.getOrganizerById(event.organizerId).catch(() => null);
     const named = tracks
       .filter((t) => valid.includes(t.id))
       .map((t) => t.name)
       .join(", ");
-    await sendEmail(
-      { email, name },
-      {
-        subject: `You're judging ${event.title}`,
-        senderName: organizer?.organization?.name?.trim(),
-        html: `<p>Hi ${name},</p><p>You have been asked to judge <strong>${event.title}</strong> (${named}).</p><p><a href="${link}">Open your scoring page</a></p><p>That link is yours alone — it needs no password, so please do not forward it.</p>`,
-        text: `Hi ${name},\n\nYou have been asked to judge ${event.title} (${named}).\n\nYour scoring page: ${link}\n\nThat link is yours alone — it needs no password, so please do not forward it.`,
-      },
-    );
+    const mail = await sendJudgeInviteMail({
+      organizerId: event.organizerId,
+      eventId: event.id,
+      eventTitle: event.title,
+      name,
+      email,
+      token,
+      subjectTpl,
+      bodyTpl,
+      trackNames: named,
+    });
+    if (!mail.ok) return fail(mail.error);
 
     for (const path of organizerHackathonCachePaths(event.organizerId, event.id))
       revalidatePath(path);
@@ -158,12 +179,100 @@ export async function inviteJudge(
   }
 }
 
+export async function resendJudgeInviteAction(formData: FormData): Promise<void> {
+  let backTo = "/";
+  try {
+    const eventId = String(formData.get("eventId") ?? "").trim();
+    const judgeId = String(formData.get("judgeId") ?? "").trim();
+    const event = await assertEventActor(eventId, "competitions");
+    if (!event || !judgeId) redirect("/");
+    const requested = String(formData.get("returnTo") ?? "").trim();
+    backTo =
+      requested.startsWith("/organizer/") && !requested.includes("//")
+        ? requested
+        : hackathonDashPath(event.organizerId, event.id, "competitions");
+
+    const sender = await requireConnectedSender(event.organizerId, { eventId });
+    if (!sender.ok) {
+      redirect(`${backTo}?e=${encodeURIComponent(sender.error || "Connect Gmail to resend.")}`);
+    }
+
+    const { data: row } = await supabaseAdmin
+      .from(TABLES.HACKATHON_JUDGES)
+      .select("*")
+      .eq("id", judgeId)
+      .eq("event_id", event.id)
+      .maybeSingle();
+    if (!row) redirect(`${backTo}?e=${encodeURIComponent("That judge is not on this event.")}`);
+
+    const ex = pickExtra(row as Record<string, unknown>);
+    const current = String(ex.inviteStatus || "invited") as
+      "invited" | "opened" | "accepted" | "declined";
+    const next = statusAfterResend(
+      current === "opened" ||
+        current === "accepted" ||
+        current === "declined" ||
+        current === "invited"
+        ? current
+        : "invited",
+    );
+    const token = String(row.invite_token || "") || mintToken();
+    const now = new Date().toISOString();
+    const extra = {
+      ...ex,
+      inviteStatus: next,
+      inviteRespondedAt: next === "invited" ? null : (ex.inviteRespondedAt ?? null),
+      organizerId: event.organizerId,
+    };
+    await supabaseAdmin
+      .from(TABLES.HACKATHON_JUDGES)
+      .update({
+        invite_token: token,
+        invited_at: now,
+        extra,
+        updated_at: now,
+      })
+      .eq("id", judgeId);
+
+    const tracks = await listTracks(event.id);
+    const trackIds = Array.isArray(row.track_ids) ? row.track_ids.map(String) : [];
+    const named = tracks
+      .filter((t) => trackIds.includes(t.id))
+      .map((t) => t.name)
+      .join(", ");
+    const mail = await sendJudgeInviteMail({
+      organizerId: event.organizerId,
+      eventId: event.id,
+      eventTitle: event.title,
+      name: String(row.name || ""),
+      email: String(row.email || ""),
+      token,
+      subjectTpl: DEFAULT_SUBJECT,
+      bodyTpl: DEFAULT_BODY,
+      trackNames: named,
+    });
+    if (!mail.ok) {
+      redirect(`${backTo}?e=${encodeURIComponent(mail.error)}`);
+    }
+    revalidatePath(backTo);
+    redirect(`${backTo}?ok=${encodeURIComponent("Invite resent.")}`);
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    console.error("[resendJudgeInviteAction]", err);
+    redirect(`${backTo}?e=${encodeURIComponent("Could not resend that invite.")}`);
+  }
+}
+
 export async function removeJudge(eventId: string, formData: FormData): Promise<void> {
   let backTo = "/";
   try {
-    const event = await assertEventActor(eventId, "scoreboard");
+    const event = await assertEventActor(eventId, "competitions");
     if (!event) redirect("/");
-    backTo = hackathonDashPath(event.organizerId, event.id, "competitions");
+    const requested = String(formData.get("returnTo") ?? "").trim();
+    backTo =
+      requested.startsWith("/organizer/") && !requested.includes("//")
+        ? requested
+        : hackathonDashPath(event.organizerId, event.id, "competitions");
 
     const judgeId = String(formData.get("judgeId") ?? "").trim();
     const { data: snap } = judgeId
@@ -188,148 +297,115 @@ export async function removeJudge(eventId: string, formData: FormData): Promise<
   }
 }
 
-export async function submitScore(
+export async function judgeLink(judge: HackathonJudge): Promise<string> {
+  return judge.inviteToken ? absoluteUrl(`/judge/${judge.inviteToken}`) : Promise.resolve("");
+}
+
+export async function markJudgeInviteOpened(token: string): Promise<void> {
+  const value = String(token ?? "").trim();
+  if (!value) return;
+  const rl = await rateLimit(`judge-open:${value.slice(0, 32)}`, 30, 60);
+  if (!rl.ok) return;
+  const judge = await findJudgeByToken(value);
+  if (!judge) return;
+  const next = statusAfterOpen(judge.inviteStatus);
+  if (next === judge.inviteStatus) return;
+  const { data: row } = await supabaseAdmin
+    .from(TABLES.HACKATHON_JUDGES)
+    .select("id, extra")
+    .eq("id", judge.id)
+    .maybeSingle();
+  if (!row) return;
+  const now = new Date().toISOString();
+  const extra = { ...pickExtra(row as Record<string, unknown>), inviteStatus: next };
+  await supabaseAdmin
+    .from(TABLES.HACKATHON_JUDGES)
+    .update({ extra, updated_at: now })
+    .eq("id", judge.id);
+}
+
+export async function recordJudgeInviteResponse(
   token: string,
-  prevState: ActionResult | null,
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const decision = String(formData.get("decision") ?? "").toLowerCase();
+    if (decision !== "accept" && decision !== "decline") {
+      return fail("Choose accept or decline.");
+    }
+    const judge = await findJudgeByToken(token);
+    if (!judge || !judge.inviteToken) return fail("That invite link is no longer valid.");
+
+    const { data: row } = await supabaseAdmin
+      .from(TABLES.HACKATHON_JUDGES)
+      .select("id, extra")
+      .eq("id", judge.id)
+      .maybeSingle();
+    if (!row) return fail("That invite link is no longer valid.");
+
+    const now = new Date().toISOString();
+    const extra = {
+      ...pickExtra(row as Record<string, unknown>),
+      inviteStatus: decision === "accept" ? "accepted" : "declined",
+      inviteRespondedAt: now,
+    };
+
+    const { error } = await supabaseAdmin
+      .from(TABLES.HACKATHON_JUDGES)
+      .update({ extra, updated_at: now } as never)
+      .eq("id", judge.id);
+    if (error) throw error;
+
+    revalidatePath(`/judge/${token}`);
+    for (const path of organizerHackathonCachePaths(judge.organizerId, judge.eventId))
+      revalidatePath(path);
+    return ok();
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    console.error("[recordJudgeInviteResponse]", err);
+    return fail("Could not save your response. Please try again.");
+  }
+}
+
+export async function scoreSubmissionAsJudgeAction(
+  token: string,
+  _prev: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
   try {
     const judge = await findJudgeByToken(token);
-    if (!judge || !judge.inviteToken) return fail("That judging link is no longer valid.");
-
-    const teamId = String(formData.get("teamId") ?? "").trim();
-    const { data: teamRow } = teamId
-      ? await supabaseAdmin.from(TABLES.HACKATHON_TEAMS).select("*").eq("id", teamId).maybeSingle()
-      : { data: null };
-    if (!teamRow) return fail("That team no longer exists.");
-
-    const team = mapToTeam(teamRow, teamRow.id);
-    if (team.eventId !== judge.eventId) return fail("That team is not on your event.");
-    if (!judge.trackIds.includes(team.trackId)) return fail("You are not judging that track.");
-
-    const track = await getTrack(team.trackId);
-    if (!track) return fail("That track no longer exists.");
-    if (!track.rubric.length)
-      return fail("The organiser has not published a rubric for this track yet.");
-
-    const round = track.currentRound;
-    if (team.eliminatedAtRound !== null && team.eliminatedAtRound < round) {
-      return fail("That team is no longer in this round.");
+    if (!judge || judge.inviteStatus !== "accepted") {
+      return fail("Only accepted judges can score submissions.");
     }
-    if (team.round < round) return fail("That team did not advance to this round.");
+    const submissionId = String(formData.get("submissionId") ?? "").trim();
+    const points = Number(String(formData.get("points") ?? "").replace(/[^\d.-]/g, ""));
+    const comment = String(formData.get("comment") ?? "").trim();
+    if (!submissionId) return fail("Missing submission.");
+    if (Number.isNaN(points)) return fail("Points must be a number.");
 
-    const raw: Record<string, unknown> = {};
-    for (const category of track.rubric) raw[category.id] = formData.get(`score-${category.id}`);
-    const { byCategory, total } = scoreCard(track.rubric, raw);
+    const rows = await listSubmissionsForJudgeTracks(judge.trackIds);
+    const sub = rows.find((r) => String(r.id) === submissionId);
+    if (!sub) return fail("That submission is not in your competitions.");
 
-    const now = new Date();
-    const scores = { ...(team.scores || {}) } as Record<string, Record<string, unknown>>;
-    if (!scores[judge.id]) scores[judge.id] = {};
-    scores[judge.id][roundKey(round)] = {
-      byCategory,
-      total,
-      comment: String(formData.get("comment") ?? "")
-        .trim()
-        .slice(0, 2000),
-      scoredAt: now.toISOString(),
-    };
-
-    await patchHackathonTeam(team.id, { scores, updatedAt: now });
-
-    await supabaseAdmin
-      .from(TABLES.HACKATHON_JUDGES)
-      .update({ last_scored_at: now.toISOString() })
-      .eq("id", judge.id)
-      .then(({ error }) => {
-        if (error) console.error("[submitScore] could not stamp the judge", error);
-      });
-
-    const comment = String(formData.get("comment") ?? "")
-      .trim()
-      .slice(0, 2000);
-    const scoreRows = Object.entries(byCategory).map(([category, score]) => ({
-      hackathon_team_id: team.id,
-      judge_id: judge.id,
-      round,
-      category,
-      score,
+    const taskMax = await getTaskMaxPoints(String(sub.task_id));
+    await upsertJudgeSubmissionScore({
+      judgeId: judge.id,
+      submissionId,
+      teamId: String(sub.team_id),
+      taskId: String(sub.task_id),
+      points,
       comment,
-      scored_at: now.toISOString(),
-    }));
-    if (scoreRows.length) {
-      await supabaseAdmin.from(TABLES.HACKATHON_SCORES).upsert(scoreRows, {
-        onConflict: "hackathon_team_id,judge_id,round,category",
-      });
-    }
+      taskMax,
+    });
 
     revalidatePath(`/judge/${token}`);
-    revalidatePath(hackathonTrackManagePath(judge.organizerId, judge.eventId, team.trackId));
-    revalidatePath(`/events/${judge.eventId}/tracks/${team.trackId}/leaderboard`);
+    for (const path of organizerHackathonCachePaths(judge.organizerId, judge.eventId))
+      revalidatePath(path);
     return ok();
   } catch (err) {
     if (isRedirectError(err)) throw err;
-    console.error("[submitScore]", err);
-    return fail("Could not save that score. Please try again.");
+    console.error("[scoreSubmissionAsJudgeAction]", err);
+    return fail("Could not save that score.");
   }
-}
-
-export async function advanceRound(
-  eventId: string,
-  prevState: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  try {
-    const event = await assertEventActor(eventId, "scoreboard");
-    if (!event) return fail("You cannot change that event.");
-
-    const trackId = String(formData.get("trackId") ?? "").trim();
-    const track = trackId ? await getTrack(trackId) : null;
-    if (!track || track.eventId !== event.id)
-      return fail("That track does not belong to this event.");
-    if (!track.rubric.length) return fail("Publish a rubric before closing a round.");
-
-    const topN = Math.max(1, Math.round(Number(formData.get("topN") ?? 0) || 0));
-    const teams = await listTeams(track.id);
-    const judges = await judgesForTrack(event.id, track.id);
-    const ranked = rankTeams(teams, track.rubric, track.currentRound, judges.length);
-    const { advancing, eliminated, carriedTies } = advanceSelection(ranked, topN);
-
-    if (!advancing.length) {
-      return fail("No team on this track has been scored yet, so there is nobody to advance.");
-    }
-
-    const nextRound = track.currentRound + 1;
-    const now = new Date().toISOString();
-    for (const id of advancing) {
-      await patchHackathonTeam(id, { round: nextRound, updatedAt: now });
-    }
-    for (const id of eliminated) {
-      await patchHackathonTeam(id, { eliminatedAtRound: track.currentRound, updatedAt: now });
-    }
-    const { error } = await supabaseAdmin
-      .from(TABLES.HACKATHON_TRACKS)
-      .update({ current_round: nextRound, updated_at: now })
-      .eq("id", track.id);
-    if (error) throw error;
-
-    const base = hackathonDashPath(event.organizerId, event.id, "competitions");
-    revalidatePath(`${base}/${track.id}`);
-    revalidatePath(`/events/${event.id}/tracks/${track.id}/leaderboard`);
-    return {
-      success: true,
-      ...(carriedTies
-        ? {
-            error: `${advancing.length} teams advanced — ${carriedTies} more than asked for, because they tied on the cut-off.`,
-          }
-        : {}),
-    };
-  } catch (err) {
-    if (isRedirectError(err)) throw err;
-    console.error("[advanceRound]", err);
-    return fail("Could not close that round. Please try again.");
-  }
-}
-
-export async function judgeLink(judge: HackathonJudge): Promise<string> {
-  return judge.inviteToken ? absoluteUrl(`/judge/${judge.inviteToken}`) : Promise.resolve("");
 }

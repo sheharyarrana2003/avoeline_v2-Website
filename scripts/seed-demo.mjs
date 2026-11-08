@@ -927,24 +927,25 @@ async function main() {
     }
 
     // Repair pass: keep re-runs usable for compete/settings smoke.
-    await admin
-      .from("hackathon_settings")
-      .upsert(
-        {
-          event_id: hack.id,
-          online_mode: true,
-          max_attachment_mb: 10,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "event_id" },
-      );
+    await admin.from("hackathon_settings").upsert(
+      {
+        event_id: hack.id,
+        max_attachment_mb: 10,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "event_id" },
+    );
     for (const t of tracks) {
       await admin
         .from("hackathon_tracks")
         .update({
-          kind: t.kind || "other",
-          instructions: `Demo instructions for ${t.name}. Follow phase deadlines and submit before the competition closes.`,
-          rules_text: "Be respectful. No sharing flags. One account per team.",
+          kind: t.kind === "ctf" ? "ctf" : "other",
+          instructions: `Rules & instructions for ${t.name}. Be respectful. No sharing flags. One account per team. Follow phase deadlines.`,
+          rules_text: `Rules & instructions for ${t.name}. Be respectful. No sharing flags. One account per team. Follow phase deadlines.`,
+          opens_at: null,
+          closes_at: null,
+          roster_locks_at: null,
+          submission_deadline_at: null,
         })
         .eq("id", t.id);
     }

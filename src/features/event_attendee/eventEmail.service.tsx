@@ -20,21 +20,30 @@ import {
   mapToRegistration,
   RegService,
 } from "@/src/services/registeration.service";
-import { listTeamsOfEvent, listTracks } from "@/src/features/hackathon/hackathon.service";
+import {
+  eventIsHackathon,
+  listTeamsOfEvent,
+  listTracks,
+} from "@/src/features/hackathon/hackathon.service";
 import { listRegistrationGroups } from "@/src/features/registration_groups/groups.service";
 import { recordCommunication } from "@/src/features/registration/registration.service";
 import QRCode from "qrcode";
+import { formatFormAnswers, isEventFree, shouldInlineMemberQrs } from "./emailCompose.logic";
+import { openInMapsHref } from "@/src/lib/mapsUrl";
+import { requireConnectedSender } from "@/src/features/email/organizerTransport.service";
 
 const TOKEN_KEYS = [
   "attendeeName",
   "eventTitle",
   "eventWhen",
   "eventVenue",
+  "eventMapsUrl",
   "teamName",
   "teamMembers",
   "competitionName",
   "ticketUrl",
   "qrCode",
+  "formAnswers",
   "paymentStatus",
 ] as const;
 
@@ -147,25 +156,32 @@ export type TeamMailContext = {
 };
 
 export async function teamContextForReg(reg: Registration): Promise<TeamMailContext | null> {
-  const teams = await listTeamsOfEvent(reg.eventId);
-  const team = teams.find((t) => t.memberRegistrationIds.includes(reg.registrationId));
-  if (team) {
-    const tracks = await listTracks(reg.eventId);
-    const leadId =
-      team.members.find((m) => m.isOwner)?.registrationId ??
-      team.members[0]?.registrationId ??
-      null;
-    return {
-      teamName: team.name,
-      trackName: tracks.find((tr) => tr.id === team.trackId)?.name ?? "",
-      members: team.members.map((m) => ({
-        name: m.name,
-        email: m.email,
-        isLead: m.registrationId === leadId,
-      })),
-      leadRegistrationId: leadId,
-    };
+  const eventModel = await EventService.getEventByID(reg.eventId);
+  if (!eventModel) return null;
+  const hackathon = await eventIsHackathon(eventModel);
+
+  if (hackathon) {
+    const teams = await listTeamsOfEvent(reg.eventId);
+    const team = teams.find((t) => t.memberRegistrationIds.includes(reg.registrationId));
+    if (team) {
+      const tracks = await listTracks(reg.eventId);
+      const leadId =
+        team.members.find((m) => m.isOwner)?.registrationId ??
+        team.members[0]?.registrationId ??
+        null;
+      return {
+        teamName: team.name,
+        trackName: tracks.find((tr) => tr.id === team.trackId)?.name ?? "",
+        members: team.members.map((m) => ({
+          name: m.name,
+          email: m.email,
+          isLead: m.registrationId === leadId,
+        })),
+        leadRegistrationId: leadId,
+      };
+    }
   }
+
   if (!reg.groupId) return null;
   const groups = await listRegistrationGroups(reg.eventId);
   const group = groups.find((g) => g.id === reg.groupId);
@@ -249,6 +265,7 @@ function buildTextExtras(opts: {
         `Event: ${vars.eventTitle}`,
         vars.eventWhen && `When: ${vars.eventWhen}`,
         vars.eventVenue && `Where: ${vars.eventVenue}`,
+        vars.eventMapsUrl && `Map: ${vars.eventMapsUrl}`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -259,6 +276,14 @@ function buildTextExtras(opts: {
   return extras;
 }
 
+function isEmbeddableQrUrl(url: string): boolean {
+  const u = url.trim();
+  if (!u) return false;
+  if (u.startsWith("data:image/")) return true;
+  if (u.startsWith("drive:") || u.includes("drive.google.com/")) return false;
+  return /^https?:\/\//i.test(u);
+}
+
 async function buildQrHtml(opts: {
   blocks: EmailIncludeBlock[];
   ticketUrl: string;
@@ -266,7 +291,8 @@ async function buildQrHtml(opts: {
 }): Promise<string> {
   if (!opts.blocks.includes("qr_code") || !opts.ticketUrl) return "";
   const hosted = (opts.hostedQrUrl || "").trim();
-  const imgSrc = hosted || (await ticketQrDataUrl(opts.ticketUrl));
+  const imgSrc =
+    (isEmbeddableQrUrl(hosted) ? hosted : "") || (await ticketQrDataUrl(opts.ticketUrl));
   if (imgSrc) {
     return (
       `<p><strong>Show this QR at the door</strong></p>` +
@@ -285,10 +311,23 @@ export async function sendOrganizerEmail(opts: {
   bodyOverride?: string;
   includeBlocks?: EmailIncludeBlock[];
   skipIfSent?: boolean;
+  hidePayment?: boolean;
 }): Promise<boolean> {
   const to = (opts.registration.attendee?.email || "").trim();
   if (!to) return false;
   if (opts.skipIfSent && alreadySent(opts.registration, opts.kind)) return true;
+
+  const senderGate = await requireConnectedSender(opts.event.organizerId, {
+    eventId: opts.event.id,
+  });
+  if (!senderGate.ok) {
+    console.warn(
+      "[sendOrganizerEmail] blocked — connect email at " +
+        `/organizer/${opts.event.organizerId}/settings/connections`,
+      senderGate.code,
+    );
+    return false;
+  }
 
   const template = await loadEventEmailTemplate(
     opts.event.id,
@@ -298,17 +337,62 @@ export async function sendOrganizerEmail(opts: {
   const ticketUrl = await absoluteUrl(
     `/events/${opts.event.id}/ticket/${opts.registration.registrationId}`,
   );
+  const mapsUrl = openInMapsHref(opts.event.mapsUrl || opts.event.mapUrl) || "";
+  const free = isEventFree({
+    isFree: opts.hidePayment === true || opts.event.pricing?.isFree,
+    priceOfTicket: opts.event.PriceOfTicket,
+    finalPrice: opts.registration.finalPrice,
+  });
+
+  const memberTickets: {
+    name: string;
+    email: string;
+    isLead: boolean;
+    ticketUrl: string;
+    registrationId: string;
+  }[] = [];
+  const regs = team?.members.length ? await RegService.getRegsOfEvent(opts.event.id) : [];
+  if (team?.members.length) {
+    const byEmail = new Map(
+      regs.map((r) => [String(r.attendee?.email || "").toLowerCase(), r] as const),
+    );
+    for (const m of team.members) {
+      const memberReg =
+        byEmail.get(String(m.email || "").toLowerCase()) || (m.isLead ? opts.registration : null);
+      const rid = memberReg?.registrationId || (m.isLead ? opts.registration.registrationId : "");
+      if (!rid) continue;
+      const url = await absoluteUrl(`/events/${opts.event.id}/ticket/${rid}`);
+      memberTickets.push({
+        name: m.name,
+        email: m.email || "",
+        isLead: Boolean(m.isLead),
+        ticketUrl: url,
+        registrationId: rid,
+      });
+    }
+  }
+
+  const memberTicketLines = memberTickets.map(
+    (m) =>
+      `- ${m.name}${m.email ? ` <${m.email}>` : ""}${m.isLead ? " (lead)" : ""} — ${m.ticketUrl}`,
+  );
+
   const vars: Record<string, string> = {
     attendeeName: opts.registration.attendee?.name || "there",
     eventTitle: opts.event.title || "Event",
     eventWhen: eventWhen(opts.event),
     eventVenue: eventVenue(opts.event),
+    eventMapsUrl: mapsUrl,
     teamName: team?.teamName || "",
-    teamMembers: team?.members.map((m) => `${m.name}${m.isLead ? " (lead)" : ""}`).join(", ") || "",
+    teamMembers:
+      memberTicketLines.join("\n") ||
+      team?.members.map((m) => `${m.name}${m.isLead ? " (lead)" : ""}`).join(", ") ||
+      "",
     competitionName: team?.trackName || "",
     ticketUrl,
     qrCode: ticketUrl,
-    paymentStatus: opts.registration.payment?.paymentStatus || "",
+    formAnswers: formatFormAnswers(opts.registration.customResponses),
+    paymentStatus: free ? "" : opts.registration.payment?.paymentStatus || "",
   };
 
   const rawBody = opts.bodyOverride ?? template.body;
@@ -335,7 +419,46 @@ export async function sendOrganizerEmail(opts: {
     ticketUrl,
     hostedQrUrl: opts.registration.qrCode?.imageUrl,
   });
-  const html = `<div><h1>${escapeHtml(subject)}</h1>${paragraphs}${qrHtml || cta}</div>`;
+
+  let membersHtml = "";
+  if (blocks.includes("team_members") && memberTickets.length) {
+    const inline = shouldInlineMemberQrs(memberTickets.length);
+    if (inline) {
+      const items: string[] = [];
+      const byId = new Map(regs.map((r) => [r.registrationId, r] as const));
+      for (const m of memberTickets) {
+        const memberReg = byId.get(m.registrationId);
+        const img = await buildQrHtml({
+          blocks: ["qr_code"],
+          ticketUrl: m.ticketUrl,
+          hostedQrUrl: memberReg?.qrCode?.imageUrl,
+        });
+        items.push(
+          `<li><strong>${escapeHtml(m.name)}${m.isLead ? " (lead)" : ""}</strong>${
+            m.email ? ` &lt;${escapeHtml(m.email)}&gt;` : ""
+          }${img}</li>`,
+        );
+      }
+      membersHtml = `<p><strong>Team tickets</strong></p><ul>${items.join("")}</ul>`;
+    } else {
+      membersHtml = `<p><strong>Team tickets</strong> (open each ticket page for the QR)</p><ul>${memberTickets
+        .map(
+          (m) =>
+            `<li>${escapeHtml(m.name)}${m.isLead ? " (lead)" : ""} — <a href="${escapeHtml(
+              m.ticketUrl,
+            )}">ticket</a></li>`,
+        )
+        .join("")}</ul>`;
+    }
+  }
+
+  const mapsHtml =
+    blocks.includes("event_details") && mapsUrl
+      ? `<p><a href="${escapeHtml(mapsUrl)}">Open in Maps</a></p>`
+      : "";
+  const html = `<div><h1>${escapeHtml(subject)}</h1>${paragraphs}${mapsHtml}${membersHtml}${
+    qrHtml || cta
+  }</div>`;
 
   const result = await sendViaOrganizerConnection({
     organizerId: opts.event.organizerId,
@@ -343,6 +466,9 @@ export async function sendOrganizerEmail(opts: {
     subject,
     html,
     text: body,
+    kind: opts.kind,
+    eventId: opts.event.id,
+    connectionId: senderGate.connectionId,
   });
 
   if (result.ok) {
@@ -352,6 +478,41 @@ export async function sendOrganizerEmail(opts: {
       channel: "email",
       status: "sent",
     });
+
+    if (blocks.includes("email_members_qr") && team?.members.length) {
+      const byEmail = new Map(
+        regs.map((r) => [String(r.attendee?.email || "").toLowerCase(), r] as const),
+      );
+      for (const m of team.members) {
+        if (m.isLead) continue;
+        const memberReg = byEmail.get(String(m.email || "").toLowerCase());
+        const memberTo = (memberReg?.attendee?.email || m.email || "").trim();
+        if (!memberTo || !memberReg) continue;
+        const memberTicket = await absoluteUrl(
+          `/events/${opts.event.id}/ticket/${memberReg.registrationId}`,
+        );
+        const memberQr = await buildQrHtml({
+          blocks: ["qr_code"],
+          ticketUrl: memberTicket,
+          hostedQrUrl: memberReg.qrCode?.imageUrl,
+        });
+        const memberSubject = `Your ticket QR — ${opts.event.title || "Event"}`;
+        const memberBody = `Hello ${m.name || "there"}, here is your personal door QR for ${
+          opts.event.title || "the event"
+        }.`;
+        await sendViaOrganizerConnection({
+          organizerId: opts.event.organizerId,
+          to: memberTo,
+          subject: memberSubject,
+          html: `<div><h1>${escapeHtml(memberSubject)}</h1><p>${escapeHtml(memberBody)}</p>${memberQr}</div>`,
+          text: `${memberBody}\n${memberTicket}`,
+          kind: opts.kind,
+          eventId: opts.event.id,
+          connectionId: senderGate.connectionId,
+        }).catch((err) => console.error("[sendOrganizerEmail] member QR", err));
+      }
+    }
+
     return true;
   }
 
@@ -421,16 +582,19 @@ export async function renderEmailPreview(opts: {
   const ticketUrl = await absoluteUrl(
     `/events/${opts.event.id}/ticket/${opts.registration.registrationId}`,
   );
+  const mapsUrl = openInMapsHref(opts.event.mapsUrl || opts.event.mapUrl) || "";
   const vars: Record<string, string> = {
     attendeeName: opts.registration.attendee?.name || "Sample Attendee",
     eventTitle: opts.event.title || "Event",
     eventWhen: eventWhen(opts.event),
     eventVenue: eventVenue(opts.event),
+    eventMapsUrl: mapsUrl,
     teamName: team?.teamName || "",
     teamMembers: team?.members.map((m) => `${m.name}${m.isLead ? " (lead)" : ""}`).join(", ") || "",
     competitionName: team?.trackName || "",
     ticketUrl,
     qrCode: ticketUrl,
+    formAnswers: formatFormAnswers(opts.registration.customResponses),
     paymentStatus: opts.hidePayment ? "" : opts.registration.payment?.paymentStatus || "",
   };
   const rawBody = opts.bodyOverride ?? template.body;

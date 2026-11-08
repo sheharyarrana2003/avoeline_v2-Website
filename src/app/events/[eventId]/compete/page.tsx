@@ -27,6 +27,9 @@ import {
   teamCompletions,
   trackTaskScoreboard,
   visibleTasksForTeam,
+  taskOrganizerAttachment,
+  taskOrganizerBrief,
+  fileStoreProxyUrl,
 } from "@/src/features/hackathon/tasks.service";
 import { listTaskSubmissionsForEvent } from "@/src/features/hackathon/taskSubmissions.service";
 import {
@@ -451,9 +454,13 @@ export default async function CompeteDashboardPage({
                       <TaskWorkSubmit
                         action={work}
                         eventId={eventId}
+                        trackId={track.id}
                         taskId={task.id}
                         linkRequired={cfg.on("link_submissions")}
                         returnTo={`${base}?tab=tasks`}
+                        brief={taskOrganizerBrief(task)}
+                        attachmentUrl={fileStoreProxyUrl(taskOrganizerAttachment(task) || {})}
+                        attachmentLabel={taskOrganizerAttachment(task)?.fileName ?? null}
                       />
                     ) : null}
                   </li>

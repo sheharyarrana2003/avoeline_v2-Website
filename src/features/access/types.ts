@@ -95,11 +95,16 @@ export interface EventInvite {
   openedAt: string | null;
   registeredAt: string | null;
   registrationId: string | null;
+  /** Soft-revoke timestamp (invite rows); stored in extra.revokedAt. */
+  revokedAt: string | null;
   /** DD/MM/YYYY, per the house date contract. Compared via parseScheduleDateTime. */
   expiresAt: string;
   singleUse: boolean;
   createdAt: string | null;
 }
+
+export type InviteDisplayStatus =
+  "pending" | "opened" | "registered" | "expired" | "revoked" | "not_registered";
 
 /** Lowercased and trimmed. The one place email normalization happens. */
 export function normalizeEmail(value: unknown): string {
@@ -119,13 +124,29 @@ export function looksLikeEmail(value: string): boolean {
  * DD/MM/YYYY and string comparison on that is meaningless. The time is pinned to
  * the end of the day, since an expiry *date* should last all of that date.
  */
-export function inviteRefusal(invite: EventInvite): "expired" | "already_used" | null {
+export function inviteRefusal(invite: EventInvite): "expired" | "already_used" | "revoked" | null {
+  if (invite.revokedAt) return "revoked";
   if (invite.expiresAt) {
     const deadline = parseScheduleDateTime(invite.expiresAt, "11:59 PM");
     if (deadline && deadline.getTime() < Date.now()) return "expired";
   }
   if (invite.singleUse && invite.registeredAt) return "already_used";
   return null;
+}
+
+/** Invite/whitelist status for organizer tables (docs/22 O3). */
+export function inviteDisplayStatus(invite: EventInvite, now = Date.now()): InviteDisplayStatus {
+  if (invite.revokedAt) return "revoked";
+  if (invite.registeredAt) return "registered";
+  if (invite.kind === "invite") {
+    if (invite.expiresAt) {
+      const deadline = parseScheduleDateTime(invite.expiresAt, "11:59 PM");
+      if (deadline && deadline.getTime() < now) return "expired";
+    }
+    if (invite.openedAt) return "opened";
+    return "pending";
+  }
+  return "not_registered";
 }
 
 /** Row of a parsed guest-list upload, before anything is written. */

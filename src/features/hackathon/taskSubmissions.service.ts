@@ -41,12 +41,12 @@ export async function listTaskSubmissionsForEvent(
   let q = supabaseAdmin
     .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
     .select(
-      "id, team_id, track_id, phase_id, task_id, submitted_by, text_answer, link_url, file_path, file_name, file_size, mime, submitted_at, status, review_note, points_awarded",
+      "id, team_id, track_id, phase_id, task_id, submitted_by, text_answer, organizer_notes, link_url, file_path, file_name, file_size, mime, submitted_at, status, review_note, points_awarded, extra",
     )
     .in("track_id", filters.trackId ? [filters.trackId] : trackIds)
     .order("submitted_at", { ascending: false })
     .order("id", { ascending: false })
-    .limit(Math.min(Math.max(filters.limit ?? 50, 1), 50));
+    .limit(Math.min(Math.max(filters.limit ?? 100, 1), 200));
 
   if (filters.cursor?.at && filters.cursor?.id) {
     q = q.or(
@@ -91,6 +91,18 @@ export async function listTaskSubmissionsForEvent(
   return rows
     .map((r) => {
       const status = isStatus(String(r.status)) ? (r.status as TaskSubmissionStatus) : "submitted";
+      const extra =
+        r.extra && typeof r.extra === "object" && !Array.isArray(r.extra)
+          ? (r.extra as Record<string, unknown>)
+          : {};
+      const extraLinks = Array.isArray(extra.links)
+        ? extra.links.map((x) => String(x).trim()).filter(Boolean)
+        : [];
+      const storedFileId = extra.storedFileId
+        ? String(extra.storedFileId)
+        : String(r.file_path || "").startsWith("file:")
+          ? String(r.file_path).slice("file:".length)
+          : null;
       return {
         id: String(r.id),
         teamId: String(r.team_id),
@@ -103,11 +115,14 @@ export async function listTaskSubmissionsForEvent(
         taskTitle: taskTitle.get(String(r.task_id)) || "Task",
         submittedBy: r.submitted_by ? String(r.submitted_by) : null,
         textAnswer: r.text_answer ? String(r.text_answer) : null,
+        organizerNotes: r.organizer_notes ? String(r.organizer_notes) : null,
         linkUrl: r.link_url ? String(r.link_url) : null,
+        extraLinks,
         filePath: r.file_path ? String(r.file_path) : null,
         fileName: r.file_name ? String(r.file_name) : null,
         fileSize: r.file_size != null ? Number(r.file_size) : null,
         mime: r.mime ? String(r.mime) : null,
+        storedFileId: storedFileId || null,
         submittedAt: String(r.submitted_at),
         status,
         reviewNote: r.review_note ? String(r.review_note) : null,
@@ -116,6 +131,8 @@ export async function listTaskSubmissionsForEvent(
     })
     .filter((r) => !teamQ || r.teamName.toLowerCase().includes(teamQ));
 }
+
+export { filterSubmissionRows } from "./taskSubmissions.logic";
 
 export async function getTaskSubmissionForEvent(
   eventId: string,
@@ -160,31 +177,49 @@ export async function insertTaskSubmission(row: {
   taskId: string;
   submittedBy?: string | null;
   textAnswer?: string | null;
+  organizerNotes?: string | null;
   linkUrl?: string | null;
   filePath?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
   mime?: string | null;
   status?: TaskSubmissionStatus;
+  /** Merged into row for storedFileId / extra links (no schema break). */
+  extra?: Record<string, unknown> | null;
 }): Promise<{ id: string } | null> {
+  const payload: Record<string, unknown> = {
+    team_id: row.teamId,
+    track_id: row.trackId,
+    phase_id: row.phaseId || null,
+    task_id: row.taskId,
+    submitted_by: row.submittedBy || null,
+    text_answer: row.textAnswer || null,
+    organizer_notes: row.organizerNotes || null,
+    link_url: row.linkUrl || null,
+    file_path: row.filePath || null,
+    file_name: row.fileName || null,
+    file_size: row.fileSize ?? null,
+    mime: row.mime || null,
+    status: row.status || "submitted",
+  };
+  // Prefer a dedicated extra column when present; otherwise ignore (legacy).
+  if (row.extra && Object.keys(row.extra).length) {
+    payload.extra = row.extra;
+  }
   const { data, error } = await supabaseAdmin
     .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
-    .insert({
-      team_id: row.teamId,
-      track_id: row.trackId,
-      phase_id: row.phaseId || null,
-      task_id: row.taskId,
-      submitted_by: row.submittedBy || null,
-      text_answer: row.textAnswer || null,
-      link_url: row.linkUrl || null,
-      file_path: row.filePath || null,
-      file_name: row.fileName || null,
-      file_size: row.fileSize ?? null,
-      mime: row.mime || null,
-      status: row.status || "submitted",
-    } as never)
+    .insert(payload as never)
     .select("id")
     .maybeSingle();
   if (error || !data) return null;
   return { id: String(data.id) };
+}
+
+export async function countTeamTaskSubmissions(teamId: string, taskId: string): Promise<number> {
+  const { count } = await supabaseAdmin
+    .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
+    .select("id", { count: "exact", head: true })
+    .eq("team_id", teamId)
+    .eq("task_id", taskId);
+  return count ?? 0;
 }

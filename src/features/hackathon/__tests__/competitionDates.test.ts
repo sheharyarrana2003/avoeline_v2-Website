@@ -29,37 +29,22 @@ describe("competitionDates / timezone helpers", () => {
     const dates = competitionDatesFromForm(
       {
         registrationClosesAt: "2026-10-01T10:00",
-        rosterLocksAt: "2026-10-02T10:00",
-        opensAt: "2026-10-03T10:00",
-        submissionDeadlineAt: "2026-10-04T18:00",
-        closesAt: "2026-10-05T18:00",
       },
       "Asia/Karachi",
     );
-    assert.equal(looksLikeSlashDate(dates.submissionDeadlineAt), false);
-    assert.equal(looksLikeSlashDate(dates.rosterLocksAt), false);
+    assert.equal(looksLikeSlashDate(dates.registrationClosesAt), false);
     assert.doesNotThrow(() => assertUtcIsoPayload(dates));
   });
 
-  it("rejects inverted ordering with a clear field error", () => {
-    const dates = competitionDatesFromForm(
-      {
-        opensAt: "2026-10-05T10:00",
-        closesAt: "2026-10-01T10:00",
-      },
-      "UTC",
-    );
-    const err = validateCompetitionDateOrder(dates);
-    assert.equal(err?.field, "closesAt");
-    assert.match(err!.message.toLowerCase(), /on or after/);
+  it("rejects invalid registration closes", () => {
+    const err = validateCompetitionDateOrder({
+      registrationClosesAt: "not-a-date",
+    });
+    assert.equal(err?.field, "registrationClosesAt");
   });
 
-  it("skips nulls when validating order", () => {
-    const dates = competitionDatesFromForm(
-      { opensAt: "2026-10-03T10:00", closesAt: "2026-10-05T10:00" },
-      "UTC",
-    );
-    assert.equal(validateCompetitionDateOrder(dates), null);
+  it("skips null registration closes", () => {
+    assert.equal(validateCompetitionDateOrder({ registrationClosesAt: null }), null);
   });
 
   it("validatePhaseWindow rejects closes before opens", () => {

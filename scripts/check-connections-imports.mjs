@@ -14,6 +14,8 @@ const ALLOWED_PREFIXES = [
   path.join(SRC, "features", "connections", "server") + path.sep,
   path.join(SRC, "features", "connections", "providers") + path.sep,
   path.join(SRC, "features", "connections", "__tests__") + path.sep,
+  // O1 FileStore is the Drive binary facade (docs/22) — may wrap GoogleDriveClient.
+  path.join(SRC, "features", "files") + path.sep,
 ];
 
 function walk(dir, out = []) {

@@ -15,6 +15,7 @@ import {
   type EventEmailKind,
   type EventEmailTemplate,
 } from "../emailTypes";
+import { COMPOSER_PREVIEW_SAMPLE, previewSubstitute } from "../emailCompose.logic";
 import {
   previewBulkAttendeeEmailAction,
   saveEventEmailTemplateAction,
@@ -58,16 +59,22 @@ function IncludeChecklist({
   body,
   setBody,
   showTeamBlocks,
+  showMemberQrOption,
 }: {
   blocks: EmailIncludeBlock[];
   setBlocks: (next: EmailIncludeBlock[]) => void;
   body: string;
   setBody: (next: string) => void;
   showTeamBlocks: boolean;
+  showMemberQrOption?: boolean;
 }) {
-  const options = EMAIL_INCLUDE_BLOCKS.filter(
-    (b) => showTeamBlocks || (b !== "team_name" && b !== "team_members" && b !== "competition"),
-  );
+  const options = EMAIL_INCLUDE_BLOCKS.filter((b) => {
+    if (b === "email_members_qr") return Boolean(showMemberQrOption);
+    if (!showTeamBlocks && (b === "team_name" || b === "team_members" || b === "competition")) {
+      return false;
+    }
+    return true;
+  });
   return (
     <fieldset className="flex flex-wrap gap-3">
       <legend className={labelClass}>Include in email</legend>
@@ -275,11 +282,28 @@ export function RegistrationEmailsModal({
             body={body}
             setBody={setBody}
             showTeamBlocks
+            showMemberQrOption={kind === "registration_confirmed"}
           />
           <p className="text-2xs text-ink-soft">
             Checking a box inserts a block into the body (you can edit it). Unchecking removes that
-            block.
+            block. “Also email each member…” does not change the body — it sends a separate QR mail
+            after confirmation.
           </p>
+          <div className="rounded-xl border border-line bg-muted/30 p-3">
+            <p className={labelClass}>Live preview</p>
+            <p className="mt-1 text-sm font-medium text-ink">
+              {previewSubstitute(subject, {
+                ...COMPOSER_PREVIEW_SAMPLE,
+                paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
+              })}
+            </p>
+            <pre className="mt-2 whitespace-pre-wrap font-sans text-xs text-ink-soft">
+              {previewSubstitute(body, {
+                ...COMPOSER_PREVIEW_SAMPLE,
+                paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
+              })}
+            </pre>
+          </div>
         </form>
       </Modal>
     </>
@@ -666,10 +690,21 @@ export function MemberEmailForm({
 }) {
   const [open, setOpen] = useState(startOpen);
   const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [blocks, setBlocks] = useState<EmailIncludeBlock[]>([
+    "ticket_url",
+    "qr_code",
+    "event_details",
+  ]);
   const [state, action] = useActionState<ActionResult | null, FormData>(
     sendMemberEmailAction,
     null,
   );
+  const sample = {
+    ...COMPOSER_PREVIEW_SAMPLE,
+    paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
+  };
   if (!open) {
     return (
       <button
@@ -688,6 +723,9 @@ export function MemberEmailForm({
       {senderConnectionId ? (
         <input type="hidden" name="connectionId" value={senderConnectionId} />
       ) : null}
+      {blocks.map((b) => (
+        <input key={b} type="hidden" name="block" value={b} />
+      ))}
       <SenderPicker eventId={eventId} value={senderConnectionId} onChange={setSenderConnectionId} />
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-ink">Compose</p>
@@ -723,6 +761,8 @@ export function MemberEmailForm({
           name="subject"
           className={`${fieldClass} mt-1`}
           placeholder="Leave blank to use the template"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
         />
       </div>
       <div>
@@ -735,22 +775,28 @@ export function MemberEmailForm({
           rows={3}
           className={`${fieldClass} mt-1`}
           placeholder="Leave blank to use the template"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
         />
       </div>
-      <div className="flex flex-wrap gap-3">
-        {EMAIL_INCLUDE_BLOCKS.filter((b) => !hidePayment || b !== "ticket_url" || true).map(
-          (block) => (
-            <label key={block} className="flex items-center gap-1.5 text-xs text-ink">
-              <input
-                type="checkbox"
-                name="block"
-                value={block}
-                defaultChecked={block === "ticket_url" || block === "qr_code"}
-              />
-              {EMAIL_BLOCK_LABELS[block]}
-            </label>
-          ),
-        )}
+      <IncludeChecklist
+        blocks={blocks}
+        setBlocks={setBlocks}
+        body={body}
+        setBody={setBody}
+        showTeamBlocks
+      />
+      <div className="rounded-lg border border-line bg-muted/30 p-2">
+        <p className={labelClass}>Live preview</p>
+        <p className="mt-1 text-xs font-medium text-ink">
+          {previewSubstitute(subject || "Your message — {{eventTitle}}", sample)}
+        </p>
+        <pre className="mt-1 whitespace-pre-wrap font-sans text-2xs text-ink-soft">
+          {previewSubstitute(
+            body || "Hello {{attendeeName}}, see details for {{eventTitle}}.",
+            sample,
+          )}
+        </pre>
       </div>
       {state?.error ? <FormFeedback error={state.error} /> : null}
       {state?.success ? <p className="text-xs text-ink-soft">Sent.</p> : null}

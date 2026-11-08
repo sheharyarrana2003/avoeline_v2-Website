@@ -97,12 +97,26 @@ export async function addGuests(
       if (error) throw error;
     }
 
+    const mailSubject = String(formData.get("mailSubject") ?? "").trim();
+    const mailBody = String(formData.get("mailBody") ?? "").trim();
+
     let mailed = 0;
     if (notify && mailedGuests.length) {
+      const mailOpts = {
+        subject: mailSubject || undefined,
+        body: mailBody || undefined,
+        eventId,
+      };
       for (const guest of mailedGuests) {
         const sent = guest.invite
-          ? await sendInviteEmail(event.organizerId, guest.email, event.title, guest.url)
-          : await sendWhitelistEmail(event.organizerId, guest.email, event.title, guest.url);
+          ? await sendInviteEmail(event.organizerId, guest.email, event.title, guest.url, mailOpts)
+          : await sendWhitelistEmail(
+              event.organizerId,
+              guest.email,
+              event.title,
+              guest.url,
+              mailOpts,
+            );
         if (sent.ok) mailed += 1;
       }
     }
@@ -153,5 +167,43 @@ export async function removeGuest(formData: FormData): Promise<void> {
     revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/access`);
   } catch (err) {
     console.error("[removeGuest]", err);
+  }
+}
+
+/** Soft-revoke an invite link so the table can still show `revoked`. */
+export async function revokeInvite(formData: FormData): Promise<void> {
+  try {
+    const eventId = String(formData.get("eventId") ?? "").trim();
+    const guestId = String(formData.get("guestId") ?? "").trim();
+    if (!guestId) return;
+
+    const event = await assertEventActor(eventId, "access");
+    if (!event) return;
+
+    const { data } = await supabaseAdmin
+      .from(TABLES.EVENT_INVITES)
+      .select("id, event_id, kind, extra")
+      .eq("id", guestId)
+      .maybeSingle();
+    if (!data || String(data.event_id) !== eventId) return;
+
+    const kind = String(data.kind || "");
+    if (kind !== "invite" && kind !== "invite_link") return;
+
+    const extra = (data.extra as Record<string, unknown> | null) ?? {};
+    const now = new Date().toISOString();
+    const { error } = await supabaseAdmin
+      .from(TABLES.EVENT_INVITES)
+      .update({
+        updated_at: now,
+        extra: { ...extra, status: "revoked", revokedAt: now },
+      })
+      .eq("id", guestId)
+      .eq("event_id", eventId);
+    if (error) throw error;
+
+    revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/access`);
+  } catch (err) {
+    console.error("[revokeInvite]", err);
   }
 }

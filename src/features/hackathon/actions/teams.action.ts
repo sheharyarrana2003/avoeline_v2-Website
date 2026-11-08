@@ -171,12 +171,29 @@ export async function joinTeam(
     const track = found ? await getTrack(found.trackId) : null;
     const mine = await teamsForRegistration(registrationId);
 
+    const { listPhasesForEvent } = await import("../tasks.service");
+    const { joinCodeValidUntilIso } = await import("../joinCodeValidity");
+    const { parseScheduleDateTime } = await import("@/src/lib/datetime");
+    const parsedEnd = parseScheduleDateTime(
+      who.event.schedule?.endDate ?? who.event.schedule?.startDate,
+      who.event.schedule?.endTime,
+    )?.toISOString();
+    const eventEndsAtIso =
+      parsedEnd || who.event.schedule?.endDate || who.event.schedule?.startDate || null;
+    const phases = await listPhasesForEvent(who.event.id, found ? [found.trackId] : []).catch(
+      () => [],
+    );
+    const joinCodeValidUntil = joinCodeValidUntilIso({
+      eventEndsAtIso: eventEndsAtIso ? String(eventEndsAtIso) : null,
+      phaseCloses: phases.map((p) => p.closes_at || p.ends_at || null),
+    });
     const decision = canJoin({
       eventId: who.event.id,
       registrationId,
       team: found,
       track,
       currentTeamTrackId: mine.find((t) => t.trackId === found?.trackId)?.trackId ?? null,
+      joinCodeValidUntil,
     });
     if (!decision.allowed) return fail(JOIN_REFUSAL_MESSAGE[decision.reason]);
     if (!found || !track) return fail(JOIN_REFUSAL_MESSAGE.no_such_code);
@@ -209,6 +226,7 @@ export async function joinTeam(
       team: fresh,
       track,
       currentTeamTrackId: alreadyInTrack?.trackId ?? null,
+      joinCodeValidUntil,
     });
     if (!again.allowed) refuse(JOIN_REFUSAL_MESSAGE[again.reason]);
 

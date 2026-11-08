@@ -77,6 +77,7 @@ export async function createInviteLinksAction(
         item.email,
         event.title || "Exclusive Event",
         fullInviteUrl,
+        { eventId },
       ).catch((err) => console.error("[createInviteLinksAction] sendEmail error:", err));
     }
 

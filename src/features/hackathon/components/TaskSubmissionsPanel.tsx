@@ -12,10 +12,20 @@ import {
 } from "../actions/taskSubmissions.action";
 import type { TaskSubmissionRow, TaskSubmissionStatus } from "../taskSubmissions.types";
 import { isSafeInlinePreview } from "../taskSubmissions.types";
+import { filterSubmissionRows } from "../taskSubmissions.logic";
 
 type TrackOpt = { id: string; name: string };
 type PhaseOpt = { id: string; name: string; trackId: string };
 type TaskOpt = { id: string; title: string; trackId: string; phaseId: string | null };
+
+function formatBytes(n: number | null): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const PAGE = 100;
 
 export function TaskSubmissionsPanel({
   eventId,
@@ -41,6 +51,7 @@ export function TaskSubmissionsPanel({
   const [teamQ, setTeamQ] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [limit, setLimit] = useState(PAGE);
   const [selected, setSelected] = useState<TaskSubmissionRow | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -62,23 +73,14 @@ export function TaskSubmissionsPanel({
     [tasks, trackId, phaseId],
   );
 
-  const visible = useMemo(() => {
-    const q = teamQ.trim().toLowerCase();
-    const fromMs = from ? Date.parse(from) : null;
-    const toMs = to ? Date.parse(to) : null;
-    return rows.filter((r) => {
-      if (trackId !== "all" && r.trackId !== trackId) return false;
-      if (phaseId !== "all" && phaseId !== "none" && r.phaseId !== phaseId) return false;
-      if (phaseId === "none" && r.phaseId) return false;
-      if (taskId !== "all" && r.taskId !== taskId) return false;
-      if (status !== "all" && r.status !== status) return false;
-      if (q && !r.teamName.toLowerCase().includes(q)) return false;
-      const at = Date.parse(r.submittedAt);
-      if (fromMs != null && Number.isFinite(fromMs) && at < fromMs) return false;
-      if (toMs != null && Number.isFinite(toMs) && at > toMs) return false;
-      return true;
-    });
-  }, [rows, trackId, phaseId, taskId, status, teamQ, from, to]);
+  const visible = useMemo(
+    () =>
+      filterSubmissionRows(rows, { trackId, phaseId, taskId, status, teamQ, from, to }).sort(
+        (a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt) || b.id.localeCompare(a.id),
+      ),
+    [rows, trackId, phaseId, taskId, status, teamQ, from, to],
+  );
+  const pageRows = visible.slice(0, limit);
 
   function openRow(row: TaskSubmissionRow) {
     setSelected(row);
@@ -87,7 +89,10 @@ export function TaskSubmissionsPanel({
     setPreviewUrl(null);
     setMsg(null);
     const kind = isSafeInlinePreview(row.mime);
-    if (row.filePath && (kind === "image" || kind === "pdf" || kind === "text")) {
+    if (
+      (row.storedFileId || row.filePath) &&
+      (kind === "image" || kind === "pdf" || kind === "text")
+    ) {
       startTransition(async () => {
         const res = await getSubmissionDownloadUrlAction({ eventId, submissionId: row.id });
         if (res.ok) setPreviewUrl(res.data.url);
@@ -120,7 +125,7 @@ export function TaskSubmissionsPanel({
   }
 
   function download() {
-    if (!selected?.filePath) return;
+    if (!selected?.filePath && !selected?.storedFileId) return;
     startTransition(async () => {
       const res = await getSubmissionDownloadUrlAction({ eventId, submissionId: selected.id });
       if (res.ok) window.open(res.data.url, "_blank", "noopener,noreferrer");
@@ -138,6 +143,8 @@ export function TaskSubmissionsPanel({
       "submitted_at",
       "link",
       "file",
+      "size",
+      "note_to_organizers",
       "points",
     ];
     const lines = [
@@ -152,6 +159,8 @@ export function TaskSubmissionsPanel({
           r.submittedAt,
           r.linkUrl || "",
           r.fileName || "",
+          r.fileSize ?? "",
+          r.organizerNotes || "",
           r.pointsAwarded ?? "",
         ]
           .map((c) => `"${String(c).replace(/"/g, '""')}"`)
@@ -305,8 +314,10 @@ export function TaskSubmissionsPanel({
         </button>
       </div>
 
-      {!visible.length ? (
-        <p className="text-sm text-ink-soft">No task submissions match these filters.</p>
+      {!rows.length ? (
+        <p className="text-sm text-ink-soft">No task submissions recorded for this event yet.</p>
+      ) : !visible.length ? (
+        <p className="text-sm text-ink-soft">No rows match these filters — widen or clear them.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-3xl">
@@ -316,13 +327,15 @@ export function TaskSubmissionsPanel({
                 <th className={tableHead}>Competition</th>
                 <th className={tableHead}>Phase</th>
                 <th className={tableHead}>Task</th>
-                <th className={tableHead}>Type</th>
+                <th className={tableHead}>File</th>
+                <th className={tableHead}>Size</th>
+                <th className={tableHead}>Points</th>
                 <th className={tableHead}>Submitted</th>
                 <th className={tableHead}>Status</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((r) => (
+              {pageRows.map((r) => (
                 <tr
                   key={r.id}
                   className={`${tableRow} cursor-pointer hover:bg-muted/40`}
@@ -340,8 +353,10 @@ export function TaskSubmissionsPanel({
                       {r.taskTitle}
                     </Link>
                   </td>
-                  <td className={tableCell}>
-                    {r.filePath ? "File" : r.linkUrl ? "Link" : r.textAnswer ? "Text" : "—"}
+                  <td className={tableCell}>{r.fileName || (r.linkUrl ? "Link" : "—")}</td>
+                  <td className={`${tableCell} tabular-nums text-xs`}>{formatBytes(r.fileSize)}</td>
+                  <td className={`${tableCell} tabular-nums`}>
+                    {r.pointsAwarded != null ? r.pointsAwarded : "—"}
                   </td>
                   <td className={`${tableCell} tabular-nums text-xs`}>
                     {formatExactSecond(r.submittedAt, timeZone)}
@@ -353,6 +368,17 @@ export function TaskSubmissionsPanel({
               ))}
             </tbody>
           </table>
+          {visible.length > limit ? (
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                className={buttonClass("secondary", "sm")}
+                onClick={() => setLimit((n) => n + PAGE)}
+              >
+                Load more ({visible.length - limit} remaining)
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -375,6 +401,14 @@ export function TaskSubmissionsPanel({
                 {selected.textAnswer}
               </pre>
             ) : null}
+            {selected.organizerNotes ? (
+              <div>
+                <p className="text-2xs font-semibold uppercase text-ink-soft">Note to organizers</p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-ink">
+                  {selected.organizerNotes}
+                </p>
+              </div>
+            ) : null}
             {selected.linkUrl ? (
               <p className="text-sm">
                 <a
@@ -387,7 +421,21 @@ export function TaskSubmissionsPanel({
                 </a>
               </p>
             ) : null}
-            {selected.filePath ? (
+            {selected.extraLinks?.length
+              ? selected.extraLinks.map((u) => (
+                  <p key={u} className="text-sm">
+                    <a
+                      href={u}
+                      className="text-ink underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {u}
+                    </a>
+                  </p>
+                ))
+              : null}
+            {selected.filePath || selected.storedFileId ? (
               <div className="space-y-2">
                 {previewKind === "image" && previewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element

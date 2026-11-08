@@ -112,6 +112,9 @@ export default async function TicketPage({
     registration.tier,
   );
 
+  // O1 A6: on-demand QR — never rely on stored Drive/hosted image URLs.
+  const qrImageSrc = `/api/qr/${registrationId}.png`;
+
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="flex flex-col items-center text-center">
@@ -151,11 +154,11 @@ export default async function TicketPage({
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-paper">
-        {registration.qrCode?.imageUrl ? (
+        {qrImageSrc ? (
           <div className="flex flex-col items-center border-b border-line px-6 py-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={registration.qrCode.imageUrl}
+              src={qrImageSrc}
               alt={`Entry QR code for ${attendeeName}`}
               className="size-56 rounded-xl bg-white p-3"
             />

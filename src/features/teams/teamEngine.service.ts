@@ -21,6 +21,7 @@ import type {
   OrganizerAccessGrantSummary,
 } from "./teamEngine.types";
 import { findMemberWithEmail, normalizeTeamEmail } from "./organizerTeams.helpers";
+import { mapAssignmentFromRow } from "./eventStaffAssignment.logic";
 
 const TEAM_COLS =
   "id, name, context_type, event_id, org_id, organizer_id, join_code, created_at, created_by, extra";
@@ -730,20 +731,17 @@ export const TeamEngineService = {
 
   async listEventStaffAssignments(
     eventId: string,
-  ): Promise<{ teamId: string; memberIds: string[] }[]> {
+  ): Promise<{ teamId: string; memberIds: string[]; leadMemberId: string | null }[]> {
     const { data } = await supabaseAdmin
       .from(TABLES.EVENT_STAFF_ASSIGNMENTS)
-      .select("team_id, member_ids")
+      .select("team_id, member_ids, lead_member_id")
       .eq("event_id", eventId);
-    return (data ?? []).map((r) => ({
-      teamId: String(r.team_id),
-      memberIds: Array.isArray(r.member_ids) ? r.member_ids.map(String) : [],
-    }));
+    return (data ?? []).map((r) => mapAssignmentFromRow(r));
   },
 
   async setEventStaffAssignments(
     eventId: string,
-    rows: { teamId: string; memberIds: string[] }[],
+    rows: { teamId: string; memberIds: string[]; leadMemberId?: string | null }[],
   ): Promise<void> {
     await supabaseAdmin.from(TABLES.EVENT_STAFF_ASSIGNMENTS).delete().eq("event_id", eventId);
     if (!rows.length) return;
@@ -752,8 +750,18 @@ export const TeamEngineService = {
         event_id: eventId,
         team_id: r.teamId,
         member_ids: r.memberIds,
+        lead_member_id: r.leadMemberId || null,
       })),
     );
+    if (error) throw error;
+  },
+
+  async removeEventStaffAssignment(eventId: string, teamId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from(TABLES.EVENT_STAFF_ASSIGNMENTS)
+      .delete()
+      .eq("event_id", eventId)
+      .eq("team_id", teamId);
     if (error) throw error;
   },
 

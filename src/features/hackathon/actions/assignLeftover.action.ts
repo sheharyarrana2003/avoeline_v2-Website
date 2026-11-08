@@ -18,7 +18,7 @@ import { revalidatePath } from "next/cache";
 export async function assignLeftoverToTeam(formData: FormData): Promise<void> {
   const eventId = String(formData.get("eventId") ?? "").trim();
   const fallback = String(formData.get("returnTo") ?? `/organizer`);
-  const event = await assertEventActor(eventId, "teams");
+  const event = await assertEventActor(eventId, "competitions");
   if (!event) finishForm(formData, fallback, fail("You cannot assign teams on that event."));
 
   const trackId = String(formData.get("trackId") ?? "").trim();

@@ -418,6 +418,7 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
   ],
   hackathon_settings: [
     "event_id",
+    // Deprecated A7 / O0 — retained in DB; app stopped writing:
     "online_mode",
     "livestream_url",
     "max_attachment_mb",
@@ -512,6 +513,8 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     "track_ids",
     "invited_at",
     "last_scored_at",
+    "extra",
+    "updated_at",
   ],
   hackathon_scores: [
     "id",

@@ -182,8 +182,42 @@ export function getGooglePickerConfig(): {
   appId: string | undefined;
 } {
   const env = getServerEnv();
+  const apiKey = env.GOOGLE_PICKER_API_KEY?.trim() || undefined;
+  const appId = env.GOOGLE_PICKER_APP_ID?.trim() || undefined;
+  warnPickerConfigOnce(apiKey, appId);
+  return { apiKey, appId };
+}
+
+let pickerWarned = false;
+function warnPickerConfigOnce(apiKey: string | undefined, appId: string | undefined): void {
+  if (pickerWarned) return;
+  if (process.env.NODE_ENV !== "production") return;
+  if (apiKey && appId) return;
+  pickerWarned = true;
+  console.warn(
+    "[env] GOOGLE_PICKER_API_KEY / GOOGLE_PICKER_APP_ID missing in production — Google Picker will fail. See docs/connections-picker-setup.md (A5).",
+  );
+}
+
+/** Presence/format diagnostics for admin — never returns secret values. */
+export function diagnoseGooglePickerEnv(): {
+  apiKeyPresent: boolean;
+  apiKeyLengthOk: boolean;
+  apiKeyLooksLikeBrowserKey: boolean;
+  appIdPresent: boolean;
+  appIdLooksNumeric: boolean;
+  oauthClientIdPresent: boolean;
+} {
+  const picker = getGooglePickerConfig();
+  const oauth = getGoogleOAuthConfig();
+  const apiKey = picker.apiKey || "";
+  const appId = picker.appId || "";
   return {
-    apiKey: env.GOOGLE_PICKER_API_KEY?.trim() || undefined,
-    appId: env.GOOGLE_PICKER_APP_ID?.trim() || undefined,
+    apiKeyPresent: apiKey.length > 0,
+    apiKeyLengthOk: apiKey.length >= 20,
+    apiKeyLooksLikeBrowserKey: apiKey.startsWith("AIza"),
+    appIdPresent: appId.length > 0,
+    appIdLooksNumeric: /^\d{6,}$/.test(appId),
+    oauthClientIdPresent: Boolean(oauth.clientId),
   };
 }

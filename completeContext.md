@@ -42,7 +42,7 @@
 - Uploads: `src/features/media/uploadMedia.action.ts` (C3 alias `FileUploadField`). Body limits **50mb** (`serverActions.bodySizeLimit` + `proxyClientMaxBodySize`).
 - Paid modules: `hasModuleAccess` / `checkPermission` / `can` — no new raw role gates for modules.
 - C3 UI primitives: `EventCard`, `EventThumb`, `CompetitionFilter`, `FileUploadField`, plus existing Modal/ConfirmDialog/StatusBadge/EmptyState/`DataTable` (Server Component)/`ClientDataTable` (row clicks only)/FilterTabs under `shared_components/ui`. Never mark `DataTable` as `"use client"` — that breaks organizer/vendor/attendee list pages.
-- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `analyze`; husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
+- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `test:api-smoke` / `analyze`; husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Route Handler Postman: collection **Avoeline API Routes** (export `postman/avoeline-api-routes.postman_collection.json`, envs Local/Production). Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
 
 ---
 
@@ -107,7 +107,7 @@ Auth IDs are **UUIDs** (`auth.users` → `public.users.id`). Vendor URLs use the
 | REGISTRATIONS / WAITLIST | `registrations` | Tickets; waitlist is `status = waitlisted`. Door QR JSON: name, email, registrationId, eventId |
 | HACKATHON_TEAMS | `hackathon_teams` | One occupancy per team. Dashboard login: `access_code_hash` (plaintext `accessCode` in extra after pay + confirm) **or** roster `join_code`. `/enter` hashes first, then join code. |
 | TEAMS / TEAM_MEMBERS / TEAM_POSITIONS / ACCESS_GRANTS | `teams`, `team_members`, `team_positions`, `access_grants`, `recruitment_forms`, `applicants` | Ops library + grants; forms `public_token`; members `source`; grants `invite_token_hash`/`invite_sent_at`; RPC `organizer_teams_stats` |
-| EVENT_STAFF_ASSIGNMENTS | `event_staff_assignments` | Which library team (and optional `member_ids`) staffs an event. Empty `member_ids` = whole roster. |
+| EVENT_STAFF_ASSIGNMENTS | `event_staff_assignments` | Library team + optional `member_ids` + optional `lead_member_id` per event. Empty `member_ids` = whole roster. |
 | APPLICANTS / RECRUITMENT_FORMS | `applicants`, `recruitment_forms` | Staff pipeline (`applicants.email`, unique per team+email; `recruitment_forms.position_id`) |
 | HACKATHON_TRACK_PRIZES | `hackathon_track_prizes` | Structured prizes per competition |
 | HACKATHON_* | tracks, teams, members, scores, judges, mentors, CTF, phases, sandboxes, anomalies, schedules, attendance | Hackathon + CTF |
@@ -117,7 +117,7 @@ Auth IDs are **UUIDs** (`auth.users` → `public.users.id`). Vendor URLs use the
 | EVENT_EXPENSES | `event_expenses` | Event spend/credits; RPC `event_expense_totals` |
 | BOOKINGS | `bookings` | Quote → booking |
 | QUOTATION_TEMPLATES | `quotation_templates` | Vendor quote message templates (`body_html` + `{{placeholders}}`; one `is_default` per vendor) |
-| CERTIFICATES / CERTIFICATE_TEMPLATES / CERTIFICATE_TEMPLATE_VERSIONS | `certificates`, `certificate_templates`, `certificate_template_versions` | Issued certs (`data` jsonb, no `pdf_url`); JSON layout templates + immutable versions |
+| CERTIFICATES / CERTIFICATE_TEMPLATES / CERTIFICATE_TEMPLATE_VERSIONS / CERTIFICATE_JOBS | `certificates`, `certificate_templates`, `certificate_template_versions`, `certificate_jobs` | Issued certs (`data` jsonb, no `pdf_url`); JSON layout templates + immutable versions; throttled private Drive archive/share jobs |
 | PAYMENTS | `payments` | Paid registration / booking rows |
 | BUDGET_ENTRIES | `budget_entries` | Org budget |
 | REVIEWS / FEEDBACK | `reviews` | Reviews (ticket feedback; optional `registration_id`) |
@@ -221,14 +221,14 @@ Each feature owns its UI and mutations. Pages should import from here rather tha
 
 ### `access`
 
-Event visibility: public / private / invite_only / hybrid / vip_tiered. Guest list, invite tokens, waitlist, approval.
+Event visibility: `public` / `private` / `invite_only` / `hybrid` / `tiered` (UI label VIP / Tiered; legacy `vip_tiered` mapped at boundary). Guest list, invite tokens, waitlist, approval.
 
-- Service: `access.service.ts`
-- Actions: `accessSettings.action.ts`, `guestList.action.ts` (whitelist + invite email via `sendEmail` / Resend), `inviteLinks.action.ts`, `markInviteOpened.action.ts`, `registrationDecision.action.ts`
-- UI: `AccessSettingsForm` (one Access settings card), `AccessGate`, `AccessTypeSelector`, `GuestListPanel` (preview + CSV filename before commit), `TrackInviteOpen`
+- Service: `access.service.ts` (`resolveEventAccess` / `decideAccess` — public page + registration)
+- Actions: `accessSettings.action.ts` (`assertEventActor` + `access`), `guestList.action.ts` (add + soft `revokeInvite`), `guestEmailBatch.action.ts`, `inviteLinks.action.ts`, `markInviteOpened.action.ts`, `registrationDecision.action.ts`
+- UI: `HowAccessWorks` (A2 table; `AccessFlowGuide` alias), type-card `AccessSettingsForm`, type-scoped `GuestListPanel` (sample CSV), split whitelist/invite tables + `inviteDisplayStatus`, `GuestEmailComposer` (tokens/filters/preview/copy-link), `AccessGate`, `TrackInviteOpen`
 - Route: `/organizer/[organizer_id]/events/[eventId]/access`
-- Tiers/promos: `TiersPromosOnAccess` — ticket tiers hidden on hackathons; promo `track_id` scoped to a competition; `ticket_tiers.active` + `available_until`
-- Public short URL `/e/[eventId]` redirects to `/events/[eventId]` (invite query preserved)
+- Tiers/promos: `TiersPromosOnAccess` — ticket tiers hidden on hackathons; `listTiers` demotes past `available_until`; public DTO exposes `seatsLeft`, **no** `promoHints`
+- Public short URL `/e/[eventId]` redirects to `/events/[eventId]` (invite query preserved; hybrid unlock requires validated invite)
 
 ### `saas`
 
@@ -269,10 +269,10 @@ Marketing CMS + public contact (docs/19 W1–W5). Blocks/registry in `blocks/`; 
 
 ### `hackathon` extras
 
-`hackathon_tasks` / completions / assignments (flag hashed server-side) / `hackathon_task_submissions` (per-task review; private bucket `hackathon-submissions`). Final project stays on team submission path. Settings via `getEffectiveConfig(trackId)`: event-wide `hackathon_config` rows (`track_id` null + `event_id`) overridden by track rows. Organizer Settings panel loads the same merge through `getHackathonConfigsForTracks` (so apply-all timers/integrity show as enabled). Matrix: `docs/hackathon-settings-matrix.md`. Track timing: `opens_at` / `closes_at` / `registration_closes_at` / `roster_locks_at` / `submission_deadline_at` (UTC timestamptz; UI in event TZ). Stubs: `docker_sandboxing`, `daily_shifts` = Not active yet. `anti_cheat_tab_close` = browser visibility logging only (not OS lockdown).
+`hackathon_tasks` / completions / assignments (flag hashed server-side) / `hackathon_task_submissions` (per-task review; FileStore + legacy `hackathon-submissions` bucket; `extra.storedFileId` / `extra.links[]`). Final project stays on team submission path. Settings via `getEffectiveConfig(trackId)`: event-wide `hackathon_config` rows (`track_id` null + `event_id`) overridden by track rows. Organizer Settings panel loads the same merge through `getHackathonConfigsForTracks` (so apply-all timers/integrity show as enabled). Matrix: `docs/hackathon-settings-matrix.md`. Track DB still has `opens_at` / `closes_at` / `roster_locks_at` / `submission_deadline_at` (nullable); **Phase B / O0** organizer competition form only edits **`registration_closes_at`** (deprecated closes/opens/roster/submission dates nulled on save; not product fields). Stubs: `docker_sandboxing`, `daily_shifts` = Not active yet. `anti_cheat_tab_close` = browser visibility logging only (not OS lockdown). O6: phase/task FileStore categories; phase windows always gate submit; `allow_resubmission` (default on); scoreboard hour-ago movement.
 
-- Organizer: competitions modal (datetime + instructions), Submissions tab (`TaskSubmissionsPanel`), scoreboard (`LiveScoreboardTable` + second-precision / first-blood / track isolation), Settings conflict warnings. Phases & Tasks accordion; CTF via `CtfFilePick`. Staff with `teams_advanced_roles` get catalog permissions (legacy `page_*` normalized) + optional `team_positions.extra.trackIds`; `filterTracksForViewer` scopes competitions/tasks/scoreboard/submissions.
-- Participant: `getParticipantAccess` reason UI on `/enter` + `/compete`; short-lived httpOnly compete cookie (6h) + `compete_access_failures` lockout audit; tabbed workspace (Instructions, Phases & Tasks, Scoreboard if `live_scoreboard` on for that track only, own Submissions, Team); rules ack on `hackathon_teams.rules_acknowledged_at`; heartbeat / integrity when settings on.
+- Organizer: competitions modal (basics + registration close / closes + merged rules/instructions), Submissions tab (`TaskSubmissionsPanel` file/size/points + `/api/files` proxy), scoreboard (`LiveScoreboardTable` + ▲▼ 1h movement + second-precision / first-blood / track isolation; gated by `live_scoreboard`), Settings (`hackathon_config` + max attachment MB + judging window). Phases & Tasks accordion (phase edit + attachments); CTF via FileStore. Staff with `teams_advanced_roles` get catalog permissions (legacy `page_*` normalized) + optional `team_positions.extra.trackIds`; `filterTracksForViewer` scopes competitions/tasks/scoreboard/submissions.
+- Participant: `getParticipantAccess` reason UI on `/enter` + `/compete`; short-lived httpOnly compete cookie (6h, path `/` for file proxy) + `compete_access_failures` lockout audit; tabbed workspace (Instructions, Phases & Tasks, Scoreboard if `live_scoreboard` on for that track only, own Submissions, Team); rules ack on `hackathon_teams.rules_acknowledged_at`; heartbeat / integrity when settings on; work submit via FileStore (≤5 links).
 
 ### `admin`
 
@@ -285,9 +285,11 @@ Platform panel (spec 9.1).
 
 ### `agendas`
 
-- `agenda.service.ts`, `actions/createAgenda.action.ts`
-- UI: `AgendaClientContent`, `AgendaHeader`, `AgendaTimeline`, `CreateAgendaForm`
-- Routes: `.../agenda`, `.../agenda/create-agenda`
+- SoT: `event_agenda_items` + `event_agenda_speakers` (nine `SessionType`s; Competition may set `track_id` → `hackathon_tracks`). Warn-only overlaps via `agendaOverlap.ts`.
+- `agenda.service.ts`, `agendaSpeakers.service.ts` / `agendaSpeakers.logic.ts`, `agendaSort.ts`, `agendaTypes.ts`, `actions/agendaItem.action.ts`
+- UI: `AgendaClientContent` (list|timeline), `AgendaHeader`, `AgendaTimeline`, `AgendaItemModal` (add/edit/delete). `.../agenda/create-agenda` redirects to agenda.
+- Public: `PublicAgenda` day sections + type badges + speaker avatars
+- Routes: `.../agenda`
 
 ### `analytics`
 
@@ -316,9 +318,10 @@ Quote / counter-offer / accept / review. Reads/writes via typed `supabaseAdmin` 
 JSON layout templates + on-demand SVG/PDF (`layout.types.ts`, `renderCertificate.ts`, `certificates.service.ts`). No blockchain; no stored cert PDFs.
 
 - Actions: `issueCertificates.action.ts`, `template.action.ts`, `applyDesign.action.ts`, `downloadCertificate.action.ts`, `emailCertificates.action.ts`
-- Email: `certificateEmail.ts` — link-first (primary CTA `/certificate/[code]/download`, secondary `/verify/[code]`); copy says certificate opens on Avoeline; `email_attach_pdf` defaults **false** (opt-in attach only)
-- UI: `CertificateEditor` (Konva), `DesignPicker`, `DownloadCertificate`
-- Routes: organizer certificates + `making-template`; `GET /api/certificates/[id]` (ETag); `/certificate/[code]/download`; public `/verify/[code]`
+- Issue: records only; optional `archiveToDrive` → `certificate_jobs` cron (`certificateJobs.service.ts`, `/api/cron/certificate-jobs`) private A6 archive
+- Email: `certificateEmail.ts` — primary CTA `/certificate/[code]` viewer (works with Drive down); secondary `/verify/[code]`; Drive link only when `includeDriveLink` + `driveShareUrl`; docs/18 `enqueueBatch` + outbox send-time render; `email_attach_pdf` defaults **false**
+- UI: `CertificateEditor` (Konva), `DesignPicker`, `DownloadCertificate`; archive + include-Drive toggles on certificates client
+- Routes: organizer certificates + `making-template`; public `/certificate/[code]` viewer; `GET /api/certificates/[id]` (ETag); `/certificate/[code]/download`; `/verify/[code]`
 
 ### `dashboard`
 
@@ -329,26 +332,28 @@ Organizer home (`/organizer/[organizer_id]/dashboard`): no plan banner (plan blo
 Browse + wizard + ownership. My Events list: `organizerEvents.filters.ts` / `organizerEvents.stats.ts` / toolbar + row menu components; `EventThumb` `showTitle`; occupancy tallies; 20/page URL pagination.
 
 - `browse.service.ts`, `event.controller.ts`, `ownership.ts`
-- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView`, `getPublicEventMeta`, `resolveRegisterButtonState`) + client-safe `types.ts` (`PublicEventDto` allowlist — no organizer contact, whitelist, meeting password, access codes, promo codes, bank, attendee/team secrets, sponsor contract/benefits). Columns `events.show_sponsors|show_collaborators|show_partners` (default false).
+- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, `resolveRegisterButtonState`) + client-safe `types.ts` (`PublicEventDto` allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / promo codes**, bank, attendee/team secrets, sponsor contract/benefits). Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false).
 - Actions: `toggleChecklistItem.action.ts`, `updateEventBasics.action.ts`, `archiveEvent.action.ts`, `deleteEvent.action.ts`, `updatePublicShowToggles.action.ts`
-- Public UI: `components/public/{PublicEventHero,PublicEventFacts,PublicRegisterCard,PublicAbout,PublicTiersAndDiscounts,PublicAgenda,PublicSpeakers,PublicCompetitions,PublicSponsorsStrip}` + `addToCalendar.ts`
+- Public UI: `components/public/{PublicEventHero,PublicEventFacts,PublicRegisterCard,PublicAbout,PublicTiersAndDiscounts,PublicAgenda,PublicSpeakers,PublicCompetitions,PublicSponsorsStrip.client}` (`PublicSponsorsStrip.tsx` re-exports) + `addToCalendar.ts`
 - Wizard: `EventWizardLayout` (shell) + `wizard/steps/{Basic,ScheduleLocation,HackathonTracks,Registration,Review}Step`, widgets `DescriptionEditor`, `TimeField`, `MapPreview`, `FormBuilder`. Defaults: free tickets, PKT timezone (no TZ picker). Validates schedule order, named hackathon tracks, paid tiers before next/publish. Product rules: `docs/09-event-creation.md`. Full tab/flow inventory: `docs/10-events-and-hackathon-dashboards.md`.
 - Extra columns: `events.map_url`, `events.requires_registration`, `events.show_sponsors|show_collaborators|show_partners`; `hackathon_tracks.image_url|policies|instructions|instructions_file_*|opens_at|closes_at|registration_closes_at|roster_locks_at|submission_deadline_at|discount_*|ended_at|status|kind|rules_text`; `hackathon_teams.rules_acknowledged_at`.
 - Routes: `/organizer/.../events`, `create`, `[eventId]`, `pub-succ`; public `/events`, `/events/[eventId]` (allowlisted DTO; `/e/[eventId]` short redirect; sticky Register; Share in hero only; sponsor strips gated by show_*; SEO JSON-LD). Sponsors tab: “Show on public page” switches. Department/club create still uses the organizer wizard.
 - Public helpers: `publicEventPresentation` / `trackRegistrationOpen` in `src/lib/publicEventStatus.ts`; `ShareEventLink`
 
-### `connections` (docs/17 C1–C6 + docs/18 limits)
+### `connections` (docs/17 C1–C6 + docs/18 limits) + O1 FileStore
 
-Single module for Google integrations. Other features must not call Google directly. **C1–C6 shipped.**
+Single module for Google integrations. Other features must not call Google directly. **C1–C6 shipped.** **O1 FileStore:** Drive-first binary uploads with private Supabase fallback + promote cron; QR never stored.
 
 - `catalog.ts` — **all five active**; vendor omits `sheets.sync` card; Drive↔Sheets and Calendar↔Meet share scopes on connect
-- Services: OAuth/tokens/sender/grants/capacity/outbox + `calendarSync` + `linkedFiles` + `sheetSync` + `health`
-- Providers: Gmail, Calendar/Meet, Drive (Picker/create) + Sheets values + Docs text
+- Services: OAuth/tokens/sender/grants/capacity/outbox + `calendarSync` + `linkedFiles` + `sheetSync` + `health` + **`assertOrganizerDriveAndGmail`** + **`eventDriveUpload.service`** (delegates to FileStore; no QR folder)
+- **FileStore** (`src/features/files/`): `fileStore` / `DriveStore` / `SupabaseStore` / A6 `folders` / `promote` / `driveHealth`; table `STORED_FILES`; bucket `file-fallback`
+- APIs: `POST /api/uploads/proof|session|complete`, `GET /api/files/[id]`, `GET /api/qr/[token].png`, `GET /api/cron/file-promote`, `GET /api/admin/picker-diagnostics`
+- Providers: Gmail, Calendar/Meet, Drive (Picker/create/**uploadBinaryFile**/resumable/download) + Sheets values + Docs text
 - Actions: `connections`, `grants`, `sender`, `send`, `adminLimits`, `calendar`, `drive`, `sheets`
-- UI: **ConnectionsHub** tabs (Accounts/Library/Calendar/Sheets/Sent email); CalendarSyncControls; Drive; **GoogleSheetsExportPanel** + attendee import on Exports
-- Crons: email-outbox, linked-files, sheet-syncs, connections-health (`CRON_SECRET`)
-- Docs: `docs/17`, **`docs/connections-complete-guide.md`** (end-to-end + organizer test flow), `docs/connections-security-review.md`, `docs/google-verification.md`, `docs/connections-picker-setup.md`
-- Tables: `CALENDAR_LINKS`, `LINKED_FILES`, `SHEET_SYNCS`, `CUSTOM_FORMS`, `CUSTOM_FORM_RESPONSES`
+- UI: **ConnectionsHub** tabs; Drive health banners on Files/Attendees/Certificates/Submissions; Picker errors via `pickerErrors.ts`
+- Crons: email-outbox, linked-files, sheet-syncs, connections-health, **file-promote** (`CRON_SECRET`)
+- Docs: `docs/17`, **`docs/connections-complete-guide.md`**, `docs/connections-security-review.md`, `docs/google-verification.md`, `docs/connections-picker-setup.md` (A5)
+- Tables: `CALENDAR_LINKS`, `LINKED_FILES`, `STORED_FILES`, `SHEET_SYNCS`, `CUSTOM_FORMS`, `CUSTOM_FORM_RESPONSES`
 
 ### `email`
 
@@ -365,12 +370,12 @@ Platform Resend lanes. Organizer outbound sends go through **Connections** (`res
 
 Organizer attendee list, check-in, team/member drawers, registration emails.
 
-- `attendee.service.ts`, `roster.ts`, `emailTypes.ts`, `eventEmail.service.tsx` (sends via organizer Google connection, not Resend; `qr_code` include block + ticket-link QR in HTML)
-- Actions: `checkIn.action.ts` (also revalidates Overview), `eventEmail.action.ts` (save template, member send, bulk preview→confirm + rateLimit), `updateAttendeeDetails.action.ts` (`safeAction`; name/email/phone/custom answers; optional resend confirmation)
-- UI: `AttendeeClientSide`, `AttendeeListItem`, `SingleAttendeeView` (solo vs member; edit details form), `TeamGroupView`, `GroupedAttendeeList`, `AttendeeInput` (controlled search + filters), `EventEmailPanels` (`EmailConnectionRequiredBanner` → `/organizer/{id}/settings/connections`; IncludeChecklist injects body blocks live)
-- Stats: occupancy = team/group seats; people = non-cancelled; checked-in = `checkIn.checkedIn` or status `checked_in`/`attended`
-- Public ticket/status URL: `/events/{eventId}/ticket/{registrationId}`
-- Auto mail: `maybeAutoEventEmail` → team lead only; `registration_confirmed` defaults include `team_members`, `ticket_url`, `qr_code`
+- `attendee.service.ts`, `roster.ts` (`hackathonTeamCodesVisible`), `emailTypes.ts` / `emailCompose.logic.ts` (composer preview + member QR ≤10 rule), `eventEmail.service.tsx` (`requireConnectedSender`; maps link; inline member QRs when ≤10 else ticket links; optional `email_members_qr`)
+- Actions: `checkIn.action.ts` (actor `checked_in_by`), `joinCode.action.ts` (revoke/regenerate), `eventEmail.action.ts`, `updateAttendeeDetails.action.ts`
+- UI: `AttendeeClientSide` (Email menu, Export, Exports/Sheets, `checkInByNames`); `RegistrationFormDrawer`; `SingleAttendeeView` (status history, tier, check-in who, on-demand QR); `TeamGroupView` (join revoke/regenerate; Valid until last phase/event end); `EventEmailPanels` live preview
+- Join validity: `hackathon/joinCodeValidity.ts` — later of last phase close and event end; enforced in `joinTeam`
+- Auto mail: `maybeAutoEventEmail` → team lead; optional per-member QR fan-out
+- Registration proofs/QR: Drive via `uploadRegistrationProofDriveAction` / `generateAndHostQr`; `registrationEmail.ts` organizer Gmail only
 
 ### `event_speakers`
 
@@ -398,13 +403,14 @@ Excel/CSV event sheets (`exceljs`), private storage, signed download.
 
 ### `hackathon`
 
-Tracks, teams, submissions, judging, live announcements, CTF arena.
+Tracks, teams, submissions, task scoreboard, CTF arena.
 
 - `hackathon.service.ts`, `ctf.service.ts`, `teamWrite.ts` (team/registration patches), `judging.ts`, `live.ts`, `kinds.ts` — data via `supabaseAdmin` + `TABLES` (no `adminDb`)
-- Actions: `tracks`, `teams`, `roster`, `judging`, `live`, `ctf`, `assignLeftover`
+- Actions: `tracks`, `teams`, `roster`, `judging` (composer invite + `requireConnectedSender`, `resendJudgeInviteAction`, `markJudgeInviteOpened`, accept/decline, `scoreSubmissionAsJudgeAction` → judge scores mean into completions), `live` (Phase B: slim settings save), `ctf`, `assignLeftover`, `tasks`
 - Paid module `hackathon_ops`. There is no left-rail Hackathon tab — hackathons live on Events (`?kind=hackathon`). Create is `.../events/create?hackathon=1`. Dashboard is the unified event layout. Old `/hackathon/*` URLs redirect.
-- Public: `/events/[eventId]/tracks`, `.../tracks/[trackId]` (competition detail; Register gated same as event + `registration_closes_at`), `.../tracks/[trackId]/leaderboard`, `.../mentors`, ticket team page, `/judge/[token]`, `/enter`, `/compete`
-- Organizer hackathon tabs on `.../events/[eventId]`: competitions (Add modal + table thumbs), tasks (accordion + CTF file pick), teams (`?track=` pills; Join vs Enter codes), submissions, scoreboard (ranked table + expand; `trackTaskScoreboardDetail`; first blood; hint-used from `extra.hintsRevealed` with no reveal timestamp), settings (`hackathon_config` apply-all-or-tick, plus `max_attachment_mb`). Paid Staff (`teams_advanced_roles`) assigns `page_*` permissions and `team_positions.extra.trackIds`. Owner sees all tabs; staff see granted tabs only. Configure/track page is roster/fees/unlock/judging/prizes — no duplicate config toggles.
+- Public: `/events/[eventId]/tracks`, `.../tracks/[trackId]`; registration via `effectiveRegistrationClosesAt` + `competitionRegisterState` (`open|closed|full`). `PublicCompetitions` CTF badge, expandable rules, Register team. DTO excludes tasks/flags/hints/judge links. `/judge/[token]` accept/decline + scoring when accepted; `/enter`, `/compete`
+- Organizer: `CompetitionModal` (portaled Modal) + O5 `TrackForm` sections; track configure judge composer (invited/opened/accepted/declined + resend). **Competitor occupancy** on **Attendees**.
+- Migrations: `20261107120000_judge_invite_extra_task_jsonb.sql`, `20261107120100_task_submission_organizer_notes.sql`, `20261107120200_hackathon_judges_updated_at.sql`, `20261108140000_o5_judge_submission_scores.sql`
 - Storage: `sponsor-logos` (public), `hackathon-challenge-files` (private, 50MB bucket cap; per-event `hackathon_settings.max_attachment_mb` default 10).
 
 ### `media`
@@ -428,7 +434,7 @@ Quotation templates MVP (no Konva editor): `quotationTemplates.service.ts`, `act
 Sponsors / collaborators / partners on an event.
 
 - `organizations.service.ts`, `actions/organizations.action.ts`, `listPartnerTypes`
-- UI: `OrganizationForm` (sponsor tier/benefits; collaborator contribution + terms; partner types + definitions; logo upload to `sponsor-logos`), `InviteCollaborator`, `AcceptCollaboration`, `SponsorStrip` (legacy), `PublicShowToggles` (Sponsors tab → `events.show_*`)
+- UI: list-first `SponsorsBoard` (modal Add/Edit with form→preview; **Preview public section** + `PublicShowToggles`); `OrganizationForm` (tier/benefits; collaborator contribution + terms; partner types; sponsor `payment_status` / `amount_received` / `received_on`; logo upload to `sponsor-logos`); `InviteCollaborator`, `AcceptCollaboration`, `SponsorStrip` (legacy)
 - Public credits: `PublicSponsorsStrip` only when matching `show_sponsors` / `show_collaborators` / `show_partners` (defaults off). No contract values/benefits/terms on the public page.
 - Sponsor-only optional `track_id` dedication. Collaborators do **not** get dashboard access from this form.
 - Routes: `.../sponsors`; public accept `/collaborate/[token]`
@@ -442,9 +448,9 @@ Own vendors on an event (marketplace bookings stay in `event_vendors` / bookings
 
 ### `event_expenses`
 
-Per-event budget and expenses (SQL totals).
+Unified ledger: view `event_ledger_lines` + RPC `event_ledger_totals` (tickets, competition fees, sponsor expected/received, bookings, own vendors, manual `expense`/`credit`/`income`). Auto booking/own-vendor lines marked `superseded` when a linked manual expense exists (excluded from totals).
 
-- `expenses.service.ts` (`listEventExpenses`, `getEventExpenseTotals` via RPC), `actions/expenses.action.ts`, `ExpensesClient`
+- `expenses.service.ts` (`listEventLedgerLines`, `getEventLedgerTotals`, `listEventExpenses`), `ledgerTotals.ts`, `actions/expenses.action.ts`, `ExpensesClient` (filters + export of auto+manual)
 - Route: `.../events/[eventId]/expenses` (nav after Sponsors). Staff keys: `page_expenses`, `expenses:manage`.
 
 ### `registration`
@@ -469,7 +475,7 @@ Admin-managed categories/formats, organizer requests, dynamic fields, checklist 
 
 ### `teams`
 
-One shared ops library (not hackathon occupancy). **Organizer page** `/organizer/[id]/teams` uses `OrganizerTeamsShell` with tabs Teams | Recruitment | Access (`organizerTeams.filters.ts`), stats RPC, stepped Add team/member modals, team drawer. Event tab label **Team** (href `/staff`) still uses `TeamsManager` + assign + event recruitment. Scopes: `organizer` | `event` | `club` | `department` | `platform`. Basic `teams_basic`; paid `teams_advanced_roles` (locked panels on Basic for paid tabs). Permission catalog + presets: `src/lib/permissions.ts`; `can()` unions grants + position permissions. Emails: `requireConnectedSender` → `sendViaOrganizerConnection` only (never platform sender / never email passwords); interview `.ics` fallback when disconnected.
+One shared ops library (not hackathon occupancy). **Organizer page** `/organizer/[id]/teams` uses `OrganizerTeamsShell` with tabs Teams | Recruitment | Access (`organizerTeams.filters.ts`), stats RPC, stepped Add team/member modals, team drawer. Event tab label **Team** (href `/staff`) uses `TeamsManager` with **`hideChrome` + `hideRecruitment`**: Assign team / Remove / Manage in Teams only; per-assignment `lead_member_id` on `event_staff_assignments`. Recruitment, grants, and roster edits stay on organizer Teams. Scopes: `organizer` | `event` | `club` | `department` | `platform`. Basic `teams_basic`; paid `teams_advanced_roles` (locked panels on Basic for paid tabs). Permission catalog + presets: `src/lib/permissions.ts`; `can()` unions grants + position permissions. Emails: `requireConnectedSender` → `sendViaOrganizerConnection` only (never platform sender / never email passwords); interview `.ics` fallback when disconnected.
 
 - `teamEngine.service.ts`, `teamScope.ts`, `recruitmentEmail.ts`, `grants.service.ts` (under permissions)
 - Actions: `teamEngine.action.ts`, `staffAdvanced.action.ts`, `exportTeams.action.ts`, `grants.action.ts`, `applyForm.action.ts`, `department.action.ts`
@@ -509,9 +515,10 @@ Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.ts
 | `/events/[eventId]/tracks` | public competition list (Register gated by lifecycle) |
 | `/events/[eventId]/tracks/[trackId]` | public competition detail |
 | `/events/[eventId]/tracks/[trackId]/tasks` | redirects signed-in registrant to their ticket tasks page |
-| `/events/[eventId]/tracks/[trackId]/leaderboard` | leaderboard |
-| `/events/[eventId]/mentors` | mentors |
+| `/events/[eventId]/tracks/[trackId]/leaderboard` | redirects to competition detail (Phase B) |
+| `/events/[eventId]/mentors` | redirects to `/events/[eventId]/tracks` (Phase B) |
 | `/verify/[code]` | certificate verify by `verification_code` (UUID param redirects to code) |
+| `/certificate/[code]` | public on-demand SVG viewer + PDF download CTA |
 | `/certificate/[code]/download` | on-demand PDF stream |
 | `/api/certificates/[id]` | mobile JSON + ETag (issued only) |
 | `/support` | support tickets |
@@ -559,7 +566,7 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../events/create` | wizard (`?hackathon=1` pre-sets hackathon) |
 | `.../events/[eventId]` | unified dashboard |
 | `.../attendees` | roster; grouped default for hackathon or group registration; `?team=` opens that team; email templates + bulk on the same page |
-| `.../staff` | Event **Team** tab (label Team, href `/staff`) — assign library teams (`event_staff_assignments`); recruitment/onboard emails via Google; export kind `staff` |
+| `.../staff` | Event **Team** tab (label Team, href `/staff`) — assign library teams/leads (`event_staff_assignments`); no recruitment UI on this tab; export kind `staff` |
 | `.../access` | Access settings card, guest preview, whitelist vs invite rows; tiers hidden on hackathons; promo scope + lists |
 | `.../agenda`, `.../agenda/create-agenda` | schedule + speaker picker |
 | `.../speakers`, `.../speakers/create-speaker` | speakers + session picker |
@@ -567,7 +574,7 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../sponsors` | orgs |
 | `.../competitions` | hackathon tracks |
 | `.../tasks` | Phases & Tasks |
-| `.../teams` | Hackathon **Competitors** tab (href `/teams`) — occupancy (`hackathon_teams`), not the organizer ops library |
+| `.../teams` | redirects to `.../attendees` (Phase B; hackathon competitor occupancy on Attendees) |
 | `.../submissions` | submissions |
 | `.../scoreboard` | task-completion scoreboard |
 | `.../settings` | hackathon_config apply-to |
@@ -585,9 +592,9 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../teams` | ops library tabs Teams/Recruitment/Access (`teams_basic` / `teams_advanced_roles`); assign from event Team tab |
 | `.../chatbot` | AI assistant (`ChatBotClient.tsx`) |
 
-Overview (`src/app/organizer/[organizer_id]/events/[eventId]/page.tsx`) is a visual system of `rounded-xl` cards: dark facts band (`bg-panel`, no duplicate banner — header uses `EventHeaderMedia`), one `MetricTile`/`Meter` stat row, then `Card` sections (Schedule, Location, Recent registrations, Capacity, Registration, Pricing, Certificate, Description). Status pills use `StatusBadge marker="dot"`. Owner header actions: Edit event, Archive/Restore, Delete. My Events uses URL filters + occupancy (not only Archived tab); list `EventThumb` uses `showTitle={false}` to avoid double titles.
+Overview (`src/app/organizer/[organizer_id]/events/[eventId]/page.tsx`) is a visual system of `rounded-xl` cards: dark facts band (`bg-panel`, no duplicate banner — header uses `EventHeaderMedia`), one `MetricTile`/`Meter` stat row, then `Card` sections (Schedule, Location, Recent registrations, Capacity, Registration, Pricing, Certificate, Description). Facts: **Agenda summary** (speakers + agenda counts), hackathon **multi-track paid** shows per-competition fees in the ticket fact, `maps_url`/`mapUrl` quick link in the hero when set, **Seats left** hidden when `totalSeats === 0` (unlimited). Status pills use `StatusBadge marker="dot"`. Owner header actions: Edit event, Archive/Restore, Delete. My Events uses URL filters + occupancy (not only Archived tab); list `EventThumb` uses `showTitle={false}` to avoid double titles.
 
-Event section tabs are a slim horizontal strip in `src/app/organizer/[organizer_id]/events/[eventId]/layout.tsx`. Labels: **Team** (ops, href `/staff`), hackathon **Competitors** (occupancy, href `/teams`). Staff missing a tab grant redirects to overview (not `notFound`). When `events.requires_registration` is false, Attendees is omitted. There is no Tickets tab; paid SKUs and promos sit on **Access** (including paid hackathons; `promo_codes.track_id` can scope a code to one competition). Hackathons appear on the Events list (badge + `?kind=`). There is no separate left-rail Hackathon tab. Unified tabs add Competitions, Phases & Tasks, Competitors, Submissions, Scoreboard, Settings when `eventIsHackathon`; missing `hackathon_ops` shows `LockedModulePanel`. `hackathonDashPath` returns `/organizer/{id}/events/{eventId}/…`. Regular group events use `registration_groups` + `registrations.group_id` and `GroupedAttendeeList` (not `hackathon_teams`). Occupancy: one team/group = one seat (`occupyingHackathonRegs` / `occupyingGroupRegs`). Agenda/speakers share `event_agenda_speakers`. Team tab assigns organizer library teams (`event_staff_assignments`); named positions + applicants need `teams_advanced_roles`. Scoreboard joins completions to `hackathon_tasks.track_id`. Exports kind `hackathon_teams` is two xlsx sheets. Public enter/compete unchanged. `assertOwnedEvent` allows `department_admin` via `canManageOrg`. Docs: `docs/10-events-and-hackathon-dashboards.md`.
+Event section tabs are a slim horizontal strip in `src/app/organizer/[organizer_id]/events/[eventId]/layout.tsx`. Labels: **Team** (ops, href `/staff`). Staff missing a tab grant redirects to overview (not `notFound`). When `events.requires_registration` is false, Attendees is omitted. There is no Tickets tab; paid SKUs and promos sit on **Access** (including paid hackathons; `promo_codes.track_id` can scope a code to one competition). Hackathons appear on the Events list (badge + `?kind=`). There is no separate left-rail Hackathon tab. Unified tabs add Competitions, Phases & Tasks, Submissions, Scoreboard, Settings when `eventIsHackathon` (competitor occupancy is **Attendees**, grouped); missing `hackathon_ops` shows `LockedModulePanel`. `hackathonDashPath` returns `/organizer/{id}/events/{eventId}/…`. Regular group events use `registration_groups` + `registrations.group_id` and `GroupedAttendeeList` (not `hackathon_teams`). Occupancy: one team/group = one seat (`occupyingHackathonRegs` / `occupyingGroupRegs`). Agenda/speakers share `event_agenda_speakers`. Team tab assigns organizer library teams (`event_staff_assignments`); named positions + applicants need `teams_advanced_roles`. Scoreboard joins completions to `hackathon_tasks.track_id`. Exports kind `hackathon_teams` is two xlsx sheets. Public enter/compete unchanged. `assertOwnedEvent` allows `department_admin` via `canManageOrg`. Docs: `docs/10-events-and-hackathon-dashboards.md`.
 
 ### Vendor (`src/app/vendor/layout.tsx` → `DashboardNav`)
 
@@ -750,6 +757,91 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-08 — O8 QA checklist + Playwright + docs
+- What: Full manual checklist for localhost `avoeline@gmail.com`; Playwright expand (A7 redirects, enter→compete + rules ack, demo auth setup soft-skip); TESTING §4.1 + docs/11 Access/Overview/Attendees sync; no A7 UI restored.
+- Files: `docs/O8-full-flow-checklist.md`, `e2e/{smoke,a7-redirects,organizer-tabs,auth.setup}.ts`, `e2e/helpers/demo.ts`, `playwright.config.ts`, `docs/TESTING.md`, `docs/11-events-and-hackathon-complete-spec.md`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o8-qa-docs.md`
+- Next: Fill checklist Pass/Fail while signed in as avoeline@gmail.com; optional fix demo password login for chromium-auth tab smoke.
+
+### 2026-11-08 — O7 Certificates and Files
+- What: Public `/certificate/[code]` viewer; issue records-only + `certificate_jobs` private Drive archive; docs/18 cert email batch + send-time render; opt-in Drive share-by-link warning; Files A4 `EventDriveFoldersPanel` + create under event folder + `assertEventActor(..., "files")`; unit tests.
+- Files: `src/app/certificate/[code]/page.tsx`, `certificateEmail.ts`, `certificateJobs.service.ts`, `api/cron/certificate-jobs/route.ts`, `emailCertificates.action.ts`, `outboxWorker.service.ts`, `batch.service.ts`, `GoogleDriveClient.shareAnyoneWithLink`, `EventDriveFoldersPanel.tsx`, `listEventDriveFolders.action.ts`, `folders.ts`, `linkedFileEntityAuth.ts`, `files/page.tsx`, `docs/22-o2-o8-status.md`, `docs/11-events-and-hackathon-complete-spec.md`, `plans/2026-11-08-o7-certificates-files.md`
+
+### 2026-11-08 — O6 Phases / Submissions / Scoreboard / Settings
+- What: FileStore phase/task/submission attachments; compete `/api/files` auth (cookie path `/`); phase windows always gate submit; multi-link + `allow_resubmission`; submissions columns/proxy/pagination; hour-ago scoreboard ▲▼; `live_scoreboard` organizer gate; settings enforcement suite + matrix.
+- Files: `authorizeFileAccess.ts`, `HackathonPhasesTasksPanel.tsx`, `tasks.action.ts`, `TaskWorkSubmit.tsx`, `taskSubmissions.*`, `scoreboardAggregate.ts`, `LiveScoreboardTable.tsx`, `HackathonWorkspace.tsx`, `configKeys.ts`, `settingsEnforcement.logic.ts`, `docs/hackathon-settings-matrix.md`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o6-phases-submissions-scoreboard-settings.md`
+
+### 2026-11-08 — O5 Competitions / Judges / Public
+- What: Portaled Modal + focus trap + O5 TrackForm sections; effective close + register open/closed/full; judge composer/opened/resend/scoring → scoreboard; public competition cards; unit tests; migration `hackathon_judge_submission_scores`.
+- Files: `src/components/ui/{Modal,modalFocus}.tsx`, `src/features/hackathon/{components/{CompetitionModal,TrackForm,HackathonJudgeInvitePanel,JudgeScoringPanel},actions/judging.action,judgeInvite.logic,judgeScoring.service}`, `src/lib/competitionRegistration.ts`, `src/features/events/{publicEvent.service,types,components/public/PublicCompetitions}`, `src/app/judge/[token]/page.tsx`, `supabase/migrations/20261108140000_o5_judge_submission_scores.sql`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o5-competitions-judges.md`
+
+### 2026-11-08 — O4 Agenda / Sponsors / Expenses / Team
+- What: Agenda SoT + nine types + list/timeline + modal + overlaps + `track_id` + public parity; speakers join sync; SponsorsBoard list-first modal preview + payment fields; SQL `event_ledger_lines` / `event_ledger_totals` + income kind; slim Event Team (`hideChrome`, `lead_member_id`); unit tests; migration `20261108120000_o4_agenda_sponsors_ledger_team.sql`.
+- Files: `src/features/agendas/*`, `src/features/organizations/{SponsorsBoard,OrganizationForm,organizations.*}`, `src/features/event_expenses/*`, `src/features/teams/{TeamsManager,OrganizerTeamsBoard,teamEngine.*,eventStaffAssignment.logic}`, `src/app/organizer/.../events/[eventId]/{agenda,sponsors,expenses,staff}/page.tsx`, `supabase/migrations/20261108120000_o4_agenda_sponsors_ledger_team.sql`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o4-agenda-sponsors-expenses-team.md`
+
+### 2026-11-08 — O3 Access tab rebuild
+- What: Type-card Access settings + A2 `HowAccessWorks`; type-scoped whitelist/invites; split tables with expired/revoked; sample CSV; `GuestEmailComposer` + send-limits/copy-link; tier window/seats at read; drop `promoHints`; public gate via `resolveEventAccess`; hybrid invite validate; unit tests.
+- Files: `src/features/access/{types,access.service,guestEmail.logic,components/{HowAccessWorks,AccessSettingsForm,GuestListPanel,GuestEmailComposer,AccessFlowGuide},actions/{accessSettings,guestList,guestEmailBatch}.action}`, `src/app/organizer/.../events/[eventId]/access/page.tsx`, `src/features/events/{publicEvent.service,types,publicEvent.logic,components/public/{PublicTiersAndDiscounts,PublicRegisterCard}}`, `src/features/ticketing/{ticketing.service,tierWindow.logic}`, `src/features/registration/{registration.service,types,actions/registerAttendee.action}`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o3-access-rebuild.md`
+
+### 2026-11-08 — O2 Overview + Attendees one-build close
+- What: Overview ticket_tiers fees, full registration window + description in Key details, Day-1 Agenda copy, empty-tracks hackathon tile; join valid-until from last phase; check-in who display names; lead email multi-member QR ≤10/>10 + maps + `requireConnectedSender`; composer live preview; unit tests (capacity, join, email, export columns).
+- Files: `src/features/events/overviewFacts.ts`, `src/app/organizer/.../events/[eventId]/{page,attendees}/page.tsx`, `src/features/event_attendee/{emailTypes,emailCompose.logic,eventEmail.service,components/EventEmailPanels,SingleAttendeeView,AttendeeClientSide}`, `src/features/hackathon/{joinCodeValidity,actions/teams.action}`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o2-overview-attendees.md`
+
+### 2026-11-07 — O2 Attendees audit follow-up
+- What: Toolbar Email menu; always show Exports/Sheets; drawer status history + check-in actor; join-code revoke/regenerate (`joinCodeRevoked`); registration email live preview + optional member QR; roster visibility tests.
+- Files: `src/features/event_attendee/{roster.ts,emailTypes.ts,eventEmail.service.tsx,actions/{checkIn,joinCode}.action.ts,components/{AttendeeClientSide,AttendeeEmailMenu,TeamGroupView,SingleAttendeeView,EventEmailPanels}.tsx,__tests__/roster.visibility.test.ts}`, `src/features/hackathon/{types.ts,hackathon.service.ts,teamWrite.ts,__tests__/canJoin.test.ts}`, `docs/22-o2-o8-status.md`
+
+### 2026-11-08 — O2 Overview audit follow-up
+- What: Capacity card hidden when unlimited; hackathon expandable competition fees; non-hackathon tier range; Agenda hero hidden when empty + day/start copy; Key details card (visibility/format/category/tickets/agenda); helpers + unit tests.
+- Files: `src/app/organizer/.../events/[eventId]/page.tsx`, `src/features/events/overviewFacts.ts`, `src/features/events/components/HackathonFeesHeroFact.tsx`, `src/features/events/__tests__/overviewFacts.test.ts`
+- Next: Full Playwright O8 matrix on demo data.
+
+### 2026-11-07 — O2–O8 gap close (docs/22)
+- What: Overview Agenda tile + hackathon fee range; Attendees **Registration form** drawer (moved off Access); Access guests only for gated types; on-demand QR in attendee drawer; join-code expiry/fee gates; cert issue soft-skips Drive when disconnected; Files A4 copy; status checklist `docs/22-o2-o8-status.md`.
+- Files: `src/app/organizer/.../events/[eventId]/{page,attendees,access,files}.tsx`, `src/features/event_attendee/components/{AttendeeClientSide,RegistrationFormDrawer,SingleAttendeeView}.tsx`, `src/features/hackathon/{types,actions/teams.action}.ts`, `src/features/certificates/certificates.service.ts`, `docs/22-o2-o8-status.md`
+- Next: Full Playwright O8 matrix on demo data; optional agenda overlap warnings / expenses SQL view polish.
+
+### 2026-11-07 — O1 FileStore (Drive first + fallback)
+- What: `stored_files` + `file-fallback` bucket; `src/features/files` FileStore (Drive → Supabase promote); A6 lazy folders (no QR kind); `POST /api/uploads/proof|session|complete`; `GET /api/files/[id]`; on-demand `GET /api/qr/[token].png`; stop writing `qr_code_image_url`; Drive health banners + `/api/cron/file-promote`; publish Drive gate only when files/paid proofs needed; Picker env warn + `/api/admin/picker-diagnostics`; A5 docs; unit tests.
+- Files: `supabase/migrations/20261107200000_stored_files.sql`, `src/features/files/**`, `src/app/api/uploads/**`, `src/app/api/files/[id]/route.ts`, `src/app/api/qr/[token]/route.ts`, `src/app/api/cron/file-promote/route.ts`, `src/features/connections/server/eventDriveUpload.service.ts`, `src/features/registration/qr.ts`, `docs/connections-picker-setup.md`, `plans/2026-11-07-o1-filestore-drive.md`
+- Next: Smoke proof upload + `/api/files` auth; schedule `file-promote` cron; optional migrate CMS/support uploads off legacy helpers.
+
+### 2026-11-07 — O0 A7 removals (steps 1–5)
+- What: Inventory + purge leftovers: deleted mentor/announcement stubs, rubric score/advance actions, online helpers; slim `live.ts` / settings; CTF checkbox + single Rules & instructions; stop writing deprecated track dates; **roster locks on `registration_closes_at`**; phases own work windows; docs 11/07/12 + settings matrix. Tables/columns deprecated not dropped. Redirects kept (mentors, leaderboard, Competitors→Attendees).
+- Files: `docs/removal-inventory.md`, `src/features/hackathon/{live,judging,types,competitionDates,actions/*,components/*}`, `docs/{11,07,12,hackathon-settings-matrix}.md`, `completeContext.md`
+- Next: Schema optimization pass to DROP deprecated columns/tables later; redeploy prod APIs if needed.
+
+### 2026-11-07 — O0 removal inventory (A7 step 1)
+- What: Formal reference list for docs/22 A7 removals (superseded by steps 2–5 same day).
+- Files: `docs/removal-inventory.md`
+
+### 2026-11-07 — API Route Handler Postman smoke + OAuth callback fix
+- What: Inventoried all Route Handlers; Postman collection **Avoeline API Routes** + envs Local/Production; `scripts/smoke-api-routes.mjs` (`npm run test:api-smoke`). Local: 14/14 unauth checks pass. Fixed Connections OAuth callback redirect `/signin` → `/auth/signin` and catch path to `/organizer/{userId}/settings/connections`; aligned dead `/signin` redirects on files/vendor/dept connections pages. Production `avoeline-website.vercel.app` returns static HTML 404 for `/api/*` (stale deploy, homepage Age ~22d) — redeploy required for live APIs.
+- Files: `src/app/api/connections/[provider]/callback/route.ts`, `src/app/{organizer,vendor,department}/**/connections|files/page.tsx`, `scripts/smoke-api-routes.mjs`, `package.json`, `postman/avoeline-api-routes.postman_collection.json`
+
+### 2026-11-07 — Event Module Phase B+ archive
+- What: Archived full B–E roadmap to `plans/2026-11-07-event-module-phase-b-plus.md` + INDEX; Files tab help copy for Picker vs Phase A Drive uploads.
+- Files: `plans/2026-11-07-event-module-phase-b-plus.md`, `plans/INDEX.md`, `src/app/organizer/.../events/[eventId]/files/page.tsx`
+
+### 2026-11-07 — Event Module Phase E
+- What: Judge invites via organizer Gmail (`inviteJudge` + `sendViaOrganizerConnection`); track configure `HackathonJudgeInvitePanel` tracks accept/decline; `/judge/[token]` minimal accept page. Public competitions: prizes, discounts, event+track registration gates. Task work: organizer brief + optional Drive attachment (`hackathon_tasks.extra`), participant link/file + `organizer_notes`; submissions table always lists timestamped rows. Scoreboard keeps zero-point teams. Docs: `docs/hackathon-settings-matrix.md` Phase B removal table.
+- Files: `src/app/judge/[token]/page.tsx`, `src/features/hackathon/{actions/judging.action.ts,components/{JudgeInviteRespondForm,HackathonJudgeInvitePanel,TaskWorkSubmit,TaskSubmissionsPanel,LiveScoreboardTable,HackathonPhasesTasksPanel,HackathonTrackManagePage}}`, `src/features/events/{publicEvent.service.ts,types.ts,components/public/PublicCompetitions.tsx}`, `src/lib/publicEventStatus.ts`, `supabase/migrations/2026110712*.sql`, `docs/hackathon-settings-matrix.md`, `completeContext.md`
+
+### 2026-11-07 — Event Module Phase D
+- What: Access tab stepped flow (`AccessFlowGuide` + numbered cards: settings → guests → registration questions → tiers/promos); `GuestListPanel` optional invite/whitelist email subject + body (organizer Gmail); approval/rejection/waitlist promotion mail via `sendOrganizerEmail` / `sendViaOrganizerConnection` (not Resend); `PublicEventDto.promoHints` + `PublicTiersAndDiscounts`; `teamContextForReg` fixed for non-hackathon groups; attendee drawer drops unused user profile location; Attendees links to Exports when Sheets synced; event Staff `TeamsManager` `hideRecruitment`.
+- Files: `src/app/organizer/.../events/[eventId]/{access,attendees,staff}/page.tsx`, `src/features/access/components/{AccessFlowGuide,GuestListPanel}.tsx`, `src/features/access/actions/{guestList,registrationDecision,inviteLinks}.action.ts`, `src/features/access/guestEmails.tsx`, `src/features/events/{publicEvent.service.ts,types.ts,components/public/PublicTiersAndDiscounts.tsx}`, `src/features/ticketing/components/TiersPromosOnAccess.tsx`, `src/features/registration/forms/components/RegistrationQuestionsCard.tsx`, `src/features/event_attendee/{components/{AttendeeClientSide,SingleAttendeeView},eventEmail.service.tsx}`, `src/features/teams/components/TeamsManager.tsx`, `completeContext.md`
+
+### 2026-11-07 — Event Module Phase C
+- What: Organizer overview ticket fact + hero map link + unlimited-capacity stat row; agenda days/sessions sorted (`agendaSort.ts`, `PublicAgenda`); public sponsors strip Preview modal (`PublicSponsorsStrip.client`) + `PublicEventDto.sponsorTiers`; expenses show registration revenue vs manual spend (`getEventExpenseTotals` + `ExpensesClient`); speaker list search uses substring match (no unsafe RegExp).
+- Files: `src/app/organizer/.../events/[eventId]/page.tsx`, `src/features/agendas/{agenda.service.ts,agendaSort.ts}`, `src/features/events/{publicEvent.service.ts,types.ts,components/public/{PublicAgenda,PublicEventFacts,PublicSponsorsStrip*}}`, `src/app/events/[eventId]/page.tsx`, `src/features/event_expenses/{expenses.service.ts,types.ts,components/ExpensesClient.tsx}`, `src/app/organizer/.../events/[eventId]/speakers/page.tsx`, `completeContext.md`
+
+### 2026-11-07 — Event Module Phase B (hackathon cut)
+- What: Removed hackathon Competitors nav + `/events/.../teams` redirects to Attendees; competitions tab no longer embeds judges/announcements/online/mentors/spectator links; public `/mentors` and track `/leaderboard` redirect; stripped mentor/leaderboard/announcements from participant ticket team page; TrackForm simplified (CTF checkbox, registration close + closes, merged rules/instructions, single attachment); `saveTrack` nulls `opens_at`/`roster_locks_at`/`submission_deadline_at` from form; `getParticipantAccess` no longer blocks on missing opens/roster lock; hackathon settings form is attachment MB + judging window only; track configure page drops rubric/advance/judge leaderboard card; Attendees grouped drawers show join + dashboard codes when registration + payment/fee confirmed (valid-until event end note); removed unused `Leaderboard`, `MentorForms`, `JudgingForms` components; legacy `page_teams` maps to attendees permission. **Follow-up:** `SingleAttendeeView` `teamCodes.teamPayment` uses `tm.payment ?? null` so typecheck matches `string | null`.
+- Files: `src/app/organizer/.../events/[eventId]/{layout,teams/page}.tsx`, `src/features/hackathon/{components/{HackathonWorkspace,HackathonTrackManagePage,TrackForm,LiveForms},actions/{live.action,tracks.action},participantAccess.ts,kinds.ts}`, `src/features/event_attendee/{roster.ts,components/{AttendeeClientSide,TeamGroupView,SingleAttendeeView,GroupedAttendeeList},actions/eventEmail.action.ts}`, `src/app/organizer/.../attendees/page.tsx`, `src/app/events/[eventId]/{tracks/**,mentors/**,ticket/.../team/page.tsx}`, `src/lib/permissions.ts`, `src/features/hackathon/actions/{roster.action,assignLeftover.action}.ts`
+
+### 2026-11-07 — Event Phase A Drive + Gmail hard-require
+- What: Hard gate Drive+Gmail for proofs/media/certs/registration mail; Drive multipart upload + event folders; Picker invalid-key UX; registration/cert email via organizer Gmail with QR; public register UI blocks when not connected.
+- Files: `src/features/connections/server/assertOrganizerDriveAndGmail.ts`, `eventDriveUpload.service.ts`, `src/features/registration/qr.ts`, `registrationEmail.ts`, `uploadRegistrationProofDrive.action.ts`, `src/features/certificates/certificates.service.ts`, `docs/17-connections-system.md`, `docs/connections-picker-setup.md`, `plans/2026-11-07-event-drive-gmail-phase-a.md`
 
 ### 2026-11-04 — Audit Batch 1 (gates)
 - What: Next → 16.4.5 (AUD-1-002); attendee Sheets import via `connections/server/sheetRead.service` (AUD-1-005 / C6); restored docs `12`, `15`, `20` stubs (AUD-1-003); regression tests for C6 gate + Next floor.

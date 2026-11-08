@@ -73,10 +73,15 @@ export function EventStaffAssignForm({
   eventId: string;
   organizerId: string;
   library: TeamWithMembers[];
-  assigned: { teamId: string; memberIds: string[] }[];
+  assigned: { teamId: string; memberIds: string[]; leadMemberId?: string | null }[];
   action: (formData: FormData) => void | Promise<void>;
 }) {
-  const assignedMap = new Map(assigned.map((a) => [a.teamId, a.memberIds]));
+  const assignedMap = new Map(
+    assigned.map((a) => [
+      a.teamId,
+      { memberIds: a.memberIds, leadMemberId: a.leadMemberId ?? null },
+    ]),
+  );
   if (!library.length) {
     return (
       <p className="text-sm text-ink-soft">
@@ -94,16 +99,21 @@ export function EventStaffAssignForm({
       <input type="hidden" name="organizerId" value={organizerId} />
       <p className="text-sm text-ink-soft">
         Tick a library team to assign to this event’s team. Leave every member ticked (or tick none)
-        to include the whole roster.{" "}
+        to include the whole roster. Pick an event lead per assigned team.{" "}
         <Link href={`/organizer/${organizerId}/teams`} className="font-medium text-ink underline">
-          Manage teams
+          Manage in Teams
         </Link>
       </p>
       <div className="space-y-4">
         {library.map((team) => {
           const current = assignedMap.get(team.id);
           const teamOn = current !== undefined;
-          const subset = current && current.length ? new Set(current) : null;
+          const subset = current && current.memberIds.length ? new Set(current.memberIds) : null;
+          const defaultLead =
+            current?.leadMemberId ||
+            team.members.find((m) => m.role === "lead")?.id ||
+            team.members[0]?.id ||
+            "";
           return (
             <fieldset key={team.id} className="rounded-xl border border-line p-4">
               <label className="flex items-center gap-2 text-sm font-medium text-ink">
@@ -118,23 +128,39 @@ export function EventStaffAssignForm({
                 <span className="font-normal text-ink-soft">· {team.members.length} people</span>
               </label>
               {team.members.length ? (
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {team.members.map((m) => (
-                    <label key={m.id} className="flex items-center gap-2 pl-6 text-sm text-ink">
-                      <input
-                        type="checkbox"
-                        name={`members_${team.id}`}
-                        value={m.id}
-                        defaultChecked={!subset || subset.has(m.id)}
-                        className="h-4 w-4 accent-current"
-                      />
-                      <span>{m.user?.name || m.displayName || "Member"}</span>
-                      {m.user?.email || m.email ? (
-                        <span className="text-xs text-ink-soft">{m.user?.email || m.email}</span>
-                      ) : null}
-                    </label>
-                  ))}
-                </div>
+                <>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {team.members.map((m) => (
+                      <label key={m.id} className="flex items-center gap-2 pl-6 text-sm text-ink">
+                        <input
+                          type="checkbox"
+                          name={`members_${team.id}`}
+                          value={m.id}
+                          defaultChecked={!subset || subset.has(m.id)}
+                          className="h-4 w-4 accent-current"
+                        />
+                        <span>{m.user?.name || m.displayName || "Member"}</span>
+                        {m.user?.email || m.email ? (
+                          <span className="text-xs text-ink-soft">{m.user?.email || m.email}</span>
+                        ) : null}
+                      </label>
+                    ))}
+                  </div>
+                  <label className="mt-3 flex flex-col gap-1 pl-6 text-sm text-ink">
+                    <span className="text-xs text-ink-soft">Event lead</span>
+                    <select
+                      name={`lead_${team.id}`}
+                      defaultValue={defaultLead}
+                      className="rounded-lg border border-line bg-paper px-2 py-1.5 text-sm"
+                    >
+                      {team.members.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.user?.name || m.displayName || m.email || "Member"}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </>
               ) : (
                 <p className="mt-2 pl-6 text-xs text-ink-soft">This team has no members yet.</p>
               )}

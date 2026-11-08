@@ -19,6 +19,13 @@ export type ScorePhaseCell = {
   completedAt: string | null;
 };
 
+export type RankMovement = {
+  direction: "up" | "down" | "same" | "new";
+  /** Positive = climbed (rank number decreased). */
+  delta: number;
+  priorRank: number | null;
+};
+
 export type ScoreboardDetailRow = {
   teamId: string;
   teamName: string;
@@ -30,10 +37,10 @@ export type ScoreboardDetailRow = {
   lastSolveAt: string | null;
   phases: ScorePhaseCell[];
   tasks: ScoreTaskCell[];
+  movement?: RankMovement;
 };
 
-/** Only completions whose task_id is in `taskRows` count — proves per-competition isolation. */
-export function aggregateScoreboardDetail(input: {
+export type ScoreboardAggregateInput = {
   teams: { id: string; name: string; extra?: unknown }[];
   taskRows: { id: string; title: string; points: number | null; phase_id: string | null }[];
   phaseRows: { id: string; name: string }[];
@@ -44,9 +51,25 @@ export function aggregateScoreboardDetail(input: {
     is_correct: boolean | null;
     attempted_at: string | null;
   }[];
-}): ScoreboardDetailRow[] {
+};
+
+/** Only completions whose task_id is in `taskRows` count — proves per-competition isolation. */
+export function aggregateScoreboardDetail(input: ScoreboardAggregateInput): ScoreboardDetailRow[] {
+  return aggregateScoreboardDetailAt(input, Number.POSITIVE_INFINITY);
+}
+
+/** Same as aggregateScoreboardDetail but only completions with attempted_at <= atMs. */
+export function aggregateScoreboardDetailAt(
+  input: ScoreboardAggregateInput,
+  atMs: number,
+): ScoreboardDetailRow[] {
   const taskIds = new Set(input.taskRows.map((t) => t.id));
-  const done = input.completions.filter((c) => c.is_correct && taskIds.has(String(c.task_id)));
+  const done = input.completions.filter((c) => {
+    if (!c.is_correct || !taskIds.has(String(c.task_id))) return false;
+    const at = c.attempted_at ? Date.parse(String(c.attempted_at)) : NaN;
+    if (!Number.isFinite(at)) return atMs === Number.POSITIVE_INFINITY;
+    return at <= atMs;
+  });
   const firstBlood = new Map<string, { teamId: string; at: string }>();
   for (const c of done) {
     const at = String(c.attempted_at || "");
@@ -122,4 +145,41 @@ export function aggregateScoreboardDetail(input: {
     const bLast = b.lastSolveAt || "\uffff";
     return aLast.localeCompare(bLast);
   });
+}
+
+/** Compare current ranks vs an earlier board (e.g. hour ago). */
+export function computeRankMovement(
+  nowRows: ScoreboardDetailRow[],
+  hourAgoRows: ScoreboardDetailRow[],
+): Map<string, RankMovement> {
+  const priorRank = new Map(hourAgoRows.map((r, i) => [r.teamId, i + 1]));
+  const out = new Map<string, RankMovement>();
+  nowRows.forEach((row, i) => {
+    const rank = i + 1;
+    const prev = priorRank.get(row.teamId);
+    if (prev == null) {
+      out.set(row.teamId, { direction: "new", delta: 0, priorRank: null });
+      return;
+    }
+    const delta = prev - rank;
+    if (delta > 0) out.set(row.teamId, { direction: "up", delta, priorRank: prev });
+    else if (delta < 0) out.set(row.teamId, { direction: "down", delta, priorRank: prev });
+    else out.set(row.teamId, { direction: "same", delta: 0, priorRank: prev });
+  });
+  return out;
+}
+
+/** Attach hour-ago movement onto current rows (mutates copies). */
+export function withRankMovement(
+  input: ScoreboardAggregateInput,
+  nowMs = Date.now(),
+  lookbackMs = 60 * 60 * 1000,
+): ScoreboardDetailRow[] {
+  const nowRows = aggregateScoreboardDetailAt(input, nowMs);
+  const hourAgoRows = aggregateScoreboardDetailAt(input, nowMs - lookbackMs);
+  const move = computeRankMovement(nowRows, hourAgoRows);
+  return nowRows.map((r) => ({
+    ...r,
+    movement: move.get(r.teamId) || { direction: "new" as const, delta: 0, priorRank: null },
+  }));
 }

@@ -1706,6 +1706,7 @@ export type Database = {
           status: string | null
           timezone: string | null
           title: string
+          track_id: string | null
         }
         Insert: {
           add_to_calendar?: boolean
@@ -1727,6 +1728,7 @@ export type Database = {
           status?: string | null
           timezone?: string | null
           title: string
+          track_id?: string | null
         }
         Update: {
           add_to_calendar?: boolean
@@ -1748,6 +1750,7 @@ export type Database = {
           status?: string | null
           timezone?: string | null
           title?: string
+          track_id?: string | null
         }
         Relationships: [
           {
@@ -1762,6 +1765,13 @@ export type Database = {
             columns: ["linked_child_event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_agenda_items_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -2343,6 +2353,9 @@ export type Database = {
           logo_url: string | null
           name: string
           partnership_kind: string | null
+          payment_status: string
+          amount_received: number
+          received_on: string | null
           role: string | null
           tier: string | null
           track_id: string | null
@@ -2371,6 +2384,9 @@ export type Database = {
           logo_url?: string | null
           name: string
           partnership_kind?: string | null
+          payment_status?: string
+          amount_received?: number
+          received_on?: string | null
           role?: string | null
           tier?: string | null
           track_id?: string | null
@@ -2399,6 +2415,9 @@ export type Database = {
           logo_url?: string | null
           name?: string
           partnership_kind?: string | null
+          payment_status?: string
+          amount_received?: number
+          received_on?: string | null
           role?: string | null
           tier?: string | null
           track_id?: string | null
@@ -2435,18 +2454,21 @@ export type Database = {
         Row: {
           event_id: string
           id: string
+          lead_member_id: string | null
           member_ids: string[]
           team_id: string
         }
         Insert: {
           event_id: string
           id?: string
+          lead_member_id?: string | null
           member_ids?: string[]
           team_id: string
         }
         Update: {
           event_id?: string
           id?: string
+          lead_member_id?: string | null
           member_ids?: string[]
           team_id?: string
         }
@@ -3582,6 +3604,51 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "hackathon_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hackathon_judge_submission_scores: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          judge_id: string
+          points: number
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          id?: string
+          judge_id: string
+          points: number
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          judge_id?: string
+          points?: number
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hackathon_judge_submission_scores_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_judges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hackathon_judge_submission_scores_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_task_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -6593,6 +6660,91 @@ export type Database = {
           },
         ]
       }
+      stored_files: {
+        Row: {
+          category: string
+          checksum: string
+          connection_id: string | null
+          entity_id: string
+          entity_type: string
+          event_id: string | null
+          expires_at: string | null
+          extra: Json
+          id: string
+          mime: string
+          name: string
+          needs_promote: boolean
+          organizer_id: string | null
+          promoted_at: string | null
+          provider: string
+          provider_file_id: string
+          size: number
+          uploaded_at: string
+        }
+        Insert: {
+          category: string
+          checksum?: string
+          connection_id?: string | null
+          entity_id?: string
+          entity_type?: string
+          event_id?: string | null
+          expires_at?: string | null
+          extra?: Json
+          id?: string
+          mime?: string
+          name: string
+          needs_promote?: boolean
+          organizer_id?: string | null
+          promoted_at?: string | null
+          provider: string
+          provider_file_id: string
+          size?: number
+          uploaded_at?: string
+        }
+        Update: {
+          category?: string
+          checksum?: string
+          connection_id?: string | null
+          entity_id?: string
+          entity_type?: string
+          event_id?: string | null
+          expires_at?: string | null
+          extra?: Json
+          id?: string
+          mime?: string
+          name?: string
+          needs_promote?: boolean
+          organizer_id?: string | null
+          promoted_at?: string | null
+          provider?: string
+          provider_file_id?: string
+          size?: number
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stored_files_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stored_files_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stored_files_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           audience: string
@@ -7476,6 +7628,26 @@ export type Database = {
       }
     }
     Views: {
+      event_ledger_lines: {
+        Row: {
+          amount: number | null
+          booking_id: string | null
+          category: string | null
+          created_at: string | null
+          direction: string | null
+          event_id: string | null
+          external_vendor_id: string | null
+          line_id: string | null
+          manual_expense_id: string | null
+          source: string | null
+          source_path: string | null
+          sponsor_id: string | null
+          status: string | null
+          superseded: boolean | null
+          title: string | null
+        }
+        Relationships: []
+      }
       mv_event_registration_counts: {
         Row: {
           awaiting_payment_count: number | null
@@ -7508,6 +7680,21 @@ export type Database = {
           category_spent: number
           remaining: number
           spent: number
+        }[]
+      }
+      event_ledger_totals: {
+        Args: { p_event_id: string }
+        Returns: {
+          budget: number
+          category: string
+          category_actual: number
+          category_budget: number
+          expenses_paid: number
+          expenses_planned: number
+          income_expected: number
+          income_received: number
+          net: number
+          projected_net: number
         }[]
       }
       get_marketing_insights: { Args: never; Returns: Json }
@@ -7697,6 +7884,5 @@ export const Constants = {
   },
 } as const
 
-/** App alias for `public.users` row (kept across `types:db` regenerations). */
 export type UserRow = Database["public"]["Tables"]["users"]["Row"]
 

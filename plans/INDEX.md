@@ -2,6 +2,20 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-08 | [o8-qa-docs](2026-11-08-o8-qa-docs.md) | done | O8: full-flow checklist, Playwright smoke/A7, docs sync; auth tab smoke soft-skip |
+| 2026-11-08 | [o7-certificates-files](2026-11-08-o7-certificates-files.md) | done | O7: cert viewer, private archive jobs, docs/18 email + share warning, Files A4 folders |
+| 2026-11-08 | [o6-phases-submissions-scoreboard-settings](2026-11-08-o6-phases-submissions-scoreboard-settings.md) | done | O6: FileStore phase/task/submit, compete file auth, multi-link/resubmit, scoreboard ▲▼, settings tests |
+| 2026-11-08 | [o5-competitions-judges](2026-11-08-o5-competitions-judges.md) | done | O5: competition modal, effective close, judge composer/scoring, public cards, tests |
+| 2026-11-08 | [o4-agenda-sponsors-expenses-team](2026-11-08-o4-agenda-sponsors-expenses-team.md) | done | O4: agenda/speakers sync, sponsors board+payments, SQL ledger, slim Event Team, tests |
+| 2026-11-08 | [o3-access-rebuild](2026-11-08-o3-access-rebuild.md) | done | O3 Access: type cards, HowAccessWorks, guest tables/email, public gates, drop promoHints, tests |
+| 2026-11-08 | [o2-overview-attendees](2026-11-08-o2-overview-attendees.md) | done | O2 Overview+Attendees one-build: Key details, join phase validity, multi-QR email, tests |
+| 2026-11-07 | [o2-attendees-audit-followup](2026-11-07-o2-attendees-audit-followup.md) | done | Attendees audit: Email toolbar, status history, join revoke/regen, member QR, roster tests |
+| 2026-11-07 | [o2-o8-event-module-close](2026-11-07-o2-o8-event-module-close.md) | done | docs/22 O2–O8 gap close: Attendees form drawer, Access guests, join codes, cert soft-archive; Playwright deferred |
+| 2026-11-07 | [o1-filestore-drive](2026-11-07-o1-filestore-drive.md) | done | O1 FileStore: Drive-first + fallback, proof/resumable APIs, `/api/files`, on-demand QR, promote cron, Picker A5 |
+| 2026-11-07 | [o0-removal-inventory](2026-11-07-o0-removal-inventory.md) | done | docs/22 A7 O0: inventory + purge leftovers; auto roster lock; docs 11/07/12; deprecate DB no drops |
+| 2026-11-07 | [event-module-phase-b-plus](2026-11-07-event-module-phase-b-plus.md) | done | Full event B–E: hackathon cut, Overview/Agenda/Sponsors/Expenses, Access/Attendees/Team, judge invite + compete ops |
+| 2026-11-07 | [event-module-phase-e](2026-11-07-event-module-phase-e.md) | done | Judge Gmail invites + accept page; public prizes/gates; task briefs/notes; submissions table; scoreboard; settings matrix Phase B |
+| 2026-11-07 | [event-drive-gmail-phase-a](2026-11-07-event-drive-gmail-phase-a.md) | done | Hard-require Drive+Gmail; Picker key UX; Drive proofs/media/QR/certs; registration mail via organizer Gmail |
 | 2026-11-04 | [organizer-connections-forms-import](2026-11-04-organizer-connections-forms-import.md) | done | Connections hub nav/tabs; attendee Excel/Sheets import; Custom Forms library + `/f/[token]`; Teams Recruitment polish |
 | 2026-10-07 | [firebase-supabase-cutover](2026-10-07-firebase-supabase-cutover.md) | done | Full cutover off Firestore façade to `supabaseAdmin` + `TABLES` |
 | 2026-10-07 | [project-standardization](2026-10-07-project-standardization.md) | archived | Original standardization plan snapshot (waves, gates, delete façade) |

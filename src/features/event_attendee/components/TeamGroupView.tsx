@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/src/lib/money";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
 import { ImageLightbox } from "@/src/shared_components/ui/ImageLightbox";
@@ -12,6 +13,11 @@ import type { Registration } from "@/src/services/models/reg.type";
 import { MemberEmailForm } from "./EventEmailPanels";
 import { DrawerTabs } from "./DrawerTabs";
 import { useToast } from "@/src/shared_components/ui/Toast";
+import { formatDateMedium } from "@/src/lib/datetime";
+import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import type { ActionResult } from "@/src/lib/action";
+import { rotateTeamJoinCode } from "../actions/joinCode.action";
+import { hackathonTeamCodesVisible } from "../roster";
 
 const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
   "pending",
@@ -25,6 +31,7 @@ export function TeamGroupView({
   members,
   onClose,
   eventId,
+  eventEndsAtIso,
   update_registration,
   requiresApproval = false,
   hidePayment = false,
@@ -33,16 +40,31 @@ export function TeamGroupView({
   members: AttendeeClientSideProp[];
   onClose: () => void;
   eventId?: string;
+  eventEndsAtIso?: string | null;
   update_registration?: (updated: Registration) => Promise<void> | void;
   requiresApproval?: boolean;
   hidePayment?: boolean;
 }) {
+  const router = useRouter();
   const lead = members.find((m) => m.register.registrationId === team.leadId) ?? members[0];
   const [leadReg, setLeadReg] = useState<Registration | null>(lead?.register ?? null);
   const [busy, setBusy] = useState(false);
   const [drawerTab, setDrawerTab] = useState<"details" | "communication">("details");
   const [composeKey, setComposeKey] = useState(0);
+  const [joinRevoked, setJoinRevoked] = useState(Boolean(team.joinCodeRevoked));
+  const [joinCode, setJoinCode] = useState(team.joinCode);
   const toast = useToast();
+  const [joinState, joinAction, joinPending] = useActionState<
+    (ActionResult & { joinCode?: string | null }) | null,
+    FormData
+  >(rotateTeamJoinCode, null);
+  useEffect(() => {
+    if (!joinState?.success) return;
+    setJoinRevoked(joinState.joinCode == null);
+    setJoinCode(joinState.joinCode ?? null);
+    toast.success(joinState.joinCode == null ? "Join code revoked." : "Join code regenerated.");
+    router.refresh();
+  }, [joinState, router, toast]);
   const checkedIn = members.filter(
     (m) =>
       m.register.checkIn?.checkedIn ||
@@ -68,6 +90,16 @@ export function TeamGroupView({
       setBusy(false);
     }
   };
+
+  const showCodes = hackathonTeamCodesVisible(
+    {
+      payment: team.payment,
+      feeStatus: team.feeStatus ?? null,
+      eliminated: team.eliminated,
+    },
+    leadReg,
+  );
+  const endNote = eventEndsAtIso && showCodes ? formatDateMedium(eventEndsAtIso) : null;
 
   const handlePayment = (status: Registration["payment"]["paymentStatus"]) => {
     if (!leadReg) return;
@@ -191,8 +223,57 @@ export function TeamGroupView({
                 </div>
               </div>
             ) : null}
-            {team.accessCode ? (
-              <p className="font-mono text-sm text-ink">Access code {team.accessCode}</p>
+            {showCodes ? (
+              <div className="rounded-lg border border-line bg-muted/40 px-3 py-2 text-sm">
+                {joinRevoked ? (
+                  <p className="text-ink">Join code revoked. Regenerate to share a new one.</p>
+                ) : joinCode ? (
+                  <p className="font-mono text-ink">
+                    Join code <span className="text-ink-soft">{joinCode}</span>
+                  </p>
+                ) : (
+                  <p className="text-ink-soft">No join code yet.</p>
+                )}
+                {team.accessCode && !joinRevoked ? (
+                  <p className="mt-1 font-mono text-ink">
+                    Dashboard access <span className="text-ink-soft">{team.accessCode}</span>
+                  </p>
+                ) : null}
+                {endNote && !joinRevoked ? (
+                  <p className="mt-2 text-xs text-ink-soft">
+                    Valid until the last phase closes or the event ends ({endNote}).
+                  </p>
+                ) : null}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <form action={joinAction}>
+                    <input type="hidden" name="teamId" value={team.id} />
+                    <input type="hidden" name="mode" value="regenerate" />
+                    <button
+                      type="submit"
+                      disabled={joinPending}
+                      className={buttonClass("secondary", "sm")}
+                    >
+                      {joinPending ? "Working…" : "Regenerate"}
+                    </button>
+                  </form>
+                  {!joinRevoked ? (
+                    <form action={joinAction}>
+                      <input type="hidden" name="teamId" value={team.id} />
+                      <input type="hidden" name="mode" value="revoke" />
+                      <button
+                        type="submit"
+                        disabled={joinPending}
+                        className={buttonClass("destructive", "sm")}
+                      >
+                        Revoke
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+                {joinState?.error ? (
+                  <FormFeedback error={joinState.error} className="mt-2" />
+                ) : null}
+              </div>
             ) : null}
             {team.proofUrl ? (
               <div>

@@ -481,13 +481,39 @@ export async function saveEventStaffAssignmentsAction(formData: FormData): Promi
         const selected = formData.getAll(`members_${teamId}`).map(String).filter(Boolean);
         const members = await TeamEngineService.getTeamMembers(teamId);
         const memberIds = !selected.length || selected.length >= members.length ? [] : selected;
-        return { teamId, memberIds };
+        const leadRaw = String(formData.get(`lead_${teamId}`) ?? "").trim();
+        const leadMemberId =
+          leadRaw &&
+          members.some((m) => m.id === leadRaw) &&
+          (!memberIds.length || memberIds.includes(leadRaw))
+            ? leadRaw
+            : null;
+        return { teamId, memberIds, leadMemberId };
       }),
   );
   await TeamEngineService.setEventStaffAssignments(eventId, rows);
   revalidatePath(fallback);
   revalidatePath(`/organizer/${event.organizerId}/teams`);
   finishForm(formData, fallback, ok(), "Staff assignment saved.");
+}
+
+export async function removeEventStaffAssignmentAction(formData: FormData): Promise<void> {
+  const { finishForm } = await import("@/src/lib/formRedirect");
+  const { assertOwnedEvent } = await import("@/src/features/events/ownership");
+  const eventId = String(formData.get("eventId") ?? "").trim();
+  const organizerId = String(formData.get("organizerId") ?? "").trim();
+  const teamId = String(formData.get("teamId") ?? "").trim();
+  const fallback = `/organizer/${organizerId}/events/${eventId}/staff`;
+  const { ok, fail } = await import("@/src/lib/action");
+  const event = await assertOwnedEvent(eventId);
+  if (!event || !teamId) {
+    finishForm(formData, fallback, fail("Could not remove that team."));
+    return;
+  }
+  await TeamEngineService.removeEventStaffAssignment(eventId, teamId);
+  revalidatePath(fallback);
+  revalidatePath(`/organizer/${event.organizerId}/teams`);
+  finishForm(formData, fallback, ok(), "Team removed from event.");
 }
 
 export async function createOrgAction(

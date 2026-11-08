@@ -31,6 +31,8 @@ export const SPONSOR_LOGOS_BUCKET = "sponsor-logos";
 export const CHALLENGE_FILES_BUCKET = "hackathon-challenge-files";
 export const HACKATHON_SUBMISSIONS_BUCKET = "hackathon-submissions";
 export const SUPPORT_ATTACHMENTS_BUCKET = "support-attachments";
+/** O1 private fallback when organizer Drive is unavailable. */
+export const FILE_FALLBACK_BUCKET = "file-fallback";
 export const PUBLIC_STORAGE_BUCKETS = new Set([MEDIA_BUCKET, SPONSOR_LOGOS_BUCKET]);
 
 export async function getSignedUrl(

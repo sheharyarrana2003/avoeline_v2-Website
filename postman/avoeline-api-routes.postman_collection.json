@@ -1,0 +1,216 @@
+{
+  "info": {
+    "_postman_id": "cc37ac19-102f-480d-80d2-9c62c7ae2f3e",
+    "name": "Avoeline API Routes",
+    "description": "All Next.js Route Handlers under /api plus certificate download and auth callback. Use env Avoeline Local (localhost:3000) or Avoeline Production. Set cronSecret for authorized cron GETs. Smoke: npm run test:api-smoke.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "cronSecret", "value": "" },
+    { "key": "connectionId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "certificateId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "certificateCode", "value": "VCODE-missing" }
+  ],
+  "item": [
+    {
+      "name": "Certificates",
+      "item": [
+        {
+          "name": "GET certificate JSON (issued)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/certificates/{{certificateId}}",
+            "description": "Public JSON + ETag. Expect 404 JSON for fake id."
+          }
+        },
+        {
+          "name": "GET certificate PDF download",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/certificate/{{certificateCode}}/download"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cron (CRON_SECRET)",
+      "item": [
+        {
+          "name": "plan-expiry GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/plan-expiry"
+          }
+        },
+        {
+          "name": "plan-expiry GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/plan-expiry"
+          }
+        },
+        {
+          "name": "plan-expiry POST authorized",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/plan-expiry"
+          }
+        },
+        {
+          "name": "email-outbox GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/email-outbox"
+          }
+        },
+        {
+          "name": "email-outbox GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/email-outbox"
+          }
+        },
+        {
+          "name": "linked-files GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/linked-files"
+          }
+        },
+        {
+          "name": "linked-files GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/linked-files"
+          }
+        },
+        {
+          "name": "sheet-syncs GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/sheet-syncs"
+          }
+        },
+        {
+          "name": "sheet-syncs GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/sheet-syncs"
+          }
+        },
+        {
+          "name": "connections-health GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/connections-health"
+          }
+        },
+        {
+          "name": "connections-health GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/connections-health"
+          }
+        },
+        {
+          "name": "feature-override-expiry GET unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/cron/feature-override-expiry"
+          }
+        },
+        {
+          "name": "feature-override-expiry GET authorized",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cronSecret}}" }],
+            "url": "{{baseUrl}}/api/cron/feature-override-expiry"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Connections",
+      "item": [
+        {
+          "name": "picker-token GET unauthenticated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/connections/google/picker-token?connectionId={{connectionId}}"
+          }
+        },
+        {
+          "name": "picker-token POST missing connectionId",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/connections/google/picker-token"
+          }
+        },
+        {
+          "name": "OAuth start unsupported provider",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/connections/foo/start"
+          }
+        },
+        {
+          "name": "OAuth start google (unauthenticated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/connections/google/start?capability=email.send"
+          }
+        },
+        {
+          "name": "OAuth callback google (no code)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/connections/google/callback",
+            "description": "Unauthenticated: 307 to /auth/signin?next=…"
+          }
+        },
+        {
+          "name": "Legacy email google callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/email/google/callback?code=x&state=y"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Supabase auth callback missing code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/callback"
+          }
+        }
+      ]
+    }
+  ]
+}

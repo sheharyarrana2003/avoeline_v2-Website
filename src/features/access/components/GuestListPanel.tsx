@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Upload } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { DateField } from "@/src/shared_components/DateField";
@@ -10,14 +10,28 @@ import type { ActionResult } from "@/src/lib/action";
 import { addGuests } from "../actions/guestList.action";
 import { parseGuestList, type GuestListReport } from "../types";
 
-export function GuestListPanel({ eventId }: { eventId: string }) {
+const SAMPLE_WHITELIST = "email,name\nguest@example.com,Alex Guest\n";
+const SAMPLE_INVITE = "email,name,tier\nguest@example.com,Alex Guest,VIP\n";
+
+export function GuestListPanel({
+  eventId,
+  kinds = ["whitelist", "invite"],
+}: {
+  eventId: string;
+  /** Which add modes this access type allows. */
+  kinds?: Array<"whitelist" | "invite">;
+}) {
+  const allowed: Array<"whitelist" | "invite"> = kinds.length ? [...kinds] : ["whitelist"];
   const [state, formAction] = useActionState<ActionResult | null, FormData>(addGuests, null);
-  const [kind, setKind] = useState<"whitelist" | "invite">("whitelist");
+  const [kind, setKind] = useState<"whitelist" | "invite">(
+    allowed.includes("invite") && !allowed.includes("whitelist") ? "invite" : "whitelist",
+  );
   const [paste, setPaste] = useState("");
   const [fileName, setFileName] = useState("");
   const [fileText, setFileText] = useState("");
   const [preview, setPreview] = useState<GuestListReport | null>(null);
 
+  const effectiveKind = allowed.includes(kind) ? kind : allowed[0];
   const combined = useMemo(() => `${paste}\n${fileText}`.trim(), [paste, fileText]);
 
   const runPreview = (raw: string) => {
@@ -28,6 +42,17 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
     setPreview(parseGuestList(raw));
   };
 
+  const downloadSample = () => {
+    const csv = effectiveKind === "invite" ? SAMPLE_INVITE : SAMPLE_WHITELIST;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = effectiveKind === "invite" ? "invite-sample.csv" : "whitelist-sample.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="eventId" value={eventId} />
@@ -35,26 +60,44 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
       {state?.error ? <FormFeedback error={state.error} /> : null}
       {state?.success ? <FormFeedback success="Everyone on that list was added." /> : null}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="guest-kind" className={labelClass}>
-          Add as
-        </label>
-        <select
-          id="guest-kind"
-          name="kind"
-          value={kind}
-          onChange={(e) => setKind(e.target.value as "whitelist" | "invite")}
-          className={fieldClass}
-        >
-          <option value="whitelist">Whitelist — these addresses may register</option>
-          <option value="invite">Invite — each person gets their own trackable link</option>
-        </select>
-      </div>
+      {allowed.length > 1 ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="guest-kind" className={labelClass}>
+            Add as
+          </label>
+          <select
+            id="guest-kind"
+            name="kind"
+            value={effectiveKind}
+            onChange={(e) => setKind(e.target.value as "whitelist" | "invite")}
+            className={fieldClass}
+          >
+            {allowed.includes("whitelist") ? (
+              <option value="whitelist">Whitelist — these addresses may register</option>
+            ) : null}
+            {allowed.includes("invite") ? (
+              <option value="invite">Invite — each person gets their own trackable link</option>
+            ) : null}
+          </select>
+        </div>
+      ) : (
+        <input type="hidden" name="kind" value={effectiveKind} />
+      )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="guests" className={labelClass}>
-          Addresses
-        </label>
+        <div className="flex items-center justify-between gap-2">
+          <label htmlFor="guests" className={labelClass}>
+            Addresses
+          </label>
+          <button
+            type="button"
+            onClick={downloadSample}
+            className={`${buttonClass("ghost", "sm")} inline-flex items-center gap-1`}
+          >
+            <Download size={12} aria-hidden />
+            Sample CSV
+          </button>
+        </div>
         <textarea
           id="guests"
           name="guests"
@@ -67,7 +110,9 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
           className={`${fieldClass} resize-none font-mono text-xs`}
         />
         <p className="text-xs text-ink-soft">
-          One per line. Optionally <code>email, name, tier</code>. A header row is ignored.
+          One per line. Optionally{" "}
+          <code>{effectiveKind === "invite" ? "email, name, tier" : "email, name"}</code>. A header
+          row is ignored.
         </p>
       </div>
 
@@ -98,7 +143,7 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
         {fileName ? <p className="text-xs text-ink-soft">Selected file: {fileName}</p> : null}
       </div>
 
-      {kind === "invite" ? (
+      {effectiveKind === "invite" ? (
         <div className="flex flex-col gap-4 rounded-xl border border-line p-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="expiresAt" className={labelClass}>
@@ -114,6 +159,39 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
         </div>
       ) : null}
 
+      <div className="flex flex-col gap-3 rounded-xl border border-line p-4">
+        <p className="text-xs font-medium uppercase text-ink-soft">Email message (optional)</p>
+        <p className="text-xs text-ink-soft">
+          Sent from your connected Gmail when &quot;Email each person&quot; is checked. Leave blank
+          for the default; your text is added above the register link.
+        </p>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="mail-subject" className={labelClass}>
+            Subject
+          </label>
+          <input
+            id="mail-subject"
+            name="mailSubject"
+            className={fieldClass}
+            placeholder={
+              effectiveKind === "invite" ? "You are invited to …" : "You are on the list for …"
+            }
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="mail-body" className={labelClass}>
+            Opening lines
+          </label>
+          <textarea
+            id="mail-body"
+            name="mailBody"
+            rows={3}
+            className={`${fieldClass} resize-none text-sm`}
+            placeholder="Hi — we’d love to have you. The link below is yours."
+          />
+        </div>
+      </div>
+
       <label className="flex items-start gap-2.5 text-sm text-ink">
         <input
           type="checkbox"
@@ -122,7 +200,7 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
           className="mt-0.5 h-4 w-4 accent-current"
         />
         <span>
-          {kind === "invite"
+          {effectiveKind === "invite"
             ? "Email each person their unique link now"
             : "Email each person that they are on the whitelist"}
         </span>
@@ -163,7 +241,7 @@ export function GuestListPanel({ eventId }: { eventId: string }) {
           disabled={!preview || preview.valid.length === 0}
         >
           <Upload size={14} aria-hidden="true" />
-          {kind === "invite" ? "Create invites" : "Add to whitelist"}
+          {effectiveKind === "invite" ? "Create invites" : "Add to whitelist"}
         </SubmitButton>
       </div>
     </form>

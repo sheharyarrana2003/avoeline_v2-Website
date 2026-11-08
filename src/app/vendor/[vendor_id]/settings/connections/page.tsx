@@ -20,7 +20,7 @@ export default async function VendorConnectionsPage({
   const { vendor_id } = await params;
   const { e, ok } = await searchParams;
   const user = await AuthService.getCurrentUser();
-  if (!user) redirect(`/signin?next=/vendor/${vendor_id}/settings/connections`);
+  if (!user) redirect(`/auth/signin?next=/vendor/${vendor_id}/settings/connections`);
   if (user.userId !== vendor_id) {
     const admin = await AuthService.requireAdmin("vendors");
     if (!admin?.isOwner) redirect("/access-denied");

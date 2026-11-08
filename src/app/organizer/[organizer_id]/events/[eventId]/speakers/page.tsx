@@ -20,12 +20,12 @@ export default async function SpeakerPage({
   const allSpeakers = await SpeakerService.getAllSpeakers(eventId);
   let allSpeaker;
 
-  if (resolvedParams.input_val) {
-    const dynamicRegex = new RegExp(`${resolvedParams.input_val}`, "i");
-    allSpeaker = allSpeakers.filter((s) => dynamicRegex.test(s.name));
-  } else {
-    allSpeaker = allSpeakers;
-  }
+  const needle = String(resolvedParams.input_val || "")
+    .trim()
+    .toLowerCase();
+  allSpeaker = needle
+    ? allSpeakers.filter((s) => s.name.toLowerCase().includes(needle))
+    : allSpeakers;
 
   const sessionsBySpeaker = await sessionsBySpeakerIds(allSpeaker.map((s) => s.speakerId));
   const withSessions = allSpeaker.map((speaker) => ({

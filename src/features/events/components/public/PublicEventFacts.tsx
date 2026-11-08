@@ -22,9 +22,11 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
     .filter(Boolean)
     .join(" · ");
   const seatsLabel =
-    dto.seats.left === null
+    dto.seats.left === null && dto.seats.total === 0
       ? "Unlimited"
-      : `${dto.seats.left} left${dto.seats.total ? ` of ${dto.seats.total}` : ""}`;
+      : dto.seats.left === null
+        ? "—"
+        : `${dto.seats.left} left${dto.seats.total ? ` of ${dto.seats.total}` : ""}`;
   const mapsHref = openInMapsHref(dto.location.mapsUrl);
 
   return (

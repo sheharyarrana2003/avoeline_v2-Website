@@ -13,6 +13,7 @@ import { Users, UserCheck, Clock, Ban } from "lucide-react";
 import type { ReactNode } from "react";
 import { Registration } from "@/src/services/models/reg.type";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { GroupedAttendeeList, type GroupedAttendeeGroup } from "./GroupedAttendeeList";
 import { TeamGroupView } from "./TeamGroupView";
 import {
@@ -20,10 +21,13 @@ import {
   RegistrationEmailsModal,
   EmailConnectionRequiredBanner,
 } from "./EventEmailPanels";
+import { AttendeeEmailMenu } from "./AttendeeEmailMenu";
+import { RegistrationFormDrawer } from "./RegistrationFormDrawer";
 import type { EventEmailTemplate } from "../emailTypes";
 import type { CustomFieldOption } from "@/src/services/models/event.model";
 import {
   filtersAreActive,
+  hackathonTeamCodesVisible,
   readRosterFilters,
   registrationMatchesFilters,
   rosterStats,
@@ -35,13 +39,17 @@ export interface AttendeeTeamGroup {
   name: string;
   trackName: string;
   accessCode: string | null;
+  joinCode: string | null;
   memberIds: string[];
   leadId?: string | null;
   payment?: string | null;
+  feeStatus?: string | null;
   amount?: number;
   currency?: string;
   proofUrl?: string | null;
   trackId?: string | null;
+  eliminated?: boolean;
+  joinCodeRevoked?: boolean;
 }
 
 export interface AttendeeClientSideProp {
@@ -76,6 +84,11 @@ export function AttendeeClientSide({
   isFree = false,
   resendTestMode = false,
   emailConnectionMissing = false,
+  sheetsConnected = false,
+  exportsHref,
+  eventEndsAtIso = null,
+  checkInByNames = {},
+  registrationForm = null,
 }: {
   attendees: AttendeeClientSideProp[] | [];
   handle_reg_status: (reg: Registration) => Promise<void>;
@@ -94,6 +107,15 @@ export function AttendeeClientSide({
   /** @deprecated Use emailConnectionMissing */
   resendTestMode?: boolean;
   emailConnectionMissing?: boolean;
+  /** Drive + Sheets in use for this event — link to the Exports tab. */
+  sheetsConnected?: boolean;
+  exportsHref?: string;
+  /** Join-code validity (last phase close or event end). */
+  eventEndsAtIso?: string | null;
+  /** userId → display name for check-in actors. */
+  checkInByNames?: Record<string, string>;
+  /** O2: form builder content for the Registration form drawer. */
+  registrationForm?: ReactNode;
 }) {
   const [open_registration_id, set_open_registration_id] = useState<string | null>(null);
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
@@ -137,6 +159,7 @@ export function AttendeeClientSide({
         teamName: team?.name ?? group?.name,
         trackName: team?.trackName ?? group?.subtitle,
         accessCode: team?.accessCode ?? group?.accessCode,
+        joinCode: team?.joinCode ?? null,
       });
     });
   }, [attendees, filters, groups, teamLookup]);
@@ -175,7 +198,12 @@ export function AttendeeClientSide({
           const matchingMembers = g.members.filter((m) =>
             attendee.some((a) => a.register.registrationId === m.register.registrationId),
           );
-          const extras = { teamName: g.name, trackName: g.subtitle, accessCode: g.accessCode };
+          const extras = {
+            teamName: g.name,
+            trackName: g.subtitle,
+            accessCode: g.accessCode,
+            joinCode: g.joinCode,
+          };
           const show = matchingMembers.length > 0 || teamMetaMatches(filters, extras);
           return {
             ...g,
@@ -194,15 +222,23 @@ export function AttendeeClientSide({
           teamName: team.name,
           trackName: team.trackName,
           accessCode: team.accessCode,
+          joinCode: team.joinCode,
         };
         const show = matching.length > 0 || teamMetaMatches(filters, extras);
         if (!show) return { id: team.id, name: team.name, members: [] as AttendeeClientSideProp[] };
+        const leadReg = attendees.find((a) => a.register.registrationId === team.leadId)?.register;
+        const showCodes = hackathonTeamCodesVisible(
+          { payment: team.payment, feeStatus: team.feeStatus ?? null },
+          leadReg,
+        );
         return {
           id: team.id,
           name: team.name,
           subtitle: team.trackName,
-          accessCode: team.accessCode,
+          accessCode: showCodes ? team.accessCode : null,
+          joinCode: showCodes ? team.joinCode : null,
           payment: team.payment,
+          feeStatus: team.feeStatus ?? null,
           amount: team.amount,
           currency: team.currency,
           proofUrl: team.proofUrl,
@@ -225,6 +261,26 @@ export function AttendeeClientSide({
       (a) => !(teams ?? []).some((t) => t.memberIds.includes(a.register.registrationId)),
     );
   }, [attendee, groups, teams]);
+
+  const drawerTeamPayload = useMemo(() => {
+    if (!openTeamMeta) return null;
+    const leadReg = attendees.find(
+      (a) => a.register.registrationId === openTeamMeta.leadId,
+    )?.register;
+    const showCodes = hackathonTeamCodesVisible(
+      {
+        payment: openTeamMeta.payment,
+        feeStatus: openTeamMeta.feeStatus ?? null,
+        eliminated: openTeamMeta.eliminated,
+      },
+      leadReg,
+    );
+    return {
+      ...openTeamMeta,
+      accessCode: showCodes && !openTeamMeta.joinCodeRevoked ? openTeamMeta.accessCode : null,
+      joinCode: showCodes && !openTeamMeta.joinCodeRevoked ? openTeamMeta.joinCode : null,
+    };
+  }, [attendees, openTeamMeta]);
 
   const memberOfTeam = open_attendee
     ? Boolean(
@@ -263,7 +319,46 @@ export function AttendeeClientSide({
                 </button>
               </div>
             ) : null}
-            {onExport ? <ExportButton run={onExport} label="Export attendees" /> : null}
+            {registrationForm ? (
+              <RegistrationFormDrawer>{registrationForm}</RegistrationFormDrawer>
+            ) : null}
+            {eventId && organizerId ? (
+              <AttendeeEmailMenu
+                connectionBanner={
+                  <EmailConnectionRequiredBanner
+                    show={emailConnectionMissing || resendTestMode}
+                    organizerId={organizerId}
+                  />
+                }
+              >
+                <BulkAttendeeEmailModal
+                  eventId={eventId}
+                  organizerId={organizerId}
+                  hasTeams={Boolean(teams?.length || groups?.length)}
+                  hidePayment={isFree}
+                />
+                <RegistrationEmailsModal
+                  eventId={eventId}
+                  organizerId={organizerId}
+                  templates={emailTemplates}
+                  hidePayment={isFree}
+                />
+              </AttendeeEmailMenu>
+            ) : null}
+            {onExport ? <ExportButton run={onExport} label="Export" /> : null}
+            {exportsHref ? (
+              <Link
+                href={exportsHref}
+                className="rounded-lg border border-line bg-paper px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted/50"
+                title={
+                  sheetsConnected
+                    ? "Open Exports / Google Sheets"
+                    : "Open Exports to connect Sheets"
+                }
+              >
+                {sheetsConnected ? "Sheets" : "Exports"}
+              </Link>
+            ) : null}
           </div>
         </div>
 
@@ -303,29 +398,6 @@ export function AttendeeClientSide({
         </div>
 
         {extra}
-
-        {eventId && organizerId ? (
-          <div className="mb-6 space-y-3">
-            <EmailConnectionRequiredBanner
-              show={emailConnectionMissing || resendTestMode}
-              organizerId={organizerId}
-            />
-            <div className="flex flex-wrap gap-2">
-              <BulkAttendeeEmailModal
-                eventId={eventId}
-                organizerId={organizerId}
-                hasTeams={Boolean(teams?.length || groups?.length)}
-                hidePayment={isFree}
-              />
-              <RegistrationEmailsModal
-                eventId={eventId}
-                organizerId={organizerId}
-                templates={emailTemplates}
-                hidePayment={isFree}
-              />
-            </div>
-          </div>
-        ) : null}
 
         {attendee.length === 0 && leftover.length === 0 && groupedCards.length === 0 ? (
           <div className="rounded-xl border border-line bg-paper p-5 shadow-sm">
@@ -382,7 +454,8 @@ export function AttendeeClientSide({
         <aside className="w-full shrink-0 overflow-hidden rounded-xl border border-line bg-paper shadow-sm lg:sticky lg:top-8 lg:h-fit lg:w-[400px]">
           {openTeamMeta ? (
             <TeamGroupView
-              team={openTeamMeta}
+              team={drawerTeamPayload!}
+              eventEndsAtIso={eventEndsAtIso}
               members={attendees.filter((a) =>
                 openTeamMeta.memberIds.includes(a.register.registrationId),
               )}
@@ -399,13 +472,16 @@ export function AttendeeClientSide({
                 name: openGroup.name,
                 trackName: openGroup.subtitle ?? "",
                 accessCode: openGroup.accessCode ?? null,
+                joinCode: openGroup.joinCode ?? null,
                 memberIds: openGroup.members.map((m) => m.register.registrationId),
                 leadId: openGroup.members[0]?.register.registrationId,
                 payment: openGroup.payment,
+                feeStatus: openGroup.feeStatus ?? null,
                 amount: openGroup.amount,
                 currency: openGroup.currency,
                 proofUrl: openGroup.proofUrl,
               }}
+              eventEndsAtIso={eventEndsAtIso}
               members={openGroup.members}
               onClose={() => setOpenTeamId(null)}
               eventId={eventId}
@@ -427,6 +503,24 @@ export function AttendeeClientSide({
             competitionName={teamLookup.get(open_attendee.register.registrationId)?.trackName}
             questions={questions}
             hidePayment={isFree}
+            eventEndsAtIso={eventEndsAtIso}
+            checkInByNames={checkInByNames}
+            teamCodes={(() => {
+              const tm = teamLookup.get(open_attendee.register.registrationId);
+              if (!tm?.leadId) return null;
+              const leadReg = attendees.find(
+                (a) => a.register.registrationId === tm.leadId,
+              )?.register;
+              if (!leadReg) return null;
+              return {
+                joinCode: tm.joinCode,
+                accessCode: tm.accessCode,
+                trackName: tm.trackName,
+                feeStatus: tm.feeStatus ?? null,
+                teamPayment: tm.payment ?? null,
+                leadRegistration: leadReg,
+              };
+            })()}
           />
         </aside>
       ) : null}

@@ -318,6 +318,8 @@ Pause for review.
 
 **Status (2026-11-02):** Shipped — `linked_files` + GoogleDriveClient (`drive.file`); picker-token route; create Doc/Sheet/Slides in Avoeline folder; Library + Files on event/team/club/booking; daily verify cron; unit tests. Setup: `docs/connections-picker-setup.md`. **Closeout (2026-11-02):** `provider_modified_at`; verify-on-open gate; Library mime/added-by filters + load more; action-level entity auth; extended `c4Drive` tests.
 
+**Phase A (2026-11-07) — Event Drive + Gmail hard-require:** Organizers must have active `drive.files` + send-capable Gmail before payment proofs, registration file fields, event media, certificates, and `registration_received` / `registration_confirmed` mail. Uploads use `GoogleDriveClient.uploadBinaryFile` into Avoeline / `Event – {title}` / Payment proofs|Certificates|Media|Submissions|QR. Registration and certificate email stay fail-closed on organizer Gmail (no Resend). Public register UI blocks paid/file flows when the gate fails. Picker invalid-key diagnosis: `docs/connections-picker-setup.md` Troubleshoot.
+
 ````text
 Read docs/17 sections 2 and 8. Enable drive.files with the drive.file scope only. Never request drive or drive.readonly.
 1. Picker: a server endpoint returning a short-lived access token for the Picker only for the current user (rate-limited, never the refresh token), a FilePickerButton component, CSP and API key setup notes.

@@ -27,8 +27,9 @@ import {
 import { registrationUploadExists } from "./requestRegistrationUpload.action";
 import { TicketingService } from "@/src/features/ticketing/ticketing.service";
 import { TABLES } from "@/data/collections";
-import { PAYMENT_SCREENSHOTS_BUCKET, supabaseAdmin } from "@/data/supabase";
+import { supabaseAdmin } from "@/data/supabase";
 import type { EventFormField } from "../forms/formFields.types";
+import { assertOrganizerDriveAndGmail } from "@/src/features/connections/server/assertOrganizerDriveAndGmail";
 
 const REFUSAL_MESSAGE: Record<RegistrationRefusal, string> = {
   event_not_found: "This event is no longer open for registration.",
@@ -42,6 +43,7 @@ const REFUSAL_MESSAGE: Record<RegistrationRefusal, string> = {
   invite_used: "That invitation has already been used.",
   not_whitelisted: "That email address cannot register for this event.",
   tier_locked: "That ticket tier needs the access code for this event.",
+  tier_unavailable: "That ticket tier is sold out or no longer available.",
   track_required: "Choose a competition to enter.",
   track_ended: "That competition has ended. Choose another one.",
 };
@@ -176,6 +178,14 @@ export async function registerAttendeeAction(
 
     const tracks = await listTracks(event.id);
     let amountDue = isPaidEvent(event) ? 1 : 0;
+    const needsDriveGmail =
+      amountDue > 0 ||
+      fields.some((f) => f.type === "file" || f.key === "payment_screenshot") ||
+      tracks.length > 0;
+    if (needsDriveGmail) {
+      const gate = await assertOrganizerDriveAndGmail(event.organizerId);
+      if (!gate.ok) return fail(gate.error);
+    }
     if (tracks.length) {
       const track =
         tracks.find((t) => t.id === trackId) ?? (trackId ? await getTrack(trackId) : null);
@@ -404,7 +414,6 @@ export async function registerAttendeeAction(
           updated_at: new Date().toISOString(),
         })
         .eq("id", result.registrationId);
-      void PAYMENT_SCREENSHOTS_BUCKET;
     }
 
     const ticketPath = `/events/${eventId}/ticket/${result.registrationId}`;

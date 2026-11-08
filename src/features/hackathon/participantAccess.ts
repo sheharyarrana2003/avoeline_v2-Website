@@ -143,14 +143,6 @@ export async function getParticipantAccess(input: {
   if (track.status === "ended" || (track.closesAt && Date.parse(track.closesAt) < now)) {
     return pack("competition_closed", { closesAt: track.closesAt || null });
   }
-  if (track.opensAt && Date.parse(track.opensAt) > now) {
-    return pack("competition_not_open", { opensAt: track.opensAt });
-  }
-
-  // Optional: require roster lock before compete (when lock time is set and not yet reached)
-  if (track.rosterLocksAt && Date.parse(track.rosterLocksAt) > now) {
-    return pack("roster_not_locked");
-  }
 
   void event;
   void rosterLocked;

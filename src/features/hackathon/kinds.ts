@@ -2,21 +2,23 @@ export const HACKATHON_KINDS = ["ctf", "business", "web_dev", "design", "data", 
 
 export type HackathonKind = (typeof HACKATHON_KINDS)[number];
 
+/** Display labels. Legacy DB kinds (business, web_dev, …) show as Competition. */
 export const HACKATHON_KIND_LABELS: Record<HackathonKind, string> = {
   ctf: "CTF",
-  business: "Business",
-  web_dev: "Web Dev",
-  design: "Design",
-  data: "Data",
-  other: "Other",
+  business: "Competition",
+  web_dev: "Competition",
+  design: "Competition",
+  data: "Competition",
+  other: "Competition",
 };
 
 export function isHackathonKind(value: unknown): value is HackathonKind {
   return typeof value === "string" && (HACKATHON_KINDS as readonly string[]).includes(value);
 }
 
+/** Normalize to product kinds only: `ctf` | `other` (legacy kinds → other). */
 export function parseHackathonKind(value: unknown): HackathonKind {
-  return isHackathonKind(value) ? value : "other";
+  return value === "ctf" ? "ctf" : "other";
 }
 
 export function isCtfKind(kind: unknown): boolean {
@@ -35,17 +37,24 @@ export function hackathonDashPath(organizerId: string, eventId: string, suffix =
   return suffix ? `${base}${suffix.startsWith("/") ? suffix : `/${suffix}`}` : base;
 }
 
-export function hackathonTrackManagePath(organizerId: string, eventId: string, trackId: string): string {
+export function hackathonTrackManagePath(
+  organizerId: string,
+  eventId: string,
+  trackId: string,
+): string {
   return hackathonDashPath(organizerId, eventId, `competitions/${trackId}`);
 }
 
-export function organizerHackathonCachePaths(organizerId: string, eventId: string, trackId?: string): string[] {
+export function organizerHackathonCachePaths(
+  organizerId: string,
+  eventId: string,
+  trackId?: string,
+): string[] {
   const dash = hackathonDashPath(organizerId, eventId);
   const paths = [
     dash,
     `${dash}/competitions`,
     `${dash}/tasks`,
-    `${dash}/teams`,
     `${dash}/submissions`,
     `${dash}/scoreboard`,
     `${dash}/settings`,

@@ -170,6 +170,16 @@ export interface AgendaItem {
   sessionId: string;
   title: string;
   type:
+    | "Opening"
+    | "Talk"
+    | "Panel"
+    | "Workshop"
+    | "Competition"
+    | "Break"
+    | "Networking"
+    | "Closing"
+    | "Other"
+    /** @deprecated legacy lowercase — normalized at read */
     | "talk"
     | "workshop"
     | "panel"
@@ -205,6 +215,8 @@ export interface AgendaItem {
   tiers?: string[];
   /** Explicit opt-in for calendar sync (default off). */
   addToCalendar?: boolean;
+  /** Linked hackathon competition when type is Competition. */
+  trackId?: string | null;
 }
 
 export interface VendorRequirement {

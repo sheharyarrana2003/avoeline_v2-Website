@@ -137,6 +137,10 @@ export interface EventOrganization {
   tier: string;
   contractValue: number;
   benefits: SponsorBenefit[];
+  /** pending | partial | received */
+  paymentStatus: "pending" | "partial" | "received";
+  amountReceived: number;
+  receivedOn: string | null;
 
   /* --- collaborator only --- */
   /** @deprecated unused for new writes */

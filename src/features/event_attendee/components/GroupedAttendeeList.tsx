@@ -13,7 +13,9 @@ export type GroupedAttendeeGroup = {
   name: string;
   members: AttendeeClientSideProp[];
   payment?: string | null;
+  feeStatus?: string | null;
   accessCode?: string | null;
+  joinCode?: string | null;
   subtitle?: string;
   amount?: number;
   currency?: string;
@@ -78,16 +80,17 @@ export function GroupedAttendeeList({
                   ) : null}
                 </span>
               </button>
-              {group.accessCode ? (
+              {group.joinCode || group.accessCode ? (
                 <span
-                  className="hidden shrink-0 font-mono text-2xs tracking-wide text-ink-soft sm:inline"
+                  className="hidden max-w-[10rem] shrink-0 truncate font-mono text-2xs tracking-wide text-ink-soft sm:inline"
                   onClick={(e) => {
                     e.stopPropagation();
-                    void navigator.clipboard.writeText(group.accessCode ?? "");
+                    const t = [group.joinCode, group.accessCode].filter(Boolean).join(" · ");
+                    void navigator.clipboard.writeText(t);
                   }}
-                  title="Copy access code"
+                  title="Copy team codes"
                 >
-                  {group.accessCode}
+                  {[group.joinCode, group.accessCode].filter(Boolean).join(" · ")}
                 </span>
               ) : null}
               {group.proofUrl ? (

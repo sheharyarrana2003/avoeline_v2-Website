@@ -95,6 +95,12 @@ function mapCert(row: Record<string, unknown>): CertificateRow {
     downloadCount: Number(row.download_count ?? 0),
     verificationCount: Number(row.verification_count ?? 0),
     emailedAt: extra.emailedAt ? String(extra.emailedAt) : null,
+    driveUrl: extra.driveUrl
+      ? String(extra.driveUrl)
+      : extra.driveRef
+        ? String(extra.driveRef)
+        : null,
+    driveShareUrl: extra.driveShareUrl ? String(extra.driveShareUrl) : null,
     createdAt: row.created_at ? String(row.created_at) : null,
     updatedAt: row.updated_at ? String(row.updated_at) : null,
   };
@@ -401,9 +407,24 @@ export async function issueCertificatesForRegistrations(input: {
   organizerId: string;
   registrationIds: string[];
   roles?: Record<string, string>;
-}): Promise<{ issued: number; skipped: number }> {
+  /** Default on when Drive connected; enqueue private archive jobs after insert. */
+  archiveToDrive?: boolean;
+}): Promise<{ issued: number; skipped: number; archiveQueued: number }> {
+  const { listConnections } = await import("@/src/features/connections/server/connections.service");
+  const conns = await listConnections({
+    ownerType: "user",
+    ownerId: input.organizerId,
+    includeQuota: false,
+  });
+  const driveConnected = conns.some(
+    (c) =>
+      c.status === "active" &&
+      (c.capabilities || []).some((cap) => cap.capability === "drive.files" && cap.enabled),
+  );
+  const archiveToDrive = input.archiveToDrive !== undefined ? input.archiveToDrive : driveConnected;
+
   const ids = [...new Set(input.registrationIds.map(String).filter(Boolean))].slice(0, BULK_CAP);
-  if (!ids.length) return { issued: 0, skipped: 0 };
+  if (!ids.length) return { issued: 0, skipped: 0, archiveQueued: 0 };
   const [event, tpl, regs, existing] = await Promise.all([
     EventService.getEventByID(input.eventId),
     ensureTemplateForEvent(input.eventId, input.organizerId),
@@ -414,7 +435,7 @@ export async function issueCertificatesForRegistrations(input: {
   const have = new Set(existing.map((c) => c.registrationId).filter(Boolean));
   const byId = new Map(regs.map((r) => [r.registrationId, r]));
   const now = new Date().toISOString();
-  const rows = [];
+  const rows: Record<string, unknown>[] = [];
   let skipped = 0;
   for (const rid of ids) {
     if (have.has(rid)) {
@@ -428,6 +449,8 @@ export async function issueCertificatesForRegistrations(input: {
     }
     const id = randomUUID();
     const role = input.roles?.[rid] || "Attendee";
+    const certificateNumber = `CERT-${id.slice(0, 8).toUpperCase()}`;
+    const verificationCode = `VCODE-${id}`;
     const data: CertificateData = {
       recipient_name: reg.attendee?.name || "Participant",
       role,
@@ -436,7 +459,10 @@ export async function issueCertificatesForRegistrations(input: {
       issuer_name: "",
       issuer_title: "",
       custom_fields: {},
+      certificate_number: certificateNumber,
+      verify_url: await absoluteUrl(`/verify/${verificationCode}`),
     };
+
     rows.push({
       id,
       event_id: input.eventId,
@@ -445,8 +471,8 @@ export async function issueCertificatesForRegistrations(input: {
       template_version: tpl.version,
       registration_id: rid,
       user_id: reg.userId || null,
-      certificate_number: `CERT-${id.slice(0, 8).toUpperCase()}`,
-      verification_code: `VCODE-${id}`,
+      certificate_number: certificateNumber,
+      verification_code: verificationCode,
       data,
       status: "issued",
       issued_at: now,
@@ -461,7 +487,18 @@ export async function issueCertificatesForRegistrations(input: {
     const { error } = await supabaseAdmin.from(TABLES.CERTIFICATES).insert(rows);
     if (error) throw error;
   }
-  return { issued: rows.length, skipped };
+
+  let archiveQueued = 0;
+  if (archiveToDrive && driveConnected && rows.length) {
+    const { enqueueCertificateJobs } = await import("./certificateJobs.service");
+    archiveQueued = await enqueueCertificateJobs({
+      eventId: input.eventId,
+      certificateIds: rows.map((r) => String(r.id)),
+      kind: "archive",
+    });
+  }
+
+  return { issued: rows.length, skipped, archiveQueued };
 }
 
 export async function rebindCertificatesToLatestTemplate(eventId: string): Promise<number> {

@@ -4,26 +4,25 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { hasModuleAccess } from "@/src/features/permissions/permissions.service";
-import {
-  getCertsOfEventByRegistration,
-  getTemplateForEvent,
-  markCertificatesEmailed,
-  renderCertPdfBytes,
-} from "@/src/features/certificates/certificates.service";
-import { buildCertificateEmail } from "@/src/features/certificates/certificateEmail";
-import type { CertificateRow } from "@/src/features/certificates/types";
+import { getCertsOfEventByRegistration } from "@/src/features/certificates/certificates.service";
+import { DRIVE_SHARE_WARNING } from "@/src/features/certificates/certificateEmail";
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
-import { OrganizerService } from "@/src/services/organizer.service";
-import { absoluteUrl } from "@/src/lib/appUrl";
-import { sendViaOrganizerConnection } from "@/src/features/email/organizerTransport.service";
-import { hasActiveOrganizerEmailConnection } from "@/src/features/email/organizerEmailConnection.service";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { safeAction, safeFail, safeOk } from "@/src/lib/safeAction";
+import {
+  enqueueBatch,
+  type ResolvedRecipient,
+} from "@/src/features/connections/server/batch.service";
+import { findActiveEmailConnection } from "@/src/features/connections/server/connections.service";
 
 const schema = z.object({
   eventId: z.string().min(1),
   resend: z.boolean().optional(),
+  /** Opt-in: share Drive archive by link and include URL in email. */
+  includeDriveLink: z.boolean().optional(),
+  /** Must be true when includeDriveLink is true (UI warning acknowledged). */
+  acknowledgeDriveShareWarning: z.boolean().optional(),
 });
 
 export const emailCertificatesAction = safeAction({
@@ -41,18 +40,25 @@ export const emailCertificatesAction = safeAction({
     if (!allowed)
       return safeFail("MODULE", "Certificates module is not enabled for this organizer.");
 
-    const connected = await hasActiveOrganizerEmailConnection(event.organizerId);
-    if (!connected) {
+    const includeDriveLink = Boolean(input.includeDriveLink);
+    if (includeDriveLink && !input.acknowledgeDriveShareWarning) {
+      return safeFail("VALIDATION", DRIVE_SHARE_WARNING);
+    }
+
+    const conn = await findActiveEmailConnection({
+      ownerType: "user",
+      ownerId: event.organizerId,
+    });
+    if (!conn) {
       return safeFail(
         "NO_CONNECTION",
-        "Connect Google or SMTP before emailing certificates (Organizer → Email connection).",
+        "Connect Gmail before emailing certificates (Organizer → Connections).",
       );
     }
 
-    const [certsByRegistration, regs, template] = await Promise.all([
+    const [certsByRegistration, regs] = await Promise.all([
       getCertsOfEventByRegistration(input.eventId),
       RegService.getRegsOfEvent(input.eventId),
-      getTemplateForEvent(input.eventId),
     ]);
 
     if (!certsByRegistration.size) {
@@ -63,7 +69,7 @@ export const emailCertificatesAction = safeAction({
       ? await UserService.getUsersByIds(regs.map((r) => r.userId).filter(Boolean))
       : new Map();
 
-    const emailByRegistration = new Map<string, { email: string; name: string }>();
+    const emailByRegistration = new Map<string, { email: string; name: string; userId: string }>();
     for (const reg of regs) {
       const user = usersById.get(String(reg.userId));
       const email = (user?.email || reg.attendee?.email || "").trim();
@@ -71,14 +77,13 @@ export const emailCertificatesAction = safeAction({
         emailByRegistration.set(String(reg.registrationId), {
           email,
           name: user?.profile?.fullName || reg.attendee?.name || "",
+          userId: String(reg.userId || ""),
         });
       }
     }
 
-    // Link-first: PDF attach is opt-in on the template (default false).
-    const attachPdf = template?.emailAttachPdf === true;
     const resend = Boolean(input.resend);
-    const outgoing: { certId: string; code: string; to: string; cert: CertificateRow }[] = [];
+    const recipients: ResolvedRecipient[] = [];
     let noAddress = 0;
 
     for (const [registrationId, cert] of certsByRegistration) {
@@ -89,15 +94,14 @@ export const emailCertificatesAction = safeAction({
         noAddress += 1;
         continue;
       }
-      outgoing.push({
-        certId: cert.id,
-        code: cert.verificationCode,
-        to: contact.email,
-        cert,
+      recipients.push({
+        email: contact.email,
+        registrationId: String(registrationId),
+        userId: contact.userId || undefined,
       });
     }
 
-    if (!outgoing.length) {
+    if (!recipients.length) {
       return noAddress
         ? safeFail(
             "NO_ADDRESS",
@@ -111,115 +115,73 @@ export const emailCertificatesAction = safeAction({
           );
     }
 
-    const { findActiveEmailConnection } =
-      await import("@/src/features/connections/server/connections.service");
-    const { getCapacity } = await import("@/src/features/connections/server/capacity.service");
-    const conn = await findActiveEmailConnection({
-      ownerType: "user",
-      ownerId: event.organizerId,
-    });
-    if (conn) {
-      const capacity = await getCapacity({
-        connection: conn,
+    if (includeDriveLink) {
+      const { enqueueCertificateJobs } = await import("../certificateJobs.service");
+      const needShare = [...certsByRegistration.values()]
+        .filter((c) => recipients.some((r) => r.registrationId === c.registrationId))
+        .filter((c) => !c.driveShareUrl)
+        .map((c) => c.id);
+      if (needShare.length) {
+        await enqueueCertificateJobs({
+          eventId: input.eventId,
+          certificateIds: needShare,
+          kind: "share",
+        });
+      }
+    }
+
+    try {
+      const result = await enqueueBatch({
         ownerId: event.organizerId,
         kind: "certificate",
+        subject: "Your certificate",
+        recipients,
+        mode: "send_and_schedule",
         eventId: input.eventId,
-      });
-      const cap = Math.min(capacity.maxPerSend, Math.max(0, capacity.remainingBulk));
-      if (cap < 1) {
-        return safeFail(
-          "CAPACITY",
-          "No bulk send capacity left today. Wait for slots to free up or schedule from Settings → Sent emails.",
-        );
-      }
-      outgoing.splice(cap);
-    }
-
-    const organizer = await OrganizerService.getOrganizerById(event.organizerId).catch(() => null);
-    const replyTo = organizer?.contact?.primaryEmail?.trim();
-
-    let sent = 0;
-    let failed = 0;
-    const stamped: string[] = [];
-
-    for (const item of outgoing) {
-      const downloadUrl = await absoluteUrl(`/certificate/${item.code}/download`);
-      const verifyUrl = await absoluteUrl(`/verify/${item.code}`);
-      const built = buildCertificateEmail(item.cert, verifyUrl, downloadUrl);
-
-      let attachments: { filename: string; content: Uint8Array; contentType: string }[] | undefined;
-      if (attachPdf) {
-        try {
-          const bytes = await renderCertPdfBytes(item.cert);
-          const safeName =
-            (item.cert.data.recipient_name || "certificate")
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "") || "certificate";
-          attachments = [
-            {
-              filename: `certificate-${safeName}.pdf`,
-              content: bytes,
-              contentType: "application/pdf",
-            },
-          ];
-        } catch (err) {
-          console.error("[emailCertificatesAction] PDF attach failed", err);
-        }
-      }
-
-      const outcome = await sendViaOrganizerConnection({
-        organizerId: event.organizerId,
-        to: item.to,
-        subject: built.subject,
-        html: built.html,
-        text: built.text,
-        kind: "certificate",
-        ...(replyTo ? { replyTo } : {}),
-        ...(attachments ? { attachments } : {}),
+        connectionId: conn.id,
+        createdBy: event.organizerId,
+        deferSendNowToOutbox: true,
+        payloadExtra: { includeDriveLink },
       });
 
-      if (outcome.ok) {
-        sent += 1;
-        stamped.push(item.certId);
-      } else if (outcome.code === "NO_CONNECTION") {
-        return safeFail(
-          "NO_CONNECTION",
-          "Connect Google or SMTP before emailing certificates (Organizer → Email connection).",
-        );
-      } else {
-        failed += 1;
-      }
+      revalidatePath(`/organizer/${event.organizerId}/events/${input.eventId}/certificates`);
+      return safeOk({
+        sent: result.sentNow,
+        queued: result.queued,
+        skipped: noAddress,
+        failed: 0,
+        batchId: result.batchId,
+        success: true as const,
+        message:
+          result.queued > 0
+            ? `Queued ${result.queued} certificate email${result.queued === 1 ? "" : "s"} (docs/18 capacity).`
+            : "Certificate emails enqueued.",
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not queue certificate emails.";
+      return safeFail("CAPACITY", message);
     }
-
-    if (stamped.length) {
-      await markCertificatesEmailed(stamped).catch((err: unknown) =>
-        console.error("[emailCertificatesAction] sent but could not record emailedAt", err),
-      );
-    }
-
-    if (!sent) {
-      return safeFail("PROVIDER", "The mail provider rejected the send. Nothing went out.");
-    }
-
-    revalidatePath(`/organizer/${event.organizerId}/events/${input.eventId}/certificates`);
-    return safeOk({
-      sent,
-      skipped: noAddress,
-      failed,
-      success: true as const,
-    });
   },
 });
 
 /** Legacy ActionResult-shaped wrapper for older form call sites. */
-export async function emailCertificatesLegacy(eventId: string, resend = false) {
-  const result = await emailCertificatesAction({ eventId, resend });
+export async function emailCertificatesLegacy(
+  eventId: string,
+  resend = false,
+  opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+) {
+  const result = await emailCertificatesAction({
+    eventId,
+    resend,
+    includeDriveLink: opts?.includeDriveLink,
+    acknowledgeDriveShareWarning: opts?.acknowledgeDriveShareWarning,
+  });
   if (!result.ok) return { success: false as const, error: result.error.message };
   return {
     success: true as const,
     sent: result.data.sent,
+    queued: result.data.queued,
     skipped: result.data.skipped,
-    ...(result.data.failed ? { error: `${result.data.failed} could not be delivered.` } : {}),
+    ...(result.data.message ? { message: result.data.message } : {}),
   };
 }

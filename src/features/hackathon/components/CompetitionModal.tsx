@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/src/lib/ui";
@@ -30,10 +30,19 @@ export function CompetitionModal({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const editing = !!track;
+  const close = useCallback(() => setOpen(false), []);
 
   return (
     <>
-      {editing ? null : (
+      {editing ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-sm font-medium text-ink hover:underline"
+        >
+          Edit
+        </button>
+      ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -43,22 +52,12 @@ export function CompetitionModal({
           Add Competition
         </button>
       )}
-      {editing ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="text-sm font-medium text-ink hover:underline"
-        >
-          Edit
-        </button>
-      ) : null}
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={close}
         title={editing ? `Edit ${track?.name}` : "Add a competition"}
-        description="Basics, timing, pricing, prizes and rules in one place."
+        description="Basics, team and pricing, prizes, rules, and registration close."
         maxWidth="2xl"
-        className="max-h-[90vh] overflow-y-auto"
       >
         <TrackForm
           action={action}
@@ -67,7 +66,8 @@ export function CompetitionModal({
           sponsors={sponsors}
           currentSponsorId={currentSponsorId}
           cancelHref={cancelHref}
-          onCancel={() => setOpen(false)}
+          onCancel={close}
+          onSuccess={close}
           timeZone={timeZone}
         />
       </Modal>

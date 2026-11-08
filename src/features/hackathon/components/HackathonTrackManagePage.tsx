@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download, Gavel, Trophy, Users } from "lucide-react";
+import type { ReactNode } from "react";
+import { ChevronLeft, Download, Users } from "lucide-react";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -8,7 +9,7 @@ import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { ConfirmSubmit } from "@/src/shared_components/ui/ConfirmDialog";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
-import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
+import { buttonClass, fieldClass, labelClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
 import { formatDate, formatDateMedium } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
@@ -17,17 +18,11 @@ import { getEventOrganizations } from "@/src/features/organizations/organization
 import {
   getHackathonSettings,
   getTrack,
-  judgesForTrack,
+  listJudges,
   listPrizesForTrack,
   listTeams,
 } from "@/src/features/hackathon/hackathon.service";
-import { judgingReady, rankTeams, rubricMax } from "@/src/features/hackathon/judging";
-import { Leaderboard } from "@/src/features/hackathon/components/Leaderboard";
-import { LiveRefresh } from "@/src/features/hackathon/components/LiveRefresh";
-import { AdvanceRoundForm, RubricForm } from "@/src/features/hackathon/components/JudgingForms";
-import { advanceRound, saveRubric } from "@/src/features/hackathon/actions/judging.action";
 import {
-  deadlinePassed,
   meetsMinimum,
   rosterLocked,
   rosterProgress,
@@ -45,6 +40,8 @@ import {
   listTasksForTrack,
   listPhasesForTrack,
   taskHints,
+  taskOrganizerAttachment,
+  taskOrganizerBrief,
 } from "@/src/features/hackathon/tasks.service";
 import {
   deleteHackathonTask,
@@ -58,15 +55,12 @@ import {
   hackathonDashPath,
   isCtfKind,
 } from "@/src/features/hackathon/kinds";
+import { judgeLink } from "@/src/features/hackathon/actions/judging.action";
+import { HackathonJudgeInvitePanel } from "@/src/features/hackathon/components/HackathonJudgeInvitePanel";
+import { requireConnectedSender } from "@/src/features/email/organizerTransport.service";
 
 /**
- * One track: its teams, their rosters, their submissions, and the two decisions
- * only the organizer can make -- unlocking a roster past the lock date, and
- * confirming the entry fee.
- *
- * Private files are signed at render rather than stored as URLs: a signed link
- * expires within the hour, so a stored one would be dead by the time anybody
- * clicked it. Same reasoning as certificates and exports.
+ * One track: its teams, their rosters, and submissions.
  */
 export default async function TrackDetailPage({
   params,
@@ -84,18 +78,30 @@ export default async function TrackDetailPage({
   const track = await getTrack(trackId);
   if (!track || track.eventId !== event.id) notFound();
 
-  const [teams, orgs, judges, tasks, phases, prizes, settings] = await Promise.all([
+  const [teams, orgs, tasks, phases, prizes, settings, allJudges, sender] = await Promise.all([
     listTeams(track.id),
     getEventOrganizations(event.id),
-    judgesForTrack(event.id, track.id),
     listTasksForTrack(track.id),
     listPhasesForTrack(track.id),
     listPrizesForTrack(track.id),
     getHackathonSettings(event.id),
+    listJudges(event.id),
+    requireConnectedSender(event.organizerId, { eventId }),
   ]);
+  const judgesOnTrack = allJudges.filter((j) => j.trackIds.includes(track.id));
+  const judgeInviteRows = await Promise.all(
+    judgesOnTrack.map(async (j) => ({
+      id: j.id,
+      name: j.name,
+      email: j.email,
+      inviteStatus: j.inviteStatus,
+      link: (await judgeLink(j)) || "",
+    })),
+  );
   const sponsor = trackSponsor(orgs, track.id);
   const ctf = isCtfKind(track.kind);
   const base = `${hackathonDashPath(organizer_id, eventId)}/competitions`;
+  const configurePath = `${base}/${trackId}`;
 
   const rulesUrl = track.rulesPath
     ? await getSignedUrl(
@@ -124,10 +130,6 @@ export default async function TrackDetailPage({
 
   const submitted = teams.filter((t) => t.submission.submittedAt).length;
   const locked = rosterLocked(track, { unlockedByOrganizer: false });
-  const closed = deadlinePassed(track);
-
-  const ranked = rankTeams(teams, track.rubric, track.currentRound, judges.length);
-  const inRound = ranked.length;
 
   return (
     <div className="space-y-8">
@@ -148,12 +150,28 @@ export default async function TrackDetailPage({
         {track.description ? (
           <p className="mt-1 max-w-3xl text-sm text-ink-soft">{track.description}</p>
         ) : null}
-        {track.rulesText ? (
-          <p className="mt-2 max-w-3xl whitespace-pre-wrap text-sm text-ink">{track.rulesText}</p>
+        {track.instructions || track.rulesText ? (
+          <p className="mt-2 max-w-3xl whitespace-pre-wrap text-sm text-ink">
+            {track.instructions || track.rulesText}
+          </p>
         ) : null}
       </div>
 
       {e ? <FormFeedback error={e} /> : null}
+
+      <Card title="Judge invites">
+        <CardBody>
+          <HackathonJudgeInvitePanel
+            eventId={eventId}
+            trackId={track.id}
+            trackName={track.name}
+            judges={judgeInviteRows}
+            returnTo={configurePath}
+            senderConnected={!!sender.ok}
+            senderError={sender.ok ? null : sender.error}
+          />
+        </CardBody>
+      </Card>
 
       <Card title="Tasks">
         <CardBody>
@@ -189,7 +207,38 @@ export default async function TrackDetailPage({
                   prefix="track-task"
                   maxAttachmentMb={settings.maxAttachmentMb}
                 />
-              ) : null}
+              ) : (
+                <>
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <label htmlFor="task-organizer-brief" className={labelClass}>
+                      Participant brief{" "}
+                      <span className="normal-case text-ink-faint">(compete)</span>
+                    </label>
+                    <textarea
+                      id="task-organizer-brief"
+                      name="organizerBrief"
+                      rows={3}
+                      maxLength={2000}
+                      className={fieldClass}
+                      placeholder="Optional instructions + what to submit"
+                    />
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1.5">
+                    <label htmlFor="task-organizer-file" className={labelClass}>
+                      Reference file <span className="normal-case text-ink-faint">(Drive)</span>
+                    </label>
+                    <input
+                      id="task-organizer-file"
+                      name="organizerBriefFile"
+                      type="file"
+                      className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+                    />
+                    <p className="text-xs text-ink-soft">
+                      Uses your connected Google Drive under this event.
+                    </p>
+                  </div>
+                </>
+              )}
               <Input id="task-hint" name="hint" label="Hint" helperText="Needs task hints on." />
               <Input
                 id="task-limit"
@@ -240,6 +289,22 @@ export default async function TrackDetailPage({
                           ? ` · ${phases.find((p) => p.id === t.phase_id)?.name ?? "phase"}`
                           : ""}
                       </span>
+                      {!ctf && taskOrganizerBrief(t) ? (
+                        <span className="mt-1 block text-xs text-ink-soft">
+                          Brief: {taskOrganizerBrief(t).slice(0, 120)}
+                          {taskOrganizerBrief(t).length > 120 ? "…" : ""}
+                        </span>
+                      ) : null}
+                      {!ctf && taskOrganizerAttachment(t)?.webUrl ? (
+                        <Link
+                          href={taskOrganizerAttachment(t)!.webUrl!}
+                          className="mt-0.5 block text-xs font-medium text-ink underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {taskOrganizerAttachment(t)?.fileName || "Organizer file"}
+                        </Link>
+                      ) : null}
                     </span>
                     <form action={deleteHackathonTask}>
                       <input type="hidden" name="trackId" value={track.id} />
@@ -268,7 +333,7 @@ export default async function TrackDetailPage({
         </CardBody>
       </Card>
 
-      <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-5 sm:divide-x sm:divide-line">
+      <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
         <MetricTile
           label="Teams"
           value={`${teams.length}`}
@@ -278,7 +343,7 @@ export default async function TrackDetailPage({
         <MetricTile
           label="Submitted"
           value={`${submitted}`}
-          sublabel={closed ? "Deadline passed" : "Deadline open"}
+          sublabel="Task / project submissions"
         />
         <MetricTile
           label="Entry fee"
@@ -289,17 +354,9 @@ export default async function TrackDetailPage({
           label="Roster"
           value={locked ? "Locked" : "Open"}
           sublabel={
-            track.rosterLockDate ? `Locks ${formatDate(track.rosterLockDate)}` : "No lock date set"
-          }
-        />
-        <MetricTile
-          label="Round"
-          value={`${track.currentRound}`}
-          icon={<Trophy className="h-4 w-4" />}
-          sublabel={
-            judgingReady(track)
-              ? `${judges.length} judge${judges.length === 1 ? "" : "s"} · ${inRound} team${inRound === 1 ? "" : "s"} in`
-              : "No rubric yet"
+            track.registrationClosesAt
+              ? `Locks when registration closes (${formatDate(track.registrationClosesAt)})`
+              : "Locks when registration closes (not set)"
           }
         />
       </section>
@@ -309,12 +366,14 @@ export default async function TrackDetailPage({
           <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
             <Fact label="Team size" value={`${track.minTeamSize} to ${track.maxTeamSize}`} />
             <Fact
-              label="Submission deadline"
-              value={track.submissionDeadline ? formatDate(track.submissionDeadline) : "Not set"}
+              label="Registration closes"
+              value={
+                track.registrationClosesAt ? formatDate(track.registrationClosesAt) : "Not set"
+              }
             />
             <Fact label="Dedicated sponsor" value={sponsor?.name ?? "None"} />
             <Fact
-              label="Rules or problem statement"
+              label="Rules & instructions file"
               value={
                 rulesUrl ? (
                   <a
@@ -322,7 +381,7 @@ export default async function TrackDetailPage({
                     className="inline-flex items-center gap-1.5 font-medium text-ink hover:underline"
                   >
                     <Download size={13} aria-hidden="true" />
-                    {track.rulesName || "Download"}
+                    {track.instructionsFileName || track.rulesName || "Download"}
                   </a>
                 ) : (
                   "None uploaded"
@@ -347,84 +406,6 @@ export default async function TrackDetailPage({
               <Fact label="Additional prize notes" value={track.prizePool} wide />
             ) : null}
           </dl>
-        </CardBody>
-      </Card>
-
-      <Card title={`Judging — round ${track.currentRound}`}>
-        <CardBody>
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div>
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-                <Gavel className="h-4 w-4" aria-hidden="true" />
-                Rubric
-              </h3>
-              <RubricForm
-                trackId={track.id}
-                rubric={track.rubric}
-                action={saveRubric.bind(null, eventId)}
-              />
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold text-ink">Judges on this track</h3>
-              {judges.length ? (
-                <ul className="divide-y divide-line border-y border-line">
-                  {judges.map((judge) => (
-                    <li
-                      key={judge.id}
-                      className="flex flex-wrap items-baseline justify-between gap-2 py-2.5"
-                    >
-                      <span className="text-sm text-ink">
-                        {judge.name}
-                        <span className="text-ink-soft"> · {judge.email}</span>
-                      </span>
-                      <span className="text-xs text-ink-soft">
-                        {judge.lastScoredAt
-                          ? `scored ${formatDateMedium(judge.lastScoredAt)}`
-                          : "not scored yet"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-ink-soft">
-                  No judges assigned to this track yet. Invite them from the Hackathon tab.
-                </p>
-              )}
-
-              {judgingReady(track) && inRound > 0 ? (
-                <div className="mt-6 border-t border-line pt-4">
-                  <AdvanceRoundForm
-                    trackId={track.id}
-                    round={track.currentRound}
-                    teamsInRound={inRound}
-                    action={advanceRound.bind(null, eventId)}
-                  />
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-
-      <Card title="Leaderboard" action={<LiveRefresh />}>
-        <CardBody>
-          <p className="pb-3 text-xs text-ink-soft">
-            Round {track.currentRound}, ranked by the average of the judges&apos; totals out of{" "}
-            {rubricMax(track.rubric) || "—"}. Averaged rather than summed, so a team scored by two
-            judges is comparable with one scored by three.
-          </p>
-          <Leaderboard
-            ranked={ranked}
-            rubric={track.rubric}
-            round={track.currentRound}
-            showJudges
-            emptyHint={
-              judgingReady(track)
-                ? "No team in this round has been scored yet."
-                : "Publish a rubric above, then invite judges, and scores appear here."
-            }
-          />
         </CardBody>
       </Card>
 
@@ -616,7 +597,7 @@ export default async function TrackDetailPage({
   );
 }
 
-function Fact({ label, value, wide }: { label: string; value: React.ReactNode; wide?: boolean }) {
+function Fact({ label, value, wide }: { label: string; value: ReactNode; wide?: boolean }) {
   return (
     <div className={wide ? "sm:col-span-2" : undefined}>
       <dt className="text-2xs font-medium uppercase text-ink-soft">{label}</dt>

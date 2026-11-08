@@ -167,6 +167,8 @@ export interface HackathonTeam {
   name: string;
   /** Short, shareable, and unique across the collection. */
   joinCode: string;
+  /** Organizer revoked the published code; join still needs a fresh regenerate. */
+  joinCodeRevoked?: boolean;
   /** Dashboard login. Plaintext only after pay + confirmation. */
   accessCode: string | null;
   members: HackathonTeamMember[];
@@ -270,37 +272,42 @@ export function complementaryTo(mine: string[], theirs: string[]): string[] {
 }
 
 /** Parse a stored UTC ISO (or legacy DD/MM/YYYY) into a Date. */
-export function rosterLockedAt(rosterLocksAt: string): Date | null {
-  if (!rosterLocksAt) return null;
-  const ms = Date.parse(rosterLocksAt);
+export function rosterLockedAt(iso: string): Date | null {
+  if (!iso) return null;
+  const ms = Date.parse(iso);
   if (Number.isFinite(ms)) return new Date(ms);
-  return parseScheduleDateTime(rosterLocksAt, "12:00 AM");
+  return parseScheduleDateTime(iso, "12:00 AM");
 }
 
+/** @deprecated Track submission deadlines removed (A7); phases / hackathon_timer control cutoffs. */
 export function deadlineAt(submissionDeadlineAt: string): Date | null {
-  if (!submissionDeadlineAt) return null;
-  const ms = Date.parse(submissionDeadlineAt);
-  if (Number.isFinite(ms)) return new Date(ms);
-  return parseScheduleDateTime(submissionDeadlineAt, "11:59 PM");
+  void submissionDeadlineAt;
+  return null;
 }
 
-/** An unset or unparseable date never locks anything. */
+/**
+ * Roster locks automatically when the competition's registration closes.
+ * Organizers can still unlock a single team (`unlockedByOrganizer`).
+ * Deprecated column `roster_locks_at` is ignored.
+ */
 export function rosterLocked(
-  track: Pick<HackathonTrack, "rosterLocksAt" | "rosterLockDate">,
+  track: Pick<HackathonTrack, "registrationClosesAt">,
   team: Pick<HackathonTeam, "unlockedByOrganizer">,
   now: Date = new Date(),
 ): boolean {
   if (team.unlockedByOrganizer) return false;
-  const at = rosterLockedAt(track.rosterLocksAt || track.rosterLockDate);
+  const at = rosterLockedAt(track.registrationClosesAt || "");
   return at ? now >= at : false;
 }
 
+/** @deprecated Always false — track submission_deadline_at is deprecated (A7). */
 export function deadlinePassed(
   track: Pick<HackathonTrack, "submissionDeadlineAt" | "submissionDeadline">,
   now: Date = new Date(),
 ): boolean {
-  const at = deadlineAt(track.submissionDeadlineAt || track.submissionDeadline);
-  return at ? now > at : false;
+  void track;
+  void now;
+  return false;
 }
 
 export type JoinRefusal =
@@ -310,7 +317,10 @@ export type JoinRefusal =
   | "team_full"
   | "already_in_this_team"
   | "already_in_another_team"
-  | "competition_ended";
+  | "competition_ended"
+  | "join_code_expired"
+  | "join_code_revoked"
+  | "team_not_ready";
 
 export const JOIN_REFUSAL_MESSAGE: Record<JoinRefusal, string> = {
   no_such_code: "That join code does not match a team.",
@@ -322,6 +332,9 @@ export const JOIN_REFUSAL_MESSAGE: Record<JoinRefusal, string> = {
   already_in_this_team: "You are already in this team.",
   already_in_another_team: "You are already in a team for this track. Leave it first.",
   competition_ended: "This competition has ended. New teams cannot join.",
+  join_code_expired: "That join code has expired for this event.",
+  join_code_revoked: "That join code does not match a team.",
+  team_not_ready: "That team is not open for join codes yet (payment or status).",
 };
 
 /**
@@ -335,11 +348,20 @@ export interface JoinFacts {
   registrationId: string;
   team: Pick<
     HackathonTeam,
-    "eventId" | "trackId" | "members" | "maxTeamSize" | "unlockedByOrganizer"
+    | "eventId"
+    | "trackId"
+    | "members"
+    | "maxTeamSize"
+    | "unlockedByOrganizer"
+    | "feeStatus"
+    | "eliminatedAtRound"
+    | "joinCodeRevoked"
   > | null;
-  track: Pick<HackathonTrack, "rosterLocksAt" | "rosterLockDate" | "status"> | null;
+  track: Pick<HackathonTrack, "registrationClosesAt" | "status"> | null;
   currentTeamTrackId: string | null;
   now?: Date;
+  /** When set, join codes stop working after this instant (event/last-phase end). */
+  joinCodeValidUntil?: Date | string | null;
 }
 
 export type JoinDecision = { allowed: true } | { allowed: false; reason: JoinRefusal };
@@ -359,6 +381,7 @@ export type JoinDecision = { allowed: true } | { allowed: false; reason: JoinRef
  */
 export function canJoin(facts: JoinFacts): JoinDecision {
   const { team, track, registrationId } = facts;
+  const now = facts.now ?? new Date();
   if (!team) return { allowed: false, reason: "no_such_code" };
   if (team.eventId !== facts.eventId) return { allowed: false, reason: "wrong_event" };
 
@@ -371,7 +394,22 @@ export function canJoin(facts: JoinFacts): JoinDecision {
   if (track?.status === "ended") {
     return { allowed: false, reason: "competition_ended" };
   }
-  if (track && rosterLocked(track, team, facts.now ?? new Date())) {
+  if (team.eliminatedAtRound != null) {
+    return { allowed: false, reason: "team_not_ready" };
+  }
+  if (team.joinCodeRevoked) {
+    return { allowed: false, reason: "join_code_revoked" };
+  }
+  if (team.feeStatus === "fee_pending") {
+    return { allowed: false, reason: "team_not_ready" };
+  }
+  if (facts.joinCodeValidUntil) {
+    const until = new Date(facts.joinCodeValidUntil);
+    if (!Number.isNaN(until.getTime()) && now.getTime() > until.getTime()) {
+      return { allowed: false, reason: "join_code_expired" };
+    }
+  }
+  if (track && rosterLocked(track, team, now)) {
     return { allowed: false, reason: "roster_locked" };
   }
   if (team.members.length >= team.maxTeamSize) {

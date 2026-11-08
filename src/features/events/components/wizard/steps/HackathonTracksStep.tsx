@@ -4,10 +4,7 @@ import type { EventFormData, WizardTrackDraft } from "@/src/services/models/even
 import { MediaUpload } from "@/src/features/media/MediaUpload";
 import { DateField } from "@/src/shared_components/DateField";
 import { emptyTrack } from "../wizardUtils";
-import { HACKATHON_KINDS, type HackathonKind } from "@/src/features/hackathon/kinds";
-
-const DEFAULT_NON_CTF_KIND: HackathonKind =
-  (HACKATHON_KINDS.find((k) => k !== "ctf") as HackathonKind | undefined) ?? "business";
+import type { HackathonKind } from "@/src/features/hackathon/kinds";
 
 export function HackathonTracksStep({
   formData,
@@ -87,12 +84,12 @@ export function HackathonTracksStep({
           <label className="flex items-center gap-2 text-xs text-ink-soft">
             <input
               type="checkbox"
-              checked={(track.kind || DEFAULT_NON_CTF_KIND) === "ctf"}
+              checked={track.kind === "ctf"}
               onChange={(e) =>
-                patch(track.id, { kind: e.target.checked ? "ctf" : DEFAULT_NON_CTF_KIND })
+                patch(track.id, { kind: (e.target.checked ? "ctf" : "other") as HackathonKind })
               }
             />
-            CTF (cyber hackathon)
+            This is a CTF
           </label>
           <textarea
             value={track.description}
@@ -145,24 +142,20 @@ export function HackathonTracksStep({
             />
           </div>
           <textarea
-            value={track.policies}
-            onChange={(e) => patch(track.id, { policies: e.target.value })}
-            placeholder="Policies"
-            rows={2}
-            className="w-full rounded-xl border border-line px-4 py-2 text-sm outline-none"
-          />
-          <textarea
-            value={track.instructions}
-            onChange={(e) => patch(track.id, { instructions: e.target.value })}
-            placeholder="Instructions for participants"
-            rows={2}
-            className="w-full rounded-xl border border-line px-4 py-2 text-sm outline-none"
-          />
-          <textarea
-            value={track.rulesText || ""}
-            onChange={(e) => patch(track.id, { rulesText: e.target.value })}
-            placeholder="Rules (paste text; you can also upload a file after publish)"
-            rows={4}
+            value={
+              track.instructions ||
+              [track.policies, track.rulesText].filter(Boolean).join("\n\n") ||
+              ""
+            }
+            onChange={(e) =>
+              patch(track.id, {
+                instructions: e.target.value,
+                policies: "",
+                rulesText: e.target.value,
+              })
+            }
+            placeholder="Rules & instructions (shown to participants)"
+            rows={6}
             className="w-full rounded-xl border border-line px-4 py-2 text-sm outline-none"
           />
         </div>

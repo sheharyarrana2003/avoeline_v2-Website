@@ -157,7 +157,8 @@ async function insertImportedRow(opts: {
     payment_proof_path: null,
     checked_in: false,
     qr_code_data: qr?.data || "",
-    qr_code_image_url: qr?.imageUrl || "",
+    // O1 A6: stop writing hosted QR URLs — render via /api/qr/[token].png
+    qr_code_image_url: null,
     certificate_issued: false,
     ticket_tier_id: null,
     promo_code_used: null,

@@ -156,26 +156,23 @@ Sign in as the organizer tenant (or a self-signed-up organizer).
 
 1. `/organizer/{id}/dashboard` shows widgets, reviews and analytics. Paid modules (Marketplace, Designer, Ushers, Certificates) show a locked panel unless the plan or an override unlocks them. Change the plan in `/admin/tenants` and refresh to confirm.
 2. **Create an event** at `.../events/create`. Tick **Is this a hackathon?** only if `hackathon_ops` is granted (`?hackathon=1` from the Hackathon rail). Description supports lists/colors; banner is **4:5**; no timezone picker; end date ≥ start; free default with **Unlimited seats** checkbox; paid needs ≥1 tier; hackathon needs ≥1 named competition (CTF checkbox, not type dropdown). Connect **Google** under Organizer → Email before attendee mail works.
-3. Open the event. Header has one banner bar + **Edit event** / **Archive** / Delete. Shared tabs: Attendees, **Team** (ops, was Staff), Access, Agenda, Speakers, Vendors, Sponsors, Certificates, Exports. Hackathon also: Competitions, Phases & Tasks, **Competitors** (occupancy), Submissions, Scoreboard, Settings. List has an **Archived** filter. Public page `/events/{id}` (share `/e/{id}`) hides Register when ended; competitions at `/events/{id}/tracks/[trackId]`.
+3. Open the event. Header has one banner bar + **Edit event** / **Archive** / Delete. Shared tabs: Attendees, **Team** (ops), Access, Agenda, Speakers, Vendors, Sponsors, Certificates, Files, Exports. Hackathon also: Competitions, Phases & Tasks, Submissions, Scoreboard, Settings. **No Competitors tab** (roster on Attendees). List has an **Archived** filter. Public page `/events/{id}` (share `/e/{id}`) hides Register when ended; competitions at `/events/{id}/tracks/[trackId]`.
 
 ### 4.1 Hackathon module — `.../events?kind=hackathon`
 
+**Canonical checklist:** [`docs/O8-full-flow-checklist.md`](O8-full-flow-checklist.md) (O0–O7 tabs + cross-flows). This section is a short path only.
+
 **Unlock:** `/admin/tenants` → grant `hackathon_ops` (or include it on the plan). Sign in as that organizer. The left rail **Hackathon** opens the Events list filtered to hackathons.
 
-1. **Create:** `/organizer/{id}/hackathon/create` redirects to `.../events/create?hackathon=1`. Publish. The event appears in Events (badge) and in `?kind=hackathon`.
-2. **Open the dashboard** at `.../events/{eventId}`: Overview plus shared tabs, then Competitions, Phases & Tasks, Competitors, Submissions, Scoreboard, Settings. Department admins who can manage the organizer can open inner tabs. Old `/hackathon/{eventId}/…` bookmarks redirect here.
-3. **Competitions:** add tracks with a kind (CTF, business, …).
-4. **Phases & Tasks:** filter All vs one competition; search phase/task names. Create a phase (open/close times). Attach tasks or add independent tasks (`phase_id` null).
-5. **Settings:** event-level online mode at the top. Each competition toggle applies to selected competitions or all. CTF-only keys skip non-CTF tracks. Turn on `live_scoreboard` and `phased_structure` for selected competitions only.
-6. **Scoreboard:** points for the picked competition only (completions joined to that track’s tasks) and refreshes every 15 seconds. Public `/events/{eventId}/tracks/{trackId}/leaderboard` is **judge** scores and only if online mode is on.
-7. **Access:** on a paid hackathon, add promo codes as whole-event or one competition.
-8. **Exports:** hackathon teams workbook (two sheets) plus the usual attendee/check-in/financial/sponsor files.
-9. **Team** (ops tab): add/remove members and a lead on the free path; named positions and applicant pipeline need `teams_advanced_roles`. Shortlist/onboard emails send via organizer Google. On Demo Spring, **Cyber CTF Lead** scopes `hackathon:manage` to Cyber CTF via `extra.trackIds` (see audit report).
-10. **Attendee email:** Compose includes checkboxes that inject team details / QR into the body; confirmed free regs email the lead with ticket/QR; edit attendee details from the drawer. Certificates email is link-first (download on Avoeline, no stored PDF).
+1. **Create:** `/organizer/{id}/hackathon/create` redirects to `.../events/create?hackathon=1`. Publish.
+2. **Open** `.../events/{eventId}`: Overview + shared tabs + Competitions, Phases & Tasks, Submissions, Scoreboard, Settings. `.../events/{id}/teams` → Attendees. Old `/hackathon/{eventId}/…` bookmarks redirect here.
+3. **Competitions:** CTF checkbox; single Rules & instructions; optional `registration_closes_at`; judge invites.
+4. **Phases & Tasks:** phase windows + FileStore; windows gate submit.
+5. **Settings:** matrix toggles only — no online mode / mentors / announcements.
+6. **Scoreboard:** per-competition; ▲▼; `live_scoreboard` gate. Public `/tracks/.../leaderboard` redirects to competition detail.
+7. **Access / Attendees / Team / Exports / Certificates / Files:** follow O8 checklist (registration form on Attendees; cert viewer `/certificate/[code]`).
 
-Settings enforcement: see [`docs/hackathon-settings-matrix.md`](hackathon-settings-matrix.md). **Enforced** examples: `live_scoreboard`, `phased_structure`, `ctf_flags`, `per_task_timer`, `hackathon_timer`, `anti_cheat_tab_close` (integrity **log/warn only** — not OS browser lockdown). **Not active yet** (toggle-only): `docker_sandboxing`, `daily_shifts`, and other matrix rows marked Not active (`docs/07-hackathon-organizer-config.md`).
-
-Live Demo Spring walkthrough results: [`docs/hackathon-e2e-audit-2026-10-19.md`](hackathon-e2e-audit-2026-10-19.md).
+Settings enforcement: [`docs/hackathon-settings-matrix.md`](hackathon-settings-matrix.md). Historical Demo Spring audit: [`docs/hackathon-e2e-audit-2026-10-19.md`](hackathon-e2e-audit-2026-10-19.md). Playwright: `npm run test:e2e` after `seed:demo`.
 
 ---
 

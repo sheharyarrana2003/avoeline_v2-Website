@@ -46,15 +46,15 @@ export function LiveScoreboardTable({
   useEffect(() => {
     setNowMs(Date.now());
   }, []);
-  const noSolves = rows.length > 0 && rows.every((r) => r.points === 0 && r.solved === 0);
-
-  if (!rows.length || noSolves) {
+  if (!rows.length) {
     return (
       <p className="text-sm text-ink-soft">
-        No submissions yet — scores will appear as teams solve tasks.
+        No teams on this competition yet — the scoreboard fills as teams join and complete tasks.
       </p>
     );
   }
+
+  const noSolves = rows.every((r) => r.points === 0 && r.solved === 0);
 
   function toggle(id: string) {
     setOpen((prev) => {
@@ -67,6 +67,11 @@ export function LiveScoreboardTable({
 
   return (
     <div className="overflow-x-auto">
+      {noSolves ? (
+        <p className="mb-3 text-sm text-ink-soft">
+          No task points yet — ranks still list every team with phases / tasks completed.
+        </p>
+      ) : null}
       <p className="mb-3 text-xs text-ink-soft">
         Ties broken by more tasks solved, then earlier last solve. Relative times show the exact
         stamp (to the second) on hover.
@@ -75,6 +80,7 @@ export function LiveScoreboardTable({
         <thead>
           <tr>
             <th className={tableHead}>Rank</th>
+            <th className={tableHead}>1h</th>
             <th className={tableHead}>Team</th>
             <th className={tableHead}>Points</th>
             <th className={tableHead}>Tasks solved</th>
@@ -88,6 +94,21 @@ export function LiveScoreboardTable({
         <tbody>
           {rows.map((row, i) => {
             const expanded = open.has(row.teamId);
+            const move = row.movement;
+            const moveLabel =
+              !move || move.direction === "same"
+                ? "—"
+                : move.direction === "up"
+                  ? `▲${move.delta}`
+                  : move.direction === "down"
+                    ? `▼${Math.abs(move.delta)}`
+                    : "new";
+            const moveTitle =
+              move?.priorRank != null
+                ? `Was #${move.priorRank} one hour ago`
+                : move?.direction === "new"
+                  ? "Not ranked one hour ago"
+                  : undefined;
             return (
               <Fragment key={row.teamId}>
                 <tr
@@ -95,6 +116,9 @@ export function LiveScoreboardTable({
                   onClick={() => toggle(row.teamId)}
                 >
                   <td className={tableCell}>{i + 1}</td>
+                  <td className={`${tableCell} tabular-nums`} title={moveTitle}>
+                    {moveLabel}
+                  </td>
                   <td className={tableCell}>{row.teamName}</td>
                   <td className={`${tableCell} tabular-nums`}>{row.points}</td>
                   <td className={`${tableCell} tabular-nums`}>
@@ -116,7 +140,7 @@ export function LiveScoreboardTable({
                 </tr>
                 {expanded ? (
                   <tr>
-                    <td colSpan={7} className="bg-muted/40 px-4 py-4">
+                    <td colSpan={8} className="bg-muted/40 px-4 py-4">
                       {row.phases.length ? (
                         <div className="mb-4">
                           <p className="mb-2 text-2xs font-semibold uppercase text-ink-soft">

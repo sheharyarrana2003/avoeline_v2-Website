@@ -22,7 +22,7 @@ import { answerText } from "@/src/lib/customFields";
 import type { CustomFieldOption } from "@/src/services/models/event.model";
 import type { ReactNode } from "react";
 import { AttendeeClientSideProp } from "./AttendeeClientSide";
-import { formatDateTime } from "@/src/lib/datetime";
+import { formatDateMedium, formatDateTime } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { statusMeta } from "@/src/lib/status";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
@@ -36,6 +36,7 @@ import { updateAttendeeDetailsAction } from "@/src/features/event_attendee/actio
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { ActionResult } from "@/src/lib/action";
 import { fieldClass, labelClass } from "@/src/lib/ui";
+import { hackathonTeamCodesVisible } from "../roster";
 
 interface SingleAttendeeViewProps {
   combined_data: AttendeeClientSideProp;
@@ -48,6 +49,16 @@ interface SingleAttendeeViewProps {
   competitionName?: string;
   questions?: CustomFieldOption[];
   hidePayment?: boolean;
+  eventEndsAtIso?: string | null;
+  checkInByNames?: Record<string, string>;
+  teamCodes?: {
+    joinCode: string | null;
+    accessCode: string | null;
+    trackName: string;
+    feeStatus: string | null;
+    teamPayment: string | null;
+    leadRegistration: Registration;
+  } | null;
 }
 
 const STATUS_OPTIONS: Registration["status"][] = [
@@ -85,6 +96,9 @@ export function SingleAttendeeView({
   competitionName,
   questions = [],
   hidePayment = false,
+  eventEndsAtIso = null,
+  checkInByNames = {},
+  teamCodes = null,
 }: SingleAttendeeViewProps) {
   // 1. Safely extract core data
   const a = combined_data?.a || ({} as any);
@@ -186,6 +200,7 @@ export function SingleAttendeeView({
   const amountPaid = registration?.payment?.amountPaid ?? 0;
   const finalPrice = registration?.finalPrice ?? amountPaid;
   const ticketType = registration?.pricingTier || "General";
+  const accessTier = registration?.tier || "";
   const discount = registration?.discountApplied;
 
   const [checkInState, checkInAction] = useActionState<ActionResult | null, FormData>(
@@ -209,11 +224,24 @@ export function SingleAttendeeView({
   const checkInMethod = registration?.checkIn?.checkInMethod
     ? registration.checkIn.checkInMethod.replace("_", " ")
     : "—";
+  const checkedInById = registration?.checkIn?.checkedInBy || null;
+  const checkedInBy =
+    (checkedInById && checkInByNames[checkedInById]) ||
+    (checkedInById ? `${checkedInById.slice(0, 8)}…` : null);
 
   const department = a?.academic?.department;
   const gradYear = a?.academic?.graduationYear;
-  const locationInfo = u?.location ? `${u.location.city}, ${u.location.country}` : "";
   const member = variant === "member";
+  const showTeamCodes =
+    teamCodes &&
+    hackathonTeamCodesVisible(
+      { payment: teamCodes.teamPayment, feeStatus: teamCodes.feeStatus },
+      teamCodes.leadRegistration,
+    );
+  const codesEndNote = eventEndsAtIso && showTeamCodes ? formatDateMedium(eventEndsAtIso) : null;
+  const statusHistory = [...(registration?.statusHistory || [])].sort((a, b) =>
+    String(a.timestamp).localeCompare(String(b.timestamp)),
+  );
   const answerFileUrls = combined_data?.answerFileUrls ?? null;
   const customAnswers = questions
     .map((q) => {
@@ -530,6 +558,9 @@ export function SingleAttendeeView({
               <Heading>Ticket</Heading>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Ticket type" value={ticketType} />
+                {accessTier && accessTier !== ticketType ? (
+                  <Field label="Tier" value={accessTier} />
+                ) : null}
                 {member ? null : (
                   <Field label="Final price" value={formatCurrency(finalPrice, currency)} />
                 )}
@@ -551,6 +582,27 @@ export function SingleAttendeeView({
                 </p>
               ) : null}
             </section>
+
+            {showTeamCodes && (teamCodes!.joinCode || teamCodes!.accessCode) ? (
+              <section className="rounded-xl border border-line bg-muted/30 p-4">
+                <Heading>Team codes ({teamCodes!.trackName})</Heading>
+                {teamCodes!.joinCode ? (
+                  <p className="font-mono text-sm text-ink">
+                    Join <span className="text-ink-soft">{teamCodes!.joinCode}</span>
+                  </p>
+                ) : null}
+                {teamCodes!.accessCode ? (
+                  <p className="mt-1 font-mono text-sm text-ink">
+                    Dashboard access <span className="text-ink-soft">{teamCodes!.accessCode}</span>
+                  </p>
+                ) : null}
+                {codesEndNote ? (
+                  <p className="mt-2 text-xs text-ink-soft">
+                    Valid until the last phase closes or the event ends ({codesEndNote}).
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
 
             {registration?.status === "pending" ? (
               <section className="rounded-xl border border-line bg-paper p-4">
@@ -615,7 +667,9 @@ export function SingleAttendeeView({
                     : "Not checked in"}
                 </p>
                 <p className="text-xs capitalize text-ink-soft">
-                  {isCheckedIn ? `Method: ${checkInMethod}` : "Mark them in when they arrive"}
+                  {isCheckedIn
+                    ? `Method: ${checkInMethod}${checkedInBy ? ` · by ${checkedInBy}` : ""}`
+                    : "Mark them in when they arrive"}
                 </p>
               </div>
               {/* A plain form, so this works with JS off and needs no state here.
@@ -640,16 +694,31 @@ export function SingleAttendeeView({
               ) : null}
             </section>
 
-            {department ||
-            gradYear ||
-            locationInfo ||
-            (organization && organization !== "Not Provided") ? (
+            {statusHistory.length ? (
+              <section>
+                <Heading>Status history</Heading>
+                <ol className="space-y-2">
+                  {statusHistory.map((entry, idx) => (
+                    <li
+                      key={`${entry.status}-${entry.timestamp}-${idx}`}
+                      className="flex items-center justify-between gap-3 text-sm"
+                    >
+                      <StatusBadge status={entry.status} size="sm" marker="dot" />
+                      <span className="tabular-nums text-xs text-ink-soft">
+                        {formatDateTime(entry.timestamp)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
+
+            {department || gradYear || (organization && organization !== "Not Provided") ? (
               <section>
                 <Heading>Details</Heading>
                 <div className="grid grid-cols-2 gap-4">
                   {department ? <Field label="Department" value={department} /> : null}
                   {gradYear ? <Field label="Graduation year" value={String(gradYear)} /> : null}
-                  {locationInfo ? <Field label="Location" value={locationInfo} /> : null}
                   {!member && organization && organization !== "Not Provided" ? (
                     <Field label="Organization" value={organization} />
                   ) : null}
@@ -790,19 +859,30 @@ export function SingleAttendeeView({
               </section>
             ) : null}
 
-            {registration?.qrCode?.imageUrl ? (
+            {registration?.registrationId ? (
               <section>
                 <Heading>Check-in QR</Heading>
-                <ImageLightbox src={registration.qrCode.imageUrl} alt={`QR for ${fullName}`}>
+                <ImageLightbox
+                  src={`/api/qr/${registration.registrationId}.png`}
+                  alt={`QR for ${fullName}`}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={registration.qrCode.imageUrl}
+                    src={`/api/qr/${registration.registrationId}.png`}
                     alt=""
                     className="h-40 w-40 rounded-xl bg-white object-contain p-2"
                   />
                 </ImageLightbox>
                 <p className="mt-1.5 text-xs text-ink-soft">
-                  This member&apos;s door QR encodes name, email, registration id, and event id.
+                  On-demand door QR (name, email, registration id, event id). Ticket:{" "}
+                  <a
+                    href={`/events/${registration.eventId}/ticket/${registration.registrationId}`}
+                    className="underline underline-offset-2"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    open ticket
+                  </a>
                 </p>
               </section>
             ) : null}

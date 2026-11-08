@@ -12,6 +12,9 @@ blockchain.cred.txt
 
 # testing
 /coverage
+/e2e/.auth/
+/test-results/
+/playwright-report/
 /reports/marketing/*
 !/reports/marketing/README.md
 !/reports/marketing/CHECKLIST.md

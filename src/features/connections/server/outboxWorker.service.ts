@@ -28,6 +28,51 @@ function jitterMs(): number {
   return Math.floor(Math.random() * 400);
 }
 
+/** Docs/18 send-time render for certificate emails (O7). */
+async function renderCertificateOutboxPayload(
+  payload: Record<string, unknown>,
+): Promise<
+  | { ok: true; subject: string; html: string; text: string; certificateId: string }
+  | { ok: false; reason: string }
+> {
+  const registrationId = payload.registrationId ? String(payload.registrationId) : "";
+  const eventId = payload.eventId ? String(payload.eventId) : "";
+  if (!registrationId || !eventId) return { ok: false, reason: "certificate_missing_ids" };
+
+  const { getCertsOfEventByRegistration, markCertificatesEmailed } =
+    await import("@/src/features/certificates/certificates.service");
+  const byReg = await getCertsOfEventByRegistration(eventId);
+  const cert = byReg.get(registrationId);
+  if (!cert || cert.status === "revoked") return { ok: false, reason: "certificate_missing" };
+
+  const includeDriveLink = payload.includeDriveLink === true;
+  let driveShareUrl: string | null = cert.driveShareUrl;
+  if (includeDriveLink) {
+    const { ensureCertificateShared } =
+      await import("@/src/features/certificates/certificateJobs.service");
+    driveShareUrl = await ensureCertificateShared(cert.id, eventId).catch(() => cert.driveShareUrl);
+  }
+
+  const { absoluteUrl } = await import("@/src/lib/appUrl");
+  const viewerUrl = await absoluteUrl(`/certificate/${cert.verificationCode}`);
+  const verifyUrl = await absoluteUrl(`/verify/${cert.verificationCode}`);
+  const { buildCertificateEmail } = await import("@/src/features/certificates/certificateEmail");
+  const built = buildCertificateEmail(cert, verifyUrl, viewerUrl, {
+    includeDriveLink,
+    driveShareUrl,
+  });
+
+  // Stamp after successful send — caller marks when send ok; keep id for that.
+  void markCertificatesEmailed;
+  return {
+    ok: true,
+    subject: built.subject,
+    html: built.html,
+    text: built.text,
+    certificateId: cert.id,
+  };
+}
+
 async function revalidateRecipient(payload: Record<string, unknown>): Promise<string | null> {
   const registrationId = payload.registrationId ? String(payload.registrationId) : null;
   const eventId = payload.eventId ? String(payload.eventId) : null;
@@ -257,10 +302,35 @@ export async function processEmailOutbox(limit = 40): Promise<{
       })
       .eq("id", raw.id);
 
+    let subject = String(payload.subject || "Message");
+    let html = payload.html ? String(payload.html) : undefined;
+    let text = payload.text ? String(payload.text) : undefined;
+    let certificateIdForStamp: string | null = null;
+
+    if (kind === "certificate") {
+      const rendered = await renderCertificateOutboxPayload(payload);
+      if (!rendered.ok) {
+        await supabaseAdmin
+          .from(TABLES.EMAIL_OUTBOX)
+          .update({
+            status: "cancelled",
+            skip_reason: rendered.reason,
+            attempt_at: new Date().toISOString(),
+          })
+          .eq("id", raw.id);
+        skipped += 1;
+        continue;
+      }
+      subject = rendered.subject;
+      html = rendered.html;
+      text = rendered.text;
+      certificateIdForStamp = rendered.certificateId;
+    }
+
     const { withUnsubscribeFooter } = await import("./suppressions.service");
     const body = withUnsubscribeFooter({
-      html: payload.html ? String(payload.html) : undefined,
-      text: payload.text ? String(payload.text) : undefined,
+      html,
+      text,
       email: String(payload.to || ""),
       ownerId: conn.ownerId,
       kind,
@@ -269,7 +339,7 @@ export async function processEmailOutbox(limit = 40): Promise<{
       {
         connectionId: conn.id,
         to: String(payload.to || ""),
-        subject: String(payload.subject || "Message"),
+        subject,
         html: body.html,
         text: body.text,
         kind,
@@ -285,6 +355,11 @@ export async function processEmailOutbox(limit = 40): Promise<{
         .from(TABLES.EMAIL_OUTBOX)
         .update({ status: "sent", last_error: null })
         .eq("id", raw.id);
+      if (certificateIdForStamp) {
+        const { markCertificatesEmailed } =
+          await import("@/src/features/certificates/certificates.service");
+        await markCertificatesEmailed([certificateIdForStamp]).catch(() => null);
+      }
       if (raw.batch_id) {
         const { data: batch } = await supabaseAdmin
           .from(TABLES.EMAIL_SEND_BATCHES)

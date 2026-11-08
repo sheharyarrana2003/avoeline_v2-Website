@@ -245,7 +245,8 @@ function registrationToRow(reg: Registration): Record<string, unknown> {
     check_in_method: reg.checkIn?.checkInMethod || null,
     checked_in_by: reg.checkIn?.checkedInBy || null,
     qr_code_data: reg.qrCode?.data || "",
-    qr_code_image_url: reg.qrCode?.imageUrl || "",
+    // O1 A6: stop writing hosted QR URLs — render via /api/qr/[token].png
+    qr_code_image_url: null,
     certificate_issued: Boolean(reg.certificate?.issued),
     certificate_id: reg.certificate?.certificateId || null,
     feedback_submitted: Boolean(reg.feedbackSubmitted),

@@ -51,24 +51,29 @@ function decode(raw: string | undefined): CompeteSession | null {
 
 export async function setCompeteCookie(session: CompeteSession): Promise<void> {
   const jar = await cookies();
+  // Path `/` so `/api/files/[id]` can authorize compete team downloads (O6).
   jar.set(COOKIE, encode(session), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: `/events/${session.eventId}`,
+    path: "/",
     maxAge: MAX_AGE_SEC,
   });
 }
 
 export async function clearCompeteCookie(eventId: string): Promise<void> {
   const jar = await cookies();
-  jar.set(COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: `/events/${eventId}`,
-    maxAge: 0,
-  });
+  const clear = (path: string) =>
+    jar.set(COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path,
+      maxAge: 0,
+    });
+  clear("/");
+  // Clear legacy event-scoped cookie from earlier compete sessions.
+  clear(`/events/${eventId}`);
 }
 
 export async function readCompeteCookie(eventId: string): Promise<CompeteSession | null> {

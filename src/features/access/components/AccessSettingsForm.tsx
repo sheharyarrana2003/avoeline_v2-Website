@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Globe, Lock, Mail, Crown, Layers } from "lucide-react";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -8,13 +9,19 @@ import type { ActionResult } from "@/src/lib/action";
 import { saveAccessSettings } from "../actions/accessSettings.action";
 import { ACCESS_TYPES, ACCESS_TYPE_META, type EventAccess, type EventAccessType } from "../types";
 
+const TYPE_ICONS: Record<
+  EventAccessType,
+  React.ComponentType<{ className?: string; size?: number }>
+> = {
+  public: Globe,
+  private: Lock,
+  invite_only: Mail,
+  hybrid: Layers,
+  tiered: Crown,
+};
+
 /**
- * The access-type selector and its settings.
- *
- * One form, and the fields that only matter to some types are shown only for
- * those types -- an access code on a public event, or gated tiers on anything but
- * hybrid, are settings with no effect, and a control that does nothing is worse
- * than an absent one.
+ * Access type cards + type-scoped settings + approval/waitlist + one Save (docs/22 O3).
  */
 export function AccessSettingsForm({
   eventId,
@@ -31,7 +38,9 @@ export function AccessSettingsForm({
     saveAccessSettings,
     null,
   );
-  const [type, setType] = useState<EventAccessType>(visibility);
+  const [type, setType] = useState<EventAccessType>(
+    visibility === ("vip_tiered" as EventAccessType) ? "tiered" : visibility,
+  );
 
   const showCode = type === "private" || type === "hybrid";
   const showGated = type === "hybrid";
@@ -43,35 +52,44 @@ export function AccessSettingsForm({
       {state?.error ? <FormFeedback error={state.error} /> : null}
       {state?.success ? <FormFeedback success="Access settings saved." /> : null}
 
-      <fieldset className="flex flex-col gap-3">
+      <fieldset>
         <legend className={labelClass}>Access type</legend>
-        {ACCESS_TYPES.map((value) => (
-          <label
-            key={value}
-            title={ACCESS_TYPE_META[value].description}
-            className={`flex cursor-pointer gap-3 rounded-xl border p-3 transition ${
-              type === value ? "border-ink bg-muted" : "border-line hover:border-line-loud"
-            }`}
-          >
-            <input
-              type="radio"
-              name="visibility"
-              value={value}
-              checked={type === value}
-              onChange={() => setType(value)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-current"
-              title={ACCESS_TYPE_META[value].description}
-            />
-            <span className="min-w-0">
-              <span className="block text-sm font-medium text-ink">
-                {ACCESS_TYPE_META[value].label}
-              </span>
-              <span className="block text-xs text-ink-soft">
-                {ACCESS_TYPE_META[value].description}
-              </span>
-            </span>
-          </label>
-        ))}
+        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {ACCESS_TYPES.map((value) => {
+            const Icon = TYPE_ICONS[value];
+            const selected = type === value;
+            return (
+              <label
+                key={value}
+                className={`relative flex cursor-pointer flex-col rounded-xl border p-4 transition ${
+                  selected
+                    ? "border-ink bg-muted ring-1 ring-ink/10"
+                    : "border-line hover:border-line-loud"
+                }`}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-paper text-ink">
+                    <Icon size={16} aria-hidden />
+                  </span>
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value={value}
+                    checked={selected}
+                    onChange={() => setType(value)}
+                    className="h-4 w-4 accent-current"
+                  />
+                </div>
+                <span className="text-sm font-medium text-ink">
+                  {ACCESS_TYPE_META[value].label}
+                </span>
+                <span className="mt-1 text-xs leading-relaxed text-ink-soft">
+                  {ACCESS_TYPE_META[value].description}
+                </span>
+              </label>
+            );
+          })}
+        </div>
       </fieldset>
 
       {showCode ? (
@@ -90,7 +108,7 @@ export function AccessSettingsForm({
           />
           <p className="text-xs text-ink-soft">
             {type === "private"
-              ? "Anyone with the link must enter this to see the event."
+              ? "Anyone with the link must enter this to see the event (unless whitelisted)."
               : "Needed only for the gated tiers below."}
           </p>
         </div>
@@ -127,8 +145,7 @@ export function AccessSettingsForm({
             className={`${fieldClass} resize-none`}
           />
           <p className="text-xs text-ink-soft">
-            One per line, and each must also appear above. These need the access code or a place on
-            the guest list.
+            One per line; each must also appear above. These need the access code or the guest list.
           </p>
         </div>
       ) : null}

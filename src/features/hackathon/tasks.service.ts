@@ -11,6 +11,7 @@ export type TaskRow = {
   category: string | null;
   points: number | null;
   hints: unknown;
+  extra: unknown;
   flag_hash?: string | null;
   time_limit_minutes: number | null;
   is_random: boolean | null;
@@ -19,6 +20,70 @@ export type TaskRow = {
   challenge_file_name?: string | null;
   created_at: string;
 };
+
+export type TaskExtraOrganizerAttachment = {
+  webUrl?: string;
+  storageRef?: string;
+  fileName?: string;
+  /** FileStore id — prefer `/api/files/{id}` for downloads. */
+  storedFileId?: string;
+};
+
+export type PhaseExtraAttachment = {
+  storedFileId?: string;
+  fileName?: string;
+  webUrl?: string;
+  storageRef?: string;
+};
+
+export function taskOrganizerBrief(task: Pick<TaskRow, "extra">): string {
+  const e = task.extra;
+  if (!e || typeof e !== "object" || Array.isArray(e)) return "";
+  const o = e as { organizerBrief?: unknown };
+  return String(o.organizerBrief ?? "").trim();
+}
+
+export function taskOrganizerAttachment(
+  task: Pick<TaskRow, "extra">,
+): TaskExtraOrganizerAttachment | null {
+  const e = task.extra;
+  if (!e || typeof e !== "object" || Array.isArray(e)) return null;
+  const o = e as {
+    organizerAttachment?: TaskExtraOrganizerAttachment | null;
+  };
+  const a = o.organizerAttachment;
+  if (!a || typeof a !== "object") return null;
+  return {
+    webUrl: a.webUrl ? String(a.webUrl) : undefined,
+    storageRef: a.storageRef ? String(a.storageRef) : undefined,
+    fileName: a.fileName ? String(a.fileName) : undefined,
+    storedFileId: a.storedFileId ? String(a.storedFileId) : undefined,
+  };
+}
+
+/** Prefer FileStore proxy URL for organizer/challenge attachments. */
+export function fileStoreProxyUrl(ref: {
+  storedFileId?: string | null;
+  webUrl?: string | null;
+  storageRef?: string | null;
+  path?: string | null;
+}): string | null {
+  if (ref.storedFileId) return `/api/files/${ref.storedFileId}`;
+  const web = String(ref.webUrl || "").trim();
+  if (web.startsWith("/api/files/")) return web;
+  const storage = String(ref.storageRef || "").trim();
+  if (storage.startsWith("file:")) {
+    const id = storage.slice("file:".length);
+    return id ? `/api/files/${id}` : null;
+  }
+  const path = String(ref.path || "").trim();
+  if (path.startsWith("file:")) {
+    const id = path.slice("file:".length);
+    return id ? `/api/files/${id}` : null;
+  }
+  if (path.startsWith("/api/files/")) return path;
+  return web || null;
+}
 
 export type PhaseRow = {
   id: string;
@@ -30,7 +95,21 @@ export type PhaseRow = {
   track_id?: string | null;
   sort_order?: number | null;
   event_id?: string | null;
+  extra?: unknown;
 };
+
+export function phaseAttachment(phase: Pick<PhaseRow, "extra">): PhaseExtraAttachment | null {
+  const e = phase.extra;
+  if (!e || typeof e !== "object" || Array.isArray(e)) return null;
+  const a = (e as { phaseAttachment?: PhaseExtraAttachment | null }).phaseAttachment;
+  if (!a || typeof a !== "object") return null;
+  return {
+    storedFileId: a.storedFileId ? String(a.storedFileId) : undefined,
+    fileName: a.fileName ? String(a.fileName) : undefined,
+    webUrl: a.webUrl ? String(a.webUrl) : undefined,
+    storageRef: a.storageRef ? String(a.storageRef) : undefined,
+  };
+}
 
 export async function listTasksForTrack(trackId: string): Promise<TaskRow[]> {
   const { data } = await supabaseAdmin
@@ -51,10 +130,13 @@ export async function listTasksForEvent(eventId: string, trackIds: string[]): Pr
   return (data ?? []) as TaskRow[];
 }
 
+const PHASE_SELECT =
+  "id, name, opens_at, closes_at, starts_at, ends_at, track_id, sort_order, event_id, extra";
+
 export async function listPhasesForTrack(trackId: string): Promise<PhaseRow[]> {
   const { data } = await supabaseAdmin
     .from(TABLES.HACKATHON_PHASES)
-    .select("id, name, opens_at, closes_at, starts_at, ends_at, track_id, sort_order")
+    .select(PHASE_SELECT)
     .eq("track_id", trackId);
   return ((data ?? []) as PhaseRow[]).sort(
     (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name),
@@ -67,13 +149,13 @@ export async function listPhasesForEvent(
 ): Promise<PhaseRow[]> {
   const { data } = await supabaseAdmin
     .from(TABLES.HACKATHON_PHASES)
-    .select("id, name, opens_at, closes_at, starts_at, ends_at, track_id, sort_order, event_id")
+    .select(PHASE_SELECT)
     .eq("event_id", eventId);
   const byId = new Map((data ?? []).map((row) => [String((row as PhaseRow).id), row as PhaseRow]));
   if (trackIds.length) {
     const extra = await supabaseAdmin
       .from(TABLES.HACKATHON_PHASES)
-      .select("id, name, opens_at, closes_at, starts_at, ends_at, track_id, sort_order, event_id")
+      .select(PHASE_SELECT)
       .in("track_id", trackIds);
     for (const row of (extra.data ?? []) as PhaseRow[]) byId.set(row.id, row);
   }
@@ -140,7 +222,8 @@ export async function getHackathonConfig(trackId: string) {
 }
 
 export type TrackConfig = {
-  on: (key: string) => boolean;
+  /** When the config row is missing, `defaultOn` applies (default false). */
+  on: (key: string, defaultOn?: boolean) => boolean;
   value: (key: string) => Record<string, unknown>;
   num: (key: string, field: string, fallback: number) => number;
   str: (key: string, field: string, fallback?: string) => string;
@@ -153,7 +236,11 @@ function configFromRows(rows: Record<string, unknown>[]): TrackConfig {
     return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
   };
   return {
-    on: (key) => byKey.get(key)?.enabled === true,
+    on: (key, defaultOn = false) => {
+      const row = byKey.get(key);
+      if (!row) return defaultOn;
+      return row.enabled === true;
+    },
     value,
     num: (key, field, fallback) => {
       const n = Number(value(key)[field]);
@@ -294,19 +381,17 @@ export async function assignedRandomTaskIds(
   return new Set([...have, ...picks.map((t) => t.id)]);
 }
 
-/** When task submissions stop: the countdown's end, else the track deadline. */
-export function taskCutoff(
-  cfg: TrackConfig,
-  trackDeadline: string | null | undefined,
-): string | null {
+/**
+ * When task submissions stop for the hackathon_timer config.
+ * Track submission_deadline_at is deprecated (A7) — only `endsAt` on the timer config applies.
+ */
+export function taskCutoff(cfg: TrackConfig, trackDeadline?: string | null): string | null {
+  void trackDeadline; // deprecated A7 — ignored; only timer endsAt applies
   if (!cfg.on("hackathon_timer")) return null;
   const endsAt = String(cfg.value("hackathon_timer").endsAt ?? "").trim();
-  const iso = endsAt
-    ? new Date(endsAt).toISOString()
-    : trackDeadline
-      ? new Date(trackDeadline).toISOString()
-      : null;
-  return iso && !Number.isNaN(Date.parse(iso)) ? iso : null;
+  if (!endsAt) return null;
+  const iso = new Date(endsAt).toISOString();
+  return !Number.isNaN(Date.parse(iso)) ? iso : null;
 }
 
 /** Tasks this team can see right now, after phases, random dealing and categories. */
@@ -364,6 +449,11 @@ export type ScoreboardDetailRow = ScoreRow & {
   lastSolveAt: string | null;
   phases: ScorePhaseCell[];
   tasks: ScoreTaskCell[];
+  movement?: {
+    direction: "up" | "down" | "same" | "new";
+    delta: number;
+    priorRank: number | null;
+  };
 };
 
 export async function trackTaskScoreboard(trackId: string): Promise<ScoreRow[]> {
@@ -405,8 +495,8 @@ export async function trackTaskScoreboardDetail(trackId: string): Promise<Scoreb
           }[],
         };
 
-  const { aggregateScoreboardDetail } = await import("./scoreboardAggregate");
-  return aggregateScoreboardDetail({
+  const { withRankMovement } = await import("./scoreboardAggregate");
+  return withRankMovement({
     teams: (teams ?? []).map((t) => ({ id: String(t.id), name: String(t.name), extra: t.extra })),
     taskRows,
     phaseRows,
@@ -420,7 +510,12 @@ export async function trackTaskScoreboardDetail(trackId: string): Promise<Scoreb
   });
 }
 
-export { aggregateScoreboardDetail } from "./scoreboardAggregate";
+export {
+  aggregateScoreboardDetail,
+  aggregateScoreboardDetailAt,
+  computeRankMovement,
+  withRankMovement,
+} from "./scoreboardAggregate";
 
 export async function teamCompletions(
   teamId: string,

@@ -78,26 +78,44 @@ export const getSubmissionDownloadUrlAction = safeAction({
 
     const { data: row } = await supabaseAdmin
       .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
-      .select("id, track_id, file_path, file_name")
+      .select("id, track_id, file_path, file_name, extra")
       .eq("id", input.submissionId)
       .maybeSingle();
-    if (!row?.file_path) return safeFail("NOT_FOUND", "No file on that submission.");
+    if (!row?.file_path && !(row as { extra?: unknown } | null)?.extra) {
+      return safeFail("NOT_FOUND", "No file on that submission.");
+    }
 
     const { data: track } = await supabaseAdmin
       .from(TABLES.HACKATHON_TRACKS)
       .select("event_id")
-      .eq("id", row.track_id)
+      .eq("id", row!.track_id)
       .maybeSingle();
     if (!track || String(track.event_id) !== event.id) {
       return safeFail("NOT_FOUND", "No file on that submission.");
     }
-    if (!(await staffCanAct(input.eventId, "submissions", String(row.track_id)))) {
+    if (!(await staffCanAct(input.eventId, "submissions", String(row!.track_id)))) {
       return safeFail("FORBIDDEN", "You cannot download that file.");
     }
 
-    const url = await signedSubmissionDownload(String(row.file_path), row.file_name);
+    const extra =
+      row!.extra && typeof row!.extra === "object" && !Array.isArray(row!.extra)
+        ? (row!.extra as Record<string, unknown>)
+        : {};
+    const storedFileId = extra.storedFileId
+      ? String(extra.storedFileId)
+      : String(row!.file_path || "").startsWith("file:")
+        ? String(row!.file_path).slice("file:".length)
+        : null;
+    if (storedFileId) {
+      return safeOk({
+        url: `/api/files/${storedFileId}`,
+        fileName: row!.file_name || "submission",
+      });
+    }
+    if (!row!.file_path) return safeFail("NOT_FOUND", "No file on that submission.");
+    const url = await signedSubmissionDownload(String(row!.file_path), row!.file_name);
     if (!url) return safeFail("UPLOAD", "Could not prepare a download.");
-    return safeOk({ url, fileName: row.file_name || "submission" });
+    return safeOk({ url, fileName: row!.file_name || "submission" });
   },
 });
 

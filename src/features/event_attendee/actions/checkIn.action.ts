@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/data/supabase";
 import { TABLES } from "@/data/collections";
 import { regStatusToDb, regStatusFromDb } from "@/data/statusMaps";
+import { AuthService } from "@/src/features/auth/authService";
 import { assertEventActor } from "@/src/features/events/ownership";
 import { ActionResult, fail, ok } from "@/src/lib/action";
 
@@ -45,6 +46,9 @@ export async function setCheckIn(
     const event = await assertEventActor(String(row.event_id ?? ""), "attendees");
     if (!event) return fail("You cannot check in attendees for that event.");
 
+    const actor = await AuthService.getCurrentUser().catch(() => null);
+    const checkedInBy = actor?.userId || event.organizerId;
+
     const appStatus = regStatusFromDb(row.status);
     if (appStatus === "cancelled") return fail("That registration was cancelled.");
 
@@ -74,7 +78,7 @@ export async function setCheckIn(
         checked_in: checkedIn,
         check_in_time: checkedIn ? now : null,
         check_in_method: checkedIn ? "manual" : null,
-        checked_in_by: checkedIn ? event.organizerId : null,
+        checked_in_by: checkedIn ? checkedInBy : null,
         updated_at: now,
       })
       .eq("id", registrationId);

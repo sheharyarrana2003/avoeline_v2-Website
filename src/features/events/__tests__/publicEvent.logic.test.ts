@@ -104,6 +104,19 @@ describe("dtoContainsForbiddenKey", () => {
       "sponsors[0].contractValue",
     );
     assert.equal(dtoContainsForbiddenKey({ meetingPassword: "x" }), "meetingPassword");
+    assert.equal(dtoContainsForbiddenKey({ promoHints: [{ scopeLabel: "x" }] }), "promoHints");
+    assert.equal(dtoContainsForbiddenKey({ code: "SECRET10" }), "code");
+  });
+
+  it("excludes tasks, flags, hints and judge links from public DTO", () => {
+    assert.equal(
+      dtoContainsForbiddenKey({ competitions: [{ tasks: [] }] }),
+      "competitions[0].tasks",
+    );
+    assert.equal(dtoContainsForbiddenKey({ flag: "secret" }), "flag");
+    assert.equal(dtoContainsForbiddenKey({ hints: ["a"] }), "hints");
+    assert.equal(dtoContainsForbiddenKey({ inviteToken: "abc" }), "inviteToken");
+    assert.equal(dtoContainsForbiddenKey({ judgeLink: "/judge/x" }), "judgeLink");
   });
 });
 

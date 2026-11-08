@@ -181,7 +181,10 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         {/* Mobile: register first. Desktop: content | sticky register */}
         <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-          <aside className="order-1 lg:order-2 lg:sticky lg:top-10 lg:h-fit">
+          <aside
+            id="register"
+            className="order-1 scroll-mt-24 lg:order-2 lg:sticky lg:top-10 lg:h-fit"
+          >
             <PublicRegisterCard
               dto={dto}
               preview={preview}
@@ -214,6 +217,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
           sponsors={dto.sponsors}
           collaborators={dto.collaborators}
           partners={dto.partners}
+          sponsorTiers={dto.sponsorTiers}
         />
 
         <footer className="mt-12 space-y-6 border-t border-line pt-6">

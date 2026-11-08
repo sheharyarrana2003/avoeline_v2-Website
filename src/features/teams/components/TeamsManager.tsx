@@ -16,6 +16,7 @@ import { StaffRecruitmentSection } from "./StaffRecruitmentSection";
 import { LockedModulePanel } from "@/src/features/permissions/components/LockedModulePanel";
 import { ExportTeamsModal } from "./ExportTeamsModal";
 import { GrantInviteModal } from "./GrantInviteModal";
+import { removeEventStaffAssignmentAction } from "../actions/teamEngine.action";
 import { buttonClass } from "@/src/lib/ui";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 
@@ -33,7 +34,7 @@ export type TeamsManagerProps = {
   currentUserId?: string;
   /** Event scope: full library for assign form */
   library?: TeamWithMembers[];
-  assigned?: { teamId: string; memberIds: string[] }[];
+  assigned?: { teamId: string; memberIds: string[]; leadMemberId?: string | null }[];
   assignAction?: (formData: FormData) => void | Promise<void>;
   advancedDetails?: {
     team: TeamWithMembers;
@@ -49,6 +50,8 @@ export type TeamsManagerProps = {
    * (organizer Teams tabbed page). Event `/staff` keeps default chrome.
    */
   hideChrome?: boolean;
+  /** When true, hide the recruitment pipeline (event staff assigns library teams only). */
+  hideRecruitment?: boolean;
   /** Controlled open for Add team panel when hideChrome is set. */
   showAddTeam?: boolean;
   onShowAddTeamChange?: (open: boolean) => void;
@@ -78,6 +81,7 @@ export function TeamsManager({
   applyRoot = "",
   contextType = "event_staff",
   hideChrome = false,
+  hideRecruitment = false,
   showAddTeam: showAddTeamProp,
   onShowAddTeamChange,
   showExport: showExportProp,
@@ -91,6 +95,7 @@ export function TeamsManager({
   const [showExportLocal, setShowExportLocal] = useState(false);
   const [showRecruit, setShowRecruit] = useState(false);
   const [showGrant, setShowGrant] = useState(false);
+  const [showAssign, setShowAssign] = useState(false);
 
   const showAddTeam = showAddTeamProp ?? showAddTeamLocal;
   const setShowAddTeam = (open: boolean | ((v: boolean) => boolean)) => {
@@ -123,8 +128,37 @@ export function TeamsManager({
     return map;
   }, [advancedDetails]);
 
+  const leadByTeam = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const a of assigned ?? []) map.set(a.teamId, a.leadMemberId ?? null);
+    return map;
+  }, [assigned]);
+
+  const eventAssignMode = hideChrome && scope.kind === "event" && !!library && !!assignAction;
+
   return (
     <div className="space-y-6">
+      {eventAssignMode ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className={buttonClass("primary", "sm")}
+            onClick={() => setShowAssign((v) => !v)}
+          >
+            <UserPlus className="mr-1 h-3.5 w-3.5" />
+            Assign team
+          </button>
+          {organizerId ? (
+            <Link
+              href={`/organizer/${organizerId}/teams`}
+              className={buttonClass("secondary", "sm")}
+            >
+              Manage in Teams
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+
       {!hideChrome ? (
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -143,7 +177,7 @@ export function TeamsManager({
             <UserPlus className="mr-1 h-3.5 w-3.5" />
             Add member
           </button>
-          {advanced ? (
+          {advanced && !hideRecruitment ? (
             <button
               type="button"
               className={buttonClass("secondary", "sm")}
@@ -173,9 +207,19 @@ export function TeamsManager({
         </div>
       ) : null}
 
+      {showAssign && eventAssignMode ? (
+        <EventStaffAssignForm
+          eventId={scope.eventId}
+          organizerId={scope.organizerId}
+          library={library!}
+          assigned={assigned ?? []}
+          action={assignAction!}
+        />
+      ) : null}
+
       {showAddTeam ? (
         <div className="space-y-4 rounded-2xl border border-line bg-paper p-4">
-          {scope.kind === "event" && library && assignAction ? (
+          {scope.kind === "event" && library && assignAction && !hideChrome ? (
             <EventStaffAssignForm
               eventId={scope.eventId}
               organizerId={scope.organizerId}
@@ -184,19 +228,21 @@ export function TeamsManager({
               action={assignAction}
             />
           ) : null}
-          <TeamCreator
-            contextType={contextType}
-            parentRef={parentRef}
-            organizerId={organizerId}
-            title="Create a team"
-            subtitle={
-              scope.kind === "event"
-                ? "Creates a library team and you can assign it above."
-                : "Name the roster and add people."
-            }
-            allowJoinCodes={contextType === "club_committee"}
-            extraMembers
-          />
+          {!hideChrome ? (
+            <TeamCreator
+              contextType={contextType}
+              parentRef={parentRef}
+              organizerId={organizerId}
+              title="Create a team"
+              subtitle={
+                scope.kind === "event"
+                  ? "Creates a library team and you can assign it above."
+                  : "Name the roster and add people."
+              }
+              allowJoinCodes={contextType === "club_committee"}
+              extraMembers
+            />
+          ) : null}
         </div>
       ) : null}
 
@@ -213,32 +259,48 @@ export function TeamsManager({
         <ul className="divide-y divide-line rounded-2xl border border-line bg-paper">
           {teams.map((team) => {
             const open = !!expanded[team.id];
-            const lead = leadOf(team);
+            const eventLeadId = leadByTeam.get(team.id);
+            const lead =
+              (eventLeadId ? team.members.find((m) => m.id === eventLeadId) : undefined) ??
+              leadOf(team);
             return (
               <li key={team.id}>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/40"
-                  onClick={() => setExpanded((s) => ({ ...s, [team.id]: !open }))}
-                >
-                  {open ? (
-                    <ChevronDown className="h-4 w-4 shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 shrink-0" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-ink">{team.name}</p>
-                    <p className="text-xs text-ink-soft">
-                      {team.contextType.replace("_", " ")}
-                      {lead ? ` · Lead ${memberLabel(lead)}` : ""}
-                      {` · ${team.members.length} member${team.members.length === 1 ? "" : "s"}`}
-                    </p>
-                  </div>
-                </button>
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <button
+                    type="button"
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left hover:bg-muted/40"
+                    onClick={() => setExpanded((s) => ({ ...s, [team.id]: !open }))}
+                  >
+                    {open ? (
+                      <ChevronDown className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-ink">{team.name}</p>
+                      <p className="text-xs text-ink-soft">
+                        {team.contextType.replace("_", " ")}
+                        {lead ? ` · Lead ${memberLabel(lead)}` : ""}
+                        {` · ${team.members.length} member${team.members.length === 1 ? "" : "s"}`}
+                      </p>
+                    </div>
+                  </button>
+                  {eventAssignMode && eventId && organizerId ? (
+                    <form action={removeEventStaffAssignmentAction}>
+                      <input type="hidden" name="eventId" value={eventId} />
+                      <input type="hidden" name="organizerId" value={organizerId} />
+                      <input type="hidden" name="teamId" value={team.id} />
+                      <button type="submit" className={buttonClass("destructive", "sm")}>
+                        Remove
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
                 {open ? (
                   <ul className="space-y-1 border-t border-line bg-muted/20 px-4 py-3">
                     {team.members.map((m) => {
                       const pos = m.positionId ? positionsByMember.get(m.positionId) : undefined;
+                      const isEventLead = eventLeadId ? m.id === eventLeadId : m.role === "lead";
                       return (
                         <li key={m.id}>
                           <button
@@ -248,7 +310,7 @@ export function TeamsManager({
                           >
                             <span>
                               {memberLabel(m)}
-                              {m.role === "lead" ? " · Lead" : ""}
+                              {isEventLead ? " · Lead" : ""}
                               {pos ? ` · ${pos.title}` : ""}
                             </span>
                             <span className="text-xs text-ink-soft">{m.source || "manual"}</span>
@@ -267,7 +329,7 @@ export function TeamsManager({
         </ul>
       )}
 
-      {advanced && showRecruit && eventId && organizerId && advancedDetails ? (
+      {advanced && !hideRecruitment && showRecruit && eventId && organizerId && advancedDetails ? (
         <StaffRecruitmentSection
           eventId={eventId}
           organizerId={organizerId}

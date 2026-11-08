@@ -1,14 +1,13 @@
-import HackathonWorkspace from "@/src/features/hackathon/components/HackathonWorkspace";
-import { HackathonTabGate } from "@/src/features/hackathon/components/HackathonTabGate";
+import { redirect } from "next/navigation";
 
-export default async function EventHackathonTeamsPage(props: {
+/**
+ * Phase B: competitor occupancy moved to Attendees — this URL stays valid for bookmarks.
+ */
+export default async function EventHackathonTeamsRedirectPage({
+  params,
+}: {
   params: Promise<{ organizer_id: string; eventId: string }>;
-  searchParams: Promise<{ edit?: string; e?: string; ok?: string; tab?: string; track?: string }>;
 }) {
-  const { organizer_id, eventId } = await props.params;
-  return (
-    <HackathonTabGate organizerId={organizer_id} eventId={eventId}>
-      <HackathonWorkspace {...props} view="teams" />
-    </HackathonTabGate>
-  );
+  const { organizer_id, eventId } = await params;
+  redirect(`/organizer/${organizer_id}/events/${eventId}/attendees`);
 }

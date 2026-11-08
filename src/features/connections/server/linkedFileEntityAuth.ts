@@ -20,7 +20,7 @@ export async function assertLinkedFileEntityAccess(opts: {
   if (entityType === "event") {
     // Organizer Library scratch bucket uses entityId === actorId (not a real event id).
     if (entityId === actorId) return { ok: true };
-    const event = await assertEventActor(entityId, "attendees");
+    const event = await assertEventActor(entityId, "files");
     if (!event) return { ok: false, error: "You cannot manage files for that event." };
     return { ok: true };
   }

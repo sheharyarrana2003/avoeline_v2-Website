@@ -28,6 +28,10 @@ export type CertificateRow = {
   downloadCount: number;
   verificationCount: number;
   emailedAt: string | null;
+  /** Private FileStore / Drive archive ref (proxy URL). Not shared by default. */
+  driveUrl: string | null;
+  /** Anyone-with-link Drive URL when organizer opted into email Drive link. */
+  driveShareUrl: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 };

@@ -54,6 +54,8 @@ const EXTRA_KEYS = new Set([
   "organizer_id",
   "accessCode",
   "access_code",
+  "joinCodeRevoked",
+  "join_code_revoked",
   "feeStatus",
   "hintsRevealed",
   "taskStartedAt",

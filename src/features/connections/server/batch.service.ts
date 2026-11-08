@@ -165,6 +165,13 @@ export async function enqueueBatch(opts: {
   eventId?: string | null;
   connectionId?: string;
   createdBy: string;
+  /** Merged into every outbox payload (e.g. certificate includeDriveLink). */
+  payloadExtra?: Record<string, unknown>;
+  /**
+   * Queue the “send now” slice into the outbox instead of syncing HTML.
+   * Used for certificate emails so the worker can render at send time (docs/18).
+   */
+  deferSendNowToOutbox?: boolean;
 }): Promise<{ batchId: string; sentNow: number; queued: number }> {
   const preview = await previewSend({
     ownerId: opts.ownerId,
@@ -245,6 +252,18 @@ export async function enqueueBatch(opts: {
   let cursor = 0;
   const outboxRows: Array<Record<string, unknown>> = [];
 
+  const basePayload = (r: ResolvedRecipient) => ({
+    to: recipientKey(r.email),
+    registrationId: r.registrationId || null,
+    userId: r.userId || null,
+    subject: opts.subject,
+    html: opts.html || null,
+    text: opts.text || null,
+    kind: opts.kind,
+    eventId: opts.eventId || null,
+    ...(opts.payloadExtra || {}),
+  });
+
   for (const chunk of schedule) {
     const slice = rest.slice(cursor, cursor + chunk.count);
     cursor += chunk.count;
@@ -258,16 +277,25 @@ export async function enqueueBatch(opts: {
         time_sensitive: timeSensitive,
         not_before: chunk.notBefore,
         idempotency_key: idemKey(batch.id, r.email),
-        payload: {
-          to: recipientKey(r.email),
-          registrationId: r.registrationId || null,
-          userId: r.userId || null,
-          subject: opts.subject,
-          html: opts.html || null,
-          text: opts.text || null,
-          kind: opts.kind,
-          eventId: opts.eventId || null,
-        },
+        payload: basePayload(r),
+      });
+    }
+  }
+
+  const deferNow = Boolean(opts.deferSendNowToOutbox) || opts.kind === "certificate";
+  if (deferNow) {
+    const nowIso = new Date().toISOString();
+    for (const r of nowSlice) {
+      outboxRows.push({
+        connection_id: preview.capacity.connectionId,
+        batch_id: batch.id,
+        status: "queued",
+        paused: false,
+        priority: timeSensitive ? 100 : 0,
+        time_sensitive: timeSensitive,
+        not_before: nowIso,
+        idempotency_key: idemKey(batch.id, r.email),
+        payload: basePayload(r),
       });
     }
   }
@@ -278,42 +306,36 @@ export async function enqueueBatch(opts: {
   }
 
   let sentNow = 0;
-  for (const r of nowSlice) {
-    const key = idemKey(batch.id, r.email);
-    const result = await sendAsConnection(
-      {
-        connectionId: preview.capacity.connectionId,
-        to: r.email,
-        subject: opts.subject,
-        html: opts.html,
-        text: opts.text,
-        kind: opts.kind,
-        idempotencyKey: key,
-      },
-      opts.createdBy,
-    );
-    if (result.ok) sentNow += 1;
-    else {
-      await supabaseAdmin.from(TABLES.EMAIL_OUTBOX).insert({
-        connection_id: preview.capacity.connectionId,
-        batch_id: batch.id,
-        status: "failed",
-        paused: false,
-        priority: timeSensitive ? 100 : 0,
-        time_sensitive: timeSensitive,
-        not_before: new Date().toISOString(),
-        idempotency_key: key,
-        last_error: result.error || "send failed",
-        payload: {
-          to: recipientKey(r.email),
-          registrationId: r.registrationId || null,
+  if (!deferNow) {
+    for (const r of nowSlice) {
+      const key = idemKey(batch.id, r.email);
+      const result = await sendAsConnection(
+        {
+          connectionId: preview.capacity.connectionId,
+          to: r.email,
           subject: opts.subject,
-          html: opts.html || null,
-          text: opts.text || null,
+          html: opts.html,
+          text: opts.text,
           kind: opts.kind,
-          eventId: opts.eventId || null,
+          idempotencyKey: key,
         },
-      });
+        opts.createdBy,
+      );
+      if (result.ok) sentNow += 1;
+      else {
+        await supabaseAdmin.from(TABLES.EMAIL_OUTBOX).insert({
+          connection_id: preview.capacity.connectionId,
+          batch_id: batch.id,
+          status: "failed",
+          paused: false,
+          priority: timeSensitive ? 100 : 0,
+          time_sensitive: timeSensitive,
+          not_before: new Date().toISOString(),
+          idempotency_key: key,
+          last_error: result.error || "send failed",
+          payload: basePayload(r),
+        });
+      }
     }
   }
 

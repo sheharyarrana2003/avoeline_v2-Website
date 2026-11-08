@@ -405,6 +405,30 @@ export const EventService = {
     const event_to_be_added: EventModel = mapFormDataToEventModel(formdata);
     event_to_be_added.organizerId = organizer_id;
 
+    // O1 A6: require Drive only when publishing an event that collects files / paid proofs.
+    const publishing =
+      !formdata.isDraft &&
+      !!formdata.publishImmediately &&
+      event_to_be_added.status === "published";
+    if (publishing) {
+      const { formDataNeedsDrive } = await import("@/src/features/files/eventNeedsDrive");
+      if (
+        formDataNeedsDrive({
+          PriceOfTicket: formdata.PriceOfTicket,
+          isPaid: Number(formdata.PriceOfTicket) > 0,
+        })
+      ) {
+        const { assertOrganizerDriveAndGmail } =
+          await import("@/src/features/connections/server/assertOrganizerDriveAndGmail");
+        const gate = await assertOrganizerDriveAndGmail(organizer_id);
+        if (!gate.ok) {
+          throw new Error(
+            "This event collects payment proofs or files. Connect Google Drive and Gmail in Connections before publishing.",
+          );
+        }
+      }
+    }
+
     const targetSuperId = formdata.superCategoryId || formdata.categorySuperId || "";
     const targetFormatId = formdata.eventFormatId || formdata.categoryFormatId || "";
 
@@ -654,16 +678,14 @@ export const EventService = {
     }
 
     if (event_to_be_added.checklist.length) {
-      await supabaseAdmin
-        .from(TABLES.EVENT_CHECKLIST_ITEMS)
-        .insert(
-          event_to_be_added.checklist.map((c, i) => ({
-            event_id: id_generated,
-            label: c.label,
-            done: c.done,
-            sort_order: i,
-          })),
-        );
+      await supabaseAdmin.from(TABLES.EVENT_CHECKLIST_ITEMS).insert(
+        event_to_be_added.checklist.map((c, i) => ({
+          event_id: id_generated,
+          label: c.label,
+          done: c.done,
+          sort_order: i,
+        })),
+      );
     }
 
     if (Array.isArray(formdata.eventTiers) && formdata.eventTiers.length > 0) {

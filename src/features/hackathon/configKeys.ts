@@ -55,7 +55,7 @@ export const HACKATHON_CONFIG_KEYS: readonly HackathonConfigKey[] = [
         name: "endsAt",
         label: "Countdown ends",
         type: "datetime",
-        help: "Blank uses the track's submission deadline.",
+        help: "Set an end time for the whole-hackathon countdown. Leave blank to rely on phase windows only.",
       },
     ],
   },
@@ -141,7 +141,14 @@ export const HACKATHON_CONFIG_KEYS: readonly HackathonConfigKey[] = [
   {
     key: "phase_lock_no_revisit",
     label: "Lock closed phases",
-    effect: "Flags for tasks in a closed phase are refused.",
+    effect:
+      "UI lock messaging for closed phases. Open/close windows always refuse submits regardless of this toggle.",
+  },
+  {
+    key: "allow_resubmission",
+    label: "Allow resubmission",
+    effect:
+      "Teams may submit more than once for the same task. Off = server rejects a second submission row (default on).",
   },
   {
     key: "team_collaboration",

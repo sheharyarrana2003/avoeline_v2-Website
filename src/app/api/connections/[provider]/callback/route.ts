@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ provider: s
   if (!user) {
     const next = `/api/connections/${provider}/callback?${req.nextUrl.searchParams.toString()}`;
     return NextResponse.redirect(
-      new URL(`/signin?next=${encodeURIComponent(next)}`, req.nextUrl.origin),
+      new URL(`/auth/signin?next=${encodeURIComponent(next)}`, req.nextUrl.origin),
     );
   }
 
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ provider: s
     });
     return NextResponse.redirect(
       new URL(
-        `/organizer/settings/connections?e=${encodeURIComponent(
+        `/organizer/${user.userId}/settings/connections?e=${encodeURIComponent(
           err instanceof Error ? err.message : "Connect failed",
         )}`,
         req.nextUrl.origin,

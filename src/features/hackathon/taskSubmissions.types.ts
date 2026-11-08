@@ -12,11 +12,17 @@ export type TaskSubmissionRow = {
   taskTitle: string;
   submittedBy: string | null;
   textAnswer: string | null;
+  /** Short note for organizers (participant-facing). */
+  organizerNotes: string | null;
   linkUrl: string | null;
+  /** Extra HTTPS links beyond primary `linkUrl`. */
+  extraLinks: string[];
   filePath: string | null;
   fileName: string | null;
   fileSize: number | null;
   mime: string | null;
+  /** FileStore id when present — prefer `/api/files/{id}` downloads. */
+  storedFileId: string | null;
   submittedAt: string;
   status: TaskSubmissionStatus;
   reviewNote: string | null;

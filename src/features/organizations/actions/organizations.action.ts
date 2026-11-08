@@ -72,6 +72,15 @@ export async function saveOrganization(
     const contractValue =
       Number(String(formData.get("contractValue") ?? "").replace(/[^\d.-]/g, "")) || 0;
     if (contractValue < 0) return fail("A contract value cannot be negative.");
+    const paymentStatusRaw = String(formData.get("paymentStatus") ?? "pending").trim();
+    const paymentStatus =
+      paymentStatusRaw === "partial" || paymentStatusRaw === "received"
+        ? paymentStatusRaw
+        : "pending";
+    const amountReceived =
+      Number(String(formData.get("amountReceived") ?? "").replace(/[^\d.-]/g, "")) || 0;
+    if (amountReceived < 0) return fail("Amount received cannot be negative.");
+    const receivedOn = String(formData.get("receivedOn") ?? "").trim() || null;
 
     const tier = String(formData.get("tier") ?? "").trim();
     if (type === "sponsor" && tier && !event.sponsorTiers.includes(tier)) {
@@ -129,6 +138,9 @@ export async function saveOrganization(
       contact_phone: String(formData.get("contactPhone") ?? "").trim() || null,
       tier: type === "sponsor" ? tier || null : null,
       contract_value: type === "sponsor" ? contractValue : 0,
+      payment_status: type === "sponsor" ? paymentStatus : "pending",
+      amount_received: type === "sponsor" ? amountReceived : 0,
+      received_on: type === "sponsor" ? receivedOn : null,
       benefits,
       role: "track",
       track_id: trackId,

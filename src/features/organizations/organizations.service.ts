@@ -37,6 +37,12 @@ function mapRowToOrganization(row: Record<string, any>): EventOrganization {
     tier: String(row.tier || extra.tier || ""),
     contractValue: Number(row.contract_value ?? extra.contractValue ?? 0),
     benefits: mapToBenefits(row.benefits ?? extra.benefits),
+    paymentStatus:
+      row.payment_status === "partial" || row.payment_status === "received"
+        ? row.payment_status
+        : "pending",
+    amountReceived: Number(row.amount_received ?? 0),
+    receivedOn: row.received_on ? String(row.received_on) : null,
 
     // Legacy field — new collaborators do not get dashboard access via role.
     role: row.role === "full" || extra.role === "full" ? "full" : "track",

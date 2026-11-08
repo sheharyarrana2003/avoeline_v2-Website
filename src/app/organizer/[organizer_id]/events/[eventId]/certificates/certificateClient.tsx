@@ -33,13 +33,23 @@ interface CertificateIssuanceClientProps {
   attendees: AttendeeCertProp[];
   eventId: string;
   organizerId: string;
+  driveConnected?: boolean;
   onGenerateCertificates: (
     selectedAttendeeIds: string[],
     roles: Record<string, string>,
+    opts?: { archiveToDrive?: boolean },
   ) => Promise<CertificateGenerationResult>;
   onEmailCertificates: (
     resend: boolean,
-  ) => Promise<{ success: boolean; error?: string; sent?: number; skipped?: number }>;
+    opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    sent?: number;
+    skipped?: number;
+    queued?: number;
+    message?: string;
+  }>;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -48,6 +58,7 @@ export default function CertificateIssuanceClient({
   attendees,
   eventId,
   organizerId,
+  driveConnected = false,
   onGenerateCertificates,
   onEmailCertificates,
 }: CertificateIssuanceClientProps) {
@@ -65,6 +76,8 @@ export default function CertificateIssuanceClient({
   const [isEmailing, startEmailing] = useTransition();
   const [emailSummary, setEmailSummary] = useState<string | null>(null);
   const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
+  const [archiveToDrive, setArchiveToDrive] = useState(driveConnected);
+  const [includeDriveLink, setIncludeDriveLink] = useState(false);
 
   const pathName = usePathname();
 
@@ -168,7 +181,9 @@ export default function CertificateIssuanceClient({
     }
     startGenerating(async () => {
       setGenerationSummary(null);
-      const result = await onGenerateCertificates(selected, roles);
+      const result = await onGenerateCertificates(selected, roles, {
+        archiveToDrive: driveConnected && archiveToDrive,
+      });
       setGenerationSummary(result.message);
       const byReg: Record<string, CertificateGenerationAttendeeResult> = {};
       for (const r of result.results) byReg[r.registrationId] = r;
@@ -183,15 +198,19 @@ export default function CertificateIssuanceClient({
   const handleEmail = (resend: boolean) => {
     startEmailing(async () => {
       setEmailSummary(null);
-      const result = await onEmailCertificates(resend);
+      const result = await onEmailCertificates(resend, {
+        includeDriveLink: includeDriveLink && driveConnected,
+        acknowledgeDriveShareWarning: includeDriveLink && driveConnected,
+      });
       if (!result.success) {
         setEmailSummary(result.error || "Could not send emails.");
         return;
       }
       setEmailSummary(
-        `Sent ${result.sent ?? 0} email${(result.sent ?? 0) === 1 ? "" : "s"}${
-          result.skipped ? ` (${result.skipped} without address)` : ""
-        }.`,
+        result.message ||
+          `Queued ${result.queued ?? result.sent ?? 0} email${
+            (result.queued ?? result.sent ?? 0) === 1 ? "" : "s"
+          }${result.skipped ? ` (${result.skipped} without address)` : ""}.`,
       );
     });
   };
@@ -242,7 +261,7 @@ export default function CertificateIssuanceClient({
             </Button>
             <ConfirmButton
               title="Issue certificates"
-              description="Creates certificate records for the selected registrants. PDFs are generated on download — nothing is minted or stored permanently."
+              description="Creates certificate records only. PDFs render on demand. Drive archive (if enabled) runs in the background."
               confirmLabel={isGenerating ? "Issuing…" : `Issue (${selectedAttendees.size})`}
               onConfirm={handleGenerate}
               disabled={isGenerating || selectedAttendees.size === 0}
@@ -252,6 +271,23 @@ export default function CertificateIssuanceClient({
             </ConfirmButton>
           </div>
         </div>
+
+        <label className="flex items-start gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={archiveToDrive && driveConnected}
+            disabled={!driveConnected}
+            onChange={(e) => setArchiveToDrive(e.target.checked)}
+          />
+          <span>
+            Save a copy to my Drive{" "}
+            <span className="text-ink-soft">
+              (Certificates folder; private archive
+              {driveConnected ? "; default on" : " — connect Drive to enable"})
+            </span>
+          </span>
+        </label>
 
         {generationSummary ? <p className="text-sm text-ink-soft">{generationSummary}</p> : null}
 
@@ -335,28 +371,54 @@ export default function CertificateIssuanceClient({
           value={senderConnectionId}
           onChange={setSenderConnectionId}
         />
+        <label className="flex items-start gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={includeDriveLink && driveConnected}
+            disabled={!driveConnected}
+            onChange={(e) => setIncludeDriveLink(e.target.checked)}
+          />
+          <span>
+            Include Drive link in email{" "}
+            <span className="text-ink-soft">
+              (requires share-by-link — anyone with that link can view the file)
+            </span>
+          </span>
+        </label>
+        {includeDriveLink && driveConnected ? (
+          <p className="rounded-lg border border-line bg-muted/40 px-3 py-2 text-xs text-ink-soft">
+            Warning: anyone with the Google Drive link can view that file. Website certificate links
+            stay access-controlled by code and work even if Drive is down.
+          </p>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-ink">Issued</h2>
           <div className="flex flex-wrap gap-2">
             <ConfirmButton
               title="Email certificates"
-              description={`Send verify and download links to ${unsentCount} recipient${unsentCount === 1 ? "" : "s"} who have not been emailed yet.`}
-              confirmLabel={isEmailing ? "Sending…" : `Email new (${unsentCount})`}
+              description={`Queue website certificate links for ${unsentCount} recipient${unsentCount === 1 ? "" : "s"} (docs/18 capacity).${
+                includeDriveLink
+                  ? " Drive share links will be included — anyone with those links can view the files."
+                  : ""
+              }`}
+              confirmLabel={isEmailing ? "Queuing…" : `Email new (${unsentCount})`}
               onConfirm={() => handleEmail(false)}
               disabled={isEmailing || unsentCount === 0}
               className={buttonClass("primary", "sm")}
             >
-              {isEmailing ? "Sending…" : `Email new (${unsentCount})`}
+              {isEmailing ? "Queuing…" : `Email new (${unsentCount})`}
             </ConfirmButton>
             <ConfirmButton
               title="Resend all certificate emails"
               description={`Resend links to all ${sendableCount} issued certificates with an email address (${sentCount} were emailed before).`}
-              confirmLabel={isEmailing ? "Sending…" : "Resend all"}
+              confirmLabel={isEmailing ? "Queuing…" : "Resend all"}
               onConfirm={() => handleEmail(true)}
               disabled={isEmailing || sendableCount === 0}
               className={buttonClass("secondary", "sm")}
             >
-              {isEmailing ? "Sending…" : "Resend all"}
+              {isEmailing ? "Queuing…" : "Resend all"}
             </ConfirmButton>
           </div>
         </div>

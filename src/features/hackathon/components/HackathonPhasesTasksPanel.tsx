@@ -40,10 +40,12 @@ function TaskFields({
   track,
   prefix,
   maxAttachmentMb,
+  eventId,
 }: {
   track: HackathonTrack;
   prefix: string;
   maxAttachmentMb: number;
+  eventId: string;
 }) {
   const ctf = isCtfKind(track.kind);
   return (
@@ -56,6 +58,39 @@ function TaskFields({
         label={ctf ? "Description" : "Brief"}
         wrapperClassName="sm:col-span-2"
       />
+      {!ctf ? (
+        <>
+          <div className="sm:col-span-2">
+            <label htmlFor={`${prefix}-organizer-brief`} className={labelClass}>
+              Participant brief{" "}
+              <span className="normal-case text-ink-faint">(shown on compete)</span>
+            </label>
+            <textarea
+              id={`${prefix}-organizer-brief`}
+              name="organizerBrief"
+              rows={3}
+              maxLength={2000}
+              className={fieldClass}
+              placeholder="What you expect for this task (link, repo, demo…)"
+            />
+          </div>
+          <div className="sm:col-span-2 flex flex-col gap-1.5">
+            <label htmlFor={`${prefix}-organizer-file`} className={labelClass}>
+              Reference file <span className="normal-case text-ink-faint">(Drive, optional)</span>
+            </label>
+            <input
+              id={`${prefix}-organizer-file`}
+              name="organizerBriefFile"
+              type="file"
+              className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+            />
+            <p className="text-xs text-ink-soft">
+              Uploads to your event folder on Google Drive when Gmail+Drive are connected ({eventId}
+              ).
+            </p>
+          </div>
+        </>
+      ) : null}
       {ctf ? <Input id={`${prefix}-flag`} name="flag" label="Flag (hashed on save)" /> : null}
       {ctf ? <CtfAttachmentFields prefix={prefix} maxAttachmentMb={maxAttachmentMb} /> : null}
     </>
@@ -91,7 +126,7 @@ export function HackathonPhasesTasksPanel({
   const [trackFilter, setTrackFilter] = useState(initialTrackFilter || "all");
   const [q, setQ] = useState("");
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => new Set());
-  const [phaseModal, setPhaseModal] = useState(false);
+  const [phaseModal, setPhaseModal] = useState<null | "add" | PhaseRow>(null);
   const [taskModal, setTaskModal] = useState<{ track: HackathonTrack; phaseId?: string } | null>(
     null,
   );
@@ -178,7 +213,7 @@ export function HackathonPhasesTasksPanel({
       <button
         type="button"
         className={buttonClass("primary", "sm")}
-        onClick={() => setPhaseModal(true)}
+        onClick={() => setPhaseModal("add")}
       >
         <Plus className="h-3.5 w-3.5" />
         Add Phase
@@ -226,16 +261,25 @@ export function HackathonPhasesTasksPanel({
             {task.title} <span className="text-ink-soft">· {task.points ?? 0} pts</span>
           </p>
         ))}
-        {track ? (
+        <div className="flex flex-wrap gap-2">
+          {track ? (
+            <button
+              type="button"
+              className={buttonClass("secondary", "sm")}
+              onClick={() => setTaskModal({ track, phaseId: phase.id })}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Task
+            </button>
+          ) : null}
           <button
             type="button"
             className={buttonClass("secondary", "sm")}
-            onClick={() => setTaskModal({ track, phaseId: phase.id })}
+            onClick={() => setPhaseModal(phase)}
           >
-            <Plus className="h-3.5 w-3.5" />
-            Add Task
+            Edit phase
           </button>
-        ) : null}
+        </div>
         <form action={deleteHackathonPhase}>
           <input type="hidden" name="eventId" value={eventId} />
           <input type="hidden" name="organizerId" value={organizerId} />
@@ -441,61 +485,114 @@ export function HackathonPhasesTasksPanel({
       </Card>
 
       <Modal
-        open={phaseModal}
-        onClose={() => setPhaseModal(false)}
-        title="Add a phase"
+        open={!!phaseModal}
+        onClose={() => setPhaseModal(null)}
+        title={phaseModal && phaseModal !== "add" ? "Edit phase" : "Add a phase"}
         description="Window when this phase is open."
         maxWidth="lg"
       >
-        <form action={saveHackathonPhase} className="grid gap-4 sm:grid-cols-2">
-          <input type="hidden" name="eventId" value={eventId} />
-          <input type="hidden" name="organizerId" value={organizerId} />
-          <input type="hidden" name="returnTo" value={tasksPath} />
-          <div className="sm:col-span-2">
-            <label htmlFor="phase-track" className={labelClass}>
-              Competition
-            </label>
-            <select
-              id="phase-track"
-              name="trackId"
-              className={fieldClass}
-              defaultValue={trackFilter !== "all" ? trackFilter : (tracks[0]?.id ?? "")}
-            >
-              {tracks.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} · {HACKATHON_KIND_LABELS[t.kind]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <label className="flex items-center gap-2 text-sm text-ink sm:col-span-2">
-            <input type="checkbox" name="allTracks" />
-            Apply this phase to every competition
-          </label>
-          <Input id="phase-name" name="name" label="Phase name" required />
-          <div>
-            <label htmlFor="phase-opens" className={labelClass}>
-              Opens
-            </label>
-            <input id="phase-opens" name="opensAt" type="datetime-local" className={fieldClass} />
-          </div>
-          <div>
-            <label htmlFor="phase-closes" className={labelClass}>
-              Closes
-            </label>
-            <input id="phase-closes" name="closesAt" type="datetime-local" className={fieldClass} />
-          </div>
-          <div className="flex justify-end gap-2 sm:col-span-2">
-            <button
-              type="button"
-              className={buttonClass("ghost", "sm")}
-              onClick={() => setPhaseModal(false)}
-            >
-              Cancel
-            </button>
-            <SubmitButton className={buttonClass()}>Save phase</SubmitButton>
-          </div>
-        </form>
+        {phaseModal ? (
+          <form
+            key={phaseModal === "add" ? "add" : phaseModal.id}
+            action={saveHackathonPhase}
+            className="grid gap-4 sm:grid-cols-2"
+          >
+            <input type="hidden" name="eventId" value={eventId} />
+            <input type="hidden" name="organizerId" value={organizerId} />
+            <input type="hidden" name="returnTo" value={tasksPath} />
+            {phaseModal !== "add" ? (
+              <input type="hidden" name="phaseId" value={phaseModal.id} />
+            ) : null}
+            {phaseModal === "add" ? (
+              <>
+                <div className="sm:col-span-2">
+                  <label htmlFor="phase-track" className={labelClass}>
+                    Competition
+                  </label>
+                  <select
+                    id="phase-track"
+                    name="trackId"
+                    className={fieldClass}
+                    defaultValue={trackFilter !== "all" ? trackFilter : (tracks[0]?.id ?? "")}
+                  >
+                    {tracks.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} · {HACKATHON_KIND_LABELS[t.kind]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 text-sm text-ink sm:col-span-2">
+                  <input type="checkbox" name="allTracks" />
+                  Apply this phase to every competition
+                </label>
+              </>
+            ) : null}
+            <Input
+              id="phase-name"
+              name="name"
+              label="Phase name"
+              required
+              defaultValue={phaseModal === "add" ? "" : phaseModal.name}
+            />
+            <div>
+              <label htmlFor="phase-opens" className={labelClass}>
+                Opens
+              </label>
+              <input
+                id="phase-opens"
+                name="opensAt"
+                type="datetime-local"
+                className={fieldClass}
+                defaultValue={
+                  phaseModal === "add"
+                    ? ""
+                    : toLocalInput(phaseModal.opens_at || phaseModal.starts_at)
+                }
+              />
+            </div>
+            <div>
+              <label htmlFor="phase-closes" className={labelClass}>
+                Closes
+              </label>
+              <input
+                id="phase-closes"
+                name="closesAt"
+                type="datetime-local"
+                className={fieldClass}
+                defaultValue={
+                  phaseModal === "add"
+                    ? ""
+                    : toLocalInput(phaseModal.closes_at || phaseModal.ends_at)
+                }
+              />
+            </div>
+            <div className="sm:col-span-2 flex flex-col gap-1.5">
+              <label htmlFor="phase-attachment" className={labelClass}>
+                Attachment <span className="normal-case text-ink-faint">(optional, FileStore)</span>
+              </label>
+              <input
+                id="phase-attachment"
+                name="phaseAttachment"
+                type="file"
+                className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink"
+              />
+              <p className="text-xs text-ink-soft">
+                Max {maxAttachmentMb}MB. Participants download via proxy.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 sm:col-span-2">
+              <button
+                type="button"
+                className={buttonClass("ghost", "sm")}
+                onClick={() => setPhaseModal(null)}
+              >
+                Cancel
+              </button>
+              <SubmitButton className={buttonClass()}>Save phase</SubmitButton>
+            </div>
+          </form>
+        ) : null}
       </Modal>
 
       <Modal
@@ -523,6 +620,7 @@ export function HackathonPhasesTasksPanel({
               track={taskModal.track}
               prefix={`modal-${taskModal.phaseId || taskModal.track.id}`}
               maxAttachmentMb={maxAttachmentMb}
+              eventId={eventId}
             />
             <div className="flex justify-end gap-2 sm:col-span-2">
               <button

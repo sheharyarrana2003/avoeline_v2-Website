@@ -13,7 +13,7 @@ import { getStaffEventGrant, staffCanAct } from "@/src/features/hackathon/staffE
 import { uploadMedia } from "@/src/features/media/uploadMedia.action";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import { getTrack, listTeams } from "../hackathon.service";
-import { hackathonDashPath, organizerHackathonCachePaths, parseHackathonKind } from "../kinds";
+import { hackathonDashPath, organizerHackathonCachePaths } from "../kinds";
 import { pickExtra } from "../teamWrite";
 import {
   assertUtcIsoPayload,
@@ -24,7 +24,6 @@ import { sanitizeDescriptionHtml } from "@/src/lib/sanitizeHtml";
 import { EventService } from "@/src/services/event.service";
 
 const MAX_RULES_BYTES = 15 * 1024 * 1024;
-const RULES_FOLDER = "track-rules";
 const MAX_TEAM_CEILING = 20;
 
 function replaceTrackPrizes(trackId: string, formData: FormData) {
@@ -88,14 +87,6 @@ export async function saveTrack(
     const dates = competitionDatesFromForm(
       {
         registrationClosesAt: String(formData.get("registrationClosesAt") ?? ""),
-        rosterLocksAt: String(
-          formData.get("rosterLocksAt") ?? formData.get("rosterLockDate") ?? "",
-        ),
-        opensAt: String(formData.get("opensAt") ?? ""),
-        submissionDeadlineAt: String(
-          formData.get("submissionDeadlineAt") ?? formData.get("submissionDeadline") ?? "",
-        ),
-        closesAt: String(formData.get("closesAt") ?? ""),
       },
       timeZone,
     );
@@ -106,6 +97,8 @@ export async function saveTrack(
     }
     const orderErr = validateCompetitionDateOrder(dates);
     if (orderErr) return fail(orderErr.message);
+
+    const kind = String(formData.get("isCtf") ?? "") === "true" ? "ctf" : "other";
 
     const existing = trackId ? await getTrack(trackId) : null;
     if (trackId && (!existing || existing.eventId !== event.id)) {
@@ -129,31 +122,13 @@ export async function saveTrack(
       }
     }
 
-    let rulesPath = existing?.rulesPath ?? "";
-    let rulesName = existing?.rulesName ?? "";
-    const rules = formData.get("rules");
-    if (rules instanceof File && rules.size > 0) {
-      if (rules.size > MAX_RULES_BYTES)
-        return fail("That file is too large. Please keep it under 15MB.");
-      const upload = new FormData();
-      upload.append("file", rules);
-      upload.append("folder", RULES_FOLDER);
-      upload.append("bucket", CERTIFICATES_BUCKET);
-      const uploaded = await uploadMedia(upload);
-      if (!uploaded.success) {
-        console.error("[saveTrack] rules upload failed", uploaded.error);
-        return fail(uploaded.error || "That file could not be uploaded.");
-      }
-      rulesPath = uploaded.path;
-      rulesName = rules.name;
-    }
-
-    let instructionsPath = existing?.instructionsFilePath ?? "";
-    let instructionsName = existing?.instructionsFileName ?? "";
+    // Canonical rules & instructions = instructions* columns (rules_* deprecated dual-write stopped).
+    let instructionsPath = existing?.instructionsFilePath || existing?.rulesPath || "";
+    let instructionsName = existing?.instructionsFileName || existing?.rulesName || "";
     const instructionsFile = formData.get("instructionsFile");
     if (instructionsFile instanceof File && instructionsFile.size > 0) {
       if (instructionsFile.size > MAX_RULES_BYTES) {
-        return fail("That instructions file is too large. Please keep it under 15MB.");
+        return fail("That file is too large. Please keep it under 15MB.");
       }
       const upload = new FormData();
       upload.append("file", instructionsFile);
@@ -161,7 +136,7 @@ export async function saveTrack(
       upload.append("bucket", CERTIFICATES_BUCKET);
       const uploaded = await uploadMedia(upload);
       if (!uploaded.success) {
-        return fail(uploaded.error || "That instructions file could not be uploaded.");
+        return fail(uploaded.error || "That file could not be uploaded.");
       }
       instructionsPath = uploaded.path;
       instructionsName = instructionsFile.name;
@@ -185,6 +160,8 @@ export async function saveTrack(
     const instructionsHtml = sanitizeDescriptionHtml(
       String(formData.get("instructions") ?? "").trim(),
     ).slice(0, 50000);
+    const mergedInstructions =
+      instructionsHtml || existing?.instructions || existing?.rulesText || "";
     const row: Record<string, unknown> = {
       id,
       event_id: event.id,
@@ -193,24 +170,24 @@ export async function saveTrack(
       description: String(formData.get("description") ?? "")
         .trim()
         .slice(0, 4000),
-      kind: parseHackathonKind(formData.get("kind")),
-      rules_text: String(formData.get("rulesText") ?? "")
-        .trim()
-        .slice(0, 20000),
-      rules_file_path: rulesPath,
-      rules_file_name: rulesName,
-      instructions: instructionsHtml || existing?.instructions || "",
+      kind,
+      // Canonical field; keep rules_text in sync once for legacy readers, no separate UI.
+      instructions: mergedInstructions,
       instructions_file_path: instructionsPath,
       instructions_file_name: instructionsName,
+      rules_text: mergedInstructions,
+      rules_file_path: instructionsPath,
+      rules_file_name: instructionsName,
       fee,
       currency: event.pricing?.currency || "PKR",
       min_team_size: minTeamSize,
       max_team_size: maxTeamSize,
-      opens_at: dates.opensAt,
-      closes_at: dates.closesAt,
+      // Deprecated date columns — stop writing (null).
+      opens_at: null,
+      closes_at: null,
       registration_closes_at: dates.registrationClosesAt,
-      roster_locks_at: dates.rosterLocksAt,
-      submission_deadline_at: dates.submissionDeadlineAt,
+      roster_locks_at: null,
+      submission_deadline_at: null,
       prize_pool: String(formData.get("prizePool") ?? "")
         .trim()
         .slice(0, 2000),
@@ -227,7 +204,7 @@ export async function saveTrack(
       updated_at: now,
     };
     if (!existing) {
-      row.rubric = [];
+      // Deprecated column `rubric` — do not write (leave DB default).
       row.current_round = 1;
       row.created_at = now;
     }

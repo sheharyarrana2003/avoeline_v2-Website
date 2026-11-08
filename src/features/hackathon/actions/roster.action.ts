@@ -19,10 +19,10 @@ type Loaded =
   | { ok: true; backTo: string; organizerId: string; eventId: string; team: HackathonTeam };
 
 async function loadOwnedTeam(eventId: string, teamId: string): Promise<Loaded> {
-  const event = await assertEventActor(eventId, "teams");
+  const event = await assertEventActor(eventId, "competitions");
   if (!event) redirect("/");
 
-  const backTo = hackathonDashPath(event.organizerId, event.id, "teams");
+  const backTo = hackathonDashPath(event.organizerId, event.id, "competitions");
 
   const id = String(teamId ?? "").trim();
   if (!id) return { ok: false, backTo, error: "Missing team." };
@@ -38,7 +38,7 @@ async function loadOwnedTeam(eventId: string, teamId: string): Promise<Loaded> {
   const team = mapToTeam(data, data.id);
   if (team.eventId !== event.id)
     return { ok: false, backTo, error: "That team is not on this event." };
-  if (!(await staffCanAct(eventId, "teams", team.trackId))) {
+  if (!(await staffCanAct(eventId, "competitions", team.trackId))) {
     return { ok: false, backTo, error: "You cannot manage that team." };
   }
   const trackBack = hackathonTrackManagePath(event.organizerId, event.id, team.trackId);

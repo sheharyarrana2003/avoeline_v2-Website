@@ -40,7 +40,9 @@ Public marketing lives in the `(marketing)` route group (`/`, `/plans`, `/about`
 
 ## Part 3 — Tab-by-Tab Complete Spec
 
-Tab order in the unified bar: **Overview · Attendees · Team · Access · Agenda · Speakers · Vendors · Sponsors · [Competitions · Phases & Tasks · Competitors · Submissions · Scoreboard · Settings — hackathon only] · Certificates · Exports**
+Tab order in the unified bar: **Overview · Attendees · Team · Access · Agenda · Speakers · Vendors · Sponsors · [Competitions · Phases & Tasks · Submissions · Scoreboard · Settings — hackathon only] · Certificates · Files · Exports**
+
+(Removed A7 / O0: Competitors tab → Attendees team cards; public leaderboard; online mode; mentors; announcements; judging rubric configure.)
 
 ---
 
@@ -50,7 +52,7 @@ Tab order in the unified bar: **Overview · Attendees · Team · Access · Agend
 
 **Data:** `events` row, aggregated `registrations`/`hackathon_teams` counts for stats.
 
-**Contents:** Hero (banner, title, status badge, tags, when/where/tickets/programme), stat cards (registrations or team registrations, seats/capacity, checked in, revenue), Schedule, Location, Recent registrations, Timestamps, Capacity, Registration window, Pricing & tickets, Certificate config, Description.
+**Contents:** Hero (banner, title, status badge, tags, when/where/tickets), **Key details**, **Agenda** tile (hidden when empty — not “Programme”), fee/capacity facts, Schedule, Location, Recent registrations, Timestamps, Capacity, Registration window, Pricing & tickets, Certificate config, Description.
 
 **UI/UX:** Dark hero card with gradient-blended banner image. Stat cards: icon in tinted circle, bold large number, muted label, consistent card weight across the row. Info sections: icon+title+divider header, tight label/value pairs, dashed-border designed empty states (not bare "No ticket tiers" text). One consistent card system across hero/stats/info sections.
 
@@ -60,11 +62,13 @@ Tab order in the unified bar: **Overview · Attendees · Team · Access · Agend
 
 ### Attendees
 
-**Purpose:** Every registration for this event — tickets, payment, QR, check-in. Not team/competition ops (that's Teams, hackathon-only).
+**Purpose:** Every registration for this event — tickets, payment, QR, check-in, and (on hackathons) team occupancy formerly called Competitors.
 
-**Data:** `registrations` (+ `custom_responses` keyed by `event_form_fields.key`), grouped via `registration_groups` (regular group events) or `hackathon_teams`/`hackathon_team_members` (hackathons) through one shared adapter into a common `{id, name, members}[]` shape. Organizer drawer answers come from field definitions (including archived fields that still have data); file answers use signed downloads from `payment-screenshots`.
+**Data:** `registrations` (+ `custom_responses` keyed by `event_form_fields.key`), grouped via `registration_groups` (regular group events) or `hackathon_teams`/`hackathon_team_members` (hackathons) through one shared adapter into a common `{id, name, members}[]` shape. Organizer drawer answers come from field definitions (including archived fields that still have data); file answers use FileStore / signed downloads.
 
-**View modes:** Flat list (default, non-group events) / Grouped by team (default for group events and all hackathons) — toggle at top. **No separate "Teams" tab for regular group events** — this grouped view IS the team view for non-hackathon events. The hackathon `Teams` tab stays separate only because of its genuine extra ops complexity (join codes, cross-competition, leftover assignment).
+**View modes:** Flat list (default, non-group events) / Grouped by team (default for group events and all hackathons) — toggle at top. **No separate Competitors / Teams occupancy tab** — grouped Attendees is the roster. Event ops staff live on the **Team** tab; join codes and leftover assignment stay in the Attendees drawer/cards.
+
+**Registration form:** edited from Attendees (**Registration form** drawer), not Access.
 
 **Stats (compute from full attendee set, not search subset):**
 - Team/Group registrations: from `occupyingHackathonRegs`/`occupyingGroupRegs`
@@ -93,7 +97,7 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 ### Team
 
-**Purpose:** Event-organizing ops (ushers, desk, leads) — never participant / hackathon occupancy teams. **One shared feature** with the organizer left-rail Teams page. Event tab label is **Team** (href `/staff` unchanged). Organizer library: `/organizer/{id}/teams`. Also `club` / `department` / `platform` scopes. Hackathon **Competitors** (`/teams`) is a different feature (`hackathon_teams`).
+**Purpose:** Event-organizing ops (ushers, desk, leads) — never participant / hackathon occupancy teams. **One shared feature** with the organizer left-rail Teams page. Event tab label is **Team** (href `/staff` unchanged). Organizer library: `/organizer/{id}/teams`. Also `club` / `department` / `platform` scopes. Hackathon occupancy (`hackathon_teams`) lives under **Attendees** (join codes after confirmation). Legacy `/events/.../teams` redirects to Attendees.
 
 **Data:** `teams` (`event_staff` / `club_committee`), `team_members` (`source` manual|recruited; contact extras in `extra`), `team_positions` (paid), `recruitment_forms` (`public_token`, FormBuilder fields), `applicants` (incl. `withdrawn`), `access_grants` (`invite_token_hash`, `invite_sent_at`), `event_staff_assignments` (event scope). Stats RPC: `organizer_teams_stats`.
 
@@ -117,9 +121,9 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Data:** `events.visibility`, `event_invites`, `ticket_tiers`, `promo_codes`, `promo_redemptions`, `event_form_fields`, `events.allow_group_registration` / `group_min_size` / `group_max_size`.
 
-**Access type:** Public / Private / Invite only / Hybrid / VIP-Tiered — radio selection consolidated into one card with the approval/waitlist checkboxes and a single "Save access settings" button at the bottom (not visually disconnected).
+**Access type:** Public / Private / Invite only / Hybrid / Tiered — type cards + How this works; approval/waitlist; single Save (`assertEventActor(..., "access")`).
 
-**Registration questions:** `RegistrationQuestionsCard` on Access edits live `event_form_fields` (add / reorder / archive; system name/email/phone; payment screenshot locked when paid; group toggle writes allow_group + min/max). Soft-archive only — never hard-delete when responses exist.
+**Registration questions:** live on **Attendees** (drawer), not Access. Soft-archive only — never hard-delete when responses exist.
 
 **Add Guests:** Whitelist or Invite-only mode. Pasting addresses or uploading a CSV shows a validation preview before committing ("8 valid · 1 duplicate skipped · 1 invalid") — never a silent partial success. CSV path feeds the same preview as pasted addresses, with filename confirmation once chosen.
 
@@ -133,7 +137,7 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 - Redeem via atomic `redeem_promo` RPC after registration/group insert; public form can `previewPromo` for original/discount/total.
 - **Active auto-expires on read** (check `expires_at` whenever the list renders) — don't rely on a cron job that doesn't exist yet.
 
-**Email delivery audit:** confirm whitelist adds and invite-link generation both actually trigger `sendEmail()` via Resend, not just a silent DB write. Confirm the full invite lifecycle (link → `opened_at` → `registered_at`/`registration_id`) works end to end.
+**Guest email:** organizer connected Gmail via Connections / docs/18 (`GuestEmailComposer`) — not platform Resend for organizer guest mail. Confirm invite lifecycle (link → `opened_at` → `registered_at`/`registration_id`) end to end.
 
 ---
 
@@ -207,23 +211,23 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Purpose:** Define the tracks/competitions under this hackathon.
 
-**Data:** `hackathon_tracks`, `hackathon_track_prizes`, `hackathon_judges`, `hackathon_mentors`, `hackathon_announcements` (`hackathon_mentor_slots` dropped 2026-10-12).
+**Data:** `hackathon_tracks`, `hackathon_track_prizes`, `hackathon_judges`. Deprecated (retained, not written by app): `hackathon_mentors`, `hackathon_announcements`, track columns `opens_at` / `closes_at` / `roster_locks_at` / `submission_deadline_at` / `rubric`, settings `online_mode` / `livestream_url`.
 
-**Timing (timestamptz UTC):** optional `registration_closes_at`, `roster_locks_at`, `opens_at`, `submission_deadline_at`, `closes_at`. UI uses `datetime-local` in the event timezone with the zone label; server validates order when set (`registration_closes ≤ roster_locks ≤ opens ≤ submission_deadline ≤ closes`). Phase opens/closes use the same helpers.
+**Keep-list fields (competition modal):** name, description, image, **This is a CTF** checkbox (`kind` = `ctf` \| `other`), team size min/max, entry fee, discount (% / note / expiry), structured prizes, optional dedicated sponsor, one optional **Registration closes** datetime, one **Rules & instructions** rich text + optional file (`instructions` / `instructions_file_*`; `rules_*` kept in sync for legacy readers).
 
-**Instructions:** sanitized rich text + optional attachment on the competition modal (`instructions`, `instructions_file_*`); shown on the participant Instructions tab.
+**Timing:** Only `registration_closes_at` is editable. When it passes, team rosters lock automatically (organizer can still unlock a single team). **Phases** (`hackathon_phases.opens_at` / `closes_at`) control when participants may work. Deprecated track date columns are nulled on save.
 
-**Add/Edit:** button opens a modal (not a permanent form), sectioned: Basics (name, description, type, image upload via `<FileUploadField />`), Team & Timing (min/max size + datetime fields above), Pricing (entry fee, dedicated sponsor, discount %/expiry/note), Prizes (structured, see below), Instructions, Rules (rules text + file upload).
+**Add/Edit:** modal — Basics, Team & timing (sizes + registration closes), Pricing, Prizes, Rules & instructions.
 
-**Table:** small consistent thumbnail (48–64px square, not a banner-sized image breaking row height), Track/Teams/Fee/Deadline/Roster/Actions columns, ROSTER OPEN as a consistent status pill.
+**Table:** thumbnail, Track / Teams / Fee / Reg. closes / Roster / Actions. Roster pill reflects auto-lock from registration closes.
 
-**Configure → track management page:** roster, fee status, unlock, judging — operational management only. **No settings/config-toggle controls here** — all hackathon-wide config lives exclusively on the Settings tab (apply-to-all-or-tick-specific-competitions pattern). If something only existed on the old Configure settings page with no Settings-tab equivalent, add it to Settings scoped per-track via `hackathon_config.track_id`, don't leave it orphaned on Configure.
+**Configure → track management:** roster, fee status, per-team unlock, judge invites (accept/decline). Standings = **Scoreboard** (task points), not a public/spectator leaderboard. Legacy `/tracks/.../leaderboard` redirects to the competition page. Rubric configure / advance-round UI removed.
 
-**Structured prizes:** `hackathon_track_prizes` table (position_label as free text — "1st"/"Best Design"/etc., amount, description, order_index), repeatable "Add another prize" rows, plus a separate optional "Additional prize notes" free-text field for anything that doesn't fit a clean row. Shown on the public competition page and the track management page, not buried in the edit form only.
+**Structured prizes:** `hackathon_track_prizes` as before.
 
-**CTF flags/hints/challenge files:** live on Phases & Tasks (see below), not in the Competitions form — a "Manage flags & challenge files →" link deep-links from a CTF-type competition's row into Phases & Tasks, pre-filtered to that competition.
+**CTF:** checkbox on the competition; flags/hints/files on Phases & Tasks.
 
-**Judges, Announcements, Online mode, Mentors:** functionally fine as built — just bring visual consistency (card header/divider styling, confirmed field labels) in line with the rest of the dashboard.
+**Removed (A7):** online mode / livestream, mentors, hackathon announcements, judging rubric, public leaderboard, Competitors tab, type dropdown, separate rules vs instructions, track roster/opens/submission/closes fields.
 
 ---
 
@@ -310,17 +314,18 @@ Config keys in use: `live_scoreboard`, `ctf_flags`, `task_hints`, `per_task_time
 
 **Templates:** Versioned JSON layouts (`certificate_templates` + immutable `certificate_template_versions`). Konva editor at `making-template`: draft autosave, publish bumps `version`, gallery seeds, token insert (`{{recipientName}}`, `{{field:<key}}`, etc.), curated fonts, `email_attach_pdf` toggle, “Re-render all with latest” (updates `template_version` on issued rows only — no stored PDFs).
 
-**Issue:** Bulk insert certificate rows only (`data` jsonb + `verification_code` / `certificate_number`). Lazy render on download/verify/email. Cap + rate limit. One cert per registration (team members each get their own).
+**Issue:** Bulk insert certificate rows only (`data` jsonb + `verification_code` / `certificate_number`). Lazy render on download/verify/email. Cap + rate limit. One cert per registration (team members each get their own). Optional **Save a copy to my Drive** (`archiveToDrive`, default on when Drive connected) enqueues private `certificate_jobs` (A6 Certificates folder via FileStore); never blocks issue if Drive is down.
 
 **Render:** Layout JSON → SVG (web/verify/preview) and pdf-lib PDF (no Chromium). Never persist rendered PDFs. Private storage holds **template assets** only (logo/signature/background).
 
 **Surfaces:**
 | Surface | Path |
 | --- | --- |
+| Public viewer | `/certificate/[code]` — on-demand SVG + Download PDF (no Drive dependency) |
 | Mobile/data | `GET /api/certificates/[id]` → `{ templateLayout, version, assets, data }` + `ETag` / 304 |
 | PDF download | `GET /certificate/[code]/download` by `verification_code` |
 | Public verify | `/verify/[code]` (legacy UUID redirects to code when resolvable) |
-| Email | Default link to download; optional in-memory PDF attach when `email_attach_pdf` |
+| Email | Primary CTA = viewer URL; docs/18 `enqueueBatch` (`kind: certificate`) with send-time HTML; optional Drive share-by-link (`includeDriveLink` + warning); optional in-memory PDF attach when `email_attach_pdf` |
 
 **No blockchain / IPFS / NFT / stored certificate PDFs.**
 
@@ -395,7 +400,7 @@ Shared rules across these three pages (cleanup 2026-10-25):
 |---|---|
 | Events Dashboard, AI Planner, Analytics (basic), Registrations, Access control, Sponsors (basic management), Teams (basic CRUD: add/remove, single Lead) | Teams advanced roles (`teams_advanced_roles`), Vendor Store, Certificates, API access, Website Builder, AI Designer, Ushers/on-ground ops, Sponsors invoicing with custom templates |
 
-Hackathon-specific: the whole hackathon tab set (Competitions/Phases & Tasks/Competitors/Submissions/Scoreboard/Settings) is gated behind `hackathon_ops` as a single module — Overview/Attendees/Team/Access/Agenda/Speakers/Vendors/Sponsors/Certificates/Exports work normally on a hackathon event even without it.
+Hackathon-specific: the whole hackathon tab set (Competitions/Phases & Tasks/Submissions/Scoreboard/Settings) is gated behind `hackathon_ops` as a single module — Overview/Attendees/Team/Access/Agenda/Speakers/Vendors/Sponsors/Certificates/Files/Exports work normally on a hackathon event even without it.
 
 ---
 

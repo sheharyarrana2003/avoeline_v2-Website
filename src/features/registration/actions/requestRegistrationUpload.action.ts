@@ -76,7 +76,14 @@ export const requestRegistrationUpload = safeAction({
 
 /** Confirm an uploaded object exists before accepting it on register. */
 export async function registrationUploadExists(path: string): Promise<boolean> {
-  if (!path || !path.startsWith("registration/")) return false;
+  if (!path) return false;
+  // O1 FileStore / legacy Drive refs.
+  if (path.startsWith("file:") && path.length > 10) return true;
+  if (path.startsWith("/api/files/") && path.length > 12) return true;
+  if (path.startsWith("drive:") && path.length > 10) return true;
+  if (path.includes("drive.google.com/") && path.length > 20) return true;
+  // Legacy Supabase payment-screenshots path.
+  if (!path.startsWith("registration/")) return false;
   const { data, error } = await supabaseAdmin.storage
     .from(PAYMENT_SCREENSHOTS_BUCKET)
     .createSignedUrl(path, 30);

@@ -103,7 +103,12 @@ export function registrationMatchesSearch(
 export function registrationMatchesFilters(
   row: { register: Registration },
   filters: RosterFilters,
-  extras: { teamName?: string; trackName?: string; accessCode?: string | null } = {},
+  extras: {
+    teamName?: string;
+    trackName?: string;
+    accessCode?: string | null;
+    joinCode?: string | null;
+  } = {},
 ): boolean {
   const r = row.register;
   if (filters.status !== "all" && r.status !== filters.status) return false;
@@ -116,16 +121,22 @@ export function registrationMatchesFilters(
     extras.teamName ?? "",
     extras.trackName ?? "",
     extras.accessCode ?? "",
+    extras.joinCode ?? "",
   ]);
 }
 
 export function teamMetaMatches(
   filters: RosterFilters,
-  extras: { teamName?: string; trackName?: string; accessCode?: string | null },
+  extras: {
+    teamName?: string;
+    trackName?: string;
+    accessCode?: string | null;
+    joinCode?: string | null;
+  },
 ): boolean {
   if (filters.track !== "all" && extras.trackName !== filters.track) return false;
   if (!filters.query) return false;
-  return haystack([extras.teamName, extras.trackName, extras.accessCode]).includes(
+  return haystack([extras.teamName, extras.trackName, extras.accessCode, extras.joinCode]).includes(
     filters.query.toLowerCase(),
   );
 }
@@ -148,4 +159,30 @@ export function teamFeeDisplay(input: {
   const payment =
     !feeStatus || feeStatus === "not_required" ? input.leadPayment || "pending" : feeStatus;
   return { payment, amount: amount > 0 ? amount : undefined };
+}
+
+/** Show join/enter codes only after fee + registration are in a good state (Phase B / O2). */
+export function hackathonTeamCodesVisible(
+  team: {
+    payment?: string | null;
+    feeStatus?: string | null;
+    cancelled?: boolean | null;
+    eliminated?: boolean | null;
+  },
+  leadReg: Registration | null | undefined,
+): boolean {
+  if (!leadReg) return false;
+  if (team.cancelled || team.eliminated) return false;
+  if (["cancelled", "rejected", "no_show"].includes(leadReg.status)) return false;
+  const settled = ["confirmed", "checked_in", "attended"].includes(leadReg.status);
+  if (!settled) return false;
+  // Free / no-fee teams: do not consult ticket paymentStatus (often still "pending").
+  if (team.payment === "not_required" || team.feeStatus === "not_required" || !team.payment) {
+    return true;
+  }
+  const pay = leadReg.payment?.paymentStatus;
+  const teamFee = team.feeStatus;
+  if (teamFee === "fee_paid") return true;
+  if (pay === "completed") return true;
+  return false;
 }

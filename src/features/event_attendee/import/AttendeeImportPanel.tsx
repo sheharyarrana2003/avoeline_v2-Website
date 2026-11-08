@@ -10,6 +10,7 @@ import {
 } from "./attendeeImport.action";
 import type { ImportColumnKey, ImportFieldOption, ParsedImportTable } from "./attendeeImport.logic";
 import { listMyDriveConnectionsAction } from "@/src/features/connections/actions/drive.action";
+import { formatPickerUserError } from "@/src/features/connections/lib/pickerErrors";
 import { buttonClass, fieldClass } from "@/src/lib/ui";
 
 type Preview =
@@ -94,7 +95,7 @@ export function AttendeeImportPanel({ eventId }: { eventId: string }) {
           appId?: string;
         };
         if (!res.ok || !json.ok || !json.accessToken || !json.apiKey || !json.appId) {
-          setError(json.error || "Could not start Google Picker.");
+          setError(formatPickerUserError(json.error || "Could not start Google Picker."));
           return;
         }
         await loadPickerScript();
@@ -128,7 +129,7 @@ export function AttendeeImportPanel({ eventId }: { eventId: string }) {
           .build();
         picker.setVisible(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Picker failed.");
+        setError(formatPickerUserError(err instanceof Error ? err.message : "Picker failed."));
       }
     });
   };

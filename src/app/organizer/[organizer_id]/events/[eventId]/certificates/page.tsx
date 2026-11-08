@@ -4,6 +4,7 @@ import { emailCertificatesLegacy } from "@/src/features/certificates/actions/ema
 import { RegService } from "@/src/services/registeration.service";
 import { UserService } from "@/src/services/user.service";
 import CertificateIssuanceClient, { type AttendeeCertProp } from "./certificateClient";
+import { DriveHealthBanner } from "@/src/features/files/components/DriveHealthBanner";
 
 export default async function CertificateIssuancePage({
   params,
@@ -45,12 +46,14 @@ export default async function CertificateIssuancePage({
   async function handleGenerateCertificates(
     selectedAttendeeIds: string[],
     roles: Record<string, string> = {},
+    opts?: { archiveToDrive?: boolean },
   ) {
     "use server";
     const result = await issueCertificatesAction({
       eventId,
       registrationIds: selectedAttendeeIds,
       roles,
+      archiveToDrive: opts?.archiveToDrive,
     });
     if (!result.ok) {
       return {
@@ -70,18 +73,41 @@ export default async function CertificateIssuancePage({
     };
   }
 
-  async function handleEmailCertificates(resend: boolean) {
+  async function handleEmailCertificates(
+    resend: boolean,
+    opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+  ) {
     "use server";
-    return emailCertificatesLegacy(eventId, resend);
+    return emailCertificatesLegacy(eventId, resend, opts);
   }
 
+  const { listConnections } = await import("@/src/features/connections/server/connections.service");
+  const conns = await listConnections({
+    ownerType: "user",
+    ownerId: organizer_id,
+    includeQuota: false,
+  });
+  const driveConnected = conns.some(
+    (c) =>
+      c.status === "active" &&
+      (c.capabilities || []).some((cap) => cap.capability === "drive.files" && cap.enabled),
+  );
+
   return (
-    <CertificateIssuanceClient
-      attendees={attendeesWithData}
-      eventId={eventId}
-      organizerId={organizer_id}
-      onGenerateCertificates={handleGenerateCertificates}
-      onEmailCertificates={handleEmailCertificates}
-    />
+    <div className="space-y-4">
+      <DriveHealthBanner
+        organizerId={organizer_id}
+        eventId={eventId}
+        connectionsHref={`/organizer/${organizer_id}/connections`}
+      />
+      <CertificateIssuanceClient
+        attendees={attendeesWithData}
+        eventId={eventId}
+        organizerId={organizer_id}
+        driveConnected={driveConnected}
+        onGenerateCertificates={handleGenerateCertificates}
+        onEmailCertificates={handleEmailCertificates}
+      />
+    </div>
   );
 }

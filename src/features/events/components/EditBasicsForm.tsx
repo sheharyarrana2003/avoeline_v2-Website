@@ -185,18 +185,22 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
         <h2 className="font-display text-lg text-ink">Media</h2>
         <MediaUpload
           folder="banners"
+          eventId={initial.eventId}
           accept="image/*"
           value={bannerImage}
           label="Banner (4:5)"
           onUploaded={setBannerImage}
           buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
         />
-        <p className="text-xs text-ink-soft">Portrait 4:5 recommended for the event banner.</p>
+        <p className="text-xs text-ink-soft">
+          Portrait 4:5 recommended for the event banner. Stored in your connected Google Drive.
+        </p>
         <div>
           <span className={labelClass}>Gallery</span>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <MediaUpload
               folder="gallery"
+              eventId={initial.eventId}
               accept={IMAGE_AND_VIDEO_ACCEPT}
               multiple
               label="+"

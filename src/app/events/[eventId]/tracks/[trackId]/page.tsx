@@ -13,7 +13,6 @@ import { getEventForVisitor } from "@/src/features/registration/registration.ser
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import {
   eventIsHackathon,
-  getHackathonSettings,
   getTrack,
   listPrizesForTracks,
   listTeams,
@@ -90,12 +89,13 @@ export default async function PublicTrackDetailPage({
   }
 
   const presentation = publicEventPresentation(event.status, event.schedule, event.registration);
-  const trackOpen = trackRegistrationOpen(track);
+  const trackOpen = trackRegistrationOpen(track, {
+    eventRegistrationOpen: presentation.registrationOpen,
+  });
   const canRegister = presentation.registrationOpen && trackOpen;
 
-  const [orgs, settings, prizesByTrack, teams, shareUrl, rulesUrl] = await Promise.all([
+  const [orgs, prizesByTrack, teams, shareUrl, rulesUrl] = await Promise.all([
     getEventOrganizations(eventId),
-    getHackathonSettings(eventId),
     listPrizesForTracks([track.id]),
     listTeams(track.id),
     absoluteUrl(`/events/${eventId}/tracks/${track.id}`),
@@ -163,10 +163,6 @@ export default async function PublicTrackDetailPage({
                 track.registrationClosesAt ? formatDateMedium(track.registrationClosesAt) : "—"
               }
             />
-            <Fact
-              label="Submit by"
-              value={track.submissionDeadline ? formatDate(track.submissionDeadline) : "—"}
-            />
             <Fact label="Status" value={trackOpen ? "Open" : "Closed"} />
           </dl>
 
@@ -183,16 +179,6 @@ export default async function PublicTrackDetailPage({
                   : "Registration for this competition has closed."}
               </p>
             )}
-            {settings.onlineMode ? (
-              <p>
-                <Link
-                  href={`/events/${eventId}/tracks/${track.id}/leaderboard${qsSuffix}`}
-                  className={buttonClass("secondary", "sm")}
-                >
-                  Watch the live leaderboard
-                </Link>
-              </p>
-            ) : null}
           </div>
         </div>
       </div>

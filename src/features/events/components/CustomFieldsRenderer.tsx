@@ -7,7 +7,6 @@ import type {
   FormFieldDraft,
 } from "@/src/features/registration/forms/formFields.types";
 import { fieldClass, labelClass } from "@/src/lib/ui";
-import { requestRegistrationUpload } from "@/src/features/registration/actions/requestRegistrationUpload.action";
 
 export type RenderableField = {
   id: string;
@@ -98,36 +97,34 @@ function RegistrationFileInput({
           }
           setError(null);
           startTransition(async () => {
-            const prepared = await requestRegistrationUpload({
-              eventId,
-              fileName: file.name,
-              contentType: file.type || "application/octet-stream",
-            });
-            if (!prepared.ok) {
-              setError(prepared.error.message);
+            try {
+              const form = new FormData();
+              form.set("eventId", eventId);
+              form.set("file", file, file.name);
+              const res = await fetch("/api/uploads/proof", {
+                method: "POST",
+                body: form,
+              });
+              const json = (await res.json()) as {
+                ok?: boolean;
+                fileId?: string;
+                error?: string;
+              };
+              if (!res.ok || !json.ok || !json.fileId) {
+                setError(json.error || "Upload failed.");
+                setPath("");
+                return;
+              }
+              setPath(`file:${json.fileId}`);
+            } catch {
+              setError("Upload failed.");
               setPath("");
-              return;
             }
-            const put = await fetch(prepared.data.signedUrl, {
-              method: "PUT",
-              body: file,
-              headers: { "Content-Type": file.type || "application/octet-stream" },
-            });
-            if (!put.ok) {
-              setError("Upload failed. Please try again.");
-              setPath("");
-              return;
-            }
-            setPath(prepared.data.path);
           });
         }}
       />
       {path ? (
-        <input
-          type="hidden"
-          name={name}
-          value={JSON.stringify({ path, bucket: "payment-screenshots" })}
-        />
+        <input type="hidden" name={name} value={JSON.stringify({ path, bucket: "filestore" })} />
       ) : null}
       {pending ? <p className="text-xs text-ink-soft">Uploading…</p> : null}
       {error ? <p className="text-xs text-red-700">{error}</p> : null}

@@ -13,7 +13,6 @@ import { getEventForVisitor } from "@/src/features/registration/registration.ser
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import {
   eventIsHackathon,
-  getHackathonSettings,
   listPrizesForTracks,
   listTeamsOfEvent,
   listTracks,
@@ -89,11 +88,10 @@ export default async function PublicTracksPage({
   const presentation = publicEventPresentation(event.status, event.schedule, event.registration);
   const canRegisterEvent = presentation.registrationOpen;
 
-  const [tracks, teams, orgs, settings] = await Promise.all([
+  const [tracks, teams, orgs] = await Promise.all([
     listTracks(eventId),
     listTeamsOfEvent(eventId),
     getEventOrganizations(eventId),
-    getHackathonSettings(eventId),
   ]);
   const prizesByTrack = await listPrizesForTracks(tracks.map((t) => t.id));
 
@@ -129,9 +127,6 @@ export default async function PublicTracksPage({
             Registration closed
           </span>
         )}
-        <Link href={`/events/${eventId}/mentors${qsSuffix}`} className={buttonClass("ghost", "sm")}>
-          Mentor at this hackathon
-        </Link>
       </p>
 
       {tracks.length === 0 ? (
@@ -156,7 +151,9 @@ export default async function PublicTracksPage({
                   ).catch(() => "")
                 : "";
               const count = teamsByTrack.get(track.id) ?? 0;
-              const open = trackRegistrationOpen(track);
+              const open = trackRegistrationOpen(track, {
+                eventRegistrationOpen: canRegisterEvent,
+              });
               const detailHref = `/events/${eventId}/tracks/${track.id}${qsSuffix}`;
               return (
                 <Card key={track.id} className="overflow-hidden">
@@ -205,9 +202,9 @@ export default async function PublicTracksPage({
                         value={track.fee > 0 ? formatCurrency(track.fee, track.currency) : "Free"}
                       />
                       <Fact
-                        label="Submit by"
+                        label="Registration closes"
                         value={
-                          track.submissionDeadline ? formatDate(track.submissionDeadline) : "—"
+                          track.registrationClosesAt ? formatDate(track.registrationClosesAt) : "—"
                         }
                       />
                       <Fact label="Teams so far" value={`${count}`} />
@@ -232,14 +229,6 @@ export default async function PublicTracksPage({
                       <Link href={detailHref} className={buttonClass("secondary", "sm")}>
                         View details
                       </Link>
-                      {settings.onlineMode ? (
-                        <Link
-                          href={`/events/${eventId}/tracks/${track.id}/leaderboard${qsSuffix}`}
-                          className={buttonClass("ghost", "sm")}
-                        >
-                          Leaderboard
-                        </Link>
-                      ) : null}
                     </p>
 
                     {(sponsor || rulesUrl) && (

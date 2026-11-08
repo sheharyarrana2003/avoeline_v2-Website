@@ -1,16 +1,15 @@
 /**
- * Competition / phase datetime ordering and payload building.
+ * Competition datetime ordering and payload building.
  * Pure — safe for vitest and Client Components.
+ *
+ * A7 / O0: only optional registration closes remains on the track.
+ * Phases own opens/closes for participant work windows.
  */
 
 import { fromEventLocalInput } from "@/src/lib/datetime";
 
 export type CompetitionDateFields = {
   registrationClosesAt: string | null;
-  rosterLocksAt: string | null;
-  opensAt: string | null;
-  submissionDeadlineAt: string | null;
-  closesAt: string | null;
 };
 
 export type CompetitionDateOrderError = {
@@ -18,35 +17,18 @@ export type CompetitionDateOrderError = {
   message: string;
 };
 
-const ORDER: Array<{ key: keyof CompetitionDateFields; label: string }> = [
-  { key: "registrationClosesAt", label: "Registration closes" },
-  { key: "rosterLocksAt", label: "Roster locks" },
-  { key: "opensAt", label: "Opens" },
-  { key: "submissionDeadlineAt", label: "Submission deadline" },
-  { key: "closesAt", label: "Closes" },
-];
-
-/** Validate registration_closes ≤ roster_locks ≤ opens ≤ submission_deadline ≤ closes (nulls skipped). */
+/** Validate registration closes when set (single field — no ordering peers). */
 export function validateCompetitionDateOrder(
   dates: CompetitionDateFields,
 ): CompetitionDateOrderError | null {
-  let prevMs: number | null = null;
-  let prevLabel = "";
-  for (const { key, label } of ORDER) {
-    const iso = dates[key];
-    if (!iso) continue;
-    const ms = Date.parse(iso);
-    if (!Number.isFinite(ms)) {
-      return { field: key, message: `${label} is not a valid date and time.` };
-    }
-    if (prevMs != null && ms < prevMs) {
-      return {
-        field: key,
-        message: `${label} must be on or after ${prevLabel.toLowerCase()}.`,
-      };
-    }
-    prevMs = ms;
-    prevLabel = label;
+  const iso = dates.registrationClosesAt;
+  if (!iso) return null;
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) {
+    return {
+      field: "registrationClosesAt",
+      message: "Registration closes is not a valid date and time.",
+    };
   }
   return null;
 }
@@ -55,20 +37,12 @@ export function validateCompetitionDateOrder(
 export function competitionDatesFromForm(
   form: {
     registrationClosesAt?: string;
-    rosterLocksAt?: string;
-    opensAt?: string;
-    submissionDeadlineAt?: string;
-    closesAt?: string;
   },
   timeZone: string,
 ): CompetitionDateFields {
   const parse = (v: string | undefined) => fromEventLocalInput(String(v ?? "").trim(), timeZone);
   return {
     registrationClosesAt: parse(form.registrationClosesAt),
-    rosterLocksAt: parse(form.rosterLocksAt),
-    opensAt: parse(form.opensAt),
-    submissionDeadlineAt: parse(form.submissionDeadlineAt),
-    closesAt: parse(form.closesAt),
   };
 }
 
@@ -79,15 +53,13 @@ export function looksLikeSlashDate(value: string | null | undefined): boolean {
 }
 
 export function assertUtcIsoPayload(dates: CompetitionDateFields): void {
-  for (const { key, label } of ORDER) {
-    const v = dates[key];
-    if (!v) continue;
-    if (looksLikeSlashDate(v)) {
-      throw new Error(`${label} must be stored as UTC ISO, not a slash date.`);
-    }
-    if (!/^\d{4}-\d{2}-\d{2}T/.test(v)) {
-      throw new Error(`${label} must be a UTC ISO timestamp.`);
-    }
+  const v = dates.registrationClosesAt;
+  if (!v) return;
+  if (looksLikeSlashDate(v)) {
+    throw new Error("Registration closes must be stored as UTC ISO, not a slash date.");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(v)) {
+    throw new Error("Registration closes must be a UTC ISO timestamp.");
   }
 }
 

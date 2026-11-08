@@ -1,5 +1,6 @@
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
+import { seatsLeftOf, tierWindowClosed } from "./tierWindow.logic";
 
 export type TicketTier = {
   id: string;
@@ -9,9 +10,13 @@ export type TicketTier = {
   price: number;
   seatsAvailable: number | null;
   seatsSold: number;
+  /** null when seats are not tracked. */
+  seatsLeft: number | null;
   availableUntil: string | null;
   active: boolean;
 };
+
+export { seatsLeftOf, tierWindowClosed } from "./tierWindow.logic";
 
 export type PromoCode = {
   id: string;
@@ -36,17 +41,25 @@ export const TicketingService = {
       .select("*")
       .eq("event_id", eventId);
     if (error) throw error;
-    return (data ?? []).map((r) => ({
-      id: r.id,
-      eventId: r.event_id,
-      name: r.name,
-      description: r.description || "",
-      price: Number(r.price) || 0,
-      seatsAvailable: r.seats_available,
-      seatsSold: Number(r.seats_sold) || 0,
-      availableUntil: r.available_until,
-      active: r.active !== false,
-    }));
+    const now = Date.now();
+    return (data ?? []).map((r) => {
+      const seatsSold = Number(r.seats_sold) || 0;
+      const seatsAvailable = r.seats_available;
+      const windowClosed = tierWindowClosed(r.available_until, now);
+      return {
+        id: r.id,
+        eventId: r.event_id,
+        name: r.name,
+        description: r.description || "",
+        price: Number(r.price) || 0,
+        seatsAvailable,
+        seatsSold,
+        seatsLeft: seatsLeftOf(seatsAvailable, seatsSold),
+        availableUntil: r.available_until,
+        // Past available_until demotes active at read (same pattern as promo expiry).
+        active: r.active !== false && !windowClosed,
+      };
+    });
   },
 
   async createTier(

@@ -5,6 +5,7 @@ export const EVENT_EMAIL_KINDS = [
 ] as const;
 export type EventEmailKind = (typeof EVENT_EMAIL_KINDS)[number];
 
+/** Include blocks for compose UI. `email_members_qr` is option-only (no body snippet). */
 export const EMAIL_INCLUDE_BLOCKS = [
   "team_name",
   "team_members",
@@ -12,6 +13,7 @@ export const EMAIL_INCLUDE_BLOCKS = [
   "event_details",
   "ticket_url",
   "qr_code",
+  "email_members_qr",
 ] as const;
 export type EmailIncludeBlock = (typeof EMAIL_INCLUDE_BLOCKS)[number];
 
@@ -29,12 +31,12 @@ export const DEFAULT_EVENT_EMAILS: Record<
   { subject: string; body: string; includeBlocks: EmailIncludeBlock[] }
 > = {
   registration_received: {
-    subject: "We have your registration — {{eventTitle}}",
-    body: "Hello {{attendeeName}}, we have received your registration for {{eventTitle}}. You will be confirmed shortly.",
+    subject: "We have your registration - {{eventTitle}}",
+    body: "Hello {{attendeeName}}, we have received your registration for {{eventTitle}}. You will be confirmed shortly.\n\nYour answers:\n{{formAnswers}}",
     includeBlocks: ["event_details", "ticket_url"],
   },
   registration_confirmed: {
-    subject: "Registration confirmed — {{eventTitle}}",
+    subject: "Registration confirmed - {{eventTitle}}",
     body: "Hello {{attendeeName}}, your registration for {{eventTitle}} is confirmed. Your ticket is ready.",
     includeBlocks: ["team_members", "event_details", "ticket_url", "qr_code"],
   },
@@ -47,6 +49,7 @@ export const EMAIL_BLOCK_LABELS: Record<EmailIncludeBlock, string> = {
   event_details: "Event date and venue",
   ticket_url: "Ticket / status link",
   qr_code: "Door QR (ticket link)",
+  email_members_qr: "Also email each member their own QR",
 };
 
 /** Plain-text snippets injected into the compose body when a block is checked. */
@@ -54,9 +57,11 @@ export const EMAIL_BLOCK_SNIPPETS: Record<EmailIncludeBlock, string> = {
   team_name: "Team: {{teamName}}",
   team_members: "Members:\n{{teamMembers}}",
   competition: "Competition: {{competitionName}}",
-  event_details: "Event: {{eventTitle}}\nWhen: {{eventWhen}}\nWhere: {{eventVenue}}",
+  event_details:
+    "Event: {{eventTitle}}\nWhen: {{eventWhen}}\nWhere: {{eventVenue}}\nMap: {{eventMapsUrl}}",
   ticket_url: "Ticket / status: {{ticketUrl}}",
   qr_code: "Show this QR at the door: {{ticketUrl}}",
+  email_members_qr: "",
 };
 
 export function wrapEmailBlock(block: EmailIncludeBlock, inner: string): string {
@@ -83,7 +88,10 @@ export function toggleEmailBlockInBody(
     .replace(/\n{3,}/g, "\n\n")
     .trimEnd();
   if (!enabled) return stripped;
-  const snippet = wrapEmailBlock(block, EMAIL_BLOCK_SNIPPETS[block]);
+  const snippetText = EMAIL_BLOCK_SNIPPETS[block];
+  // Option-only blocks (no body snippet) just flip the include list.
+  if (!snippetText.trim()) return stripped;
+  const snippet = wrapEmailBlock(block, snippetText);
   return stripped ? `${stripped}\n\n${snippet}` : snippet;
 }
 
@@ -104,10 +112,12 @@ export const EMAIL_TOKEN_MENU: { token: string; label: string; paymentOnly?: boo
   { token: "{{eventTitle}}", label: "Event title" },
   { token: "{{eventWhen}}", label: "Event date/time" },
   { token: "{{eventVenue}}", label: "Venue" },
+  { token: "{{eventMapsUrl}}", label: "Maps link" },
   { token: "{{teamName}}", label: "Team name" },
   { token: "{{teamMembers}}", label: "Team members" },
   { token: "{{competitionName}}", label: "Competition" },
   { token: "{{ticketUrl}}", label: "Ticket link" },
   { token: "{{qrCode}}", label: "Door QR (ticket link)" },
+  { token: "{{formAnswers}}", label: "Form answers" },
   { token: "{{paymentStatus}}", label: "Payment status", paymentOnly: true },
 ];

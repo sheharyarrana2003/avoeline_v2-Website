@@ -25,7 +25,7 @@ export default async function DepartmentConnectionsPage({
   }>;
 }) {
   const user = await AuthService.getCurrentUser();
-  if (!user) redirect("/signin?next=/department/settings/connections");
+  if (!user) redirect("/auth/signin?next=/department/settings/connections");
   const sp = await searchParams;
   const { department } = await resolveDepartment(sp.orgId);
   if (!(await canManageConnections(user, department.id))) redirect("/access-denied");

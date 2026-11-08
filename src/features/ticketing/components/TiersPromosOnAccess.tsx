@@ -19,12 +19,15 @@ export async function TiersPromosOnAccess({
   error,
   success,
   isHackathon = false,
+  title = "Tiers & promos",
 }: {
   eventId: string;
   organizerId: string;
   error?: string;
   success?: string;
   isHackathon?: boolean;
+  /** Card title (e.g. stepped flow on Access tab). */
+  title?: string;
 }) {
   const [tiers, promos, tracks] = await Promise.all([
     TicketingService.listTiers(eventId),
@@ -41,7 +44,7 @@ export async function TiersPromosOnAccess({
   );
 
   return (
-    <Card title="Tiers & promos">
+    <Card title={title}>
       <CardBody className="space-y-8">
         <FormFeedback error={error} success={success} />
         <p className="text-sm text-ink-soft">

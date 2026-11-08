@@ -7,8 +7,6 @@ import { hasModuleAccess } from "@/src/features/permissions/permissions.service"
 import { staffMayOpenTab } from "@/src/features/hackathon/staffEventAccess";
 import { LockedModulePanel } from "@/src/features/permissions/components/LockedModulePanel";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
-import { eventIsHackathon, listTracks } from "@/src/features/hackathon/hackathon.service";
-import { absoluteUrl } from "@/src/lib/appUrl";
 import { saveEventStaffAssignmentsAction } from "@/src/features/teams/actions/teamEngine.action";
 import { TeamsManager } from "@/src/features/teams/components/TeamsManager";
 import { can } from "@/src/features/permissions/can";
@@ -51,11 +49,9 @@ export default async function EventStaffPage({
     );
   }
 
-  const [libraryDocs, assigned, applyRoot, isHack] = await Promise.all([
+  const [libraryDocs, assigned] = await Promise.all([
     TeamEngineService.listOrganizerStaffTeams(event.organizerId),
     TeamEngineService.listEventStaffAssignments(eventId),
-    absoluteUrl("/"),
-    eventIsHackathon(event),
   ]);
   const library: TeamWithMembers[] = await TeamEngineService.getTeamsWithMembers(libraryDocs);
   const assignedIds = new Set(assigned.map((a) => a.teamId));
@@ -69,35 +65,13 @@ export default async function EventStaffPage({
       return { ...team, members };
     });
 
-  const assignedTeamIds = assignedTeams.map((t) => t.id);
-  const [positionsByTeam, applicantsByTeam, formsByTeam, tracks] = await Promise.all([
-    advanced
-      ? TeamEngineService.listPositionsForTeams(assignedTeamIds)
-      : Promise.resolve(new Map()),
-    advanced
-      ? TeamEngineService.listApplicantsForTeams(assignedTeamIds)
-      : Promise.resolve(new Map()),
-    advanced
-      ? TeamEngineService.listRecruitmentFormsForTeams(assignedTeamIds)
-      : Promise.resolve(new Map()),
-    isHack ? listTracks(eventId) : Promise.resolve([]),
-  ]);
-  const advancedDetails = advanced
-    ? assignedTeams.map((team) => ({
-        team,
-        positions: positionsByTeam.get(team.id) ?? [],
-        applicants: applicantsByTeam.get(team.id) ?? [],
-        forms: formsByTeam.get(team.id) ?? [],
-      }))
-    : [];
-
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-ink">Event team</h2>
         <p className="mt-1 text-sm text-ink-soft">
-          Ops team for this event — assign people from your Teams library, manage roles, recruit,
-          and export.
+          Assign library teams and members for this event. Recruitment, grants, and roster edits
+          live on Manage in Teams.
         </p>
       </div>
       <FormFeedback error={sp.e} success={sp.ok} />
@@ -108,11 +82,10 @@ export default async function EventStaffPage({
         library={library}
         assigned={assigned}
         assignAction={saveEventStaffAssignmentsAction}
-        advanced={advanced}
-        advancedDetails={advancedDetails}
-        tracks={tracks.map((t) => ({ id: t.id, name: t.name }))}
-        applyRoot={applyRoot.replace(/\/$/, "")}
+        advanced={false}
         contextType="event_staff"
+        hideRecruitment
+        hideChrome
       />
     </div>
   );

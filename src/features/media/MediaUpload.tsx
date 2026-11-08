@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { ImageUp, TriangleAlert } from "lucide-react";
 import { compressImage } from "./compressImage";
 import { uploadMedia } from "./uploadMedia.action";
+import { uploadEventMediaDriveAction } from "./uploadEventMediaDrive.action";
 import { isVideoUrl } from "./media.utils";
 
 interface MediaUploadProps {
@@ -17,6 +18,8 @@ interface MediaUploadProps {
   multiple?: boolean;
   /** Target bucket; defaults to the public "media" bucket. */
   bucket?: string;
+  /** When set, event-owned media goes to organizer Drive (Phase A). */
+  eventId?: string;
   /** Optional current single-image URL to preview. */
   value?: string | null;
   /** Optional label shown in the dropzone. */
@@ -40,6 +43,7 @@ export function MediaUpload({
   accept = "image/*",
   multiple = false,
   bucket,
+  eventId,
   value,
   label = "Upload",
   className = "",
@@ -64,6 +68,25 @@ export function MediaUpload({
         const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
         if (file.size > MAX_BYTES) {
           setError(`"${file.name}" is too large after compression (max 50MB).`);
+          continue;
+        }
+        if (eventId) {
+          const buf = await file.arrayBuffer();
+          const contentBase64 = btoa(
+            Array.from(new Uint8Array(buf), (b) => String.fromCharCode(b)).join(""),
+          );
+          const res = await uploadEventMediaDriveAction({
+            eventId,
+            fileName: file.name,
+            contentType: file.type || "application/octet-stream",
+            contentBase64,
+          });
+          if (res.ok) {
+            if (!multiple) setPreview(res.data.url);
+            onUploaded(res.data.url);
+          } else {
+            setError(res.error.message);
+          }
           continue;
         }
         const fd = new FormData();
