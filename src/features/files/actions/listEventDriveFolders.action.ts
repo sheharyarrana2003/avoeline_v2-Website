@@ -7,8 +7,13 @@ import { getAccessTokenForConnection } from "@/src/features/connections/server/c
 import { listDriveConnectionsForUser } from "@/src/features/connections/server/linkedFiles.service";
 import { assertEventActor } from "@/src/features/events/ownership";
 import { rateLimit } from "@/src/lib/rateLimit";
-import { safeAction, safeFail, safeOk } from "@/src/lib/safeAction";
+import { safeAction, safeFail, safeOk, type SafeActionResult } from "@/src/lib/safeAction";
 import { listEventDriveFolders } from "../folders";
+
+const inputSchema = z.object({
+  eventId: z.string().uuid(),
+  connectionId: z.string().uuid().optional(),
+});
 
 export type EventDriveFoldersResult =
   | { connected: false; folders: [] }
@@ -23,17 +28,9 @@ export type EventDriveFoldersResult =
       }>;
     };
 
-export const listEventDriveFoldersAction = safeAction({
-  input: z.object({
-    eventId: z.string().uuid(),
-    connectionId: z.string().uuid().optional(),
-  }),
-  run: async (
-    input,
-  ): Promise<
-    | { ok: true; data: EventDriveFoldersResult }
-    | { ok: false; error: { code: string; message: string } }
-  > => {
+export const listEventDriveFoldersAction = safeAction<typeof inputSchema, EventDriveFoldersResult>({
+  input: inputSchema,
+  run: async (input): Promise<SafeActionResult<EventDriveFoldersResult>> => {
     const user = await AuthService.getCurrentUser();
     if (!user) return safeFail("FORBIDDEN", "Sign in required.");
 
@@ -45,7 +42,8 @@ export const listEventDriveFoldersAction = safeAction({
 
     const drive = await listDriveConnectionsForUser(user.userId);
     if (!drive.length) {
-      return safeOk({ connected: false, folders: [] } satisfies EventDriveFoldersResult);
+      const data: EventDriveFoldersResult = { connected: false, folders: [] };
+      return safeOk(data);
     }
 
     const connectionId = input.connectionId || drive[0]!.id;
@@ -63,7 +61,7 @@ export const listEventDriveFoldersAction = safeAction({
         accessToken: token,
         eventId: input.eventId,
       });
-      return safeOk({
+      const data: EventDriveFoldersResult = {
         connected: true,
         connectionId,
         folders: folders.map((f) => ({
@@ -72,7 +70,8 @@ export const listEventDriveFoldersAction = safeAction({
           folderId: f.folderId,
           webViewLink: f.webViewLink,
         })),
-      } satisfies EventDriveFoldersResult);
+      };
+      return safeOk(data);
     } catch (e) {
       return safeFail("DRIVE", e instanceof Error ? e.message : "Could not list Drive folders.");
     }

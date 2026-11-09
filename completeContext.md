@@ -758,6 +758,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 
 ## Change log
 
+### 2026-11-09 — Harden listEventDriveFoldersAction for Vercel tsc
+- What: Explicit `safeAction<typeof inputSchema, EventDriveFoldersResult>` + `SafeActionResult` return so TData is not inferred as `void` / disconnected union (fixes panel `res.data.connected` and safeOk connected:true mismatch on Vercel).
+- Files: `src/features/files/actions/listEventDriveFolders.action.ts`
+- Next: Deploy from `main` (Vercel production branch); prior typecheck fixes already on `audit/batch-1-gates` must be merged into `main`.
+
 ### 2026-11-09 — Fix Google OAuth redirect to localhost on production
 - What: `absoluteUrl` prefers `NEXT_PUBLIC_SITE_URL` so OAuth `redirectTo` uses the live domain; docs note Supabase Site URL must not stay `http://localhost:3000` (that caused `/?code=` on localhost after Google).
 - Files: `src/lib/appUrl.ts`, `.env.example`, `docs/onboarding-plans-checkout.md`
