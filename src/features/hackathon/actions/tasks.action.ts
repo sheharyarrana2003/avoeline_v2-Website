@@ -361,9 +361,11 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
   const eventActor = await assertEventActor(eventId, "tasks");
   if (!eventActor) {
     finishForm(formData, fallback, fail("You can't edit phases for that event."));
+    return;
   }
-  // Narrow for nested closures (TS does not carry `never` into inner functions).
-  const event = eventActor!;
+  const event = eventActor;
+  const uploadOrganizerId: string = event.organizerId;
+  const uploadEventId: string = event.id;
   if (!(await staffCanAct(eventId, "tasks"))) {
     finishForm(formData, fallback, fail("You can't edit phases for that competition."));
   }
@@ -371,7 +373,7 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) finishForm(formData, fallback, fail("Give the phase a name."));
 
-  const tracks = await listTracks(event.id);
+  const tracks = await listTracks(uploadEventId);
   const all = formData.get("allTracks") === "on";
   const trackId = String(formData.get("trackId") ?? "").trim();
   const chosen = all ? tracks : tracks.filter((t) => t.id === trackId);
@@ -392,8 +394,6 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
   const maxBytes = Math.max(1, settings.maxAttachmentMb || 10) * 1024 * 1024;
   const attachmentFile = formData.get("phaseAttachment");
   let phaseAttachment: Record<string, unknown> | null | undefined;
-  const uploadOrganizerId = event.organizerId;
-  const uploadEventId = event.id;
 
   async function uploadPhaseAttachment(entityId: string) {
     if (!(attachmentFile instanceof File) || attachmentFile.size <= 0) return null;

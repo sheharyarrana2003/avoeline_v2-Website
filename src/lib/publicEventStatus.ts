@@ -89,8 +89,9 @@ export function trackRegistrationOpen(
     now?: Date;
   },
 ): boolean {
-  const eventLifecycleActive = opts?.eventRegistrationOpen !== false;
-  if (!eventLifecycleActive) return false;
+  // Prefer explicit === false so TS never sees `true | undefined !== false` as empty.
+  if (opts?.eventRegistrationOpen === false) return false;
+  const eventLifecycleActive = true;
   const effective = effectiveRegistrationClosesAt(
     track.registrationClosesAt,
     opts?.eventRegistrationCloseDate,

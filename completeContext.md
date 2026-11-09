@@ -758,6 +758,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 
 ## Change log
 
+### 2026-11-09 — Nuclear typecheck fix for Vercel (Drive folders / phases / public status)
+- What: `listEventDriveFoldersAction` is a plain async server action with explicit `SafeActionResult<EventDriveFoldersResult>` (no `safeAction` factory inference); panel annotates result; `saveHackathonPhase` early-returns after null actor + captures upload ids as `string`; `trackRegistrationOpen` uses `=== false` early return.
+- Files: `listEventDriveFolders.action.ts`, `EventDriveFoldersPanel.tsx`, `tasks.action.ts`, `publicEventStatus.ts`
+- Next: Deploy **new** commit on `main` (do not Redeploy an old failed deployment — that rebuilds the same SHA).
+
 ### 2026-11-09 — Harden listEventDriveFoldersAction for Vercel tsc
 - What: Explicit `safeAction<typeof inputSchema, EventDriveFoldersResult>` + `SafeActionResult` return so TData is not inferred as `void` / disconnected union (fixes panel `res.data.connected` and safeOk connected:true mismatch on Vercel).
 - Files: `src/features/files/actions/listEventDriveFolders.action.ts`

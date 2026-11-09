@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { listEventDriveFoldersAction } from "../actions/listEventDriveFolders.action";
+import {
+  listEventDriveFoldersAction,
+  type EventDriveFoldersResult,
+} from "../actions/listEventDriveFolders.action";
+import type { SafeActionResult } from "@/src/lib/safeAction";
 import { buttonClass } from "@/src/lib/ui";
 
 type FolderRow = {
@@ -27,15 +31,18 @@ export function EventDriveFoldersPanel({
   const reload = useCallback(() => {
     start(async () => {
       setError(null);
-      const res = await listEventDriveFoldersAction({ eventId });
+      const res: SafeActionResult<EventDriveFoldersResult> = await listEventDriveFoldersAction({
+        eventId,
+      });
       if (!res.ok) {
         setError(res.error.message);
         setConnected(null);
         setFolders([]);
         return;
       }
-      setConnected(res.data.connected);
-      setFolders(res.data.connected ? [...res.data.folders] : []);
+      const data = res.data;
+      setConnected(data.connected);
+      setFolders(data.connected ? [...data.folders] : []);
     });
   }, [eventId]);
 
