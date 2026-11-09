@@ -14,7 +14,9 @@ Admin-created tenants (`/admin/tenants/new`) still support department / organize
 
 1. Supabase Dashboard → Authentication → Providers → Google: enable and add Client ID/Secret.
 2. Authorized redirect URL: `https://<your-domain>/auth/callback` (and local `http://localhost:3000/auth/callback`).
-3. Optional: pass preferred role via signup “Continue with Google” (uses selected account type).
+3. **Supabase → Authentication → URL Configuration:** set **Site URL** to the live origin (e.g. `https://avoeline.aroxes.com`), not `http://localhost:3000`. Add that same `/auth/callback` to **Redirect URLs**. If Site URL stays localhost, Google finishes and dumps `?code=` on `http://localhost:3000/`.
+4. Deploy env: `NEXT_PUBLIC_SITE_URL=https://avoeline.aroxes.com` (no trailing slash) so OAuth `redirectTo` matches production.
+5. Optional: pass preferred role via signup “Continue with Google” (uses selected account type).
 
 ## Bank details
 
