@@ -7,9 +7,6 @@ import {
 } from "@/src/features/organizations/organizations.service";
 import { publicOrder } from "@/src/features/organizations/types";
 import { SponsorsBoard } from "@/src/features/organizations/components/SponsorsBoard";
-import { InviteCollaborator } from "@/src/features/organizations/components/InviteCollaborator";
-import { absoluteUrl } from "@/src/lib/appUrl";
-import { Card, CardBody } from "@/src/shared_components/ui/Card";
 
 export default async function EventSponsorsPage({
   params,
@@ -27,7 +24,6 @@ export default async function EventSponsorsPage({
     listPartnerTypes(event.organizerId),
   ]);
   const orgs = publicOrder(orgsRaw, event.sponsorTiers);
-  const origin = await absoluteUrl("/collaborate");
   const currency = event.pricing?.currency || "PKR";
 
   return (
@@ -45,12 +41,6 @@ export default async function EventSponsorsPage({
         showPartners={!!event.showPartners}
         currency={currency}
       />
-
-      <Card title="Invite a collaborator">
-        <CardBody>
-          <InviteCollaborator eventId={eventId} inviteBase={origin} />
-        </CardBody>
-      </Card>
     </div>
   );
 }

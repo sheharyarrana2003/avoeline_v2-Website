@@ -89,7 +89,8 @@ export function trackRegistrationOpen(
     now?: Date;
   },
 ): boolean {
-  if (opts?.eventRegistrationOpen === false) return false;
+  const eventLifecycleActive = opts?.eventRegistrationOpen !== false;
+  if (!eventLifecycleActive) return false;
   const effective = effectiveRegistrationClosesAt(
     track.registrationClosesAt,
     opts?.eventRegistrationCloseDate,
@@ -97,7 +98,7 @@ export function trackRegistrationOpen(
   const state = competitionRegisterState({
     effectiveClosesAt: effective,
     trackEnded: String(track.status || "").toLowerCase() === "ended",
-    eventLifecycleActive: opts?.eventRegistrationOpen !== false,
+    eventLifecycleActive,
     seatsLeft: opts?.seatsLeft ?? null,
     waitlistEnabled: !!opts?.waitlistEnabled,
     now: opts?.now,

@@ -39,7 +39,7 @@ function lead(opts: {
       checkedInBy: null,
       deviceId: null,
     },
-  } as Registration;
+  } as unknown as Registration;
 }
 
 describe("hackathonTeamCodesVisible", () => {

@@ -758,6 +758,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 
 ## Change log
 
+### 2026-11-09 — Fix Google OAuth redirect to localhost on production
+- What: `absoluteUrl` prefers `NEXT_PUBLIC_SITE_URL` so OAuth `redirectTo` uses the live domain; docs note Supabase Site URL must not stay `http://localhost:3000` (that caused `/?code=` on localhost after Google).
+- Files: `src/lib/appUrl.ts`, `.env.example`, `docs/onboarding-plans-checkout.md`
+- Next: Set `NEXT_PUBLIC_SITE_URL=https://avoeline.aroxes.com` on the host and update Supabase Auth URL Configuration; redeploy.
+
 ### 2026-11-08 — O8 QA checklist + Playwright + docs
 - What: Full manual checklist for localhost `avoeline@gmail.com`; Playwright expand (A7 redirects, enter→compete + rules ack, demo auth setup soft-skip); TESTING §4.1 + docs/11 Access/Overview/Attendees sync; no A7 UI restored.
 - Files: `docs/O8-full-flow-checklist.md`, `e2e/{smoke,a7-redirects,organizer-tabs,auth.setup}.ts`, `e2e/helpers/demo.ts`, `playwright.config.ts`, `docs/TESTING.md`, `docs/11-events-and-hackathon-complete-spec.md`, `docs/22-o2-o8-status.md`, `plans/2026-11-08-o8-qa-docs.md`

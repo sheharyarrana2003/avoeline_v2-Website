@@ -10,12 +10,30 @@ import { rateLimit } from "@/src/lib/rateLimit";
 import { safeAction, safeFail, safeOk } from "@/src/lib/safeAction";
 import { listEventDriveFolders } from "../folders";
 
+export type EventDriveFoldersResult =
+  | { connected: false; folders: [] }
+  | {
+      connected: true;
+      connectionId: string;
+      folders: Array<{
+        kind: string;
+        name: string;
+        folderId: string;
+        webViewLink: string | null;
+      }>;
+    };
+
 export const listEventDriveFoldersAction = safeAction({
   input: z.object({
     eventId: z.string().uuid(),
     connectionId: z.string().uuid().optional(),
   }),
-  run: async (input) => {
+  run: async (
+    input,
+  ): Promise<
+    | { ok: true; data: EventDriveFoldersResult }
+    | { ok: false; error: { code: string; message: string } }
+  > => {
     const user = await AuthService.getCurrentUser();
     if (!user) return safeFail("FORBIDDEN", "Sign in required.");
 
@@ -27,7 +45,7 @@ export const listEventDriveFoldersAction = safeAction({
 
     const drive = await listDriveConnectionsForUser(user.userId);
     if (!drive.length) {
-      return safeOk({ connected: false as const, folders: [] as const });
+      return safeOk({ connected: false, folders: [] } satisfies EventDriveFoldersResult);
     }
 
     const connectionId = input.connectionId || drive[0]!.id;
@@ -46,7 +64,7 @@ export const listEventDriveFoldersAction = safeAction({
         eventId: input.eventId,
       });
       return safeOk({
-        connected: true as const,
+        connected: true,
         connectionId,
         folders: folders.map((f) => ({
           kind: f.kind,
@@ -54,7 +72,7 @@ export const listEventDriveFoldersAction = safeAction({
           folderId: f.folderId,
           webViewLink: f.webViewLink,
         })),
-      });
+      } satisfies EventDriveFoldersResult);
     } catch (e) {
       return safeFail("DRIVE", e instanceof Error ? e.message : "Could not list Drive folders.");
     }

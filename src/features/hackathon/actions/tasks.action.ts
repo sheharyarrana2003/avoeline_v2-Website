@@ -358,8 +358,12 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
   const eventId = String(formData.get("eventId") ?? "");
   const organizerId = String(formData.get("organizerId") ?? "");
   const fallback = organizerTasksPath(organizerId, eventId);
-  const event = await assertEventActor(eventId, "tasks");
-  if (!event) finishForm(formData, fallback, fail("You can't edit phases for that event."));
+  const eventActor = await assertEventActor(eventId, "tasks");
+  if (!eventActor) {
+    finishForm(formData, fallback, fail("You can't edit phases for that event."));
+  }
+  // Narrow for nested closures (TS does not carry `never` into inner functions).
+  const event = eventActor!;
   if (!(await staffCanAct(eventId, "tasks"))) {
     finishForm(formData, fallback, fail("You can't edit phases for that competition."));
   }
@@ -388,6 +392,8 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
   const maxBytes = Math.max(1, settings.maxAttachmentMb || 10) * 1024 * 1024;
   const attachmentFile = formData.get("phaseAttachment");
   let phaseAttachment: Record<string, unknown> | null | undefined;
+  const uploadOrganizerId = event.organizerId;
+  const uploadEventId = event.id;
 
   async function uploadPhaseAttachment(entityId: string) {
     if (!(attachmentFile instanceof File) || attachmentFile.size <= 0) return null;
@@ -403,8 +409,8 @@ export async function saveHackathonPhase(formData: FormData): Promise<void> {
       await import("@/src/features/connections/server/eventDriveUpload.service");
     try {
       const uploaded = await uploadEventAssetToOrganizerDrive({
-        organizerId: event.organizerId,
-        eventId: event.id,
+        organizerId: uploadOrganizerId,
+        eventId: uploadEventId,
         kind: "media",
         fileName: attachmentFile.name,
         mimeType: attachmentFile.type || "application/octet-stream",
