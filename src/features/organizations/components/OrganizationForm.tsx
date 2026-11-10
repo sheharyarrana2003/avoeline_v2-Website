@@ -128,7 +128,14 @@ export function OrganizationForm({
         <label className={labelClass}>Logo</label>
         <MediaUploadField
           name="logoUrl"
-          folder={`${eventId}`}
+          kind={
+            type === "collaborator"
+              ? "collaborator_logo"
+              : type === "partner"
+                ? "partner_logo"
+                : "sponsor_logo"
+          }
+          eventId={eventId}
           bucket="sponsor-logos"
           accept="image/*"
           label="Upload logo"
@@ -145,7 +152,7 @@ export function OrganizationForm({
         {pasteUrl ? (
           <input
             id="org-logo"
-            name="logoUrl"
+            name="logoUrlPaste"
             type="url"
             defaultValue={editing?.logoUrl}
             placeholder="https://"

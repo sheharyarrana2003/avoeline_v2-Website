@@ -8,10 +8,11 @@ import {
   toggleTicketTier,
 } from "@/src/features/ticketing/actions/ticketing.action";
 import { listTracks } from "@/src/features/hackathon/hackathon.service";
-import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import { buttonClass } from "@/src/lib/ui";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { formatDate } from "@/src/lib/datetime";
+import { PromoFieldGrid, TierFieldGrid } from "./TiersAndPromosEditor";
 
 export async function TiersPromosOnAccess({
   eventId,
@@ -42,6 +43,7 @@ export async function TiersPromosOnAccess({
       <input type="hidden" name="returnTo" value={returnTo} />
     </>
   );
+  const trackOpts = tracks.map((t) => ({ id: t.id, name: t.name }));
 
   return (
     <Card title={title}>
@@ -70,6 +72,8 @@ export async function TiersPromosOnAccess({
                     <p className="text-xs text-ink-soft">
                       {t.price === 0 ? "Free" : t.price} · {t.seatsSold}/{t.seatsAvailable ?? "∞"}{" "}
                       sold
+                      {t.isEarlyBird ? " · early bird" : ""}
+                      {t.availableFrom ? ` · from ${formatDate(t.availableFrom)}` : ""}
                       {t.availableUntil ? ` · until ${formatDate(t.availableUntil)}` : ""}
                     </p>
                   </div>
@@ -101,45 +105,7 @@ export async function TiersPromosOnAccess({
               className="grid gap-3 rounded-xl border border-line p-4 sm:grid-cols-2"
             >
               {hidden}
-              <div className="sm:col-span-2">
-                <label className={labelClass} htmlFor="tier-name">
-                  Name
-                </label>
-                <input id="tier-name" name="name" required className={fieldClass} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="tier-price">
-                  Price
-                </label>
-                <input
-                  id="tier-price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  className={fieldClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="tier-seats">
-                  Seats
-                </label>
-                <input id="tier-seats" name="seats" type="number" className={fieldClass} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="tier-until">
-                  Available until
-                </label>
-                <input id="tier-until" name="availableUntil" type="date" className={fieldClass} />
-              </div>
-              <label className="flex items-center gap-2 self-end text-sm text-ink">
-                <input
-                  type="checkbox"
-                  name="active"
-                  defaultChecked
-                  className="h-4 w-4 accent-current"
-                />
-                Active
-              </label>
+              <TierFieldGrid idPrefix="tier" />
               <div className="sm:col-span-2 flex justify-end">
                 <button type="submit" className={buttonClass("primary", "sm")}>
                   Add tier
@@ -207,66 +173,7 @@ export async function TiersPromosOnAccess({
             className="grid gap-3 rounded-xl border border-line p-4 sm:grid-cols-2"
           >
             {hidden}
-            <div>
-              <label className={labelClass} htmlFor="promo-code">
-                Code
-              </label>
-              <input id="promo-code" name="code" required className={`${fieldClass} uppercase`} />
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="promo-type">
-                Type
-              </label>
-              <select id="promo-type" name="discountType" className={fieldClass}>
-                <option value="percent">Percent</option>
-                <option value="flat">Flat</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="promo-value">
-                Value
-              </label>
-              <input
-                id="promo-value"
-                name="value"
-                type="number"
-                step="0.01"
-                required
-                className={fieldClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="promo-expires">
-                Expiry date
-              </label>
-              <input id="promo-expires" name="expiresAt" type="date" className={fieldClass} />
-            </div>
-            {isHackathon ? (
-              <div className="sm:col-span-2">
-                <label className={labelClass} htmlFor="promo-scope">
-                  Scope
-                </label>
-                <select id="promo-scope" name="trackId" className={fieldClass} defaultValue="">
-                  <option value="">Whole event</option>
-                  {tracks.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <input type="hidden" name="trackId" value="" />
-            )}
-            <label className="flex items-center gap-2 text-sm text-ink">
-              <input
-                type="checkbox"
-                name="active"
-                defaultChecked
-                className="h-4 w-4 accent-current"
-              />
-              Active
-            </label>
+            <PromoFieldGrid idPrefix="promo" isHackathon={isHackathon} tracks={trackOpts} />
             <div className="sm:col-span-2 flex justify-end">
               <button type="submit" className={buttonClass("primary", "sm")}>
                 Add code

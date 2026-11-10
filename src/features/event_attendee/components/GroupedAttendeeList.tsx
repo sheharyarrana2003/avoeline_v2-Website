@@ -31,6 +31,9 @@ export function GroupedAttendeeList({
   handleOnClick,
   openRegistrationId,
   onQuickStatusChange,
+  isPaid = false,
+  selectedIds,
+  onToggleSelect,
 }: {
   groups: GroupedAttendeeGroup[];
   leftover: AttendeeClientSideProp[];
@@ -40,6 +43,9 @@ export function GroupedAttendeeList({
   handleOnClick: (registration_id: string) => void;
   openRegistrationId: string | null;
   onQuickStatusChange: (reg: Registration, newStatus: "confirmed" | "rejected") => void;
+  isPaid?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (registrationId: string, next: boolean) => void;
 }) {
   const visible = useMemo(() => groups.filter((g) => g.members.length), [groups]);
 
@@ -117,11 +123,13 @@ export function GroupedAttendeeList({
             </div>
             {open ? (
               <div className="border-t border-line">
-                <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr] border-b border-line bg-muted/30 px-4 py-2 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+                <div className="grid grid-cols-[auto_minmax(0,2.2fr)_minmax(0,1fr)_auto_auto_auto] border-b border-line bg-muted/30 px-4 py-2 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+                  <div aria-hidden="true" />
                   <div>Member</div>
                   <div>Ticket</div>
                   <div>Status</div>
-                  <div>Check-in / Action</div>
+                  <div>Check-in</div>
+                  <div className="text-right">Action</div>
                 </div>
                 <div className="divide-y divide-line">
                   {group.members.map((acs) => (
@@ -132,6 +140,10 @@ export function GroupedAttendeeList({
                       handleOnClick={handleOnClick}
                       isOpen={acs.register.registrationId === openRegistrationId}
                       onQuickStatusChange={onQuickStatusChange}
+                      isPaid={isPaid}
+                      competitionName={group.subtitle || ""}
+                      selected={selectedIds?.has(acs.register.registrationId) ?? false}
+                      onToggleSelect={onToggleSelect}
                     />
                   ))}
                 </div>
@@ -154,6 +166,9 @@ export function GroupedAttendeeList({
                 handleOnClick={handleOnClick}
                 isOpen={acs.register.registrationId === openRegistrationId}
                 onQuickStatusChange={onQuickStatusChange}
+                isPaid={isPaid}
+                selected={selectedIds?.has(acs.register.registrationId) ?? false}
+                onToggleSelect={onToggleSelect}
               />
             ))}
           </div>

@@ -12,7 +12,9 @@ export type TicketTier = {
   seatsSold: number;
   /** null when seats are not tracked. */
   seatsLeft: number | null;
+  availableFrom: string | null;
   availableUntil: string | null;
+  isEarlyBird: boolean;
   active: boolean;
 };
 
@@ -55,7 +57,9 @@ export const TicketingService = {
         seatsAvailable,
         seatsSold,
         seatsLeft: seatsLeftOf(seatsAvailable, seatsSold),
+        availableFrom: r.available_from ?? null,
         availableUntil: r.available_until,
+        isEarlyBird: !!r.is_early_bird,
         // Past available_until demotes active at read (same pattern as promo expiry).
         active: r.active !== false && !windowClosed,
       };
@@ -67,9 +71,11 @@ export const TicketingService = {
     input: {
       name: string;
       price: number;
-      seatsAvailable?: number;
+      seatsAvailable?: number | null;
       description?: string;
+      availableFrom?: string | null;
       availableUntil?: string | null;
+      isEarlyBird?: boolean;
       active?: boolean;
     },
   ) {
@@ -81,7 +87,9 @@ export const TicketingService = {
         price: input.price,
         seats_available: input.seatsAvailable ?? null,
         description: input.description || "",
+        available_from: input.availableFrom || null,
         available_until: input.availableUntil || null,
+        is_early_bird: !!input.isEarlyBird,
         active: input.active !== false,
       })
       .select("*")
@@ -93,14 +101,23 @@ export const TicketingService = {
   async updateTier(
     eventId: string,
     id: string,
-    patch: { availableUntil?: string | null; active?: boolean; name?: string; price?: number },
+    patch: {
+      availableFrom?: string | null;
+      availableUntil?: string | null;
+      active?: boolean;
+      name?: string;
+      price?: number;
+      isEarlyBird?: boolean;
+    },
   ) {
     const { error } = await supabaseAdmin
       .from(TABLES.TICKET_TIERS)
       .update({
         ...(patch.name !== undefined ? { name: patch.name } : {}),
         ...(patch.price !== undefined ? { price: patch.price } : {}),
+        ...(patch.availableFrom !== undefined ? { available_from: patch.availableFrom } : {}),
         ...(patch.availableUntil !== undefined ? { available_until: patch.availableUntil } : {}),
+        ...(patch.isEarlyBird !== undefined ? { is_early_bird: patch.isEarlyBird } : {}),
         ...(patch.active !== undefined ? { active: patch.active } : {}),
       })
       .eq("id", id)

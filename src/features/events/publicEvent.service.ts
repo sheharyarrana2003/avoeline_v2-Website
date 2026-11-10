@@ -514,6 +514,11 @@ async function buildDto(
     sharePath: shareUrl,
     organizerConnectionsReady: connections.ready,
     organizerConnectionsMessage: connections.message,
+    paymentInstructions: (() => {
+      const free = !paid && fromPrices.length === 0;
+      if (free) return null;
+      return String(event.paymentInstructions || "").trim() || null;
+    })(),
   };
 }
 

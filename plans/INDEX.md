@@ -2,6 +2,13 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-10 | [n7-connections-redesign](2026-11-10-n7-connections-redesign.md) | done | N7: single Connections page, account + integration cards, OAuth diagnostics, smoke tests |
+| 2026-11-09 | [n6-attendee-emails](2026-11-09-n6-attendee-emails.md) | done | N6: React Email attendee layout, composer parity, CID QRs, Mailpit + snapshots |
+| 2026-11-09 | [n5-attendees-tab](2026-11-09-n5-attendees-tab.md) | done | N5: registrant identity, approve/proof rules, bulk, Import free-only, export proof URLs |
+| 2026-11-09 | [n4-ticket-short-codes](2026-11-09-n4-ticket-short-codes.md) | done | N4: short codes, ticket redesign, signed QR, staff check-in lookup |
+| 2026-11-09 | [n3-public-event-page](2026-11-09-n3-public-event-page.md) | done | N3: clean hero, share/calendar menus, media lightbox, payment instructions, register card |
+| 2026-11-09 | [n2-event-wizard](2026-11-09-n2-event-wizard.md) | done | N2: shared TiersAndPromosEditor, unlimited summary, legal links+accept, drop wizard show-* toggles |
+| 2026-11-09 | [n1-upload-blockers](2026-11-09-n1-upload-blockers.md) | done | N1: registration proof/submit errors, UploadKind, public media quotas, preview-only, sponsor logos |
 | 2026-11-08 | [o8-qa-docs](2026-11-08-o8-qa-docs.md) | done | O8: full-flow checklist, Playwright smoke/A7, docs sync; auth tab smoke soft-skip |
 | 2026-11-08 | [o7-certificates-files](2026-11-08-o7-certificates-files.md) | done | O7: cert viewer, private archive jobs, docs/18 email + share warning, Files A4 folders |
 | 2026-11-08 | [o6-phases-submissions-scoreboard-settings](2026-11-08-o6-phases-submissions-scoreboard-settings.md) | done | O6: FileStore phase/task/submit, compete file auth, multi-link/resubmit, scoreboard ▲▼, settings tests |

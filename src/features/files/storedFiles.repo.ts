@@ -104,6 +104,17 @@ export async function getStoredFileById(id: string): Promise<StoredFileRow | nul
   return mapStoredFileRow(data as DbRow);
 }
 
+export async function getStoredFilesByIds(ids: string[]): Promise<StoredFileRow[]> {
+  const unique = [...new Set(ids.map(String).filter(Boolean))];
+  if (!unique.length) return [];
+  const { data, error } = await supabaseAdmin
+    .from(TABLES.STORED_FILES)
+    .select("*")
+    .in("id", unique);
+  if (error) throw new Error(error.message);
+  return (data || []).map((r) => mapStoredFileRow(r as DbRow));
+}
+
 export async function updateStoredFile(
   id: string,
   patch: Record<string, unknown>,

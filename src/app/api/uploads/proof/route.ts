@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TABLES } from "@/data/collections";
-import { supabaseAdmin } from "@/data/supabase";
-import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { logger } from "@/src/lib/logger";
 import { fileStore } from "@/src/features/files/fileStore";
 import { validateAndNormalizeProof } from "@/src/features/files/validateUpload";
+import { assertPublicRegistrationEvent } from "@/src/features/registration/publicRegistrationEligibility";
+import {
+  mapProofUploadClientError,
+  UPLOAD_FILE_HELP,
+} from "@/src/features/registration/registrationErrors";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,6 +23,7 @@ function clientIp(req: NextRequest): string {
 /**
  * Public payment/proof upload → FileStore (Drive first, fallback).
  * Returns `{ fileId }` only — no Drive URLs or tokens.
+ * Attendee-facing errors are plain language (never raw Drive/Zod).
  */
 export async function POST(req: NextRequest) {
   let eventId = "";
@@ -54,13 +57,24 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: UPLOAD_FILE_HELP, code: "INVALID_BODY" },
+      { status: 400 },
+    );
   }
 
-  if (!/^[0-9a-f-]{36}$/i.test(eventId) || !bytes) {
+  if (!bytes) {
     return NextResponse.json(
-      { ok: false, error: "eventId and file are required." },
+      { ok: false, error: UPLOAD_FILE_HELP, code: "MISSING_FILE" },
       { status: 400 },
+    );
+  }
+
+  const gate = await assertPublicRegistrationEvent(eventId);
+  if (!gate.ok) {
+    return NextResponse.json(
+      { ok: false, error: gate.message, code: gate.code },
+      { status: gate.status },
     );
   }
 
@@ -70,34 +84,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Too many uploads. Try again shortly.",
+        error: mapProofUploadClientError("Too many uploads.", 429),
+        code: "RATE_LIMIT",
         retryAfterSec: limited.retryAfterSec,
       },
       { status: 429, headers: { "Retry-After": String(limited.retryAfterSec) } },
-    );
-  }
-
-  const { data: event, error: eventErr } = await supabaseAdmin
-    .from(TABLES.EVENTS)
-    .select("id, organizer_id, status, requires_registration, schedule")
-    .eq("id", eventId)
-    .maybeSingle();
-
-  if (eventErr || !event) {
-    return NextResponse.json({ ok: false, error: "Event not found." }, { status: 404 });
-  }
-  if (event.requires_registration === false) {
-    return NextResponse.json(
-      { ok: false, error: "This event does not take registrations." },
-      { status: 400 },
-    );
-  }
-
-  const schedule = (event.schedule || {}) as { startDate?: string; endDate?: string };
-  if (!isActiveLifecycle(eventLifecycle(String(event.status || ""), schedule))) {
-    return NextResponse.json(
-      { ok: false, error: "This event is not open for registration." },
-      { status: 400 },
     );
   }
 
@@ -108,7 +99,11 @@ export async function POST(req: NextRequest) {
   });
   if (!normalized.ok) {
     return NextResponse.json(
-      { ok: false, error: normalized.error, code: normalized.code },
+      {
+        ok: false,
+        error: mapProofUploadClientError(normalized.error),
+        code: normalized.code,
+      },
       { status: 400 },
     );
   }
@@ -122,7 +117,7 @@ export async function POST(req: NextRequest) {
       category: "payment_proof",
       entityType: "event",
       entityId: eventId,
-      organizerId: String(event.organizer_id),
+      organizerId: gate.event.organizerId,
       eventId,
       folderKind: "payment_proofs",
       allowFallback: true,
@@ -133,7 +128,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     logger.error("[uploads/proof]", { err: err instanceof Error ? err.message : "unknown" });
     return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : "Upload failed." },
+      { ok: false, error: UPLOAD_FILE_HELP, code: "UPLOAD_FAILED" },
       { status: 502 },
     );
   }

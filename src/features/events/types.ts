@@ -204,6 +204,8 @@ export type PublicEventDto = {
   /** Phase A: organizer has active Drive + Gmail for proofs / registration mail. */
   organizerConnectionsReady: boolean;
   organizerConnectionsMessage: string | null;
+  /** Paid events only — organizer bank/wallet/reference text for the register card. */
+  paymentInstructions: string | null;
 };
 
 export type PublicEventGateReason =

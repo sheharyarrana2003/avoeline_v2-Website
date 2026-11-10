@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import type { IntegrationCatalogEntry } from "../types";
 import { PermissionList } from "./PermissionList";
 import { startConnectAction } from "../actions/connections.action";
+import { formatSafeActionError } from "../lib/connectionUserErrors";
 
 export function ConnectDialog({
   open,
@@ -23,6 +24,7 @@ export function ConnectDialog({
   returnTo?: string;
 }) {
   const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   if (!open) return null;
 
   return (
@@ -46,6 +48,11 @@ export function ConnectDialog({
             Privacy policy
           </a>
         </p>
+        {error ? (
+          <p role="alert" className="mt-3 text-sm text-red-700">
+            {error}
+          </p>
+        ) : null}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
@@ -61,6 +68,7 @@ export function ConnectDialog({
             className="rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
             onClick={() =>
               start(async () => {
+                setError(null);
                 const r = await startConnectAction({
                   ownerId,
                   ownerType,
@@ -75,6 +83,10 @@ export function ConnectDialog({
                 });
                 if (r.ok && r.data.url) {
                   window.location.href = r.data.url;
+                  return;
+                }
+                if (!r.ok) {
+                  setError(formatSafeActionError(r.error));
                 }
               })
             }

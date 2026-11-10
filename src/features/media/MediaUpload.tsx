@@ -4,21 +4,23 @@ import { useRef, useState, useTransition } from "react";
 import { ImageUp, TriangleAlert } from "lucide-react";
 import { compressImage } from "./compressImage";
 import { uploadMedia } from "./uploadMedia.action";
-import { uploadEventMediaDriveAction } from "./uploadEventMediaDrive.action";
 import { isVideoUrl } from "./media.utils";
+import type { UploadKind } from "@/src/features/files/uploadKinds";
 
 interface MediaUploadProps {
-  /** Storage folder/prefix, e.g. "banners", "gallery", "speaker-avatars". */
-  folder: string;
+  /** Typed upload kind (preferred). Provide `kind` or legacy `folder`. */
+  kind?: UploadKind;
+  /** @deprecated Prefer `kind`. Kept for vendor/organizer callers. */
+  folder?: string;
   /** Called with the resulting URL after each successful upload. */
   onUploaded: (url: string) => void;
   /** Accept attribute; defaults to images. */
   accept?: string;
   /** Allow selecting/uploading multiple files (fires onUploaded per file). */
   multiple?: boolean;
-  /** Target bucket; defaults to the public "media" bucket. */
+  /** Target bucket override; usually inferred from kind. */
   bucket?: string;
-  /** When set, event-owned media goes to organizer Drive (Phase A). */
+  /** Event scope for path + ownership. */
   eventId?: string;
   /** Optional current single-image URL to preview. */
   value?: string | null;
@@ -32,12 +34,10 @@ interface MediaUploadProps {
 const DEFAULT_BUTTON =
   "relative flex h-28 w-full flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-ink disabled:opacity-60";
 
-// Keep in step with uploadMedia.action MAX_BYTES and next.config proxyClientMaxBodySize.
-// Guarding here avoids a raw 500 ("Unexpected end of form") when the body would be
-// truncated by the proxy layer before the server action can validate size.
-const MAX_BYTES = 50 * 1024 * 1024;
+const MAX_BYTES = 12 * 1024 * 1024;
 
 export function MediaUpload({
+  kind,
   folder,
   onUploaded,
   accept = "image/*",
@@ -59,40 +59,27 @@ export function MediaUpload({
     setError(null);
     const tooBig = Array.from(files).find((f) => f.size > MAX_BYTES);
     if (tooBig) {
-      setError(`"${tooBig.name}" is too large (max 50MB).`);
+      setError(`"${tooBig.name}" is too large (max 12MB before compression).`);
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
     startTransition(async () => {
       for (const raw of Array.from(files)) {
-        const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
-        if (file.size > MAX_BYTES) {
-          setError(`"${file.name}" is too large after compression (max 50MB).`);
+        if (raw.type.startsWith("video/")) {
+          setError("Videos are links only. Paste a YouTube or Vimeo URL instead.");
           continue;
         }
-        if (eventId) {
-          const buf = await file.arrayBuffer();
-          const contentBase64 = btoa(
-            Array.from(new Uint8Array(buf), (b) => String.fromCharCode(b)).join(""),
-          );
-          const res = await uploadEventMediaDriveAction({
-            eventId,
-            fileName: file.name,
-            contentType: file.type || "application/octet-stream",
-            contentBase64,
-          });
-          if (res.ok) {
-            if (!multiple) setPreview(res.data.url);
-            onUploaded(res.data.url);
-          } else {
-            setError(res.error.message);
-          }
+        const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
+        if (file.size > MAX_BYTES) {
+          setError(`"${file.name}" is still too large after compression.`);
           continue;
         }
         const fd = new FormData();
         fd.append("file", file);
-        fd.append("folder", folder);
+        if (kind) fd.append("kind", kind);
+        if (folder) fd.append("folder", folder);
         if (bucket) fd.append("bucket", bucket);
+        if (eventId) fd.append("eventId", eventId);
         const res = await uploadMedia(fd);
         if (res.success) {
           if (!multiple) setPreview(res.url);
@@ -107,9 +94,6 @@ export function MediaUpload({
 
   return (
     <div className={className}>
-      {/* Once something is uploaded this button contains only the preview
-          image, so without an explicit name it announces as an unnamed button
-          -- the visible text it otherwise carries is gone. */}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}

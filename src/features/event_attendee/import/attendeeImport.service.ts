@@ -12,8 +12,9 @@ import {
   fieldsToCustomForm,
 } from "@/src/features/registration/forms/formFields.service";
 import { sanitizeAnswers } from "@/src/lib/customFields";
-import { buildQrPayload, generateAndHostQr } from "@/src/features/registration/qr";
-// qr helpers shared with public registration
+import { generateAndHostQr } from "@/src/features/registration/qr";
+import { generateShortCode } from "@/src/features/registration/shortCode";
+import { isShortCodeUniqueViolation } from "@/src/features/registration/allocateShortCode";
 import { readSpreadsheetValuesForActor } from "@/src/features/connections/server/sheetRead.service";
 import {
   mapRows,
@@ -125,59 +126,64 @@ async function insertImportedRow(opts: {
 }): Promise<{ ok: true; registrationId: string } | { ok: false; error: string }> {
   const registrationId = randomUUID();
   const now = new Date().toISOString();
-  const status = opts.requiresApproval ? "pending" : "confirmed";
-  const qr = await generateAndHostQr(
-    buildQrPayload({
-      name: opts.row.name.trim(),
-      email: opts.row.email.trim(),
-      eventId: opts.eventId,
-      registrationId,
-      timestamp: now,
-    }),
-  );
-  const customResponses = sanitizeAnswers(opts.customForm, opts.row.customResponses);
-  const { error } = await supabaseAdmin.from(TABLES.REGISTRATIONS).insert({
-    id: registrationId,
-    event_id: opts.eventId,
-    user_id: null,
-    attendee_name: opts.row.name.trim(),
-    attendee_email: opts.row.email.trim().toLowerCase(),
-    attendee_phone: opts.row.phone || null,
-    organizer_id: opts.organizerId,
-    status,
-    waitlist_position: null,
-    invite_id: null,
-    custom_responses: customResponses,
-    registration_source: "admin_panel",
-    tier: opts.row.tier || "General",
-    pricing_tier: opts.row.tier || "General",
-    final_price: 0,
-    payment_status: "completed",
-    amount_paid: 0,
-    payment_proof_path: null,
-    checked_in: false,
-    qr_code_data: qr?.data || "",
-    // O1 A6: stop writing hosted QR URLs — render via /api/qr/[token].png
-    qr_code_image_url: null,
-    certificate_issued: false,
-    ticket_tier_id: null,
-    promo_code_used: null,
-    communications: [],
-    status_history: [{ status, timestamp: now, note: "Imported by organizer" }],
-    group_id: null,
-    extra: {
-      attendee: {
-        name: opts.row.name.trim(),
-        email: opts.row.email.trim().toLowerCase(),
-        phone: opts.row.phone || "",
-      },
-      imported: true,
-    },
-    created_at: now,
-    updated_at: now,
+  // N5: imports are confirmed + marked imported (free events only).
+  void opts.requiresApproval;
+  const status = "confirmed";
+  const qr = await generateAndHostQr({
+    registrationId,
+    eventId: opts.eventId,
   });
-  if (error) return { ok: false, error: error.message };
-  return { ok: true, registrationId };
+  const customResponses = sanitizeAnswers(opts.customForm, opts.row.customResponses);
+  let shortCode = generateShortCode();
+  let lastError = "";
+  for (let attempt = 0; attempt < 8; attempt++) {
+    shortCode = attempt === 0 ? shortCode : generateShortCode();
+    const { error } = await supabaseAdmin.from(TABLES.REGISTRATIONS).insert({
+      id: registrationId,
+      event_id: opts.eventId,
+      user_id: null,
+      attendee_name: opts.row.name.trim(),
+      attendee_email: opts.row.email.trim().toLowerCase(),
+      attendee_phone: opts.row.phone || null,
+      organizer_id: opts.organizerId,
+      status,
+      waitlist_position: null,
+      invite_id: null,
+      custom_responses: customResponses,
+      registration_source: "admin_panel",
+      tier: opts.row.tier || "General",
+      pricing_tier: opts.row.tier || "General",
+      final_price: 0,
+      payment_status: "completed",
+      amount_paid: 0,
+      payment_proof_path: null,
+      checked_in: false,
+      qr_code_data: qr?.data || "",
+      qr_code_image_url: null,
+      short_code: shortCode,
+      certificate_issued: false,
+      ticket_tier_id: null,
+      promo_code_used: null,
+      communications: [],
+      status_history: [{ status, timestamp: now, note: "Imported by organizer" }],
+      group_id: null,
+      extra: {
+        attendee: {
+          name: opts.row.name.trim(),
+          email: opts.row.email.trim().toLowerCase(),
+          phone: opts.row.phone || "",
+        },
+        shortCode,
+        imported: true,
+      },
+      created_at: now,
+      updated_at: now,
+    });
+    if (!error) return { ok: true, registrationId };
+    if (!isShortCodeUniqueViolation(error)) return { ok: false, error: error.message };
+    lastError = error.message;
+  }
+  return { ok: false, error: lastError || "Could not allocate short_code" };
 }
 
 export async function commitAttendeeImport(opts: {

@@ -65,18 +65,21 @@ async function sendJudgeInviteMail(opts: {
   };
   const subject = applyJudgeInviteTemplate(opts.subjectTpl || DEFAULT_SUBJECT, vars);
   const text = applyJudgeInviteTemplate(opts.bodyTpl || DEFAULT_BODY, vars);
-  const html = text
-    .split("\n")
-    .map((line) =>
-      line.trim() ? `<p>${line.replace(link, `<a href="${link}">${link}</a>`)}</p>` : "<br/>",
-    )
-    .join("");
+  const { renderJudgeInviteEmail } = await import("@/src/features/email/renderAttendeeEmail");
+  const rendered = await renderJudgeInviteEmail({
+    organizerName: "Organizer",
+    judgeName: opts.name,
+    eventTitle: vars.eventTitle,
+    inviteUrl: link,
+    subject,
+    bodyPlain: text,
+  });
   const mail = await sendViaOrganizerConnection({
     organizerId: opts.organizerId,
     to: opts.email,
-    subject,
-    html,
-    text,
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
     kind: "judge_invite",
     eventId: opts.eventId,
   });

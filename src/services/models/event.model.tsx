@@ -327,6 +327,8 @@ export class EventModel {
   showCollaborators: boolean;
   /** When true, partners appear on the public event page. */
   showPartners: boolean;
+  /** Plain-text payment instructions for paid public registration. */
+  paymentInstructions: string;
 
   constructor(raw: any) {
     this.id = String(raw.id || raw.event_id || raw.eventId || "").trim();
@@ -367,6 +369,9 @@ export class EventModel {
     this.showSponsors = !!(raw.showSponsors ?? raw.show_sponsors);
     this.showCollaborators = !!(raw.showCollaborators ?? raw.show_collaborators);
     this.showPartners = !!(raw.showPartners ?? raw.show_partners);
+    this.paymentInstructions = String(
+      raw.paymentInstructions ?? raw.payment_instructions ?? "",
+    ).trim();
 
     this.schedule = {
       startDate: raw.schedule?.startDate || raw.start_date || "",
@@ -647,9 +652,24 @@ export interface TicketTier {
   id: string;
   name: string;
   price: number;
-  seatsAvailable: number;
+  /** null / empty = unlimited for this tier */
+  seatsAvailable: number | null;
+  availableFrom: string;
   availableUntil: string;
   description: string;
+  active: boolean;
+  isEarlyBird: boolean;
+}
+
+export interface WizardPromoDraft {
+  id: string;
+  code: string;
+  discountType: "percent" | "flat";
+  value: number;
+  trackId: string | null;
+  usageLimit: number | null;
+  expiresAt: string;
+  active: boolean;
 }
 
 export interface WizardTrackDraft {
@@ -737,7 +757,7 @@ export interface EventFormData {
   groupMinSize: number;
   groupMaxSize: number;
   isHackathon: boolean;
-  promoCodes: string[];
+  promoCodes: WizardPromoDraft[];
   customFields: CustomField[];
   requiresRegistration: boolean;
   multiTrack: boolean;

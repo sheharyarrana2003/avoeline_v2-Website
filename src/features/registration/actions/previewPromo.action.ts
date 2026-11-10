@@ -26,7 +26,9 @@ export const previewPromo = safeAction({
     if (!limited.ok) return safeFail("RATE_LIMIT", "Too many promo checks. Try again shortly.");
 
     const event = await getPublicEvent(input.eventId);
-    if (!event) return safeFail("CLOSED", "Event not found.");
+    if (!event) {
+      return safeFail("CLOSED", "This event is not open for registration right now.");
+    }
 
     // Promo previews against the base fee only — never stacked on track/student/group discounts.
     const tracks = await listTracks(event.id);

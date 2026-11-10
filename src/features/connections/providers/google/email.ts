@@ -63,6 +63,11 @@ function toBase64Url(raw: string): string {
     .replace(/=+$/, "");
 }
 
+function toBuffer(content: string | Buffer | Uint8Array): Buffer {
+  if (typeof content === "string") return Buffer.from(content, "base64");
+  return Buffer.isBuffer(content) ? content : Buffer.from(content);
+}
+
 export const GoogleEmailSender: EmailSender = {
   async send(
     accessToken: string,
@@ -76,7 +81,11 @@ export const GoogleEmailSender: EmailSender = {
       return { ok: false, code: "INVALID", error: "Missing email body" };
     }
 
-    // Attachments: build multipart/mixed via nodemailer when present
+    const fromDisplay = input.fromName
+      ? `${stripControls(input.fromName)} <${input.fromEmail}>`
+      : input.fromEmail;
+
+    // Attachments (including CID / multipart related): nodemailer
     if (input.attachments?.length) {
       const nodemailer = await import("nodemailer");
       const transporter = nodemailer.createTransport({
@@ -87,9 +96,6 @@ export const GoogleEmailSender: EmailSender = {
           accessToken,
         },
       });
-      const fromDisplay = input.fromName
-        ? `${stripControls(input.fromName)} <${input.fromEmail}>`
-        : input.fromEmail;
       try {
         await transporter.sendMail({
           from: fromDisplay,
@@ -100,11 +106,10 @@ export const GoogleEmailSender: EmailSender = {
           replyTo: input.replyTo,
           attachments: input.attachments.map((a) => ({
             filename: a.filename,
-            content:
-              typeof a.content === "string"
-                ? Buffer.from(a.content, "base64")
-                : Buffer.from(a.content),
+            content: toBuffer(a.content),
             contentType: a.contentType,
+            cid: a.cid || undefined,
+            contentDisposition: a.cid ? ("inline" as const) : ("attachment" as const),
           })),
         });
         return { ok: true };
@@ -119,9 +124,6 @@ export const GoogleEmailSender: EmailSender = {
       }
     }
 
-    const fromDisplay = input.fromName
-      ? `${stripControls(input.fromName)} <${input.fromEmail}>`
-      : input.fromEmail;
     const raw = mimeMessage({
       from: fromDisplay,
       to: list,

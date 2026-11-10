@@ -64,6 +64,7 @@ export default async function EditEventPage({
           totalSeats: Number(owned.capacity?.totalSeats) || 0,
           ticketType: isFree ? "free" : "paid",
           ticketPrice,
+          paymentInstructions: owned.paymentInstructions || "",
         }}
       />
     </div>

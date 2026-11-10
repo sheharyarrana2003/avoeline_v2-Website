@@ -7,5 +7,5 @@ export default async function OrganizerEmailBatchesPage({
   params: Promise<{ organizer_id: string }>;
 }) {
   const { organizer_id } = await params;
-  redirect(`/organizer/${organizer_id}/settings/connections?tab=email`);
+  redirect(`/organizer/${organizer_id}/settings/connections?section=email`);
 }

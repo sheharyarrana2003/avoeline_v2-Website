@@ -18,6 +18,7 @@ import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { ActionResult } from "@/src/lib/action";
 import { rotateTeamJoinCode } from "../actions/joinCode.action";
 import { hackathonTeamCodesVisible } from "../roster";
+import { registrantIdentity } from "@/src/features/event_attendee/registrantIdentity";
 
 const PAYMENT_STATUS_OPTIONS: Registration["payment"]["paymentStatus"][] = [
   "pending",
@@ -47,6 +48,9 @@ export function TeamGroupView({
 }) {
   const router = useRouter();
   const lead = members.find((m) => m.register.registrationId === team.leadId) ?? members[0];
+  const leadIdentity = lead
+    ? registrantIdentity(lead.register, lead.user)
+    : { name: "—", email: "No email", phone: "No phone", initials: "?" };
   const [leadReg, setLeadReg] = useState<Registration | null>(lead?.register ?? null);
   const [busy, setBusy] = useState(false);
   const [drawerTab, setDrawerTab] = useState<"details" | "communication">("details");
@@ -158,12 +162,10 @@ export function TeamGroupView({
             {lead ? (
               <div className="space-y-1 text-sm text-ink-soft">
                 <p className="flex items-center gap-2">
-                  <Mail size={14} />{" "}
-                  {lead.user?.email || lead.register.attendee?.email || "No email"}
+                  <Mail size={14} /> {leadIdentity.email || "No email"}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Phone size={14} />{" "}
-                  {lead.user?.profile?.phoneNumber || lead.register.attendee?.phone || "No phone"}
+                  <Phone size={14} /> {leadIdentity.phone || "No phone"}
                 </p>
               </div>
             ) : null}
@@ -178,9 +180,7 @@ export function TeamGroupView({
               </div>
               <div>
                 <dt className="text-2xs uppercase text-ink-soft">Lead</dt>
-                <dd className="mt-0.5 truncate text-ink">
-                  {lead?.user?.profile?.fullName || lead?.register.attendee?.name || "—"}
-                </dd>
+                <dd className="mt-0.5 truncate text-ink">{leadIdentity.name}</dd>
               </div>
               {hasAmount ? (
                 <div>
@@ -309,6 +309,7 @@ export function TeamGroupView({
                 eventId={eventId}
                 registrationId={leadReg.registrationId}
                 startOpen={composeKey > 0}
+                hidePayment={hidePayment}
               />
             ) : (
               <p className="text-sm text-ink-soft">No lead email on this team.</p>

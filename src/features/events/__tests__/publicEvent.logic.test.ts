@@ -24,9 +24,13 @@ describe("resolveRegisterButtonState", () => {
     assert.equal(resolveRegisterButtonState(base), "open");
   });
 
-  it("returns admin_preview for draft previews", () => {
+  it("returns admin_preview for any staff preview (draft or published)", () => {
     assert.equal(
       resolveRegisterButtonState({ ...base, preview: true, lifecycle: "draft" }),
+      "admin_preview",
+    );
+    assert.equal(
+      resolveRegisterButtonState({ ...base, preview: true, lifecycle: "published" }),
       "admin_preview",
     );
   });

@@ -85,7 +85,8 @@ export function resolveRegisterButtonState(input: {
   now?: Date;
 }): RegisterButtonState {
   const now = input.now ?? new Date();
-  if (input.preview && input.lifecycle === "draft") return "admin_preview";
+  // Any staff preview (draft or published) is preview-only — never a live submit.
+  if (input.preview) return "admin_preview";
   if (!input.requiresRegistration) return "no_registration";
   if (
     input.lifecycle === "completed" ||

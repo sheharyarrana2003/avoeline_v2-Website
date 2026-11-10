@@ -23,3 +23,12 @@ export type {
   EventFolderKind,
   DriveHealthSnapshot,
 } from "./types";
+export {
+  UPLOAD_KINDS,
+  UPLOAD_KIND_CONFIG,
+  isUploadKind,
+  getUploadKindConfig,
+  mimeAllowedForKind,
+  pathForUploadKind,
+  type UploadKind,
+} from "./uploadKinds";

@@ -22,6 +22,13 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { safeAction, safeFail, safeOk } from "@/src/lib/safeAction";
+import { formatConnectionUserError } from "@/src/features/connections/lib/connectionUserErrors";
+import {
+  createAndCleanupTestCalendarEvent,
+  createAndCleanupTestDriveFolder,
+  createAndCleanupTestSheet,
+  getAvoelineFolderLink,
+} from "@/src/features/connections/server/connectionSmoke.service";
 
 function revalidateConnections(ownerType: "user" | "org", ownerId: string) {
   revalidatePath(`/organizer/${ownerId}/settings/connections`);
@@ -70,7 +77,7 @@ export const startConnectAction = safeAction({
       }
     }
     if (!googleConnectionsConfigured()) {
-      return safeFail("CONFIG", "Google OAuth is not configured on this deployment.");
+      return safeFail("CONFIG", formatConnectionUserError("CONFIG"));
     }
     const origin =
       input.origin ||
@@ -154,9 +161,150 @@ export const testConnectionAction = safeAction({
     );
     revalidateConnections(conn.ownerType, conn.ownerId);
     if (!result.ok) {
-      return safeFail(result.code || "SEND_FAILED", result.error || "Test send failed.");
+      return safeFail(
+        result.code || "SEND_FAILED",
+        formatConnectionUserError(result.code || result.error, "Test send failed."),
+      );
     }
     return safeOk({ sent: true, to: target });
+  },
+});
+
+export const createTestCalendarEventAction = safeAction({
+  input: z.object({
+    connectionId: z.string().uuid(),
+  }),
+  run: async ({ connectionId }) => {
+    const conn = await getConnectionById(connectionId);
+    if (!conn) return safeFail("NOT_FOUND", formatConnectionUserError("NOT_FOUND"));
+    const user = await AuthService.getCurrentUser();
+    if (!user) return safeFail("FORBIDDEN", "Sign in required.");
+    const gate = await assertCanConnectOwner({
+      user,
+      ownerType: conn.ownerType,
+      ownerId: conn.ownerId,
+    });
+    if (!gate.ok) return safeFail("FORBIDDEN", gate.error);
+    const limited = rateLimit(`connections:test-cal:${connectionId}`, 5, 300);
+    if (!limited.ok) {
+      return safeFail("RATE_LIMIT", formatConnectionUserError("RATE_LIMIT"));
+    }
+    const r = await createAndCleanupTestCalendarEvent({
+      actorId: user.userId,
+      connectionId,
+      withMeet: false,
+    });
+    if (!r.ok) return safeFail(r.code, formatConnectionUserError(r.code, r.error));
+    return safeOk(r);
+  },
+});
+
+export const createTestMeetLinkAction = safeAction({
+  input: z.object({
+    connectionId: z.string().uuid(),
+  }),
+  run: async ({ connectionId }) => {
+    const conn = await getConnectionById(connectionId);
+    if (!conn) return safeFail("NOT_FOUND", formatConnectionUserError("NOT_FOUND"));
+    const user = await AuthService.getCurrentUser();
+    if (!user) return safeFail("FORBIDDEN", "Sign in required.");
+    const gate = await assertCanConnectOwner({
+      user,
+      ownerType: conn.ownerType,
+      ownerId: conn.ownerId,
+    });
+    if (!gate.ok) return safeFail("FORBIDDEN", gate.error);
+    const limited = rateLimit(`connections:test-meet:${connectionId}`, 5, 300);
+    if (!limited.ok) {
+      return safeFail("RATE_LIMIT", formatConnectionUserError("RATE_LIMIT"));
+    }
+    const r = await createAndCleanupTestCalendarEvent({
+      actorId: user.userId,
+      connectionId,
+      withMeet: true,
+    });
+    if (!r.ok) return safeFail(r.code, formatConnectionUserError(r.code, r.error));
+    return safeOk(r);
+  },
+});
+
+export const createTestDriveFolderAction = safeAction({
+  input: z.object({
+    connectionId: z.string().uuid(),
+  }),
+  run: async ({ connectionId }) => {
+    const conn = await getConnectionById(connectionId);
+    if (!conn) return safeFail("NOT_FOUND", formatConnectionUserError("NOT_FOUND"));
+    const user = await AuthService.getCurrentUser();
+    if (!user) return safeFail("FORBIDDEN", "Sign in required.");
+    const gate = await assertCanConnectOwner({
+      user,
+      ownerType: conn.ownerType,
+      ownerId: conn.ownerId,
+    });
+    if (!gate.ok) return safeFail("FORBIDDEN", gate.error);
+    const limited = rateLimit(`connections:test-folder:${connectionId}`, 5, 300);
+    if (!limited.ok) {
+      return safeFail("RATE_LIMIT", formatConnectionUserError("RATE_LIMIT"));
+    }
+    const r = await createAndCleanupTestDriveFolder({
+      actorId: user.userId,
+      connectionId,
+    });
+    if (!r.ok) return safeFail(r.code, formatConnectionUserError(r.code, r.error));
+    return safeOk(r);
+  },
+});
+
+export const createTestSheetAction = safeAction({
+  input: z.object({
+    connectionId: z.string().uuid(),
+  }),
+  run: async ({ connectionId }) => {
+    const conn = await getConnectionById(connectionId);
+    if (!conn) return safeFail("NOT_FOUND", formatConnectionUserError("NOT_FOUND"));
+    const user = await AuthService.getCurrentUser();
+    if (!user) return safeFail("FORBIDDEN", "Sign in required.");
+    const gate = await assertCanConnectOwner({
+      user,
+      ownerType: conn.ownerType,
+      ownerId: conn.ownerId,
+    });
+    if (!gate.ok) return safeFail("FORBIDDEN", gate.error);
+    const limited = rateLimit(`connections:test-sheet:${connectionId}`, 5, 300);
+    if (!limited.ok) {
+      return safeFail("RATE_LIMIT", formatConnectionUserError("RATE_LIMIT"));
+    }
+    const r = await createAndCleanupTestSheet({
+      actorId: user.userId,
+      connectionId,
+    });
+    if (!r.ok) return safeFail(r.code, formatConnectionUserError(r.code, r.error));
+    return safeOk(r);
+  },
+});
+
+export const openAvoelineFolderAction = safeAction({
+  input: z.object({
+    connectionId: z.string().uuid(),
+  }),
+  run: async ({ connectionId }) => {
+    const conn = await getConnectionById(connectionId);
+    if (!conn) return safeFail("NOT_FOUND", formatConnectionUserError("NOT_FOUND"));
+    const user = await AuthService.getCurrentUser();
+    if (!user) return safeFail("FORBIDDEN", "Sign in required.");
+    const gate = await assertCanConnectOwner({
+      user,
+      ownerType: conn.ownerType,
+      ownerId: conn.ownerId,
+    });
+    if (!gate.ok) return safeFail("FORBIDDEN", gate.error);
+    const r = await getAvoelineFolderLink({
+      actorId: user.userId,
+      connectionId,
+    });
+    if (!r.ok) return safeFail(r.code, formatConnectionUserError(r.code, r.error));
+    return safeOk(r);
   },
 });
 

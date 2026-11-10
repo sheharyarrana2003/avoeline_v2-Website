@@ -60,7 +60,7 @@ export function buildRegistrationEmail(
     ["Venue", venue || "—"],
     ["Ticket", registration.pricingTier],
     ["Price", price],
-    ["Registration ID", registration.registrationId],
+    ["Short code", registration.shortCode || "—"],
   ];
 
   const memberText = members.length

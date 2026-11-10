@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { AccessTypeSelector } from "@/src/features/access/components/AccessTypeSelector";
 import type { EventFormData } from "@/src/services/models/event.model";
 import { formatDate, formatTime } from "@/src/lib/datetime";
 import { MapPreview } from "../MapPreview";
-import { isHackathonForm } from "../wizardUtils";
+import { formatRegistrationSummary, isHackathonForm } from "../wizardUtils";
 
 const previewDate = (d: string) => {
   const f = formatDate(d);
@@ -26,10 +27,44 @@ export function ReviewStep({
   patchForm: (patch: Partial<EventFormData>) => void;
   goToStep: (step: number) => void;
 }) {
+  const locationLine =
+    formData.locationType === "virtual"
+      ? formData.meetingLink || "Meeting link not set"
+      : `${formData.venueName || "Venue not set"}${formData.city ? ` · ${formData.city}` : ""}`;
+
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-ink">Review details</h3>
+        <h3 className="text-lg font-bold text-ink">Public page preview</h3>
+        <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
+          <div className="relative aspect-video w-full bg-muted">
+            {formData.bannerImage ? (
+              // eslint-disable-next-line @next/next/no-img-element -- wizard draft URL may be blob/data/storage
+              <img src={formData.bannerImage} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-ink-soft">
+                No banner yet
+              </div>
+            )}
+          </div>
+          <div className="space-y-2 p-5">
+            <p className="text-lg font-bold text-ink">{formData.eventTitle || "Untitled"}</p>
+            <p className="text-xs text-ink-soft">
+              {formData.category || "—"} · {formData.eventType || "—"}
+            </p>
+            <p className="text-sm text-ink">
+              {formData.startDate
+                ? `${previewDate(formData.startDate)} – ${previewDate(formData.endDate || formData.startDate)}`
+                : "Dates not set"}
+            </p>
+            <p className="text-sm text-ink-soft">
+              {previewTime(formData.startTime)} – {previewTime(formData.endTime)}
+            </p>
+            <p className="text-sm text-ink-soft">{locationLine}</p>
+            <p className="text-sm text-ink">{formatRegistrationSummary(formData)}</p>
+          </div>
+        </div>
+
         <ReviewCard title="Basic information" onEdit={() => goToStep(1)}>
           <p>{formData.eventTitle || "Untitled"}</p>
           <p>
@@ -45,11 +80,7 @@ export function ReviewStep({
           <p>
             {previewTime(formData.startTime)} – {previewTime(formData.endTime)}
           </p>
-          <p>
-            {formData.locationType === "virtual"
-              ? formData.meetingLink || "Meeting link not set"
-              : `${formData.venueName || "Venue not set"} ${formData.city || ""}`}
-          </p>
+          <p>{locationLine}</p>
           {formData.locationType !== "virtual" && (formData.mapsUrl || formData.mapUrl) ? (
             <MapPreview mapUrl={formData.mapsUrl || formData.mapUrl || ""} />
           ) : null}
@@ -68,17 +99,7 @@ export function ReviewStep({
           </ReviewCard>
         ) : null}
         <ReviewCard title="Registration" onEdit={() => goToStep(isHackathonForm(formData) ? 4 : 3)}>
-          {formData.requiresRegistration === false ? (
-            <p>No registration</p>
-          ) : (
-            <p>
-              {formData.ticketType === "free"
-                ? "Free"
-                : `${formData.ticketTiers.length} paid tier(s)`}{" "}
-              · {formData.totalSeats} seats · {formData.customFields.length} extra question
-              {formData.customFields.length === 1 ? "" : "s"}
-            </p>
-          )}
+          <p>{formatRegistrationSummary(formData)}</p>
         </ReviewCard>
       </div>
 
@@ -126,33 +147,6 @@ export function ReviewStep({
             </button>
           </div>
           <div className="space-y-3 border-t border-line pt-4">
-            <p className="text-sm font-medium text-ink">Show on public page</p>
-            <p className="text-xs text-ink-soft">
-              Logos stay off until you turn these on. You can change them later on the Sponsors tab.
-            </p>
-            {(
-              [
-                ["showSponsors", "Sponsors", !!formData.showSponsors],
-                ["showCollaborators", "Collaborators", !!formData.showCollaborators],
-                ["showPartners", "Partners", !!formData.showPartners],
-              ] as const
-            ).map(([key, label, on]) => (
-              <div key={key} className="flex items-center justify-between gap-3">
-                <span className="text-sm text-ink">{label}</span>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => updateForm(key, !on)}
-                  className={`relative h-6 w-11 rounded-full transition-colors ${on ? "bg-ink" : "bg-muted-strong"}`}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-paper shadow ${on ? "right-1" : "left-1"}`}
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-3 border-t border-line pt-4">
             <label className="flex cursor-pointer items-start gap-3">
               <input
                 type="checkbox"
@@ -161,8 +155,16 @@ export function ReviewStep({
                 className="mt-0.5"
               />
               <p className="text-xs text-ink-soft">
-                I confirm that I have the rights to use all uploaded images and content for this
-                event.
+                I confirm I have the rights to use all uploaded images and content for this event.{" "}
+                <Link
+                  href="/content-rights"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  Content Rights
+                </Link>
+                .
               </p>
             </label>
             <label className="flex cursor-pointer items-start gap-3">
@@ -173,7 +175,25 @@ export function ReviewStep({
                 className="mt-0.5"
               />
               <p className="text-xs text-ink-soft">
-                I agree to the Terms of Service and Event Organizer Agreement.
+                I agree to the{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/organizer-agreement"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  Event Organizer Agreement
+                </Link>
+                .
               </p>
             </label>
           </div>

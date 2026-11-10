@@ -1,4 +1,5 @@
 import type { Registration } from "@/src/services/models/reg.type";
+import { shortCodeMatchesNeedle } from "@/src/features/registration/shortCode";
 
 export function isCheckedIn(reg: Registration | undefined): boolean {
   if (!reg) return false;
@@ -82,14 +83,15 @@ export function registrationMatchesSearch(
 ): boolean {
   if (!needle) return true;
   const r = row.register;
+  if (shortCodeMatchesNeedle(r.shortCode, needle)) return true;
   const blob = haystack([
-    row.user?.profile?.fullName,
     r.attendee?.name,
-    row.user?.email,
     r.attendee?.email,
-    row.user?.profile?.phoneNumber,
     r.attendee?.phone,
-    r.registrationId,
+    r.shortCode,
+    row.user?.profile?.fullName,
+    row.user?.email,
+    row.user?.profile?.phoneNumber,
     r.pricingTier,
     r.tier,
     r.status,

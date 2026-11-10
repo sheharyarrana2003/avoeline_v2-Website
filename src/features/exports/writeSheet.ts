@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { toCsv, type CsvColumn } from "@/src/lib/csv";
+import { sanitizeSheetCell } from "@/src/features/connections/lib/sheetSanitize";
 import { deliverFile, type DeliveredFile } from "./deliverFile";
 
 /**
@@ -17,43 +18,50 @@ import { deliverFile, type DeliveredFile } from "./deliverFile";
 export type SheetFormat = "csv" | "xlsx";
 
 export function isSheetFormat(value: unknown): value is SheetFormat {
-    return value === "csv" || value === "xlsx";
+  return value === "csv" || value === "xlsx";
 }
 
-async function buildXlsx<T>(rows: T[], columns: CsvColumn<T>[], sheetName: string): Promise<Uint8Array> {
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = "Avoeline";
-    workbook.created = new Date();
+async function buildXlsx<T>(
+  rows: T[],
+  columns: CsvColumn<T>[],
+  sheetName: string,
+): Promise<Uint8Array> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Avoeline";
+  workbook.created = new Date();
 
-    // Excel rejects * ? : \ / [ ] in a sheet name and caps it at 31 characters,
-    // and throws rather than truncating -- so an event title cannot be passed
-    // through unsanitised.
-    const safeName = (sheetName || "Export").replace(/[*?:\\/[\]]/g, "-").slice(0, 31) || "Export";
-    const sheet = workbook.addWorksheet(safeName);
+  // Excel rejects * ? : \ / [ ] in a sheet name and caps it at 31 characters,
+  // and throws rather than truncating -- so an event title cannot be passed
+  // through unsanitised.
+  const safeName = (sheetName || "Export").replace(/[*?:\\/[\]]/g, "-").slice(0, 31) || "Export";
+  const sheet = workbook.addWorksheet(safeName);
 
-    sheet.columns = columns.map((c) => ({
-        header: c.header,
-        key: c.header,
-        // Roomy enough to read without autofit, which exceljs does not do.
-        width: Math.min(42, Math.max(12, c.header.length + 6)),
-    }));
-    sheet.getRow(1).font = { bold: true };
-    sheet.views = [{ state: "frozen", ySplit: 1 }];
+  sheet.columns = columns.map((c) => ({
+    header: c.header,
+    key: c.header,
+    // Roomy enough to read without autofit, which exceljs does not do.
+    width: Math.min(42, Math.max(12, c.header.length + 6)),
+  }));
+  sheet.getRow(1).font = { bold: true };
+  sheet.views = [{ state: "frozen", ySplit: 1 }];
 
-    for (const row of rows) {
-        sheet.addRow(columns.map((c) => {
-            const value = c.value(row);
-            return value === null || value === undefined ? "" : value;
-        }));
-    }
+  for (const row of rows) {
+    sheet.addRow(
+      columns.map((c) => {
+        const value = c.value(row);
+        if (value === null || value === undefined) return "";
+        return sanitizeSheetCell(value);
+      }),
+    );
+  }
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    return new Uint8Array(buffer as ArrayBuffer);
+  const buffer = await workbook.xlsx.writeBuffer();
+  return new Uint8Array(buffer as ArrayBuffer);
 }
 
 const CONTENT_TYPE: Record<SheetFormat, string> = {
-    csv: "text/csv; charset=utf-8",
-    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv; charset=utf-8",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
 
 /**
@@ -63,40 +71,42 @@ const CONTENT_TYPE: Record<SheetFormat, string> = {
  * caller cannot produce a .csv containing a workbook.
  */
 export async function deliverSheet<T>(
-    baseName: string,
-    format: SheetFormat,
-    rows: T[],
-    columns: CsvColumn<T>[],
-    sheetName = "Export",
+  baseName: string,
+  format: SheetFormat,
+  rows: T[],
+  columns: CsvColumn<T>[],
+  sheetName = "Export",
 ): Promise<DeliveredFile> {
-    const body = format === "xlsx" ? await buildXlsx(rows, columns, sheetName) : toCsv(rows, columns);
-    return deliverFile(`${baseName}.${format}`, body, CONTENT_TYPE[format]);
+  const body = format === "xlsx" ? await buildXlsx(rows, columns, sheetName) : toCsv(rows, columns);
+  return deliverFile(`${baseName}.${format}`, body, CONTENT_TYPE[format]);
 }
 
 export async function deliverWorkbook(
-    baseName: string,
-    sheets: { name: string; rows: unknown[]; columns: CsvColumn<unknown>[] }[],
+  baseName: string,
+  sheets: { name: string; rows: unknown[]; columns: CsvColumn<unknown>[] }[],
 ): Promise<DeliveredFile> {
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = "Avoeline";
-    workbook.created = new Date();
-    for (const entry of sheets) {
-        const safeName = (entry.name || "Export").replace(/[*?:\\/[\]]/g, "-").slice(0, 31) || "Export";
-        const sheet = workbook.addWorksheet(safeName);
-        sheet.columns = entry.columns.map((c) => ({
-            header: c.header,
-            key: c.header,
-            width: Math.min(42, Math.max(12, c.header.length + 6)),
-        }));
-        sheet.getRow(1).font = { bold: true };
-        sheet.views = [{ state: "frozen", ySplit: 1 }];
-        for (const row of entry.rows) {
-            sheet.addRow(entry.columns.map((c) => {
-                const value = c.value(row);
-                return value === null || value === undefined ? "" : value;
-            }));
-        }
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Avoeline";
+  workbook.created = new Date();
+  for (const entry of sheets) {
+    const safeName = (entry.name || "Export").replace(/[*?:\\/[\]]/g, "-").slice(0, 31) || "Export";
+    const sheet = workbook.addWorksheet(safeName);
+    sheet.columns = entry.columns.map((c) => ({
+      header: c.header,
+      key: c.header,
+      width: Math.min(42, Math.max(12, c.header.length + 6)),
+    }));
+    sheet.getRow(1).font = { bold: true };
+    sheet.views = [{ state: "frozen", ySplit: 1 }];
+    for (const row of entry.rows) {
+      sheet.addRow(
+        entry.columns.map((c) => {
+          const value = c.value(row);
+          return value === null || value === undefined ? "" : value;
+        }),
+      );
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    return deliverFile(`${baseName}.xlsx`, new Uint8Array(buffer as ArrayBuffer), CONTENT_TYPE.xlsx);
+  }
+  const buffer = await workbook.xlsx.writeBuffer();
+  return deliverFile(`${baseName}.xlsx`, new Uint8Array(buffer as ArrayBuffer), CONTENT_TYPE.xlsx);
 }

@@ -1,5 +1,79 @@
 import type { EventFormData, WizardTrackDraft } from "@/src/services/models/event.model";
 
+/**
+ * Review / summary line for registration — never prints "0 seats" for unlimited.
+ * Example: "Registration: 1 paid tier (Rs 100) · Unlimited seats · Approval required · 1 extra question"
+ */
+export function formatRegistrationSummary(
+  form: Pick<
+    EventFormData,
+    | "requiresRegistration"
+    | "ticketType"
+    | "ticketTiers"
+    | "totalSeats"
+    | "requiresApproval"
+    | "customFields"
+    | "PriceOfTicket"
+    | "isHackathon"
+    | "multiTrack"
+    | "wizardTracks"
+  >,
+): string {
+  if (form.requiresRegistration === false) return "Registration: No registration";
+
+  const parts: string[] = [];
+  if (form.ticketType === "free") {
+    parts.push("Free");
+  } else if (form.isHackathon) {
+    const fees = (form.wizardTracks ?? []).map((t) => Number(t.fee) || 0);
+    const priced = fees.filter((n) => n > 0);
+    if (form.multiTrack) {
+      if (!priced.length) parts.push("Paid competitions");
+      else if (priced.length === 1) parts.push(`Competition fee (Rs ${priced[0]})`);
+      else {
+        const min = Math.min(...priced);
+        const max = Math.max(...priced);
+        parts.push(
+          min === max
+            ? `${priced.length} competition fees (Rs ${min})`
+            : `${priced.length} competition fees (Rs ${min}–${max})`,
+        );
+      }
+    } else {
+      const fee = priced[0] ?? fees[0] ?? 0;
+      parts.push(fee > 0 ? `Entry fee (Rs ${fee})` : "Paid");
+    }
+  } else {
+    const entry = Number(form.PriceOfTicket) || 0;
+    const tiers = (form.ticketTiers ?? []).filter((t) => t.active !== false);
+    const allTiers = tiers.length ? tiers : (form.ticketTiers ?? []);
+    if (allTiers.length) {
+      const prices = allTiers.map((t) => Number(t.price) || 0);
+      const price = prices.length ? Math.min(...prices) : 0;
+      const n = allTiers.length;
+      const tierLabel = `${n} paid tier${n === 1 ? "" : "s"}`;
+      parts.push(price > 0 ? `${tierLabel} (Rs ${price})` : tierLabel);
+    } else if (entry > 0) {
+      parts.push(`Entry fee (Rs ${entry})`);
+    } else {
+      parts.push("Paid");
+    }
+  }
+
+  if (Number(form.totalSeats) <= 0) {
+    parts.push("Unlimited seats");
+  } else {
+    parts.push(`${Number(form.totalSeats)} seats`);
+  }
+
+  if (form.requiresApproval) parts.push("Approval required");
+
+  const q = (form.customFields ?? []).length;
+  parts.push(`${q} extra question${q === 1 ? "" : "s"}`);
+
+  return `Registration: ${parts.join(" · ")}`;
+}
+
 export const TIMEZONES = [
   "Pakistan Standard Time (PKT, UTC+5)",
   "Pacific Daylight Time (PDT, UTC-7)",

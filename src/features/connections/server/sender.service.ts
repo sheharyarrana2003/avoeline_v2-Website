@@ -286,6 +286,40 @@ export async function sendAsOrganizer(opts: {
   attachments?: ConnectionSendInput["attachments"];
   idempotencyKey?: string;
 }): Promise<ConnectionSendResult & { connectionId?: string }> {
+  // Local Mailpit escape hatch (N6) — never used in production.
+  if (process.env.EMAIL_TRANSPORT === "mailpit" && process.env.NODE_ENV !== "production") {
+    try {
+      const nodemailer = await import("nodemailer");
+      const smtpUrl = process.env.MAILPIT_SMTP_URL || "smtp://127.0.0.1:1025";
+      const transporter = nodemailer.createTransport(smtpUrl);
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM || "avoeline@localhost",
+        to: Array.isArray(opts.to) ? opts.to.join(", ") : opts.to,
+        subject: opts.subject,
+        html: opts.html,
+        text: opts.text,
+        replyTo: opts.replyTo,
+        attachments: (opts.attachments || []).map((a) => ({
+          filename: a.filename,
+          content:
+            typeof a.content === "string"
+              ? Buffer.from(a.content, "base64")
+              : Buffer.from(a.content),
+          contentType: a.contentType,
+          cid: a.cid,
+          contentDisposition: a.cid ? ("inline" as const) : ("attachment" as const),
+        })),
+      });
+      return { ok: true, connectionId: "mailpit" };
+    } catch (err) {
+      return {
+        ok: false,
+        code: "SEND_FAILED",
+        error: err instanceof Error ? err.message : "Mailpit send failed",
+      };
+    }
+  }
+
   const sender = await resolveSender({
     actorId: opts.organizerId,
     kind: opts.kind,

@@ -64,7 +64,12 @@ export function countsAsSale(status: RegistrationStatus): boolean {
  */
 export function attendeeColumns(
   questions: CustomFieldOption[],
-  extras: { ticketUrl?: (r: AttendeeRow) => string } = {},
+  extras: {
+    ticketUrl?: (r: AttendeeRow) => string;
+    proofPlatformUrl?: (r: AttendeeRow) => string;
+    proofDriveUrl?: (r: AttendeeRow) => string;
+    checkInWho?: (r: AttendeeRow) => string;
+  } = {},
 ): CsvColumn<AttendeeRow>[] {
   return [
     { header: "Name", value: (r) => r.name },
@@ -75,17 +80,27 @@ export function attendeeColumns(
     { header: "Attendee tier", value: (r) => r.reg.tier },
     { header: "Amount due", value: (r) => Number(r.reg.finalPrice ?? 0) },
     { header: "Payment status", value: (r) => r.reg.payment?.paymentStatus ?? "" },
+    { header: "Payment proof (platform)", value: (r) => extras.proofPlatformUrl?.(r) ?? "" },
+    { header: "Payment proof (Drive)", value: (r) => extras.proofDriveUrl?.(r) ?? "" },
     { header: "Checked in", value: (r) => (r.reg.checkIn?.checkedIn ? "Yes" : "No") },
     {
       header: "Check-in time",
       value: (r) => (r.reg.checkIn?.checkInTime ? formatDateTime(r.reg.checkIn.checkInTime) : ""),
     },
     {
+      header: "Check-in method",
+      value: (r) => String(r.reg.checkIn?.checkInMethod || ""),
+    },
+    {
+      header: "Checked in by",
+      value: (r) => extras.checkInWho?.(r) ?? r.reg.checkIn?.checkedInBy ?? "",
+    },
+    {
       header: "Waitlist position",
       value: (r) => (r.reg.waitlistPosition > 0 ? r.reg.waitlistPosition : ""),
     },
     { header: "Registered", value: (r) => formatDateTime(r.reg.createdAt) },
-    { header: "Registration ID", value: (r) => r.reg.registrationId },
+    { header: "Short code", value: (r) => r.reg.shortCode || "" },
     { header: "Ticket URL", value: (r) => extras.ticketUrl?.(r) ?? "" },
     ...questions.map((q) => ({
       header: q.label,
@@ -117,7 +132,7 @@ export type AttendeeMemberSheetRow = {
   team: string;
   competition: string;
   checkedIn: string;
-  registrationId: string;
+  shortCode: string;
   ticketUrl: string;
   answers: Record<string, string>;
 };
@@ -148,7 +163,7 @@ export function attendeeMemberColumns(
     { header: "Team", value: (r) => r.team },
     { header: "Competition", value: (r) => r.competition },
     { header: "Checked in", value: (r) => r.checkedIn },
-    { header: "Registration ID", value: (r) => r.registrationId },
+    { header: "Short code", value: (r) => r.shortCode },
     { header: "Ticket URL", value: (r) => r.ticketUrl },
     ...questions.map((q) => ({
       header: q.label,
@@ -161,6 +176,7 @@ export function attendeeMemberColumns(
 
 const CHECK_IN_METHOD: Record<string, string> = {
   qr_scan: "QR scan",
+  short_code: "Short code",
   manual: "Manual",
   nfc: "NFC",
 };
@@ -180,7 +196,7 @@ export const checkInColumns: CsvColumn<AttendeeRow>[] = [
   },
   { header: "Checked in by", value: (r) => r.reg.checkIn?.checkedInBy ?? "" },
   { header: "Scans", value: (r) => Number(r.reg.qrCode?.scanCount ?? 0) },
-  { header: "Registration ID", value: (r) => r.reg.registrationId },
+  { header: "Short code", value: (r) => r.reg.shortCode || "" },
 ];
 
 /**
@@ -373,7 +389,7 @@ export type HackathonTeamMemberRow = {
   memberName: string;
   email: string;
   role: string;
-  registrationId: string;
+  shortCode: string;
 };
 
 export const hackathonTeamSummaryColumns: CsvColumn<HackathonTeamSummaryRow>[] = [
@@ -390,7 +406,7 @@ export const hackathonTeamMemberColumns: CsvColumn<HackathonTeamMemberRow>[] = [
   { header: "Name", value: (r) => r.memberName },
   { header: "Email", value: (r) => r.email },
   { header: "Role", value: (r) => r.role },
-  { header: "Registration ID", value: (r) => r.registrationId },
+  { header: "Short code", value: (r) => r.shortCode },
 ];
 
 export type StaffSheetRow = {

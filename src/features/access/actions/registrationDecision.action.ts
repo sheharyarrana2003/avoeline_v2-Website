@@ -160,8 +160,12 @@ export async function decideRegistration(formData: FormData): Promise<ActionResu
     const eventId = String(formData.get("eventId") ?? "").trim();
     const registrationId = String(formData.get("registrationId") ?? "").trim();
     const decision = String(formData.get("decision") ?? "");
+    const reason = String(formData.get("reason") ?? "").trim();
     if (!registrationId) return fail("Missing registration.");
     if (decision !== "approve" && decision !== "reject") return fail("Choose approve or reject.");
+    if (decision === "reject" && !reason) {
+      return fail("Add a reason before rejecting.");
+    }
 
     const event = await assertEventActor(eventId, "attendees");
     if (!event) return fail("You cannot decide registrations for that event.");
@@ -171,13 +175,26 @@ export async function decideRegistration(formData: FormData): Promise<ActionResu
     if (!reg) return fail("That registration no longer exists.");
     if (reg.status !== "pending") return fail("That registration has already been decided.");
 
+    const fullEvent = await EventService.getEventByID(eventId);
     const approved = decision === "approve";
+    if (approved && fullEvent) {
+      const { isPaidEvent } = await import("@/src/features/registration/registration.service");
+      const { approveDisabledReason } =
+        await import("@/src/features/event_attendee/approveDisabledReason");
+      const block = approveDisabledReason({
+        isPaid: isPaidEvent(fullEvent),
+        status: reg.status,
+        proofPath: reg.payment?.proofPath,
+        paymentStatus: reg.payment?.paymentStatus,
+      });
+      if (block) return fail(block);
+    }
+
     await setStatus(reg, approved ? "confirmed" : "rejected");
     if (approved) {
       await maybeRevealHackathonAccessCodes(registrationId);
     }
 
-    const fullEvent = await EventService.getEventByID(eventId);
     const updatedRegs = await RegService.getRegsOfEvent(eventId);
     const updatedReg = updatedRegs.find((r) => r.registrationId === registrationId);
     const email = updatedReg?.attendee?.email;
@@ -190,16 +207,27 @@ export async function decideRegistration(formData: FormData): Promise<ActionResu
           kind: "registration_confirmed",
           skipIfSent: false,
         });
-      } else if (!approved) {
+      } else if (!approved && updatedReg) {
+        const { renderRegistrationKindEmail } =
+          await import("@/src/features/email/renderAttendeeEmail");
         const subject = `About your registration for ${event.title}`;
-        const html = `<p>Your registration for <strong>${escapeHtml(event.title)}</strong> was not approved by the organizer.</p>`;
-        const text = `Your registration for ${event.title} was not approved by the organizer.`;
+        const rendered = await renderRegistrationKindEmail({
+          kind: "registration_rejected",
+          registration: updatedReg,
+          event: fullEvent,
+          subject,
+          bodyPlain: reason
+            ? `Your registration was not approved. Reason: ${reason}`
+            : "Your registration was not approved by the organizer.",
+          includeBlocks: [],
+          rejectReason: reason || null,
+        });
         await sendViaOrganizerConnection({
           organizerId: fullEvent.organizerId,
           to: email,
-          subject,
-          html,
-          text,
+          subject: rendered.subject,
+          html: rendered.html,
+          text: rendered.text,
           kind: "registration_rejected",
           eventId,
         });

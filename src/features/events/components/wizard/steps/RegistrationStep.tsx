@@ -1,9 +1,11 @@
 "use client";
 
 import { DateField } from "@/src/shared_components/DateField";
-import type { CustomField, EventFormData, TicketTier } from "@/src/services/models/event.model";
+import type { CustomField, EventFormData } from "@/src/services/models/event.model";
 import { EventFormFieldsEditor } from "@/src/features/registration/forms/components/EventFormFieldsEditor";
 import type { FormFieldDraft } from "@/src/features/registration/forms/formFields.types";
+import { TiersAndPromosEditor } from "@/src/features/ticketing/components/TiersAndPromosEditor";
+import { isHackathonForm } from "../wizardUtils";
 
 function draftsFromCustomFields(fields: CustomField[]): FormFieldDraft[] {
   return (fields ?? []).map((field) => {
@@ -106,6 +108,7 @@ export function RegistrationStep({
   hideGroupToggle?: boolean;
 }) {
   const on = formData.requiresRegistration !== false;
+  const hackathon = isHackathonForm(formData);
   const editorFields = [
     ...SYSTEM_DRAFTS,
     ...(formData.ticketType === "paid"
@@ -218,7 +221,10 @@ export function RegistrationStep({
                 <button
                   key={kind}
                   type="button"
-                  onClick={() => updateForm("ticketType", kind)}
+                  onClick={() => {
+                    updateForm("ticketType", kind);
+                    if (kind === "free") updateForm("PriceOfTicket", 0);
+                  }}
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
                     formData.ticketType === kind
                       ? "bg-ink text-ink-invert"
@@ -231,88 +237,45 @@ export function RegistrationStep({
             </div>
           </div>
 
-          {formData.ticketType === "paid" ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-ink">Ticket tiers</h3>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateForm("ticketTiers", [
-                      ...formData.ticketTiers,
-                      {
-                        id: `tier-${Date.now()}`,
-                        name: "General",
-                        price: 0,
-                        seatsAvailable: formData.totalSeats || 0,
-                        availableUntil: "",
-                        description: "",
-                      },
-                    ])
-                  }
-                  className="text-xs font-semibold text-ink underline"
-                >
-                  Add tier
-                </button>
-              </div>
-              {formData.ticketTiers.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-line bg-muted px-4 py-3 text-sm text-ink-soft">
-                  Add at least one ticket tier for a paid event.
-                </p>
-              ) : null}
-              {formData.ticketTiers.map((tier) => (
-                <div
-                  key={tier.id}
-                  className="grid grid-cols-1 gap-2 rounded-xl border border-line p-3 md:grid-cols-4"
-                >
-                  <input
-                    value={tier.name}
-                    onChange={(e) =>
-                      patchTier(formData, updateForm, tier.id, { name: e.target.value })
-                    }
-                    placeholder="Tier name"
-                    className="rounded-lg border border-line px-3 py-2 text-sm"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    value={tier.price}
-                    onChange={(e) =>
-                      patchTier(formData, updateForm, tier.id, {
-                        price: Number(e.target.value) || 0,
-                      })
-                    }
-                    placeholder="Price"
-                    className="rounded-lg border border-line px-3 py-2 text-sm"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    value={tier.seatsAvailable}
-                    onChange={(e) =>
-                      patchTier(formData, updateForm, tier.id, {
-                        seatsAvailable: Number(e.target.value) || 0,
-                      })
-                    }
-                    placeholder="Seats"
-                    className="rounded-lg border border-line px-3 py-2 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateForm(
-                        "ticketTiers",
-                        formData.ticketTiers.filter((t) => t.id !== tier.id),
-                      )
-                    }
-                    className="text-left text-xs text-red-700 md:text-right"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+          {formData.ticketType === "paid" && !hackathon ? (
+            <div className="max-w-xs space-y-1">
+              <label className="block text-xs text-ink-soft" htmlFor="wizard-entry-fee">
+                Entry fee (PKR)
+              </label>
+              <input
+                id="wizard-entry-fee"
+                type="number"
+                min={0}
+                step="0.01"
+                value={formData.PriceOfTicket || 0}
+                onChange={(e) => updateForm("PriceOfTicket", Number(e.target.value) || 0)}
+                className="w-full rounded-xl border border-line px-3 py-2 text-sm"
+              />
+              <p className="text-xs text-ink-soft">
+                Base registration price. Optional tiers below can offer other prices (early bird,
+                VIP). Leave tiers empty to use only this fee.
+              </p>
             </div>
           ) : null}
+
+          {formData.ticketType === "paid" && hackathon ? (
+            <p className="rounded-xl border border-line bg-muted px-4 py-3 text-sm text-ink-soft">
+              {formData.multiTrack
+                ? "Fees are set per competition on the Competitions step."
+                : "Set the entry fee on the single competition (Competitions step)."}
+            </p>
+          ) : null}
+
+          <TiersAndPromosEditor
+            mode="draft"
+            hideTiers={formData.ticketType === "free" || hackathon}
+            tiers={formData.ticketTiers ?? []}
+            promos={formData.promoCodes ?? []}
+            onTiersChange={(tiers) => updateForm("ticketTiers", tiers)}
+            onPromosChange={(promos) => updateForm("promoCodes", promos)}
+            isHackathon={hackathon}
+            tracks={(formData.wizardTracks ?? []).map((t) => ({ id: t.id, name: t.name }))}
+          />
 
           <EventFormFieldsEditor
             mode="draft"
@@ -336,17 +299,5 @@ export function RegistrationStep({
         </p>
       )}
     </div>
-  );
-}
-
-function patchTier(
-  formData: EventFormData,
-  updateForm: (field: keyof EventFormData, value: unknown) => void,
-  id: string,
-  patch: Partial<TicketTier>,
-) {
-  updateForm(
-    "ticketTiers",
-    formData.ticketTiers.map((t) => (t.id === id ? { ...t, ...patch } : t)),
   );
 }

@@ -13,7 +13,9 @@ import { EventModel } from "@/src/services/models/event.model";
 import { Registration, CommunicationLog } from "@/src/services/models/reg.type";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import { PublicRegistrationInput, RegistrationRefusal } from "./types";
-import { buildQrPayload, generateAndHostQr } from "./qr";
+import { generateAndHostQr } from "./qr";
+import { generateShortCode } from "@/src/features/registration/shortCode";
+import { isShortCodeUniqueViolation } from "@/src/features/registration/allocateShortCode";
 import { resolveEventAccess, type AccessAttempt } from "@/src/features/access/access.service";
 import type { AccessDenial } from "@/src/features/access/types";
 import type { RegistrationStatus } from "@/src/services/models/reg.type";
@@ -292,20 +294,12 @@ export async function createPublicRegistration(
   const registrationId = randomUUID();
   const now = new Date().toISOString();
 
-  // Generated before the write so the document carries its QR from the outset
-  // rather than needing a second write to attach one. Returns null on failure,
-  // which leaves qrCode empty: a registration without a QR is recoverable, a
-  // lost registration is not.
-  const qr = await generateAndHostQr(
-    buildQrPayload({
-      name: input.name.trim(),
-      email: input.email.trim(),
-      eventId: event.id,
-      registrationId,
-      timestamp: now,
-    }),
-    { organizerId: event.organizerId, eventId: event.id },
-  );
+  // On-demand signed check-in QR (opaque token). Failure leaves qrCode empty —
+  // a registration without a QR is recoverable; a lost registration is not.
+  const qr = await generateAndHostQr({
+    registrationId,
+    eventId: event.id,
+  });
   const dbTiers = await TicketingService.listTiers(event.id).catch(() => []);
   const requestedTier =
     input.ticketTierId || input.tier
@@ -428,8 +422,11 @@ export async function createPublicRegistration(
         ? "pending"
         : "confirmed";
 
+  let shortCode = generateShortCode();
+
   const registration: Registration = {
     registrationId,
+    shortCode: shortCode,
     eventId: event.id,
     // Linked to the account when the person registering is signed in.
     // This was hardcoded blank, and because `certsForUser`,
@@ -512,49 +509,61 @@ export async function createPublicRegistration(
   };
 
   try {
-    const { error: insertError } = await supabaseAdmin.from(TABLES.REGISTRATIONS).insert({
-      id: registrationId,
-      event_id: registration.eventId,
-      user_id: registration.userId || null,
-      attendee_name: registration.attendee?.name || "",
-      attendee_email: registration.attendee?.email || "",
-      attendee_phone: registration.attendee?.phone || null,
-      organizer_id: registration.organizerId || null,
-      status: regStatusToDb(registration.status),
-      waitlist_position: registration.waitlistPosition || null,
-      invite_id: registration.inviteId || null,
-      custom_responses: registration.customResponses || {},
-      registration_source: registration.registrationSource || "web",
-      tier: registration.tier || null,
-      pricing_tier: registration.pricingTier || null,
-      final_price: registration.finalPrice ?? 0,
-      payment_status: payStatusToDb(registration.payment?.paymentStatus),
-      amount_paid: registration.payment?.amountPaid ?? 0,
-      payment_proof_path: registration.payment?.proofPath ?? null,
-      checked_in: false,
-      qr_code_data: registration.qrCode?.data || "",
-      // O1 A6: stop writing hosted QR URLs — render via /api/qr/[token].png
-      qr_code_image_url: null,
-      certificate_issued: false,
-      ticket_tier_id: ticket.ticketTierId || null,
-      promo_code_used: promoUsed,
-      communications: [],
-      status_history: registration.statusHistory || [],
-      group_id: registration.groupId || null,
-      created_at: now,
-      updated_at: now,
-      extra: {
-        ...registration,
-        ticketTierId: ticket.ticketTierId,
-        promoCodeUsed: promoUsed,
-        hackathonTrackId: registration.hackathonTrackId,
-        hackathonRole: registration.hackathonRole,
-        groupRole: registration.groupRole,
-        discountApplied: registration.discountApplied,
-        metadata: registration.metadata,
-      },
-    });
-    if (insertError) throw insertError;
+    let inserted = false;
+    for (let attempt = 0; attempt < 8 && !inserted; attempt++) {
+      shortCode = attempt === 0 ? shortCode : generateShortCode();
+      registration.shortCode = shortCode;
+      const { error: insertError } = await supabaseAdmin.from(TABLES.REGISTRATIONS).insert({
+        id: registrationId,
+        event_id: registration.eventId,
+        user_id: registration.userId || null,
+        attendee_name: registration.attendee?.name || "",
+        attendee_email: registration.attendee?.email || "",
+        attendee_phone: registration.attendee?.phone || null,
+        organizer_id: registration.organizerId || null,
+        status: regStatusToDb(registration.status),
+        waitlist_position: registration.waitlistPosition || null,
+        invite_id: registration.inviteId || null,
+        custom_responses: registration.customResponses || {},
+        registration_source: registration.registrationSource || "web",
+        tier: registration.tier || null,
+        pricing_tier: registration.pricingTier || null,
+        final_price: registration.finalPrice ?? 0,
+        payment_status: payStatusToDb(registration.payment?.paymentStatus),
+        amount_paid: registration.payment?.amountPaid ?? 0,
+        payment_proof_path: registration.payment?.proofPath ?? null,
+        checked_in: false,
+        qr_code_data: registration.qrCode?.data || "",
+        // O1 A6 / N4: on-demand QR via signed token path — never store image URLs
+        qr_code_image_url: null,
+        short_code: shortCode,
+        certificate_issued: false,
+        ticket_tier_id: ticket.ticketTierId || null,
+        promo_code_used: promoUsed,
+        communications: [],
+        status_history: registration.statusHistory || [],
+        group_id: registration.groupId || null,
+        created_at: now,
+        updated_at: now,
+        extra: {
+          ...registration,
+          shortCode,
+          ticketTierId: ticket.ticketTierId,
+          promoCodeUsed: promoUsed,
+          hackathonTrackId: registration.hackathonTrackId,
+          hackathonRole: registration.hackathonRole,
+          groupRole: registration.groupRole,
+          discountApplied: registration.discountApplied,
+          metadata: registration.metadata,
+        },
+      });
+      if (!insertError) {
+        inserted = true;
+        break;
+      }
+      if (!isShortCodeUniqueViolation(insertError)) throw insertError;
+    }
+    if (!inserted) throw new Error("Could not allocate a unique short_code");
 
     // Solo / lead: redeem immediately when not holding for a group redeem.
     if (promoId && !extras?.holdForTeamPayment && !extras?.deferPromoRedeem) {

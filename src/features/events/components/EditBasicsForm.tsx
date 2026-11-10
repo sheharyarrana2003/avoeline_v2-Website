@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DescriptionEditor } from "@/src/features/events/components/wizard/DescriptionEditor";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
-import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from "@/src/features/media/media.utils";
+import { isVideoUrl } from "@/src/features/media/media.utils";
 import { updateEventBasics } from "@/src/features/events/actions/updateEventBasics.action";
 import { CalendarSyncControls } from "@/src/features/connections/components/CalendarSyncControls";
 import { parseScheduleDateTime } from "@/src/lib/datetime";
@@ -25,6 +25,7 @@ export type EditBasicsInitial = {
   totalSeats: number;
   ticketType: "free" | "paid";
   ticketPrice: number;
+  paymentInstructions: string;
 };
 
 export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
@@ -44,6 +45,7 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
   const [totalSeats, setTotalSeats] = useState(Math.max(0, initial.totalSeats));
   const [ticketType, setTicketType] = useState<"free" | "paid">(initial.ticketType);
   const [ticketPrice, setTicketPrice] = useState(initial.ticketPrice);
+  const [paymentInstructions, setPaymentInstructions] = useState(initial.paymentInstructions || "");
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,6 +66,7 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
         unlimitedSeats,
         ticketType,
         ticketPrice,
+        paymentInstructions: ticketType === "paid" ? paymentInstructions : "",
       });
       if (!result.ok) {
         setError(result.error.message);
@@ -184,7 +187,7 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
       <section className="space-y-4">
         <h2 className="font-display text-lg text-ink">Media</h2>
         <MediaUpload
-          folder="banners"
+          kind="event_banner"
           eventId={initial.eventId}
           accept="image/*"
           value={bannerImage}
@@ -193,15 +196,16 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
           buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
         />
         <p className="text-xs text-ink-soft">
-          Portrait 4:5 recommended for the event banner. Stored in your connected Google Drive.
+          Portrait 4:5 recommended for the event banner. Stored in the public media library
+          (compressed).
         </p>
         <div>
           <span className={labelClass}>Gallery</span>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <MediaUpload
-              folder="gallery"
+              kind="event_gallery"
               eventId={initial.eventId}
-              accept={IMAGE_AND_VIDEO_ACCEPT}
+              accept="image/*"
               multiple
               label="+"
               className="shrink-0"
@@ -267,16 +271,31 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
           ))}
         </div>
         {ticketType === "paid" ? (
-          <label className="block max-w-xs">
-            <span className={labelClass}>Ticket price (PKR)</span>
-            <input
-              type="number"
-              min={0}
-              className={`${fieldClass} mt-1`}
-              value={ticketPrice}
-              onChange={(e) => setTicketPrice(Number(e.target.value) || 0)}
-            />
-          </label>
+          <>
+            <label className="block max-w-xs">
+              <span className={labelClass}>Ticket price (PKR)</span>
+              <input
+                type="number"
+                min={0}
+                className={`${fieldClass} mt-1`}
+                value={ticketPrice}
+                onChange={(e) => setTicketPrice(Number(e.target.value) || 0)}
+              />
+            </label>
+            <label className="block">
+              <span className={labelClass}>Payment instructions</span>
+              <textarea
+                className={`${fieldClass} mt-1 min-h-[100px]`}
+                value={paymentInstructions}
+                onChange={(e) => setPaymentInstructions(e.target.value)}
+                maxLength={4000}
+                placeholder="Bank name, account title, IBAN or wallet ID, and what reference to use."
+              />
+              <span className="mt-1 block text-xs text-ink-soft">
+                Shown on the public registration form before the payment screenshot field.
+              </span>
+            </label>
+          </>
         ) : null}
       </section>
 

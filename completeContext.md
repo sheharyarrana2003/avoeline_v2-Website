@@ -104,7 +104,7 @@ Auth IDs are **UUIDs** (`auth.users` → `public.users.id`). Vendor URLs use the
 | EVENT_INVITES / INVITE_LINKS | `event_invites` | Guest list + invite links (`kind` whitelist / invite_link) |
 | TICKET_TIERS | `ticket_tiers` | Paid SKUs (Access tab “Tiers & promos”; `active`, `available_until`). Hidden on hackathons |
 | PROMO_CODES | `promo_codes` | Promo codes (`expires_at`, `active`, `track_id` for a competition) |
-| REGISTRATIONS / WAITLIST | `registrations` | Tickets; waitlist is `status = waitlisted`. Door QR JSON: name, email, registrationId, eventId |
+| REGISTRATIONS / WAITLIST | `registrations` | Tickets; waitlist is `status = waitlisted`. Display `short_code` (AVO-…); door QR = signed opaque check-in token (on-demand PNG); ticket URL capability = registration UUID |
 | HACKATHON_TEAMS | `hackathon_teams` | One occupancy per team. Dashboard login: `access_code_hash` (plaintext `accessCode` in extra after pay + confirm) **or** roster `join_code`. `/enter` hashes first, then join code. |
 | TEAMS / TEAM_MEMBERS / TEAM_POSITIONS / ACCESS_GRANTS | `teams`, `team_members`, `team_positions`, `access_grants`, `recruitment_forms`, `applicants` | Ops library + grants; forms `public_token`; members `source`; grants `invite_token_hash`/`invite_sent_at`; RPC `organizer_teams_stats` |
 | EVENT_STAFF_ASSIGNMENTS | `event_staff_assignments` | Library team + optional `member_ids` + optional `lead_member_id` per event. Empty `member_ids` = whole roster. |
@@ -227,7 +227,7 @@ Event visibility: `public` / `private` / `invite_only` / `hybrid` / `tiered` (UI
 - Actions: `accessSettings.action.ts` (`assertEventActor` + `access`), `guestList.action.ts` (add + soft `revokeInvite`), `guestEmailBatch.action.ts`, `inviteLinks.action.ts`, `markInviteOpened.action.ts`, `registrationDecision.action.ts`
 - UI: `HowAccessWorks` (A2 table; `AccessFlowGuide` alias), type-card `AccessSettingsForm`, type-scoped `GuestListPanel` (sample CSV), split whitelist/invite tables + `inviteDisplayStatus`, `GuestEmailComposer` (tokens/filters/preview/copy-link), `AccessGate`, `TrackInviteOpen`
 - Route: `/organizer/[organizer_id]/events/[eventId]/access`
-- Tiers/promos: `TiersPromosOnAccess` — ticket tiers hidden on hackathons; `listTiers` demotes past `available_until`; public DTO exposes `seatsLeft`, **no** `promoHints`
+- Tiers/promos: shared client `TiersAndPromosEditor` (draft in wizard Registration; Access create forms via `TiersPromosOnAccess`). Labeled fields include Available from (`ticket_tiers.available_from`), Early bird, promo usage limit. Tiers hidden on hackathons / free wizard; `listTiers` demotes past `available_until`; public DTO exposes `seatsLeft`, **no** `promoHints`
 - Public short URL `/e/[eventId]` redirects to `/events/[eventId]` (invite query preserved; hybrid unlock requires validated invite)
 
 ### `saas`
@@ -332,13 +332,13 @@ Organizer home (`/organizer/[organizer_id]/dashboard`): no plan banner (plan blo
 Browse + wizard + ownership. My Events list: `organizerEvents.filters.ts` / `organizerEvents.stats.ts` / toolbar + row menu components; `EventThumb` `showTitle`; occupancy tallies; 20/page URL pagination.
 
 - `browse.service.ts`, `event.controller.ts`, `ownership.ts`
-- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, `resolveRegisterButtonState`) + client-safe `types.ts` (`PublicEventDto` allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / promo codes**, bank, attendee/team secrets, sponsor contract/benefits). Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false).
+- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, `resolveRegisterButtonState`) + client-safe `types.ts` (`PublicEventDto` allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / promo codes**, structured bank/IBAN, attendee/team secrets, sponsor contract/benefits). Allowlisted `paymentInstructions` (plain text) for paid events only. Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false); `events.payment_instructions`.
 - Actions: `toggleChecklistItem.action.ts`, `updateEventBasics.action.ts`, `archiveEvent.action.ts`, `deleteEvent.action.ts`, `updatePublicShowToggles.action.ts`
-- Public UI: `components/public/{PublicEventHero,PublicEventFacts,PublicRegisterCard,PublicAbout,PublicTiersAndDiscounts,PublicAgenda,PublicSpeakers,PublicCompetitions,PublicSponsorsStrip.client}` (`PublicSponsorsStrip.tsx` re-exports) + `addToCalendar.ts`
-- Wizard: `EventWizardLayout` (shell) + `wizard/steps/{Basic,ScheduleLocation,HackathonTracks,Registration,Review}Step`, widgets `DescriptionEditor`, `TimeField`, `MapPreview`, `FormBuilder`. Defaults: free tickets, PKT timezone (no TZ picker). Validates schedule order, named hackathon tracks, paid tiers before next/publish. Product rules: `docs/09-event-creation.md`. Full tab/flow inventory: `docs/10-events-and-hackathon-dashboards.md`.
+- Public UI (N3): clean banner hero + meta (`PublicEventHero`); Share / Add-to-calendar menus; `PublicMedia` (banner+gallery lightbox, lazy YouTube/Vimeo); Facts hide unlimited seats; sections Facts → Media → About → Tickets → Agenda → Speakers → Competitions → Sponsors → Organizer → Report; sticky `PublicRegisterCard` with `paymentInstructions` before screenshot + “What happens next”. Helpers in `publicPage.logic.ts` + `addToCalendar.ts`.
+- Wizard: `EventWizardLayout` (shell) + `wizard/steps/{Basic,ScheduleLocation,HackathonTracks,Registration,Review}Step`, widgets `DescriptionEditor`, `TimeField`, `MapPreview`, `FormBuilder`. Registration uses shared `TiersAndPromosEditor` (tiers+promos) plus **Entry fee (PKR)** (`PriceOfTicket`) for paid non-hackathons (tiers optional; create seeds a General SKU when fee-only). Hackathons: fees on Competitions (`Entry fee` for single track, per-competition `Fee` when multi); Registration points organizers there. Review shows banner preview + `formatRegistrationSummary` (never “0 seats”), Publish immediately, CMS-linked Terms / Organizer Agreement / Content Rights (acceptances recorded as `user_consents` context `event_publish`). Sponsor show-* toggles live on Sponsors tab only. Defaults: free tickets, PKT timezone (no TZ picker). Validates schedule order, named hackathon tracks, paid entry fee or tiers before next/publish. Product rules: `docs/09-event-creation.md`. Full tab/flow inventory: `docs/10-events-and-hackathon-dashboards.md`.
 - Extra columns: `events.map_url`, `events.requires_registration`, `events.show_sponsors|show_collaborators|show_partners`; `hackathon_tracks.image_url|policies|instructions|instructions_file_*|opens_at|closes_at|registration_closes_at|roster_locks_at|submission_deadline_at|discount_*|ended_at|status|kind|rules_text`; `hackathon_teams.rules_acknowledged_at`.
-- Routes: `/organizer/.../events`, `create`, `[eventId]`, `pub-succ`; public `/events`, `/events/[eventId]` (allowlisted DTO; `/e/[eventId]` short redirect; sticky Register; Share in hero only; sponsor strips gated by show_*; SEO JSON-LD). Sponsors tab: “Show on public page” switches. Department/club create still uses the organizer wizard.
-- Public helpers: `publicEventPresentation` / `trackRegistrationOpen` in `src/lib/publicEventStatus.ts`; `ShareEventLink`
+- Routes: `/organizer/.../events`, `create`, `[eventId]`, `pub-succ`; public `/events`, `/events/[eventId]` (allowlisted DTO; `/e/[eventId]` short redirect; sticky Register; Share + calendar menus in hero meta; sponsor strips gated by show_*; SEO JSON-LD). Sponsors tab: “Show on public page” switches. Department/club create still uses the organizer wizard.
+- Public helpers: `publicEventPresentation` / `trackRegistrationOpen` in `src/lib/publicEventStatus.ts`; `PublicShareMenu` / `PublicCalendarMenu`
 
 ### `connections` (docs/17 C1–C6 + docs/18 limits) + O1 FileStore
 
@@ -350,7 +350,7 @@ Single module for Google integrations. Other features must not call Google direc
 - APIs: `POST /api/uploads/proof|session|complete`, `GET /api/files/[id]`, `GET /api/qr/[token].png`, `GET /api/cron/file-promote`, `GET /api/admin/picker-diagnostics`
 - Providers: Gmail, Calendar/Meet, Drive (Picker/create/**uploadBinaryFile**/resumable/download) + Sheets values + Docs text
 - Actions: `connections`, `grants`, `sender`, `send`, `adminLimits`, `calendar`, `drive`, `sheets`
-- UI: **ConnectionsHub** tabs; Drive health banners on Files/Attendees/Certificates/Submissions; Picker errors via `pickerErrors.ts`
+- UI: **ConnectionsHub** single page — `GoogleAccountCard` + Email / Calendar+Meet / Drive / Sheets cards (no tab bar); incremental Enable; smoke test actions; admin OAuth diagnostics (`diagnoseGoogleConnectionsEnv`); Drive health banners; Picker errors via `pickerErrors.ts` / `connectionUserErrors.ts`
 - Crons: email-outbox, linked-files, sheet-syncs, connections-health, **file-promote** (`CRON_SECRET`)
 - Docs: `docs/17`, **`docs/connections-complete-guide.md`**, `docs/connections-security-review.md`, `docs/google-verification.md`, `docs/connections-picker-setup.md` (A5)
 - Tables: `CALENDAR_LINKS`, `LINKED_FILES`, `STORED_FILES`, `SHEET_SYNCS`, `CUSTOM_FORMS`, `CUSTOM_FORM_RESPONSES`
@@ -370,12 +370,16 @@ Platform Resend lanes. Organizer outbound sends go through **Connections** (`res
 
 Organizer attendee list, check-in, team/member drawers, registration emails.
 
-- `attendee.service.ts`, `roster.ts` (`hackathonTeamCodesVisible`), `emailTypes.ts` / `emailCompose.logic.ts` (composer preview + member QR ≤10 rule), `eventEmail.service.tsx` (`requireConnectedSender`; maps link; inline member QRs when ≤10 else ticket links; optional `email_members_qr`)
-- Actions: `checkIn.action.ts` (actor `checked_in_by`), `joinCode.action.ts` (revoke/regenerate), `eventEmail.action.ts`, `updateAttendeeDetails.action.ts`
-- UI: `AttendeeClientSide` (Email menu, Export, Exports/Sheets, `checkInByNames`); `RegistrationFormDrawer`; `SingleAttendeeView` (status history, tier, check-in who, on-demand QR); `TeamGroupView` (join revoke/regenerate; Valid until last phase/event end); `EventEmailPanels` live preview
-- Join validity: `hackathon/joinCodeValidity.ts` — later of last phase close and event end; enforced in `joinTeam`
-- Auto mail: `maybeAutoEventEmail` → team lead; optional per-member QR fan-out
-- Registration proofs/QR: Drive via `uploadRegistrationProofDriveAction` / `generateAndHostQr`; `registrationEmail.ts` organizer Gmail only
+- Identity: `registrantIdentity.ts` — snapshot (`Registration.attendee`) over linked `User`; used by list/drawer/team/export/Sheets
+- Approve gate: `approveDisabledReason.ts` — paid + no `payment.proofPath` → tooltip `No payment proof yet`; `paymentProofPlatformUrl` / `storedFileIdFromProofPath` for `file:` → `/api/files/{id}`
+- Import: `importGate.ts` (free-only toolbar); `import/AttendeeImportPanel` + service commits `confirmed` + `extra.imported`
+- **N6 emails:** React Email under `emails/attendee/` (600px `AttendeeEmailLayout`); `src/features/email/renderAttendeeEmail.ts` + `attendeeEmail.model.ts`; one `View ticket` CTA; CID QRs via Gmail nodemailer (`cid`); calendar Google + `/api/events/[eventId]/calendar.ics`
+- `attendee.service.ts`, `roster.ts`, `emailTypes.ts` / `emailCompose.logic.ts`, `eventEmail.service.tsx` (`sendOrganizerEmail` / `renderEmailPreview` / `renderOrganizerEmailPayload` → React Email; `requireConnectedSender`)
+- Actions: `checkIn.action.ts`, `joinCode.action.ts`, `eventEmail.action.ts` (`previewComposerEmailAction`, bulk `deferSendNowToOutbox` + `renderAtSend`), `updateAttendeeDetails.action.ts`, `lookupCheckIn.action.ts`, `bulkDecideRegistrations.action.ts`
+- UI: `AttendeeClientSide`; `EventEmailPanels` (member/bulk/registration: SenderPicker, CapacityStrip, server HTML iframe preview, connectionId on member send); `AttendeeListItem`; `SingleAttendeeView`; `TeamGroupView`
+- Auto mail: `maybeAutoEventEmail` → team lead; optional `email_members_qr` fan-out; reject uses `registration_rejected` template
+- Local QA: `npm run email:dev`, `npm run mailpit` + `EMAIL_TRANSPORT=mailpit` (non-prod)
+- Registration proofs/QR: Drive via `uploadRegistrationProofDriveAction` / `generateAndHostQr`
 
 ### `event_speakers`
 
@@ -397,7 +401,7 @@ Vendor profile media + vendor CRUD used by marketplace. Typed `supabaseAdmin` + 
 Excel/CSV event sheets (`exceljs`), private storage, signed download.
 
 - `eventSheets.ts`, `writeSheet.ts`, `deliverFile.ts`
-- Actions: `exportEventSheet.action.ts` — attendees xlsx is two sheets (Teams/leads + Members) when the event has teams or registration groups; otherwise one sheet plus ticket URLs. Kind `staff` exports roster members (and applicant pipeline when advanced roles are on).
+- Actions: `exportEventSheet.action.ts` — attendees xlsx is two sheets (Teams/leads + Members) when the event has teams or registration groups; otherwise one sheet plus ticket URLs, short codes, payment proof platform/Drive URLs (via `registrantIdentity`); cells sanitized with `sanitizeSheetCell`. Kind `staff` exports roster members (and applicant pipeline when advanced roles are on).
 - UI: `ExportPanel`, `ExportButton`
 - Route: `.../exports`
 
@@ -457,11 +461,11 @@ Unified ledger: view `event_ledger_lines` + RPC `event_ledger_totals` (tickets, 
 
 Public register, QR, form engine. Auto registration emails go to the team lead (or solo attendee) via `maybeAutoEventEmail` and `event_email_templates`. Extra members are not emailed those templates; certificates stay per person. Access-code mail is lead-only.
 
-- `registration.service.ts`, `qr.ts`, `registrationEmail.ts` (access-code mail)
+- `registration.service.ts`, `qr.ts`, `shortCode.ts`, `checkInToken.ts`, `ticketPage.logic.ts`, `registrationEmail.ts` (access-code mail)
 - Forms: `forms/formFields.types.ts`, `forms/formFields.service.ts`, `forms/buildRegistrationSchema.ts`, `forms/components/EventFormFieldsEditor.tsx`, `forms/components/RegistrationQuestionsCard.tsx`, `forms/actions/formFields.action.ts`
 - Actions: `registerAttendee.action.ts`, `requestRegistrationUpload.action.ts`, `previewPromo.action.ts`
 - UI: `RegistrationForm.tsx` (fields from `event_form_fields` via `CustomFieldsRenderer`; honeypot + rate limit). Hackathons pass open competitions; fee/proof follow the selected track (`trackDueAmount`).
-- Ticket pages: `/events/[eventId]/ticket/[registrationId]`, `.../team`
+- Ticket pages (N4): `/events/[eventId]/ticket/[registrationId]` — status hero, short code + copy, what-happens-next, confirmed-only QR download + calendar menu; lead team member QRs. Env `REGISTRATION_QR_SECRET`. Staff lookup: `lookupAndCheckIn.action` (token or short code, rate-limited).
 
 ### `taxonomy`
 
@@ -500,7 +504,7 @@ Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.ts
 | `/plans` | cards + module comparison + enterprise CTA + FAQ (`listPublicPlans` / `getModuleComparison`) |
 | `/about` `/partners` | CMS blocks + granted partners by category (empty sections hidden) |
 | `/contact` | `ContactForm` (`?topic=` maps enterprise→sales); CMS blocks when published |
-| `/privacy` `/terms` | `getLegalDocument` + TOC/sanitized markdown (`legalMarkdown.ts`) |
+| `/privacy` `/terms` `/organizer-agreement` `/content-rights` | `getLegalDocument` + TOC/sanitized markdown (`legalMarkdown.ts`); publish accept uses `EVENT_PUBLISH_LEGAL_SLUGS` |
 | `sitemap.xml` / `robots.txt` | `src/app/sitemap.ts`, `src/app/robots.ts` |
 | `/events` | `src/app/events/page.tsx` |
 | `/apply/[token]` | public staff recruitment (token); legacy `staff-apply/[formId]` redirects here |
@@ -558,9 +562,9 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../analytics` | URL `range`/`event` filters; occupancy tiles; local-day chart; Gemini feedback cache |
 | `.../events` | My Events list/grid (`?kind=&status=&q=&sort=&view=&page=`); occupancy columns |
 | `.../profile` | organizer profile + logo + **plan block** (modules / overrides / support) + Connections link |
-| `.../settings/connections` | Connections **hub** tabs: Accounts / Library / Calendar / Sheets / Sent email (`?tab=`); disconnect on Accounts |
-| `.../settings/email-batches` | Redirect → `settings/connections?tab=email` |
-| `.../library` | Redirect → `settings/connections?tab=library` |
+| `.../settings/connections` | Connections page: Google account card + Email / Calendar+Meet / Drive / Sheets; `?section=` scroll; admin diagnostics |
+| `.../settings/email-batches` | Redirect → `settings/connections?section=email` |
+| `.../library` | Redirect → `settings/connections?section=drive` |
 | `.../forms`, `.../forms/[formId]`, `.../forms/[formId]/responses` | Organizer Custom Forms library + responses |
 | `.../email` | legacy redirect → `settings/connections` |
 | `.../events/create` | wizard (`?hackathon=1` pre-sets hackathon) |
@@ -757,6 +761,47 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-10 — N7 Connections page redesign
+- What: Removed Connections tab bar and profile/forms chrome; one Google account card (chips, reconnect/add/disconnect revoke) plus Email / Calendar+Meet / Drive / Sheets cards with Enable incremental consent and per-card smoke tests that create then clean up; CapacityStrip + sent batches on Email; library inside Drive; friendly OAuth-not-configured copy + admin-only env presence/redirect diagnostics; specific `formatConnectionUserError` messages; legacy `?tab=` / library / email-batches → `?section=`.
+- Files: `ConnectionsHub.tsx`, `ConnectionsPage.tsx`, `GoogleAccountCard.tsx`, `CapabilityIntegrationCards.tsx`, `ConnectionsOAuthStatus.tsx`, `ConnectDialog.tsx`, `ScrollToConnectionSection.tsx`, `connectionUserErrors.ts`, `connectionCardHelpers.ts`, `connectionSmoke.service.ts`, `connections.action.ts`, `env.ts` (`diagnoseGoogleConnectionsEnv`), `google/errors.ts`, organizer connections/library/email-batches/profile pages, `__tests__/n7*.test.ts`, `plans/2026-11-10-n7-connections-redesign.md`
+- Next: docs/23 pause for review after N7.
+
+### 2026-11-09 — N6 attendee emails (composer + React Email)
+- What: Shared 600px React Email attendee layout + templates (received/confirmed/rejected/custom/access/certificate/judge); CID QR embeds; one ticket CTA; composer server preview + SenderPicker/CapacityStrip on all surfaces; member `connectionId`; bulk per-recipient outbox render; Mailpit local transport; snapshot tests.
+- Files: `emails/attendee/**`, `src/features/email/{renderAttendeeEmail,attendeeEmail.model,publicSiteUrl}.ts`, `eventEmail.service.tsx`, `EventEmailPanels.tsx`, `eventEmail.action.ts`, `google/email.ts`, `outboxWorker.service.ts`, `sender.service.ts`, `guestEmails.tsx`, `certificateEmail.ts`, `judging.action.ts`, `registrationDecision.action.ts`, `api/events/[eventId]/calendar.ics`, `docker-compose.mailpit.yml`, `__tests__/attendeeEmail.snapshots.test.ts`, `plans/2026-11-09-n6-attendee-emails.md`
+- Next: N7 Connections UI per docs/23.
+
+### 2026-11-09 — N5 Attendees tab
+- What: Snapshot-canonical `registrantIdentity` across list/drawer/team/export/Sheets; list cards with approve-disable (`No payment proof yet`), bulk approve/reject, registrant-first search; drawer proof via `/api/files` + Open in Drive + reject reason; free-only Import toolbar; export proof URL columns + `sanitizeSheetCell`; Drive health + Supabase-fallback proof banner.
+- Files: `registrantIdentity.ts`, `approveDisabledReason.ts`, `importGate.ts`, `bulkDecideRegistrations.action.ts`, `AttendeeListItem.tsx`, `AttendeeClientSide.tsx`, `GroupedAttendeeList.tsx`, `SingleAttendeeView.tsx`, `TeamGroupView.tsx`, `AttendeeImportPanel.tsx`, `attendees/page.tsx`, `eventSheets.ts`, `exportEventSheet.action.ts`, `writeSheet.ts`, `sheetSync.service.ts`, `registrationDecision.action.ts`, `__tests__/n5Attendees.logic.test.ts`, `plans/2026-11-09-n5-attendees-tab.md`
+- Next: Continue docs/23 backlog after N5.
+
+### 2026-11-09 — N4 ticket short codes / QR / calendar
+- What: Unique `registrations.short_code` (AVO-… Crockford) with backfill; ticket redesign (status hero, details, what-next, short code copy, confirmed QR + download, team member QRs, confirmed-only Add to calendar); signed opaque check-in QR via `REGISTRATION_QR_SECRET`; one ticket URL; staff rate-limited lookup by token or short code; UUID no longer displayed in ticket/emails/exports.
+- Files: `shortCode.ts`, `checkInToken.ts`, `qr.ts`, `/api/qr/[token]/route.ts`, `ticketPage.logic.ts`, `TicketCalendarMenu.tsx`, `CopyShortCode.tsx`, `ticket/.../page.tsx`, `lookupCheckIn.action.ts`, `CheckInLookupBar.tsx`, `SingleAttendeeView.tsx`, `AttendeeListItem.tsx`, `eventSheets.ts`, `registrationEmail.logic.ts`, `eventEmail.service.tsx`, `env.ts`, `supabase/migrations/20261109200000_n4_registration_short_codes.sql`, `plans/2026-11-09-n4-ticket-short-codes.md`
+- Next: N5 Attendees tab polish per docs/23.
+
+### 2026-11-09 — N3 public event page redesign
+- What: Clean banner (no overlay text); Share + Add to calendar menus; PublicMedia lightbox/video; facts hide unlimited seats; section reorder + organizer card; `payment_instructions` migration + Edit basics + register card block; unit tests in `publicPage.logic.test.ts`.
+- Files: `PublicEventHero.tsx`, `PublicShareMenu.tsx`, `PublicCalendarMenu.tsx`, `PublicMedia.tsx`, `PublicEventFacts.tsx`, `PublicAbout.tsx`, `PublicTiersAndDiscounts.tsx`, `PublicOrganizerCard.tsx`, `PublicRegisterCard.tsx`, `RegistrationForm.tsx`, `publicPage.logic.ts`, `page.tsx` / `loading.tsx`, `EditBasicsForm.tsx`, `updateEventBasics.action.ts`, `publicEvent.service.ts`, `types.ts`, `event.model.tsx`, `supabase/migrations/20261109190000_n3_payment_instructions.sql`, `plans/2026-11-09-n3-public-event-page.md`
+- Next: N4 ticket short codes / QR / calendar per docs/23.
+
+### 2026-11-09 — Wizard entry fee (paid vs hackathon)
+- What: Paid non-hackathon Registration shows Entry fee (PKR) alongside tiers/promos; fee-only create seeds General `ticket_tiers`; hackathon fees stay on Competitions (single = Entry fee label); summary + validation updated.
+- Files: `RegistrationStep.tsx`, `HackathonTracksStep.tsx`, `EventWizardLayout.tsx`, `wizardUtils.ts`, `event.service.ts`, `wizardSummary.test.ts`, `completeContext.md`
+- Next: N3 public event page redesign per docs/23.
+
+### 2026-11-09 — N2 event wizard tiers / review / legal
+- What: Shared `TiersAndPromosEditor` on wizard Registration + Access create forms; wizard promos persist; Review banner + `formatRegistrationSummary` (Unlimited seats); CMS links for Terms / Organizer Agreement / Content Rights with `event_publish` consents; removed wizard show-on-public sponsor switches; `ticket_tiers.available_from` + legal seed migration.
+- Files: `TiersAndPromosEditor.tsx`, `TiersPromosOnAccess.tsx`, `RegistrationStep.tsx`, `ReviewStep.tsx`, `wizardUtils.ts`, `ticketing.service.ts`, `ticketing.action.ts`, `event.service.ts`, `event.model.tsx`, `consent.logic.ts`, `consent.service.ts`, `(marketing)/organizer-agreement`, `(marketing)/content-rights`, `supabase/migrations/20261109180000_n2_wizard_tiers_legal.sql`, `plans/2026-11-09-n2-event-wizard.md`
+- Next: N3 public event page redesign per docs/23.
+
+### 2026-11-09 — N1 registration / UploadKind / sponsors blockers
+- What: Shared `assertPublicRegistrationEvent` for proof uploads; attendee-safe error maps (no raw Zod); admin `preview` shows form with Preview only (no submit/upload); typed `UploadKind` catalog + public Supabase WebP budgets + `media_bytes_used` quota; private proofs stay FileStore; sponsor/collaborator/partner logos via kinds; gallery/banner callers fixed.
+- Causes: (1) proof 404 masked DB/closed cases + failed upload left `payment_screenshot` undefined → Zod “expected object”; (2) `gallery` / UUID folders not in allowlist; (3) preview only blocked draft, not all preview.
+- Files: `uploadKinds.ts`, `uploadMedia.action.ts`, `publicMediaProcess.ts`, `mediaQuota.service.ts`, `registrationErrors.ts`, `publicRegistrationEligibility.ts`, `api/uploads/proof/route.ts`, `buildRegistrationSchema.ts`, `registerAttendee.action.ts`, `CustomFieldsRenderer.tsx`, `RegistrationForm.tsx`, `PublicRegisterCard.tsx`, `publicEvent.logic.ts`, `OrganizationForm.tsx`, `organizations.action.ts`, `BasicStep.tsx`, `EditBasicsForm.tsx`, `supabase/migrations/20261109120000_n1_organizer_media_quota.sql`, `plans/2026-11-09-n1-upload-blockers.md`
+- Next: Apply migration on Supabase; run N2 wizard; pause for review per docs/23.
 
 ### 2026-11-09 — Nuclear typecheck fix for Vercel (Drive folders / phases / public status)
 - What: `listEventDriveFoldersAction` is a plain async server action with explicit `SafeActionResult<EventDriveFoldersResult>` (no `safeAction` factory inference); panel annotates result; `saveHackathonPhase` early-returns after null actor + captures upload ids as `string`; `trackRegistrationOpen` uses `=== false` early return.

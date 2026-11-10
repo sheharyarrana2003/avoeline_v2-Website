@@ -44,12 +44,14 @@ async function buildAttendeeMatrix(eventId: string): Promise<unknown[][]> {
   const usersById = regs.length
     ? await UserService.getUsersByIds(regs.map((r) => r.userId).filter(Boolean))
     : new Map();
+  const { registrantIdentity } = await import("@/src/features/event_attendee/registrantIdentity");
   const rows: AttendeeRow[] = regs.map((reg) => {
     const user = usersById.get(String(reg.userId));
+    const id = registrantIdentity(reg, user);
     return {
       reg,
-      name: user?.profile?.fullName || reg.attendee?.name || "",
-      email: user?.email || reg.attendee?.email || "",
+      name: id.name === "Unknown" ? "" : id.name,
+      email: id.email,
     };
   });
   const { listAllFields, fieldsToCustomForm } =
@@ -70,12 +72,14 @@ async function buildCheckinMatrix(eventId: string): Promise<unknown[][]> {
   const usersById = regs.length
     ? await UserService.getUsersByIds(regs.map((r) => r.userId).filter(Boolean))
     : new Map();
+  const { registrantIdentity } = await import("@/src/features/event_attendee/registrantIdentity");
   const rows: AttendeeRow[] = regs.map((reg) => {
     const user = usersById.get(String(reg.userId));
+    const id = registrantIdentity(reg, user);
     return {
       reg,
-      name: user?.profile?.fullName || reg.attendee?.name || "",
-      email: user?.email || reg.attendee?.email || "",
+      name: id.name === "Unknown" ? "" : id.name,
+      email: id.email,
     };
   });
   const data = checkInRows(rows);

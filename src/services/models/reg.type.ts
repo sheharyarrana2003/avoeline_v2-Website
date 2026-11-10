@@ -53,7 +53,7 @@ export interface DiscountInfo {
 export interface CheckInInfo {
   checkedIn: boolean;
   checkInTime: string | null;
-  checkInMethod: "qr_scan" | "manual" | "nfc" | null;
+  checkInMethod: "qr_scan" | "short_code" | "manual" | "nfc" | null;
   checkedInBy: string | null; // Organizer ID
   deviceId: string | null;
 }
@@ -66,7 +66,7 @@ export interface QRCodeInfo {
 }
 
 export interface RegistrationCertificate {
-  type : CertificateType
+  type: CertificateType;
   issued: boolean;
   certificateId: string | null;
   issueDate: string | null;
@@ -103,6 +103,11 @@ export interface RegistrantContact {
 
 export interface Registration {
   registrationId: string;
+  /**
+   * Human display/search code (e.g. AVO-K7Q4M2). Not an access credential —
+   * the ticket URL uses the unguessable registration UUID.
+   */
+  shortCode: string;
   eventId: string; // Foreign Key to Event
   userId: string; // Foreign Key to User -- "" for public, account-less registrations
   /** Set when `userId` is empty; null for registrations made by a signed-in user. */

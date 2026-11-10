@@ -4,35 +4,39 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { MediaUpload } from "./MediaUpload";
 import { isVideoUrl } from "./media.utils";
+import type { UploadKind } from "@/src/features/files/uploadKinds";
 
 interface MediaUploadFieldProps {
   /** Form field name; uploaded URL(s) are emitted as hidden input(s) with this name. */
   name: string;
-  folder: string;
+  kind?: UploadKind;
+  /** @deprecated Prefer `kind`. */
+  folder?: string;
   accept?: string;
   multiple?: boolean;
   label?: string;
   bucket?: string;
+  eventId?: string;
   buttonClassName?: string;
   /**
    * Media the form already has (edit flows). Rendered as removable thumbnails and
-   * submitted alongside anything newly uploaded, so an edit that touches nothing
-   * else preserves the existing URLs instead of clearing them.
+   * submitted alongside anything newly uploaded.
    */
   initialUrls?: string[];
 }
 
 /**
- * Drop-in uploader for plain (server-action) forms: uploads to Supabase and
- * exposes the resulting URL(s) as hidden inputs so they submit with the form.
+ * Drop-in uploader for plain forms: typed UploadKind → Supabase public media.
  */
 export function MediaUploadField({
   name,
+  kind,
   folder,
   accept = "image/*",
   multiple = false,
   label = "Upload",
   bucket,
+  eventId,
   buttonClassName,
   initialUrls,
 }: MediaUploadFieldProps) {
@@ -41,10 +45,12 @@ export function MediaUploadField({
   return (
     <div className="flex flex-wrap items-center gap-3">
       <MediaUpload
+        kind={kind}
         folder={folder}
         accept={accept}
         multiple={multiple}
         bucket={bucket}
+        eventId={eventId}
         label={label}
         buttonClassName={buttonClassName}
         className="shrink-0"

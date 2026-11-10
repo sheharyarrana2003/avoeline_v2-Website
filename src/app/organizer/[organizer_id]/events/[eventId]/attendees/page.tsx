@@ -106,6 +106,7 @@ export default async function AttendeesPage({
   }
 
   let attendeesWithUsers: AttendeeClientSideProp[] = [];
+  let proofFallbackCount = 0;
   if (regs.length) {
     const userIds = regs.map((r) => r.userId).filter(Boolean);
     const [usersById, attendeesByUser] = await Promise.all([
@@ -113,7 +114,7 @@ export default async function AttendeesPage({
       AttendeeService.getAttendeeProfilesByUserIds(userIds),
     ]);
 
-    // O1: file:{uuid} → /api/files; legacy Supabase paths still signed.
+    // O1/N5: file:{uuid} → /api/files; Drive open from stored_files.extra.webUrl.
     const proofPaths = regs.map((r) => r.payment?.proofPath).filter((p): p is string => !!p);
     const legacyProofs = proofPaths.filter(
       (p) =>
@@ -124,23 +125,38 @@ export default async function AttendeesPage({
         !p.includes("drive.google.com/"),
     );
     const regProofs = proofPaths.filter((p) => p.startsWith("registration/"));
-    const [signedLegacy, signedReg] = await Promise.all([
+    const { storedFileIdFromProofPath } =
+      await import("@/src/features/event_attendee/approveDisabledReason");
+    const { getStoredFilesByIds } = await import("@/src/features/files/storedFiles.repo");
+    const fileIds = [
+      ...new Set(
+        proofPaths
+          .map((p) => storedFileIdFromProofPath(p))
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const [signedLegacy, signedReg, storedFiles] = await Promise.all([
       getSignedUrlsByPath(CERTIFICATES_BUCKET, legacyProofs),
       getSignedUrlsByPath(PAYMENT_SCREENSHOTS_BUCKET, regProofs),
+      getStoredFilesByIds(fileIds),
     ]);
+    const storedById = new Map(storedFiles.map((f) => [f.id, f]));
     const proofUrls = new Map<string, string>();
+    const proofDriveUrls = new Map<string, string>();
     for (const r of regs) {
       const path = r.payment?.proofPath;
       if (!path) continue;
-      if (path.startsWith("file:")) {
-        proofUrls.set(r.registrationId, `/api/files/${path.slice("file:".length)}`);
+      if (path.startsWith("file:") || path.startsWith("/api/files/")) {
+        const fid = storedFileIdFromProofPath(path);
+        if (fid) {
+          proofUrls.set(r.registrationId, `/api/files/${fid}`);
+          const sf = storedById.get(fid);
+          if (sf?.provider === "supabase") proofFallbackCount += 1;
+          const web = sf?.provider === "drive" ? String(sf.extra?.webUrl || "") : "";
+          if (web) proofDriveUrls.set(r.registrationId, web);
+        }
         continue;
       }
-      if (path.startsWith("/api/files/")) {
-        proofUrls.set(r.registrationId, path);
-        continue;
-      }
-      // Legacy drive: refs are not publicly viewable — organizers open via Files tab / re-upload.
       if (path.startsWith("drive:") || path.includes("drive.google.com/")) {
         continue;
       }
@@ -152,12 +168,10 @@ export default async function AttendeesPage({
       a:
         attendeesByUser.get(String(register.userId)) ??
         emptyAttendeeForUser(String(register.userId)),
-      // No `!` here: a public registration has no account to find, and a
-      // deleted user resolves to nothing either. Both used to hand the list
-      // `undefined` and crash it on the first property access.
       user: usersById.get(String(register.userId)) ?? userFromRegistration(register),
       register,
       proofUrl: proofUrls.get(register.registrationId) ?? null,
+      proofDriveUrl: proofDriveUrls.get(register.registrationId) ?? null,
     }));
   }
 
@@ -341,6 +355,9 @@ export default async function AttendeesPage({
       })
     : undefined;
 
+  const isFreeEvent =
+    eventForAccess.pricing?.isFree === true || Number(eventForAccess.PriceOfTicket ?? 0) <= 0;
+
   return (
     <>
       <DriveHealthBanner
@@ -348,6 +365,13 @@ export default async function AttendeesPage({
         eventId={event_id}
         connectionsHref={`/organizer/${organizer_id}/connections`}
       />
+      {proofFallbackCount > 0 ? (
+        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          {proofFallbackCount} payment proof{proofFallbackCount === 1 ? " is" : "s are"} in
+          temporary storage because Drive was unavailable. Connect Drive under Connections so they
+          can be promoted.
+        </p>
+      ) : null}
       <AttendeeClientSide
         attendees={attendeesWithUsers}
         handle_reg_status={handle_reg_status}
@@ -367,38 +391,34 @@ export default async function AttendeesPage({
         emailTemplates={emailTemplates}
         questions={formQuestions}
         teams={teams}
-        isFree={
-          eventForAccess.pricing?.isFree === true || Number(eventForAccess.PriceOfTicket ?? 0) <= 0
-        }
+        isFree={isFreeEvent}
         emailConnectionMissing={!emailConnected}
         sheetsConnected={sheetConnected}
         exportsHref={`/organizer/${organizer_id}/events/${event_id}/exports`}
         eventEndsAtIso={joinValidUntilIso || eventEndsAtIso}
         checkInByNames={checkInByNames}
         registrationForm={<RegistrationQuestionsCard eventId={event_id} bare />}
+        importPanel={<AttendeeImportPanel eventId={event_id} />}
         extra={
-          <>
-            <AttendeeImportPanel eventId={event_id} />
-            {isHackathon ? (
-              <AssignLeftoverTeams
-                eventId={event_id}
-                returnTo={assignReturn}
-                leftover={leftover}
-                tracks={hackTracks.map((t) => ({
-                  id: t.id,
-                  name: t.name,
-                  maxTeamSize: t.maxTeamSize,
-                }))}
-                teams={hackTeams.map((t) => ({
-                  id: t.id,
-                  name: t.name,
-                  trackId: t.trackId,
-                  size: t.members.length,
-                  maxTeamSize: t.maxTeamSize,
-                }))}
-              />
-            ) : null}
-          </>
+          isHackathon ? (
+            <AssignLeftoverTeams
+              eventId={event_id}
+              returnTo={assignReturn}
+              leftover={leftover}
+              tracks={hackTracks.map((t) => ({
+                id: t.id,
+                name: t.name,
+                maxTeamSize: t.maxTeamSize,
+              }))}
+              teams={hackTeams.map((t) => ({
+                id: t.id,
+                name: t.name,
+                trackId: t.trackId,
+                size: t.members.length,
+                maxTeamSize: t.maxTeamSize,
+              }))}
+            />
+          ) : null
         }
       />
     </>

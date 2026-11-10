@@ -37,6 +37,9 @@ import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { ActionResult } from "@/src/lib/action";
 import { fieldClass, labelClass } from "@/src/lib/ui";
 import { hackathonTeamCodesVisible } from "../roster";
+import { registrantIdentity } from "@/src/features/event_attendee/registrantIdentity";
+import { approveDisabledReason } from "@/src/features/event_attendee/approveDisabledReason";
+import { paymentProofPlatformUrl } from "@/src/features/event_attendee/approveDisabledReason";
 
 interface SingleAttendeeViewProps {
   combined_data: AttendeeClientSideProp;
@@ -46,6 +49,7 @@ interface SingleAttendeeViewProps {
   requiresApproval?: boolean;
   variant?: "full" | "member";
   eventId?: string;
+  organizerId?: string;
   competitionName?: string;
   questions?: CustomFieldOption[];
   hidePayment?: boolean;
@@ -93,6 +97,7 @@ export function SingleAttendeeView({
   requiresApproval = false,
   variant = "full",
   eventId,
+  organizerId,
   competitionName,
   questions = [],
   hidePayment = false,
@@ -104,7 +109,10 @@ export function SingleAttendeeView({
   const a = combined_data?.a || ({} as any);
   const u = combined_data?.user || ({} as any);
   const r = combined_data?.register || ({} as any);
-  const proofUrl = combined_data?.proofUrl ?? null;
+  const proofDriveUrl = combined_data?.proofDriveUrl ?? null;
+  const proofUrl =
+    paymentProofPlatformUrl(r?.payment?.proofPath) || combined_data?.proofUrl || null;
+  const proofLooksPdf = /\.pdf($|\?)/i.test(String(proofUrl || ""));
 
   // State for local registration updates
   const [registration, setRegistration] = useState<Registration>(r);
@@ -124,13 +132,15 @@ export function SingleAttendeeView({
   const [resendConfirmation, setResendConfirmation] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [editPending, startEditTransition] = useTransition();
+  const [rejectReason, setRejectReason] = useState("");
   const toast = useToast();
   const router = useRouter();
 
-  const contactName = registration?.attendee?.name || u?.profile?.fullName || "";
-  const contactEmail = registration?.attendee?.email || u?.email || "";
-  const contactPhone = registration?.attendee?.phone || u?.profile?.phoneNumber || "";
-  const fullName = contactName || "Unknown Attendee";
+  const identity = registrantIdentity(registration, u);
+  const contactName = identity.name === "Unknown" ? "" : identity.name;
+  const contactEmail = identity.email;
+  const contactPhone = identity.phone;
+  const fullName = identity.name === "Unknown" ? "Unknown Attendee" : identity.name;
   const email = contactEmail || "No email provided";
   const phone = contactPhone || "No phone provided";
 
@@ -257,6 +267,12 @@ export function SingleAttendeeView({
     eventId && registration.registrationId
       ? `/events/${eventId}/ticket/${registration.registrationId}`
       : null;
+  const approveBlock = approveDisabledReason({
+    isPaid: !hidePayment,
+    status: registration.status,
+    proofPath: registration.payment?.proofPath,
+    paymentStatus: registration.payment?.paymentStatus,
+  });
 
   /**
    * Commit an optimistic update, and put the old value back if the write
@@ -570,7 +586,7 @@ export function SingleAttendeeView({
                 )}
               </div>
               {ticketPath ? (
-                <p className="mt-3 text-sm">
+                <p className="mt-3 flex flex-wrap items-center gap-3 text-sm">
                   <a
                     href={ticketPath}
                     className="font-medium text-ink underline"
@@ -579,6 +595,20 @@ export function SingleAttendeeView({
                   >
                     Public ticket / status
                   </a>
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-ink-soft underline hover:text-ink"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(
+                        typeof window !== "undefined"
+                          ? `${window.location.origin}${ticketPath}`
+                          : ticketPath,
+                      );
+                      toast.success("Ticket link copied.");
+                    }}
+                  >
+                    Copy link
+                  </button>
                 </p>
               ) : null}
             </section>
@@ -613,29 +643,46 @@ export function SingleAttendeeView({
                 {decisionState?.error ? (
                   <FormFeedback error={decisionState.error} className="mt-3" />
                 ) : null}
-                {/* One form, two submit buttons -- the submitter's name/value is
-                        what tells the action which way to go. */}
-                <form action={decisionAction} className="mt-3 flex flex-wrap gap-2">
+                <form action={decisionAction} className="mt-3 space-y-3">
                   <input type="hidden" name="eventId" value={registration.eventId} />
                   <input type="hidden" name="registrationId" value={registration.registrationId} />
-                  <button
-                    type="submit"
-                    name="decision"
-                    value="approve"
-                    className={buttonClass("primary", "sm")}
-                  >
-                    Approve
-                  </button>
-                  <ConfirmSubmit
-                    name="decision"
-                    value="reject"
-                    title={`Reject ${registration.attendee?.name || "this registration"}?`}
-                    description="They are emailed to say the organizer did not approve it, and their seat is released to anyone on the waitlist."
-                    confirmLabel="Reject registration"
-                    className={buttonClass("destructive", "sm")}
-                  >
-                    Reject
-                  </ConfirmSubmit>
+                  <div>
+                    <label className={labelClass} htmlFor="reject-reason">
+                      Reject reason
+                    </label>
+                    <textarea
+                      id="reject-reason"
+                      name="reason"
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      rows={2}
+                      className={`${fieldClass} mt-1`}
+                      placeholder="Required when rejecting"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="submit"
+                      name="decision"
+                      value="approve"
+                      disabled={Boolean(approveBlock)}
+                      title={approveBlock || undefined}
+                      className={buttonClass("primary", "sm")}
+                    >
+                      Approve
+                    </button>
+                    <ConfirmSubmit
+                      name="decision"
+                      value="reject"
+                      title={`Reject ${registration.attendee?.name || "this registration"}?`}
+                      description="They are emailed with your reason, and their seat is released to anyone on the waitlist."
+                      confirmLabel="Reject registration"
+                      className={buttonClass("destructive", "sm")}
+                      disabled={!rejectReason.trim()}
+                    >
+                      Reject
+                    </ConfirmSubmit>
+                  </div>
                 </form>
               </section>
             ) : null}
@@ -798,23 +845,56 @@ export function SingleAttendeeView({
                 {proofUrl ? (
                   <div className="mt-4">
                     <p className={labelClass}>Payment proof</p>
-                    <ImageLightbox
-                      src={proofUrl}
-                      alt="Payment screenshot supplied by the attendee"
-                      className="mt-1.5 aspect-video w-full bg-muted"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    {proofLooksPdf ? (
+                      <a
+                        href={proofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1.5 inline-flex text-sm font-medium text-ink underline"
+                      >
+                        Open PDF proof
+                      </a>
+                    ) : (
+                      <ImageLightbox
                         src={proofUrl}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-contain"
-                      />
-                    </ImageLightbox>
-                    <p className="mt-1.5 text-xs text-ink-soft">
-                      Click to enlarge before verifying.
-                    </p>
+                        alt="Payment screenshot supplied by the attendee"
+                        className="mt-1.5 aspect-video w-full bg-muted"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={proofUrl}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-contain"
+                        />
+                      </ImageLightbox>
+                    )}
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <a
+                        href={proofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-medium text-ink underline"
+                      >
+                        Open proof
+                      </a>
+                      {proofDriveUrl ? (
+                        <a
+                          href={proofDriveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-medium text-ink underline"
+                        >
+                          Open in Drive
+                        </a>
+                      ) : null}
+                    </div>
+                    {!proofLooksPdf ? (
+                      <p className="mt-1.5 text-xs text-ink-soft">
+                        Click to enlarge before verifying.
+                      </p>
+                    ) : null}
                   </div>
-                ) : registration?.status === "awaiting_payment" ? (
+                ) : registration?.status === "awaiting_payment" || !hidePayment ? (
                   <p className="mt-4 text-xs text-ink-soft">
                     No payment proof was uploaded with this registration.
                   </p>
@@ -861,28 +941,34 @@ export function SingleAttendeeView({
 
             {registration?.registrationId ? (
               <section>
-                <Heading>Check-in QR</Heading>
-                <ImageLightbox
-                  src={`/api/qr/${registration.registrationId}.png`}
-                  alt={`QR for ${fullName}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/qr/${registration.registrationId}.png`}
-                    alt=""
-                    className="h-40 w-40 rounded-xl bg-white object-contain p-2"
-                  />
-                </ImageLightbox>
+                <Heading>Ticket &amp; QR</Heading>
+                {registration.shortCode ? (
+                  <p className="mb-2 font-mono text-sm tracking-wide text-ink">
+                    {registration.shortCode}
+                  </p>
+                ) : null}
+                {registration.qrCode?.imageUrl ? (
+                  <ImageLightbox src={registration.qrCode.imageUrl} alt={`QR for ${fullName}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={registration.qrCode.imageUrl}
+                      alt=""
+                      className="h-40 w-40 rounded-xl bg-white object-contain p-2"
+                    />
+                  </ImageLightbox>
+                ) : null}
                 <p className="mt-1.5 text-xs text-ink-soft">
-                  On-demand door QR (name, email, registration id, event id). Ticket:{" "}
-                  <a
-                    href={`/events/${registration.eventId}/ticket/${registration.registrationId}`}
-                    className="underline underline-offset-2"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    open ticket
-                  </a>
+                  On-demand door QR (signed check-in token).{" "}
+                  {ticketPath ? (
+                    <a
+                      href={ticketPath}
+                      className="underline underline-offset-2"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open ticket
+                    </a>
+                  ) : null}
                 </p>
               </section>
             ) : null}
@@ -917,8 +1003,10 @@ export function SingleAttendeeView({
               <MemberEmailForm
                 key={`${registration.registrationId}-${composeKey}`}
                 eventId={eventId}
+                organizerId={organizerId}
                 registrationId={registration.registrationId}
                 startOpen={composeKey > 0}
+                hidePayment={hidePayment}
               />
             ) : null}
 

@@ -7,6 +7,7 @@ export type OrganizerSendAttachment = {
   filename: string;
   content: string | Buffer | Uint8Array;
   contentType?: string;
+  cid?: string;
 };
 
 export type OrganizerSendInput = {

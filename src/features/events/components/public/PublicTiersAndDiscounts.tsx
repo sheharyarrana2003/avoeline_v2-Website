@@ -16,31 +16,30 @@ export function PublicTiersAndDiscounts({ dto }: { dto: PublicEventDto }) {
     <section className="space-y-4">
       <h2 className="font-display text-lg text-ink">Tickets &amp; discounts</h2>
       {dto.pricingTiers.length ? (
-        <ul className="divide-y divide-line rounded-2xl border border-line">
+        <ul className="grid gap-3 sm:grid-cols-2">
           {dto.pricingTiers.map((t) => (
-            <li
-              key={t.id}
-              className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3"
-            >
-              <div>
+            <li key={t.id} className="rounded-2xl border border-line bg-paper p-4">
+              <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-medium text-ink">{t.name}</p>
-                {t.description ? (
-                  <p className="mt-0.5 text-xs text-ink-soft">{t.description}</p>
-                ) : null}
-                {t.availableUntil ? (
-                  <p className="mt-0.5 text-2xs text-ink-faint">
-                    Available until {formatDateMedium(t.availableUntil)}
-                  </p>
-                ) : null}
-                {t.seatsLeft != null ? (
-                  <p className="mt-0.5 text-2xs text-ink-faint">
-                    {t.seatsLeft} seat{t.seatsLeft === 1 ? "" : "s"} left
-                  </p>
-                ) : null}
+                <p className="shrink-0 font-display text-base text-ink">
+                  {formatCurrency(t.price, dto.currency, "Free")}
+                </p>
               </div>
-              <p className="font-display text-base text-ink">
-                {formatCurrency(t.price, dto.currency, "Free")}
-              </p>
+              {t.description ? (
+                <p className="mt-1 break-words text-xs text-ink-soft">{t.description}</p>
+              ) : null}
+              <ul className="mt-3 space-y-1 text-2xs text-ink-faint">
+                {t.availableUntil ? (
+                  <li>Available until {formatDateMedium(t.availableUntil)}</li>
+                ) : (
+                  <li>Available now</li>
+                )}
+                {t.seatsLeft != null ? (
+                  <li>
+                    {t.seatsLeft} seat{t.seatsLeft === 1 ? "" : "s"} left
+                  </li>
+                ) : null}
+              </ul>
             </li>
           ))}
         </ul>

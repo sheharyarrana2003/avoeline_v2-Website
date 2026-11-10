@@ -20,6 +20,7 @@ function reg(
 ): Registration {
   return {
     userId: "",
+    shortCode: partial.shortCode ?? "AVO-TEST01",
     attendee: null,
     organizerId: "org1",
     registrationDate: String(partial.createdAt),

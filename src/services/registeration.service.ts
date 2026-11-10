@@ -3,8 +3,26 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { regStatusFromDb, regStatusToDb, payStatusFromDb, payStatusToDb } from "@/data/statusMaps";
 import { toIsoString } from "@/src/lib/datetime";
+import { checkInQrImagePath, signCheckInToken } from "@/src/features/registration/checkInToken";
 
 type RegRow = Record<string, unknown>;
+
+function liveQrFields(row: RegRow): { data: string; imageUrl: string } {
+  const id = String(row.id || "");
+  const eventId = String(row.event_id || "");
+  if (id && eventId) {
+    try {
+      const token = signCheckInToken({ registrationId: id, eventId });
+      return { data: token, imageUrl: checkInQrImagePath(token) };
+    } catch {
+      // Secret missing in some unit/boot contexts — fall back to stored fields.
+    }
+  }
+  return {
+    data: String(row.qr_code_data || ""),
+    imageUrl: String(row.qr_code_image_url || ""),
+  };
+}
 
 /** Hydrate a Postgres registrations row into the camelCase shape mapToRegistration expects. */
 export function hydrateRegistrationRow(row: RegRow): Record<string, unknown> {
@@ -14,10 +32,12 @@ export function hydrateRegistrationRow(row: RegRow): Record<string, unknown> {
   >;
   const status = regStatusFromDb(String(row.status || extra.status || "pending"));
   const pay = payStatusFromDb(String(row.payment_status || "pending"));
+  const qrLive = liveQrFields(row);
   return {
     ...extra,
     registrationId: row.id,
     id: row.id,
+    shortCode: String(row.short_code || extra.shortCode || ""),
     eventId: row.event_id,
     userId: row.user_id || "",
     organizerId: row.organizer_id || extra.organizerId,
@@ -49,9 +69,9 @@ export function hydrateRegistrationRow(row: RegRow): Record<string, unknown> {
       checkedInBy: row.checked_in_by,
       deviceId: null,
     },
-    qrCode: (extra.qrCode as object) || {
-      data: row.qr_code_data,
-      imageUrl: row.qr_code_image_url,
+    qrCode: {
+      data: qrLive.data,
+      imageUrl: qrLive.imageUrl,
       scanCount: 0,
       lastScanned: null,
     },
@@ -96,6 +116,7 @@ export function mapToRegistration(raw: any, fallbackId?: string): Registration {
     // Live rows don't always carry a registrationId field, so fall back to the
     // table primary key — callers key list rows off this and need it unique.
     registrationId: String(raw.registrationId || fallbackId || ""),
+    shortCode: String(raw.shortCode || raw.short_code || ""),
     eventId: String(raw.eventId || ""),
     userId: String(raw.userId || ""),
     // Only public, account-less registrations carry this. Seeded docs predate the
@@ -307,6 +328,19 @@ export const RegService = {
       .from(TABLES.REGISTRATIONS)
       .select("*")
       .eq("event_id", event_id);
+    if (error) throw error;
+    return (data ?? []).map((row) =>
+      mapToRegistration(hydrateRegistrationRow(row as RegRow), row.id),
+    );
+  },
+
+  async getRegsByIds(ids: string[]): Promise<Registration[]> {
+    const unique = [...new Set(ids.map(String).filter(Boolean))];
+    if (!unique.length) return [];
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.REGISTRATIONS)
+      .select("*")
+      .in("id", unique);
     if (error) throw error;
     return (data ?? []).map((row) =>
       mapToRegistration(hydrateRegistrationRow(row as RegRow), row.id),

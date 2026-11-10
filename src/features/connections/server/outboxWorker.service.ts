@@ -56,8 +56,9 @@ async function renderCertificateOutboxPayload(
   const { absoluteUrl } = await import("@/src/lib/appUrl");
   const viewerUrl = await absoluteUrl(`/certificate/${cert.verificationCode}`);
   const verifyUrl = await absoluteUrl(`/verify/${cert.verificationCode}`);
-  const { buildCertificateEmail } = await import("@/src/features/certificates/certificateEmail");
-  const built = buildCertificateEmail(cert, verifyUrl, viewerUrl, {
+  const { buildCertificateEmailAsync } =
+    await import("@/src/features/certificates/certificateEmail");
+  const built = await buildCertificateEmailAsync(cert, verifyUrl, viewerUrl, {
     includeDriveLink,
     driveShareUrl,
   });
@@ -327,6 +328,49 @@ export async function processEmailOutbox(limit = 40): Promise<{
       certificateIdForStamp = rendered.certificateId;
     }
 
+    let sendAttachments:
+      Array<{ filename: string; content: Buffer; contentType?: string; cid?: string }> | undefined;
+
+    if (payload.renderAtSend === true && payload.registrationId && payload.eventId) {
+      try {
+        const { EventService } = await import("@/src/services/event.service");
+        const { RegService } = await import("@/src/services/registeration.service");
+        const { renderOrganizerEmailPayload } =
+          await import("@/src/features/event_attendee/eventEmail.service");
+        const { isEventEmailKind } = await import("@/src/features/event_attendee/emailTypes");
+        const event = await EventService.getEventByID(String(payload.eventId));
+        const regs = await RegService.getRegsOfEvent(String(payload.eventId));
+        const registration = regs.find((r) => r.registrationId === String(payload.registrationId));
+        const kindEmail = String(payload.kind || "custom");
+        if (event && registration && isEventEmailKind(kindEmail)) {
+          const blocks = Array.isArray(payload.includeBlocks)
+            ? (payload.includeBlocks as import("@/src/features/event_attendee/emailTypes").EmailIncludeBlock[])
+            : undefined;
+          const rendered = await renderOrganizerEmailPayload({
+            registration,
+            event,
+            kind: kindEmail,
+            subjectOverride: payload.subjectOverride
+              ? String(payload.subjectOverride)
+              : payload.subject
+                ? String(payload.subject)
+                : undefined,
+            bodyOverride: payload.bodyOverride ? String(payload.bodyOverride) : undefined,
+            includeBlocks: blocks,
+          });
+          subject = rendered.subject;
+          html = rendered.html;
+          text = rendered.text;
+          sendAttachments = rendered.attachments;
+        }
+      } catch (err) {
+        logger.error("[outbox] attendee renderAtSend failed", {
+          id: raw.id,
+          err: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
     const { withUnsubscribeFooter } = await import("./suppressions.service");
     const body = withUnsubscribeFooter({
       html,
@@ -344,6 +388,7 @@ export async function processEmailOutbox(limit = 40): Promise<{
         text: body.text,
         kind,
         idempotencyKey: raw.idempotency_key || undefined,
+        attachments: sendAttachments,
       },
       conn.ownerId,
     );

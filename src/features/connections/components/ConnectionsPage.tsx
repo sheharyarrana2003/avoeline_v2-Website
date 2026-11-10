@@ -1,8 +1,9 @@
-import { ConnectionsHub, type ConnectionsHubTab } from "./ConnectionsHub";
+import { ConnectionsHub } from "./ConnectionsHub";
 import type { CatalogScope } from "../catalog";
 import type { ConnectionPublic } from "../types";
 import type { OwnerCalendarLinkRow } from "../server/calendarSync.service";
 import type { OwnerSheetSyncRow } from "../server/sheetSync.service";
+import type { diagnoseGoogleConnectionsEnv } from "@/src/env";
 
 /** Thin wrapper around ConnectionsHub for organizer/vendor/department pages. */
 export function ConnectionsPage({
@@ -19,11 +20,11 @@ export function ConnectionsPage({
   error,
   success,
   blockedNote,
-  tab,
   hubBasePath,
   calendarLinks,
   sheetSyncs,
   emailBatches,
+  oauthDiagnostics,
 }: {
   ownerType: "user" | "org";
   ownerId: string;
@@ -38,7 +39,6 @@ export function ConnectionsPage({
   error?: string | null;
   success?: string | null;
   blockedNote?: string | null;
-  tab?: ConnectionsHubTab;
   hubBasePath?: string;
   calendarLinks?: OwnerCalendarLinkRow[];
   sheetSyncs?: OwnerSheetSyncRow[];
@@ -58,6 +58,7 @@ export function ConnectionsPage({
     }>;
     nextCursor: { createdAt: string; id: string } | null;
   };
+  oauthDiagnostics?: ReturnType<typeof diagnoseGoogleConnectionsEnv> | null;
 }) {
   return (
     <ConnectionsHub
@@ -73,7 +74,6 @@ export function ConnectionsPage({
       error={error}
       success={success}
       blockedNote={blockedNote}
-      tab={tab}
       hubBasePath={
         hubBasePath ||
         (ownerType === "user"
@@ -83,6 +83,7 @@ export function ConnectionsPage({
       calendarLinks={calendarLinks}
       sheetSyncs={sheetSyncs}
       emailBatches={emailBatches}
+      oauthDiagnostics={oauthDiagnostics}
     />
   );
 }

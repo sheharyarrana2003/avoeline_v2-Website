@@ -6,6 +6,8 @@ export const MARKETING_SITEMAP_PATHS = [
   "/contact",
   "/privacy",
   "/terms",
+  "/organizer-agreement",
+  "/content-rights",
 ] as const;
 
 export const MARKETING_ROBOTS_DISALLOW = ["/admin", "/organizer", "/vendor", "/attendee"] as const;

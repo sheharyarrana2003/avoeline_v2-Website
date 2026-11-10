@@ -38,6 +38,23 @@ function asIsoDate(value: unknown): string | null {
   return toIsoDate(raw) || null;
 }
 
+/** Entry fee for Drive gate / emails: explicit PriceOfTicket, else min tier, else min hackathon track fee. */
+function resolveWizardEntryPrice(formData: EventFormData): number {
+  if (formData.ticketType === "free") return 0;
+  const entry = Math.max(0, Number(formData.PriceOfTicket) || 0);
+  if (entry > 0) return entry;
+  if (formData.isHackathon) {
+    const fees = (formData.wizardTracks ?? [])
+      .map((t) => Math.max(0, Number(t.fee) || 0))
+      .filter((n) => n > 0);
+    return fees.length ? Math.min(...fees) : 0;
+  }
+  const tierPrices = (formData.ticketTiers ?? [])
+    .map((t) => Math.max(0, Number(t.price) || 0))
+    .filter((n) => n > 0);
+  return tierPrices.length ? Math.min(...tierPrices) : 0;
+}
+
 function locationFormat(format: string): "physical" | "virtual" | "hybrid" {
   if (format === "virtual" || format === "hybrid") return format;
   return "physical";
@@ -139,16 +156,34 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
   };
 
   // 6. Map TicketTiers from form to the expected pricing structures
+  const resolvedTicketPrice = resolveWizardEntryPrice(formData);
+  const pricingTiers =
+    formData.ticketType === "free"
+      ? []
+      : (formData.ticketTiers ?? []).length > 0
+        ? (formData.ticketTiers ?? []).map((tier) => ({
+            name: tier.name,
+            price: tier.price,
+            availableUntil: tier.availableUntil ? formatDate(tier.availableUntil) : "",
+            seats:
+              tier.seatsAvailable == null || tier.seatsAvailable <= 0 ? 0 : tier.seatsAvailable,
+            description: tier.description,
+          }))
+        : resolvedTicketPrice > 0 && !formData.isHackathon
+          ? [
+              {
+                name: "General",
+                price: resolvedTicketPrice,
+                availableUntil: "",
+                seats: 0,
+                description: "",
+              },
+            ]
+          : [];
   const pricing = {
     isFree: formData.ticketType === "free",
     currency: "PKR", // Default application currency
-    tiers: (formData.ticketTiers ?? []).map((tier) => ({
-      name: tier.name,
-      price: formData.ticketType === "free" ? 0 : tier.price,
-      availableUntil: tier.availableUntil ? formatDate(tier.availableUntil) : "",
-      seats: tier.seatsAvailable,
-      description: tier.description,
-    })),
+    tiers: pricingTiers,
     studentDiscount: {
       enabled: formData.studentDiscount,
       percentage: formData.studentDiscountPercent,
@@ -216,7 +251,7 @@ function mapFormDataToEventModel(formData: EventFormData): EventModel {
     publishedAt: formData.isDraft || !formData.publishImmediately ? null : new Date(),
     archivedAt: null,
     deletedAt: null,
-    PriceOfTicket: formData.PriceOfTicket,
+    PriceOfTicket: resolvedTicketPrice,
     mapsUrl: formData.mapsUrl || formData.mapUrl || "",
     mapUrl: formData.mapsUrl || formData.mapUrl || "",
     requiresRegistration: formData.requiresRegistration !== false,
@@ -700,32 +735,84 @@ export const EventService = {
     }
 
     // Paid SKUs for Access tab (pricing jsonb alone is not enough for TicketingService).
+    // Entry fee alone (no custom tiers) seeds a General SKU so public register / Access match.
     if (
       formdata.requiresRegistration !== false &&
       formdata.ticketType === "paid" &&
-      Array.isArray(formdata.ticketTiers) &&
-      formdata.ticketTiers.length > 0
+      !formdata.isHackathon
     ) {
-      const { error: tierErr } = await supabaseAdmin.from(TABLES.TICKET_TIERS).insert(
-        formdata.ticketTiers.map((tier) => ({
-          event_id: id_generated,
-          name:
-            String(tier.name || "General")
-              .trim()
-              .slice(0, 120) || "General",
-          description: String(tier.description || ""),
-          price: Math.max(0, Number(tier.price) || 0),
-          seats_available: Number(tier.seatsAvailable) || null,
-          available_until: asIsoDate(tier.availableUntil),
-          active: true,
-          student_discount_enabled: !!formdata.studentDiscount,
-          student_discount_pct: Number(formdata.studentDiscountPercent) || 0,
-          group_discount_enabled: !!formdata.groupDiscount,
-          group_discount_pct: Number(formdata.groupDiscountPercent) || 0,
-          group_min_size: Number(formdata.minSizeForGroupDiscounts) || null,
-        })),
-      );
-      if (tierErr) console.error("[create_event] ticket tiers failed", tierErr);
+      const draftTiers =
+        Array.isArray(formdata.ticketTiers) && formdata.ticketTiers.length > 0
+          ? formdata.ticketTiers
+          : Number(event_to_be_added.PriceOfTicket) > 0
+            ? [
+                {
+                  name: "General",
+                  price: Number(event_to_be_added.PriceOfTicket),
+                  seatsAvailable: null as number | null,
+                  availableFrom: "",
+                  availableUntil: "",
+                  description: "",
+                  active: true,
+                  isEarlyBird: false,
+                },
+              ]
+            : [];
+      if (draftTiers.length > 0) {
+        const { error: tierErr } = await supabaseAdmin.from(TABLES.TICKET_TIERS).insert(
+          draftTiers.map((tier) => {
+            const seatsRaw = "seatsAvailable" in tier ? tier.seatsAvailable : null;
+            const seatsNum = seatsRaw == null ? NaN : Number(seatsRaw);
+            return {
+              event_id: id_generated,
+              name:
+                String(tier.name || "General")
+                  .trim()
+                  .slice(0, 120) || "General",
+              description: String(tier.description || ""),
+              price: Math.max(0, Number(tier.price) || 0),
+              seats_available: Number.isFinite(seatsNum) && seatsNum > 0 ? seatsNum : null,
+              available_from: asIsoDate("availableFrom" in tier ? tier.availableFrom : ""),
+              available_until: asIsoDate("availableUntil" in tier ? tier.availableUntil : ""),
+              is_early_bird: "isEarlyBird" in tier ? !!tier.isEarlyBird : false,
+              active: "active" in tier ? tier.active !== false : true,
+              student_discount_enabled: !!formdata.studentDiscount,
+              student_discount_pct: Number(formdata.studentDiscountPercent) || 0,
+              group_discount_enabled: !!formdata.groupDiscount,
+              group_discount_pct: Number(formdata.groupDiscountPercent) || 0,
+              group_min_size: Number(formdata.minSizeForGroupDiscounts) || null,
+            };
+          }),
+        );
+        if (tierErr) console.error("[create_event] ticket tiers failed", tierErr);
+      }
+    }
+
+    // Wizard promo drafts → promo_codes (same columns as TicketingService.createPromo).
+    if (formdata.requiresRegistration !== false && Array.isArray(formdata.promoCodes)) {
+      const promoRows = formdata.promoCodes
+        .map((p) => {
+          const code = String(p.code || "")
+            .trim()
+            .toUpperCase();
+          if (!code) return null;
+          const usage = p.usageLimit == null ? null : Number(p.usageLimit);
+          return {
+            event_id: id_generated,
+            code,
+            discount_type: p.discountType === "flat" ? "flat" : "percent",
+            value: Math.max(0, Number(p.value) || 0),
+            usage_limit: usage != null && Number.isFinite(usage) && usage > 0 ? usage : null,
+            track_id: p.trackId || null,
+            expires_at: asIsoDate(p.expiresAt),
+            active: p.active !== false,
+          };
+        })
+        .filter((row): row is NonNullable<typeof row> => Boolean(row));
+      if (promoRows.length) {
+        const { error: promoErr } = await supabaseAdmin.from(TABLES.PROMO_CODES).insert(promoRows);
+        if (promoErr) console.error("[create_event] promo codes failed", promoErr);
+      }
     }
 
     // Whitelist / invite emails from ReviewStep AccessTypeSelector.
@@ -856,6 +943,32 @@ export const EventService = {
       }
     }
 
+    // Versioned legal acceptance for publish (Terms + Organizer Agreement + Content rights).
+    if (publishing) {
+      if (!formdata.agreeToTerms || !formdata.confirmRights) {
+        throw new Error(
+          "Accept the Terms, Organizer Agreement, and content-rights statement to publish.",
+        );
+      }
+      const { UserService } = await import("@/src/services/user.service");
+      const { recordLegalAcceptance } = await import("@/src/features/website/consent.service");
+      const { EVENT_PUBLISH_LEGAL_SLUGS } = await import("@/src/features/website/consent.logic");
+      const organizer = await UserService.getUserById(organizer_id).catch(() => null);
+      const email = String(organizer?.email || "").trim();
+      if (!email.includes("@")) {
+        throw new Error("Could not record legal acceptance: organizer email is missing.");
+      }
+      const legalRes = await recordLegalAcceptance({
+        userId: organizer_id,
+        email,
+        context: "event_publish",
+        slugs: EVENT_PUBLISH_LEGAL_SLUGS,
+      });
+      if (!legalRes.ok) {
+        throw new Error(legalRes.error || "Could not record legal acceptance.");
+      }
+    }
+
     return id_generated;
   },
 
@@ -893,6 +1006,7 @@ export const EventService = {
       showSponsors: "show_sponsors",
       showCollaborators: "show_collaborators",
       showPartners: "show_partners",
+      paymentInstructions: "payment_instructions",
     };
     for (const [k, v] of Object.entries(patch)) {
       const col = map[k] || k;

@@ -11,6 +11,8 @@ import { PublicAgenda } from "@/src/features/events/components/public/PublicAgen
 import { PublicCompetitions } from "@/src/features/events/components/public/PublicCompetitions";
 import { PublicEventFacts } from "@/src/features/events/components/public/PublicEventFacts";
 import { PublicEventHero } from "@/src/features/events/components/public/PublicEventHero";
+import { PublicMedia } from "@/src/features/events/components/public/PublicMedia";
+import { PublicOrganizerCard } from "@/src/features/events/components/public/PublicOrganizerCard";
 import { PublicRegisterCard } from "@/src/features/events/components/public/PublicRegisterCard";
 import { PublicSpeakers } from "@/src/features/events/components/public/PublicSpeakers";
 import { PublicSponsorsStrip } from "@/src/features/events/components/public/PublicSponsorsStrip";
@@ -198,34 +200,28 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
 
           <div className="order-2 space-y-12 lg:order-1">
             <PublicEventFacts dto={dto} />
+            <PublicMedia dto={dto} />
             <PublicAbout dto={dto} />
             <PublicTiersAndDiscounts dto={dto} />
             <PublicAgenda items={dto.agenda} />
             <PublicSpeakers speakers={dto.speakers} />
+            {dto.isHackathon ? (
+              <PublicCompetitions
+                eventId={dto.id}
+                competitions={dto.competitions}
+                qsSuffix={qsSuffix}
+              />
+            ) : null}
+            <PublicSponsorsStrip
+              sponsors={dto.sponsors}
+              collaborators={dto.collaborators}
+              partners={dto.partners}
+              sponsorTiers={dto.sponsorTiers}
+            />
+            <PublicOrganizerCard dto={dto} />
+            <ReportEvent action={reportEvent.bind(null, dto.id)} />
           </div>
         </div>
-
-        {dto.isHackathon ? (
-          <PublicCompetitions
-            eventId={dto.id}
-            competitions={dto.competitions}
-            qsSuffix={qsSuffix}
-          />
-        ) : null}
-
-        <PublicSponsorsStrip
-          sponsors={dto.sponsors}
-          collaborators={dto.collaborators}
-          partners={dto.partners}
-          sponsorTiers={dto.sponsorTiers}
-        />
-
-        <footer className="mt-12 space-y-6 border-t border-line pt-6">
-          <p className="text-sm text-ink-soft">
-            Organized by <span className="font-medium text-ink">{dto.organizerChip.name}</span>
-          </p>
-          <ReportEvent action={reportEvent.bind(null, dto.id)} />
-        </footer>
       </div>
     </main>
   );

@@ -23,12 +23,23 @@ function asDraft(field: SchemaField | FormFieldDraft): SchemaField {
   };
 }
 
-function fileAnswerSchema(required: boolean) {
-  const shape = z.object({
-    path: z.string().min(1),
-    bucket: z.string().optional(),
+const FILE_UPLOAD_MSG = "We couldn't upload this file. Use an image or PDF under 5 MB.";
+
+function isFileAnswer(v: unknown): v is { path: string; bucket?: string } {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  const path = (v as { path?: unknown }).path;
+  return typeof path === "string" && path.trim().length > 0;
+}
+
+function fileAnswerSchema(required: boolean, label: string) {
+  const missing = required ? `Please upload ${label}. ${FILE_UPLOAD_MSG}` : FILE_UPLOAD_MSG;
+  const requiredSchema = z.custom<{ path: string; bucket?: string }>(isFileAnswer, {
+    message: missing,
   });
-  return required ? shape : shape.optional().nullable();
+  if (!required) {
+    return z.union([requiredSchema, z.null(), z.undefined()]);
+  }
+  return requiredSchema;
 }
 
 function fieldZod(field: SchemaField): z.ZodTypeAny {
@@ -88,7 +99,7 @@ function fieldZod(field: SchemaField): z.ZodTypeAny {
         : base.optional().or(z.literal(""));
     }
     case "file":
-      return fileAnswerSchema(field.required);
+      return fileAnswerSchema(field.required, label);
     case "textarea":
     case "text":
     case "date":

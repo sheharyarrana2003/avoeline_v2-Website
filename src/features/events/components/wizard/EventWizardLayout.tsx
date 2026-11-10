@@ -122,8 +122,24 @@ function tracksValidationError(form: EventFormData): string | null {
 
 function registrationValidationError(form: EventFormData): string | null {
   if (form.requiresRegistration === false) return null;
-  if (form.ticketType === "paid" && (form.ticketTiers?.length ?? 0) < 1) {
-    return "Add at least one ticket tier for a paid event.";
+  if (form.ticketType !== "paid") return null;
+
+  // Hackathon fees live on competitions, not event-level tiers.
+  if (form.isHackathon) {
+    const tracks = form.wizardTracks ?? [];
+    const hasFee = tracks.some((t) => Number(t.fee) > 0);
+    if (!hasFee) {
+      return form.multiTrack
+        ? "Set a fee on at least one competition, or switch registration to Free."
+        : "Set the entry fee on the competition, or switch registration to Free.";
+    }
+    return null;
+  }
+
+  const entry = Number(form.PriceOfTicket) || 0;
+  const tiers = form.ticketTiers ?? [];
+  if (entry <= 0 && tiers.length < 1) {
+    return "Set an entry fee or add at least one ticket tier for a paid event.";
   }
   return null;
 }

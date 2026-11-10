@@ -50,7 +50,12 @@ export function mapGoogleApiError(status: number, body: string): GoogleMappedErr
       message: "Your organization's Google admin has blocked this app.",
     };
   }
-  return { kind: "other", message: body.slice(0, 500) || `Google API error (${status})`, status };
+  // Never surface raw Google JSON/HTML to organizers.
+  return {
+    kind: "other",
+    message: `Google API error (${status}). Please try again.`,
+    status,
+  };
 }
 
 export function missingRequiredScopes(granted: string[], required: string[]): string[] {

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { AuthService } from "@/src/features/auth/authService";
 import { ConnectionsPage } from "@/src/features/connections/components/ConnectionsPage";
-import type { ConnectionsHubTab } from "@/src/features/connections/components/ConnectionsHub";
 import { DelayedConfirmationsBanner } from "@/src/features/connections/components/DelayedConfirmationsBanner";
+import { ScrollToConnectionSection } from "@/src/features/connections/components/ScrollToConnectionSection";
 import {
   googleConnectionsConfigured,
   listConnections,
@@ -13,17 +12,30 @@ import { listSheetSyncsForOwner } from "@/src/features/connections/server/sheetS
 import { listBatches } from "@/src/features/connections/server/batch.service";
 import { consumeReconnectToken } from "@/src/features/connections/server/reconnectTokens.service";
 import { buildBlockedByAdminNote } from "@/src/features/connections/lib/blockedByAdminCopy";
-import { getGoogleOAuthConfig } from "@/src/env";
+import { diagnoseGoogleConnectionsEnv, getGoogleOAuthConfig } from "@/src/env";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 
-const TABS = new Set<ConnectionsHubTab>(["accounts", "library", "calendar", "sheets", "email"]);
+const TAB_TO_SECTION: Record<string, string> = {
+  library: "drive",
+  email: "email",
+  calendar: "calendar",
+  sheets: "sheets",
+  accounts: "",
+};
 
 export default async function OrganizerConnectionsSettingsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ organizer_id: string }>;
-  searchParams: Promise<{ e?: string; ok?: string; t?: string; reconnect?: string; tab?: string }>;
+  searchParams: Promise<{
+    e?: string;
+    ok?: string;
+    t?: string;
+    reconnect?: string;
+    tab?: string;
+    section?: string;
+  }>;
 }) {
   const { organizer_id } = await params;
   const sp = await searchParams;
@@ -33,6 +45,21 @@ export default async function OrganizerConnectionsSettingsPage({
     const admin = await AuthService.requireAdmin("organizers");
     if (!admin?.isOwner) redirect("/access-denied");
   }
+
+  // Legacy ?tab= → ?section= (tabs removed; server redirects cannot keep #hash).
+  if (sp.tab && TAB_TO_SECTION[sp.tab] !== undefined && !sp.section) {
+    const section = TAB_TO_SECTION[sp.tab];
+    const q = new URLSearchParams();
+    if (sp.e) q.set("e", sp.e);
+    if (sp.ok) q.set("ok", sp.ok);
+    if (sp.t) q.set("t", sp.t);
+    if (sp.reconnect) q.set("reconnect", sp.reconnect);
+    if (section) q.set("section", section);
+    const qs = q.toString();
+    redirect(`/organizer/${organizer_id}/settings/connections${qs ? `?${qs}` : ""}`);
+  }
+
+  const section = sp.section || (sp.tab ? TAB_TO_SECTION[sp.tab] : undefined);
 
   let reconnectOk: string | undefined;
   let reconnectErr: string | undefined;
@@ -46,8 +73,6 @@ export default async function OrganizerConnectionsSettingsPage({
     else reconnectErr = consumed.error;
   }
 
-  const tabRaw = String(sp.tab || "accounts") as ConnectionsHubTab;
-  const tab = TABS.has(tabRaw) ? tabRaw : "accounts";
   const hubBase = `/organizer/${organizer_id}/settings/connections`;
 
   const [connections, googleReady, calendarLinks, sheetSyncs, emailPage] = await Promise.all([
@@ -60,21 +85,17 @@ export default async function OrganizerConnectionsSettingsPage({
   const oauth = getGoogleOAuthConfig();
   const blockedNote = buildBlockedByAdminNote({ clientId: oauth.clientId || "" });
 
+  // Platform owners / admins only — presence flags, never secret values.
+  const adminIdentity = await AuthService.requireAdmin("organizers");
+  const oauthDiagnostics = adminIdentity ? diagnoseGoogleConnectionsEnv() : null;
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      <ScrollToConnectionSection section={section} />
       <PageHeader
         title="Connections"
-        description="Google accounts, Drive library, calendar syncs, Sheets, and sent email."
+        description="Google account, email, Calendar and Meet, Drive, and Sheets."
       />
-      <p className="mb-4 text-sm text-ink-soft">
-        <Link href={`/organizer/${organizer_id}/profile`} className="underline hover:text-ink">
-          Back to profile
-        </Link>
-        {" · "}
-        <Link href={`/organizer/${organizer_id}/forms`} className="underline hover:text-ink">
-          Custom Forms
-        </Link>
-      </p>
       <div className="mb-4">
         <DelayedConfirmationsBanner ownerId={organizer_id} />
       </div>
@@ -85,13 +106,13 @@ export default async function OrganizerConnectionsSettingsPage({
         googleReady={googleReady}
         catalogScope="organizer"
         hubBasePath={hubBase}
-        tab={tab}
         calendarLinks={calendarLinks}
         sheetSyncs={sheetSyncs}
         emailBatches={{ rows: emailPage.rows, nextCursor: emailPage.nextCursor }}
         error={sp.e || reconnectErr}
         success={sp.ok || reconnectOk}
         blockedNote={blockedNote}
+        oauthDiagnostics={oauthDiagnostics}
       />
     </div>
   );

@@ -1,46 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { CalendarPlus } from "lucide-react";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
-import { ShareEventLink } from "@/src/features/events/components/ShareEventLink";
 import type { PublicEventDto } from "@/src/features/events/types";
-import { downloadEventIcs, eventGoogleCalendarUrl } from "./addToCalendar";
-import { buttonClass } from "@/src/lib/ui";
+import { PublicShareMenu } from "./PublicShareMenu";
+import { PublicCalendarMenu } from "./PublicCalendarMenu";
+import { lifecycleLabel } from "./publicPage.logic";
 
-const LIFECYCLE_LABEL: Record<string, string> = {
-  draft: "Draft",
-  upcoming: "Upcoming",
-  ongoing: "Happening now",
-  completed: "Completed",
-  cancelled: "Cancelled",
-  archived: "Archived",
-  published: "Published",
-};
-
+/**
+ * Clean banner (no text/glass overlays) + solid meta section below.
+ * Do not add gradient overlays or chips on top of the banner image.
+ */
 export function PublicEventHero({ dto, preview }: { dto: PublicEventDto; preview: boolean }) {
-  const statusLabel = preview ? "Admin preview" : LIFECYCLE_LABEL[dto.lifecycle] || dto.status;
+  const statusLabel = lifecycleLabel(dto.lifecycle, preview);
 
   return (
-    <header className="relative overflow-hidden rounded-none border-b border-line">
-      <div className="relative min-h-[280px] w-full sm:min-h-[360px]">
-        {dto.bannerImage ? (
-          <Image
-            src={dto.bannerImage}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-muted via-paper to-muted" />
-        )}
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/35 to-ink/10"
-          aria-hidden="true"
-        />
-        <div className="relative z-10 mx-auto flex h-full min-h-[280px] w-full max-w-6xl flex-col justify-end gap-4 px-4 py-10 sm:min-h-[360px] sm:px-6 sm:py-14">
+    <header className="border-b border-line bg-paper">
+      <div className="relative w-full overflow-hidden bg-muted">
+        <div className="relative aspect-video w-full md:aspect-[21/9]">
+          {dto.bannerImage ? (
+            <Image
+              src={dto.bannerImage}
+              alt={dto.title ? `${dto.title} banner` : "Event banner"}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-muted via-paper to-muted" />
+          )}
+        </div>
+      </div>
+
+      <div className="relative z-10 mx-auto -mt-6 w-full max-w-6xl px-4 sm:-mt-8 sm:px-6">
+        <div className="rounded-2xl border border-line bg-paper px-4 py-6 shadow-sm sm:px-6 sm:py-8">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge
               status={preview ? "unpublished" : dto.lifecycle}
@@ -51,42 +45,27 @@ export function PublicEventHero({ dto, preview }: { dto: PublicEventDto; preview
             {dto.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-white/30 bg-white/10 px-2.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-white"
+                className="rounded-full border border-line bg-muted px-2.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-ink-soft"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <h1 className="max-w-3xl font-display text-3xl text-white sm:text-5xl">{dto.title}</h1>
+          <h1 className="mt-3 max-w-3xl font-display text-3xl text-ink sm:text-4xl md:text-5xl">
+            {dto.title}
+          </h1>
 
           {dto.shortDescription ? (
-            <p className="max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg">
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
               {dto.shortDescription}
             </p>
           ) : null}
 
-          <div className="mt-2 flex flex-wrap items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <OrganizerChip name={dto.organizerChip.name} logoUrl={dto.organizerChip.logoUrl} />
-            <div className="min-w-0 flex-1 sm:max-w-sm">
-              <ShareEventLink url={dto.sharePath} label="Share" />
-            </div>
-            <button
-              type="button"
-              onClick={() => downloadEventIcs(dto)}
-              className={buttonClass("secondary", "sm")}
-            >
-              <CalendarPlus className="h-3.5 w-3.5" aria-hidden="true" />
-              Download .ics
-            </button>
-            <a
-              href={eventGoogleCalendarUrl(dto)}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonClass("secondary", "sm")}
-            >
-              Google Calendar
-            </a>
+            <PublicShareMenu sharePath={dto.sharePath} title={dto.title} />
+            <PublicCalendarMenu dto={dto} preview={preview} />
           </div>
         </div>
       </div>
@@ -96,12 +75,12 @@ export function PublicEventHero({ dto, preview }: { dto: PublicEventDto; preview
 
 function OrganizerChip({ name, logoUrl }: { name: string; logoUrl?: string | null }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/25 px-2.5 py-1.5 text-sm text-white backdrop-blur-sm">
+    <div className="inline-flex items-center gap-2 rounded-full border border-line bg-muted px-2.5 py-1.5 text-sm text-ink">
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
       ) : (
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 font-display text-2xs">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-paper font-display text-2xs">
           {name.slice(0, 1).toUpperCase()}
         </span>
       )}

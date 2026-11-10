@@ -22,6 +22,7 @@ const schema = z.object({
   unlimitedSeats: z.boolean().optional().default(false),
   ticketType: z.enum(["free", "paid"]),
   ticketPrice: z.number().min(0).max(10_000_000).optional().default(0),
+  paymentInstructions: z.string().max(4000).optional().default(""),
 });
 
 export type UpdateEventBasicsInput = z.infer<typeof schema>;
@@ -70,6 +71,7 @@ export const updateEventBasics = safeAction({
         available_seats: seats > 0 ? Math.max(0, seats - (event.capacity?.reservedSeats ?? 0)) : 0,
         isFree,
         pricing,
+        paymentInstructions: isFree ? "" : String(input.paymentInstructions || "").trim(),
       });
     } catch (err) {
       console.error("[updateEventBasics]", err);
@@ -79,6 +81,8 @@ export const updateEventBasics = safeAction({
     revalidatePath(`/organizer/${event.organizerId}/events`);
     revalidatePath(`/organizer/${event.organizerId}/events/${input.eventId}`);
     revalidatePath(`/organizer/${event.organizerId}/events/${input.eventId}/edit`);
+    revalidatePath(`/events/${input.eventId}`);
+    revalidatePath(`/e/${input.eventId}`);
     return safeOk({ eventId: input.eventId });
   },
 });

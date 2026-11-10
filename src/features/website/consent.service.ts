@@ -5,7 +5,9 @@ import { supabaseAdmin } from "@/data/supabase";
 import { getServerEnv } from "@/src/env";
 import type { Database } from "@/src/lib/database.types";
 import {
+  EVENT_PUBLISH_LEGAL_SLUGS,
   MARKETING_SCOPES,
+  REGISTRATION_LEGAL_SLUGS,
   buildUnsubscribeToken,
   hashEmail,
   hashUnsubscribeToken,
@@ -13,6 +15,8 @@ import {
   parseAndVerifyUnsubscribeToken,
   type MarketingScope,
 } from "./consent.logic";
+
+export { EVENT_PUBLISH_LEGAL_SLUGS, REGISTRATION_LEGAL_SLUGS };
 
 type MarketingRow = Database["public"]["Tables"]["marketing_consents"]["Row"];
 type UserConsentRow = Database["public"]["Tables"]["user_consents"]["Row"];
@@ -34,13 +38,14 @@ export function getAppOrigin(): string {
   return "http://localhost:3000";
 }
 
-export async function getCurrentLegalVersions(): Promise<
-  Array<{ slug: string; version: number; documentId: string }>
-> {
+export async function getCurrentLegalVersions(
+  slugs: readonly string[] = REGISTRATION_LEGAL_SLUGS,
+): Promise<Array<{ slug: string; version: number; documentId: string }>> {
+  const wanted = slugs.length ? [...slugs] : [...REGISTRATION_LEGAL_SLUGS];
   const { data: docs, error } = await supabaseAdmin
     .from(TABLES.LEGAL_DOCUMENTS)
     .select("id, slug, current_version_id")
-    .in("slug", ["privacy", "terms"]);
+    .in("slug", wanted);
   if (error || !docs?.length) {
     console.error("[getCurrentLegalVersions]", error?.message);
     return [];
@@ -68,9 +73,12 @@ export async function recordLegalAcceptance(opts: {
   email: string;
   context: string;
   ipHash?: string | null;
+  /** Defaults to privacy + terms. */
+  slugs?: readonly string[];
 }): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
-  const versions = await getCurrentLegalVersions();
-  if (!versions.length) {
+  const wanted = opts.slugs ?? REGISTRATION_LEGAL_SLUGS;
+  const versions = await getCurrentLegalVersions(wanted);
+  if (!versions.length || versions.length < wanted.length) {
     return { ok: false, error: "Legal documents are not published yet." };
   }
   const emailHash = hashEmail(opts.email);

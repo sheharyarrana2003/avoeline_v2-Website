@@ -5,6 +5,7 @@ import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import type { EventFormField } from "@/src/features/registration/forms/formFields.types";
 import type { PublicEventDto, RegisterButtonState } from "@/src/features/events/types";
+import { whatHappensNextLine } from "./publicPage.logic";
 
 type Props = {
   dto: PublicEventDto;
@@ -35,7 +36,7 @@ export function PublicRegisterCard({
         <ul className="mt-4 space-y-2 border-t border-line pt-4">
           {dto.pricingTiers.map((t) => (
             <li key={t.id} className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="text-ink">
+              <span className="break-words text-ink">
                 {t.name}
                 {t.availableUntil ? (
                   <span className="ml-1 text-2xs text-ink-soft">
@@ -46,7 +47,7 @@ export function PublicRegisterCard({
                   <span className="ml-1 text-2xs text-ink-soft">{t.seatsLeft} left</span>
                 ) : null}
               </span>
-              <span className="tabular-nums text-ink-soft">
+              <span className="shrink-0 tabular-nums text-ink-soft">
                 {formatCurrency(t.price, dto.currency, "Free")}
               </span>
             </li>
@@ -86,11 +87,38 @@ function RegisterBody({
   accessCode: string | null;
   attendee: { name?: string; email?: string } | null;
 }) {
-  if (state === "admin_preview" || (preview && dto.lifecycle === "draft")) {
+  const nextLine = whatHappensNextLine({
+    isFree: dto.isFree,
+    requiresApproval: dto.requiresApproval,
+  });
+
+  if (state === "admin_preview" || preview) {
+    const openCompetitions = dto.competitions.filter((c) => c.registrationOpen);
     return (
-      <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
-        Admin preview — registration is not available while this event is a draft.
-      </p>
+      <div className="space-y-3">
+        <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
+          Preview only — registration cannot be submitted from this view.
+        </p>
+        <RegistrationForm
+          eventId={dto.id}
+          isPaid={!dto.isFree}
+          priceLabel={dto.admissionLabel}
+          inviteToken={null}
+          accessCode={null}
+          joinsWaitlist={false}
+          needsApproval={dto.requiresApproval}
+          formFields={formFields}
+          competitions={openCompetitions.map((c) => competitionChoice(c))}
+          groupRegistration={dto.groupRegistration}
+          groupMinSize={dto.groupMinSize}
+          groupMaxSize={dto.groupMaxSize}
+          attendee={attendee}
+          tierChoices={[]}
+          previewOnly
+          paymentInstructions={dto.paymentInstructions}
+        />
+        <p className="text-xs text-ink-soft">{nextLine}</p>
+      </div>
     );
   }
 
@@ -164,9 +192,9 @@ function RegisterBody({
       );
     }
     return (
-      <>
+      <div className="space-y-3">
         {state === "waitlist" ? (
-          <p className="mb-4 rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+          <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
             Seats are full — you will join the waitlist.
           </p>
         ) : null}
@@ -179,25 +207,7 @@ function RegisterBody({
           joinsWaitlist={state === "waitlist"}
           needsApproval={dto.requiresApproval}
           formFields={formFields}
-          competitions={openCompetitions.map((c) => ({
-            id: c.id,
-            name: c.name,
-            kind: c.kind,
-            description: c.description,
-            instructions: "",
-            policies: "",
-            rulesText: c.rulesText,
-            fee: c.fee,
-            due: c.due,
-            currency: c.currency,
-            discountPercent: c.discountPercent,
-            discountNote: c.discountNote,
-            minTeamSize: c.minTeamSize,
-            maxTeamSize: c.maxTeamSize,
-            submissionDeadline: c.submissionDeadline,
-            prizePool: c.prizePool,
-            imageUrl: c.imageUrl,
-          }))}
+          competitions={openCompetitions.map((c) => competitionChoice(c))}
           groupRegistration={dto.groupRegistration}
           groupMinSize={dto.groupMinSize}
           groupMaxSize={dto.groupMaxSize}
@@ -209,12 +219,36 @@ function RegisterBody({
                 ? dto.attendeeTiers.filter((t) => !dto.lockedTiers.includes(t))
                 : []
           }
+          paymentInstructions={dto.paymentInstructions}
         />
-      </>
+        <p className="text-xs text-ink-soft">{nextLine}</p>
+      </div>
     );
   }
 
   return null;
+}
+
+function competitionChoice(c: PublicEventDto["competitions"][number]) {
+  return {
+    id: c.id,
+    name: c.name,
+    kind: c.kind,
+    description: c.description,
+    instructions: "",
+    policies: "",
+    rulesText: c.rulesText,
+    fee: c.fee,
+    due: c.due,
+    currency: c.currency,
+    discountPercent: c.discountPercent,
+    discountNote: c.discountNote,
+    minTeamSize: c.minTeamSize,
+    maxTeamSize: c.maxTeamSize,
+    submissionDeadline: c.submissionDeadline,
+    prizePool: c.prizePool,
+    imageUrl: c.imageUrl,
+  };
 }
 
 /** Reconstruct EventFormField-shaped rows for RegistrationForm (ids are synthetic). */

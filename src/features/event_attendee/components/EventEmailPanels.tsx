@@ -15,9 +15,9 @@ import {
   type EventEmailKind,
   type EventEmailTemplate,
 } from "../emailTypes";
-import { COMPOSER_PREVIEW_SAMPLE, previewSubstitute } from "../emailCompose.logic";
 import {
   previewBulkAttendeeEmailAction,
+  previewComposerEmailAction,
   saveEventEmailTemplateAction,
   sendBulkAttendeeEmailAction,
   sendMemberEmailAction,
@@ -28,6 +28,7 @@ import { CapacityStrip } from "@/src/features/connections/components/CapacityStr
 import { CapacityDialog } from "@/src/features/connections/components/CapacityDialog";
 import { SenderPicker } from "@/src/features/connections/components/SenderPicker";
 import type { PreviewSendResult } from "@/src/features/connections/types";
+import { useEffect } from "react";
 
 function TokenInsertMenu({
   onInsert,
@@ -155,7 +156,28 @@ export function RegistrationEmailsModal({
   const [blocks, setBlocks] = useState<EmailIncludeBlock[]>(
     saved?.includeBlocks?.length ? saved.includeBlocks : fallback.includeBlocks,
   );
+  const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [previewSubject, setPreviewSubject] = useState<string>("");
+  const [previewPending, startPreview] = useTransition();
+  const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const fd = new FormData();
+    fd.set("eventId", eventId);
+    fd.set("kind", kind);
+    fd.set("subject", subject);
+    fd.set("body", body);
+    for (const b of blocks) fd.append("block", b);
+    startPreview(async () => {
+      const r = await previewComposerEmailAction(fd);
+      if (r.success) {
+        setPreviewHtml(r.html || "");
+        setPreviewSubject(r.subject || "");
+      }
+    });
+  }, [open, eventId, kind, subject, body, blocks]);
 
   function switchKind(next: Exclude<EventEmailKind, "custom">) {
     const row = templates.find((t) => t.kind === next);
@@ -289,20 +311,24 @@ export function RegistrationEmailsModal({
             block. “Also email each member…” does not change the body — it sends a separate QR mail
             after confirmation.
           </p>
+          <SenderPicker
+            eventId={eventId}
+            value={senderConnectionId}
+            onChange={setSenderConnectionId}
+          />
+          <CapacityStrip ownerId={organizerId} kind={kind} eventId={eventId} />
           <div className="rounded-xl border border-line bg-muted/30 p-3">
-            <p className={labelClass}>Live preview</p>
-            <p className="mt-1 text-sm font-medium text-ink">
-              {previewSubstitute(subject, {
-                ...COMPOSER_PREVIEW_SAMPLE,
-                paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
-              })}
-            </p>
-            <pre className="mt-2 whitespace-pre-wrap font-sans text-xs text-ink-soft">
-              {previewSubstitute(body, {
-                ...COMPOSER_PREVIEW_SAMPLE,
-                paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
-              })}
-            </pre>
+            <p className={labelClass}>Live preview{previewPending ? "…" : ""}</p>
+            <p className="mt-1 text-sm font-medium text-ink">{previewSubject || subject}</p>
+            {previewHtml ? (
+              <iframe
+                title="Registration email preview"
+                className="mt-2 h-80 w-full rounded-lg border border-line bg-paper"
+                srcDoc={previewHtml}
+              />
+            ) : (
+              <p className="mt-2 text-xs text-ink-soft">Preview loads from the server renderer.</p>
+            )}
           </div>
         </form>
       </Modal>
@@ -680,11 +706,13 @@ export function BulkAttendeeEmail(props: {
 export function MemberEmailForm({
   eventId,
   registrationId,
+  organizerId,
   startOpen = false,
   hidePayment,
 }: {
   eventId: string;
   registrationId: string;
+  organizerId?: string;
   startOpen?: boolean;
   hidePayment?: boolean;
 }) {
@@ -692,19 +720,38 @@ export function MemberEmailForm({
   const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [kind, setKind] = useState<EventEmailKind>("registration_confirmed");
   const [blocks, setBlocks] = useState<EmailIncludeBlock[]>([
     "ticket_url",
     "qr_code",
     "event_details",
   ]);
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewSubject, setPreviewSubject] = useState("");
+  const [previewPending, startPreview] = useTransition();
   const [state, action] = useActionState<ActionResult | null, FormData>(
     sendMemberEmailAction,
     null,
   );
-  const sample = {
-    ...COMPOSER_PREVIEW_SAMPLE,
-    paymentStatus: hidePayment ? "" : COMPOSER_PREVIEW_SAMPLE.paymentStatus,
-  };
+
+  useEffect(() => {
+    if (!open) return;
+    const fd = new FormData();
+    fd.set("eventId", eventId);
+    fd.set("registrationId", registrationId);
+    fd.set("kind", kind);
+    if (subject) fd.set("subject", subject);
+    if (body) fd.set("body", body);
+    for (const b of blocks) fd.append("block", b);
+    startPreview(async () => {
+      const r = await previewComposerEmailAction(fd);
+      if (r.success) {
+        setPreviewHtml(r.html || "");
+        setPreviewSubject(r.subject || "");
+      }
+    });
+  }, [open, eventId, registrationId, kind, subject, body, blocks]);
+
   if (!open) {
     return (
       <button
@@ -727,6 +774,7 @@ export function MemberEmailForm({
         <input key={b} type="hidden" name="block" value={b} />
       ))}
       <SenderPicker eventId={eventId} value={senderConnectionId} onChange={setSenderConnectionId} />
+      {organizerId ? <CapacityStrip ownerId={organizerId} kind={kind} eventId={eventId} /> : null}
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-ink">Compose</p>
         <button
@@ -745,7 +793,8 @@ export function MemberEmailForm({
           id={`email-type-${registrationId}`}
           name="kind"
           className={`${fieldClass} mt-1`}
-          defaultValue="registration_confirmed"
+          value={kind}
+          onChange={(e) => setKind(e.target.value as EventEmailKind)}
         >
           <option value="registration_received">Registration received</option>
           <option value="registration_confirmed">Registration confirmed</option>
@@ -787,16 +836,17 @@ export function MemberEmailForm({
         showTeamBlocks
       />
       <div className="rounded-lg border border-line bg-muted/30 p-2">
-        <p className={labelClass}>Live preview</p>
-        <p className="mt-1 text-xs font-medium text-ink">
-          {previewSubstitute(subject || "Your message — {{eventTitle}}", sample)}
-        </p>
-        <pre className="mt-1 whitespace-pre-wrap font-sans text-2xs text-ink-soft">
-          {previewSubstitute(
-            body || "Hello {{attendeeName}}, see details for {{eventTitle}}.",
-            sample,
-          )}
-        </pre>
+        <p className={labelClass}>Live preview{previewPending ? "…" : ""}</p>
+        <p className="mt-1 text-xs font-medium text-ink">{previewSubject || "—"}</p>
+        {previewHtml ? (
+          <iframe
+            title="Member email preview"
+            className="mt-2 h-64 w-full rounded-lg border border-line bg-paper"
+            srcDoc={previewHtml}
+          />
+        ) : (
+          <p className="mt-1 text-2xs text-ink-soft">Preview loads from the server renderer.</p>
+        )}
       </div>
       {state?.error ? <FormFeedback error={state.error} /> : null}
       {state?.success ? <p className="text-xs text-ink-soft">Sent.</p> : null}

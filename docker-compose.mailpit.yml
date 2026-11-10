@@ -1,0 +1,11 @@
+# Local catch-all SMTP for attendee email QA (N6).
+# Usage: docker compose -f docker-compose.mailpit.yml up -d
+# UI: http://localhost:8025  SMTP: localhost:1025
+# Set EMAIL_TRANSPORT=mailpit in .env.local (non-production only).
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped

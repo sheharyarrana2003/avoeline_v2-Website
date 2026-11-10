@@ -254,7 +254,7 @@ export default async function OrganizerProfile({
                     {emailConnected ? "Manage connections" : "Connect Google"}
                   </Link>
                   <Link
-                    href={`${basePath}/settings/connections?tab=library`}
+                    href={`${basePath}/settings/connections?section=drive`}
                     className="underline text-ink-soft hover:text-ink"
                   >
                     Drive library

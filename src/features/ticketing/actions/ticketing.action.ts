@@ -22,11 +22,15 @@ export async function createTicketTierAction(
   const price = Number(formData.get("price") || 0);
   if (!name) return fail("Name is required.");
   try {
+    const seatsRaw = String(formData.get("seats") || "").trim();
+    const seatsNum = seatsRaw ? Number(seatsRaw) : NaN;
     await TicketingService.createTier(eventId, {
       name,
       price,
-      seatsAvailable: Number(formData.get("seats")) || undefined,
+      seatsAvailable: Number.isFinite(seatsNum) && seatsNum > 0 ? seatsNum : null,
+      availableFrom: String(formData.get("availableFrom") || "").trim() || null,
       availableUntil: String(formData.get("availableUntil") || "").trim() || null,
+      isEarlyBird: formData.get("isEarlyBird") === "on",
       active: formData.get("active") === "on",
     });
     revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/access`);
@@ -49,11 +53,14 @@ export async function createPromoCodeAction(
   if (!code) return fail("Code is required.");
   try {
     const trackId = String(formData.get("trackId") || "").trim();
+    const usageRaw = String(formData.get("usageLimit") || "").trim();
+    const usageNum = usageRaw ? Number(usageRaw) : NaN;
     await TicketingService.createPromo(eventId, {
       code,
       discountType,
       value,
       trackId: trackId || null,
+      usageLimit: Number.isFinite(usageNum) && usageNum > 0 ? usageNum : undefined,
       expiresAt: String(formData.get("expiresAt") || "").trim() || null,
       active: formData.get("active") === "on",
     });

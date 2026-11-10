@@ -5,12 +5,13 @@ import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { randomUUID } from "crypto";
 import { TABLES } from "@/data/collections";
-import { supabaseAdmin, CERTIFICATES_BUCKET } from "@/data/supabase";
+import { supabaseAdmin } from "@/data/supabase";
 import { toIsoDate } from "@/src/lib/datetime";
 import { type ActionResult, fail, ok } from "@/src/lib/action";
 import { assertEventActor } from "@/src/features/events/ownership";
 import { getStaffEventGrant, staffCanAct } from "@/src/features/hackathon/staffEventAccess";
 import { uploadMedia } from "@/src/features/media/uploadMedia.action";
+import { uploadEventAssetToOrganizerDrive } from "@/src/features/connections/server/eventDriveUpload.service";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import { getTrack, listTeams } from "../hackathon.service";
 import { hackathonDashPath, organizerHackathonCachePaths } from "../kinds";
@@ -130,16 +131,26 @@ export async function saveTrack(
       if (instructionsFile.size > MAX_RULES_BYTES) {
         return fail("That file is too large. Please keep it under 15MB.");
       }
-      const upload = new FormData();
-      upload.append("file", instructionsFile);
-      upload.append("folder", "track-instructions");
-      upload.append("bucket", CERTIFICATES_BUCKET);
-      const uploaded = await uploadMedia(upload);
-      if (!uploaded.success) {
-        return fail(uploaded.error || "That file could not be uploaded.");
+      try {
+        const bytes = Buffer.from(await instructionsFile.arrayBuffer());
+        const uploaded = await uploadEventAssetToOrganizerDrive({
+          organizerId: event.organizerId,
+          eventId: event.id,
+          kind: "media",
+          fileName: instructionsFile.name,
+          mimeType: instructionsFile.type || "application/octet-stream",
+          bytes,
+          category: "other",
+          entityType: "hackathon_track",
+          entityId: trackId || "new",
+          allowFallback: true,
+          linkLibrary: false,
+        });
+        instructionsPath = uploaded.storageRef || uploaded.webUrl || "";
+        instructionsName = instructionsFile.name;
+      } catch {
+        return fail("That instruction file could not be uploaded. Try again or reconnect Drive.");
       }
-      instructionsPath = uploaded.path;
-      instructionsName = instructionsFile.name;
     }
 
     let imageUrl = existing?.imageUrl ?? "";
@@ -147,7 +158,8 @@ export async function saveTrack(
     if (image instanceof File && image.size > 0) {
       const upload = new FormData();
       upload.append("file", image);
-      upload.append("folder", "track-images");
+      upload.append("kind", "competition_image");
+      upload.append("eventId", event.id);
       const uploaded = await uploadMedia(upload);
       if (!uploaded.success) {
         return fail(uploaded.error || "That image could not be uploaded.");

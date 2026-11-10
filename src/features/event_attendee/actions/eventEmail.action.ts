@@ -97,6 +97,7 @@ export async function sendMemberEmailAction(
       subjectOverride: String(formData.get("subject") ?? "") || undefined,
       bodyOverride: String(formData.get("body") ?? "") || undefined,
       includeBlocks: blocksFromForm(formData),
+      connectionId: String(formData.get("connectionId") ?? "").trim() || null,
     });
     if (!sent) {
       return fail(
@@ -253,7 +254,7 @@ export async function sendBulkAttendeeEmailAction(
       kind: kindRaw,
       subject: preview.subject || subject,
       html: preview.html,
-      text: undefined,
+      text: preview.text,
       recipients: capped.map((r) => ({
         email: String(r.attendee?.email || ""),
         registrationId: r.registrationId,
@@ -264,6 +265,14 @@ export async function sendBulkAttendeeEmailAction(
       eventId,
       connectionId: conn.id,
       createdBy: actor.userId,
+      // Per-recipient React Email render at send time (docs/18 + N6).
+      deferSendNowToOutbox: true,
+      payloadExtra: {
+        bodyOverride: body,
+        subjectOverride: subject,
+        includeBlocks: blocks,
+        renderAtSend: true,
+      },
     });
 
     revalidatePath(`/organizer/${event.organizerId}/events/${event.id}/attendees`);
@@ -280,6 +289,47 @@ export async function sendBulkAttendeeEmailAction(
   } catch (err) {
     console.error("[sendBulkAttendeeEmailAction]", err);
     return fail("Could not send those emails.");
+  }
+}
+
+/** Shared server preview for member + registration template composers (N6). */
+export async function previewComposerEmailAction(
+  formData: FormData,
+): Promise<ActionResult & { html?: string; subject?: string; to?: string }> {
+  try {
+    const eventId = String(formData.get("eventId") ?? "").trim();
+    const registrationId = String(formData.get("registrationId") ?? "").trim();
+    const kindRaw = String(formData.get("kind") ?? "custom").trim();
+    if (!isEventEmailKind(kindRaw)) return fail("Unknown email type.");
+    const event = await assertEventActor(eventId, "attendees");
+    if (!event) return fail("You cannot preview emails for that event.");
+    const full = await EventService.getEventByID(eventId);
+    if (!full) return fail("Event not found.");
+    const regs = await RegService.getRegsOfEvent(eventId);
+    const registration =
+      regs.find((r) => r.registrationId === registrationId) ||
+      regs.find((r) => looksLikeEmail(r.attendee?.email || "")) ||
+      regs[0];
+    if (!registration) return fail("No registration to preview against.");
+    const hidePayment = full.pricing?.isFree === true || Number(full.PriceOfTicket ?? 0) <= 0;
+    const preview = await renderEmailPreview({
+      registration,
+      event: full,
+      kind: kindRaw,
+      subjectOverride: String(formData.get("subject") ?? "") || undefined,
+      bodyOverride: String(formData.get("body") ?? "") || undefined,
+      includeBlocks: blocksFromForm(formData),
+      hidePayment,
+    });
+    return {
+      success: true,
+      html: preview.html,
+      subject: preview.subject,
+      to: preview.to,
+    };
+  } catch (err) {
+    console.error("[previewComposerEmailAction]", err);
+    return fail("Could not build that preview.");
   }
 }
 

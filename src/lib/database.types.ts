@@ -662,6 +662,60 @@ export type Database = {
           },
         ]
       }
+      certificate_jobs: {
+        Row: {
+          attempts: number
+          certificate_id: string
+          created_at: string
+          event_id: string
+          id: string
+          kind: string
+          last_error: string | null
+          not_before: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          certificate_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+          kind: string
+          last_error?: string | null
+          not_before?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          certificate_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          not_before?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_jobs_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_jobs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificate_template_versions: {
         Row: {
           assets: Json
@@ -2335,6 +2389,7 @@ export type Database = {
       event_sponsors_partners: {
         Row: {
           accepted_at: string | null
+          amount_received: number
           benefits: Json | null
           collaboration_terms: string | null
           contact_email: string | null
@@ -2354,7 +2409,6 @@ export type Database = {
           name: string
           partnership_kind: string | null
           payment_status: string
-          amount_received: number
           received_on: string | null
           role: string | null
           tier: string | null
@@ -2366,6 +2420,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          amount_received?: number
           benefits?: Json | null
           collaboration_terms?: string | null
           contact_email?: string | null
@@ -2385,7 +2440,6 @@ export type Database = {
           name: string
           partnership_kind?: string | null
           payment_status?: string
-          amount_received?: number
           received_on?: string | null
           role?: string | null
           tier?: string | null
@@ -2397,6 +2451,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          amount_received?: number
           benefits?: Json | null
           collaboration_terms?: string | null
           contact_email?: string | null
@@ -2416,7 +2471,6 @@ export type Database = {
           name?: string
           partnership_kind?: string | null
           payment_status?: string
-          amount_received?: number
           received_on?: string | null
           role?: string | null
           tier?: string | null
@@ -2481,6 +2535,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "event_staff_assignments_lead_member_id_fkey"
+            columns: ["lead_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "event_staff_assignments_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -2536,6 +2597,7 @@ export type Database = {
           org_id: string | null
           organizer_id: string
           parent_event_id: string | null
+          payment_instructions: string | null
           pricing: Json | null
           promo_video_url: string | null
           published_at: string | null
@@ -2614,6 +2676,7 @@ export type Database = {
           org_id?: string | null
           organizer_id: string
           parent_event_id?: string | null
+          payment_instructions?: string | null
           pricing?: Json | null
           promo_video_url?: string | null
           published_at?: string | null
@@ -2692,6 +2755,7 @@ export type Database = {
           org_id?: string | null
           organizer_id?: string
           parent_event_id?: string | null
+          payment_instructions?: string | null
           pricing?: Json | null
           promo_video_url?: string | null
           published_at?: string | null
@@ -3201,6 +3265,51 @@ export type Database = {
           },
         ]
       }
+      hackathon_judge_submission_scores: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          judge_id: string
+          points: number
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          id?: string
+          judge_id: string
+          points: number
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          judge_id?: string
+          points?: number
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hackathon_judge_submission_scores_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_judges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hackathon_judge_submission_scores_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_task_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hackathon_judges: {
         Row: {
           email: string
@@ -3608,51 +3717,6 @@ export type Database = {
           },
         ]
       }
-      hackathon_judge_submission_scores: {
-        Row: {
-          comment: string
-          created_at: string
-          id: string
-          judge_id: string
-          points: number
-          submission_id: string
-          updated_at: string
-        }
-        Insert: {
-          comment?: string
-          created_at?: string
-          id?: string
-          judge_id: string
-          points: number
-          submission_id: string
-          updated_at?: string
-        }
-        Update: {
-          comment?: string
-          created_at?: string
-          id?: string
-          judge_id?: string
-          points?: number
-          submission_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hackathon_judge_submission_scores_judge_id_fkey"
-            columns: ["judge_id"]
-            isOneToOne: false
-            referencedRelation: "hackathon_judges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hackathon_judge_submission_scores_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "hackathon_task_submissions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hackathon_task_completions: {
         Row: {
           attempted_at: string | null
@@ -3704,6 +3768,7 @@ export type Database = {
       hackathon_task_submissions: {
         Row: {
           created_at: string
+          extra: Json
           file_name: string | null
           file_path: string | null
           file_size: number | null
@@ -3724,6 +3789,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          extra?: Json
           file_name?: string | null
           file_path?: string | null
           file_size?: number | null
@@ -3744,6 +3810,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          extra?: Json
           file_name?: string | null
           file_path?: string | null
           file_size?: number | null
@@ -5968,6 +6035,7 @@ export type Database = {
           rating: number | null
           registration_source: string | null
           review_id: string | null
+          short_code: string
           status: string
           status_history: Json | null
           ticket_tier_id: string | null
@@ -6009,6 +6077,7 @@ export type Database = {
           rating?: number | null
           registration_source?: string | null
           review_id?: string | null
+          short_code: string
           status?: string
           status_history?: Json | null
           ticket_tier_id?: string | null
@@ -6050,6 +6119,7 @@ export type Database = {
           rating?: number | null
           registration_source?: string | null
           review_id?: string | null
+          short_code?: string
           status?: string
           status_history?: Json | null
           ticket_tier_id?: string | null
@@ -7211,6 +7281,7 @@ export type Database = {
       ticket_tiers: {
         Row: {
           active: boolean
+          available_from: string | null
           available_until: string | null
           created_at: string | null
           description: string | null
@@ -7230,6 +7301,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          available_from?: string | null
           available_until?: string | null
           created_at?: string | null
           description?: string | null
@@ -7249,6 +7321,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          available_from?: string | null
           available_until?: string | null
           created_at?: string | null
           description?: string | null

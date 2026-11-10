@@ -33,14 +33,8 @@ export async function sendRegistrationEmail(
   let qrAttachment: { filename: string; content: Buffer; contentType: string } | undefined;
   if (registration.qrCode?.data) {
     try {
-      const payload = JSON.parse(registration.qrCode.data) as {
-        name: string;
-        email: string;
-        eventId: string;
-        registrationId: string;
-        timestamp: string;
-      };
-      const png = await generateQrPng(payload);
+      // N4: qrCode.data is the opaque check-in token (not PII JSON).
+      const png = await generateQrPng(String(registration.qrCode.data));
       qrImageSrc = `data:image/png;base64,${png.toString("base64")}`;
       qrAttachment = {
         filename: "ticket-qr.png",

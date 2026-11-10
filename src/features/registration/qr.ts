@@ -1,14 +1,54 @@
 import QRCode from "qrcode";
-import { QrPayload } from "./types";
+import { signCheckInToken, checkInQrImagePath } from "@/src/features/registration/checkInToken";
 
 /**
- * What the attendee's QR code encodes.
- *
- * Exactly the four values the feature asks for. Stored verbatim in
- * `registration.qrCode.data`, so whoever writes the scanner reads back the same
- * string that was encoded rather than reconstructing it from other fields and
- * hoping the two agree.
+ * On-demand QR PNG encodes a signed opaque check-in token (no PII JSON).
+ * Images are never stored in Drive/Storage.
  */
+export async function generateQrPng(opaqueToken: string): Promise<Buffer> {
+  return QRCode.toBuffer(String(opaqueToken), {
+    type: "png",
+    errorCorrectionLevel: "M",
+    margin: 2,
+    width: 512,
+  });
+}
+
+/**
+ * Build signed check-in QR for a registration. Returns token + synthetic image path.
+ */
+export async function generateAndHostQr(args: {
+  registrationId: string;
+  eventId: string;
+}): Promise<{ data: string; imageUrl: string; png?: Buffer; token: string } | null> {
+  try {
+    const token = signCheckInToken({
+      registrationId: args.registrationId,
+      eventId: args.eventId,
+    });
+    const png = await generateQrPng(token);
+    return {
+      data: token,
+      token,
+      imageUrl: checkInQrImagePath(token),
+      png,
+    };
+  } catch (err) {
+    console.error("[generateAndHostQr]", err);
+    return null;
+  }
+}
+
+/** @deprecated PII JSON payload removed in N4 — kept for type import compatibility. */
+export type QrPayload = {
+  name: string;
+  email: string;
+  eventId: string;
+  registrationId: string;
+  timestamp: string;
+};
+
+/** @deprecated Use generateAndHostQr({ registrationId, eventId }). */
 export function buildQrPayload(args: {
   name: string;
   email: string;
@@ -23,36 +63,4 @@ export function buildQrPayload(args: {
     registrationId: args.registrationId,
     timestamp: args.timestamp,
   };
-}
-
-export async function generateQrPng(payload: QrPayload): Promise<Buffer> {
-  return QRCode.toBuffer(JSON.stringify(payload), {
-    type: "png",
-    errorCorrectionLevel: "M",
-    margin: 2,
-    width: 512,
-  });
-}
-
-/**
- * Generate QR payload + PNG for email inline. Does not store or host the image
- * (O1 A6) — ticket UI uses `/api/qr/{registrationId}.png`.
- */
-export async function generateAndHostQr(
-  payload: QrPayload,
-  _opts?: { organizerId?: string; eventId?: string },
-): Promise<{ data: string; imageUrl: string; png?: Buffer } | null> {
-  void _opts;
-  try {
-    const png = await generateQrPng(payload);
-    const data = JSON.stringify(payload);
-    return {
-      data,
-      imageUrl: `/api/qr/${payload.registrationId}.png`,
-      png,
-    };
-  } catch (err) {
-    console.error("[generateAndHostQr]", err);
-    return null;
-  }
 }

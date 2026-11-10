@@ -65,7 +65,7 @@ export default function CreateSpeakerForm({
           <div className="space-y-6">
             <div className="flex flex-col items-center justify-center rounded-2xl border border-line p-8">
               <MediaUpload
-                folder="speakers"
+                kind="speaker_photo"
                 eventId={eventId}
                 accept="image/*"
                 value={photoUrl || null}

@@ -133,13 +133,17 @@ export async function exportEventSheetAction(request: SheetRequest): Promise<Exp
         paymentStatus: t.feeStatus || "",
         accessCode: t.accessCode || "",
       }));
+      const memberRegs = await RegService.getRegsByIds(
+        teams.flatMap((t) => t.memberRegistrationIds || t.members.map((m) => m.registrationId)),
+      );
+      const shortById = new Map(memberRegs.map((r) => [r.registrationId, r.shortCode] as const));
       const members = teams.flatMap((t) =>
         t.members.map((m) => ({
           teamName: t.name,
           memberName: m.name,
           email: m.email || "",
           role: m.isOwner ? "lead" : "member",
-          registrationId: m.registrationId,
+          shortCode: shortById.get(m.registrationId) || "",
         })),
       );
       if (format === "xlsx") {
@@ -175,15 +179,14 @@ export async function exportEventSheetAction(request: SheetRequest): Promise<Exp
       ? await UserService.getUsersByIds(regs.map((r) => r.userId).filter(Boolean))
       : new Map();
 
+    const { registrantIdentity } = await import("@/src/features/event_attendee/registrantIdentity");
     const rows: AttendeeRow[] = regs.map((reg) => {
       const user = usersById.get(String(reg.userId));
+      const id = registrantIdentity(reg, user);
       return {
         reg,
-        // Same fallback chain as the certificates page: a public
-        // registration has no account, so its contact details live on the
-        // registration itself.
-        name: user?.profile?.fullName || reg.attendee?.name || "",
-        email: user?.email || reg.attendee?.email || "",
+        name: id.name === "Unknown" ? "" : id.name,
+        email: id.email,
       };
     });
 
@@ -291,7 +294,7 @@ export async function exportEventSheetAction(request: SheetRequest): Promise<Exp
             team: input.name,
             competition: input.competition,
             checkedIn: isCheckedIn(m.reg) ? "Yes" : "No",
-            registrationId: m.reg.registrationId,
+            shortCode: m.reg.shortCode || "",
             ticketUrl: await ticketUrlFor(m.reg.registrationId),
             answers,
           });
@@ -336,7 +339,7 @@ export async function exportEventSheetAction(request: SheetRequest): Promise<Exp
           team: "",
           competition: "",
           checkedIn: isCheckedIn(row.reg) ? "Yes" : "No",
-          registrationId: row.reg.registrationId,
+          shortCode: row.reg.shortCode || "",
           ticketUrl: await ticketUrlFor(row.reg.registrationId),
           answers,
         });
@@ -377,12 +380,45 @@ export async function exportEventSheetAction(request: SheetRequest): Promise<Exp
       urls.set(row.reg.registrationId, await ticketUrlFor(row.reg.registrationId));
     }
 
+    const { paymentProofPlatformUrl, storedFileIdFromProofPath } =
+      await import("@/src/features/event_attendee/approveDisabledReason");
+    const { getStoredFileById } = await import("@/src/features/files/storedFiles.repo");
+    const driveByReg = new Map<string, string>();
+    const fileIds = [
+      ...new Set(
+        filtered
+          .map((r) => storedFileIdFromProofPath(r.reg.payment?.proofPath))
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    await Promise.all(
+      fileIds.map(async (fid) => {
+        const row = await getStoredFileById(fid).catch(() => null);
+        const web = row?.provider === "drive" ? String(row.extra?.webUrl || "") : "";
+        if (!web) return;
+        for (const r of filtered) {
+          if (storedFileIdFromProofPath(r.reg.payment?.proofPath) === fid) {
+            driveByReg.set(r.reg.registrationId, web);
+          }
+        }
+      }),
+    );
+
+    const origin = (await absoluteUrl("/")).replace(/\/$/, "");
     return deliver(
       await deliverSheet(
         name,
         format,
         filtered,
-        attendeeColumns(questions, { ticketUrl: (r) => urls.get(r.reg.registrationId) ?? "" }),
+        attendeeColumns(questions, {
+          ticketUrl: (r) => urls.get(r.reg.registrationId) ?? "",
+          proofPlatformUrl: (r) => {
+            const path = paymentProofPlatformUrl(r.reg.payment?.proofPath);
+            return path ? `${origin}${path}` : "";
+          },
+          proofDriveUrl: (r) => driveByReg.get(r.reg.registrationId) ?? "",
+          checkInWho: (r) => r.reg.checkIn?.checkedInBy ?? "",
+        }),
         SHEET_META[kind].label,
       ),
     );

@@ -1,6 +1,16 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 
 export const CONSENT_HASH_FALLBACK_SALT = "avoeline-consent-v1";
+/** Default for signup / attendee registration. */
+export const REGISTRATION_LEGAL_SLUGS = ["privacy", "terms"] as const;
+
+/** Wizard publish acceptance (Terms + Organizer Agreement + Content rights). */
+export const EVENT_PUBLISH_LEGAL_SLUGS = [
+  "terms",
+  "organizer-agreement",
+  "content-rights",
+] as const;
+
 export const MARKETING_SCOPES = ["product_updates", "community"] as const;
 export type MarketingScope = (typeof MARKETING_SCOPES)[number];
 

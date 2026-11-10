@@ -2,6 +2,7 @@ import { Calendar, Clock, MapPin, Ticket, Users, Wifi } from "lucide-react";
 import { formatDateMedium, formatTime } from "@/src/lib/datetime";
 import { isGoogleEmbedUrl, openInMapsHref } from "@/src/lib/mapsUrl";
 import type { PublicEventDto } from "@/src/features/events/types";
+import { showSeatsFact } from "./publicPage.logic";
 
 export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
   const startDate = formatDateMedium(dto.schedule.startDate);
@@ -22,12 +23,11 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
     .filter(Boolean)
     .join(" · ");
   const seatsLabel =
-    dto.seats.left === null && dto.seats.total === 0
-      ? "Unlimited"
-      : dto.seats.left === null
-        ? "—"
-        : `${dto.seats.left} left${dto.seats.total ? ` of ${dto.seats.total}` : ""}`;
+    dto.seats.left == null
+      ? null
+      : `${dto.seats.left} left${dto.seats.total ? ` of ${dto.seats.total}` : ""}`;
   const mapsHref = openInMapsHref(dto.location.mapsUrl);
+  const showSeats = showSeatsFact(dto.seats);
 
   return (
     <section className="space-y-6">
@@ -39,52 +39,68 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
           label="Time"
           value={timeLabel ? `${timeLabel}${tz ? ` (${tz})` : ""}` : "—"}
         />
-        <Fact icon={<MapPin className="h-4 w-4" />} label="Venue" value={venue || "—"} />
+        <Fact
+          icon={<MapPin className="h-4 w-4" />}
+          label="Venue"
+          value={venue || "—"}
+          action={
+            mapsHref ? (
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-flex text-sm font-semibold text-ink underline"
+              >
+                Open in Maps
+              </a>
+            ) : null
+          }
+        />
         <Fact
           icon={<Wifi className="h-4 w-4" />}
           label="Format"
           value={dto.schedule.formatLabel || dto.formatLabel || "—"}
         />
-        <Fact icon={<Users className="h-4 w-4" />} label="Seats" value={seatsLabel} />
+        {showSeats && seatsLabel ? (
+          <Fact icon={<Users className="h-4 w-4" />} label="Seats" value={seatsLabel} />
+        ) : null}
         <Fact icon={<Ticket className="h-4 w-4" />} label="Admission" value={dto.admissionLabel} />
         {regWindow ? (
           <Fact icon={<Calendar className="h-4 w-4" />} label="Registration" value={regWindow} />
         ) : null}
       </dl>
 
-      {mapsHref ? (
-        <div className="space-y-3">
-          <a
-            href={mapsHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex text-sm font-semibold text-ink underline"
-          >
-            Open in Maps
-          </a>
-          {isGoogleEmbedUrl(mapsHref) ? (
-            <iframe
-              title="Venue map"
-              src={mapsHref}
-              className="h-48 w-full rounded-2xl border border-line"
-            />
-          ) : null}
-        </div>
+      {mapsHref && isGoogleEmbedUrl(mapsHref) ? (
+        <iframe
+          title="Venue map"
+          src={mapsHref}
+          className="h-48 w-full rounded-2xl border border-line"
+        />
       ) : null}
     </section>
   );
 }
 
-function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function Fact({
+  icon,
+  label,
+  value,
+  action,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3">
       <span className="mt-0.5 text-ink-soft" aria-hidden="true">
         {icon}
       </span>
       <div className="min-w-0">
-        <dt className="text-2xs font-medium uppercase text-ink-soft">{label}</dt>
-        {/* No truncate — full date/venue must remain readable */}
-        <dd className="mt-0.5 text-sm text-ink">{value}</dd>
+        <dt className="text-2xs font-medium uppercase tracking-wide text-ink-soft">{label}</dt>
+        <dd className="mt-0.5 break-words text-sm text-ink">{value}</dd>
+        {action}
       </div>
     </div>
   );

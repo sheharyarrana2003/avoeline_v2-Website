@@ -23,6 +23,7 @@ import {
 } from "./EventEmailPanels";
 import { AttendeeEmailMenu } from "./AttendeeEmailMenu";
 import { RegistrationFormDrawer } from "./RegistrationFormDrawer";
+import { CheckInLookupBar } from "./CheckInLookupBar";
 import type { EventEmailTemplate } from "../emailTypes";
 import type { CustomFieldOption } from "@/src/services/models/event.model";
 import {
@@ -33,6 +34,13 @@ import {
   rosterStats,
   teamMetaMatches,
 } from "../roster";
+import { bulkDecideRegistrationsAction } from "@/src/features/event_attendee/actions/bulkDecideRegistrations.action";
+import {
+  importAttendeesAllowed,
+  PAID_IMPORT_TOOLTIP,
+} from "@/src/features/event_attendee/importGate";
+import { useToast } from "@/src/shared_components/ui/Toast";
+import { buttonClass } from "@/src/lib/ui";
 
 export interface AttendeeTeamGroup {
   id: string;
@@ -65,6 +73,8 @@ export interface AttendeeClientSideProp {
    * a URL.
    */
   proofUrl?: string | null;
+  /** Drive webViewLink when proof is on organizer Drive (owner open). */
+  proofDriveUrl?: string | null;
 }
 
 export function AttendeeClientSide({
@@ -89,6 +99,7 @@ export function AttendeeClientSide({
   eventEndsAtIso = null,
   checkInByNames = {},
   registrationForm = null,
+  importPanel = null,
 }: {
   attendees: AttendeeClientSideProp[] | [];
   handle_reg_status: (reg: Registration) => Promise<void>;
@@ -116,12 +127,19 @@ export function AttendeeClientSide({
   checkInByNames?: Record<string, string>;
   /** O2: form builder content for the Registration form drawer. */
   registrationForm?: ReactNode;
+  /** Free-event Import UI (modal/panel). */
+  importPanel?: ReactNode;
 }) {
   const [open_registration_id, set_open_registration_id] = useState<string | null>(null);
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
   const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
   const [view, setView] = useState<"grouped" | "flat">(defaultGrouped ? "grouped" : "flat");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [importOpen, setImportOpen] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const searchParams = useSearchParams();
+  const toast = useToast();
+  const canImport = importAttendeesAllowed(isFree);
 
   useEffect(() => {
     const team = searchParams.get("team");
@@ -136,6 +154,45 @@ export function AttendeeClientSide({
     setOpenTeamId(null);
     set_open_registration_id(registration_id);
   }, []);
+
+  const toggleSelect = useCallback((registrationId: string, next: boolean) => {
+    setSelectedIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(registrationId);
+      else copy.delete(registrationId);
+      return copy;
+    });
+  }, []);
+
+  const runBulk = useCallback(
+    async (decision: "approve" | "reject") => {
+      if (!eventId || selectedIds.size === 0) return;
+      const reason =
+        decision === "reject"
+          ? (window.prompt("Optional reject reason (shown in email):") ?? "")
+          : "";
+      setBulkBusy(true);
+      try {
+        const result = await bulkDecideRegistrationsAction({
+          eventId,
+          registrationIds: [...selectedIds],
+          decision,
+          reason,
+        });
+        if (!result.ok) {
+          toast.error(result.error.message);
+          return;
+        }
+        toast.success(
+          `Approved ${result.data.approved}, rejected ${result.data.rejected}, skipped ${result.data.skipped}.`,
+        );
+        setSelectedIds(new Set());
+      } finally {
+        setBulkBusy(false);
+      }
+    },
+    [eventId, selectedIds, toast],
+  );
 
   const stats = useMemo(() => rosterStats(attendees, occupyingCount), [attendees, occupyingCount]);
   const filters = useMemo(() => readRosterFilters(searchParams), [searchParams]);
@@ -166,6 +223,20 @@ export function AttendeeClientSide({
 
   const handleQuickStatusChange = useCallback(
     async (reg: Registration, newStatus: "confirmed" | "rejected") => {
+      if (newStatus === "confirmed") {
+        const { approveDisabledReason } =
+          await import("@/src/features/event_attendee/approveDisabledReason");
+        const block = approveDisabledReason({
+          isPaid: !isFree,
+          status: reg.status,
+          proofPath: reg.payment?.proofPath,
+          paymentStatus: reg.payment?.paymentStatus,
+        });
+        if (block) {
+          toast.error(block);
+          return;
+        }
+      }
       const updated: Registration = {
         ...reg,
         status: newStatus,
@@ -176,7 +247,7 @@ export function AttendeeClientSide({
       };
       await handle_reg_status(updated);
     },
-    [handle_reg_status],
+    [handle_reg_status, isFree, toast],
   );
 
   const open_attendee =
@@ -346,6 +417,26 @@ export function AttendeeClientSide({
               </AttendeeEmailMenu>
             ) : null}
             {onExport ? <ExportButton run={onExport} label="Export" /> : null}
+            {importPanel ? (
+              canImport ? (
+                <button
+                  type="button"
+                  className={buttonClass("secondary", "sm")}
+                  onClick={() => setImportOpen(true)}
+                >
+                  Import
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={buttonClass("secondary", "sm")}
+                  disabled
+                  title={PAID_IMPORT_TOOLTIP}
+                >
+                  Import
+                </button>
+              )
+            ) : null}
             {exportsHref ? (
               <Link
                 href={exportsHref}
@@ -361,6 +452,53 @@ export function AttendeeClientSide({
             ) : null}
           </div>
         </div>
+
+        {importOpen && importPanel ? (
+          <div className="mb-6 rounded-xl border border-line bg-paper p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-medium text-ink">Import attendees</h3>
+              <button
+                type="button"
+                className="text-xs text-ink-soft hover:text-ink"
+                onClick={() => setImportOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+            {importPanel}
+          </div>
+        ) : null}
+
+        {selectedIds.size > 0 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-muted/40 px-4 py-3">
+            <span className="text-sm text-ink">{selectedIds.size} selected</span>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              className={buttonClass("primary", "sm")}
+              onClick={() => void runBulk("approve")}
+            >
+              Bulk approve
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              className={buttonClass("destructive", "sm")}
+              onClick={() => void runBulk("reject")}
+            >
+              Bulk reject
+            </button>
+            <button
+              type="button"
+              className="text-xs text-ink-soft hover:text-ink"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear
+            </button>
+          </div>
+        ) : null}
+
+        {eventId ? <CheckInLookupBar eventId={eventId} /> : null}
 
         <section className="mb-8 grid grid-cols-2 rounded-xl border border-line bg-paper shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-line">
           <MetricTile
@@ -424,14 +562,19 @@ export function AttendeeClientSide({
             handleOnClick={handleOnClick}
             openRegistrationId={open_registration_id}
             onQuickStatusChange={handleQuickStatusChange}
+            isPaid={!isFree}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
           />
         ) : (
           <div className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm">
-            <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr] border-b border-line bg-muted/30 px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+            <div className="grid grid-cols-[auto_minmax(0,2.2fr)_minmax(0,1fr)_auto_auto_auto] border-b border-line bg-muted/30 px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
+              <div aria-hidden="true" />
               <div>Attendee</div>
               <div>Ticket</div>
               <div>Status</div>
-              <div>Check-in / Action</div>
+              <div>Check-in</div>
+              <div className="text-right">Action</div>
             </div>
 
             <div className="divide-y divide-line">
@@ -443,6 +586,10 @@ export function AttendeeClientSide({
                   handleOnClick={handleOnClick}
                   isOpen={acs.register.registrationId === open_registration_id}
                   onQuickStatusChange={handleQuickStatusChange}
+                  isPaid={!isFree}
+                  competitionName={teamLookup.get(acs.register.registrationId)?.trackName || ""}
+                  selected={selectedIds.has(acs.register.registrationId)}
+                  onToggleSelect={toggleSelect}
                 />
               ))}
             </div>
@@ -500,6 +647,7 @@ export function AttendeeClientSide({
             update_registration={handle_reg_status}
             variant={memberOfTeam ? "member" : "full"}
             eventId={eventId}
+            organizerId={organizerId}
             competitionName={teamLookup.get(open_attendee.register.registrationId)?.trackName}
             questions={questions}
             hidePayment={isFree}

@@ -208,7 +208,14 @@ export async function registerAttendeeAction(
     leadAnswers.website = String(formData.get("website") ?? "");
     const leadParsed = buildRegistrationSchema(leadSchemaFields).safeParse(leadAnswers);
     if (!leadParsed.success) {
-      return fail(leadParsed.error.issues[0]?.message || "Please check your answers.");
+      const { mapRegistrationValidationMessage } = await import("../registrationErrors");
+      const issue = leadParsed.error.issues[0];
+      const fieldKey = issue?.path?.[0];
+      const fieldLabel =
+        typeof fieldKey === "string"
+          ? leadSchemaFields.find((f) => f.key === fieldKey)?.label
+          : undefined;
+      return fail(mapRegistrationValidationMessage(issue?.message, { fieldLabel }));
     }
 
     const fileErr = await verifyFileAnswers(leadAnswers, leadSchemaFields);
@@ -248,7 +255,11 @@ export async function registerAttendeeAction(
         const memberAnswers = answersFromFields(formData, perMemberFields, `member_${i}_`);
         const parsed = memberSchema.safeParse(memberAnswers);
         if (!parsed.success) {
-          return fail(parsed.error.issues[0]?.message || `Please check member ${i + 2}'s answers.`);
+          const { mapRegistrationValidationMessage } = await import("../registrationErrors");
+          return fail(
+            mapRegistrationValidationMessage(parsed.error.issues[0]?.message) ||
+              `Please check member ${i + 2}'s answers.`,
+          );
         }
         const split = splitSystemAnswers(memberAnswers);
         if (!split.email) return fail("Each team member needs an email address.");

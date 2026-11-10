@@ -10,7 +10,7 @@ import type {
 } from "@/src/features/taxonomy/categoryEngine.types";
 import type { EventFormData } from "@/src/services/models/event.model";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
-import { isVideoUrl, IMAGE_AND_VIDEO_ACCEPT } from "@/src/features/media/media.utils";
+import { isVideoUrl } from "@/src/features/media/media.utils";
 import { DescriptionEditor } from "@/src/features/events/components/wizard/DescriptionEditor";
 
 export function BasicStep({
@@ -200,7 +200,7 @@ export function BasicStep({
             <p className="mb-4 text-sm text-ink-soft">High-quality visuals increase engagement.</p>
           </div>
           <MediaUpload
-            folder="banners"
+            kind="event_banner"
             accept="image/*"
             value={formData.bannerImage ?? ""}
             label="Upload Event Banner"
@@ -214,8 +214,8 @@ export function BasicStep({
             </label>
             <div className="flex flex-wrap items-center gap-3">
               <MediaUpload
-                folder="gallery"
-                accept={IMAGE_AND_VIDEO_ACCEPT}
+                kind="event_gallery"
+                accept="image/*"
                 multiple
                 label="+"
                 className="shrink-0"

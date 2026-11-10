@@ -16,6 +16,8 @@ const serverSchema = publicSchema.extend({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
   /** Required when compete cookies are used; optional at boot so CI build works. */
   HACKATHON_COMPETE_SECRET: z.string().min(16).optional(),
+  /** HMAC for door QR / check-in tokens (N4); required at use site. */
+  REGISTRATION_QR_SECRET: z.string().min(16).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   /** Default/fallback From only (`info@…`). Lane aliases override via RESEND_FROM_*. */
   RESEND_FROM_EMAIL: z.string().min(1).optional(),
@@ -29,6 +31,9 @@ const serverSchema = publicSchema.extend({
   RESEND_FROM_SUPPORT: z.string().min(1).optional(),
   RESEND_FROM_SECURITY: z.string().min(1).optional(),
   MAIL_FROM: z.string().min(1).optional(),
+  /** Local only: `mailpit` routes organizer mail to SMTP (see docker-compose.mailpit.yml). */
+  EMAIL_TRANSPORT: z.enum(["google", "mailpit"]).optional(),
+  MAILPIT_SMTP_URL: z.string().optional(),
   BREVO_API_KEY: z.string().min(1).optional(),
   /** AES key material for organizer email connection secrets (min 16 chars). */
   EMAIL_CONNECTION_SECRET: z.string().min(16).optional(),
@@ -80,6 +85,7 @@ function readServer(): ServerEnv {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     HACKATHON_COMPETE_SECRET: process.env.HACKATHON_COMPETE_SECRET || undefined,
+    REGISTRATION_QR_SECRET: process.env.REGISTRATION_QR_SECRET || undefined,
     RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || undefined,
     RESEND_FROM: process.env.RESEND_FROM || undefined,
@@ -92,6 +98,11 @@ function readServer(): ServerEnv {
     RESEND_FROM_SUPPORT: process.env.RESEND_FROM_SUPPORT || undefined,
     RESEND_FROM_SECURITY: process.env.RESEND_FROM_SECURITY || undefined,
     MAIL_FROM: process.env.MAIL_FROM || undefined,
+    EMAIL_TRANSPORT: (process.env.EMAIL_TRANSPORT === "mailpit" ||
+    process.env.EMAIL_TRANSPORT === "google"
+      ? process.env.EMAIL_TRANSPORT
+      : undefined) as "google" | "mailpit" | undefined,
+    MAILPIT_SMTP_URL: process.env.MAILPIT_SMTP_URL || undefined,
     BREVO_API_KEY: process.env.BREVO_API_KEY || undefined,
     EMAIL_CONNECTION_SECRET: process.env.EMAIL_CONNECTION_SECRET || undefined,
     CONNECTIONS_ENCRYPTION_KEY: process.env.CONNECTIONS_ENCRYPTION_KEY || undefined,
@@ -143,6 +154,18 @@ export function requireCompeteSecret(): string {
   if (!value || value.length < 16) {
     throw new Error(
       "HACKATHON_COMPETE_SECRET is required (do not fall back to the service-role key).",
+    );
+  }
+  return value;
+}
+
+/** Door QR / check-in HMAC — required at use site (N4), not at boot. */
+export function requireRegistrationQrSecret(): string {
+  const live = process.env.REGISTRATION_QR_SECRET?.trim();
+  const value = live && live.length >= 16 ? live : getServerEnv().REGISTRATION_QR_SECRET?.trim();
+  if (!value || value.length < 16) {
+    throw new Error(
+      "REGISTRATION_QR_SECRET is required (do not fall back to the service-role key).",
     );
   }
   return value;
@@ -219,5 +242,75 @@ export function diagnoseGooglePickerEnv(): {
     appIdPresent: appId.length > 0,
     appIdLooksNumeric: /^\d{6,}$/.test(appId),
     oauthClientIdPresent: Boolean(oauth.clientId),
+  };
+}
+
+const CONNECTIONS_CALLBACK_PATH = "/api/connections/google/callback";
+
+/**
+ * Admin-only Connections OAuth diagnostics — presence flags and expected redirect path.
+ * Never returns client secrets, encryption keys, or credential values.
+ * Reads process.env directly so unit tests need no full server env.
+ */
+export function diagnoseGoogleConnectionsEnv(): {
+  ready: boolean;
+  googleEnabled: boolean;
+  variables: Array<{ name: string; present: boolean; legacyAlias?: string }>;
+  expectedRedirectPath: string;
+  expectedRedirectUriHint: string;
+} {
+  const pe = process.env;
+  const clientIdPresent = Boolean(pe.GOOGLE_OAUTH_CLIENT_ID?.trim() || pe.GOOGLE_CLIENT_ID?.trim());
+  const clientSecretPresent = Boolean(
+    pe.GOOGLE_OAUTH_CLIENT_SECRET?.trim() || pe.GOOGLE_CLIENT_SECRET?.trim(),
+  );
+  const redirectPresent = Boolean(
+    pe.GOOGLE_OAUTH_REDIRECT_URI?.trim() || pe.GOOGLE_REDIRECT_URI?.trim(),
+  );
+  const enc = pe.CONNECTIONS_ENCRYPTION_KEY?.trim() || pe.EMAIL_CONNECTION_SECRET?.trim() || "";
+  const encryptionPresent = enc.length >= 16;
+  const googleEnabled = pe.CONNECTIONS_GOOGLE_ENABLED !== "false";
+
+  const site =
+    pe.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    (pe.VERCEL_URL ? `https://${pe.VERCEL_URL}` : "http://localhost:3000");
+
+  return {
+    ready: Boolean(
+      clientIdPresent &&
+      clientSecretPresent &&
+      redirectPresent &&
+      encryptionPresent &&
+      googleEnabled,
+    ),
+    googleEnabled,
+    variables: [
+      {
+        name: "GOOGLE_OAUTH_CLIENT_ID",
+        present: clientIdPresent,
+        legacyAlias: "GOOGLE_CLIENT_ID",
+      },
+      {
+        name: "GOOGLE_OAUTH_CLIENT_SECRET",
+        present: clientSecretPresent,
+        legacyAlias: "GOOGLE_CLIENT_SECRET",
+      },
+      {
+        name: "GOOGLE_OAUTH_REDIRECT_URI",
+        present: redirectPresent,
+        legacyAlias: "GOOGLE_REDIRECT_URI",
+      },
+      {
+        name: "CONNECTIONS_ENCRYPTION_KEY",
+        present: encryptionPresent,
+        legacyAlias: "EMAIL_CONNECTION_SECRET",
+      },
+      {
+        name: "CONNECTIONS_GOOGLE_ENABLED",
+        present: googleEnabled,
+      },
+    ],
+    expectedRedirectPath: CONNECTIONS_CALLBACK_PATH,
+    expectedRedirectUriHint: `${site}${CONNECTIONS_CALLBACK_PATH}`,
   };
 }

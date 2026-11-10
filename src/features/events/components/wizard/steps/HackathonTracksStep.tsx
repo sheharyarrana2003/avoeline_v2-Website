@@ -99,7 +99,7 @@ export function HackathonTracksStep({
             className="w-full rounded-xl border border-line px-4 py-2 text-sm outline-none"
           />
           <MediaUpload
-            folder="tracks"
+            kind="competition_image"
             accept="image/*"
             value={track.imageUrl}
             label="Competition image (4:5 Instagram portrait)"
@@ -108,7 +108,7 @@ export function HackathonTracksStep({
           />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <LabeledNumber
-              label="Fee (PKR)"
+              label={formData.multiTrack ? "Fee (PKR)" : "Entry fee (PKR)"}
               value={track.fee}
               onChange={(n) => patch(track.id, { fee: n })}
             />

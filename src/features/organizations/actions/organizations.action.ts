@@ -131,7 +131,10 @@ export async function saveOrganization(
       event_id: eventId,
       type,
       name,
-      logo_url: String(formData.get("logoUrl") ?? "").trim() || null,
+      logo_url:
+        String(formData.get("logoUrl") ?? "").trim() ||
+        String(formData.get("logoUrlPaste") ?? "").trim() ||
+        null,
       website_url: String(formData.get("websiteUrl") ?? "").trim() || null,
       contact_name: String(formData.get("contactName") ?? "").trim() || null,
       contact_email: contactEmail || null,
@@ -177,7 +180,9 @@ export async function saveOrganization(
     return ok();
   } catch (err) {
     console.error("[saveOrganization]", err);
-    return fail("Could not save that. Please try again.");
+    return fail(
+      "Could not save that organization. Check the name, logo, and required fields, then try again.",
+    );
   }
 }
 

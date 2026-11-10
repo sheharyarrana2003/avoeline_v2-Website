@@ -6,6 +6,7 @@ import type {
   EventFormField,
   FormFieldDraft,
 } from "@/src/features/registration/forms/formFields.types";
+import { mapProofUploadClientError } from "@/src/features/registration/registrationErrors";
 import { fieldClass, labelClass } from "@/src/lib/ui";
 
 export type RenderableField = {
@@ -64,6 +65,7 @@ function RegistrationFileInput({
   required,
   accept,
   label,
+  disabled = false,
 }: {
   eventId: string;
   name: string;
@@ -71,6 +73,8 @@ function RegistrationFileInput({
   required?: boolean;
   accept?: string;
   label: string;
+  /** Admin preview: show control but never upload. */
+  disabled?: boolean;
 }) {
   const [path, setPath] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -86,10 +90,14 @@ function RegistrationFileInput({
         id={id}
         type="file"
         accept={accept || "image/*,application/pdf"}
-        required={required && !path}
-        disabled={pending}
+        required={required && !path && !disabled}
+        disabled={pending || disabled}
         className="w-full rounded-lg border border-line-loud bg-paper px-3 py-2 text-sm"
         onChange={(e) => {
+          if (disabled) {
+            e.target.value = "";
+            return;
+          }
           const file = e.target.files?.[0];
           if (!file) {
             setPath("");
@@ -111,14 +119,16 @@ function RegistrationFileInput({
                 error?: string;
               };
               if (!res.ok || !json.ok || !json.fileId) {
-                setError(json.error || "Upload failed.");
+                setError(mapProofUploadClientError(json.error, res.status));
                 setPath("");
+                e.target.value = "";
                 return;
               }
               setPath(`file:${json.fileId}`);
             } catch {
-              setError("Upload failed.");
+              setError(mapProofUploadClientError("Upload failed."));
               setPath("");
+              e.target.value = "";
             }
           });
         }}
@@ -141,12 +151,15 @@ export function CustomFieldsRenderer({
   namePrefix = "field_",
   eventId,
   useKeyAsName = false,
+  previewOnly = false,
 }: {
   fields: Array<CustomField | EventFormField | FormFieldDraft | RenderableField>;
   namePrefix?: string;
   eventId?: string;
   /** When true, input name is exactly field.key (registration form). */
   useKeyAsName?: boolean;
+  /** Admin preview: disable file uploads and inputs. */
+  previewOnly?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -165,9 +178,10 @@ export function CustomFieldsRenderer({
                 eventId={eventId}
                 name={name}
                 id={id}
-                required={field.required}
+                required={field.required && !previewOnly}
                 accept={type === "image" ? "image/*" : "image/*,application/pdf"}
                 label={field.label}
+                disabled={previewOnly}
               />
             );
           }
@@ -181,7 +195,8 @@ export function CustomFieldsRenderer({
                 id={id}
                 name={name}
                 type="file"
-                required={field.required}
+                required={field.required && !previewOnly}
+                disabled={previewOnly}
                 className={fieldClass}
               />
             </div>

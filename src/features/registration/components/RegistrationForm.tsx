@@ -52,6 +52,10 @@ export interface RegistrationFormProps {
   groupRegistration?: boolean;
   groupMinSize?: number;
   groupMaxSize?: number;
+  /** Admin preview: show fields but disable submit and uploads. */
+  previewOnly?: boolean;
+  /** Paid events: shown before the payment screenshot field. */
+  paymentInstructions?: string | null;
 }
 
 export function RegistrationForm({
@@ -69,6 +73,8 @@ export function RegistrationForm({
   groupRegistration = false,
   groupMinSize = 2,
   groupMaxSize = 8,
+  previewOnly = false,
+  paymentInstructions = null,
 }: RegistrationFormProps) {
   const boundAction = registerAttendeeAction.bind(null, eventId);
   const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
@@ -109,6 +115,10 @@ export function RegistrationForm({
   const memberFields = leadFields.filter((f) => f.scope === "per_member");
   // Solo: all fields once. Group/hackathon lead: per_member for lead + per_group once.
   const soloOrLeadMemberFields = memberFields;
+  const paymentField = soloOrLeadMemberFields.find((f) => f.key === "payment_screenshot");
+  const fieldsBeforePayment = soloOrLeadMemberFields.filter((f) => f.key !== "payment_screenshot");
+  const showPaymentInstructions =
+    paidNow && !!String(paymentInstructions || "").trim() && !!paymentField;
   const amountLabel = selected
     ? selected.due > 0
       ? formatCurrency(selected.due, selected.currency, "Free")
@@ -116,7 +126,13 @@ export function RegistrationForm({
     : priceLabel;
 
   return (
-    <form action={formAction} className="flex flex-col gap-5" encType="multipart/form-data">
+    <form
+      action={previewOnly ? undefined : formAction}
+      onSubmit={previewOnly ? (e) => e.preventDefault() : undefined}
+      className="flex flex-col gap-5"
+      encType="multipart/form-data"
+      aria-disabled={previewOnly || undefined}
+    >
       {inviteToken ? <input type="hidden" name="inviteToken" value={inviteToken} /> : null}
       {accessCode ? <input type="hidden" name="accessCode" value={accessCode} /> : null}
 
@@ -223,7 +239,7 @@ export function RegistrationForm({
         </>
       ) : null}
 
-      {soloOrLeadMemberFields.length ? (
+      {fieldsBeforePayment.length || paymentField ? (
         <div className="flex flex-col gap-5">
           <p className={labelClass}>
             {competitions.length || groupMode
@@ -232,17 +248,52 @@ export function RegistrationForm({
                 : "Team lead"
               : "Your details"}
           </p>
-          <CustomFieldsRenderer fields={soloOrLeadMemberFields} eventId={eventId} useKeyAsName />
+          {fieldsBeforePayment.length ? (
+            <CustomFieldsRenderer
+              fields={fieldsBeforePayment}
+              eventId={eventId}
+              useKeyAsName
+              previewOnly={previewOnly}
+            />
+          ) : null}
+          {showPaymentInstructions ? (
+            <div className="rounded-xl border border-line bg-muted/50 px-4 py-3 text-sm text-ink">
+              <p className="text-2xs font-medium uppercase tracking-wide text-ink-soft">
+                Payment instructions
+              </p>
+              <p className="mt-2 whitespace-pre-wrap break-words">
+                {String(paymentInstructions).trim()}
+              </p>
+            </div>
+          ) : null}
+          {paymentField ? (
+            <CustomFieldsRenderer
+              fields={[paymentField]}
+              eventId={eventId}
+              useKeyAsName
+              previewOnly={previewOnly}
+            />
+          ) : null}
         </div>
       ) : null}
 
       {groupOnlyFields.length && (groupMode || competitions.length) ? (
         <div className="flex flex-col gap-5 border-t border-line pt-5">
           <p className={labelClass}>Questions for the {groupMode ? "group" : "team"}</p>
-          <CustomFieldsRenderer fields={groupOnlyFields} eventId={eventId} useKeyAsName />
+          <CustomFieldsRenderer
+            fields={groupOnlyFields}
+            eventId={eventId}
+            useKeyAsName
+            previewOnly={previewOnly}
+          />
         </div>
       ) : groupOnlyFields.length && !groupMode && !competitions.length ? (
-        <CustomFieldsRenderer fields={groupOnlyFields} eventId={eventId} useKeyAsName />
+        <CustomFieldsRenderer
+          fields={groupOnlyFields}
+          eventId={eventId}
+          useKeyAsName
+          previewOnly={previewOnly}
+        />
       ) : null}
 
       {tierChoices.length > 1 ? (
@@ -297,6 +348,7 @@ export function RegistrationForm({
                 eventId={eventId}
                 namePrefix={`member_${index}_`}
                 useKeyAsName={false}
+                previewOnly={previewOnly}
               />
             </div>
           ))}
@@ -360,13 +412,15 @@ export function RegistrationForm({
       <SubmitButton
         pendingText="Registering…"
         className={buttonClass("primary", "lg", "w-full")}
-        disabled={!consent.legalAccepted}
+        disabled={previewOnly || !consent.legalAccepted}
       >
-        {joinsWaitlist
-          ? "Join the waitlist"
-          : paidNow
-            ? `Register — ${promoPreview ? formatCurrency(promoPreview.total, promoPreview.currency, "Free") : amountLabel}`
-            : "Register for free"}
+        {previewOnly
+          ? "Preview only"
+          : joinsWaitlist
+            ? "Join the waitlist"
+            : paidNow
+              ? `Register — ${promoPreview ? formatCurrency(promoPreview.total, promoPreview.currency, "Free") : amountLabel}`
+              : "Register for free"}
       </SubmitButton>
 
       <p className="text-xs text-ink-soft">

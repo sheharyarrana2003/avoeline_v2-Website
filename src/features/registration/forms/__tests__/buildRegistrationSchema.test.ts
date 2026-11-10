@@ -92,6 +92,9 @@ test("file field requires path object when required", () => {
     diet: "Halal",
   });
   assert.equal(bad.success, false);
+  const badMsg = bad.success ? "" : bad.error.issues[0]?.message || "";
+  assert.match(badMsg, /upload|Payment screenshot/i);
+  assert.equal(/expected object|received undefined/i.test(badMsg), false);
   const good = schema.safeParse({
     name: "Ayesha",
     email: "a@example.com",

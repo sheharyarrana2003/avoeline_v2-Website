@@ -136,6 +136,8 @@ export type ConnectionSendInput = {
     filename: string;
     content: string | Buffer | Uint8Array;
     contentType?: string;
+    /** When set, embedded as multipart/related Content-ID (cid:…). */
+    cid?: string;
   }>;
 };
 

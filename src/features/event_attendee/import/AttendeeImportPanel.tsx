@@ -12,6 +12,7 @@ import type { ImportColumnKey, ImportFieldOption, ParsedImportTable } from "./at
 import { listMyDriveConnectionsAction } from "@/src/features/connections/actions/drive.action";
 import { formatPickerUserError } from "@/src/features/connections/lib/pickerErrors";
 import { buttonClass, fieldClass } from "@/src/lib/ui";
+import { PAID_IMPORT_TOOLTIP } from "@/src/features/event_attendee/importGate";
 
 type Preview =
   { rowIndex: number; ok: true } | { rowIndex: number; ok: false; error: string; email?: string };
@@ -152,9 +153,7 @@ export function AttendeeImportPanel({ eventId }: { eventId: string }) {
         ),
       );
       setMessage(
-        r.data.paidBlocked
-          ? "Paid events cannot be imported."
-          : `${r.data.willCreate} row(s) ready to create.`,
+        r.data.paidBlocked ? PAID_IMPORT_TOOLTIP : `${r.data.willCreate} row(s) ready to create.`,
       );
       setError(null);
     });
