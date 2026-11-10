@@ -51,7 +51,7 @@ const MAX_BYTES = 100 * 1024;
 function eventWhen(event: EventModel): string {
   const date = formatDateMedium(event.schedule?.startDate);
   const time = formatTime(event.schedule?.startTime);
-  const tz = event.schedule?.timezone || event.timezone || "";
+  const tz = event.schedule?.timezone || "";
   return [date, time, tz].filter((p) => p && p !== "—").join(" · ");
 }
 
