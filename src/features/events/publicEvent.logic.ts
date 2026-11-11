@@ -95,14 +95,17 @@ export function resolveRegisterButtonState(input: {
   ) {
     return "ended";
   }
-  if (input.hasTracks && input.openCompetitionCount === 0) return "competitions_closed";
-
+  // Future open date must win over competitions_closed (tracks look closed before open).
   const opens = toDate(input.registrationOpenDate);
   if (opens) {
-    const start = new Date(opens);
-    start.setHours(0, 0, 0, 0);
+    // Date-only → treat as start of that calendar day (UTC parse of YYYY-MM-DD).
+    const start = /^\d{4}-\d{2}-\d{2}$/.test(String(input.registrationOpenDate || "").trim())
+      ? new Date(`${String(input.registrationOpenDate).trim()}T00:00:00`)
+      : new Date(opens);
     if (now < start) return "opens_at";
   }
+
+  if (input.hasTracks && input.openCompetitionCount === 0) return "competitions_closed";
 
   if (!input.registrationOpen) return "closed";
 

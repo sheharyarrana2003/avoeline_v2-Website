@@ -227,7 +227,7 @@ Event visibility: `public` / `private` / `invite_only` / `hybrid` / `tiered` (UI
 - Actions: `accessSettings.action.ts` (`assertEventActor` + `access`), `guestList.action.ts` (add + soft `revokeInvite`), `guestEmailBatch.action.ts`, `inviteLinks.action.ts`, `markInviteOpened.action.ts`, `registrationDecision.action.ts`
 - UI: `HowAccessWorks` (A2 table; `AccessFlowGuide` alias), type-card `AccessSettingsForm`, type-scoped `GuestListPanel` (sample CSV), split whitelist/invite tables + `inviteDisplayStatus`, `GuestEmailComposer` (tokens/filters/preview/copy-link), `AccessGate`, `TrackInviteOpen`
 - Route: `/organizer/[organizer_id]/events/[eventId]/access`
-- Tiers/promos: shared client `TiersAndPromosEditor` (draft in wizard Registration; Access create forms via `TiersPromosOnAccess`). Labeled fields include Available from (`ticket_tiers.available_from`), Early bird, promo usage limit. Tiers hidden on hackathons / free wizard; `listTiers` demotes past `available_until`; public DTO exposes `seatsLeft`, **no** `promoHints`
+- Tiers/promos: shared client `TiersAndPromosEditor` (draft in wizard Registration; Access create forms via `TiersPromosOnAccess`). Labeled fields include Available from (`ticket_tiers.available_from`), Early bird, promo usage limit, **list publicly** (`promo_codes.visibility`). Tiers hidden on hackathons / free wizard; `listTiers` demotes past `available_until`; public DTO exposes `seatsLeft` + `publicPromos` chips only (never private codes / no `promoHints`)
 - Public short URL `/e/[eventId]` redirects to `/events/[eventId]` (invite query preserved; hybrid unlock requires validated invite)
 
 ### `saas`
@@ -761,6 +761,11 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-11 — Access, certificates, hackathon status, public page
+- What: Access UI tokens + `vip_tiered`/`extra.access` persist; ReviewStep visibility; browse includes VIP; unlock cookie; guest email SenderPicker; CTA `opens_at` before `competitions_closed` + server registration window; `promo_codes.visibility` public|private + chips; cert editor hydrate/Preview/Transformer/assets + email fail-closed; public competitions polish + `?track=` + DTO tracks list.
+- Files: `accessSettings.action.ts`, `accessVisibility.ts`, `accessUnlock.ts`, `unlockAccess.action.ts`, `AccessTypeSelector.tsx`, `AccessGate.tsx`, `GuestEmailComposer.tsx`, `ReviewStep.tsx`, `browse.service.ts`, `event.service.ts`, `publicEvent.logic.ts`, `publicEventStatus.ts`, `competitionRegistration.ts`, `publicRegistrationEligibility.ts`, `registration.service.ts`, `ticketing.service.ts`, `RegistrationForm.tsx`, `PublicRegisterCard.tsx`, `PublicCompetitions.tsx`, `tracks/page.tsx`, `CertificateEditor.tsx`, `emailCertificates.action.ts`, `supabase/migrations/20261111200000_promo_visibility.sql`, `docs/11-…`, `plans/2026-11-11-access-certs-public-fixes.md`
+- Next: full marketing dark-hero rewrite deferred; Konva rotation deferred.
 
 ### 2026-11-10 — N7 Connections page redesign
 - What: Removed Connections tab bar and profile/forms chrome; one Google account card (chips, reconnect/add/disconnect revoke) plus Email / Calendar+Meet / Drive / Sheets cards with Enable incremental consent and per-card smoke tests that create then clean up; CapacityStrip + sent batches on Email; library inside Drive; friendly OAuth-not-configured copy + admin-only env presence/redirect diagnostics; specific `formatConnectionUserError` messages; legacy `?tab=` / library / email-batches → `?section=`.

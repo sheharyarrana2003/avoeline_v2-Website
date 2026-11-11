@@ -5769,6 +5769,7 @@ export type Database = {
           usage_count: number | null
           usage_limit: number | null
           value: number
+          visibility: string
         }
         Insert: {
           active?: boolean | null
@@ -5783,6 +5784,7 @@ export type Database = {
           usage_count?: number | null
           usage_limit?: number | null
           value: number
+          visibility?: string
         }
         Update: {
           active?: boolean | null
@@ -5797,6 +5799,7 @@ export type Database = {
           usage_count?: number | null
           usage_limit?: number | null
           value?: number
+          visibility?: string
         }
         Relationships: [
           {

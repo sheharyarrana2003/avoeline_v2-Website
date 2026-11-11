@@ -55,6 +55,10 @@ export async function createPromoCodeAction(
     const trackId = String(formData.get("trackId") || "").trim();
     const usageRaw = String(formData.get("usageLimit") || "").trim();
     const usageNum = usageRaw ? Number(usageRaw) : NaN;
+    const visibility =
+      formData.get("visibility") === "public" || formData.get("listPublicly") === "on"
+        ? ("public" as const)
+        : ("private" as const);
     await TicketingService.createPromo(eventId, {
       code,
       discountType,
@@ -63,6 +67,7 @@ export async function createPromoCodeAction(
       usageLimit: Number.isFinite(usageNum) && usageNum > 0 ? usageNum : undefined,
       expiresAt: String(formData.get("expiresAt") || "").trim() || null,
       active: formData.get("active") === "on",
+      visibility,
     });
     revalidatePath(`/organizer/${event.organizerId}/events/${eventId}/access`);
     return ok();

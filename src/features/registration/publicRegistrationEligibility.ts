@@ -3,6 +3,7 @@ import "server-only";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
+import { isWithinRegistrationDates } from "@/src/lib/publicEventStatus";
 import { logger } from "@/src/lib/logger";
 
 export type RegistrationEligibleEvent = {
@@ -46,7 +47,9 @@ export async function assertPublicRegistrationEvent(
 
   const { data: event, error: eventErr } = await supabaseAdmin
     .from(TABLES.EVENTS)
-    .select("id, organizer_id, status, requires_registration, schedule")
+    .select(
+      "id, organizer_id, status, requires_registration, schedule, registration_open_date, registration_close_date, timezone",
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -77,8 +80,34 @@ export async function assertPublicRegistrationEvent(
     };
   }
 
-  const schedule = (event.schedule || {}) as { startDate?: string; endDate?: string };
+  const schedule = (event.schedule || {}) as {
+    startDate?: string;
+    endDate?: string;
+    timezone?: string;
+  };
   if (!isActiveLifecycle(eventLifecycle(String(event.status || ""), schedule))) {
+    return {
+      ok: false,
+      code: "CLOSED",
+      message: "This event is not open for registration right now.",
+      status: 400,
+    };
+  }
+
+  const tz =
+    String(schedule.timezone || "").trim() ||
+    String((event as { timezone?: string | null }).timezone || "").trim() ||
+    null;
+  if (
+    !isWithinRegistrationDates(
+      {
+        registrationOpenDate: event.registration_open_date,
+        registrationCloseDate: event.registration_close_date,
+        timezone: tz,
+      },
+      new Date(),
+    )
+  ) {
     return {
       ok: false,
       code: "CLOSED",

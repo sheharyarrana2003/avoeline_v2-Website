@@ -1,17 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Globe,
-  Lock,
-  Mail,
-  Crown,
-  Layers,
-  KeyRound,
-  Plus,
-  Trash2,
-  HelpCircle,
-} from "lucide-react";
+import { Globe, Lock, Mail, Crown, Layers, KeyRound, Plus, Trash2, HelpCircle } from "lucide-react";
 import type { AccessType } from "../accessEngine.types";
 import { CsvWhitelistUploader } from "./CsvWhitelistUploader";
 import { fieldClass, labelClass } from "@/src/lib/ui";
@@ -74,8 +64,16 @@ const ACCESS_TYPE_OPTIONS: Array<{
 
 const DEFAULT_VIP_TIERS = [
   { name: "General", description: "Standard conference and keynotes access", order: 1 },
-  { name: "Premium", description: "Full conference with workshops and networking dinner", order: 2 },
-  { name: "VIP", description: "All-access pass with backstage lounge and speakers dinner", order: 3 },
+  {
+    name: "Premium",
+    description: "Full conference with workshops and networking dinner",
+    order: 2,
+  },
+  {
+    name: "VIP",
+    description: "All-access pass with backstage lounge and speakers dinner",
+    order: 3,
+  },
   { name: "Speaker", description: "Designated pass for presenters and keynotes", order: 4 },
   { name: "Sponsor", description: "Partner and exhibit booth pass", order: 5 },
 ];
@@ -103,7 +101,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
   const handleUpdateTier = (
     index: number,
-    patch: Partial<{ name: string; description: string; order: number }>
+    patch: Partial<{ name: string; description: string; order: number }>,
   ) => {
     const updated = [...currentTiers];
     updated[index] = { ...updated[index], ...patch };
@@ -135,21 +133,19 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
             return (
               <label
                 key={opt.id}
-                className={`relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all ${
+                className={`relative flex cursor-pointer flex-col rounded-2xl border p-4 transition-all ${
                   isSelected
-                    ? "border-primary-600 bg-primary-50/50 dark:bg-primary-950/30 ring-2 ring-primary-500/20"
-                    : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700"
+                    ? "border-ink bg-muted ring-1 ring-ink/10"
+                    : "border-line bg-paper hover:border-line-loud"
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <div
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                      isSelected
-                        ? "bg-primary-600 text-white"
-                        : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
+                    className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                      isSelected ? "bg-ink text-paper" : "bg-canvas text-ink-soft"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                   </div>
                   <input
                     type="radio"
@@ -158,14 +154,12 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
                     checked={isSelected}
                     disabled={disabled}
                     onChange={() => onChange({ accessType: opt.id })}
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 dark:border-neutral-700"
+                    className="h-4 w-4 accent-current"
                   />
                 </div>
 
-                <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
-                  {opt.label}
-                </span>
-                <span className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">
+                <span className="text-sm font-semibold text-ink">{opt.label}</span>
+                <span className="mt-1 text-xs leading-relaxed text-ink-soft">
                   {opt.description}
                 </span>
               </label>
@@ -176,22 +170,22 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 1: Private -> CSV Whitelist + Access Code */}
       {accessType === "private" && (
-        <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-5 animate-fadeIn">
-          <div className="border-b border-neutral-100 dark:border-neutral-800 pb-2">
-            <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-primary-600" />
+        <div className="space-y-5 rounded-2xl border border-line bg-paper p-5">
+          <div className="border-b border-line pb-2">
+            <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Lock className="h-4 w-4 text-ink-soft" />
               <span>Private Access Settings</span>
             </h4>
-            <p className="text-xs text-neutral-500">
-              Control who can access this private event using an email whitelist, access code, or direct link.
+            <p className="text-xs text-ink-soft">
+              Control who can access this private event using an email whitelist, access code, or
+              direct link.
             </p>
           </div>
 
-          {/* Access Code Input */}
           <div className="space-y-1.5">
             <label htmlFor="private-access-code" className={labelClass}>
               <span className="flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-neutral-400" />
+                <KeyRound className="h-3.5 w-3.5 text-ink-faint" />
                 <span>Access Passcode (Optional)</span>
               </span>
             </label>
@@ -204,8 +198,9 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
               onChange={(e) => onChange({ accessCode: e.target.value })}
               className={fieldClass}
             />
-            <p className="text-[11px] text-neutral-400">
-              If set, visitors must enter this code to access the event page unless their email is whitelisted.
+            <p className="text-[11px] text-ink-faint">
+              If set, visitors must enter this code to access the event page unless their email is
+              whitelisted.
             </p>
           </div>
 
@@ -223,13 +218,13 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 2: Invite-Only -> Email List */}
       {accessType === "invite_only" && (
-        <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-4 animate-fadeIn">
-          <div className="border-b border-neutral-100 dark:border-neutral-800 pb-2">
-            <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-primary-600" />
+        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+          <div className="border-b border-line pb-2">
+            <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Mail className="h-4 w-4 text-ink-soft" />
               <span>Invite-Only Settings</span>
             </h4>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-ink-soft">
               Each invitee receives a personalized, secure link with token tracking.
             </p>
           </div>
@@ -251,7 +246,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
               }
               className={`${fieldClass} font-mono text-xs`}
             />
-            <p className="text-[11px] text-neutral-400 mt-1">
+            <p className="mt-1 text-[11px] text-ink-faint">
               Invite links will be generated automatically once the event is created.
             </p>
           </div>
@@ -260,14 +255,14 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 3: VIP / Tiered -> Repeatable Event Tiers */}
       {accessType === "vip_tiered" && (
-        <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-4 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
+        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+          <div className="flex items-center justify-between border-b border-line pb-2">
             <div>
-              <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" />
+              <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Crown className="h-4 w-4 text-ink-soft" />
                 <span>Define Event Tiers</span>
               </h4>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-ink-soft">
                 Configure tiers for designated privileges, passes, and custom agenda access.
               </p>
             </div>
@@ -275,9 +270,9 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
               type="button"
               disabled={disabled}
               onClick={handleAddTier}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-ink hover:underline"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="h-3.5 w-3.5" />
               <span>Add Tier</span>
             </button>
           </div>
@@ -286,9 +281,9 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
             {currentTiers.map((tier, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/40 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+                className="flex flex-col items-start gap-3 rounded-xl border border-line bg-canvas/40 p-3.5 sm:flex-row sm:items-center"
               >
-                <div className="w-8 text-xs font-bold text-neutral-400 text-center">
+                <div className="w-8 text-center text-xs font-bold text-ink-faint">
                   #{tier.order || idx + 1}
                 </div>
                 <div className="w-full sm:w-48">
@@ -301,7 +296,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
                     className={fieldClass}
                   />
                 </div>
-                <div className="flex-1 w-full">
+                <div className="w-full flex-1">
                   <input
                     type="text"
                     disabled={disabled}
@@ -315,10 +310,10 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
                   type="button"
                   disabled={disabled || currentTiers.length <= 1}
                   onClick={() => handleRemoveTier(idx)}
-                  className="p-2 text-neutral-400 hover:text-rose-600 rounded-lg transition disabled:opacity-30"
+                  className="rounded-lg p-2 text-ink-faint transition hover:text-red-700 disabled:opacity-30"
                   title="Remove tier"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))}
@@ -328,14 +323,15 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 4: Hybrid -> Public with Gated Tiers */}
       {accessType === "hybrid" && (
-        <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-4 animate-fadeIn">
-          <div className="border-b border-neutral-100 dark:border-neutral-800 pb-2">
-            <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-primary-600" />
+        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+          <div className="border-b border-line pb-2">
+            <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Layers className="h-4 w-4 text-ink-soft" />
               <span>Hybrid Gated Tier Settings</span>
             </h4>
-            <p className="text-xs text-neutral-500">
-              The event is publicly visible, but the selected tiers require passcode or whitelist approval.
+            <p className="text-xs text-ink-soft">
+              The event is publicly visible, but the selected tiers require passcode or whitelist
+              approval.
             </p>
           </div>
 
@@ -350,20 +346,21 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => handleToggleGatedTier(tier.name)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
                       isGated
-                        ? "bg-primary-600 text-white border-primary-600 shadow-sm"
-                        : "bg-neutral-50 dark:bg-neutral-800/60 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-primary-400"
+                        ? "border-ink bg-ink text-paper"
+                        : "border-line bg-canvas text-ink-soft hover:border-line-loud"
                     }`}
                   >
-                    {isGated ? "🔒 " : "🔓 "}
                     {tier.name}
+                    {isGated ? " (gated)" : ""}
                   </button>
                 );
               })}
             </div>
-            <p className="text-[11px] text-neutral-400">
-              Tiers marked with 🔒 will be hidden or locked for general public registrations.
+            <p className="text-[11px] text-ink-faint">
+              Gated tiers stay locked for general public registrations until a code or whitelist
+              unlock.
             </p>
           </div>
 

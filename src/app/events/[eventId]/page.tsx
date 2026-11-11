@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AccessGate } from "@/src/features/access/components/AccessGate";
 import { markInviteOpenedAction } from "@/src/features/access/actions/inviteLinks.action";
+import { accessUnlockCookieName } from "@/src/features/access/lib/accessUnlock";
 import { ReportEvent } from "@/src/features/admin/components/ReportEvent";
 import { reportEvent } from "@/src/features/admin/actions/events.action";
 import { AuthService } from "@/src/features/auth/authService";
@@ -23,7 +25,7 @@ export const revalidate = 60;
 
 type PageProps = {
   params: Promise<{ eventId: string }>;
-  searchParams: Promise<{ invite?: string; code?: string }>;
+  searchParams: Promise<{ invite?: string; code?: string; bad?: string; track?: string }>;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -62,7 +64,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 export default async function PublicEventPage({ params, searchParams }: PageProps) {
   const { eventId } = await params;
-  const { invite, code } = await searchParams;
+  const { invite, code, bad, track } = await searchParams;
+
+  const jar = await cookies();
+  const unlockToken = jar.get(accessUnlockCookieName(eventId))?.value ?? null;
 
   const viewer = await AuthService.getCurrentUser().catch(() => null);
   const view = await getPublicEventView(
@@ -78,7 +83,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
           presidentOfOrgIds: viewer.presidentOfOrgIds,
         }
       : null,
-    { token: invite, code },
+    { token: invite, code, unlockToken },
   );
 
   if (view.kind === "unavailable") notFound();
@@ -90,7 +95,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
         <AccessGate
           eventId={view.eventId}
           inviteToken={view.inviteToken ?? invite ?? null}
-          wrongCode={view.reason === "bad_code"}
+          wrongCode={view.reason === "bad_code" || bad === "1"}
           reason={
             view.reason === "rate_limited" || view.reason === "closed" ? "needs_code" : view.reason
           }
@@ -110,12 +115,8 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
     await markInviteOpenedAction(invite);
   }
 
-  const qs = [
-    code ? `code=${encodeURIComponent(code)}` : "",
-    invite ? `invite=${encodeURIComponent(invite)}` : "",
-  ]
-    .filter(Boolean)
-    .join("&");
+  // Prefer invite in share links; unlock cookie covers access code after first entry.
+  const qs = [invite ? `invite=${encodeURIComponent(invite)}` : ""].filter(Boolean).join("&");
   const qsSuffix = qs ? `?${qs}` : "";
 
   const jsonLd = {
@@ -192,6 +193,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
               preview={preview}
               inviteToken={invite ?? null}
               accessCode={code ?? null}
+              initialTrackId={track ?? null}
               attendee={
                 viewer?.userId ? { name: viewer.name ?? "", email: viewer.email ?? "" } : null
               }

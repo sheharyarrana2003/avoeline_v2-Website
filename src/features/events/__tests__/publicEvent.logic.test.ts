@@ -68,6 +68,21 @@ describe("resolveRegisterButtonState", () => {
     );
   });
 
+  it("prefers opens_at over competitions_closed when hackathon open is in the future", () => {
+    const now = new Date("2026-06-01T12:00:00Z");
+    assert.equal(
+      resolveRegisterButtonState({
+        ...base,
+        hasTracks: true,
+        openCompetitionCount: 0,
+        registrationOpenDate: "2026-07-01",
+        registrationOpen: false,
+        now,
+      }),
+      "opens_at",
+    );
+  });
+
   it("returns closed when the window is shut", () => {
     assert.equal(resolveRegisterButtonState({ ...base, registrationOpen: false }), "closed");
   });

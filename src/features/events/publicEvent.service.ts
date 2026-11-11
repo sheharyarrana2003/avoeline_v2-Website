@@ -223,22 +223,36 @@ async function buildDto(
     attempt: PublicEventAttempt;
   },
 ): Promise<PublicEventDto> {
-  const presentation = publicEventPresentation(event.status, event.schedule, event.registration);
+  const presentation = publicEventPresentation(event.status, event.schedule, {
+    registrationOpenDate: event.registration?.registrationOpenDate,
+    registrationCloseDate: event.registration?.registrationCloseDate,
+    timezone: event.schedule?.timezone,
+  });
   const hackathon = await eventIsHackathon(event);
 
-  const [regs, organizations, tracks, teamsOnEvent, groupsOnEvent, tiers, chip, shareUrl] =
-    await Promise.all([
-      RegService.getRegsOfEvent(event.id),
-      getEventOrganizations(event.id),
-      hackathon ? listTracks(event.id) : Promise.resolve([]),
-      hackathon ? listTeamsOfEvent(event.id) : Promise.resolve([]),
-      !hackathon && event.registration?.groupRegistration
-        ? listRegistrationGroups(event.id)
-        : Promise.resolve([]),
-      TicketingService.listTiers(event.id).catch(() => []),
-      organizerChipFor(event),
-      absoluteUrl(`/e/${event.id}`),
-    ]);
+  const [
+    regs,
+    organizations,
+    tracks,
+    teamsOnEvent,
+    groupsOnEvent,
+    tiers,
+    chip,
+    shareUrl,
+    publicPromos,
+  ] = await Promise.all([
+    RegService.getRegsOfEvent(event.id),
+    getEventOrganizations(event.id),
+    hackathon ? listTracks(event.id) : Promise.resolve([]),
+    hackathon ? listTeamsOfEvent(event.id) : Promise.resolve([]),
+    !hackathon && event.registration?.groupRegistration
+      ? listRegistrationGroups(event.id)
+      : Promise.resolve([]),
+    TicketingService.listTiers(event.id).catch(() => []),
+    organizerChipFor(event),
+    absoluteUrl(`/e/${event.id}`),
+    TicketingService.listPublicPromoChips(event.id).catch(() => []),
+  ]);
 
   let formFieldsRaw = await listActiveFields(event.id).catch(() => [] as EventFormField[]);
   if (!formFieldsRaw.length) {
@@ -282,6 +296,7 @@ async function buildDto(
     const effectiveClose = effectiveRegistrationClosesAt(t.registrationClosesAt, eventCloseDate);
     const registerState = competitionRegisterState({
       effectiveClosesAt: effectiveClose,
+      opensAt: (t as { opensAt?: string }).opensAt || null,
       trackEnded: String(t.status || "").toLowerCase() === "ended",
       eventLifecycleActive: presentation.registrationOpen,
       seatsLeft,
@@ -489,6 +504,7 @@ async function buildDto(
     currency,
     pricingTiers,
     discounts,
+    publicPromos,
     showSponsors,
     showCollaborators,
     showPartners,

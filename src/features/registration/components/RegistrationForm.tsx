@@ -56,6 +56,15 @@ export interface RegistrationFormProps {
   previewOnly?: boolean;
   /** Paid events: shown before the payment screenshot field. */
   paymentInstructions?: string | null;
+  /** Opted-in public promo chips (never private codes). */
+  publicPromos?: Array<{
+    id: string;
+    label: string;
+    discountSummary: string;
+    trackId: string | null;
+  }>;
+  /** Prefill competition from `?track=`. */
+  initialTrackId?: string | null;
 }
 
 export function RegistrationForm({
@@ -75,10 +84,15 @@ export function RegistrationForm({
   groupMaxSize = 8,
   previewOnly = false,
   paymentInstructions = null,
+  publicPromos = [],
+  initialTrackId = null,
 }: RegistrationFormProps) {
   const boundAction = registerAttendeeAction.bind(null, eventId);
   const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
-  const [trackId, setTrackId] = useState(competitions[0]?.id ?? "");
+  const [trackId, setTrackId] = useState(() => {
+    if (initialTrackId && competitions.some((c) => c.id === initialTrackId)) return initialTrackId;
+    return competitions[0]?.id ?? "";
+  });
   const [registerAsTeam, setRegisterAsTeam] = useState(false);
   const [memberSlots, setMemberSlots] = useState<number[]>([]);
   const [promoPreview, setPromoPreview] = useState<{
@@ -357,8 +371,41 @@ export function RegistrationForm({
 
       {paidNow ? (
         <div className="flex flex-col gap-1.5 border-t border-line pt-5">
+          {amountLabel ? (
+            <p className="text-sm text-ink">
+              Original price: <span className="font-medium">{amountLabel}</span>
+            </p>
+          ) : null}
+          {publicPromos.length ? (
+            <div className="flex flex-wrap gap-2">
+              {publicPromos
+                .filter((p) => !p.trackId || p.trackId === trackId)
+                .map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-xs font-medium text-ink hover:border-line-loud"
+                    onClick={() => {
+                      const input = document.getElementById("reg-promo") as HTMLInputElement | null;
+                      if (input) input.value = p.label;
+                      startPromo(async () => {
+                        const res = await previewPromo({
+                          eventId,
+                          code: p.label,
+                          trackId: trackId || null,
+                        });
+                        if (res.ok) setPromoPreview(res.data);
+                        else setPromoPreview(null);
+                      });
+                    }}
+                  >
+                    {p.label} · {p.discountSummary}
+                  </button>
+                ))}
+            </div>
+          ) : null}
           <label htmlFor="reg-promo" className={labelClass}>
-            Promo code <span className="normal-case text-ink-faint">(optional)</span>
+            Promo / discount code <span className="normal-case text-ink-faint">(optional)</span>
           </label>
           <div className="flex gap-2">
             <input id="reg-promo" name="promoCode" className={fieldClass} autoComplete="off" />
@@ -389,11 +436,11 @@ export function RegistrationForm({
           </div>
           {promoPreview ? (
             <p className="text-xs text-ink-soft">
-              {formatCurrency(promoPreview.original, promoPreview.currency)} −{" "}
-              {formatCurrency(promoPreview.discount, promoPreview.currency)} ={" "}
+              Was {formatCurrency(promoPreview.original, promoPreview.currency)} → now{" "}
               <span className="font-medium text-ink">
                 {formatCurrency(promoPreview.total, promoPreview.currency, "Free")}
-              </span>
+              </span>{" "}
+              (−{formatCurrency(promoPreview.discount, promoPreview.currency)})
             </p>
           ) : null}
         </div>

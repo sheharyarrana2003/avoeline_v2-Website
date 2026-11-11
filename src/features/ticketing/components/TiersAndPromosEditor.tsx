@@ -372,6 +372,10 @@ export function PromoFieldGrid({
         />
         Active
       </label>
+      <label className="flex items-center gap-2 self-end text-sm text-ink sm:col-span-2">
+        <input type="checkbox" name="listPublicly" className="h-4 w-4 accent-current" />
+        List on registration form (public promo chip)
+      </label>
     </>
   );
 }

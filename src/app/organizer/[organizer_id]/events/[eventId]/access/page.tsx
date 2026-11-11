@@ -253,6 +253,7 @@ export default async function EventAccessPage({
           <CardBody>
             <GuestEmailComposer
               eventId={eventId}
+              organizerId={event.organizerId}
               eventUrl={origin}
               guests={guests.map((g) => ({
                 id: g.id,

@@ -8,8 +8,16 @@ import type { PublicCompetition } from "@/src/features/events/types";
 
 function registerLabel(state: PublicCompetition["registerState"]): string {
   if (state === "full") return "Full";
-  if (state === "closed") return "Registration closed";
+  if (state === "closed") return "Closed";
+  if (state === "not_yet_open") return "Not yet open";
   return "Register team";
+}
+
+function statusBadge(state: PublicCompetition["registerState"]): string {
+  if (state === "open") return "Open";
+  if (state === "full") return "Full";
+  if (state === "not_yet_open") return "Not yet open";
+  return "Closed";
 }
 
 export function PublicCompetitions({
@@ -90,6 +98,9 @@ export function PublicCompetitions({
                       CTF
                     </span>
                   ) : null}
+                  <span className="rounded-md border border-line px-1.5 py-0.5 text-2xs font-medium text-ink-soft">
+                    {statusBadge(track.registerState)}
+                  </span>
                 </div>
                 <p className="text-2xs font-medium uppercase text-ink-soft">
                   {HACKATHON_KIND_LABELS[track.kind]} · teams of {track.minTeamSize}–
@@ -99,8 +110,8 @@ export function PublicCompetitions({
                   <p className="line-clamp-3 text-sm text-ink-soft">{track.description}</p>
                 ) : null}
                 <p className="text-sm tabular-nums text-ink">
-                  {track.due > 0 ? formatCurrency(track.due, track.currency, "Free") : "Free"}
-                  {track.prizePool ? ` · ${track.prizePool}` : ""}
+                  Fee: {track.fee > 0 ? formatCurrency(track.fee, track.currency, "Free") : "Free"}
+                  {track.prizePool ? ` · Prize pool ${track.prizePool}` : ""}
                 </p>
                 {track.discountPercent > 0 ? (
                   <p className="text-xs text-ink-soft">

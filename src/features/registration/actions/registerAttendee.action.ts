@@ -161,9 +161,14 @@ export async function registerAttendeeAction(
       return fail("You must accept the Terms and Privacy Policy to register.");
     }
 
+    const { cookies } = await import("next/headers");
+    const { accessUnlockCookieName } = await import("@/src/features/access/lib/accessUnlock");
+    const jar = await cookies();
+    const unlockToken = jar.get(accessUnlockCookieName(eventId))?.value ?? null;
     const attempt = {
       token: String(formData.get("inviteToken") ?? "").trim() || null,
       code: String(formData.get("accessCode") ?? "").trim() || null,
+      unlockToken,
     };
     const promoCode = String(formData.get("promoCode") ?? "").trim();
     const ticketTierId = String(formData.get("ticketTierId") ?? "").trim();

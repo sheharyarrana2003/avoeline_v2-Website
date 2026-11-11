@@ -123,9 +123,10 @@ export function ReviewStep({
                 ...(patch.accessType
                   ? {
                       visibility:
-                        patch.accessType === "vip_tiered" || patch.accessType === "hybrid"
-                          ? "invite_only"
+                        patch.accessType === "vip_tiered"
+                          ? ("vip_tiered" as EventFormData["visibility"])
                           : (patch.accessType as EventFormData["visibility"]),
+                      accessType: patch.accessType,
                     }
                   : {}),
               });

@@ -547,13 +547,16 @@ export class EventModel {
       attendeeTiers:
         Array.isArray(raw.access?.attendeeTiers) && raw.access.attendeeTiers.length
           ? raw.access.attendeeTiers.map(String)
-          : ["General", "Premium", "VIP", "Speaker", "Sponsor"],
+          : Array.isArray(extraAccess?.attendeeTiers) &&
+              (extraAccess!.attendeeTiers as unknown[]).length
+            ? (extraAccess!.attendeeTiers as unknown[]).map(String)
+            : ["General", "Premium", "VIP", "Speaker", "Sponsor"],
       gatedTiers: Array.isArray(raw.access?.gatedTiers)
         ? raw.access.gatedTiers.map(String)
         : Array.isArray(extraAccess?.gatedTiers)
           ? (extraAccess!.gatedTiers as unknown[]).map(String)
           : [],
-      allowTierSelfSelect: !!raw.access?.allowTierSelfSelect,
+      allowTierSelfSelect: !!(raw.access?.allowTierSelfSelect ?? extraAccess?.allowTiersSelfSelect),
       // Falls back to the older top-level flag, which is where every event
       // created before this block stored the same setting.
       requiresApproval: !!(

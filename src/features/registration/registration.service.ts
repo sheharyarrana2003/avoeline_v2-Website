@@ -246,6 +246,23 @@ export async function createPublicRegistration(
   if (event.requiresRegistration === false) return { ok: false, refusal: "event_closed" };
   if (!access.allowed) return { ok: false, refusal: ACCESS_REFUSAL[access.reason] };
 
+  // Server-enforce registration open/close window (UI alone is not enough).
+  const { isWithinRegistrationDates } = await import("@/src/lib/publicEventStatus");
+  const { effectiveRegistrationClosesAt, competitionRegisterState } =
+    await import("@/src/lib/competitionRegistration");
+  if (
+    !isWithinRegistrationDates(
+      {
+        registrationOpenDate: event.registration?.registrationOpenDate,
+        registrationCloseDate: event.registration?.registrationCloseDate,
+        timezone: event.schedule?.timezone,
+      },
+      new Date(),
+    )
+  ) {
+    return { ok: false, refusal: "event_closed" };
+  }
+
   // One read serves the guards below.
   const existing = await RegService.getRegsOfEvent(eventId);
 
@@ -330,6 +347,22 @@ export async function createPublicRegistration(
       return { ok: false, refusal: "track_ended" };
     chosenTrackId = pick.id;
     trackPick = pick;
+    const eventClose = event.registration?.registrationCloseDate || null;
+    const effectiveClose = effectiveRegistrationClosesAt(
+      pick.registrationClosesAt || null,
+      eventClose,
+    );
+    const trackState = competitionRegisterState({
+      effectiveClosesAt: effectiveClose,
+      opensAt: (pick as { opensAt?: string }).opensAt || null,
+      trackEnded: String(pick.status || "").toLowerCase() === "ended",
+      eventLifecycleActive: true,
+      seatsLeft: null,
+      waitlistEnabled: false,
+    });
+    if (trackState === "closed" || trackState === "not_yet_open" || trackState === "full") {
+      return { ok: false, refusal: "track_ended" };
+    }
     // Base fee before track/student/group discounts — promo applies to this only.
     ticket = { tierName: pick.name, price: Number(pick.fee) || 0, ticketTierId: null };
   }

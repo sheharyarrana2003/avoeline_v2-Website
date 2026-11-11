@@ -20,6 +20,8 @@ export type TicketTier = {
 
 export { seatsLeftOf, tierWindowClosed } from "./tierWindow.logic";
 
+export type PromoVisibility = "public" | "private";
+
 export type PromoCode = {
   id: string;
   eventId: string;
@@ -34,6 +36,16 @@ export type PromoCode = {
   perEmailLimit: number | null;
   /** Sum of discount_amount from promo_redemptions. */
   totalDiscounted: number;
+  /** public = listed on register form; private = code-entry only. */
+  visibility: PromoVisibility;
+};
+
+/** Allowlisted public promo chip — never includes private codes. */
+export type PublicPromoChip = {
+  id: string;
+  label: string;
+  discountSummary: string;
+  trackId: string | null;
 };
 
 export const TicketingService = {
@@ -156,11 +168,13 @@ export const TicketingService = {
     const now = Date.now();
     return promos.map((r) => {
       const expired = r.expires_at ? new Date(r.expires_at).getTime() <= now : false;
+      const visibility =
+        (r as { visibility?: string }).visibility === "public" ? "public" : "private";
       return {
         id: r.id,
         eventId: r.event_id,
         code: r.code,
-        discountType: r.discount_type,
+        discountType: (r.discount_type as "percent" | "flat") || "percent",
         value: Number(r.value) || 0,
         usageLimit: r.usage_limit,
         usageCount: Number(r.usage_count) || 0,
@@ -169,8 +183,22 @@ export const TicketingService = {
         trackId: r.track_id || null,
         perEmailLimit: r.per_email_limit ?? null,
         totalDiscounted: discountedByPromo.get(r.id) ?? 0,
+        visibility,
       };
     });
+  },
+
+  /** Public chips only — code string is the display label for opted-in public promos. */
+  async listPublicPromoChips(eventId: string): Promise<PublicPromoChip[]> {
+    const all = await this.listPromos(eventId);
+    return all
+      .filter((p) => p.active && p.visibility === "public")
+      .map((p) => ({
+        id: p.id,
+        label: p.code,
+        discountSummary: p.discountType === "percent" ? `${p.value}% off` : `${p.value} off`,
+        trackId: p.trackId,
+      }));
   },
 
   async createPromo(
@@ -183,6 +211,7 @@ export const TicketingService = {
       trackId?: string | null;
       expiresAt?: string | null;
       active?: boolean;
+      visibility?: PromoVisibility;
     },
   ) {
     const { data, error } = await supabaseAdmin
@@ -196,6 +225,7 @@ export const TicketingService = {
         track_id: input.trackId || null,
         expires_at: input.expiresAt || null,
         active: input.active !== false,
+        visibility: input.visibility === "public" ? "public" : "private",
       })
       .select("*")
       .single();
@@ -203,10 +233,17 @@ export const TicketingService = {
     return data;
   },
 
-  async updatePromo(eventId: string, id: string, patch: { active?: boolean }) {
+  async updatePromo(
+    eventId: string,
+    id: string,
+    patch: { active?: boolean; visibility?: PromoVisibility },
+  ) {
     const { error } = await supabaseAdmin
       .from(TABLES.PROMO_CODES)
-      .update(patch)
+      .update({
+        ...(patch.active !== undefined ? { active: patch.active } : {}),
+        ...(patch.visibility !== undefined ? { visibility: patch.visibility } : {}),
+      })
       .eq("id", id)
       .eq("event_id", eventId);
     if (error) throw error;

@@ -1,4 +1,4 @@
-import { toDate } from "@/src/lib/datetime";
+import { fromEventLocalInput, toDate } from "@/src/lib/datetime";
 import type { EventLifecycle } from "@/src/lib/eventState";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import {
@@ -18,31 +18,47 @@ export type PublicEventBanner = {
 export type RegistrationWindow = {
   registrationOpenDate?: string | null;
   registrationCloseDate?: string | null;
+  /** IANA timezone from event.schedule — used for date-only open/close bounds. */
+  timezone?: string | null;
 };
 
 /**
+ * Instant for a date-only (YYYY-MM-DD) bound in the event timezone.
+ * Open = start of that local day; close = end of that local day.
+ * Full ISO strings are used as absolute instants.
+ */
+export function registrationBoundInstant(
+  raw: string | null | undefined,
+  edge: "start" | "end",
+  timeZone?: string | null,
+): Date | null {
+  const s = String(raw || "").trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const tz = String(timeZone || "").trim() || "UTC";
+    const local = edge === "start" ? `${s}T00:00:00` : `${s}T23:59:59`;
+    const iso = fromEventLocalInput(local, tz);
+    return iso ? new Date(iso) : toDate(s);
+  }
+  return toDate(s);
+}
+
+/**
  * Whether the event's registration open/close dates currently allow signup.
- * Missing dates mean "no extra window constraint". Close date is end-of-day local.
+ * Missing dates mean "no extra window constraint". Date-only bounds use event TZ.
  */
 export function isWithinRegistrationDates(
   registration: RegistrationWindow | null | undefined,
   now: Date = new Date(),
 ): boolean {
   if (!registration) return true;
+  const tz = registration.timezone;
 
-  const opens = toDate(registration.registrationOpenDate);
-  if (opens) {
-    const start = new Date(opens);
-    start.setHours(0, 0, 0, 0);
-    if (now < start) return false;
-  }
+  const opens = registrationBoundInstant(registration.registrationOpenDate, "start", tz);
+  if (opens && now < opens) return false;
 
-  const closes = toDate(registration.registrationCloseDate);
-  if (closes) {
-    const end = new Date(closes);
-    end.setHours(23, 59, 59, 999);
-    if (now > end) return false;
-  }
+  const closes = registrationBoundInstant(registration.registrationCloseDate, "end", tz);
+  if (closes && now > closes) return false;
 
   return true;
 }
@@ -67,7 +83,20 @@ export function publicEventPresentation(
 
   let banner = banners[lifecycle] ?? null;
   if (!banner && lifecycleAllows && !datesAllow) {
-    banner = "Registration is closed for this event.";
+    const opens = registrationBoundInstant(
+      registration?.registrationOpenDate,
+      "start",
+      registration?.timezone,
+    );
+    if (opens && now < opens) {
+      banner = `Registration opens on ${opens.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })}.`;
+    } else {
+      banner = "Registration is closed for this event.";
+    }
   }
 
   return {

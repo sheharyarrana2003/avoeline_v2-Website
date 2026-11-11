@@ -2,6 +2,8 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { Copy, Mail } from "lucide-react";
+import { CapacityStrip } from "@/src/features/connections/components/CapacityStrip";
+import { SenderPicker } from "@/src/features/connections/components/SenderPicker";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -25,11 +27,13 @@ const FILTER_OPTIONS: { value: GuestEmailFilter; label: string }[] = [
 
 export function GuestEmailComposer({
   eventId,
+  organizerId,
   eventUrl,
   guests,
   senderConnected,
 }: {
   eventId: string;
+  organizerId: string;
   eventUrl: string;
   guests: GuestEmailRow[];
   senderConnected: boolean;
@@ -40,6 +44,7 @@ export function GuestEmailComposer({
   >(sendGuestEmailBatchAction, null);
   const [filter, setFilter] = useState<GuestEmailFilter>("all_pending");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [senderConnectionId, setSenderConnectionId] = useState<string | null>(null);
   const [subject, setSubject] = useState("You're invited — {{name}}");
   const [body, setBody] = useState(
     "Hi {{name}},\n\nUse your personal link to register:\n{{inviteLink}}\n\nOr open the event page:\n{{eventLink}}",
@@ -100,12 +105,26 @@ export function GuestEmailComposer({
         <input type="hidden" name="eventId" value={eventId} />
         <input type="hidden" name="filter" value={filter} />
         <input type="hidden" name="selectedIds" value={[...selected].join(",")} />
+        {senderConnectionId ? (
+          <input type="hidden" name="connectionId" value={senderConnectionId} />
+        ) : null}
 
         {state?.error ? <FormFeedback error={state.error} /> : null}
         {state?.success ? (
           <FormFeedback
             success={`Sent ${state.sent ?? 0}${state.skipped ? ` · ${state.skipped} failed` : ""}.`}
           />
+        ) : null}
+
+        {senderConnected ? (
+          <div className="space-y-2">
+            <SenderPicker
+              eventId={eventId}
+              value={senderConnectionId}
+              onChange={setSenderConnectionId}
+            />
+            <CapacityStrip ownerId={organizerId} kind="custom" eventId={eventId} />
+          </div>
         ) : null}
 
         <div className="flex flex-col gap-1.5">

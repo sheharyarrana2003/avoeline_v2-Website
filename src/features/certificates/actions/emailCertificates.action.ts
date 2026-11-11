@@ -19,6 +19,7 @@ import { findActiveEmailConnection } from "@/src/features/connections/server/con
 const schema = z.object({
   eventId: z.string().min(1),
   resend: z.boolean().optional(),
+  connectionId: z.string().uuid().optional().nullable(),
   /** Opt-in: share Drive archive by link and include URL in email. */
   includeDriveLink: z.boolean().optional(),
   /** Must be true when includeDriveLink is true (UI warning acknowledged). */
@@ -45,11 +46,24 @@ export const emailCertificatesAction = safeAction({
       return safeFail("VALIDATION", DRIVE_SHARE_WARNING);
     }
 
-    const conn = await findActiveEmailConnection({
-      ownerType: "user",
-      ownerId: event.organizerId,
-    });
-    if (!conn) {
+    const { requireConnectedSender } =
+      await import("@/src/features/email/organizerTransport.service");
+    const { getConnectionById } =
+      await import("@/src/features/connections/server/connections.service");
+    const sender = await requireConnectedSender(event.organizerId, { eventId: input.eventId });
+    if (!sender.connected) {
+      return safeFail(
+        "NO_CONNECTION",
+        "Connect Gmail before emailing certificates (Organizer → Connections).",
+      );
+    }
+    const conn = input.connectionId
+      ? await getConnectionById(input.connectionId)
+      : await findActiveEmailConnection({
+          ownerType: "user",
+          ownerId: event.organizerId,
+        });
+    if (!conn || conn.status !== "active") {
       return safeFail(
         "NO_CONNECTION",
         "Connect Gmail before emailing certificates (Organizer → Connections).",
@@ -168,11 +182,16 @@ export const emailCertificatesAction = safeAction({
 export async function emailCertificatesLegacy(
   eventId: string,
   resend = false,
-  opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+  opts?: {
+    includeDriveLink?: boolean;
+    acknowledgeDriveShareWarning?: boolean;
+    connectionId?: string | null;
+  },
 ) {
   const result = await emailCertificatesAction({
     eventId,
     resend,
+    connectionId: opts?.connectionId,
     includeDriveLink: opts?.includeDriveLink,
     acknowledgeDriveShareWarning: opts?.acknowledgeDriveShareWarning,
   });

@@ -75,7 +75,11 @@ export default async function CertificateIssuancePage({
 
   async function handleEmailCertificates(
     resend: boolean,
-    opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+    opts?: {
+      includeDriveLink?: boolean;
+      acknowledgeDriveShareWarning?: boolean;
+      connectionId?: string | null;
+    },
   ) {
     "use server";
     return emailCertificatesLegacy(eventId, resend, opts);

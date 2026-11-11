@@ -13,6 +13,7 @@ type Props = {
   inviteToken?: string | null;
   accessCode?: string | null;
   attendee?: { name?: string; email?: string } | null;
+  initialTrackId?: string | null;
 };
 
 export function PublicRegisterCard({
@@ -21,6 +22,7 @@ export function PublicRegisterCard({
   inviteToken = null,
   accessCode = null,
   attendee = null,
+  initialTrackId = null,
 }: Props) {
   const state = dto.registerState;
   const formFields = dtoToFormFields(dto);
@@ -64,6 +66,7 @@ export function PublicRegisterCard({
           inviteToken={inviteToken}
           accessCode={accessCode}
           attendee={attendee}
+          initialTrackId={initialTrackId}
         />
       </div>
     </div>
@@ -78,6 +81,7 @@ function RegisterBody({
   inviteToken,
   accessCode,
   attendee,
+  initialTrackId,
 }: {
   state: RegisterButtonState;
   dto: PublicEventDto;
@@ -86,6 +90,7 @@ function RegisterBody({
   inviteToken: string | null;
   accessCode: string | null;
   attendee: { name?: string; email?: string } | null;
+  initialTrackId: string | null;
 }) {
   const nextLine = whatHappensNextLine({
     isFree: dto.isFree,
@@ -116,6 +121,8 @@ function RegisterBody({
           tierChoices={[]}
           previewOnly
           paymentInstructions={dto.paymentInstructions}
+          publicPromos={dto.publicPromos}
+          initialTrackId={initialTrackId}
         />
         <p className="text-xs text-ink-soft">{nextLine}</p>
       </div>
@@ -212,6 +219,8 @@ function RegisterBody({
           groupMinSize={dto.groupMinSize}
           groupMaxSize={dto.groupMaxSize}
           attendee={attendee}
+          publicPromos={dto.publicPromos}
+          initialTrackId={initialTrackId}
           tierChoices={
             openCompetitions.length
               ? []

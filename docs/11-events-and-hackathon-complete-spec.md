@@ -121,7 +121,7 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Data:** `events.visibility`, `event_invites`, `ticket_tiers`, `promo_codes`, `promo_redemptions`, `event_form_fields`, `events.allow_group_registration` / `group_min_size` / `group_max_size`.
 
-**Access type:** Public / Private / Invite only / Hybrid / Tiered — type cards + How this works; approval/waitlist; single Save (`assertEventActor(..., "access")`).
+**Access type:** Public / Private / Invite only / Hybrid / VIP tiered (`vip_tiered` in Postgres; UI may say “Tiered”) — type cards + How this works; approval/waitlist; single Save (`assertEventActor(..., "access")`). Nested flags (`gatedTiers`, `attendeeTiers`, …) live in `events.extra.access` — never a fake `access` column. VIP/tiered events are **listed** on Browse. Private unlock: valid code sets an httpOnly same-origin unlock cookie so registration works without keeping `?code=` forever (`?code=` / `?invite=` remain entry).
 
 **Registration questions:** live on **Attendees** (drawer), not Access. Soft-archive only — never hard-delete when responses exist.
 
@@ -132,9 +132,9 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 **Tiers & Promos:**
 - **Ticket Tiers: hidden entirely on hackathon events** (fees live per-competition, not on the event ticket) — show a note pointing to Competitions instead.
 - Tiers get Active/Inactive toggle + optional "Available until" date. Once created, show as a real list (name, price, seats sold/available, active toggle, edit/delete) — not a permanent "No tiers yet."
-- Promo codes get Expiry + Active toggle in addition to Code/Type/Value. **Scope dropdown is dynamic**: non-hackathon events default to/hide-as "Whole event"; hackathon events populate the dropdown with "Whole event" + one option per competition (live from `hackathon_tracks`), writing to `promo_codes.track_id`.
+- Promo codes get Expiry + Active toggle in addition to Code/Type/Value. **Visibility** `public` | `private` (default **private**): public codes appear as selectable chips on the register form; private codes are never in the public DTO — code-entry field only. **Scope dropdown is dynamic**: non-hackathon events default to/hide-as "Whole event"; hackathon events populate the dropdown with "Whole event" + one option per competition (live from `hackathon_tracks`), writing to `promo_codes.track_id`.
 - Once created, show codes as a real list: code, type+value, scope (resolved competition name or "Whole event"), usage (`X/limit` or `X used`), **total discounted** (sum of `promo_redemptions.discount_amount`), expiry, active toggle, delete.
-- Redeem via atomic `redeem_promo` RPC after registration/group insert; public form can `previewPromo` for original/discount/total.
+- One discount at a time; show **original price first**, then discounted after verify. Redeem via atomic `redeem_promo` RPC after registration/group insert; public form can `previewPromo` (rate-limited) for original/discount/total.
 - **Active auto-expires on read** (check `expires_at` whenever the list renders) — don't rely on a cron job that doesn't exist yet.
 
 **Guest email:** organizer connected Gmail via Connections / docs/18 (`GuestEmailComposer`) — not platform Resend for organizer guest mail. Confirm invite lifecycle (link → `opened_at` → `registered_at`/`registration_id`) end to end.
@@ -199,11 +199,13 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Purpose:** Guest-facing event surface. Never pass a raw `EventModel` or `select('*')` to the client.
 
-**Data:** `getPublicEventView` in `src/features/events/publicEvent.service.ts` returns an allowlisted `PublicEventDto` (or gated / unavailable). Forbidden on the DTO: organizer contact, whitelist, meeting password/link, access codes, promo codes, bank/IBAN, attendee/team secrets, tasks/flags, sponsor contract/benefits.
+**Data:** `getPublicEventView` in `src/features/events/publicEvent.service.ts` returns an allowlisted `PublicEventDto` (or gated / unavailable). Forbidden on the DTO: organizer contact, whitelist, meeting password/link, access codes, **private** promo codes, bank/IBAN, attendee/team secrets, tasks/flags, sponsor contract/benefits. Allowlisted `publicPromos` chips only when `promo_codes.visibility = public`.
 
-**Access:** published + public → full DTO; private/invite → title + `AccessGate` until server-validated code/token (rate-limited); draft/archived/cancelled → unavailable for guests; owner/staff/dept/club/support → full + Admin preview banner.
+**Access:** published + public/hybrid/VIP → full DTO; private/invite → title + `AccessGate` until server-validated code/token (rate-limited) or unlock cookie; draft/archived/cancelled → unavailable for guests; owner/staff/dept/club/support → full + Admin preview banner.
 
-**Layout:** hero (Share + .ics only here); desktop two-column sticky Register / mobile Register first; facts (no truncated venue/date); Register card without shareable link; form fields from `event_form_fields` (seed defaults if empty); about/gallery/video; tiers + automatic discounts only; agenda; speakers; competitions; sponsors strips only when toggles on; footer organizer chip + Report. SEO: `generateMetadata`, OG, schema.org Event JSON-LD, `loading.tsx`.
+**Registration CTA:** `resolveRegisterButtonState` checks future `registrationOpenDate` (`opens_at`) **before** `competitions_closed`. Server enforces the same window (+ competition close) on submit. `?track=` preselects a competition on the register form. `/events/.../tracks` uses the same DTO + `PublicCompetitions` cards + `PublicShareMenu`.
+
+**Layout:** hero (Share + .ics only here); desktop two-column sticky Register / mobile Register first; facts (no truncated venue/date); Register card without shareable link; form fields from `event_form_fields` (seed defaults if empty); about/gallery/video; tiers + automatic discounts + public promo chips; agenda; speakers; competitions (image, CTF, team size, original fee, status, expandable rules); sponsors strips only when toggles on; footer organizer chip + Report. SEO: `generateMetadata`, OG, schema.org Event JSON-LD, `loading.tsx`.
 
 ---
 
@@ -312,7 +314,7 @@ Config keys in use: `live_scoreboard`, `ctf_flags`, `task_hints`, `per_task_time
 
 **Purpose:** Issue/verify certificates. Same UI for every event regardless of `isHackathon`, gated by the `certificates` module.
 
-**Templates:** Versioned JSON layouts (`certificate_templates` + immutable `certificate_template_versions`). Konva editor at `making-template`: draft autosave, publish bumps `version`, gallery seeds, token insert (`{{recipientName}}`, `{{field:<key}}`, etc.), curated fonts, `email_attach_pdf` toggle, “Re-render all with latest” (updates `template_version` on issued rows only — no stored PDFs).
+**Templates:** Versioned JSON layouts (`certificate_templates` + immutable `certificate_template_versions`). Konva editor at `making-template`: empty/corrupt layouts hydrate to `defaultLayout()`; draft autosave (incl. assets); **Preview** modal (not always-on live SVG); Transformer resize + inspector; publish bumps `version`, gallery seeds, token insert, curated fonts, `email_attach_pdf` toggle, “Re-render all with latest” (updates `template_version` on issued rows only — no stored PDFs). Email: link-first to `/certificate/[code]`; `SenderPicker` `connectionId` + `requireConnectedSender` fail-closed; Drive share only when opted in + acknowledged.
 
 **Issue:** Bulk insert certificate rows only (`data` jsonb + `verification_code` / `certificate_number`). Lazy render on download/verify/email. Cap + rate limit. One cert per registration (team members each get their own). Optional **Save a copy to my Drive** (`archiveToDrive`, default on when Drive connected) enqueues private `certificate_jobs` (A6 Certificates folder via FileStore); never blocks issue if Drive is down.
 

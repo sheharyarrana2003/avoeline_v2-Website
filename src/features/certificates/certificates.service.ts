@@ -23,7 +23,8 @@ function asLayout(raw: unknown): CertificateLayout {
     raw &&
     typeof raw === "object" &&
     (raw as CertificateLayout).page &&
-    Array.isArray((raw as CertificateLayout).elements)
+    Array.isArray((raw as CertificateLayout).elements) &&
+    (raw as CertificateLayout).elements.length > 0
   ) {
     return raw as CertificateLayout;
   }

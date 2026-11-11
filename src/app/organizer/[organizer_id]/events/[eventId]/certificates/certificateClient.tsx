@@ -41,7 +41,11 @@ interface CertificateIssuanceClientProps {
   ) => Promise<CertificateGenerationResult>;
   onEmailCertificates: (
     resend: boolean,
-    opts?: { includeDriveLink?: boolean; acknowledgeDriveShareWarning?: boolean },
+    opts?: {
+      includeDriveLink?: boolean;
+      acknowledgeDriveShareWarning?: boolean;
+      connectionId?: string | null;
+    },
   ) => Promise<{
     success: boolean;
     error?: string;
@@ -201,6 +205,7 @@ export default function CertificateIssuanceClient({
       const result = await onEmailCertificates(resend, {
         includeDriveLink: includeDriveLink && driveConnected,
         acknowledgeDriveShareWarning: includeDriveLink && driveConnected,
+        connectionId: senderConnectionId,
       });
       if (!result.success) {
         setEmailSummary(result.error || "Could not send emails.");

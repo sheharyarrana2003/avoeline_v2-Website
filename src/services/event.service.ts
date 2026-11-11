@@ -1007,9 +1007,16 @@ export const EventService = {
       showCollaborators: "show_collaborators",
       showPartners: "show_partners",
       paymentInstructions: "payment_instructions",
+      extra: "extra",
     };
     for (const [k, v] of Object.entries(patch)) {
+      // Nested access flags live in extra.access — never write a fake `access` column.
+      if (k === "access") continue;
       const col = map[k] || k;
+      if (col === "visibility" && (v === "tiered" || v === "vip_tiered")) {
+        snake.visibility = "vip_tiered";
+        continue;
+      }
       if ((col === "start_date" || col === "end_date") && typeof v === "string") {
         snake[col] = asIsoDate(v);
       } else {

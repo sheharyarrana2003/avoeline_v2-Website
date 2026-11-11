@@ -120,6 +120,8 @@ export type AccessAttempt = {
   token?: string | null;
   code?: string | null;
   email?: string | null;
+  /** Signed httpOnly unlock from a prior valid code (session cookie). */
+  unlockToken?: string | null;
 };
 
 export async function resolveEventAccess(
@@ -131,6 +133,8 @@ export async function resolveEventAccess(
   const type = accessTypeOf(event);
   const requiredCode = String(event.accessCode ?? "").trim();
   const submittedCode = String(attempt.code ?? "").trim();
+  const { verifyAccessUnlockToken } = await import("./lib/accessUnlock");
+  const unlockedByCookie = verifyAccessUnlockToken(event.id, attempt.unlockToken);
 
   let entry: EventInvite | null = null;
   if (attempt.token) {
@@ -151,14 +155,16 @@ export async function resolveEventAccess(
     type === "private" && !!email && !entry ? await hasGuestList(event.id) : false;
   const suspended = await UserService.suspendedOrganizerIds();
 
+  const codeMatches = unlockedByCookie || (!!requiredCode && submittedCode === requiredCode);
+
   const decision = decideAccess({
     type,
     open:
       isActiveLifecycle(eventLifecycle(event.status, event.schedule)) &&
       !suspended.has(String(event.organizerId)),
     hasCode: !!requiredCode,
-    codeMatches: !!requiredCode && submittedCode === requiredCode,
-    codeSubmitted: !!submittedCode,
+    codeMatches,
+    codeSubmitted: !!submittedCode || unlockedByCookie,
     entry,
     emailKnown: !!email,
     guestListInUse,

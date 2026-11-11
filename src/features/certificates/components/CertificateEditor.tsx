@@ -6,10 +6,12 @@ import {
   CERT_TOKENS,
   CURATED_FONTS,
   PAGE_PRESETS,
+  defaultLayout,
   type CertificateLayout,
   type ElementType,
   type LayoutElement,
   type PageSize,
+  type TemplateAssets,
 } from "@/src/features/certificates/layout.types";
 import type { CertificateTemplateRow } from "@/src/features/certificates/types";
 import { GALLERY_SEEDS } from "@/src/features/certificates/gallerySeeds";
@@ -21,6 +23,7 @@ import {
   saveDraftAction,
   setEmailAttachPdfAction,
 } from "@/src/features/certificates/actions/template.action";
+import { Modal } from "@/src/components/ui/Modal";
 import { buttonClass, fieldClass } from "@/src/lib/ui";
 
 const Stage = dynamic(() => import("react-konva").then((m) => m.Stage), { ssr: false });
@@ -30,6 +33,16 @@ const Text = dynamic(() => import("react-konva").then((m) => m.Text), { ssr: fal
 const Line = dynamic(() => import("react-konva").then((m) => m.Line), { ssr: false });
 const Ellipse = dynamic(() => import("react-konva").then((m) => m.Ellipse), { ssr: false });
 const Group = dynamic(() => import("react-konva").then((m) => m.Group), { ssr: false });
+const Transformer = dynamic(() => import("react-konva").then((m) => m.Transformer), {
+  ssr: false,
+});
+
+function hydrateLayout(raw: CertificateLayout | null | undefined): CertificateLayout {
+  if (raw && raw.page && Array.isArray(raw.elements) && raw.elements.length > 0) {
+    return cloneLayout(raw);
+  }
+  return cloneLayout(defaultLayout());
+}
 
 const SNAP = 8;
 const HISTORY_MAX = 40;
@@ -77,19 +90,55 @@ export default function CertificateEditor({
   eventId: string;
   initial: CertificateTemplateRow;
 }) {
-  const [layout, setLayout] = useState<CertificateLayout>(() => cloneLayout(initial.layout));
+  const [layout, setLayout] = useState<CertificateLayout>(() => hydrateLayout(initial.layout));
+  const [assets, setAssets] = useState<TemplateAssets>(() => initial.assets || {});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showGrid, setShowGrid] = useState(true);
   const [snapOn, setSnapOn] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [stress, setStress] = useState<"short" | "long" | "nonlatin">("short");
   const [emailAttachPdf, setEmailAttachPdf] = useState(initial.emailAttachPdf);
   const [name, setName] = useState(initial.name);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const history = useRef<CertificateLayout[]>([cloneLayout(initial.layout)]);
+  const history = useRef<CertificateLayout[]>([hydrateLayout(initial.layout)]);
   const future = useRef<CertificateLayout[]>([]);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const trRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nodeRefs = useRef<Map<string, any>>(new Map());
+
+  // Re-hydrate when async initial.layout arrives (avoids blank Konva after load).
+  useEffect(() => {
+    const next = hydrateLayout(initial.layout);
+    setLayout(next);
+    setAssets(initial.assets || {});
+    setName(initial.name);
+    setEmailAttachPdf(initial.emailAttachPdf);
+    history.current = [cloneLayout(next)];
+    future.current = [];
+  }, [
+    initial.id,
+    initial.updatedAt,
+    initial.layout,
+    initial.assets,
+    initial.name,
+    initial.emailAttachPdf,
+  ]);
+
+  useEffect(() => {
+    const tr = trRef.current;
+    if (!tr) return;
+    const konvaNode = selectedId ? nodeRefs.current.get(selectedId) : null;
+    if (konvaNode) {
+      tr.nodes([konvaNode]);
+      tr.getLayer?.()?.batchDraw();
+    } else {
+      tr.nodes([]);
+    }
+  }, [selectedId, layout.elements]);
 
   const sample =
     stress === "long" ? SAMPLE_LONG : stress === "nonlatin" ? SAMPLE_NON_LATIN : SAMPLE_SHORT;
@@ -138,6 +187,7 @@ export default function CertificateEditor({
           eventId,
           name,
           layout,
+          assets,
           emailAttachPdf,
         });
         if (result.ok) setStatusMsg("Draft saved");
@@ -147,9 +197,15 @@ export default function CertificateEditor({
     return () => {
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     };
-  }, [eventId, layout, name, emailAttachPdf]);
+  }, [eventId, layout, assets, name, emailAttachPdf]);
 
-  const preview = useMemo(() => renderCertificate(layout, sample), [layout, sample]);
+  const preview = useMemo(() => {
+    const resolved: Record<string, string> = {};
+    for (const [k, v] of Object.entries(assets)) {
+      if (v) resolved[k] = v;
+    }
+    return renderCertificate(layout, sample, resolved);
+  }, [layout, sample, assets]);
 
   const addElement = (type: ElementType) => {
     updateLayout((prev) => {
@@ -402,6 +458,13 @@ export default function CertificateEditor({
         >
           Re-render all with latest
         </button>
+        <button
+          type="button"
+          className={buttonClass("primary", "sm")}
+          onClick={() => setPreviewOpen(true)}
+        >
+          Preview
+        </button>
       </div>
 
       <div className="space-y-2">
@@ -478,6 +541,10 @@ export default function CertificateEditor({
                   .map((el) => (
                     <Group
                       key={el.id}
+                      ref={(node) => {
+                        if (node) nodeRefs.current.set(el.id, node);
+                        else nodeRefs.current.delete(el.id);
+                      }}
                       x={el.x}
                       y={el.y}
                       draggable
@@ -487,7 +554,33 @@ export default function CertificateEditor({
                         const x = snap(e.target.x(), snapOn);
                         const y = snap(e.target.y(), snapOn);
                         e.target.position({ x, y });
-                        patchSelected({ x, y });
+                        updateLayout((prev) => ({
+                          ...prev,
+                          elements: prev.elements.map((item) =>
+                            item.id === el.id ? { ...item, x, y } : item,
+                          ),
+                        }));
+                      }}
+                      onTransformEnd={(e) => {
+                        const node = e.target;
+                        const scaleX = node.scaleX();
+                        const scaleY = node.scaleY();
+                        node.scaleX(1);
+                        node.scaleY(1);
+                        updateLayout((prev) => ({
+                          ...prev,
+                          elements: prev.elements.map((item) =>
+                            item.id === el.id
+                              ? {
+                                  ...item,
+                                  x: snap(node.x(), snapOn),
+                                  y: snap(node.y(), snapOn),
+                                  w: Math.max(8, snap(el.w * scaleX, snapOn)),
+                                  h: Math.max(8, snap((el.h || 8) * scaleY, snapOn)),
+                                }
+                              : item,
+                          ),
+                        }));
                       }}
                     >
                       {el.type === "text" ? (
@@ -538,17 +631,18 @@ export default function CertificateEditor({
                           dash={[4, 4]}
                         />
                       ) : null}
-                      {selectedId === el.id ? (
-                        <Rect
-                          width={el.w || 4}
-                          height={el.h || 4}
-                          stroke="#2563eb"
-                          strokeWidth={1}
-                          listening={false}
-                        />
-                      ) : null}
                     </Group>
                   ))}
+                <Transformer
+                  ref={(node) => {
+                    trRef.current = node;
+                  }}
+                  rotateEnabled={false}
+                  boundBoxFunc={(oldBox, newBox) => {
+                    if (newBox.width < 8 || newBox.height < 8) return oldBox;
+                    return newBox;
+                  }}
+                />
               </Layer>
             </Stage>
           </div>
@@ -682,18 +776,80 @@ export default function CertificateEditor({
                   }
                 />
               </label>
+              {(selected.type === "image" || selected.type === "qr") && (
+                <label className="block text-xs text-ink-soft">
+                  Asset key
+                  <select
+                    className={`${fieldClass} mt-1 block w-full`}
+                    value={selected.assetKey || ""}
+                    onChange={(e) => patchSelected({ assetKey: e.target.value || undefined })}
+                  >
+                    <option value="">None</option>
+                    <option value="logo">logo</option>
+                    <option value="signature">signature</option>
+                    <option value="background">background</option>
+                  </select>
+                </label>
+              )}
             </div>
           )}
+          <div className="space-y-2 border-t border-line pt-3">
+            <p className="text-2xs font-medium uppercase text-ink-soft">Template assets</p>
+            <label className="block text-xs text-ink-soft">
+              Logo URL
+              <input
+                className={`${fieldClass} mt-1 block w-full`}
+                value={assets.logo || ""}
+                onChange={(e) => setAssets((a) => ({ ...a, logo: e.target.value || undefined }))}
+              />
+            </label>
+            <label className="block text-xs text-ink-soft">
+              Signature URL
+              <input
+                className={`${fieldClass} mt-1 block w-full`}
+                value={assets.signature || ""}
+                onChange={(e) =>
+                  setAssets((a) => ({ ...a, signature: e.target.value || undefined }))
+                }
+              />
+            </label>
+          </div>
         </aside>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-2xs font-medium uppercase text-ink-soft">Live SVG preview</p>
+      <aside className="space-y-3 rounded-lg border border-line p-3 lg:hidden">
+        <p className="text-2xs font-medium uppercase text-ink-soft">Assets</p>
+        <label className="block text-xs text-ink-soft">
+          Logo URL
+          <input
+            className={`${fieldClass} mt-1 block w-full`}
+            value={assets.logo || ""}
+            onChange={(e) => setAssets((a) => ({ ...a, logo: e.target.value || undefined }))}
+            placeholder="https://… or Drive file URL"
+          />
+        </label>
+        <label className="block text-xs text-ink-soft">
+          Signature URL
+          <input
+            className={`${fieldClass} mt-1 block w-full`}
+            value={assets.signature || ""}
+            onChange={(e) => setAssets((a) => ({ ...a, signature: e.target.value || undefined }))}
+            placeholder="https://… or Drive file URL"
+          />
+        </label>
+      </aside>
+
+      <Modal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title="Certificate preview"
+        maxWidth="2xl"
+      >
         <div
           className="overflow-auto rounded-lg border border-line bg-white p-2"
           dangerouslySetInnerHTML={{ __html: preview.svg }}
         />
-      </div>
+      </Modal>
     </div>
   );
 }

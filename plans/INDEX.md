@@ -2,6 +2,7 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-11 | [access-certs-public-fixes](2026-11-11-access-certs-public-fixes.md) | done | Access vip_tiered/extra.access + unlock cookie; opens_at CTA; promo visibility; cert Preview/Transformer; public tracks DTO |
 | 2026-11-10 | [n7-connections-redesign](2026-11-10-n7-connections-redesign.md) | done | N7: single Connections page, account + integration cards, OAuth diagnostics, smoke tests |
 | 2026-11-09 | [n6-attendee-emails](2026-11-09-n6-attendee-emails.md) | done | N6: React Email attendee layout, composer parity, CID QRs, Mailpit + snapshots |
 | 2026-11-09 | [n5-attendees-tab](2026-11-09-n5-attendees-tab.md) | done | N5: registrant identity, approve/proof rules, bulk, Import free-only, export proof URLs |

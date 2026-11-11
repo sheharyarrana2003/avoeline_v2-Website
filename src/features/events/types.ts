@@ -90,7 +90,7 @@ export type PublicCompetitionPrize = {
   description: string;
 };
 
-export type CompetitionRegisterState = "open" | "closed" | "full";
+export type CompetitionRegisterState = "not_yet_open" | "open" | "closed" | "full";
 
 export type PublicCompetition = {
   id: string;
@@ -177,6 +177,13 @@ export type PublicEventDto = {
   currency: string;
   pricingTiers: PublicPricingTier[];
   discounts: PublicDiscount[];
+  /** Opted-in public promo chips only — never private codes. */
+  publicPromos: Array<{
+    id: string;
+    label: string;
+    discountSummary: string;
+    trackId: string | null;
+  }>;
   showSponsors: boolean;
   showCollaborators: boolean;
   showPartners: boolean;
@@ -239,6 +246,7 @@ export type PublicEventAttempt = {
   token?: string | null;
   code?: string | null;
   email?: string | null;
+  unlockToken?: string | null;
 };
 
 export type PublicEventViewer = {

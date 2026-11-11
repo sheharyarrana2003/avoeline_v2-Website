@@ -1,6 +1,6 @@
 import { toDate } from "@/src/lib/datetime";
 
-export type CompetitionRegisterState = "open" | "closed" | "full";
+export type CompetitionRegisterState = "not_yet_open" | "open" | "closed" | "full";
 
 /** Prefer competition close; else event close (date-only → end of local day). */
 export function effectiveRegistrationClosesAt(
@@ -24,6 +24,7 @@ export function effectiveRegistrationClosesAt(
 
 export function competitionRegisterState(input: {
   effectiveClosesAt: string | null;
+  opensAt?: string | null;
   trackEnded?: boolean;
   eventLifecycleActive: boolean;
   seatsLeft: number | null;
@@ -32,6 +33,10 @@ export function competitionRegisterState(input: {
 }): CompetitionRegisterState {
   const now = input.now ?? new Date();
   if (!input.eventLifecycleActive || input.trackEnded) return "closed";
+  if (input.opensAt) {
+    const opens = Date.parse(input.opensAt);
+    if (Number.isFinite(opens) && opens > now.getTime()) return "not_yet_open";
+  }
   if (input.effectiveClosesAt) {
     const closes = Date.parse(input.effectiveClosesAt);
     if (Number.isFinite(closes) && closes < now.getTime()) return "closed";

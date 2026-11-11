@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Download, Lock } from "lucide-react";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
@@ -9,6 +10,7 @@ import { formatDate, formatDateMedium } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
 import { CERTIFICATES_BUCKET, getSignedUrl } from "@/data/supabase";
 import { absoluteUrl } from "@/src/lib/appUrl";
+import { accessUnlockCookieName } from "@/src/features/access/lib/accessUnlock";
 import { getEventForVisitor } from "@/src/features/registration/registration.service";
 import { getEventOrganizations } from "@/src/features/organizations/organizations.service";
 import {
@@ -19,7 +21,7 @@ import {
 } from "@/src/features/hackathon/hackathon.service";
 import { trackDueAmount, trackSponsor } from "@/src/features/hackathon/types";
 import { publicEventPresentation, trackRegistrationOpen } from "@/src/lib/publicEventStatus";
-import { ShareEventLink } from "@/src/features/events/components/ShareEventLink";
+import { PublicShareMenu } from "@/src/features/events/components/public/PublicShareMenu";
 import { RichDescription } from "@/src/shared_components/ui/RichDescription";
 
 export const metadata = { title: "Competition — Avoeline" };
@@ -38,25 +40,24 @@ export default async function PublicTrackDetailPage({
 }) {
   const { eventId, trackId } = await params;
   const { code, invite } = await searchParams;
+  const jar = await cookies();
+  const unlockToken = jar.get(accessUnlockCookieName(eventId))?.value ?? null;
 
   const { event, access } = await getEventForVisitor(eventId, {
     code: code ?? null,
     token: invite ?? null,
+    unlockToken,
   });
   if (!event || !(await eventIsHackathon(event))) notFound();
 
   const track = await getTrack(trackId);
   if (!track || track.eventId !== eventId) notFound();
 
-  const qs = [
-    code ? `code=${encodeURIComponent(code)}` : "",
-    invite ? `invite=${encodeURIComponent(invite)}` : "",
-  ]
-    .filter(Boolean)
-    .join("&");
+  const qs = [invite ? `invite=${encodeURIComponent(invite)}` : ""].filter(Boolean).join("&");
   const qsSuffix = qs ? `?${qs}` : "";
   const eventHref = `/events/${eventId}${qsSuffix}`;
-  const registerHref = eventHref;
+  const registerJoin = qsSuffix.includes("?") ? "&" : "?";
+  const registerHref = `${eventHref}${registerJoin}track=${encodeURIComponent(trackId)}#register`;
 
   if (!access.allowed) {
     return (
@@ -167,7 +168,7 @@ export default async function PublicTrackDetailPage({
           </dl>
 
           <div className="mt-6 space-y-3">
-            <ShareEventLink url={shareUrl} label="Share this competition" />
+            <PublicShareMenu sharePath={shareUrl} title={track.name} />
             {canRegister ? (
               <Link href={registerHref} className={buttonClass("primary")}>
                 Register for this event
